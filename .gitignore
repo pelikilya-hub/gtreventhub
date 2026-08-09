@@ -1,0 +1,10 @@
+node_modules
+dist
+.output
+.nitro
+.netlify
+.wrangler
+.tanstack
+*.log
+.DS_Store
+*.local

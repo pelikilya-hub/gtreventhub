@@ -24,6 +24,9 @@ import {
   presetsFor,
   RATE_COLOR,
   RATE_LABEL,
+  equipGroups,
+  equipOf,
+  equipPrice,
   STAGE_COLOR,
   STAGE_LABEL,
   STATUS_COLOR,
@@ -708,8 +711,14 @@ export function ConstructorScreen({
                   VENDOR_KINDS.includes(kind),
                 );
               const isArtist = kind === "artist";
+              // Оборудование и интерактив приходят не от подрядчика, а из
+              // каталога позиций — со своим статусом провенанса цены
+              const equipCat =
+                kind === "gear" ? "equipment" : kind === "interactive" ? "interactive" : null;
+              const equipItems = equipCat ? equipOf(equipCat) : [];
               const presets = presetsFor(kind, vid);
-              const expandable = vendors.length > 0 || isArtist || presets.length > 0;
+              const expandable =
+                vendors.length > 0 || isArtist || presets.length > 0 || equipItems.length > 0;
               return (
                 <div key={kind}>
                   <button
@@ -811,7 +820,7 @@ export function ConstructorScreen({
                   {/* Категории без подрядчиков: готовые варианты блока.
                       Залы, слоты и бюджет — из данных площадки, остальное —
                       типовой набор GTR. */}
-                  {open && !isArtist && !vendors.length ? (
+                  {open && !isArtist && !vendors.length && !equipCat ? (
                     <div style={{ display: "grid", gap: 5, padding: "6px 0 4px 10px" }}>
                       {presets.map((p) => {
                         const added = g.nodes.some((n) => n.title === p.title);
@@ -863,6 +872,77 @@ export function ConstructorScreen({
                       >
                         + Свой блок
                       </button>
+                    </div>
+                  ) : null}
+                  {open && equipCat ? (
+                    <div style={{ display: "grid", gap: 5, padding: "6px 0 4px 10px" }}>
+                      {equipGroups(equipCat).map((grp) => (
+                        <div key={grp} style={{ display: "grid", gap: 4 }}>
+                          <div
+                            className="gtr-eyebrow"
+                            style={{ fontSize: 8.5, marginTop: 2, color: "rgba(255,255,255,.45)" }}
+                          >
+                            {grp}
+                          </div>
+                          {equipItems
+                            .filter((e) => e.group === grp)
+                            .map((e) => {
+                              const added = g.nodes.some((n) => n.title === e.name);
+                              return (
+                                <button
+                                  key={e.id}
+                                  className="gtr-pal-btn"
+                                  style={{ padding: "7px 9px", opacity: added ? 0.45 : 1 }}
+                                  onClick={() =>
+                                    added
+                                      ? setSel(g.nodes.find((n) => n.title === e.name)!.id)
+                                      : addNode(
+                                          kind,
+                                          e.name,
+                                          e.spec,
+                                          e.price ? "ПОЗИЦИЯ" : "ЗАПРОС",
+                                          [
+                                            ["ГРУППА", e.group],
+                                            ["ЦЕНА", equipPrice(e)],
+                                            // цену в расчёт кладём только когда она есть:
+                                            // ноль в ЦЕНА_THB смета приняла бы за твёрдую цифру
+                                            ...(e.price
+                                              ? ([["ЦЕНА_THB", String(e.price)]] as [
+                                                  string,
+                                                  string,
+                                                ][])
+                                              : []),
+                                            ["СТАТУС ЦЕНЫ", RATE_LABEL[e.kind]],
+                                            ["ПОДРЯДЧИК", e.vendor || "не назначен"],
+                                            ["КОНТАКТ", e.contact || "—"],
+                                            ["ИСТОЧНИК", e.source || "—"],
+                                          ],
+                                          true,
+                                        )
+                                  }
+                                >
+                                  <span style={{ flex: 1, minWidth: 0 }}>
+                                    <span
+                                      style={{ display: "block", fontWeight: 600, fontSize: 11 }}
+                                    >
+                                      {e.name}
+                                    </span>
+                                    <span
+                                      style={{
+                                        display: "block",
+                                        marginTop: 2,
+                                        font: "700 9.5px/1.3 'JetBrains Mono',monospace",
+                                        color: added ? "rgba(255,255,255,.4)" : RATE_COLOR[e.kind],
+                                      }}
+                                    >
+                                      {added ? "уже в графе" : equipPrice(e)}
+                                    </span>
+                                  </span>
+                                </button>
+                              );
+                            })}
+                        </div>
+                      ))}
                     </div>
                   ) : null}
                   {open && !isArtist && vendors.length ? (

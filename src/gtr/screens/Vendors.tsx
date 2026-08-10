@@ -1,15 +1,21 @@
 import { useState } from "react";
 
 import {
+  EQUIPMENT,
+  equipOf,
+  equipPrice,
   fmtThb,
   KINDS,
+  RATE_COLOR,
+  RATE_LABEL,
   VENDOR_CAT_LABEL,
   VENDORS_FLAT,
   type CatalogVendor,
+  type EquipItem,
 } from "../data/app-data";
 import { Card, Chip, Eyebrow, Icon } from "../ui";
 
-type Cat = "all" | "sound" | "light" | "decor" | "content";
+type Cat = "all" | "sound" | "light" | "decor" | "content" | "gear" | "interactive";
 
 const CATS: [Cat, string][] = [
   ["all", "Все категории"],
@@ -17,6 +23,8 @@ const CATS: [Cat, string][] = [
   ["light", VENDOR_CAT_LABEL.light],
   ["decor", VENDOR_CAT_LABEL.decor],
   ["content", VENDOR_CAT_LABEL.content],
+  ["gear", "Оборудование"],
+  ["interactive", "Интерактив"],
 ];
 
 export function VendorsScreen() {
@@ -30,6 +38,17 @@ export function VendorsScreen() {
       (!q.trim() || `${v.name} ${v.meta}`.toLowerCase().includes(q.toLowerCase().trim())),
   );
 
+  // Оборудование и интерактив — не подрядчики, а позиции каталога:
+  // у них своя карточка со статусом провенанса цены
+  const isEquip = cat === "gear" || cat === "interactive";
+  const equipRows = isEquip
+    ? equipOf(cat === "gear" ? "equipment" : "interactive").filter(
+        (e) =>
+          !q.trim() ||
+          `${e.name} ${e.spec} ${e.group}`.toLowerCase().includes(q.toLowerCase().trim()),
+      )
+    : [];
+
   const open = openId ? VENDORS_FLAT.find((v) => v.id === openId) : null;
   if (open) return <VendorCard v={open} onBack={() => setOpenId(null)} />;
 
@@ -39,13 +58,19 @@ export function VendorsScreen() {
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 6 }}>
         <h1 className="gtr-oswald gtr-h1">
-          Каталог подрядчиков
+          {cat === "gear"
+            ? "Каталог оборудования"
+            : cat === "interactive"
+              ? "Каталог интерактива"
+              : "Каталог подрядчиков"}
         </h1>
         <span
           className="gtr-mono"
           style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
-          {rows.length} подрядчиков · {totalPackages} позиций с ценой
+          {isEquip
+            ? `${equipRows.length} позиций · цену уточняем запросом`
+            : `${rows.length} подрядчиков · ${totalPackages} позиций с ценой · ${EQUIPMENT.length} в каталоге оборудования`}
         </span>
       </div>
 
@@ -83,7 +108,10 @@ export function VendorsScreen() {
           gap: 12,
         }}
       >
-        {rows.map((v) => {
+        {isEquip
+          ? equipRows.map((e) => <EquipCard key={e.id} e={e} kind={cat as "gear" | "interactive"} />)
+          : null}
+        {(isEquip ? [] : rows).map((v) => {
           const K = KINDS[v.category];
           return (
             <Card key={v.id} hover style={{ padding: "16px 18px" }} onClick={() => setOpenId(v.id)}>
@@ -154,6 +182,81 @@ export function VendorsScreen() {
         })}
       </div>
     </div>
+  );
+}
+
+function EquipCard({ e, kind }: { e: EquipItem; kind: "gear" | "interactive" }) {
+  const K = KINDS[kind];
+  return (
+    <Card style={{ padding: "16px 18px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+        <span
+          style={{
+            width: 30,
+            height: 30,
+            flex: "none",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: K[2],
+            color: K[1],
+          }}
+        >
+          <Icon d={K[3]} size={15} />
+        </span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: "block", font: "600 13.5px/1.3 'Golos Text',sans-serif" }}>
+            {e.name}
+          </span>
+          <Chip color={K[1]} style={{ marginTop: 4 }}>
+            {e.group.toUpperCase()}
+          </Chip>
+        </span>
+      </div>
+      <div
+        style={{
+          font: "500 11px/1.5 'Golos Text',sans-serif",
+          color: "var(--gtr-t2)",
+          minHeight: 33,
+        }}
+      >
+        {e.spec}
+      </div>
+      <div
+        style={{
+          marginTop: 10,
+          paddingTop: 9,
+          borderTop: "1px solid rgba(255,255,255,.06)",
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          gap: 8,
+        }}
+      >
+        <span
+          className="gtr-mono"
+          style={{ font: "600 9px/1.3 'JetBrains Mono',monospace", color: RATE_COLOR[e.kind] }}
+        >
+          {RATE_LABEL[e.kind].toUpperCase()}
+        </span>
+        <span
+          className="gtr-mono"
+          style={{
+            font: "700 11.5px/1 'JetBrains Mono',monospace",
+            color: e.price ? "#fff" : "var(--gtr-t3)",
+            textAlign: "right",
+          }}
+        >
+          {equipPrice(e)}
+        </span>
+      </div>
+      <div
+        className="gtr-mono"
+        style={{ marginTop: 7, font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+      >
+        {e.vendor ? `${e.vendor} · ${e.contact}` : "подрядчик не назначен"}
+      </div>
+    </Card>
   );
 }
 

@@ -2,6 +2,7 @@
 import venuesRaw from "./venues.json";
 import richRaw from "./rich.json";
 import vendorPackagesRaw from "./vendor-packages.json";
+import equipmentRaw from "./equipment.json";
 import venueRatesRaw from "./venue-rates.json";
 
 export type Venue = {
@@ -427,7 +428,9 @@ export type NodeKind =
   | "sound"
   | "light"
   | "decor"
-  | "content";
+  | "content"
+  | "gear"
+  | "interactive";
 
 // [подпись, цвет, фон, svg-путь]
 export const KINDS: Record<NodeKind, [string, string, string, string]> = {
@@ -493,6 +496,18 @@ export const KINDS: Record<NodeKind, [string, string, string, string]> = {
     "#00C2FF",
     "rgba(0,194,255,.14)",
     "M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
+  ],
+  gear: [
+    "ОБОРУДОВАНИЕ",
+    "#9AA4B2",
+    "rgba(154,164,178,.16)",
+    "M4 7h16 M4 12h16 M4 17h16 M9 5v4 M16 10v4 M12 15v4",
+  ],
+  interactive: [
+    "ИНТЕРАКТИВ",
+    "#FF4FD8",
+    "rgba(255,79,216,.16)",
+    "M12 3l2.2 5.6L20 10.4l-5.8 1.8L12 18l-2.2-5.8L4 10.4l5.8-1.8z M18 16l1 2.4 2.4 1-2.4 1L18 23l-1-2.6-2.4-1 2.4-1z",
   ],
 };
 
@@ -599,6 +614,8 @@ export const CX_PALETTE: [NodeKind, string][] = [
   ["sound", "Подрядчик · звук"],
   ["light", "Подрядчик · свет"],
   ["decor", "Декор и оформление"],
+  ["gear", "Оборудование"],
+  ["interactive", "Интерактив"],
   ["content", "Фото и видео"],
   ["promo", "Промо и билеты"],
   ["money", "Бюджет"],
@@ -1833,7 +1850,16 @@ export const rateOf = (venueId: string): VenueRate | null =>
 export const artistFee = (tier?: string) => (tier && ARTIST_TIER_FEE[tier]) || ARTIST_FEE_DEFAULT;
 
 export type QuoteLine = {
-  group: "venue" | "artist" | "sound" | "light" | "decor" | "content" | "other";
+  group:
+    | "venue"
+    | "artist"
+    | "sound"
+    | "light"
+    | "decor"
+    | "content"
+    | "gear"
+    | "interactive"
+    | "other";
   label: string;
   note: string;
   amount: number;
@@ -1913,7 +1939,16 @@ export const computeQuote = (graph: Graph, venueId: string): Quote => {
     });
   }
 
-  const VK: ("sound" | "light" | "decor" | "content")[] = ["sound", "light", "decor", "content"];
+  // Оборудование и интерактив считаются наравне с подрядными блоками:
+  // цена берётся из той же пары полей ЦЕНА_THB / ЦЕНА
+  const VK: ("sound" | "light" | "decor" | "content" | "gear" | "interactive")[] = [
+    "sound",
+    "light",
+    "decor",
+    "content",
+    "gear",
+    "interactive",
+  ];
   for (const k of VK) {
     for (const n of graph.nodes.filter((x) => x.kind === k)) {
       // Конкретный пакет подрядчика кладёт точную цену в ЦЕНА_THB.
@@ -1931,7 +1966,12 @@ export const computeQuote = (graph: Graph, venueId: string): Quote => {
         estimate: !exact,
         kind,
       });
-      if (amount === 0) missing.push(`Цена подрядчика: ${n.title}`);
+      if (amount === 0)
+        missing.push(
+          k === "gear" || k === "interactive"
+            ? `Цена позиции: ${n.title} — нужен запрос подрядчику`
+            : `Цена подрядчика: ${n.title}`,
+        );
       else if (!exact) missing.push(`«${n.title}» — цена по нижней границе вилки, нужен пакет`);
     }
   }
@@ -2000,6 +2040,11 @@ export const UNIT_LABEL: Record<string, string> = {
   package: "пакет",
   "add-on": "доп. опция",
   hour: "час",
+  event: "событие",
+  unit: "штука",
+  show: "выступление",
+  m2: "м²",
+  m: "пог. м",
 };
 
 export const unitLabel = (u: string) => UNIT_LABEL[u] ?? u;
@@ -2043,6 +2088,52 @@ export const VENDORS_FLAT: CatalogVendor[] = (["sound", "light", "decor", "conte
   .filter(
     (v, i, arr) => arr.findIndex((x) => x.name === v.name && x.category === v.category) === i,
   );
+
+
+// ---------- каталог оборудования и интерактива ----------
+// Позиции, которые добираются в событие поверх подрядных пакетов: свет, сцена,
+// спецэффекты, мебель и развлекательные активности. Цену большинство
+// подрядчиков Пхукета не публикует, поэтому позиция живёт со статусом
+// провенанса — так же, как ставки площадок в venue-rates.
+export type EquipCategory = "equipment" | "interactive";
+
+export type EquipItem = {
+  id: string;
+  category: EquipCategory;
+  group: string;
+  name: string;
+  spec: string;
+  price: number; // 0 = цены нет, нужен запрос подрядчику
+  unit: string;
+  currency: string;
+  kind: RateKind;
+  vendor: string;
+  contact: string;
+  source: string;
+  collected: string;
+  note?: string;
+};
+
+export const EQUIPMENT = equipmentRaw as EquipItem[];
+
+export const EQUIP_CAT_LABEL: Record<EquipCategory, string> = {
+  equipment: "Оборудование",
+  interactive: "Интерактив",
+};
+
+export const equipOf = (category: EquipCategory) =>
+  EQUIPMENT.filter((e) => e.category === category);
+
+// Группы в порядке появления — палитра и каталог показывают позиции по ним
+export const equipGroups = (category: EquipCategory) => {
+  const seen: string[] = [];
+  for (const e of equipOf(category)) if (!seen.includes(e.group)) seen.push(e.group);
+  return seen;
+};
+
+// «฿4 000 / день» либо честное «по запросу», когда цифры нет
+export const equipPrice = (e: EquipItem) =>
+  e.price ? `${fmtThb(e.price)} / ${unitLabel(e.unit)}` : `по запросу / ${unitLabel(e.unit)}`;
 
 // ---------- здоровье графа: статусы, связи, оповещения ----------
 export const STATUS_COLOR: Record<NodeStatus, string> = {

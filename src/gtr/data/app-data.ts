@@ -1989,6 +1989,98 @@ export const computeQuote = (graph: Graph, venueId: string): Quote => {
   };
 };
 
+
+// ---------- сравнение вариантов: эконом / оптимум / премиум ----------
+// Три уровня собираются из подтверждённых пакетов подрядчиков. Площадка и
+// гонорары артистов одинаковы во всех трёх — меняется только подряд.
+export type QuoteTier = "econom" | "optimum" | "premium";
+
+export const TIER_LABEL: Record<QuoteTier, string> = {
+  econom: "Эконом",
+  optimum: "Оптимум",
+  premium: "Премиум",
+};
+
+export const TIER_NOTE: Record<QuoteTier, string> = {
+  econom: "Минимальный подтверждённый пакет по каждой системе",
+  optimum: "Средний пакет — рабочий уровень для большинства событий",
+  premium: "Максимальная комплектация из тех, что подрядчики публикуют",
+};
+
+// Пакет попадает в лестницу, только если это самостоятельная позиция.
+// Доборы (час сверх, ассистент, трансфер) ценой не сопоставимы с пакетом,
+// а Turnkey закрывает сразу звук и свет — в поштучном подборе он дал бы
+// двойной счёт, поэтому идёт отдельной строкой «под ключ».
+const tierEligible = (p: VendorPackage) =>
+  p.price > 0 && (p.unit === "day" || p.unit === "package") && p.system !== "Turnkey" && !p.combo;
+
+// Какие системы подряда осмысленно сравнивать для блока события
+const KIND_SYSTEMS: Partial<Record<NodeKind, string[]>> = {
+  sound: ["DJ", "Sound"],
+  content: ["Photo", "Video"],
+};
+
+export const packagesOfSystem = (system: string) =>
+  VENDOR_PACKAGES.filter((p) => p.system === system && tierEligible(p)).sort(
+    (a, b) => a.price - b.price,
+  );
+
+export const pickTier = (packs: VendorPackage[], tier: QuoteTier): VendorPackage | null => {
+  if (!packs.length) return null;
+  if (tier === "econom") return packs[0];
+  if (tier === "premium") return packs[packs.length - 1];
+  return packs[Math.floor((packs.length - 1) / 2)];
+};
+
+export type TierPick = { system: string; pkg: VendorPackage };
+
+export type TierPlan = {
+  tier: QuoteTier;
+  base: number; // площадка и артисты — не зависят от уровня
+  picks: TierPick[];
+  vendorTotal: number;
+  subtotal: number;
+  commission: number;
+  total: number;
+};
+
+// Системы, для которых в событии есть соответствующий блок.
+// Пустое событие сравнивать не на чем — берём базовый звук.
+export const tierSystems = (graph: Graph): string[] => {
+  const out: string[] = [];
+  for (const [kind, systems] of Object.entries(KIND_SYSTEMS)) {
+    if (!graph.nodes.some((n) => n.kind === (kind as NodeKind))) continue;
+    for (const sys of systems ?? []) if (packagesOfSystem(sys).length) out.push(sys);
+  }
+  return out.length ? out : ["DJ"];
+};
+
+export const tierPlans = (graph: Graph, venueId: string): TierPlan[] => {
+  const q = computeQuote(graph, venueId);
+  const base = q.lines
+    .filter((l) => l.group === "venue" || l.group === "artist")
+    .reduce((sum, l) => sum + l.amount, 0);
+  const systems = tierSystems(graph);
+
+  return (["econom", "optimum", "premium"] as QuoteTier[]).map((tier) => {
+    const picks: TierPick[] = [];
+    for (const system of systems) {
+      const pkg = pickTier(packagesOfSystem(system), tier);
+      if (pkg) picks.push({ system, pkg });
+    }
+    const vendorTotal = picks.reduce((sum, p) => sum + p.pkg.price, 0);
+    const subtotal = base + vendorTotal;
+    const commission = Math.round((subtotal * COMMISSION_PCT) / 100);
+    return { tier, base, picks, vendorTotal, subtotal, commission, total: subtotal + commission };
+  });
+};
+
+// Комплексные пакеты «под ключ» — альтернатива поштучному подбору
+export const turnkeyPackages = () =>
+  VENDOR_PACKAGES.filter((p) => p.system === "Turnkey" && p.price > 0).sort(
+    (a, b) => a.price - b.price,
+  );
+
 export const fmtThb = (n: number) => "฿" + n.toLocaleString("ru-RU");
 
 // ---------- запрос организатора (сторона спроса) ----------
@@ -2023,6 +2115,7 @@ export type VendorPackage = {
   contact: string;
   source: string;
   verified: string; // дата, когда цена подтверждена на сайте подрядчика; пусто — не подтверждена
+  combo?: boolean; // пакет закрывает сразу несколько систем — считать поштучно нельзя
   note?: string;
 };
 

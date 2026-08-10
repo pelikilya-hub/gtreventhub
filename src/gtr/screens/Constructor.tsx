@@ -24,6 +24,10 @@ import {
   presetsFor,
   RATE_COLOR,
   RATE_LABEL,
+  TIER_LABEL,
+  TIER_NOTE,
+  tierPlans,
+  turnkeyPackages,
   equipGroups,
   equipOf,
   equipPrice,
@@ -1653,6 +1657,8 @@ export function ConstructorScreen({
             )}
           </Card>
 
+          <TierCompare graph={g} venueId={vid} />
+
           <Card style={{ padding: 14 }}>
             <Eyebrow style={{ marginBottom: 9 }}>СВЯЗИ · {g.links.length}</Eyebrow>
             <div style={{ display: "grid", gap: 5, maxHeight: 150, overflowY: "auto" }}>
@@ -2360,6 +2366,191 @@ function BriefPanel({
           {t("Собрать блоки из брифа →", "Build event blocks →")}
         </button>
       </div>
+    </Card>
+  );
+}
+
+// Три уровня комплектации одного и того же события. Площадка и артисты
+// не меняются — сравнивается только подряд, поэтому разница читается честно.
+function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
+  const [open, setOpen] = useState(false);
+  const plans = useMemo(() => tierPlans(graph, venueId), [graph, venueId]);
+  const turnkey = useMemo(() => turnkeyPackages(), []);
+  const hasPicks = plans.some((p) => p.picks.length);
+
+  return (
+    <Card style={{ padding: 14 }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          background: "transparent",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          color: "inherit",
+        }}
+      >
+        <Eyebrow>ВАРИАНТЫ КОМПЛЕКТАЦИИ</Eyebrow>
+        <span
+          className="gtr-mono"
+          style={{
+            font: "700 12px/1 'JetBrains Mono',monospace",
+            color: "var(--gtr-t3)",
+            transition: "transform .15s",
+            transform: open ? "rotate(90deg)" : "none",
+          }}
+        >
+          ›
+        </span>
+      </button>
+
+      {!open ? null : !hasPicks ? (
+        <div
+          style={{
+            marginTop: 10,
+            font: "500 10px/1.5 'Golos Text',sans-serif",
+            color: "var(--gtr-t3)",
+          }}
+        >
+          Подрядчики этого события прайс не публикуют — сравнивать нечего. Добавьте блок звука или
+          съёмки.
+        </div>
+      ) : (
+        <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+          {plans.map((plan) => (
+            <div
+              key={plan.tier}
+              style={{
+                border: `1px solid ${plan.tier === "optimum" ? "var(--gtr-red)" : "rgba(255,255,255,.09)"}`,
+                background: plan.tier === "optimum" ? "rgba(229,35,27,.07)" : "transparent",
+                padding: "9px 10px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  justifyContent: "space-between",
+                  gap: 8,
+                }}
+              >
+                <span
+                  className="gtr-oswald"
+                  style={{ font: "700 12px/1 Oswald,sans-serif", letterSpacing: ".04em" }}
+                >
+                  {TIER_LABEL[plan.tier]}
+                </span>
+                <span
+                  className="gtr-mono"
+                  style={{ font: "700 13px/1 'JetBrains Mono',monospace", color: "#fff" }}
+                >
+                  {fmtThb(plan.total)}
+                </span>
+              </div>
+              <div
+                style={{
+                  marginTop: 5,
+                  font: "500 9px/1.4 'JetBrains Mono',monospace",
+                  color: "var(--gtr-t3)",
+                }}
+              >
+                {TIER_NOTE[plan.tier]}
+              </div>
+              <div style={{ display: "grid", gap: 3, marginTop: 7 }}>
+                {plan.picks.map((pick) => (
+                  <div
+                    key={pick.system}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 8,
+                      font: "500 9.5px/1.35 'Golos Text',sans-serif",
+                      color: "var(--gtr-t2)",
+                    }}
+                  >
+                    <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {pick.pkg.package}
+                    </span>
+                    <span
+                      className="gtr-mono"
+                      style={{ flex: "none", font: "600 9.5px/1.35 'JetBrains Mono',monospace" }}
+                    >
+                      {fmtThb(pick.pkg.price)}
+                    </span>
+                  </div>
+                ))}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 8,
+                    marginTop: 2,
+                    paddingTop: 4,
+                    borderTop: "1px solid rgba(255,255,255,.06)",
+                    font: "500 9px/1.3 'JetBrains Mono',monospace",
+                    color: "var(--gtr-t3)",
+                  }}
+                >
+                  <span>площадка и артисты</span>
+                  <span>{fmtThb(plan.base)}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <div
+            style={{
+              font: "500 9px/1.45 'Golos Text',sans-serif",
+              color: "var(--gtr-t3)",
+            }}
+          >
+            Пакеты отличаются не только ценой, но и объёмом — часами съёмки, числом дек, составом
+            звука. Сравнивайте состав, а не только итог.
+          </div>
+
+          {turnkey.length ? (
+            <div style={{ borderTop: "1px solid rgba(255,255,255,.08)", paddingTop: 8 }}>
+              <Eyebrow style={{ marginBottom: 6 }}>ПОД КЛЮЧ · АЛЬТЕРНАТИВА</Eyebrow>
+              {turnkey.map((t) => (
+                <div
+                  key={t.package}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 8,
+                    marginBottom: 3,
+                    font: "500 9.5px/1.35 'Golos Text',sans-serif",
+                    color: "var(--gtr-t2)",
+                  }}
+                >
+                  <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {t.package}
+                  </span>
+                  <span
+                    className="gtr-mono"
+                    style={{ flex: "none", font: "600 9.5px/1.35 'JetBrains Mono',monospace" }}
+                  >
+                    {fmtThb(t.price)}
+                  </span>
+                </div>
+              ))}
+              <div
+                style={{
+                  marginTop: 4,
+                  font: "500 9px/1.45 'Golos Text',sans-serif",
+                  color: "var(--gtr-t3)",
+                }}
+              >
+                Один подряд закрывает звук, свет и LED сразу — в поштучный расчёт выше не входит.
+              </div>
+            </div>
+          ) : null}
+        </div>
+      )}
     </Card>
   );
 }

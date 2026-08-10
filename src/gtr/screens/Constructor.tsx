@@ -1,4 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -34,6 +35,7 @@ import {
   type NodeKind,
   type NodeStatus,
 } from "../data/app-data";
+import { quoteDocument } from "../quote-doc";
 import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow, Icon } from "../ui";
 
@@ -224,8 +226,12 @@ export function ConstructorScreen({
     }));
 
   const vendorNodes = g.nodes.filter((n) => VENDOR_KINDS.includes(n.kind));
+  // Точная цена пакета важнее строки-вилки — как и в смете
   const budget = vendorNodes.reduce(
-    (sum, n) => sum + parseThb(n.fields.find((f) => f[0] === "ЦЕНА")?.[1]),
+    (sum, n) =>
+      sum +
+      (parseThb(n.fields.find((f) => f[0] === "ЦЕНА_THB")?.[1]) ||
+        parseThb(n.fields.find((f) => f[0] === "ЦЕНА")?.[1])),
     0,
   );
 
@@ -244,6 +250,8 @@ export function ConstructorScreen({
   const health = graphHealth(alerts);
   const questions = EVENT_QUESTIONS.map((qq) => ({ ...qq, ok: qq.satisfied(g) }));
   const openQuestions = questions.filter((qq) => qq.required && !qq.ok);
+  // Экспорт сметы: печатный документ, из которого браузер делает PDF.
+  // Если попапы заблокированы — не молчим, а отдаём текстовый файл.
   const exportQuote = () => {
     const when = g.nodes.find((n) => n.kind === "slot")?.sub || "дата уточняется";
     const rooms =
@@ -251,30 +259,46 @@ export function ConstructorScreen({
         .filter((n) => n.kind === "room")
         .map((n) => n.title)
         .join(", ") || "—";
-    const body = [
-      `GTR EVENT · Предложение по событию`,
-      `Площадка: ${v.name} (${vid})`,
-      `Залы: ${rooms}`,
-      `Когда: ${when}`,
-      ``,
-      ...quote.lines.map(
-        (l) => `  ${l.label} — ${l.amount ? fmtThb(l.amount) : "по запросу"}  (${l.note})`,
-      ),
-      ``,
-      `Подытог: ${fmtThb(quote.subtotal)}`,
-      `Комиссия GTR ${quote.commissionPct}%: ${fmtThb(quote.commission)}`,
-      `ИТОГО: ${fmtThb(quote.total)}`,
-      quote.missing.length
-        ? `\nТребует уточнения:\n${quote.missing.map((m) => "  · " + m).join("\n")}`
-        : ``,
-      `\nОценка, THB. Точные ставки подтверждаются площадкой и подрядчиками.`,
-    ].join("\n");
-    const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `GTR-смета-${vid}.txt`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    const no = `GTR-${vid.replace("VEN-", "")}-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}`;
+    const win = window.open("", "_blank", "width=900,height=1100");
+
+    if (!win) {
+      const body = [
+        `GTR EVENT · Предложение по событию № ${no}`,
+        `Площадка: ${v.name} (${vid})`,
+        `Залы: ${rooms}`,
+        `Когда: ${when}`,
+        ``,
+        ...quote.lines.map(
+          (l) =>
+            `  ${l.label} — ${l.amount ? fmtThb(l.amount) : "по запросу"}  (${l.note}; ${RATE_LABEL[l.kind]})`,
+        ),
+        ``,
+        `Подытог: ${fmtThb(quote.subtotal)}`,
+        `Комиссия GTR ${quote.commissionPct}%: ${fmtThb(quote.commission)}`,
+        `ИТОГО: ${fmtThb(quote.total)}`,
+        quote.missing.length
+          ? `\nТребует уточнения:\n${quote.missing.map((m) => "  · " + m).join("\n")}`
+          : ``,
+        `\nОценка, THB. Точные ставки подтверждаются площадкой и подрядчиками.`,
+      ].join("\n");
+      const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `${no}.txt`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast("Печать заблокирована браузером — смета скачана текстом", {
+        description: "Разрешите всплывающие окна, чтобы получить PDF.",
+      });
+      return;
+    }
+
+    win.document.write(quoteDocument({ no, venue: v.name, vid, rooms, when, quote }));
+    win.document.close();
+    win.focus();
+    // Даём странице отрисовать шрифты перед вызовом печати
+    win.setTimeout(() => win.print(), 250);
   };
 
   // Организатор: отправка собранного события запросом в кабинет площадки

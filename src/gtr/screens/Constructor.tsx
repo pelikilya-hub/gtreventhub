@@ -36,6 +36,7 @@ import {
   type NodeKind,
   type NodeStatus,
 } from "../data/app-data";
+import { notifyRequestFn } from "../notify";
 import { quoteDocument } from "../quote-doc";
 import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow, Icon } from "../ui";
@@ -325,6 +326,40 @@ export function ConstructorScreen({
     });
     setStage("sent", `Отправлено площадке · смета ${fmtThb(quote.total)}`);
     onSubmitted?.(id);
+
+    // Уведомление менеджера GTR — доставка, а не условие приёма заявки:
+    // заявка уже сохранена и видна площадке, что бы ни ответил Telegram.
+    notifyRequestFn({
+      data: {
+        venueName: v.name || vid,
+        venueId: vid,
+        organizerName: org.name.trim() || "Организатор",
+        organizerContact: org.contact.trim() || "—",
+        title: org.title.trim() || "Событие",
+        date: when,
+        guests: org.guests.trim() || "—",
+        note: org.note.trim(),
+        total: quote.total,
+        commission: quote.commission,
+        lineCount: quote.lines.length,
+      },
+    })
+      .then((r) => {
+        if (r.ok) {
+          toast("Менеджер GTR уведомлён в Telegram");
+        } else if (r.reason === "not-configured") {
+          toast("Заявка принята, Telegram не подключён", {
+            description: "Уведомление не ушло: " + r.detail,
+          });
+        } else {
+          toast("Заявка принята, уведомление не доставлено", { description: r.detail });
+        }
+      })
+      .catch(() =>
+        toast("Заявка принята, уведомление не доставлено", {
+          description: "Сервер уведомлений недоступен",
+        }),
+      );
   };
 
   return (

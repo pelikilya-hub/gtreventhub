@@ -8,3 +8,8 @@ dist
 *.log
 .DS_Store
 *.local
+
+# секреты: токен бота и chat-id живут только в окружении
+.env
+.env.*
+!.env.example

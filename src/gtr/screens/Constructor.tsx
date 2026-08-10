@@ -11,6 +11,7 @@ import {
   fmtThb,
   graphHealth,
   GREEN,
+  isPerformer,
   KINDS,
   linkStatus,
   loadArtists,
@@ -193,7 +194,7 @@ export function ConstructorScreen({
       artBase
         ? (shared.lineup
             .map((id) => artBase.artists.find((a) => a.id === id))
-            .filter(Boolean) as Artist[])
+            .filter((a): a is Artist => Boolean(a) && isPerformer(a as Artist)))
         : [],
     [artBase, shared.lineup],
   );
@@ -202,7 +203,11 @@ export function ConstructorScreen({
     const q = artQ.toLowerCase().trim();
     if (!q) return [];
     const rank = (p: string) => (p === "A" ? 0 : p === "B" ? 1 : 2);
+    // Только те, кто действительно выступает. Лейблы, агентства и
+    // площадки-промоутеры в событие артистом не добавляются — иначе им
+    // начисляется гонорар по тиру, и смета врёт.
     return artBase.artists
+      .filter(isPerformer)
       .filter((a) => `${a.name} ${(a.styles || []).join(" ")} ${a.role}`.toLowerCase().includes(q))
       .sort((a, b) => rank(a.prio) - rank(b.prio))
       .slice(0, 8);

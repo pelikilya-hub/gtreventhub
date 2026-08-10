@@ -1,7 +1,17 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 
-import { AMBER, GREEN, loadArtists, RIDERS, type Artist, type ArtistBase } from "../data/app-data";
+import {
+  AMBER,
+  ENTITY_KIND_LABEL,
+  entityColor,
+  GREEN,
+  isPerformer,
+  loadArtists,
+  RIDERS,
+  type Artist,
+  type ArtistBase,
+} from "../data/app-data";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow } from "../ui";
 
@@ -37,6 +47,9 @@ const LINKS: [keyof Artist, string][] = [
 export function ArtistsScreen({ artistId }: { artistId?: string }) {
   const [base, setBase] = useState<ArtistBase | null>(null);
   const [q, setQ] = useState("");
+  // Исполнители и контрагенты — разные сущности и разные задачи, поэтому
+  // разведены на верхнем уровне, а не спрятаны в общий фильтр по типу
+  const [scope, setScope] = useState<"performers" | "counterparties">("performers");
   const [kind, setKind] = useState("all");
   const [pool, setPool] = useState("all");
   const [style, setStyle] = useState("all");
@@ -60,6 +73,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
     const rank = (p: string) => (p === "A" ? 0 : p === "B" ? 1 : 2);
     return base.artists
       .filter((a) => {
+        if (scope === "performers" ? !isPerformer(a) : isPerformer(a)) return false;
         if (kind !== "all" && a.kind !== kind) return false;
         if (pool !== "all" && a.group !== pool) return false;
         if (style !== "all" && !(a.styles || []).includes(style)) return false;
@@ -68,7 +82,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
         return true;
       })
       .sort((a, b) => rank(a.prio) - rank(b.prio) || a.name.localeCompare(b.name, "ru"));
-  }, [base, q, kind, pool, style]);
+  }, [base, q, scope, kind, pool, style]);
 
   if (!base)
     return (
@@ -84,12 +98,14 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
   if (selected) return <ArtistCard a={selected} onBack={() => openArtist()} />;
 
   const topStyles = base.meta.styles.slice(0, 14);
+  const performerCount = base.artists.filter(isPerformer).length;
+  const counterpartyCount = base.artists.length - performerCount;
 
   return (
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 14 }}>
         <h1 className="gtr-oswald" style={{ font: "700 22px/1 Oswald,sans-serif", margin: 0 }}>
-          Артисты и диджеи
+          {scope === "performers" ? "Артисты и диджеи" : "Контрагенты"}
         </h1>
         <span
           className="gtr-mono"
@@ -102,11 +118,53 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
         ) : null}
       </div>
 
+      {/* Исполнители и контрагенты разведены: в событие добавляются только
+          первые, вторые — канал букинга и контакт */}
+      <div style={{ display: "flex", gap: 7, marginBottom: 12 }}>
+        {(
+          [
+            ["performers", "Исполнители", performerCount, "#7B4DFF"],
+            ["counterparties", "Контрагенты", counterpartyCount, "#F5A623"],
+          ] as const
+        ).map(([key, label, n, color]) => {
+          const on = scope === key;
+          return (
+            <button
+              key={key}
+              onClick={() => {
+                setScope(key);
+                setKind("all");
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                borderRadius: 8,
+                padding: "8px 14px",
+                cursor: "pointer",
+                font: `${on ? 600 : 500} 12px/1 'Golos Text',sans-serif`,
+                border: `1px solid ${on ? color : "rgba(255,255,255,.12)"}`,
+                background: on ? `${color}22` : "transparent",
+                color: on ? "#fff" : "rgba(255,255,255,.6)",
+              }}
+            >
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: color }} />
+              {label}
+              <span className="gtr-mono" style={{ fontSize: 10, opacity: 0.65 }}>
+                {n}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
         <input
           className="gtr-input"
           style={{ maxWidth: 260 }}
-          placeholder="Поиск по имени и стилю…"
+          placeholder={
+            scope === "performers" ? "Поиск по имени и стилю…" : "Поиск по названию и роли…"
+          }
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
@@ -116,11 +174,20 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
           value={kind}
           onChange={(e) => setKind(e.target.value)}
         >
-          {Object.entries(KIND_LABEL).map(([k, l]) => (
-            <option key={k} value={k}>
-              {l}
-            </option>
-          ))}
+          {/* типы только текущего раздела: в контрагентах нет «артистов» */}
+          {Object.entries(KIND_LABEL)
+            .filter(
+              ([k]) =>
+                k === "all" ||
+                (scope === "performers"
+                  ? isPerformer({ kind: k })
+                  : !isPerformer({ kind: k })),
+            )
+            .map(([k, l]) => (
+              <option key={k} value={k}>
+                {l}
+              </option>
+            ))}
         </select>
         <select
           className="gtr-input"
@@ -136,7 +203,15 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
         </select>
       </div>
 
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+      {/* стили — характеристика исполнителя, у лейбла или агентства их нет */}
+      <div
+        style={{
+          display: scope === "performers" ? "flex" : "none",
+          gap: 6,
+          flexWrap: "wrap",
+          marginBottom: 16,
+        }}
+      >
         {[["all", filtered.length] as [string, number], ...topStyles].map(([s, n]) => (
           <button
             key={s}
@@ -166,6 +241,17 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
         {filtered.slice(0, 90).map((a) => (
           <Card key={a.id} hover style={{ padding: "14px 16px" }} onClick={() => openArtist(a.id)}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {/* цветная метка типа: артист, лейбл, агентство, площадка */}
+              <span
+                title={ENTITY_KIND_LABEL[a.kind] ?? a.kind}
+                style={{
+                  width: 8,
+                  height: 8,
+                  flex: "none",
+                  borderRadius: "50%",
+                  background: entityColor(a.kind),
+                }}
+              />
               <span style={{ font: "600 13px/1.25 'Golos Text',sans-serif", flex: 1, minWidth: 0 }}>
                 {a.name}
               </span>

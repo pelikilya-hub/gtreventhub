@@ -1723,6 +1723,40 @@ export type ArtistBase = {
   artists: Artist[];
 };
 
+// ---------- исполнители и контрагенты ----------
+// В базе 312 записей, но выступают только 269: остальные — лейблы, агентства,
+// менеджмент и площадки-промоутеры, то есть каналы букинга, а не артисты.
+// Раньше поиск в конструкторе их не различал, и лейбл попадал в событие
+// артистом — вместе с гонораром по тиру в смете.
+export const PERFORMER_KINDS = ["artist", "live"] as const;
+export const COUNTERPARTY_KINDS = ["team", "agency", "venue", "community"] as const;
+
+export const isPerformer = (a: { kind?: string }) =>
+  (PERFORMER_KINDS as readonly string[]).includes(String(a.kind));
+
+export const ENTITY_KIND_LABEL: Record<string, string> = {
+  artist: "Артист / DJ",
+  live: "Лайв-состав",
+  team: "Лейбл / менеджмент",
+  agency: "Агентство",
+  venue: "Площадка-промоутер",
+  community: "Комьюнити",
+};
+
+// Цветовые метки типов: артисты в фиолетовом языке KINDS.artist, площадки —
+// в красном KINDS.venue, чтобы список читался так же, как канвас события.
+export const ENTITY_KIND_COLOR: Record<string, string> = {
+  artist: "#7B4DFF",
+  live: "#22D3C7",
+  team: "#00C2FF",
+  agency: "#F5A623",
+  venue: "#E5231B",
+  community: "#2ECC71",
+};
+
+export const entityColor = (kind?: string) =>
+  ENTITY_KIND_COLOR[String(kind)] ?? "rgba(255,255,255,.35)";
+
 export const loadArtists = () =>
   import("./artists.json").then((m) => m.default as unknown as ArtistBase);
 

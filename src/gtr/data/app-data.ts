@@ -59,12 +59,22 @@ export type Space = {
   [k: string]: unknown;
 };
 
+// Поля соответствуют venues.json: там name/role, а не person/roleTitle —
+// из-за расхождения реальный контакт площадки нигде не подхватывался.
 export type Contact = {
   venueId: string;
-  person?: string;
-  roleTitle?: string;
+  id?: string;
+  name?: string;
+  role?: string;
+  type?: string;
   phone?: string;
   email?: string;
+  channel?: string;
+  status?: string;
+  verified?: string;
+  action?: string;
+  priority?: string;
+  notes?: string;
   [k: string]: unknown;
 };
 
@@ -1175,6 +1185,222 @@ export const calPaletteOf = (venueId: string): [string, string, string, string, 
   });
 };
 
+// ---------- пресеты модулей события ----------
+// Категории без каталога подрядчиков раньше добавлялись пустой карточкой
+// «Заполните данные блока». Теперь у каждой есть готовые варианты: залы,
+// слоты и бюджет берутся из данных площадки, а договоры, промо и роли —
+// это стандартный набор GTR, одинаковый для всех площадок.
+
+export type ModulePreset = {
+  key: string;
+  title: string;
+  sub: string;
+  badge: string;
+  fields: [string, string][];
+  fromBase: boolean; // взято из базы площадки, а не из типового набора
+};
+
+const docPresets = (): ModulePreset[] =>
+  [
+    ["Договор аренды площадки", "Основной договор с площадкой", "Аренда"],
+    ["Технический райдер", "Согласование звука, света и сцены", "Техника"],
+    ["Страхование мероприятия", "Ответственность перед гостями и площадкой", "Страховка"],
+    ["Согласование времени работы", "Поздние часы и уровень звука", "Регламент"],
+  ].map(([title, sub, badge]) => ({
+    key: `doc-${title}`,
+    title,
+    sub,
+    badge: badge.toUpperCase(),
+    fields: [
+      ["ДОКУМЕНТ", title],
+      ["СТАТУС", "Не начат"],
+      ["ОТВЕТСТВЕННЫЙ", "—"],
+      ["СРОК", "—"],
+    ] as [string, string][],
+    fromBase: false,
+  }));
+
+const promoPresets = (): ModulePreset[] =>
+  [
+    ["Афиша и анонсы", "Публикации площадки и артистов"],
+    ["Продажа билетов", "Тираж, цены, каналы продаж"],
+    ["Таргет и соцсети", "Платное продвижение события"],
+    ["Работа с медиа", "Пресса, блогеры, партнёрские анонсы"],
+  ].map(([title, sub]) => ({
+    key: `promo-${title}`,
+    title,
+    sub,
+    badge: "ПРОМО",
+    fields: [
+      ["КАНАЛ", title],
+      ["СТАТУС", "Не начат"],
+      ["БЮДЖЕТ", "—"],
+      ["ОТВЕТСТВЕННЫЙ", "—"],
+    ] as [string, string][],
+    fromBase: false,
+  }));
+
+const staffPresets = (venueId: string): ModulePreset[] => {
+  const c = CONTACT(venueId);
+  const list: ModulePreset[] = [];
+  // Реальный контакт площадки, если он есть в базе
+  if (c?.name) {
+    list.push({
+      key: `staff-${c.name}`,
+      title: String(c.name),
+      sub: [c.role, "контакт площадки"].filter(Boolean).join(" · "),
+      badge: "ПЛОЩАДКА",
+      fields: [
+        ["РОЛЬ", String(c.role || "Контакт площадки")],
+        ["ТЕЛЕФОН", String(c.phone || "—")],
+        ["EMAIL", String(c.email || "—")],
+        ["КАНАЛ", String(c.channel || "—")],
+        ["ПРОВЕРЕН", String(c.verified || "—")],
+      ],
+      fromBase: true,
+    });
+  }
+  const roles: [string, string][] = [
+    ["Менеджер площадки", "Согласование площадки и слота"],
+    ["Технический директор", "Звук, свет, сцена"],
+    ["Промоутер", "Продвижение и билеты"],
+    ["Координатор GTR", "Ведение события со стороны GTR"],
+  ];
+  roles.forEach(([title, sub]) =>
+    list.push({
+      key: `staff-${title}`,
+      title,
+      sub,
+      badge: "РОЛЬ",
+      fields: [
+        ["РОЛЬ", title],
+        ["ИМЯ", "—"],
+        ["КОНТАКТ", "—"],
+        ["СТАТУС", "Не назначен"],
+      ],
+      fromBase: false,
+    }),
+  );
+  return list;
+};
+
+const moneyPresets = (venueId: string): ModulePreset[] => {
+  const rate = rateOf(venueId);
+  const list: ModulePreset[] = [];
+  if (rate) {
+    list.push({
+      key: "money-venue",
+      title: "Аренда площадки",
+      sub: `${rate.covers} · ${RATE_LABEL[rate.kind]}`,
+      badge: "АРЕНДА",
+      fields: [
+        ["СУММА", fmtThb(rate.amount)],
+        ["ЧТО ВХОДИТ", rate.covers],
+        ["СТАТУС ЦЕНЫ", RATE_LABEL[rate.kind]],
+        ["ИСТОЧНИК", rate.source || "не указан"],
+      ],
+      fromBase: true,
+    });
+  }
+  list.push(
+    {
+      key: "money-commission",
+      title: `Комиссия GTR · ${COMMISSION_PCT}%`,
+      sub: "Начисляется на подытог сметы",
+      badge: "КОМИССИЯ",
+      fields: [
+        ["СТАВКА", `${COMMISSION_PCT}%`],
+        ["БАЗА", "Подытог сметы"],
+        ["СТАТУС", "Стандартная"],
+      ],
+      fromBase: false,
+    },
+    {
+      key: "money-deposit",
+      title: "Депозит / предоплата",
+      sub: "Условия и сроки внесения",
+      badge: "ОПЛАТА",
+      fields: [
+        ["СУММА", "—"],
+        ["СРОК", "—"],
+        ["УСЛОВИЯ", "уточняются у площадки"],
+      ],
+      fromBase: false,
+    },
+    {
+      key: "money-fnb",
+      title: "Бар и F&B",
+      sub: "Минимальный спенд по еде и напиткам",
+      badge: "F&B",
+      fields: [
+        ["МИН. СПЕНД", "—"],
+        ["ФОРМАТ", "—"],
+        ["СТАТУС", "по запросу"],
+      ],
+      fromBase: false,
+    },
+  );
+  return list;
+};
+
+const roomPresets = (venueId: string): ModulePreset[] =>
+  SPACES(venueId).map((s) => {
+    const pax = spacePax(s);
+    const area = spaceArea(s);
+    const gap = spaceGap(s);
+    return {
+      key: String(s.id),
+      title: String(s.name),
+      sub: [pax ? `${pax} гостей` : "вместимость не заявлена", String(s.type ?? "")]
+        .filter(Boolean)
+        .join(" · "),
+      badge: pax || "—",
+      fields: [
+        ["ЗАЛ", String(s.name)],
+        ["ПЛОЩАДЬ", area ? `${area.toLocaleString("ru-RU")} м²` : "не заявлена"],
+        ["ВМЕСТИМОСТЬ", pax ? `${pax} гостей` : "не заявлена"],
+        ["БРОНИРОВАНИЕ", String(s.bookable ?? "по запросу")],
+        ...(gap ? ([["ТРЕБУЕТ ДАННЫХ", gap]] as [string, string][]) : []),
+      ],
+      fromBase: true,
+    };
+  });
+
+const slotPresets = (venueId: string): ModulePreset[] =>
+  calPaletteOf(venueId).map(([name, , from, to, where]) => ({
+    key: `slot-${name}`,
+    title: `${name} · ${from}–${to}`,
+    sub: where,
+    badge: from,
+    fields: [
+      ["ДАТА", "—"],
+      ["ВРЕМЯ", `${from}–${to}`],
+      ["ЗАЛ", where],
+      ["СТАТУС", "Черновик"],
+    ] as [string, string][],
+    fromBase: false,
+  }));
+
+// Готовые варианты блока для категории палитры
+export const presetsFor = (kind: NodeKind, venueId: string): ModulePreset[] => {
+  switch (kind) {
+    case "room":
+      return roomPresets(venueId);
+    case "slot":
+      return slotPresets(venueId);
+    case "money":
+      return moneyPresets(venueId);
+    case "doc":
+      return docPresets();
+    case "promo":
+      return promoPresets();
+    case "staff":
+      return staffPresets(venueId);
+    default:
+      return [];
+  }
+};
+
 // ---------- rich-контент Illuzion ----------
 const ILZ = "https://www.illuzionphuket.com/wp-content/uploads/";
 export const ILZ_RICH: RichVenue = {
@@ -1499,6 +1725,7 @@ export type RateKind = "published" | "quoted" | "gtr-estimate" | "inquiry";
 export type VenueRate = {
   venueId: string;
   amount: number;
+  unit: string; // час / день / событие — без этого «฿1 000» читается как цена всего события
   currency: string;
   covers: string;
   kind: RateKind;
@@ -1563,16 +1790,25 @@ export const computeQuote = (graph: Graph, venueId: string): Quote => {
   const rate = rateOf(venueId);
   if (venueNode) {
     if (rate) {
+      const perUnit = rate.unit && rate.unit !== "событие";
       lines.push({
         group: "venue",
         label: venueNode.title,
-        note: rate.covers || "Аренда площадки",
+        note: perUnit
+          ? `${rate.covers} · ставка за ${rate.unit}`
+          : rate.covers || "Аренда площадки",
         amount: rate.amount,
         estimate: rate.kind !== "published" && rate.kind !== "quoted",
         kind: rate.kind,
       });
       if (rate.kind === "gtr-estimate") {
         missing.push(`Ставка «${venueNode.title}» — ориентир GTR, нужен запрос площадке`);
+      }
+      // Почасовая или посуточная ставка без длительности даёт неверный итог
+      if (perUnit) {
+        missing.push(
+          `«${venueNode.title}» — ставка за ${rate.unit}, в смете учтён один. Задайте длительность события`,
+        );
       }
     } else {
       lines.push({

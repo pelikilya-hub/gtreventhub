@@ -18,6 +18,7 @@ import {
   nodeStatus,
   packagePrice,
   packagesOf,
+  presetsFor,
   RATE_COLOR,
   RATE_LABEL,
   STAGE_COLOR,
@@ -511,7 +512,8 @@ export function ConstructorScreen({
                   VENDOR_KINDS.includes(kind),
                 );
               const isArtist = kind === "artist";
-              const expandable = vendors.length > 0 || isArtist;
+              const presets = presetsFor(kind, vid);
+              const expandable = vendors.length > 0 || isArtist || presets.length > 0;
               return (
                 <div key={kind}>
                   <button
@@ -593,7 +595,64 @@ export function ConstructorScreen({
                       </button>
                     </div>
                   ) : null}
-                  {open && !isArtist ? (
+                  {/* Категории без подрядчиков: готовые варианты блока.
+                      Залы, слоты и бюджет — из данных площадки, остальное —
+                      типовой набор GTR. */}
+                  {open && !isArtist && !vendors.length ? (
+                    <div style={{ display: "grid", gap: 5, padding: "6px 0 4px 10px" }}>
+                      {presets.map((p) => {
+                        const added = g.nodes.some((n) => n.title === p.title);
+                        return (
+                          <button
+                            key={p.key}
+                            className="gtr-pal-btn"
+                            style={{ padding: "7px 9px", opacity: added ? 0.45 : 1 }}
+                            onClick={() =>
+                              added
+                                ? setSel(g.nodes.find((n) => n.title === p.title)!.id)
+                                : addNode(kind, p.title, p.sub, p.badge, p.fields, true)
+                            }
+                          >
+                            <span style={{ flex: 1, minWidth: 0 }}>
+                              <span style={{ display: "block", fontWeight: 600, fontSize: 11 }}>
+                                {p.title}
+                              </span>
+                              <span
+                                style={{
+                                  display: "block",
+                                  marginTop: 2,
+                                  font: "500 9px/1.3 'JetBrains Mono',monospace",
+                                  color: "rgba(255,255,255,.4)",
+                                }}
+                              >
+                                {added ? "уже в графе" : p.sub}
+                              </span>
+                            </span>
+                            {p.fromBase ? (
+                              <span
+                                title="Из данных площадки"
+                                style={{
+                                  width: 5,
+                                  height: 5,
+                                  borderRadius: "50%",
+                                  background: GREEN,
+                                  flex: "none",
+                                }}
+                              />
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                      <button
+                        className="gtr-pal-btn"
+                        style={{ padding: "7px 9px", color: "rgba(255,255,255,.55)" }}
+                        onClick={addBlank}
+                      >
+                        + Свой блок
+                      </button>
+                    </div>
+                  ) : null}
+                  {open && !isArtist && vendors.length ? (
                     <div style={{ display: "grid", gap: 5, padding: "6px 0 4px 10px" }}>
                       {vendors.map((vd) => {
                         const packs = packagesOf(vd.name);

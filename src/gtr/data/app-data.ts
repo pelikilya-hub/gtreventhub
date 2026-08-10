@@ -1966,7 +1966,13 @@ export type VendorPackage = {
   unit: string;
   contact: string;
   source: string;
+  verified: string; // дата, когда цена подтверждена на сайте подрядчика; пусто — не подтверждена
+  note?: string;
 };
+
+// Подтверждённая цена весомее перенесённой: в смете это разный статус
+export const packageRateKind = (p: VendorPackage): RateKind =>
+  p.verified ? "published" : "gtr-estimate";
 
 export const VENDOR_PACKAGES = vendorPackagesRaw as VendorPackage[];
 

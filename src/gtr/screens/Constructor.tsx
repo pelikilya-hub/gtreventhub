@@ -761,6 +761,7 @@ export function ConstructorScreen({
                                       ["ПОДРЯДЧИК", vd.name],
                                       ["ЦЕНА", packagePrice(p)],
                                       ["ЦЕНА_THB", String(p.price)],
+                                      ["ПРОВЕРЕНО", p.verified || "не подтверждена"],
                                       ["КОНТАКТ", p.contact || vd.contact || "—"],
                                       ["ИСТОЧНИК", p.source || vd.source || "—"],
                                     ],
@@ -781,7 +782,24 @@ export function ConstructorScreen({
                                     }}
                                   >
                                     {packagePrice(p)}
+                                    {p.verified ? (
+                                      <span style={{ color: GREEN, marginLeft: 6 }}>
+                                        ✓ {p.verified}
+                                      </span>
+                                    ) : null}
                                   </span>
+                                  {p.note ? (
+                                    <span
+                                      style={{
+                                        display: "block",
+                                        marginTop: 2,
+                                        font: "500 9px/1.35 'Golos Text',sans-serif",
+                                        color: "rgba(255,255,255,.4)",
+                                      }}
+                                    >
+                                      {p.note}
+                                    </span>
+                                  ) : null}
                                 </span>
                               </button>
                             ))}

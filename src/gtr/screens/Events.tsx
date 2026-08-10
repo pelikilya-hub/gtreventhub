@@ -166,7 +166,7 @@ export function EventsScreen() {
           </div>
         </Card>
       ) : (
-        <div style={{ display: "grid", gap: 10 }}>
+        <div className="gtr-seq" style={{ display: "grid", gap: 10 }}>
           {list.map((d) => {
             const v = V(d.venueId);
             const st = d.graph.stage ?? "draft";

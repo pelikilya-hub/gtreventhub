@@ -366,11 +366,13 @@
 }
 
 /* тонкий лазер: проходит по контейнеру сверху вниз */
+/* дистанция прохода задаётся контейнером через --gtr-run:
+   проценты тут считались бы от высоты самой линии (1px) */
 @keyframes gtrscan {
-  0% { transform: translateY(-100%); opacity: 0; }
-  8% { opacity: 1; }
-  92% { opacity: 1; }
-  100% { transform: translateY(2000%); opacity: 0; }
+  0% { transform: translateY(-8px); opacity: 0; }
+  10% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(var(--gtr-run, 240px)); opacity: 0; }
 }
 .gtr-laser {
   position: absolute;
@@ -414,6 +416,13 @@
   100% { text-shadow: none; }
 }
 .gtr-split { animation: gtrsplit 0.5s ease-out both; }
+
+/* тревога: расходящаяся красная обводка */
+@keyframes gtralert {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(229, 35, 27, 0.6); }
+  55% { box-shadow: 0 0 0 6px rgba(229, 35, 27, 0); }
+}
+.gtr-alert { animation: gtralert 1.8s ease-out infinite; }
 
 @keyframes gtrpulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.5); }
@@ -606,13 +615,7 @@
   background: linear-gradient(180deg, #141519, #0e0f12);
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
   touch-action: none;
-  clip-path: polygon(
-    0 0,
-    calc(100% - var(--gtr-cut)) 0,
-    100% var(--gtr-cut),
-    100% 100%,
-    0 100%
-  );
+  /* фаску здесь не режем: по углам сидят порты связей */
 }
 .gtr-node:active { cursor: grabbing; }
 
@@ -639,7 +642,8 @@
   .gtr-beam,
   .gtr-neon,
   .gtr-glowbar,
-  .gtr-presence { animation: none; }
+  .gtr-presence,
+  .gtr-alert { animation: none; }
   .gtr-vibe-card,
   .gtr-vibe-card:hover,
   .gtr-card-hover:hover { transition: none; transform: none; }
@@ -654,4 +658,26 @@
   letter-spacing: -0.02em;
   text-transform: uppercase;
   margin: 0;
+}
+
+/* ---------- последовательное разрывное проявление ---------- */
+.gtr-seq > * { animation: gtrrip 0.45s cubic-bezier(0.2, 0.75, 0.25, 1) both; }
+.gtr-seq > *:nth-child(1) { animation-delay: 0.000s; }
+.gtr-seq > *:nth-child(2) { animation-delay: 0.045s; }
+.gtr-seq > *:nth-child(3) { animation-delay: 0.090s; }
+.gtr-seq > *:nth-child(4) { animation-delay: 0.135s; }
+.gtr-seq > *:nth-child(5) { animation-delay: 0.180s; }
+.gtr-seq > *:nth-child(6) { animation-delay: 0.225s; }
+.gtr-seq > *:nth-child(7) { animation-delay: 0.270s; }
+.gtr-seq > *:nth-child(8) { animation-delay: 0.315s; }
+.gtr-seq > *:nth-child(9) { animation-delay: 0.360s; }
+.gtr-seq > *:nth-child(10) { animation-delay: 0.405s; }
+.gtr-seq > *:nth-child(11) { animation-delay: 0.450s; }
+.gtr-seq > *:nth-child(12) { animation-delay: 0.495s; }
+.gtr-seq > *:nth-child(13) { animation-delay: 0.540s; }
+.gtr-seq > *:nth-child(14) { animation-delay: 0.585s; }
+.gtr-seq > *:nth-child(n + 15) { animation-delay: 0.63s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-seq > * { animation: none; }
 }

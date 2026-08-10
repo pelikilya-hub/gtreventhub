@@ -480,6 +480,12 @@ export function DashScreen() {
         <div className="gtr-beam" />
         <div className="gtr-glowbar" style={{ left: "62%" }} />
         <div className="gtr-glowbar" style={{ left: "84%", animationDelay: "1.2s" }} />
+        {/* сканирующие лазеры поверх шапки */}
+        <div className="gtr-laser" style={{ top: 0, ["--gtr-run" as string]: "210px" }} />
+        <div
+          className="gtr-laser"
+          style={{ top: 0, animationDelay: "2.6s", opacity: 0.6, ["--gtr-run" as string]: "210px" }}
+        />
         <div style={{ position: "relative" }}>
           <Eyebrow>{d.kicker}</Eyebrow>
           <div

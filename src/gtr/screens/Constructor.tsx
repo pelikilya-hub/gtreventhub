@@ -523,7 +523,7 @@ export function ConstructorScreen({
         ) : null}
         <Chip
           color={STATUS_COLOR[health.verdict]}
-          style={health.clean ? undefined : { animation: "gtrpulse 2s ease-out infinite" }}
+          style={health.clean ? undefined : { animation: "gtralert 1.8s ease-out infinite" }}
         >
           {health.clean
             ? "СОБЫТИЕ В ПОРЯДКЕ"

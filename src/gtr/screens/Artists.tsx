@@ -232,6 +232,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
       </div>
 
       <div
+        className="gtr-seq"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))",

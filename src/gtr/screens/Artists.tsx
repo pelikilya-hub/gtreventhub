@@ -13,7 +13,7 @@ import {
   type ArtistBase,
 } from "../data/app-data";
 import { useGtr } from "../store";
-import { Card, Chip, Eyebrow } from "../ui";
+import { Card, Chip, Eyebrow, tint } from "../ui";
 
 const KIND_LABEL: Record<string, string> = {
   all: "Все записи",
@@ -104,7 +104,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
   return (
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 14 }}>
-        <h1 className="gtr-oswald" style={{ font: "700 22px/1 Oswald,sans-serif", margin: 0 }}>
+        <h1 className="gtr-oswald gtr-h1">
           {scope === "performers" ? "Артисты и диджеи" : "Контрагенты"}
         </h1>
         <span
@@ -139,16 +139,16 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
-                borderRadius: 8,
+                borderRadius: 0,
                 padding: "8px 14px",
                 cursor: "pointer",
                 font: `${on ? 600 : 500} 12px/1 'Golos Text',sans-serif`,
                 border: `1px solid ${on ? color : "rgba(255,255,255,.12)"}`,
-                background: on ? `${color}22` : "transparent",
+                background: on ? tint(color, 0.12) : "transparent",
                 color: on ? "#fff" : "rgba(255,255,255,.6)",
               }}
             >
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: color }} />
+              <span style={{ width: 8, height: 8, borderRadius: 0, background: color }} />
               {label}
               <span className="gtr-mono" style={{ fontSize: 10, opacity: 0.65 }}>
                 {n}
@@ -220,7 +220,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
               border: `1px solid ${style === s ? "#E5231B" : "rgba(255,255,255,.12)"}`,
               background: style === s ? "rgba(229,35,27,.14)" : "transparent",
               color: style === s ? "#fff" : "rgba(255,255,255,.55)",
-              borderRadius: 7,
+              borderRadius: 0,
               padding: "6px 10px",
               cursor: "pointer",
               font: "500 10.5px/1 'Golos Text',sans-serif",
@@ -248,7 +248,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                   width: 8,
                   height: 8,
                   flex: "none",
-                  borderRadius: "50%",
+                  borderRadius: 0,
                   background: entityColor(a.kind),
                 }}
               />

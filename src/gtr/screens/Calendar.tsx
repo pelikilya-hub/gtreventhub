@@ -125,7 +125,7 @@ export function CalendarScreen() {
           marginBottom: 16,
         }}
       >
-        <h1 className="gtr-oswald" style={{ font: "700 22px/1 Oswald,sans-serif", margin: 0 }}>
+        <h1 className="gtr-oswald gtr-h1">
           Календарь и программа
         </h1>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -156,7 +156,7 @@ export function CalendarScreen() {
                   display: "flex",
                   alignItems: "center",
                   gap: 7,
-                  borderRadius: 7,
+                  borderRadius: 0,
                   padding: "7px 11px",
                   cursor: "pointer",
                   font: `${room === k ? 600 : 500} 11px/1 'Golos Text',sans-serif`,
@@ -165,7 +165,7 @@ export function CalendarScreen() {
                   color: room === k ? "#fff" : "rgba(255,255,255,.6)",
                 }}
               >
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: color }} />
+                <span style={{ width: 7, height: 7, borderRadius: 0, background: color }} />
                 {label}
               </button>
             ),
@@ -241,7 +241,7 @@ export function CalendarScreen() {
                             font: "600 8.5px/1 'JetBrains Mono',monospace",
                             color: "rgba(255,255,255,.45)",
                             background: "rgba(255,255,255,.08)",
-                            borderRadius: 4,
+                            borderRadius: 0,
                             padding: "3px 5px",
                           }}
                         >
@@ -260,7 +260,7 @@ export function CalendarScreen() {
                             alignItems: "center",
                             gap: 5,
                             padding: "4px 5px",
-                            borderRadius: 5,
+                            borderRadius: 0,
                             cursor: "grab",
                             font: "500 9.5px/1.2 'Golos Text',sans-serif",
                             background: statusBg(e),
@@ -271,7 +271,7 @@ export function CalendarScreen() {
                               width: 6,
                               height: 6,
                               flex: "none",
-                              borderRadius: "50%",
+                              borderRadius: 0,
                               background: roomColor(e.room),
                             }}
                           />
@@ -313,7 +313,7 @@ export function CalendarScreen() {
                   title={`${i + 1} ${MONTHS[month]}: ${c}`}
                   style={{
                     flex: 1,
-                    borderRadius: 1,
+                    borderRadius: 0,
                     background: c ? "#E5231B" : "rgba(255,255,255,.1)",
                     height: `${c ? Math.min(100, 30 + c * 35) : 12}%`,
                     transition: "height .3s",
@@ -344,7 +344,7 @@ export function CalendarScreen() {
                     style={{
                       background: "var(--gtr-card2)",
                       border: "1px solid rgba(255,255,255,.07)",
-                      borderRadius: 10,
+                      borderRadius: 0,
                       padding: "10px 12px",
                     }}
                   >
@@ -353,7 +353,7 @@ export function CalendarScreen() {
                         style={{
                           width: 7,
                           height: 7,
-                          borderRadius: "50%",
+                          borderRadius: 0,
                           background: roomColor(e.room),
                           flex: "none",
                         }}
@@ -437,7 +437,7 @@ export function CalendarScreen() {
                         width: 8,
                         height: 8,
                         flex: "none",
-                        borderRadius: "50%",
+                        borderRadius: 0,
                         background: roomColor(evRoom),
                       }}
                     />
@@ -469,7 +469,7 @@ export function CalendarScreen() {
                       width: 8,
                       height: 8,
                       flex: "none",
-                      borderRadius: "50%",
+                      borderRadius: 0,
                       background: "#7B4DFF",
                     }}
                   />

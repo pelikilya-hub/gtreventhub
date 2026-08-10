@@ -642,7 +642,7 @@ export function DashScreen() {
                   width: 32,
                   height: 32,
                   flex: "none",
-                  borderRadius: 9,
+                  borderRadius: 0,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

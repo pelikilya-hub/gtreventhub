@@ -38,7 +38,7 @@ export function VendorsScreen() {
   return (
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 6 }}>
-        <h1 className="gtr-oswald" style={{ font: "700 22px/1 Oswald,sans-serif", margin: 0 }}>
+        <h1 className="gtr-oswald gtr-h1">
           Каталог подрядчиков
         </h1>
         <span
@@ -58,7 +58,7 @@ export function VendorsScreen() {
               border: `1px solid ${cat === k ? "#E5231B" : "rgba(255,255,255,.12)"}`,
               background: cat === k ? "#E5231B" : "transparent",
               color: cat === k ? "#fff" : "rgba(255,255,255,.6)",
-              borderRadius: 7,
+              borderRadius: 0,
               padding: "7px 11px",
               cursor: "pointer",
               font: `${cat === k ? 600 : 500} 11px/1 'Golos Text',sans-serif`,
@@ -93,7 +93,7 @@ export function VendorsScreen() {
                     width: 30,
                     height: 30,
                     flex: "none",
-                    borderRadius: 8,
+                    borderRadius: 0,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -187,7 +187,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
                 width: 34,
                 height: 34,
                 flex: "none",
-                borderRadius: 9,
+                borderRadius: 0,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

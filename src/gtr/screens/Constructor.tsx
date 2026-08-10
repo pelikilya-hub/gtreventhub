@@ -51,7 +51,7 @@ import {
 import { notifyRequestFn } from "../notify";
 import { quoteDocument } from "../quote-doc";
 import { useGtr } from "../store";
-import { Card, Chip, Dot, Eyebrow, Icon } from "../ui";
+import { Card, Chip, Dot, Eyebrow, Icon, tint } from "../ui";
 
 const VENDOR_KINDS: NodeKind[] = ["sound", "light", "decor", "content"];
 const RIDER_LABEL: Record<string, string> = {
@@ -488,7 +488,7 @@ export function ConstructorScreen({
           marginBottom: 14,
         }}
       >
-        <h1 className="gtr-oswald" style={{ font: "700 22px/1 Oswald,sans-serif", margin: 0 }}>
+        <h1 className="gtr-oswald gtr-h1">
           Конструктор события
         </h1>
         <Chip color="rgba(255,255,255,.5)">{v.name ?? vid}</Chip>
@@ -501,7 +501,7 @@ export function ConstructorScreen({
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
-              borderRadius: 99,
+              borderRadius: 0,
               padding: "5px 10px",
               font: "600 9.5px/1 'JetBrains Mono',monospace",
               letterSpacing: ".06em",
@@ -514,7 +514,7 @@ export function ConstructorScreen({
               style={{
                 width: 8,
                 height: 8,
-                borderRadius: "50%",
+                borderRadius: 0,
                 background: `linear-gradient(120deg, ${eventVibe.colors[0]}, ${eventVibe.colors[1]})`,
               }}
             />
@@ -546,7 +546,7 @@ export function ConstructorScreen({
               style={{
                 width: 22,
                 height: 22,
-                borderRadius: 7,
+                borderRadius: 0,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -565,7 +565,7 @@ export function ConstructorScreen({
                 style={{
                   width: 22,
                   height: 22,
-                  borderRadius: 7,
+                  borderRadius: 0,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -721,7 +721,7 @@ export function ConstructorScreen({
                         width: 24,
                         height: 24,
                         flex: "none",
-                        borderRadius: 7,
+                        borderRadius: 0,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -847,7 +847,7 @@ export function ConstructorScreen({
                                 style={{
                                   width: 5,
                                   height: 5,
-                                  borderRadius: "50%",
+                                  borderRadius: 0,
                                   background: GREEN,
                                   flex: "none",
                                 }}
@@ -1086,7 +1086,7 @@ export function ConstructorScreen({
                       right: -6,
                       width: 13,
                       height: 13,
-                      borderRadius: "50%",
+                      borderRadius: 0,
                       background: sc,
                       border: "2px solid #0A0B0D",
                       animation: healthy ? undefined : "gtrpulse 1.6s ease-out infinite",
@@ -1098,7 +1098,7 @@ export function ConstructorScreen({
                         width: 20,
                         height: 20,
                         flex: "none",
-                        borderRadius: 6,
+                        borderRadius: 0,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -1126,7 +1126,7 @@ export function ConstructorScreen({
                           font: "600 8.5px/1 'JetBrains Mono',monospace",
                           color: "rgba(255,255,255,.5)",
                           background: "rgba(255,255,255,.07)",
-                          borderRadius: 4,
+                          borderRadius: 0,
                           padding: "3px 5px",
                         }}
                       >
@@ -1166,7 +1166,7 @@ export function ConstructorScreen({
                       transform: "translateY(-50%)",
                       width: 13,
                       height: 13,
-                      borderRadius: "50%",
+                      borderRadius: 0,
                       background: "#0A0B0D",
                       border: `2px solid ${linkFrom && linkFrom !== n.id ? GREEN : "rgba(255,255,255,.28)"}`,
                       cursor: "crosshair",
@@ -1185,7 +1185,7 @@ export function ConstructorScreen({
                       transform: "translateY(-50%)",
                       width: 13,
                       height: 13,
-                      borderRadius: "50%",
+                      borderRadius: 0,
                       background: linking ? GREEN : "#0A0B0D",
                       border: `2px solid ${linking ? GREEN : K[1]}`,
                       cursor: "crosshair",
@@ -1327,11 +1327,11 @@ export function ConstructorScreen({
                           alignItems: "center",
                           gap: 6,
                           padding: "6px 8px",
-                          borderRadius: 7,
+                          borderRadius: 0,
                           cursor: "pointer",
                           font: "600 9.5px/1 'Golos Text',sans-serif",
                           border: `1px solid ${active ? STATUS_COLOR[s] : "rgba(255,255,255,.12)"}`,
-                          background: active ? `${STATUS_COLOR[s]}22` : "transparent",
+                          background: active ? tint(STATUS_COLOR[s], 0.12) : "transparent",
                           color: active ? STATUS_COLOR[s] : "rgba(255,255,255,.6)",
                         }}
                       >
@@ -1339,7 +1339,7 @@ export function ConstructorScreen({
                           style={{
                             width: 7,
                             height: 7,
-                            borderRadius: "50%",
+                            borderRadius: 0,
                             background: STATUS_COLOR[s],
                             flex: "none",
                           }}
@@ -1497,7 +1497,7 @@ export function ConstructorScreen({
                           style={{
                             width: 6,
                             height: 6,
-                            borderRadius: "50%",
+                            borderRadius: 0,
                             background: RATE_COLOR[l.kind],
                             flex: "none",
                           }}
@@ -1657,7 +1657,7 @@ export function ConstructorScreen({
                   gap: 8,
                   alignItems: "center",
                   padding: "10px 12px",
-                  borderRadius: 9,
+                  borderRadius: 0,
                   background: "rgba(46,204,113,.1)",
                   border: "1px solid rgba(46,204,113,.3)",
                 }}
@@ -1677,7 +1677,7 @@ export function ConstructorScreen({
                       display: "flex",
                       gap: 8,
                       padding: "9px 10px",
-                      borderRadius: 8,
+                      borderRadius: 0,
                       cursor: a.nodeId ? "pointer" : "default",
                       background: `${STATUS_COLOR[a.severity]}14`,
                       border: `1px solid ${STATUS_COLOR[a.severity]}44`,
@@ -1733,7 +1733,7 @@ export function ConstructorScreen({
                       width: 15,
                       height: 15,
                       flex: "none",
-                      borderRadius: "50%",
+                      borderRadius: 0,
                       marginTop: 1,
                       display: "flex",
                       alignItems: "center",
@@ -1998,7 +1998,7 @@ function BriefPanel({
               key={l}
               onClick={() => switchLang(l)}
               style={{
-                borderRadius: 6,
+                borderRadius: 0,
                 padding: "5px 9px",
                 cursor: "pointer",
                 font: `700 9.5px/1 'JetBrains Mono',monospace`,
@@ -2022,12 +2022,12 @@ function BriefPanel({
       </div>
 
       {/* прогресс брифа */}
-      <div style={{ height: 3, borderRadius: 99, background: "rgba(255,255,255,.07)" }}>
+      <div style={{ height: 3, borderRadius: 0, background: "rgba(255,255,255,.07)" }}>
         <div
           style={{
             height: "100%",
             width: `${pct}%`,
-            borderRadius: 99,
+            borderRadius: 0,
             background: "linear-gradient(90deg,#E5231B,#F5A623)",
             transition: "width .35s cubic-bezier(.2,.7,.3,1)",
           }}
@@ -2094,7 +2094,7 @@ function BriefPanel({
                         className="gtr-vibe-card"
                         onClick={() => onAnswer(qq.id, on ? [] : [o.id])}
                         style={{
-                          borderRadius: 12,
+                          borderRadius: 0,
                           overflow: "hidden",
                           padding: 0,
                           textAlign: "left",
@@ -2121,7 +2121,7 @@ function BriefPanel({
                                 right: 8,
                                 width: 18,
                                 height: 18,
-                                borderRadius: "50%",
+                                borderRadius: 0,
                                 background: "rgba(10,11,13,.75)",
                                 color: "#fff",
                                 font: "700 10px/18px 'JetBrains Mono',monospace",
@@ -2181,7 +2181,7 @@ function BriefPanel({
                           display: "flex",
                           alignItems: "center",
                           gap: 7,
-                          borderRadius: 8,
+                          borderRadius: 0,
                           padding: "8px 13px",
                           cursor: "pointer",
                           textAlign: "left",
@@ -2197,7 +2197,8 @@ function BriefPanel({
                             width: 13,
                             height: 13,
                             flex: "none",
-                            borderRadius: qq.multi ? 4 : "50%",
+                            borderRadius: 0,
+                            transform: qq.multi ? undefined : "rotate(45deg)",
                             border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.25)"}`,
                             background: on ? "#E5231B" : "transparent",
                             transition: "background .15s, border-color .15s",

@@ -19,7 +19,7 @@ import {
 import { BRIEF, vibeOf, vibeQuestionFor, type BriefAnswers } from "../data/brief";
 import { buildPresetDraft, EVENT_PRESETS, presetBlockCount } from "../data/presets";
 import { useGtr } from "../store";
-import { Card, Chip, Eyebrow } from "../ui";
+import { Card, Chip, Eyebrow, tint } from "../ui";
 
 const FORMATS = [
   "Клубная ночь",
@@ -87,7 +87,7 @@ export function EventsScreen() {
           marginBottom: 16,
         }}
       >
-        <h1 className="gtr-oswald" style={{ font: "700 22px/1 Oswald,sans-serif", margin: 0 }}>
+        <h1 className="gtr-oswald gtr-h1">
           События
         </h1>
         <Chip color="rgba(255,255,255,.5)">{scoped.length}</Chip>
@@ -133,16 +133,20 @@ export function EventsScreen() {
                 display: "flex",
                 alignItems: "center",
                 gap: 7,
-                borderRadius: 7,
+                borderRadius: 0,
                 padding: "7px 12px",
                 cursor: "pointer",
-                font: `${on ? 600 : 500} 11px/1 'Golos Text',sans-serif`,
-                border: `1px solid ${on ? color : "rgba(255,255,255,.12)"}`,
-                background: on ? `${color}22` : "transparent",
-                color: on ? "#fff" : "rgba(255,255,255,.6)",
+                font: `${on ? 600 : 500} 10.5px/1 'JetBrains Mono',monospace`,
+                letterSpacing: ".07em",
+                textTransform: "uppercase",
+                border: `1px solid ${on ? tint(color, 0.55) : "rgba(255,255,255,.12)"}`,
+                borderTop: `2px solid ${on ? color : "transparent"}`,
+                background: on ? tint(color, 0.12) : "transparent",
+                color: on ? "#fff" : "rgba(234,234,234,.55)",
+                transition: "border-color .15s, background .15s, color .15s",
               }}
             >
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: color }} />
+              <span style={{ width: 7, height: 7, borderRadius: 0, background: color }} />
               {s === "all" ? "Все" : STAGE_LABEL[s]}
               <span className="gtr-mono" style={{ fontSize: 9.5, opacity: 0.6 }}>
                 {counts[s] ?? 0}
@@ -214,7 +218,7 @@ export function EventsScreen() {
                         display: "inline-flex",
                         alignItems: "center",
                         gap: 5,
-                        borderRadius: 99,
+                        borderRadius: 0,
                         padding: "4px 9px",
                         font: "600 9px/1 'JetBrains Mono',monospace",
                         letterSpacing: ".05em",
@@ -227,7 +231,7 @@ export function EventsScreen() {
                         style={{
                           width: 7,
                           height: 7,
-                          borderRadius: "50%",
+                          borderRadius: 0,
                           background: `linear-gradient(120deg, ${vibe.colors[0]}, ${vibe.colors[1]})`,
                         }}
                       />
@@ -471,7 +475,7 @@ function NewEvent({
                   setVibeId("");
                 }}
                 style={{
-                  borderRadius: 10,
+                  borderRadius: 0,
                   padding: "11px 13px",
                   cursor: "pointer",
                   textAlign: "left",
@@ -515,7 +519,7 @@ function NewEvent({
               setVibeId("");
             }}
             style={{
-              borderRadius: 10,
+              borderRadius: 0,
               padding: "11px 13px",
               cursor: "pointer",
               textAlign: "left",
@@ -543,7 +547,7 @@ function NewEvent({
                   key={f}
                   onClick={() => setFormat(f)}
                   style={{
-                    borderRadius: 7,
+                    borderRadius: 0,
                     padding: "7px 12px",
                     cursor: "pointer",
                     font: `${on ? 600 : 500} 11px/1 'Golos Text',sans-serif`,
@@ -582,7 +586,7 @@ function NewEvent({
                     display: "flex",
                     alignItems: "center",
                     gap: 8,
-                    borderRadius: 9,
+                    borderRadius: 0,
                     padding: "7px 12px 7px 8px",
                     cursor: "pointer",
                     font: `${on ? 600 : 500} 11.5px/1.2 'Golos Text',sans-serif`,
@@ -596,7 +600,7 @@ function NewEvent({
                       width: 22,
                       height: 22,
                       flex: "none",
-                      borderRadius: 7,
+                      borderRadius: 0,
                       background: `linear-gradient(120deg, ${c1}, ${c2})`,
                     }}
                   />

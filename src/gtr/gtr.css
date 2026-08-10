@@ -163,31 +163,161 @@
 }
 
 .gtr-app {
+  /* ---- подложка: приглушённый чёрный, не #000 ---- */
   --gtr-bg: #0a0b0d;
   --gtr-side: #0c0d10;
   --gtr-card: #0f1013;
   --gtr-card2: #131417;
+
+  /* ---- единственный акцент: аварийный красный ---- */
   --gtr-red: #e5231b;
+  --gtr-red-hot: #ff2a2a;
+  --gtr-red-deep: #8f1610;
   --gtr-green: #2ecc71;
   --gtr-amber: #f5a623;
-  --gtr-border: rgba(255, 255, 255, 0.07);
-  --gtr-border2: rgba(255, 255, 255, 0.12);
-  --gtr-t1: #fff;
-  --gtr-t2: rgba(255, 255, 255, 0.55);
-  --gtr-t3: rgba(255, 255, 255, 0.35);
+
+  /* ---- линии: волосяные, видимые, без мягкости ---- */
+  --gtr-border: rgba(255, 255, 255, 0.09);
+  --gtr-border2: rgba(255, 255, 255, 0.17);
+  --gtr-t1: #eaeaea;
+  --gtr-t2: rgba(234, 234, 234, 0.55);
+  --gtr-t3: rgba(234, 234, 234, 0.33);
+
+  /* ---- геометрия: 90 градусов, никаких скруглений ---- */
+  --gtr-r: 0px;
+  --gtr-cut: 9px;
+  --gtr-cut-s: 6px;
+  --gtr-hair: 1px;
+
+  /* ---- слои ---- */
+  --gtr-z-node: 10;
+  --gtr-z-panel: 20;
+  --gtr-z-modal: 40;
+  --gtr-z-grain: 60;
+
   font-family: "Golos Text", system-ui, sans-serif;
   background: var(--gtr-bg);
   color: var(--gtr-t1);
   -webkit-font-smoothing: antialiased;
+  position: relative;
 }
+
+/* ---------- текстура: зерно поверх всего ---------- */
+.gtr-app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: var(--gtr-z-grain);
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- текстура: развёртка ЭЛТ ---------- */
+.gtr-app::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: var(--gtr-z-grain);
+  pointer-events: none;
+  opacity: 0.4;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 2px,
+    rgba(0, 0, 0, 0.16) 2px 3px
+  );
+}
+
 .gtr-app *::-webkit-scrollbar { width: 8px; height: 8px; }
-.gtr-app *::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
+.gtr-app *::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 0;
+}
+.gtr-app *::-webkit-scrollbar-thumb:hover { background: var(--gtr-red); }
 .gtr-app *::-webkit-scrollbar-track { background: transparent; }
 
+/* ---------- типографика ---------- */
 .gtr-oswald { font-family: "Oswald", "Golos Text", sans-serif; text-transform: uppercase; }
-.gtr-mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+.gtr-mono {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
 
-/* ---------- анимации из прототипа ---------- */
+/* макро-заголовок: тесный трекинг, сжатый интерлиньяж */
+.gtr-macro {
+  font-family: "Oswald", sans-serif;
+  font-weight: 700;
+  font-size: clamp(2rem, 5.5vw, 4.75rem);
+  line-height: 0.86;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+/* крупная цифра телеметрии */
+.gtr-figure {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.75rem, 3.4vw, 3rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+}
+
+/* ---------- служебная символика ---------- */
+.gtr-bracket::before { content: "[ "; color: var(--gtr-red); }
+.gtr-bracket::after { content: " ]"; color: var(--gtr-red); }
+
+/* крест на пересечении сетки */
+.gtr-cross {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  pointer-events: none;
+  opacity: 0.5;
+  background:
+    linear-gradient(var(--gtr-t3) 0 0) center / 100% 1px no-repeat,
+    linear-gradient(var(--gtr-t3) 0 0) center / 1px 100% no-repeat;
+}
+
+/* штамп-метка */
+.gtr-stamp {
+  display: inline-block;
+  font: 700 8.5px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gtr-red);
+  border: 1.5px solid var(--gtr-red);
+  padding: 3px 5px;
+  transform: rotate(-3deg);
+  opacity: 0.85;
+}
+
+/* аварийная штриховка */
+.gtr-hazard {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--gtr-red) 0 7px,
+    transparent 7px 14px
+  );
+}
+
+/* штрих-код как разделитель */
+.gtr-barcode {
+  height: 14px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--gtr-t3) 0 1px,
+    transparent 1px 3px,
+    var(--gtr-t3) 3px 5px,
+    transparent 5px 6px,
+    var(--gtr-t3) 6px 8px,
+    transparent 8px 12px
+  );
+  opacity: 0.35;
+}
+
+/* ---------- анимации ---------- */
 @keyframes gtrfade {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
@@ -235,6 +365,56 @@
   pointer-events: none;
 }
 
+/* тонкий лазер: проходит по контейнеру сверху вниз */
+@keyframes gtrscan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  8% { opacity: 1; }
+  92% { opacity: 1; }
+  100% { transform: translateY(2000%); opacity: 0; }
+}
+.gtr-laser {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gtr-red-hot) 35%,
+    var(--gtr-red-hot) 65%,
+    transparent
+  );
+  box-shadow: 0 0 8px 1px rgba(255, 42, 42, 0.55);
+  animation: gtrscan 5.5s linear infinite;
+}
+
+/* стробоскоп */
+@keyframes gtrstrobe {
+  0%, 88%, 100% { opacity: 0.2; }
+  89%, 91%, 93% { opacity: 1; }
+  90%, 92% { opacity: 0.25; }
+}
+.gtr-strobe { animation: gtrstrobe 4s steps(1, end) infinite; }
+
+/* разрывное проявление */
+@keyframes gtrrip {
+  0% { clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); opacity: 0; }
+  30% { clip-path: polygon(0 0, 100% 0, 100% 38%, 0 22%); opacity: 1; }
+  45% { clip-path: polygon(0 0, 100% 0, 100% 34%, 0 46%); }
+  70% { clip-path: polygon(0 0, 100% 0, 100% 82%, 0 68%); }
+  100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); opacity: 1; }
+}
+.gtr-rip { animation: gtrrip 0.55s cubic-bezier(0.2, 0.75, 0.25, 1) both; }
+
+/* расщепление каналов на появлении */
+@keyframes gtrsplit {
+  0% { text-shadow: -3px 0 var(--gtr-red), 3px 0 rgba(0, 229, 255, 0.75); }
+  60% { text-shadow: -1px 0 var(--gtr-red), 1px 0 rgba(0, 229, 255, 0.4); }
+  100% { text-shadow: none; }
+}
+.gtr-split { animation: gtrsplit 0.5s ease-out both; }
+
 @keyframes gtrpulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.5); }
   60% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
@@ -244,27 +424,43 @@
 /* ---------- примитивы ---------- */
 .gtr-card {
   background: var(--gtr-card);
-  border: 1px solid var(--gtr-border);
-  border-radius: 14px;
+  border: var(--gtr-hair) solid var(--gtr-border);
+  border-radius: var(--gtr-r);
+  position: relative;
+}
+/* срез верхнего правого угла — фирменная фаска */
+.gtr-card-cut {
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--gtr-cut)) 0,
+    100% var(--gtr-cut),
+    100% 100%,
+    0 100%
+  );
 }
 .gtr-card-hover {
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
 }
 .gtr-card-hover:hover {
   border-color: var(--gtr-red);
-  box-shadow: 0 0 18px -2px rgba(229, 35, 27, 0.6);
-  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px rgba(229, 35, 27, 0.35),
+    0 0 22px -6px rgba(229, 35, 27, 0.7);
+  transform: translate(-1px, -1px);
 }
+.gtr-card-hover:active { transform: translate(0, 0); }
+
 .gtr-eyebrow {
   font: 600 10px/1 "JetBrains Mono", monospace;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--gtr-t3);
 }
 .gtr-chip {
   font: 600 8.5px/1 "JetBrains Mono", monospace;
-  letter-spacing: 0.05em;
-  border-radius: 4px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 0;
   padding: 4px 6px;
   white-space: nowrap;
   display: inline-block;
@@ -274,87 +470,153 @@
   align-items: center;
   gap: 11px;
   width: 100%;
-  padding: 9px 11px;
+  padding: 10px 12px;
   border: none;
-  border-radius: 9px;
+  border-left: 2px solid transparent;
+  border-radius: 0;
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+  transition: background 0.18s, color 0.18s, border-color 0.18s, letter-spacing 0.18s;
   font: 500 12px/1 "Golos Text", sans-serif;
   background: transparent;
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(234, 234, 234, 0.55);
   text-align: left;
 }
-.gtr-nav-item:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+.gtr-nav-item:hover {
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--gtr-t1);
+  border-left-color: rgba(229, 35, 27, 0.5);
+  letter-spacing: 0.02em;
+}
 .gtr-nav-item.on {
   font-weight: 600;
-  background: rgba(229, 35, 27, 0.16);
+  background: linear-gradient(90deg, rgba(229, 35, 27, 0.22), transparent 70%);
   color: #fff;
-  box-shadow: inset 2px 0 0 #e5231b, 0 0 16px -3px rgba(229, 35, 27, 0.65);
+  border-left-color: var(--gtr-red);
+  box-shadow: 0 0 18px -6px rgba(229, 35, 27, 0.8);
 }
+
 .gtr-input {
   width: 100%;
   background: var(--gtr-card2);
-  border: 1px solid var(--gtr-border2);
-  border-radius: 8px;
+  border: var(--gtr-hair) solid var(--gtr-border2);
+  border-radius: 0;
   padding: 10px 12px;
-  color: #fff;
+  color: var(--gtr-t1);
   font: 500 12.5px/1.3 "Golos Text", sans-serif;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
+.gtr-input::placeholder { color: var(--gtr-t3); }
 .gtr-input:focus {
   border-color: var(--gtr-red);
-  box-shadow: 0 0 0 3px rgba(229, 35, 27, 0.18);
+  background: #16171b;
+  box-shadow: inset 0 0 0 1px rgba(229, 35, 27, 0.25);
 }
+
+/* ---------- кнопка: красное заливает слева ---------- */
 .gtr-btn {
-  border: 1px solid var(--gtr-border2);
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
-  border-radius: 7px;
-  padding: 8px 13px;
+  position: relative;
+  border: var(--gtr-hair) solid var(--gtr-border2);
+  color: var(--gtr-t1);
+  border-radius: 0;
+  padding: 9px 14px;
   cursor: pointer;
-  font: 600 11px/1 "Golos Text", sans-serif;
-  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  font: 600 10.5px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(90deg, var(--gtr-red) 0 50%, transparent 50% 100%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  background-repeat: no-repeat;
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--gtr-cut-s)) 0,
+    100% var(--gtr-cut-s),
+    100% 100%,
+    var(--gtr-cut-s) 100%,
+    0 calc(100% - var(--gtr-cut-s))
+  );
+  transition:
+    background-position 0.24s cubic-bezier(0.2, 0.75, 0.25, 1),
+    border-color 0.18s,
+    color 0.18s,
+    transform 0.07s;
 }
-.gtr-btn:hover { background: rgba(255, 255, 255, 0.12); }
-.gtr-btn-red {
-  background: var(--gtr-red);
+.gtr-btn:hover {
+  background-position: 0 0;
   border-color: var(--gtr-red);
+  color: #fff;
+}
+.gtr-btn:active { transform: translateY(1px); }
+.gtr-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-position: 100% 0;
+}
+
+.gtr-btn-red {
+  background-color: var(--gtr-red);
+  background-image: linear-gradient(90deg, var(--gtr-red-hot) 0 50%, var(--gtr-red) 50% 100%);
+  border-color: var(--gtr-red);
+  color: #fff;
 }
 .gtr-btn-red:hover {
-  background: #f03028;
-  box-shadow: 0 0 18px -4px rgba(229, 35, 27, 0.8);
+  border-color: var(--gtr-red-hot);
+  box-shadow: 0 0 20px -4px rgba(229, 35, 27, 0.85);
 }
+
+/* фокус с клавиатуры — обязателен */
+.gtr-app :focus-visible {
+  outline: 2px solid var(--gtr-red-hot);
+  outline-offset: 2px;
+}
+
 .gtr-pal-btn {
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
-  border: 1px solid var(--gtr-border);
+  border: var(--gtr-hair) solid var(--gtr-border);
+  border-left: 2px solid transparent;
   background: var(--gtr-card2);
-  border-radius: 9px;
+  border-radius: 0;
   padding: 9px 11px;
   cursor: pointer;
-  color: #fff;
+  color: var(--gtr-t1);
   font: 500 11.5px/1.2 "Golos Text", sans-serif;
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
   text-align: left;
 }
-.gtr-pal-btn:hover { border-color: rgba(229, 35, 27, 0.6); background: rgba(229, 35, 27, 0.08); }
+.gtr-pal-btn:hover {
+  border-color: rgba(229, 35, 27, 0.5);
+  border-left-color: var(--gtr-red);
+  background: rgba(229, 35, 27, 0.09);
+  transform: translateX(2px);
+}
+.gtr-pal-btn:active { transform: translateX(0); }
+
 .gtr-node {
   position: absolute;
   width: 196px;
   padding: 12px 13px;
-  border-radius: 12px;
+  border-radius: 0;
   cursor: grab;
   user-select: none;
   background: linear-gradient(180deg, #141519, #0e0f12);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
   touch-action: none;
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--gtr-cut)) 0,
+    100% var(--gtr-cut),
+    100% 100%,
+    0 100%
+  );
 }
 .gtr-node:active { cursor: grabbing; }
 
-/* ---------- бриф: анимации ---------- */
+/* ---------- бриф ---------- */
 @keyframes gtrBriefIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
@@ -364,8 +626,32 @@
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
-.gtr-vibe-card:hover { transform: translateY(-3px); }
+.gtr-vibe-card:hover { transform: translate(-2px, -3px); }
+.gtr-vibe-card:active { transform: translate(0, 0); }
+
 @media (prefers-reduced-motion: reduce) {
-  .gtr-brief-q { animation: none; }
-  .gtr-vibe-card, .gtr-vibe-card:hover { transition: none; transform: none; }
+  .gtr-brief-q,
+  .gtr-rip,
+  .gtr-split,
+  .gtr-fade { animation: none; }
+  .gtr-laser,
+  .gtr-strobe,
+  .gtr-beam,
+  .gtr-neon,
+  .gtr-glowbar,
+  .gtr-presence { animation: none; }
+  .gtr-vibe-card,
+  .gtr-vibe-card:hover,
+  .gtr-card-hover:hover { transition: none; transform: none; }
+}
+
+/* ---------- заголовок раздела ---------- */
+.gtr-h1 {
+  font-family: "Oswald", sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.55rem, 2.5vw, 2.3rem);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin: 0;
 }

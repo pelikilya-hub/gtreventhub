@@ -22,7 +22,7 @@ import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow } from "../ui";
 
 const Title = ({ children }: { children: string }) => (
-  <h1 className="gtr-oswald" style={{ font: "700 22px/1 Oswald,sans-serif", margin: "0 0 16px" }}>
+  <h1 className="gtr-oswald gtr-h1" style={{ marginBottom: 16 }}>
     {children}
   </h1>
 );
@@ -108,7 +108,7 @@ export function InquiriesScreen() {
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 16 }}>
-        <h1 className="gtr-oswald" style={{ font: "700 22px/1 Oswald,sans-serif", margin: 0 }}>
+        <h1 className="gtr-oswald gtr-h1">
           Заявки организаторов
         </h1>
         {incoming.length ? (
@@ -593,7 +593,7 @@ export function VenueScreen() {
                   width: 8,
                   height: 8,
                   flex: "none",
-                  borderRadius: "50%",
+                  borderRadius: 0,
                   background: String(c),
                   position: "relative",
                   top: 1,
@@ -627,7 +627,7 @@ export function VenueScreen() {
                   style={{ display: "flex", gap: 8, alignItems: "center", padding: "5px 0" }}
                 >
                   <span
-                    style={{ width: 7, height: 7, borderRadius: "50%", background: String(c) }}
+                    style={{ width: 7, height: 7, borderRadius: 0, background: String(c) }}
                   />
                   <span
                     style={{ font: "500 11px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}
@@ -655,7 +655,7 @@ export function VenueScreen() {
                   width: "100%",
                   aspectRatio: "3/2",
                   objectFit: "cover",
-                  borderRadius: 8,
+                  borderRadius: 0,
                   border: "1px solid rgba(255,255,255,.08)",
                 }}
               />
@@ -933,7 +933,7 @@ export function AccessScreen() {
                     display: "inline-flex",
                     width: 20,
                     height: 20,
-                    borderRadius: 6,
+                    borderRadius: 0,
                     alignItems: "center",
                     justifyContent: "center",
                     font: "700 10px/1 'JetBrains Mono',monospace",

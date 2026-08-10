@@ -125,7 +125,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                     font: "700 9px/1 'JetBrains Mono',monospace",
                     color: "#fff",
                     background: "#E5231B",
-                    borderRadius: 5,
+                    borderRadius: 0,
                     padding: "3px 6px",
                   }}
                 >
@@ -138,7 +138,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                     font: "600 9px/1 'JetBrains Mono',monospace",
                     color: "rgba(255,255,255,.45)",
                     background: "rgba(255,255,255,.09)",
-                    borderRadius: 5,
+                    borderRadius: 0,
                     padding: "3px 5px",
                   }}
                 >
@@ -189,7 +189,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
             alignItems: "center",
             gap: 9,
             padding: "8px 9px",
-            borderRadius: 10,
+            borderRadius: 0,
             border: "1px solid #E5231B",
             background: "rgba(229,35,27,.14)",
             marginBottom: 18,
@@ -200,7 +200,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
               width: 26,
               height: 26,
               flex: "none",
-              borderRadius: 8,
+              borderRadius: 0,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -246,7 +246,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                     style={{
                       width: 24,
                       height: 24,
-                      borderRadius: 8,
+                      borderRadius: 0,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",

@@ -57,7 +57,7 @@ export function BaseScreen() {
             border: `1px solid ${value === label ? "#E5231B" : "rgba(255,255,255,.12)"}`,
             background: value === label ? "#E5231B" : "transparent",
             color: value === label ? "#fff" : "rgba(255,255,255,.6)",
-            borderRadius: 7,
+            borderRadius: 0,
             padding: "7px 11px",
             cursor: "pointer",
             font: `${value === label ? 600 : 500} 11px/1 'Golos Text',sans-serif`,
@@ -72,7 +72,7 @@ export function BaseScreen() {
   return (
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 6 }}>
-        <h1 className="gtr-oswald" style={{ font: "700 22px/1 Oswald,sans-serif", margin: 0 }}>
+        <h1 className="gtr-oswald gtr-h1">
           База · Пхукет
         </h1>
         <span
@@ -348,7 +348,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                       width: "100%",
                       aspectRatio: "3/2",
                       objectFit: "cover",
-                      borderRadius: 8,
+                      borderRadius: 0,
                       border: "1px solid rgba(255,255,255,.08)",
                     }}
                   />
@@ -392,7 +392,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     width: 8,
                     height: 8,
                     flex: "none",
-                    borderRadius: "50%",
+                    borderRadius: 0,
                     background: String(c),
                     position: "relative",
                     top: 1,
@@ -441,7 +441,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                       width: 7,
                       height: 7,
                       flex: "none",
-                      borderRadius: "50%",
+                      borderRadius: 0,
                       background: String(c),
                     }}
                   />

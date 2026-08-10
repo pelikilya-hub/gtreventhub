@@ -41,7 +41,9 @@ import {
   briefProgress,
   modulesFromBrief,
   visibleQuestions,
+  vibeOf,
   type BriefAnswers,
+  type BriefLang,
   type ModuleSpec,
 } from "../data/brief";
 import { notifyRequestFn } from "../notify";
@@ -202,6 +204,7 @@ export function ConstructorScreen({
   // ---------- бриф ----------
   const briefAnswers: BriefAnswers = draft?.brief ?? {};
   const briefFormat = draft?.format ?? "";
+  const eventVibe = vibeOf(briefFormat, briefAnswers);
   const setAnswer = (qid: string, ids: string[]) =>
     draft && updateDraft(draft.id, { brief: { ...briefAnswers, [qid]: ids } });
 
@@ -476,6 +479,34 @@ export function ConstructorScreen({
         </h1>
         <Chip color="rgba(255,255,255,.5)">{v.name ?? vid}</Chip>
         <Chip color={STAGE_COLOR[stage]}>{STAGE_LABEL[stage].toUpperCase()}</Chip>
+        {eventVibe?.colors ? (
+          <span
+            className="gtr-mono"
+            title="Вайб события из брифа"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              borderRadius: 99,
+              padding: "5px 10px",
+              font: "600 9.5px/1 'JetBrains Mono',monospace",
+              letterSpacing: ".06em",
+              color: "#fff",
+              border: "1px solid rgba(255,255,255,.14)",
+              background: `linear-gradient(120deg, ${eventVibe.colors[0]}44, ${eventVibe.colors[1]}44)`,
+            }}
+          >
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: `linear-gradient(120deg, ${eventVibe.colors[0]}, ${eventVibe.colors[1]})`,
+              }}
+            />
+            {eventVibe.label.toUpperCase()}
+          </span>
+        ) : null}
         <Chip
           color={STATUS_COLOR[health.verdict]}
           style={health.clean ? undefined : { animation: "gtrpulse 2s ease-out infinite" }}
@@ -1871,7 +1902,16 @@ function ArtistPick({ a, color, onAdd }: { a: Artist; color: string; onAdd: () =
   );
 }
 
+const plural = (n: number, one: string, few: string, many: string) => {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return one;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+  return many;
+};
+
 // ---------- панель брифа ----------
+// Вайб рендерится карточками с палитрой-градиентом, остальные вопросы —
+// чипами. Панель двуязычная: организаторы на Пхукете часто англоязычные.
 function BriefPanel({
   format,
   answers,
@@ -1885,14 +1925,32 @@ function BriefPanel({
   onBuild: () => void;
   onClose: () => void;
 }) {
+  const [lang, setLang] = useState<BriefLang>(() => {
+    try {
+      return window.localStorage.getItem("gtr-brief-lang") === "en" ? "en" : "ru";
+    } catch {
+      return "ru";
+    }
+  });
+  const switchLang = (l: BriefLang) => {
+    setLang(l);
+    try {
+      window.localStorage.setItem("gtr-brief-lang", l);
+    } catch {
+      // приватный режим — язык просто не сохранится
+    }
+  };
+  const t = (ru: string, en?: string) => (lang === "en" && en ? en : ru);
+
   const qs = visibleQuestions(format, answers);
   const prog = briefProgress(format, answers);
   const pending = modulesFromBrief(format, answers);
+  const pct = prog.total ? Math.round((prog.done / prog.total) * 100) : 0;
 
   return (
-    <Card style={{ padding: "20px 22px", marginBottom: 14, display: "grid", gap: 16 }}>
+    <Card style={{ padding: "20px 22px", marginBottom: 14, display: "grid", gap: 15 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <Eyebrow>БРИФ СОБЫТИЯ</Eyebrow>
+        <Eyebrow>{t("БРИФ СОБЫТИЯ", "EVENT BRIEF")}</Eyebrow>
         <Chip color={prog.missing.length ? AMBER : GREEN}>
           {prog.done} / {prog.total}
         </Chip>
@@ -1900,30 +1958,70 @@ function BriefPanel({
           className="gtr-mono"
           style={{ font: "500 10px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
-          {format || "формат не задан"} · вопросы подстраиваются под ответы
+          {format || t("формат не задан", "format not set")} ·{" "}
+          {t("вопросы подстраиваются под ответы", "questions adapt to your answers")}
         </span>
-        <button
-          className="gtr-btn"
-          style={{ marginLeft: "auto", padding: "6px 12px", fontSize: 11 }}
-          onClick={onClose}
-        >
-          Свернуть
-        </button>
+        <div style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center" }}>
+          {(["ru", "en"] as BriefLang[]).map((l) => (
+            <button
+              key={l}
+              onClick={() => switchLang(l)}
+              style={{
+                borderRadius: 6,
+                padding: "5px 9px",
+                cursor: "pointer",
+                font: `700 9.5px/1 'JetBrains Mono',monospace`,
+                letterSpacing: ".08em",
+                border: `1px solid ${lang === l ? "#E5231B" : "rgba(255,255,255,.14)"}`,
+                background: lang === l ? "rgba(229,35,27,.14)" : "transparent",
+                color: lang === l ? "#fff" : "rgba(255,255,255,.5)",
+              }}
+            >
+              {l.toUpperCase()}
+            </button>
+          ))}
+          <button
+            className="gtr-btn"
+            style={{ padding: "6px 12px", fontSize: 11 }}
+            onClick={onClose}
+          >
+            {t("Свернуть", "Hide")}
+          </button>
+        </div>
+      </div>
+
+      {/* прогресс брифа */}
+      <div style={{ height: 3, borderRadius: 99, background: "rgba(255,255,255,.07)" }}>
+        <div
+          style={{
+            height: "100%",
+            width: `${pct}%`,
+            borderRadius: 99,
+            background: "linear-gradient(90deg,#E5231B,#F5A623)",
+            transition: "width .35s cubic-bezier(.2,.7,.3,1)",
+          }}
+        />
       </div>
 
       <div style={{ display: "grid", gap: 18 }}>
-        {qs.map((qq) => {
+        {qs.map((qq, qi) => {
           const picked = answers[qq.id] ?? [];
           return (
-            <div key={qq.id} style={{ display: "grid", gap: 8 }}>
+            <div
+              key={qq.id}
+              className="gtr-brief-q"
+              style={{ display: "grid", gap: 8, animationDelay: `${Math.min(qi * 45, 320)}ms` }}
+            >
               <div style={{ display: "flex", alignItems: "baseline", gap: 9, flexWrap: "wrap" }}>
-                <span style={{ font: "600 12.5px/1.3 'Golos Text',sans-serif" }}>{qq.q}</span>
+                <span style={{ font: "600 12.5px/1.3 'Golos Text',sans-serif" }}>
+                  {t(qq.q, qq.qEn)}
+                </span>
                 {qq.required ? (
                   <span
                     className="gtr-mono"
                     style={{ font: "600 8.5px/1 'JetBrains Mono',monospace", color: AMBER }}
                   >
-                    ОБЯЗАТЕЛЬНО
+                    {t("ОБЯЗАТЕЛЬНО", "REQUIRED")}
                   </span>
                 ) : null}
                 {qq.multi ? (
@@ -1931,7 +2029,7 @@ function BriefPanel({
                     className="gtr-mono"
                     style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
-                    НЕСКОЛЬКО
+                    {t("НЕСКОЛЬКО", "MULTI")}
                   </span>
                 ) : null}
               </div>
@@ -1943,83 +2041,169 @@ function BriefPanel({
                     marginTop: -3,
                   }}
                 >
-                  {qq.hint}
+                  {t(qq.hint, qq.hintEn)}
                 </span>
               ) : null}
-              <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
-                {qq.options.map((o) => {
-                  const on = picked.includes(o.id);
-                  const adds = (o.modules ?? []).length;
-                  return (
-                    <button
-                      key={o.id}
-                      onClick={() =>
-                        onAnswer(
-                          qq.id,
-                          qq.multi
-                            ? on
-                              ? picked.filter((x) => x !== o.id)
-                              : [...picked, o.id]
-                            : on
-                              ? []
-                              : [o.id],
-                        )
-                      }
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 7,
-                        borderRadius: 8,
-                        padding: "8px 13px",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        font: `${on ? 600 : 500} 11.5px/1.3 'Golos Text',sans-serif`,
-                        border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.12)"}`,
-                        background: on ? "rgba(229,35,27,.14)" : "transparent",
-                        color: on ? "#fff" : "rgba(255,255,255,.62)",
-                      }}
-                    >
-                      <span
+
+              {qq.kind === "vibe" ? (
+                /* вайб: карточки направления с палитрой */
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill,minmax(190px,1fr))",
+                    gap: 9,
+                  }}
+                >
+                  {qq.options.map((o) => {
+                    const on = picked.includes(o.id);
+                    const [c1, c2] = o.colors ?? ["#E5231B", "#F5A623"];
+                    return (
+                      <button
+                        key={o.id}
+                        className="gtr-vibe-card"
+                        onClick={() => onAnswer(qq.id, on ? [] : [o.id])}
                         style={{
-                          width: 13,
-                          height: 13,
-                          flex: "none",
-                          borderRadius: qq.multi ? 4 : "50%",
-                          border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.25)"}`,
-                          background: on ? "#E5231B" : "transparent",
+                          borderRadius: 12,
+                          overflow: "hidden",
+                          padding: 0,
+                          textAlign: "left",
+                          background: "var(--gtr-card2)",
+                          border: `1px solid ${on ? c1 : "rgba(255,255,255,.1)"}`,
+                          boxShadow: on ? `0 0 0 1px ${c1}, 0 8px 24px -12px ${c1}88` : "none",
                         }}
-                      />
-                      <span>
-                        {o.label}
-                        {o.hint ? (
+                      >
+                        <span
+                          style={{
+                            display: "block",
+                            height: 44,
+                            position: "relative",
+                            background: `linear-gradient(120deg, ${c1}, ${c2})`,
+                            opacity: on ? 1 : 0.55,
+                            transition: "opacity .2s",
+                          }}
+                        >
+                          {on ? (
+                            <span
+                              style={{
+                                position: "absolute",
+                                top: 8,
+                                right: 8,
+                                width: 18,
+                                height: 18,
+                                borderRadius: "50%",
+                                background: "rgba(10,11,13,.75)",
+                                color: "#fff",
+                                font: "700 10px/18px 'JetBrains Mono',monospace",
+                                textAlign: "center",
+                              }}
+                            >
+                              ✓
+                            </span>
+                          ) : null}
+                        </span>
+                        <span style={{ display: "block", padding: "10px 12px 12px" }}>
                           <span
                             style={{
                               display: "block",
-                              marginTop: 2,
-                              font: "500 9px/1.3 'JetBrains Mono',monospace",
-                              color: "rgba(255,255,255,.4)",
+                              font: "600 12px/1.3 'Golos Text',sans-serif",
+                              color: on ? "#fff" : "rgba(255,255,255,.82)",
                             }}
                           >
-                            {o.hint}
+                            {t(o.label, o.labelEn)}
+                          </span>
+                          <span
+                            style={{
+                              display: "block",
+                              marginTop: 4,
+                              font: "500 10px/1.45 'Golos Text',sans-serif",
+                              color: "var(--gtr-t3)",
+                            }}
+                          >
+                            {t(o.hint ?? "", o.hintEn)}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+                  {qq.options.map((o) => {
+                    const on = picked.includes(o.id);
+                    const adds = (o.modules ?? []).length;
+                    return (
+                      <button
+                        key={o.id}
+                        onClick={() =>
+                          onAnswer(
+                            qq.id,
+                            qq.multi
+                              ? on
+                                ? picked.filter((x) => x !== o.id)
+                                : [...picked, o.id]
+                              : on
+                                ? []
+                                : [o.id],
+                          )
+                        }
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 7,
+                          borderRadius: 8,
+                          padding: "8px 13px",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          font: `${on ? 600 : 500} 11.5px/1.3 'Golos Text',sans-serif`,
+                          border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.12)"}`,
+                          background: on ? "rgba(229,35,27,.14)" : "transparent",
+                          color: on ? "#fff" : "rgba(255,255,255,.62)",
+                          transition: "border-color .15s, background .15s, color .15s",
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 13,
+                            height: 13,
+                            flex: "none",
+                            borderRadius: qq.multi ? 4 : "50%",
+                            border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.25)"}`,
+                            background: on ? "#E5231B" : "transparent",
+                            transition: "background .15s, border-color .15s",
+                          }}
+                        />
+                        <span>
+                          {t(o.label, o.labelEn)}
+                          {o.hint ? (
+                            <span
+                              style={{
+                                display: "block",
+                                marginTop: 2,
+                                font: "500 9px/1.3 'JetBrains Mono',monospace",
+                                color: "rgba(255,255,255,.4)",
+                              }}
+                            >
+                              {t(o.hint, o.hintEn)}
+                            </span>
+                          ) : null}
+                        </span>
+                        {adds ? (
+                          <span
+                            className="gtr-mono"
+                            title={t(`Добавит блоков: ${adds}`, `Adds ${adds} block(s)`)}
+                            style={{
+                              font: "600 8.5px/1 'JetBrains Mono',monospace",
+                              color: on ? GREEN : "rgba(255,255,255,.3)",
+                            }}
+                          >
+                            +{adds}
                           </span>
                         ) : null}
-                      </span>
-                      {adds ? (
-                        <span
-                          className="gtr-mono"
-                          title={`Добавит блоков: ${adds}`}
-                          style={{
-                            font: "600 8.5px/1 'JetBrains Mono',monospace",
-                            color: on ? GREEN : "rgba(255,255,255,.3)",
-                          }}
-                        >
-                          +{adds}
-                        </span>
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}
@@ -2039,12 +2223,19 @@ function BriefPanel({
           style={{ font: "500 11.5px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t2)", flex: 1 }}
         >
           {pending.length
-            ? `Ответы дают ${pending.length} блоков события. Уже добавленные не дублируются.`
-            : "Ответьте на вопросы — из них соберутся блоки события."}
+            ? t(
+                `Ответы дают ${pending.length} ${plural(pending.length, "блок", "блока", "блоков")} события. Уже добавленные не дублируются.`,
+                `Your answers produce ${pending.length} event ${pending.length === 1 ? "block" : "blocks"}. Existing ones are not duplicated.`,
+              )
+            : t(
+                "Ответьте на вопросы — из них соберутся блоки события.",
+                "Answer the questions — they turn into event blocks.",
+              )}
           {prog.missing.length ? (
             <span style={{ color: AMBER }}>
               {" "}
-              Без ответа обязательных: {prog.missing.map((m) => m.q).join(", ")}
+              {t("Без ответа обязательных:", "Required unanswered:")}{" "}
+              {prog.missing.map((m) => t(m.q, m.qEn)).join(", ")}
             </span>
           ) : null}
         </span>
@@ -2054,7 +2245,7 @@ function BriefPanel({
           disabled={!pending.length}
           onClick={onBuild}
         >
-          Собрать блоки из брифа →
+          {t("Собрать блоки из брифа →", "Build event blocks →")}
         </button>
       </div>
     </Card>

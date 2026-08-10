@@ -15,6 +15,7 @@ import {
   venueGraph,
   type EventStage,
 } from "../data/app-data";
+import { vibeOf } from "../data/brief";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow } from "../ui";
 
@@ -174,13 +175,34 @@ export function EventsScreen() {
             const vendors = d.graph.nodes.filter((n) =>
               ["sound", "light", "decor", "content"].includes(n.kind),
             ).length;
+            const vibe = vibeOf(d.format, d.brief ?? {});
             return (
               <Card
                 key={d.id}
                 hover
                 onClick={() => open(d.id)}
-                style={{ padding: "16px 18px", display: "grid", gap: 9, cursor: "pointer" }}
+                style={{
+                  padding: "16px 18px",
+                  display: "grid",
+                  gap: 9,
+                  cursor: "pointer",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
               >
+                {/* полоса вайба: направление события видно в списке с одного взгляда */}
+                {vibe?.colors ? (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: 3,
+                      background: `linear-gradient(90deg, ${vibe.colors[0]}, ${vibe.colors[1]})`,
+                    }}
+                  />
+                ) : null}
                 <div
                   style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}
                 >
@@ -188,6 +210,33 @@ export function EventsScreen() {
                     {draftTitle(d)}
                   </span>
                   <Chip color={STAGE_COLOR[st]}>{STAGE_LABEL[st].toUpperCase()}</Chip>
+                  {vibe?.colors ? (
+                    <span
+                      className="gtr-mono"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 5,
+                        borderRadius: 99,
+                        padding: "4px 9px",
+                        font: "600 9px/1 'JetBrains Mono',monospace",
+                        letterSpacing: ".05em",
+                        color: "#fff",
+                        border: "1px solid rgba(255,255,255,.12)",
+                        background: `linear-gradient(120deg, ${vibe.colors[0]}44, ${vibe.colors[1]}44)`,
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 7,
+                          height: 7,
+                          borderRadius: "50%",
+                          background: `linear-gradient(120deg, ${vibe.colors[0]}, ${vibe.colors[1]})`,
+                        }}
+                      />
+                      {vibe.label.toUpperCase()}
+                    </span>
+                  ) : null}
                   <span
                     className="gtr-mono"
                     style={{

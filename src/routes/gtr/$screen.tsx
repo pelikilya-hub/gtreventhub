@@ -7,6 +7,7 @@ import type { ScreenId } from "@/gtr/data/app-data";
 const SCREENS: ScreenId[] = [
   "dash",
   "calendar",
+  "events",
   "constructor",
   "inquiries",
   "spaces",
@@ -21,9 +22,12 @@ const SCREENS: ScreenId[] = [
 ];
 
 export const Route = createFileRoute("/gtr/$screen")({
-  validateSearch: (s: Record<string, unknown>): { vid?: string; artist?: string } => ({
+  validateSearch: (
+    s: Record<string, unknown>,
+  ): { vid?: string; artist?: string; draft?: string } => ({
     vid: typeof s.vid === "string" ? s.vid : undefined,
     artist: typeof s.artist === "string" ? s.artist : undefined,
+    draft: typeof s.draft === "string" ? s.draft : undefined,
   }),
   beforeLoad: async ({ params }) => {
     const { user } = await sessionFn();

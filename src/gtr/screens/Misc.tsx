@@ -44,7 +44,7 @@ const NoAccess = ({ what }: { what: string }) => (
 
 // ---------- заявки организаторов ----------
 export function InquiriesScreen() {
-  const { user, shared, updateRequest, setGraph } = useGtr();
+  const { user, shared, updateRequest, setDraftGraph, draftsOf } = useGtr();
   const vid = user.venueId || "VEN-0013";
   const rows = inqOf(vid);
   const [replied, setReplied] = useState<number[]>([]);
@@ -52,10 +52,15 @@ export function InquiriesScreen() {
   // Входящие запросы организаторов (собраны на витрине, падают со сметой)
   const incoming = shared.requests.filter((r) => r.venueId === vid).sort((a, b) => b.ts - a.ts);
 
-  // Принять запрос: помечаем и переводим событие в стадию «Утверждено»
+  // Принять запрос: помечаем и переводим в «Утверждено» именно то событие, из
+  // которого заявка собрана. У заявок старого формата draftId нет — тогда
+  // берём последнее событие площадки.
   const acceptRequest = (id: string, name: string) => {
     updateRequest(id, { status: "accepted" });
-    setGraph(vid, (gr) => ({
+    const req = shared.requests.find((r) => r.id === id);
+    const targetId = req?.draftId ?? draftsOf(vid)[0]?.id;
+    if (!targetId) return;
+    setDraftGraph(targetId, (gr) => ({
       ...gr,
       stage: "approved",
       log: [

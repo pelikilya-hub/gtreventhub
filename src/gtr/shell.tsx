@@ -19,6 +19,7 @@ import { Eyebrow, Icon } from "./ui";
 import { DashScreen } from "./screens/Dash";
 import { CalendarScreen } from "./screens/Calendar";
 import { ConstructorScreen } from "./screens/Constructor";
+import { EventsScreen } from "./screens/Events";
 import {
   AccessScreen,
   AdminScreen,
@@ -36,7 +37,7 @@ const VendorsScreen = lazy(() =>
   import("./screens/Vendors").then((m) => ({ default: m.VendorsScreen })),
 );
 
-export type GtrSearch = { vid?: string; artist?: string };
+export type GtrSearch = { vid?: string; artist?: string; draft?: string };
 
 export function GtrShell({
   user,
@@ -55,21 +56,21 @@ export function GtrShell({
 }
 
 function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch }) {
-  const { user, peers, graphOf } = useGtr();
+  const { user, peers, draftsOf } = useGtr();
   const { editMode, setEditMode } = useContent();
   const navigate = useNavigate();
   const venue = user.venueId ? V(user.venueId) : null;
 
   const go = (id: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: id } });
 
-  // Живые проблемы/задержки события площадки — для счётчика и тостов
+  // Живые проблемы/задержки по всем событиям площадки — для счётчика и тостов.
+  // Событий теперь может быть несколько, поэтому счётчик собирается по всем.
   const problemAlerts = useMemo(() => {
     if (!user.venueId) return [];
-    const g = graphOf(user.venueId);
-    return eventAlerts(g, venue ?? undefined, {}).filter(
-      (a) => a.severity === "problem" || a.severity === "delay",
-    );
-  }, [user.venueId, graphOf, venue]);
+    return draftsOf(user.venueId)
+      .flatMap((d) => eventAlerts(d.graph, venue ?? undefined, {}))
+      .filter((a) => a.severity === "problem" || a.severity === "delay");
+  }, [user.venueId, draftsOf, venue]);
   const problemCount = problemAlerts.length;
 
   // Тост только на НОВУЮ проблему/задержку (не на каждый ререндер и не на
@@ -329,7 +330,9 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
     case "calendar":
       return <CalendarScreen />;
     case "constructor":
-      return <ConstructorScreen />;
+      return <ConstructorScreen draftId={search.draft} />;
+    case "events":
+      return <EventsScreen />;
     case "inquiries":
       return <InquiriesScreen />;
     case "spaces":

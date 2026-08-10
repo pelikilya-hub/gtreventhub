@@ -131,6 +131,7 @@ export const ROLES: [RoleId, string, string, string][] = [
 export type ScreenId =
   | "dash"
   | "calendar"
+  | "events"
   | "constructor"
   | "inquiries"
   | "spaces"
@@ -146,6 +147,12 @@ export type ScreenId =
 export const NAV_VENUE: [ScreenId, string, string, string][] = [
   ["dash", "Дашборд", "M3 3h7v7H3z M14 3h7v4h-7z M14 10h7v11h-7z M3 14h7v7H3z", ""],
   ["calendar", "Календарь и программа", "M3 6h18v15H3z M8 3v5 M16 3v5 M3 11h18", ""],
+  [
+    "events",
+    "События",
+    "M4 4h16v16H4z M4 9h16 M9 13h6 M9 17h3",
+    "",
+  ],
   [
     "constructor",
     "Конструктор события",
@@ -612,6 +619,26 @@ export type Graph = {
   stage?: EventStage;
   log?: LogEntry[];
 };
+
+// ---------- событие как самостоятельная сущность ----------
+// Раньше граф хранился как graphs[venueId] — ровно одно событие на площадку
+// навсегда, без возможности начать новое. Теперь событие живёт отдельной
+// записью с собственным id, и на одной площадке их может быть сколько угодно.
+export type EventDraft = {
+  id: string;
+  venueId: string;
+  title: string;
+  format: string; // формат из брифа: клубная ночь, свадьба, корпоратив…
+  guests: string;
+  date: string;
+  author: string; // кто создал — GTR-админ или роль площадки
+  created: number;
+  updated: number;
+  graph: Graph;
+  brief: Record<string, string[]>; // ответы ветвящегося брифа
+};
+
+export const draftTitle = (d: EventDraft) => d.title || d.format || "Событие без названия";
 
 export const STAGE_LABEL: Record<EventStage, string> = {
   draft: "Черновик",
@@ -1879,6 +1906,7 @@ export type OrgRequestStatus = "new" | "seen" | "accepted" | "declined";
 
 export type OrgRequest = {
   id: string;
+  draftId?: string; // событие, из которого собрана заявка
   venueId: string;
   venueName: string;
   organizerName: string;

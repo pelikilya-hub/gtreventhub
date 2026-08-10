@@ -76,23 +76,33 @@ export type EventIntake = {
   budget?: string;
 };
 
+const EMPTY_GRAPH: Graph = { nodes: [], links: [] };
+
 export function ConstructorScreen({
+  draftId,
   venueId,
   organizer,
   intake,
   onSubmitted,
 }: {
+  draftId?: string;
   venueId?: string;
   organizer?: boolean;
   intake?: EventIntake;
   onSubmitted?: (requestId: string) => void;
 } = {}) {
-  const { user, peers, shared, graphOf, setGraph, addRequest } = useGtr();
+  const { user, peers, shared, draftOf, draftsOf, createDraft, setDraftGraph, addRequest } =
+    useGtr();
   const navigate = useNavigate();
   const vid = venueId || user.venueId || "VEN-0013";
   const v = V(vid);
   const R = v.readiness;
-  const g = graphOf(vid);
+
+  // Событие задаётся явным id. Без него открываем последнее событие площадки,
+  // а если событий нет — предлагаем создать, а не подсовываем единственный
+  // вечный граф, как было раньше.
+  const draft = (draftId ? draftOf(draftId) : undefined) ?? draftsOf(vid)[0];
+  const g = draft?.graph ?? EMPTY_GRAPH;
 
   const [sel, setSel] = useState("n1");
   const [linkFrom, setLinkFrom] = useState<string | null>(null);
@@ -118,7 +128,7 @@ export function ConstructorScreen({
     if (openCat === "artist" && !artBase) loadArtists().then(setArtBase);
   }, [openCat, artBase]);
 
-  const mutate = (fn: (gr: Graph) => Graph) => setGraph(vid, fn);
+  const mutate = (fn: (gr: Graph) => Graph) => draft && setDraftGraph(draft.id, fn);
   const nodeById = (id: string) => g.nodes.find((n) => n.id === id);
 
   const actor = organizer ? "Организатор" : user.roleLabel;
@@ -197,6 +207,35 @@ export function ConstructorScreen({
       .sort((a, b) => rank(a.prio) - rank(b.prio))
       .slice(0, 8);
   }, [artBase, artQ]);
+
+  // Событий у площадки ещё нет — предлагаем создать. Все хуки выше уже
+  // отработали, поэтому ранний возврат здесь безопасен.
+  if (!draft) {
+    return (
+      <div style={{ maxWidth: 620, margin: "60px auto" }}>
+        <Card style={{ padding: "34px 32px", display: "grid", gap: 14 }}>
+          <Eyebrow>КОНСТРУКТОР СОБЫТИЯ</Eyebrow>
+          <h1 className="gtr-oswald" style={{ font: "700 24px/1.2 Oswald,sans-serif", margin: 0 }}>
+            На площадке «{v.name ?? vid}» пока нет событий
+          </h1>
+          <p style={{ margin: 0, color: "var(--gtr-t2)", font: "500 13px/1.6 'Golos Text',sans-serif" }}>
+            Событие больше не привязано к площадке намертво: их может быть сколько угодно, каждое со
+            своим составом, сметой и историей.
+          </p>
+          <button
+            className="gtr-btn gtr-btn-red"
+            style={{ justifySelf: "start", padding: "10px 16px" }}
+            onClick={() => {
+              const id = createDraft({ venueId: vid, format: "Событие" });
+              navigate({ to: "/gtr/$screen", params: { screen: "constructor" }, search: { draft: id } });
+            }}
+          >
+            Создать событие →
+          </button>
+        </Card>
+      </div>
+    );
+  }
 
   const onPointerDown = (e: React.PointerEvent, n: GraphNode) => {
     const r = canvasRef.current?.getBoundingClientRect();
@@ -309,6 +348,7 @@ export function ConstructorScreen({
     const id = `REQ-${Date.now().toString(36)}`;
     addRequest({
       id,
+      draftId: draft.id,
       venueId: vid,
       venueName: v.name || vid,
       organizerName: org.name.trim() || "Организатор",

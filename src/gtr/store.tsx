@@ -17,13 +17,14 @@ import {
   seedEvents,
   venueGraph,
   type CalEvent,
+  type EventDraft,
   type Graph,
   type OrgRequest,
 } from "./data/app-data";
 
 type Shared = {
   events: CalEvent[];
-  graphs: Record<string, Graph>;
+  drafts: EventDraft[]; // события конструктора
   lineup: string[];
   requests: OrgRequest[];
 };
@@ -35,33 +36,81 @@ type GtrStore = {
   shared: Shared;
   peers: Peer[];
   setEvents: (fn: (list: CalEvent[]) => CalEvent[]) => void;
-  setGraph: (venueId: string, fn: (g: Graph) => Graph) => void;
   setLineup: (fn: (ids: string[]) => string[]) => void;
-  graphOf: (venueId: string) => Graph;
   addRequest: (req: OrgRequest) => void;
   updateRequest: (id: string, patch: Partial<OrgRequest>) => void;
+  // события конструктора
+  drafts: EventDraft[];
+  draftOf: (id: string) => EventDraft | undefined;
+  draftsOf: (venueId: string) => EventDraft[];
+  createDraft: (init: Partial<EventDraft> & { venueId: string }) => string;
+  updateDraft: (id: string, patch: Partial<EventDraft>) => void;
+  setDraftGraph: (id: string, fn: (g: Graph) => Graph) => void;
+  deleteDraft: (id: string) => void;
 };
 
 const KEY = "gtr-shared-v1";
 const CH = "gtr-sync-v1";
 
+const mkId = () => `EV-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+
+// Стартовые события: по одному на каждую засеянную вручную площадку —
+// чтобы демо не открывалось пустым, но они уже обычные записи, а не
+// единственно возможный граф этой площадки.
+const seedDrafts = (): EventDraft[] =>
+  Object.entries(GRAPH_SEED).map(([venueId, graph], i) => ({
+    id: `EV-seed-${i + 1}`,
+    venueId,
+    title: "",
+    format: "Событие площадки",
+    guests: "",
+    date: "",
+    author: "GTR",
+    created: 0,
+    updated: 0,
+    graph: structuredClone(graph),
+    brief: {},
+  }));
+
 const defaultShared = (): Shared => ({
   events: seedEvents(),
-  graphs: structuredClone(GRAPH_SEED),
+  drafts: seedDrafts(),
   lineup: [],
   requests: [],
 });
+
+// Миграция: в старом формате граф лежал в graphs[venueId]. Переносим каждый
+// в отдельное событие, чтобы уже собранное у пользователя не потерялось.
+const migrateGraphs = (graphs: Record<string, Graph>): EventDraft[] =>
+  Object.entries(graphs).map(([venueId, graph], i) => ({
+    id: `EV-mig-${i + 1}`,
+    venueId,
+    title: "",
+    format: "Перенесено из старой версии",
+    guests: "",
+    date: "",
+    author: "GTR",
+    created: 0,
+    updated: 0,
+    graph,
+    brief: {},
+  }));
 
 const load = (): Shared => {
   if (typeof window === "undefined") return defaultShared();
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return defaultShared();
-    const parsed = JSON.parse(raw) as Partial<Shared>;
+    const parsed = JSON.parse(raw) as Partial<Shared> & { graphs?: Record<string, Graph> };
     const base = defaultShared();
+    const drafts = Array.isArray(parsed.drafts)
+      ? (parsed.drafts as EventDraft[])
+      : parsed.graphs
+        ? migrateGraphs(parsed.graphs)
+        : base.drafts;
     return {
       events: Array.isArray(parsed.events) ? (parsed.events as CalEvent[]) : base.events,
-      graphs: { ...base.graphs, ...(parsed.graphs ?? {}) },
+      drafts,
       lineup: Array.isArray(parsed.lineup) ? (parsed.lineup as string[]) : [],
       requests: Array.isArray(parsed.requests) ? (parsed.requests as OrgRequest[]) : [],
     };
@@ -139,14 +188,51 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
       shared,
       peers,
       setEvents: (fn) => commit({ ...shared, events: fn(shared.events) }),
-      // Площадки без сохранённого графа получают его сгенерированным из базы —
-      // иначе конструктор пуст для всех, кроме трёх пилотных площадок.
-      setGraph: (venueId, fn) => {
-        const g = shared.graphs[venueId] ?? venueGraph(venueId);
-        commit({ ...shared, graphs: { ...shared.graphs, [venueId]: fn(g) } });
-      },
       setLineup: (fn) => commit({ ...shared, lineup: fn(shared.lineup) }),
-      graphOf: (venueId) => shared.graphs[venueId] ?? venueGraph(venueId),
+
+      drafts: shared.drafts,
+      draftOf: (id) => shared.drafts.find((d) => d.id === id),
+      draftsOf: (venueId) =>
+        shared.drafts.filter((d) => d.venueId === venueId).sort((a, b) => b.updated - a.updated),
+
+      // Новое событие: граф либо передан (сценарий-пресет), либо собирается
+      // из базы площадки — площадка, залы, слот.
+      createDraft: (init) => {
+        const id = init.id ?? mkId();
+        const now = Date.now();
+        const draft: EventDraft = {
+          id,
+          venueId: init.venueId,
+          title: init.title ?? "",
+          format: init.format ?? "",
+          guests: init.guests ?? "",
+          date: init.date ?? "",
+          author: init.author ?? user.roleLabel,
+          created: now,
+          updated: now,
+          graph: init.graph ?? venueGraph(init.venueId),
+          brief: init.brief ?? {},
+        };
+        commit({ ...shared, drafts: [draft, ...shared.drafts] });
+        return id;
+      },
+      updateDraft: (id, patch) =>
+        commit({
+          ...shared,
+          drafts: shared.drafts.map((d) =>
+            d.id === id ? { ...d, ...patch, updated: Date.now() } : d,
+          ),
+        }),
+      setDraftGraph: (id, fn) =>
+        commit({
+          ...shared,
+          drafts: shared.drafts.map((d) =>
+            d.id === id ? { ...d, graph: fn(d.graph), updated: Date.now() } : d,
+          ),
+        }),
+      deleteDraft: (id) =>
+        commit({ ...shared, drafts: shared.drafts.filter((d) => d.id !== id) }),
+
       addRequest: (req) => commit({ ...shared, requests: [req, ...shared.requests] }),
       updateRequest: (id, patch) =>
         commit({

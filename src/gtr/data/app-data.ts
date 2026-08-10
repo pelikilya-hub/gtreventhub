@@ -2,6 +2,7 @@
 import venuesRaw from "./venues.json";
 import richRaw from "./rich.json";
 import vendorPackagesRaw from "./vendor-packages.json";
+import venueRatesRaw from "./venue-rates.json";
 
 export type Venue = {
   id: string;
@@ -997,6 +998,149 @@ export const GRAPH_SEED: Record<string, Graph> = {
   ),
 };
 
+// ---------- генерация графа события из базы ----------
+// Для трёх пилотных площадок граф собран вручную (GRAPH_SEED) — он богаче.
+// Для остальных 94 граф строится из venues.json + spaces: площадка → залы →
+// слот. Так конструктор открывается на любой площадке базы, а не на трёх.
+
+const ROOM_COLORS = ["#E5231B", "#F5A623", "#4285F4", "#7B4DFF", "#2ECC71", "#22D3C7"];
+const MAX_AUTO_ROOMS = 6;
+
+const intOf = (x: unknown): number => {
+  const n = parseInt(String(x ?? "").replace(/[^\d]/g, ""), 10);
+  return Number.isFinite(n) ? n : 0;
+};
+
+const host = (url?: string) =>
+  (url || "").replace(/^https?:\/\/(www\.)?/, "").replace(/\/.*$/, "") || "";
+
+// Максимальная заявленная вместимость зала по любой из рассадок
+export const spaceCapacity = (s: Space) =>
+  Math.max(intOf(s.capTheatre), intOf(s.capCocktail), intOf(s.capBanquet));
+
+// У посадочных единиц бич-клубов (кабана, дейбед, сала) поле sqm хранит не
+// площадь, а число гостей: «1–3». Трактовать его как метры нельзя — получится
+// «кабана 3 м²». Отличаем по типу зала.
+const SEAT_UNIT = /sunbed|seating|cabana|daybed|sala/i;
+const isSeatUnit = (s: Space) => SEAT_UNIT.test(String(s.type ?? ""));
+
+// Площадь в м² — только для настоящих залов
+export const spaceArea = (s: Space) => (isSeatUnit(s) ? 0 : intOf(s.sqm));
+
+// Вместимость как её заявила площадка: число либо диапазон «1–3»
+export const spacePax = (s: Space): string => {
+  const declared = spaceCapacity(s);
+  if (declared) return declared.toLocaleString("ru-RU");
+  const raw = String(s.sqm ?? "").trim();
+  if (isSeatUnit(s) && raw) return raw;
+  return "";
+};
+
+// База сама помечает свои пробелы в notes («Capacity missing.») — показываем
+// это как есть, а не додумываем цифру.
+export const spaceGap = (s: Space): string => {
+  const m = String(s.notes ?? "").match(/·\s*([^·]*missing[^·]*)$/i);
+  return m ? m[1].trim() : "";
+};
+
+const spaceSub = (s: Space) => {
+  const pax = spacePax(s);
+  const area = spaceArea(s);
+  return [
+    pax ? `${pax} гостей` : "вместимость не заявлена",
+    area ? `${area.toLocaleString("ru-RU")} м²` : "",
+    String(s.inOut ?? ""),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+};
+
+// Залы площадки для календаря и палитры: вручную заданные или из базы
+export const roomsOf = (venueId: string): [string, string, string][] => {
+  const manual = ROOMS[venueId];
+  if (manual) return manual;
+  return SPACES(venueId)
+    .slice(0, MAX_AUTO_ROOMS)
+    .map((s, i) => [String(s.id), String(s.name), ROOM_COLORS[i % ROOM_COLORS.length]]);
+};
+
+// Граф события для площадки: вручную собранный сид либо генерация из базы
+export const venueGraph = (venueId: string): Graph => {
+  const seed = GRAPH_SEED[venueId];
+  if (seed) return structuredClone(seed);
+
+  const v = V(venueId);
+  if (!v.id) return { nodes: [], links: [] };
+
+  const rd = v.readiness;
+  const nodes: GraphNode[] = [
+    {
+      id: "n1",
+      kind: "venue",
+      x: 30,
+      y: 32,
+      title: v.name,
+      sub: [v.area, v.cluster].filter(Boolean).join(" · ") || v.district || "Пхукет",
+      badge: v.id,
+      fields: [
+        ["ID", v.id],
+        ["ТИП", v.type || "—"],
+        ["ИСТОЧНИК", host(v.website) || v.source || "—"],
+        ["ГОТОВНОСТЬ", rd ? `${rd.score} / 100` : "не оценена"],
+      ],
+    },
+  ];
+  const links: GraphLink[] = [];
+
+  const spaces = SPACES(venueId).slice(0, MAX_AUTO_ROOMS);
+  spaces.forEach((s, i) => {
+    const id = `r${i + 1}`;
+    const pax = spacePax(s);
+    const area = spaceArea(s);
+    const gap = spaceGap(s);
+    nodes.push({
+      id,
+      kind: "room",
+      x: 276,
+      y: 26 + i * 150,
+      title: String(s.name),
+      sub: spaceSub(s),
+      badge: pax || "—",
+      fields: [
+        ["ЗАЛ", String(s.name)],
+        ["ПЛОЩАДЬ", area ? `${area.toLocaleString("ru-RU")} м²` : "не заявлена"],
+        ["ВМЕСТИМОСТЬ", pax ? `${pax} гостей` : "не заявлена"],
+        ["БРОНИРОВАНИЕ", String(s.bookable ?? "по запросу")],
+        ...(gap ? ([["ТРЕБУЕТ ДАННЫХ", gap]] as [string, string][]) : []),
+      ],
+    });
+    links.push({ from: "n1", to: id });
+  });
+
+  // Слот-заглушка: дата события заполняется организатором, но блок есть всегда,
+  // иначе смета и заявка уходят без даты.
+  const slotY = spaces.length ? 26 + (spaces.length - 1) * 150 : 32;
+  nodes.push({
+    id: "s1",
+    kind: "slot",
+    x: 528,
+    y: slotY,
+    title: "Слот не выбран",
+    sub: "Укажите дату и время",
+    badge: "—",
+    fields: [
+      ["ДАТА", "—"],
+      ["ВРЕМЯ", "—"],
+      ["ЗАЛ", spaces.length ? String(spaces[0].name) : "—"],
+      ["СТАТУС", "Черновик"],
+    ],
+  });
+  if (spaces.length) links.push({ from: "r1", to: "s1" });
+  else links.push({ from: "n1", to: "s1" });
+
+  return { nodes, links };
+};
+
 // ---------- rich-контент Illuzion ----------
 const ILZ = "https://www.illuzionphuket.com/wp-content/uploads/";
 export const ILZ_RICH: RichVenue = {
@@ -1311,13 +1455,42 @@ export const ARTIST_TIER_FEE: Record<string, number> = {
 };
 export const ARTIST_FEE_DEFAULT = 20000;
 
-// Приватная аренда / минимальный спенд площадки (THB). Для площадок без
-// опубликованной ставки — 0 (в смете показывается «по запросу»).
-export const VENUE_FEE: Record<string, number> = {
-  "VEN-0013": 400000, // Illuzion — выкуп ночного клуба
-  "VEN-0061": 25000, // Place Coworking — event-день
-  "VEN-0033": 180000, // InterContinental — бальный зал
+// ---------- ставки площадок ----------
+// Каждая ставка несёт провенанс: откуда взята, когда и насколько твёрдая.
+// published — опубликована площадкой, quoted — прислана в ответ на запрос,
+// gtr-estimate — ориентир GTR, inquiry — ставки нет, только запрос.
+// Смета обязана показывать разницу: ориентир ≠ подтверждённая цена.
+export type RateKind = "published" | "quoted" | "gtr-estimate" | "inquiry";
+
+export type VenueRate = {
+  venueId: string;
+  amount: number;
+  currency: string;
+  covers: string;
+  kind: RateKind;
+  source: string;
+  collected: string;
+  note?: string;
 };
+
+export const RATE_LABEL: Record<RateKind, string> = {
+  published: "Опубликованная ставка",
+  quoted: "Подтверждено площадкой",
+  "gtr-estimate": "Ориентир GTR",
+  inquiry: "По запросу",
+};
+
+export const RATE_COLOR: Record<RateKind, string> = {
+  published: GREEN,
+  quoted: GREEN,
+  "gtr-estimate": AMBER,
+  inquiry: "rgba(255,255,255,.35)",
+};
+
+export const VENUE_RATES = venueRatesRaw as VenueRate[];
+
+export const rateOf = (venueId: string): VenueRate | null =>
+  VENUE_RATES.find((r) => r.venueId === venueId && r.amount > 0) ?? null;
 
 export const artistFee = (tier?: string) => (tier && ARTIST_TIER_FEE[tier]) || ARTIST_FEE_DEFAULT;
 
@@ -1327,6 +1500,7 @@ export type QuoteLine = {
   note: string;
   amount: number;
   estimate: boolean;
+  kind: RateKind; // насколько твёрдая цифра — показывается в смете
 };
 
 export type Quote = {
@@ -1352,18 +1526,30 @@ export const computeQuote = (graph: Graph, venueId: string): Quote => {
   const missing: string[] = [];
 
   const venueNode = graph.nodes.find((n) => n.kind === "venue");
-  const venueFee = VENUE_FEE[venueId] ?? 0;
+  const rate = rateOf(venueId);
   if (venueNode) {
-    if (venueFee > 0) {
+    if (rate) {
       lines.push({
         group: "venue",
         label: venueNode.title,
-        note: "Приватная аренда / мин. спенд площадки",
-        amount: venueFee,
-        estimate: true,
+        note: rate.covers || "Аренда площадки",
+        amount: rate.amount,
+        estimate: rate.kind !== "published" && rate.kind !== "quoted",
+        kind: rate.kind,
       });
+      if (rate.kind === "gtr-estimate") {
+        missing.push(`Ставка «${venueNode.title}» — ориентир GTR, нужен запрос площадке`);
+      }
     } else {
-      missing.push("Ставка аренды площадки — по запросу");
+      lines.push({
+        group: "venue",
+        label: venueNode.title,
+        note: "Аренда площадки — ставка не опубликована",
+        amount: 0,
+        estimate: true,
+        kind: "inquiry",
+      });
+      missing.push(`Ставка аренды «${venueNode.title}» — по запросу`);
     }
   }
 
@@ -1376,22 +1562,30 @@ export const computeQuote = (graph: Graph, venueId: string): Quote => {
       note: `Гонорар · ${tier || "артист"}`,
       amount: fee,
       estimate: true,
+      kind: "gtr-estimate",
     });
   }
 
   const VK: ("sound" | "light" | "decor" | "content")[] = ["sound", "light", "decor", "content"];
   for (const k of VK) {
     for (const n of graph.nodes.filter((x) => x.kind === k)) {
+      // Конкретный пакет подрядчика кладёт точную цену в ЦЕНА_THB.
+      // Строка ЦЕНА — человекочитаемая («฿4 000–31 000 / день») и для
+      // расчёта не годится: из диапазона парсится нижняя граница.
+      const exact = intOf(n.fields.find((f) => f[0] === "ЦЕНА_THB")?.[1]);
       const price = n.fields.find((f) => f[0] === "ЦЕНА")?.[1];
-      const amount = thb(price);
+      const amount = exact || thb(price);
+      const kind: RateKind = exact ? "published" : amount ? "gtr-estimate" : "inquiry";
       lines.push({
         group: k,
         label: n.title,
         note: `${KINDS[k][0]} · ${price || "по запросу"}`,
         amount,
-        estimate: amount === 0 ? true : true,
+        estimate: !exact,
+        kind,
       });
       if (amount === 0) missing.push(`Цена подрядчика: ${n.title}`);
+      else if (!exact) missing.push(`«${n.title}» — цена по нижней границе вилки, нужен пакет`);
     }
   }
 

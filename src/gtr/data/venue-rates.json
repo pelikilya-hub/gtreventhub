@@ -1,0 +1,32 @@
+[
+  {
+    "venueId": "VEN-0013",
+    "amount": 400000,
+    "currency": "THB",
+    "covers": "Приватный выкуп клуба, ночь",
+    "kind": "gtr-estimate",
+    "source": "",
+    "collected": "2026-08-10",
+    "note": "Ориентир GTR, площадкой не подтверждён. Требует запроса."
+  },
+  {
+    "venueId": "VEN-0061",
+    "amount": 25000,
+    "currency": "THB",
+    "covers": "Event-день, площадка целиком",
+    "kind": "gtr-estimate",
+    "source": "",
+    "collected": "2026-08-10",
+    "note": "Ориентир GTR, площадкой не подтверждён. Требует запроса."
+  },
+  {
+    "venueId": "VEN-0033",
+    "amount": 180000,
+    "currency": "THB",
+    "covers": "Бальный зал, полный день",
+    "kind": "gtr-estimate",
+    "source": "",
+    "collected": "2026-08-10",
+    "note": "Ориентир GTR, площадкой не подтверждён. Требует запроса."
+  }
+]

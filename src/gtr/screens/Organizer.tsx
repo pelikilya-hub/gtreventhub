@@ -1,6 +1,15 @@
 import { useMemo, useState } from "react";
 
-import { fmtThb, PH, richOf, V, VENUE_FEE, type Venue } from "../data/app-data";
+import {
+  fmtThb,
+  PH,
+  RATE_COLOR,
+  RATE_LABEL,
+  rateOf,
+  richOf,
+  V,
+  type Venue,
+} from "../data/app-data";
 import { GtrProvider, useGtr } from "../store";
 import type { SessionUser } from "../auth";
 import { ConstructorScreen, type EventIntake } from "./Constructor";
@@ -343,7 +352,9 @@ function PickVenue({ onPick }: { onPick: (vid: string) => void }) {
 
 function VenueTile({ v, onPick }: { v: Venue; onPick: () => void }) {
   const rich = richOf(v.id);
-  const bookable = VENUE_FEE[v.id] != null;
+  const rate = rateOf(v.id);
+  // Зелёный чип только у подтверждённых ставок: ориентир GTR — это не цена.
+  const firm = rate?.kind === "published" || rate?.kind === "quoted";
   return (
     <Card hover style={{ overflow: "hidden", padding: 0 }} onClick={onPick}>
       <div style={{ position: "relative", aspectRatio: "16/10", background: "var(--gtr-card2)" }}>
@@ -378,7 +389,9 @@ function VenueTile({ v, onPick }: { v: Venue; onPick: () => void }) {
         <div style={{ position: "absolute", left: 12, right: 12, bottom: 10 }}>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             <Chip color="rgba(255,255,255,.6)">{v.tag.toUpperCase()}</Chip>
-            {bookable ? <Chip color="#2ECC71">ЦЕНА ЕСТЬ</Chip> : null}
+            {rate ? (
+              <Chip color={RATE_COLOR[rate.kind]}>{RATE_LABEL[rate.kind].toUpperCase()}</Chip>
+            ) : null}
           </div>
         </div>
       </div>
@@ -398,7 +411,9 @@ function VenueTile({ v, onPick }: { v: Venue; onPick: () => void }) {
             className="gtr-mono"
             style={{ font: "600 9.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
           >
-            {VENUE_FEE[v.id] ? `аренда от ${fmtThb(VENUE_FEE[v.id])}` : "аренда по запросу"}
+            {rate
+              ? `${firm ? "аренда от" : "ориентир"} ${fmtThb(rate.amount)}`
+              : "аренда по запросу"}
           </span>
           <span className="gtr-btn gtr-btn-red" style={{ padding: "6px 11px", fontSize: 10.5 }}>
             Собрать →

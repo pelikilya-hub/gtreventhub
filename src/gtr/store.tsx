@@ -15,6 +15,7 @@ import type { SessionUser } from "./auth";
 import {
   GRAPH_SEED,
   seedEvents,
+  venueGraph,
   type CalEvent,
   type Graph,
   type OrgRequest,
@@ -138,12 +139,14 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
       shared,
       peers,
       setEvents: (fn) => commit({ ...shared, events: fn(shared.events) }),
+      // Площадки без сохранённого графа получают его сгенерированным из базы —
+      // иначе конструктор пуст для всех, кроме трёх пилотных площадок.
       setGraph: (venueId, fn) => {
-        const g = shared.graphs[venueId] ?? { nodes: [], links: [] };
+        const g = shared.graphs[venueId] ?? venueGraph(venueId);
         commit({ ...shared, graphs: { ...shared.graphs, [venueId]: fn(g) } });
       },
       setLineup: (fn) => commit({ ...shared, lineup: fn(shared.lineup) }),
-      graphOf: (venueId) => shared.graphs[venueId] ?? { nodes: [], links: [] },
+      graphOf: (venueId) => shared.graphs[venueId] ?? venueGraph(venueId),
       addRequest: (req) => commit({ ...shared, requests: [req, ...shared.requests] }),
       updateRequest: (id, patch) =>
         commit({

@@ -1,7 +1,11 @@
 // Авторизация GTR Event: httpOnly-cookie сессия, подписанная HMAC-SHA256 (Web Crypto,
 // работает и в Node, и в Cloudflare Workers). Пользователи — демо-состав MVP.
 import { createServerFn } from "@tanstack/react-start";
-import { getCookie, setCookie, deleteCookie } from "@tanstack/react-start/server";
+import {
+  getCookie,
+  setCookie,
+  deleteCookie,
+} from "@tanstack/react-start/server";
 import type { RoleId } from "./data/app-data";
 
 export type SessionUser = {
@@ -16,14 +20,32 @@ export type SessionUser = {
 type DemoUser = SessionUser & { passHash: string };
 
 const sha256 = async (s: string) => {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  const buf = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(s),
+  );
   return Array.from(new Uint8Array(buf))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 };
 
-// Пароль демо-доступа: gtr2026 (указан на экране входа)
-const DEMO_PASS_HASH = "d1afdc8a7155abb9c52f8ef746699c5e0648b5c8c1b30e2ac7360ae4c913dcda";
+// Пароль демо-доступа: gtr2026 (подсказан на экране входа).
+// На публичном стенде демо-пароль означает открытый доступ: он написан
+// в самом интерфейсе. Поэтому если задан GTR_ACCESS_PASSWORD, вход идёт
+// только по нему, а подсказки и кнопки быстрого входа гаснут.
+const DEMO_PASS_HASH =
+  "d1afdc8a7155abb9c52f8ef746699c5e0648b5c8c1b30e2ac7360ae4c913dcda";
+
+const accessPassword = () =>
+  (typeof process !== "undefined" && process.env?.GTR_ACCESS_PASSWORD) || "";
+
+export const isDemoAccess = () => !accessPassword();
+
+// Ожидаемый хэш: из переменной окружения либо демо-пароль для локальной работы
+const expectedHash = async () => {
+  const pw = accessPassword();
+  return pw ? await sha256(pw) : DEMO_PASS_HASH;
+};
 
 const USERS: DemoUser[] = [
   {
@@ -89,7 +111,11 @@ const hmacKey = async () =>
   );
 
 const sign = async (payload: string) => {
-  const sig = await crypto.subtle.sign("HMAC", await hmacKey(), new TextEncoder().encode(payload));
+  const sig = await crypto.subtle.sign(
+    "HMAC",
+    await hmacKey(),
+    new TextEncoder().encode(payload),
+  );
   return btoa(String.fromCharCode(...new Uint8Array(sig)))
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
@@ -97,11 +123,15 @@ const sign = async (payload: string) => {
 };
 
 const makeToken = async (user: SessionUser) => {
-  const payload = b64url(JSON.stringify({ ...user, exp: Date.now() + WEEK * 1000 }));
+  const payload = b64url(
+    JSON.stringify({ ...user, exp: Date.now() + WEEK * 1000 }),
+  );
   return `${payload}.${await sign(payload)}`;
 };
 
-const readToken = async (token: string | undefined): Promise<SessionUser | null> => {
+const readToken = async (
+  token: string | undefined,
+): Promise<SessionUser | null> => {
   if (!token) return null;
   const [payload, sig] = token.split(".");
   if (!payload || !sig) return null;
@@ -120,7 +150,7 @@ export const loginFn = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string; password: string }) => d)
   .handler(async ({ data }) => {
     const user = USERS.find((u) => u.email === data.email.trim().toLowerCase());
-    if (!user || user.passHash !== (await sha256(data.password))) {
+    if (!user || (await expectedHash()) !== (await sha256(data.password))) {
       return { ok: false as const, error: "Неверный email или пароль" };
     }
     const { passHash: _ph, ...sessionUser } = user;
@@ -144,8 +174,20 @@ export const sessionFn = createServerFn({ method: "GET" }).handler(async () => {
   return { user };
 });
 
+// Экран входа спрашивает, показывать ли демо-подсказки: на стенде с заданным
+// паролем они выдали бы доступ любому, кто открыл ссылку
+export const accessModeFn = createServerFn({ method: "GET" }).handler(
+  async () => ({
+    demo: isDemoAccess(),
+  }),
+);
+
 // Матрица прав (экран «Доступы и роли» + фактические проверки в интерфейсе)
-export const PERMISSIONS: { key: string; label: string; roles: Record<RoleId, boolean> }[] = [
+export const PERMISSIONS: {
+  key: string;
+  label: string;
+  roles: Record<RoleId, boolean>;
+}[] = [
   {
     key: "dash",
     label: "Дашборд площадки",

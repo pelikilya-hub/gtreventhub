@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 
 import {
-  CAL_PALETTE,
+  calPaletteOf,
   loadArtists,
   MONTHS,
-  ROOMS,
+  roomsOf,
   type Artist,
   type CalEvent,
 } from "../data/app-data";
@@ -18,7 +18,7 @@ const WD_FULL = ["воскресенье", "понедельник", "вторн
 export function CalendarScreen() {
   const { user, shared, setEvents } = useGtr();
   const vid = user.venueId || "VEN-0013";
-  const rooms = ROOMS[vid] ?? ROOMS["VEN-0013"];
+  const rooms = roomsOf(vid);
 
   const [month, setMonth] = useState(7);
   const [year, setYear] = useState(2026);
@@ -425,7 +425,7 @@ export function CalendarScreen() {
           <Card style={{ padding: "16px 18px" }}>
             <Eyebrow style={{ marginBottom: 10 }}>ПАЛИТРА ФОРМАТОВ · В ДЕНЬ {selDay}</Eyebrow>
             <div style={{ display: "grid", gap: 7 }}>
-              {(CAL_PALETTE[vid] ?? CAL_PALETTE["VEN-0013"]).map(
+              {calPaletteOf(vid).map(
                 ([title, evRoom, start, end, meta]) => (
                   <button
                     key={title}

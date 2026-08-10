@@ -15,6 +15,10 @@ import {
   loadArtists,
   NODE_W,
   nodeStatus,
+  packagePrice,
+  packagesOf,
+  RATE_COLOR,
+  RATE_LABEL,
   STAGE_COLOR,
   STAGE_LABEL,
   STATUS_COLOR,
@@ -567,53 +571,97 @@ export function ConstructorScreen({
                   ) : null}
                   {open && !isArtist ? (
                     <div style={{ display: "grid", gap: 5, padding: "6px 0 4px 10px" }}>
-                      {vendors.map((vd) => (
-                        <button
-                          key={vd.name}
-                          className="gtr-pal-btn"
-                          style={{ padding: "7px 9px" }}
-                          onClick={() =>
-                            addNode(
-                              kind,
-                              vd.name,
-                              vd.meta,
-                              "ПОДРЯДЧИК",
-                              [
-                                ["ЦЕНА", vd.price || "По запросу"],
-                                ["КОНТАКТ", vd.contact || "—"],
-                                ["ИСТОЧНИК", vd.source || "—"],
-                              ],
-                              true,
-                            )
-                          }
-                        >
-                          <span style={{ flex: 1, minWidth: 0 }}>
-                            <span style={{ display: "block", fontWeight: 600, fontSize: 11 }}>
+                      {vendors.map((vd) => {
+                        const packs = packagesOf(vd.name);
+                        return (
+                          <div key={vd.name} style={{ display: "grid", gap: 4 }}>
+                            <div
+                              className="gtr-eyebrow"
+                              style={{ fontSize: 8.5, marginTop: 2, color: "rgba(255,255,255,.45)" }}
+                            >
                               {vd.name}
-                            </span>
-                            <span
-                              style={{
-                                display: "block",
-                                marginTop: 2,
-                                font: "500 9px/1.3 'JetBrains Mono',monospace",
-                                color: "rgba(255,255,255,.4)",
-                              }}
-                            >
-                              {vd.meta}
-                            </span>
-                            <span
-                              style={{
-                                display: "block",
-                                marginTop: 2,
-                                font: "600 9px/1.3 'JetBrains Mono',monospace",
-                                color: K[1],
-                              }}
-                            >
-                              {vd.price}
-                            </span>
-                          </span>
-                        </button>
-                      ))}
+                            </div>
+                            {/* Пакет с точной ценой — считается в смете как есть.
+                                Без пакетов остаётся запрос цены у подрядчика. */}
+                            {packs.map((p) => (
+                              <button
+                                key={p.package}
+                                className="gtr-pal-btn"
+                                style={{ padding: "7px 9px" }}
+                                onClick={() =>
+                                  addNode(
+                                    kind,
+                                    p.package,
+                                    `${vd.name} · ${p.system}`,
+                                    "ПАКЕТ",
+                                    [
+                                      ["ПОДРЯДЧИК", vd.name],
+                                      ["ЦЕНА", packagePrice(p)],
+                                      ["ЦЕНА_THB", String(p.price)],
+                                      ["КОНТАКТ", p.contact || vd.contact || "—"],
+                                      ["ИСТОЧНИК", p.source || vd.source || "—"],
+                                    ],
+                                    true,
+                                  )
+                                }
+                              >
+                                <span style={{ flex: 1, minWidth: 0 }}>
+                                  <span style={{ display: "block", fontWeight: 600, fontSize: 11 }}>
+                                    {p.package}
+                                  </span>
+                                  <span
+                                    style={{
+                                      display: "block",
+                                      marginTop: 2,
+                                      font: "700 9.5px/1.3 'JetBrains Mono',monospace",
+                                      color: K[1],
+                                    }}
+                                  >
+                                    {packagePrice(p)}
+                                  </span>
+                                </span>
+                              </button>
+                            ))}
+                            {!packs.length ? (
+                              <button
+                                className="gtr-pal-btn"
+                                style={{ padding: "7px 9px" }}
+                                onClick={() =>
+                                  addNode(
+                                    kind,
+                                    vd.name,
+                                    vd.meta,
+                                    "ЗАПРОС",
+                                    [
+                                      ["ПОДРЯДЧИК", vd.name],
+                                      ["ЦЕНА", vd.price || "по запросу"],
+                                      ["КОНТАКТ", vd.contact || "—"],
+                                      ["ИСТОЧНИК", vd.source || "—"],
+                                    ],
+                                    true,
+                                  )
+                                }
+                              >
+                                <span style={{ flex: 1, minWidth: 0 }}>
+                                  <span style={{ display: "block", fontWeight: 600, fontSize: 11 }}>
+                                    {vd.meta}
+                                  </span>
+                                  <span
+                                    style={{
+                                      display: "block",
+                                      marginTop: 2,
+                                      font: "600 9px/1.3 'JetBrains Mono',monospace",
+                                      color: "rgba(255,255,255,.4)",
+                                    }}
+                                  >
+                                    {vd.price || "цена по запросу"}
+                                  </span>
+                                </span>
+                              </button>
+                            ) : null}
+                          </div>
+                        );
+                      })}
                       <button
                         className="gtr-pal-btn"
                         style={{ padding: "7px 9px", color: "rgba(255,255,255,.55)" }}
@@ -894,7 +942,10 @@ export function ConstructorScreen({
                 style={{ marginBottom: 10 }}
               />
               <div style={{ display: "grid", gap: 6 }}>
-                {selNode.fields.map(([k, val], i) => (
+                {/* ЦЕНА_THB — служебное числовое поле для сметы, рядом с
+                    человекочитаемой ЦЕНА его показывать незачем */}
+                {selNode.fields.map(([k, val], i) =>
+                  k === "ЦЕНА_THB" ? null : (
                   <div key={`${k}-${i}`}>
                     <Eyebrow style={{ fontSize: 8.5, marginBottom: 3 }}>{k}</Eyebrow>
                     <input
@@ -910,7 +961,8 @@ export function ConstructorScreen({
                       }
                     />
                   </div>
-                ))}
+                  ),
+                )}
               </div>
               {selNode.kind === "artist" && selNode.fields.find((f) => f[0] === "КАРТОЧКА")?.[1] ? (
                 <button
@@ -1117,14 +1169,34 @@ export function ConstructorScreen({
                         </span>
                       </span>
                       <span
-                        className="gtr-mono"
                         style={{
-                          font: "600 10.5px/1 'JetBrains Mono',monospace",
-                          color: l.amount ? "#fff" : "var(--gtr-t3)",
                           flex: "none",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 5,
                         }}
                       >
-                        {l.amount ? fmtThb(l.amount) : "по запросу"}
+                        {/* Точка провенанса: подтверждённая цена, ориентир
+                            или запрос — видно прямо в строке сметы */}
+                        <span
+                          title={RATE_LABEL[l.kind]}
+                          style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: "50%",
+                            background: RATE_COLOR[l.kind],
+                            flex: "none",
+                          }}
+                        />
+                        <span
+                          className="gtr-mono"
+                          style={{
+                            font: "600 10.5px/1 'JetBrains Mono',monospace",
+                            color: l.amount ? "#fff" : "var(--gtr-t3)",
+                          }}
+                        >
+                          {l.amount ? fmtThb(l.amount) : "по запросу"}
+                        </span>
                       </span>
                     </div>
                   ))}

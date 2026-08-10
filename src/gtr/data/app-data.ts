@@ -1141,6 +1141,40 @@ export const venueGraph = (venueId: string): Graph => {
   return { nodes, links };
 };
 
+// ---------- доступ к данным площадки без подмены чужими ----------
+// Заявки, финансы и программа — факты конкретной площадки. Раньше для
+// незасеянных площадок отдавались данные Illuzion, и владелец отеля видел
+// заявки ночного клуба как свои. Теперь недостающее отдаётся пустым.
+
+export const inqOf = (venueId: string): InqRow[] => INQ[venueId] ?? [];
+
+export const finKpiOf = (venueId: string): [string, string, string, string][] =>
+  FIN_KPI[venueId] ?? [];
+
+export const finBlockerOf = (venueId: string): string =>
+  FIN_BLOCKER[venueId] ??
+  "Финансовые данные по этой площадке ещё не собраны. Заполните ставку и условия в паспорте площадки.";
+
+// Форматы событий для календаря. Это предложение GTR, а не факт о площадке,
+// поэтому для незасеянных площадок список строится из их же залов.
+export const calPaletteOf = (venueId: string): [string, string, string, string, string][] => {
+  const manual = CAL_PALETTE[venueId];
+  if (manual) return manual;
+  const rooms = roomsOf(venueId);
+  if (!rooms.length) return [];
+  const formats: [string, string, string][] = [
+    ["Приватное событие", "18:00", "23:00"],
+    ["Корпоратив", "10:00", "17:00"],
+    ["Свадьба / банкет", "16:00", "23:00"],
+    ["Дневная активация", "12:00", "16:00"],
+    ["Вечерний приём", "19:00", "22:00"],
+  ];
+  return formats.map(([name, from, to], i) => {
+    const [key, label] = rooms[i % rooms.length];
+    return [name, key, from, to, label];
+  });
+};
+
 // ---------- rich-контент Illuzion ----------
 const ILZ = "https://www.illuzionphuket.com/wp-content/uploads/";
 export const ILZ_RICH: RichVenue = {
@@ -1640,6 +1674,19 @@ export const VENDOR_PACKAGES = vendorPackagesRaw as VendorPackage[];
 
 export const packagesOf = (vendorName: string) =>
   VENDOR_PACKAGES.filter((p) => p.vendor === vendorName);
+
+export const UNIT_LABEL: Record<string, string> = {
+  day: "день",
+  package: "пакет",
+  "add-on": "доп. опция",
+  hour: "час",
+};
+
+export const unitLabel = (u: string) => UNIT_LABEL[u] ?? u;
+
+// Подпись пакета в смете и палитре: «฿13 000 / день»
+export const packagePrice = (p: VendorPackage) =>
+  `${fmtThb(p.price)} / ${unitLabel(p.unit)}`;
 
 // Русские подписи категорий подрядчиков
 export const VENDOR_CAT_LABEL: Record<"sound" | "light" | "decor" | "content", string> = {

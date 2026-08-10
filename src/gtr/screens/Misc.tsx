@@ -5,11 +5,11 @@ import { can, PERMISSIONS } from "../auth";
 import {
   AMBER,
   CONTACT,
-  FIN_BLOCKER,
-  FIN_KPI,
+  finBlockerOf,
+  finKpiOf,
   fmtThb,
   GREEN,
-  INQ,
+  inqOf,
   PH,
   RED,
   richOf,
@@ -46,7 +46,7 @@ const NoAccess = ({ what }: { what: string }) => (
 export function InquiriesScreen() {
   const { user, shared, updateRequest, setGraph } = useGtr();
   const vid = user.venueId || "VEN-0013";
-  const rows = INQ[vid] ?? INQ["VEN-0013"];
+  const rows = inqOf(vid);
   const [replied, setReplied] = useState<number[]>([]);
 
   // Входящие запросы организаторов (собраны на витрине, падают со сметой)
@@ -232,6 +232,22 @@ export function InquiriesScreen() {
           ) : null}
 
           <Card>
+            {/* Архивных заявок по площадке может не быть — это нормальное
+                состояние, а не повод показывать чужие */}
+            {!rows.length ? (
+              <div
+                style={{
+                  padding: "26px 20px",
+                  textAlign: "center",
+                  font: "500 12px/1.6 'Golos Text',sans-serif",
+                  color: "var(--gtr-t2)",
+                }}
+              >
+                История заявок по этой площадке пока не собрана.
+                <br />
+                Новые запросы с витрины появятся здесь сразу.
+              </div>
+            ) : null}
             {rows.map(([day, mon, title, meta, budget, sla, status, c, cta], i) => (
               <div
                 key={i}
@@ -769,10 +785,23 @@ export function FinanceScreen() {
   return (
     <div style={{ maxWidth: 1080, margin: "0 auto" }}>
       <Title>Финансы</Title>
+      {!finKpiOf(vid).length ? (
+        <Card style={{ padding: "22px 20px", marginBottom: 16 }}>
+          <div
+            style={{
+              font: "500 12px/1.6 'Golos Text',sans-serif",
+              color: "var(--gtr-t2)",
+            }}
+          >
+            Финансовые показатели по этой площадке ещё не заведены. Чтобы они появились, нужны
+            ставка аренды, условия оплаты и договор — их заполняют в паспорте площадки.
+          </div>
+        </Card>
+      ) : null}
       <div
         style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 16 }}
       >
-        {(FIN_KPI[vid] ?? FIN_KPI["VEN-0013"]).map(([label, value, color, note]) => (
+        {finKpiOf(vid).map(([label, value, color, note]) => (
           <Card
             key={label}
             style={{
@@ -843,7 +872,7 @@ export function FinanceScreen() {
       <Card style={{ padding: 20, borderColor: "rgba(229,35,27,.3)" }}>
         <Eyebrow style={{ marginBottom: 8, color: "#E5231B" }}>ГЛАВНЫЙ БЛОКЕР</Eyebrow>
         <div style={{ font: "500 12px/1.7 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-          {FIN_BLOCKER[vid] ?? FIN_BLOCKER["VEN-0013"]}
+          {finBlockerOf(vid)}
         </div>
       </Card>
     </div>

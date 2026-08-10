@@ -14,8 +14,10 @@ import {
   V,
   venueGraph,
   type EventStage,
+  type Graph,
 } from "../data/app-data";
-import { vibeOf } from "../data/brief";
+import { BRIEF, vibeOf, vibeQuestionFor, type BriefAnswers } from "../data/brief";
+import { buildPresetDraft, EVENT_PRESETS, presetBlockCount } from "../data/presets";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow } from "../ui";
 
@@ -103,13 +105,8 @@ export function EventsScreen() {
           isAdmin={isAdmin}
           ownVenue={user.venueId}
           onCancel={() => setCreating(false)}
-          onCreate={(venueId, format, title) => {
-            const id = createDraft({
-              venueId,
-              format,
-              title,
-              graph: venueGraph(venueId),
-            });
+          onCreate={(init) => {
+            const id = createDraft(init);
             setCreating(false);
             open(id);
           }}
@@ -333,12 +330,24 @@ function NewEvent({
   isAdmin: boolean;
   ownVenue: string;
   onCancel: () => void;
-  onCreate: (venueId: string, format: string, title: string) => void;
+  onCreate: (init: {
+    venueId: string;
+    format: string;
+    title: string;
+    guests?: string;
+    graph: Graph;
+    brief?: BriefAnswers;
+  }) => void;
 }) {
   const [venueId, setVenueId] = useState(isAdmin ? "" : ownVenue);
-  const [format, setFormat] = useState("");
+  const [presetId, setPresetId] = useState<string | "blank" | "">("");
+  const [vibeId, setVibeId] = useState("");
+  const [format, setFormat] = useState(""); // для пустого события
   const [title, setTitle] = useState("");
   const [vq, setVq] = useState("");
+
+  const preset = EVENT_PRESETS.find((x) => x.id === presetId);
+  const vibeQ = preset ? vibeQuestionFor(preset.format) : undefined;
 
   // Админ выбирает любую из 97 площадок, роль площадки — только свою
   const venues = useMemo(() => {
@@ -351,7 +360,29 @@ function NewEvent({
   }, [vq, isAdmin, ownVenue]);
 
   const picked = venueId ? V(venueId) : null;
-  const ready = Boolean(venueId && format);
+  const ready = Boolean(
+    venueId && (preset ? (vibeQ ? vibeId : true) : presetId === "blank" && format),
+  );
+
+  const create = () => {
+    if (!venueId) return;
+    if (preset) {
+      const built = buildPresetDraft(venueId, preset, vibeId);
+      const guestsLabel =
+        BRIEF.find((qq) => qq.id === "guests")?.options.find((o) => o.id === preset.guests)
+          ?.label ?? "";
+      onCreate({
+        venueId,
+        format: preset.format,
+        title: title.trim(),
+        guests: guestsLabel,
+        graph: built.graph,
+        brief: built.brief,
+      });
+    } else {
+      onCreate({ venueId, format, title: title.trim(), graph: venueGraph(venueId) });
+    }
+  };
 
   return (
     <Card style={{ padding: "20px 22px", marginBottom: 16, display: "grid", gap: 16 }}>
@@ -419,42 +450,192 @@ function NewEvent({
         )}
       </div>
 
-      {/* шаг 2 — формат */}
+      {/* шаг 2 — сценарий: готовый каркас или пустое событие */}
       <div style={{ display: "grid", gap: 7 }}>
-        <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>2. Формат события</span>
-        <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
-          {FORMATS.map((f) => {
-            const on = format === f;
+        <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>2. Сценарий</span>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill,minmax(215px,1fr))",
+            gap: 8,
+          }}
+        >
+          {EVENT_PRESETS.map((p) => {
+            const on = presetId === p.id;
+            const blocks = presetBlockCount(p);
             return (
               <button
-                key={f}
-                onClick={() => setFormat(f)}
+                key={p.id}
+                onClick={() => {
+                  setPresetId(on ? "" : p.id);
+                  setVibeId("");
+                }}
                 style={{
-                  borderRadius: 7,
-                  padding: "7px 12px",
+                  borderRadius: 10,
+                  padding: "11px 13px",
                   cursor: "pointer",
-                  font: `${on ? 600 : 500} 11px/1 'Golos Text',sans-serif`,
-                  border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.12)"}`,
-                  background: on ? "rgba(229,35,27,.14)" : "transparent",
-                  color: on ? "#fff" : "rgba(255,255,255,.6)",
+                  textAlign: "left",
+                  display: "grid",
+                  gap: 5,
+                  border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.1)"}`,
+                  background: on ? "rgba(229,35,27,.12)" : "var(--gtr-card2)",
                 }}
               >
-                {f}
+                <span
+                  style={{
+                    font: "600 12px/1.3 'Golos Text',sans-serif",
+                    color: on ? "#fff" : "rgba(255,255,255,.85)",
+                  }}
+                >
+                  {p.title}
+                </span>
+                <span
+                  style={{
+                    font: "500 10px/1.45 'Golos Text',sans-serif",
+                    color: "var(--gtr-t3)",
+                  }}
+                >
+                  {p.desc}
+                </span>
+                <span
+                  className="gtr-mono"
+                  style={{
+                    font: "600 9px/1 'JetBrains Mono',monospace",
+                    color: on ? "#2ECC71" : "rgba(255,255,255,.35)",
+                  }}
+                >
+                  {p.format} · зал + слот + {blocks} блоков
+                </span>
               </button>
             );
           })}
+          <button
+            onClick={() => {
+              setPresetId(presetId === "blank" ? "" : "blank");
+              setVibeId("");
+            }}
+            style={{
+              borderRadius: 10,
+              padding: "11px 13px",
+              cursor: "pointer",
+              textAlign: "left",
+              display: "grid",
+              gap: 5,
+              alignContent: "start",
+              border: `1px dashed ${presetId === "blank" ? "#E5231B" : "rgba(255,255,255,.18)"}`,
+              background: presetId === "blank" ? "rgba(229,35,27,.12)" : "transparent",
+            }}
+          >
+            <span style={{ font: "600 12px/1.3 'Golos Text',sans-serif", color: "rgba(255,255,255,.75)" }}>
+              Пустое событие
+            </span>
+            <span style={{ font: "500 10px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+              Только площадка, залы и слот — состав собираете сами
+            </span>
+          </button>
         </div>
+        {presetId === "blank" ? (
+          <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 3 }}>
+            {FORMATS.map((f) => {
+              const on = format === f;
+              return (
+                <button
+                  key={f}
+                  onClick={() => setFormat(f)}
+                  style={{
+                    borderRadius: 7,
+                    padding: "7px 12px",
+                    cursor: "pointer",
+                    font: `${on ? 600 : 500} 11px/1 'Golos Text',sans-serif`,
+                    border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.12)"}`,
+                    background: on ? "rgba(229,35,27,.14)" : "transparent",
+                    color: on ? "#fff" : "rgba(255,255,255,.6)",
+                  }}
+                >
+                  {f}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
 
-      {/* шаг 3 — название */}
+      {/* шаг 3 — вайб пресета: направление и музыкальные стили */}
+      {preset && vibeQ ? (
+        <div style={{ display: "grid", gap: 7 }}>
+          <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>
+            3. {vibeQ.q}{" "}
+            <span style={{ color: "var(--gtr-t3)", fontWeight: 500 }}>
+              — задаёт палитру и музыкальные стили
+            </span>
+          </span>
+          <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+            {vibeQ.options.map((o) => {
+              const on = vibeId === o.id;
+              const [c1, c2] = o.colors ?? ["#E5231B", "#F5A623"];
+              return (
+                <button
+                  key={o.id}
+                  onClick={() => setVibeId(on ? "" : o.id)}
+                  title={(o.styles ?? []).join(" · ")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    borderRadius: 9,
+                    padding: "7px 12px 7px 8px",
+                    cursor: "pointer",
+                    font: `${on ? 600 : 500} 11.5px/1.2 'Golos Text',sans-serif`,
+                    border: `1px solid ${on ? c1 : "rgba(255,255,255,.12)"}`,
+                    background: on ? `linear-gradient(120deg, ${c1}33, ${c2}33)` : "transparent",
+                    color: on ? "#fff" : "rgba(255,255,255,.65)",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 22,
+                      height: 22,
+                      flex: "none",
+                      borderRadius: 7,
+                      background: `linear-gradient(120deg, ${c1}, ${c2})`,
+                    }}
+                  />
+                  <span>
+                    {o.label}
+                    <span
+                      style={{
+                        display: "block",
+                        marginTop: 2,
+                        font: "500 8.5px/1.2 'JetBrains Mono',monospace",
+                        color: on ? "rgba(255,255,255,.75)" : "rgba(255,255,255,.35)",
+                      }}
+                    >
+                      {(o.styles ?? []).slice(0, 3).join(" · ")}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
+      {/* шаг 4 — название */}
       <div style={{ display: "grid", gap: 7 }}>
         <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>
-          3. Название <span style={{ color: "var(--gtr-t3)", fontWeight: 500 }}>— необязательно</span>
+          {preset && vibeQ ? "4" : "3"}. Название{" "}
+          <span style={{ color: "var(--gtr-t3)", fontWeight: 500 }}>— необязательно</span>
         </span>
         <input
           className="gtr-input"
           style={{ padding: "8px 11px", fontSize: 12 }}
-          placeholder={format ? `${format} · ${picked?.name ?? ""}` : "Например: Открытие сезона"}
+          placeholder={
+            preset
+              ? `${preset.title} · ${picked?.name ?? ""}`
+              : format
+                ? `${format} · ${picked?.name ?? ""}`
+                : "Например: Открытие сезона"
+          }
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -465,7 +646,7 @@ function NewEvent({
           className="gtr-btn gtr-btn-red"
           style={{ padding: "9px 16px", opacity: ready ? 1 : 0.4 }}
           disabled={!ready}
-          onClick={() => onCreate(venueId, format, title.trim())}
+          onClick={create}
         >
           Создать и открыть конструктор →
         </button>

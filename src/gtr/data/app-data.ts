@@ -397,6 +397,22 @@ export const RIDERS: Record<string, { label: string; tech: string[]; hosp: strin
 
 // ---------- конструктор ----------
 export const NODE_W = 196;
+export const NODE_H = 104;
+
+// Первая свободная ячейка сетки канваса 196×104 с шагом 246×150 — общая для
+// конструктора и сборщиков графа, чтобы блоки из разных источников не
+// накладывались и не расходились при смене сетки.
+export const freeGridCell = (nodes: GraphNode[]) => {
+  for (let row = 0; row < 14; row++) {
+    for (let col = 0; col < 5; col++) {
+      const x = 30 + col * (NODE_W + 50);
+      const y = 26 + row * (NODE_H + 46);
+      const busy = nodes.some((n) => Math.abs(n.x - x) < NODE_W && Math.abs(n.y - y) < NODE_H);
+      if (!busy) return { x, y };
+    }
+  }
+  return { x: 30, y: 26 };
+};
 
 export type NodeKind =
   | "venue"

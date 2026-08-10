@@ -24,6 +24,7 @@ export type BriefOption = {
   hint?: string;
   hintEn?: string;
   colors?: [string, string]; // палитра вайба — градиент карточки и окрас события
+  styles?: string[]; // канонические стили из базы артистов — для подбора под вайб
   modules?: ModuleSpec[];
 };
 
@@ -55,13 +56,46 @@ const todo = (what: string): [string, string][] => [
   ["ЧТО НУЖНО", what],
 ];
 
+// Стили каждого вайба — строго из тех значений, что живут в базе артистов
+// (Техно, Тек-хаус, Латин-хаус, Джаз…): по ним конструктор подбирает артистов.
+const VIBE_STYLES: Record<string, string[]> = {
+  neon: ["Техно", "Андеграунд-электроника", "Тек-хаус"],
+  tropic: ["Бич-клаб-хаус", "Мелодик-хаус", "Органик-хаус"],
+  hiphop: ["Хип-хоп", "Рэп", "R&B"],
+  disco: ["Фанк", "Соул", "Открытый формат"],
+  boho: ["Свадебный сет", "Лаунж / чилаут", "Джаз"],
+  classic: ["Джаз", "Live-вокал", "Свадебный сет"],
+  garden: ["Лаунж / чилаут", "Дип-хаус", "Поп"],
+  glam: ["Соул", "R&B", "Джаз"],
+  lux: ["Лаунж / чилаут", "Дип-хаус", "Джаз"],
+  tropicana: ["Латин-хаус", "Афро-хаус", "Хаус"],
+  white: ["Хаус", "Мелодик-хаус", "Дип-хаус"],
+  neon_f: ["Электроника", "EDM", "Биг-рум"],
+  sunset: ["Лаунж / чилаут", "Органик-хаус", "Даунтемпо"],
+  pool: ["Хаус", "Поп", "EDM"],
+  gastro: ["Джаз", "Соул", "Live-вокал"],
+  allnight: ["Клубная электроника", "Техно", "Тек-хаус"],
+  futur: ["Электроника", "EDM", "Клубная электроника"],
+  eco: ["Даунтемпо", "Лаунж / чилаут", "Органик-хаус"],
+  pop: ["Поп", "Танцевальный поп", "Инди-поп"],
+  festival: ["Live-программа", "Рок", "Поп"],
+  acoustic: ["Джаз", "Соул", "Live-вокал"],
+  theatrical: ["Эстрада", "Live-программа", "Поп"],
+};
+
 // Блок арт-дирекшна: вайб ложится в граф события отдельным модулем,
 // чтобы направление не потерялось между брифом и подрядчиками
-const vibeMod = (label: string, colors: [string, string], music: string): ModuleSpec =>
+const vibeMod = (
+  label: string,
+  colors: [string, string],
+  music: string,
+  styles: string[],
+): ModuleSpec =>
   mod("promo", "Арт-дирекшн: " + label, "Направление события из брифа", "ВАЙБ", [
     ["НАПРАВЛЕНИЕ", label],
     ["ПАЛИТРА", colors.join(" → ")],
     ["МУЗЫКА", music || "по формату"],
+    ["СТИЛИ", styles.join(", ") || "—"],
     ["СТАТУС", "Из брифа"],
     ["ЧТО НУЖНО", "Референсы, декор и дресс-код под направление"],
   ]);
@@ -81,7 +115,8 @@ const vibe = (
   colors,
   hint,
   hintEn,
-  modules: [vibeMod(label, colors, music)],
+  styles: VIBE_STYLES[id] ?? [],
+  modules: [vibeMod(label, colors, music, VIBE_STYLES[id] ?? [])],
 });
 
 // ---------- банк вопросов ----------
@@ -550,6 +585,10 @@ export const briefProgress = (format: string, answers: BriefAnswers) => {
   const missing = required.filter((q) => !(answers[q.id] ?? []).length);
   return { total: qs.length, done, missing };
 };
+
+// Вайб-вопрос формата — пресеты показывают его варианты при создании события
+export const vibeQuestionFor = (format: string): BriefQuestion | undefined =>
+  BRIEF.find((q) => q.kind === "vibe" && (q.formats ?? []).includes(format));
 
 // Выбранный вайб события — окрашивает карточку события и шапку конструктора
 export const vibeOf = (format: string, answers: BriefAnswers): BriefOption | null => {

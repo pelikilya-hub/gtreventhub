@@ -14,7 +14,9 @@ import {
   isPerformer,
   KINDS,
   linkStatus,
+  freeGridCell,
   loadArtists,
+  NODE_H,
   NODE_W,
   nodeStatus,
   packagePrice,
@@ -51,7 +53,6 @@ import { quoteDocument } from "../quote-doc";
 import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow, Icon } from "../ui";
 
-const NODE_H = 104;
 const VENDOR_KINDS: NodeKind[] = ["sound", "light", "decor", "content"];
 const RIDER_LABEL: Record<string, string> = {
   dj: "DJ-сет",
@@ -60,18 +61,7 @@ const RIDER_LABEL: Record<string, string> = {
   show: "Шоу-программа",
 };
 
-// первый свободный слот сетки 196×104, чтобы новые узлы не накладывались
-const freeSlot = (nodes: GraphNode[]) => {
-  for (let row = 0; row < 12; row++) {
-    for (let col = 0; col < 5; col++) {
-      const x = 30 + col * (NODE_W + 50);
-      const y = 26 + row * (NODE_H + 46);
-      const busy = nodes.some((n) => Math.abs(n.x - x) < NODE_W && Math.abs(n.y - y) < NODE_H);
-      if (!busy) return { x, y };
-    }
-  }
-  return { x: 30, y: 26 };
-};
+const freeSlot = freeGridCell;
 
 const parseThb = (str?: string) => {
   if (!str) return 0;
@@ -254,20 +244,44 @@ export function ConstructorScreen({
         : [],
     [artBase, shared.lineup],
   );
+  // Артисты под вайб события: стили вайба сверяются со стилями базы.
+  // Уже добавленные в граф и состоящие в лайнапе не дублируются — лайнап
+  // рендерится отдельной секцией ниже.
+  const vibeMatches = useMemo(() => {
+    if (!artBase || !eventVibe?.styles?.length) return [];
+    const wanted = new Set(eventVibe.styles);
+    const taken = new Set([
+      ...shared.lineup,
+      ...g.nodes
+        .filter((n) => n.kind === "artist")
+        .flatMap((n) => n.fields.filter((f) => f[0] === "КАРТОЧКА").map((f) => f[1])),
+    ]);
+    const rank = (pr: string) => (pr === "A" ? 0 : pr === "B" ? 1 : 2);
+    return artBase.artists
+      .filter(isPerformer)
+      .filter((a) => !taken.has(a.id))
+      .filter((a) => (a.styles || []).some((st) => wanted.has(st)))
+      .sort((a, b) => rank(a.prio) - rank(b.prio))
+      .slice(0, 6);
+  }, [artBase, eventVibe, g.nodes, shared.lineup]);
+
   const artSearch = useMemo(() => {
     if (!artBase) return [];
     const q = artQ.toLowerCase().trim();
     if (!q) return [];
+    const shown = new Set(vibeMatches.map((a) => a.id));
     const rank = (p: string) => (p === "A" ? 0 : p === "B" ? 1 : 2);
     // Только те, кто действительно выступает. Лейблы, агентства и
     // площадки-промоутеры в событие артистом не добавляются — иначе им
-    // начисляется гонорар по тиру, и смета врёт.
+    // начисляется гонорар по тиру, и смета врёт. Показанные в «под вайб»
+    // не дублируются в результатах поиска.
     return artBase.artists
       .filter(isPerformer)
+      .filter((a) => !shown.has(a.id))
       .filter((a) => `${a.name} ${(a.styles || []).join(" ")} ${a.role}`.toLowerCase().includes(q))
       .sort((a, b) => rank(a.prio) - rank(b.prio))
       .slice(0, 8);
-  }, [artBase, artQ]);
+  }, [artBase, artQ, vibeMatches]);
 
   // Событий у площадки ещё нет — предлагаем создать. Все хуки выше уже
   // отработали, поэтому ранний возврат здесь безопасен.
@@ -739,6 +753,23 @@ export function ConstructorScreen({
                         value={artQ}
                         onChange={(e) => setArtQ(e.target.value)}
                       />
+                      {vibeMatches.length ? (
+                        <div
+                          className="gtr-eyebrow"
+                          style={{ fontSize: 8.5, marginTop: 2, color: eventVibe?.colors?.[0] }}
+                          title={(eventVibe?.styles ?? []).join(" · ")}
+                        >
+                          ПОД ВАЙБ · {(eventVibe?.styles ?? []).slice(0, 2).join(", ")}
+                        </div>
+                      ) : null}
+                      {vibeMatches.map((a) => (
+                        <ArtistPick
+                          key={`vm-${a.id}`}
+                          a={a}
+                          color={eventVibe?.colors?.[0] ?? K[1]}
+                          onAdd={() => addArtistNode(a)}
+                        />
+                      ))}
                       {lineupArtists.length ? (
                         <div className="gtr-eyebrow" style={{ fontSize: 8.5, marginTop: 2 }}>
                           ИЗ ЛАЙНАПА · {lineupArtists.length}

@@ -37,6 +37,13 @@ import {
   type NodeKind,
   type NodeStatus,
 } from "../data/app-data";
+import {
+  briefProgress,
+  modulesFromBrief,
+  visibleQuestions,
+  type BriefAnswers,
+  type ModuleSpec,
+} from "../data/brief";
 import { notifyRequestFn } from "../notify";
 import { quoteDocument } from "../quote-doc";
 import { useGtr } from "../store";
@@ -92,17 +99,20 @@ export function ConstructorScreen({
   intake?: EventIntake;
   onSubmitted?: (requestId: string) => void;
 } = {}) {
-  const { user, peers, shared, draftOf, draftsOf, createDraft, setDraftGraph, addRequest } =
+  const { user, peers, shared, draftOf, draftsOf, createDraft, setDraftGraph, updateDraft, addRequest } =
     useGtr();
   const navigate = useNavigate();
-  const vid = venueId || user.venueId || "VEN-0013";
+  // Площадку задаёт само событие. У GTR-админа своей площадки нет, и раньше
+  // vid падал на дефолтную VEN-0013 — смета, пресеты и проверки считались по
+  // чужой площадке, хотя на канвасе была площадка события.
+  const explicitDraft = draftId ? draftOf(draftId) : undefined;
+  const vid = explicitDraft?.venueId || venueId || user.venueId || "VEN-0013";
   const v = V(vid);
   const R = v.readiness;
 
-  // Событие задаётся явным id. Без него открываем последнее событие площадки,
-  // а если событий нет — предлагаем создать, а не подсовываем единственный
-  // вечный граф, как было раньше.
-  const draft = (draftId ? draftOf(draftId) : undefined) ?? draftsOf(vid)[0];
+  // Без явного id открываем последнее событие площадки, а если событий нет —
+  // предлагаем создать, а не подсовываем единственный вечный граф.
+  const draft = explicitDraft ?? draftsOf(vid)[0];
   const g = draft?.graph ?? EMPTY_GRAPH;
 
   const [sel, setSel] = useState("n1");
@@ -110,6 +120,7 @@ export function ConstructorScreen({
   const [openCat, setOpenCat] = useState<NodeKind | null>(null);
   const [artBase, setArtBase] = useState<ArtistBase | null>(null);
   const [artQ, setArtQ] = useState("");
+  const [briefOpen, setBriefOpen] = useState(false);
   // Форма организатора (режим organizer): контакт и параметры запроса.
   // Предзаполняется ответами визарда (intake), если он был пройден.
   const [org, setOrg] = useState(() => ({
@@ -188,6 +199,48 @@ export function ConstructorScreen({
     );
   };
 
+  // ---------- бриф ----------
+  const briefAnswers: BriefAnswers = draft?.brief ?? {};
+  const briefFormat = draft?.format ?? "";
+  const setAnswer = (qid: string, ids: string[]) =>
+    draft && updateDraft(draft.id, { brief: { ...briefAnswers, [qid]: ids } });
+
+  // Ответы превращаются в блоки события. Совпадением считаем пару вид+название:
+  // чужой блок с похожим именем не должен глушить модуль из брифа.
+  const sameModule = (n: GraphNode, m: ModuleSpec) => n.kind === m.kind && n.title === m.title;
+
+  // Все блоки добавляются одной правкой графа. Цикл из addNode здесь не годится:
+  // каждый вызов считает состояние от одного и того же снимка, и до графа
+  // доходит только последний блок, хотя тост рапортует про все.
+  const buildFromBrief = () => {
+    const specs = modulesFromBrief(briefFormat, briefAnswers);
+    const fresh = specs.filter((m) => !g.nodes.some((n) => sameModule(n, m)));
+    if (!fresh.length) {
+      toast("Все блоки из брифа уже в событии");
+      return;
+    }
+    mutate((gr) => {
+      const nodes = [...gr.nodes];
+      const links = [...gr.links];
+      const venue = gr.nodes.find((n) => n.kind === "venue");
+      fresh.forEach((m, i) => {
+        const { x, y } = freeSlot(nodes); // считается по растущему списку — блоки не наложатся
+        const id = `nb${Date.now().toString(36)}${i}${Math.random().toString(36).slice(2, 5)}`;
+        nodes.push({ id, kind: m.kind, x, y, title: m.title, sub: m.sub, badge: m.badge, fields: m.fields });
+        if (venue) links.push({ from: venue.id, to: id });
+      });
+      return {
+        ...gr,
+        nodes,
+        links,
+        log: pushLog(gr, `Из брифа добавлено блоков: ${fresh.length}`),
+      };
+    });
+    toast(`Добавлено блоков: ${fresh.length}`, {
+      description: "Заполните подрядчиков и цены — блоки помечены как черновые",
+    });
+  };
+
   // Артисты для палитры: лайнап + результаты поиска по базе
   const lineupArtists = useMemo(
     () =>
@@ -231,7 +284,7 @@ export function ConstructorScreen({
             className="gtr-btn gtr-btn-red"
             style={{ justifySelf: "start", padding: "10px 16px" }}
             onClick={() => {
-              const id = createDraft({ venueId: vid, format: "Событие" });
+              const id = createDraft({ venueId: vid, format: "" });
               navigate({ to: "/gtr/$screen", params: { screen: "constructor" }, search: { draft: id } });
             }}
           >
@@ -432,6 +485,14 @@ export function ConstructorScreen({
             : `${health.problems + health.delays} ПРОБЛЕМ · ${health.warns} ВНИМАНИЕ`}
         </Chip>
         {linkFrom ? <Chip color={GREEN}>СВЯЗЬ: выберите левый порт целевого блока</Chip> : null}
+        <button
+          className={briefOpen ? "gtr-btn gtr-btn-red" : "gtr-btn"}
+          style={{ padding: "6px 12px", fontSize: 11 }}
+          onClick={() => setBriefOpen((x) => !x)}
+        >
+          Бриф · {briefProgress(briefFormat, briefAnswers).done}/
+          {briefProgress(briefFormat, briefAnswers).total}
+        </button>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
           <Eyebrow>УЧАСТНИКИ ОНЛАЙН</Eyebrow>
           <div style={{ display: "flex", gap: 5 }}>
@@ -552,6 +613,16 @@ export function ConstructorScreen({
             </button>
           </div>
         </Card>
+      ) : null}
+
+      {briefOpen ? (
+        <BriefPanel
+          format={briefFormat}
+          answers={briefAnswers}
+          onAnswer={setAnswer}
+          onBuild={buildFromBrief}
+          onClose={() => setBriefOpen(false)}
+        />
       ) : null}
 
       <div
@@ -1797,5 +1868,195 @@ function ArtistPick({ a, color, onAdd }: { a: Artist; color: string; onAdd: () =
       </span>
       <span style={{ color: "rgba(255,255,255,.4)", fontWeight: 700 }}>+</span>
     </button>
+  );
+}
+
+// ---------- панель брифа ----------
+function BriefPanel({
+  format,
+  answers,
+  onAnswer,
+  onBuild,
+  onClose,
+}: {
+  format: string;
+  answers: BriefAnswers;
+  onAnswer: (qid: string, ids: string[]) => void;
+  onBuild: () => void;
+  onClose: () => void;
+}) {
+  const qs = visibleQuestions(format, answers);
+  const prog = briefProgress(format, answers);
+  const pending = modulesFromBrief(format, answers);
+
+  return (
+    <Card style={{ padding: "20px 22px", marginBottom: 14, display: "grid", gap: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <Eyebrow>БРИФ СОБЫТИЯ</Eyebrow>
+        <Chip color={prog.missing.length ? AMBER : GREEN}>
+          {prog.done} / {prog.total}
+        </Chip>
+        <span
+          className="gtr-mono"
+          style={{ font: "500 10px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+        >
+          {format || "формат не задан"} · вопросы подстраиваются под ответы
+        </span>
+        <button
+          className="gtr-btn"
+          style={{ marginLeft: "auto", padding: "6px 12px", fontSize: 11 }}
+          onClick={onClose}
+        >
+          Свернуть
+        </button>
+      </div>
+
+      <div style={{ display: "grid", gap: 18 }}>
+        {qs.map((qq) => {
+          const picked = answers[qq.id] ?? [];
+          return (
+            <div key={qq.id} style={{ display: "grid", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 9, flexWrap: "wrap" }}>
+                <span style={{ font: "600 12.5px/1.3 'Golos Text',sans-serif" }}>{qq.q}</span>
+                {qq.required ? (
+                  <span
+                    className="gtr-mono"
+                    style={{ font: "600 8.5px/1 'JetBrains Mono',monospace", color: AMBER }}
+                  >
+                    ОБЯЗАТЕЛЬНО
+                  </span>
+                ) : null}
+                {qq.multi ? (
+                  <span
+                    className="gtr-mono"
+                    style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                  >
+                    НЕСКОЛЬКО
+                  </span>
+                ) : null}
+              </div>
+              {qq.hint ? (
+                <span
+                  style={{
+                    font: "500 10.5px/1.4 'Golos Text',sans-serif",
+                    color: "var(--gtr-t3)",
+                    marginTop: -3,
+                  }}
+                >
+                  {qq.hint}
+                </span>
+              ) : null}
+              <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+                {qq.options.map((o) => {
+                  const on = picked.includes(o.id);
+                  const adds = (o.modules ?? []).length;
+                  return (
+                    <button
+                      key={o.id}
+                      onClick={() =>
+                        onAnswer(
+                          qq.id,
+                          qq.multi
+                            ? on
+                              ? picked.filter((x) => x !== o.id)
+                              : [...picked, o.id]
+                            : on
+                              ? []
+                              : [o.id],
+                        )
+                      }
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 7,
+                        borderRadius: 8,
+                        padding: "8px 13px",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        font: `${on ? 600 : 500} 11.5px/1.3 'Golos Text',sans-serif`,
+                        border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.12)"}`,
+                        background: on ? "rgba(229,35,27,.14)" : "transparent",
+                        color: on ? "#fff" : "rgba(255,255,255,.62)",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 13,
+                          height: 13,
+                          flex: "none",
+                          borderRadius: qq.multi ? 4 : "50%",
+                          border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.25)"}`,
+                          background: on ? "#E5231B" : "transparent",
+                        }}
+                      />
+                      <span>
+                        {o.label}
+                        {o.hint ? (
+                          <span
+                            style={{
+                              display: "block",
+                              marginTop: 2,
+                              font: "500 9px/1.3 'JetBrains Mono',monospace",
+                              color: "rgba(255,255,255,.4)",
+                            }}
+                          >
+                            {o.hint}
+                          </span>
+                        ) : null}
+                      </span>
+                      {adds ? (
+                        <span
+                          className="gtr-mono"
+                          title={`Добавит блоков: ${adds}`}
+                          style={{
+                            font: "600 8.5px/1 'JetBrains Mono',monospace",
+                            color: on ? GREEN : "rgba(255,255,255,.3)",
+                          }}
+                        >
+                          +{adds}
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          flexWrap: "wrap",
+          borderTop: "1px solid rgba(255,255,255,.08)",
+          paddingTop: 13,
+        }}
+      >
+        <span
+          style={{ font: "500 11.5px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t2)", flex: 1 }}
+        >
+          {pending.length
+            ? `Ответы дают ${pending.length} блоков события. Уже добавленные не дублируются.`
+            : "Ответьте на вопросы — из них соберутся блоки события."}
+          {prog.missing.length ? (
+            <span style={{ color: AMBER }}>
+              {" "}
+              Без ответа обязательных: {prog.missing.map((m) => m.q).join(", ")}
+            </span>
+          ) : null}
+        </span>
+        <button
+          className="gtr-btn gtr-btn-red"
+          style={{ padding: "9px 15px", opacity: pending.length ? 1 : 0.4 }}
+          disabled={!pending.length}
+          onClick={onBuild}
+        >
+          Собрать блоки из брифа →
+        </button>
+      </div>
+    </Card>
   );
 }

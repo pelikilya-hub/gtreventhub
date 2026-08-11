@@ -87,12 +87,8 @@ function LoginPage() {
       >
         <div style={{ textAlign: "center", marginBottom: 26 }}>
           <div
-            className="gtr-oswald gtr-neon"
-            style={{
-              font: "700 34px/1 Oswald,sans-serif",
-              letterSpacing: ".08em",
-              color: "#fff",
-            }}
+            className="gtr-logo gtr-neon"
+            style={{ fontSize: 40, lineHeight: 1, color: "#fff" }}
           >
             GTR <span style={{ color: "#E5231B" }}>EVENT</span>
           </div>

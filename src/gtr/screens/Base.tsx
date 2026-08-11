@@ -223,10 +223,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               marginTop: 8,
             }}
           >
-            <h1
-              className="gtr-oswald"
-              style={{ font: "700 27px/1.05 Oswald,sans-serif", margin: 0 }}
-            >
+            <h1 className="gtr-trash" style={{ fontSize: 29, lineHeight: 1.05, margin: 0 }}>
               {v.name}
             </h1>
             <Chip color={confColor(v.confidence)}>ДОСТОВЕРНОСТЬ: {v.confidence.toUpperCase()}</Chip>

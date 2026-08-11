@@ -14,7 +14,7 @@ import {
 } from "../data/app-data";
 import photosRaw from "../data/artist-photos.json";
 import { useGtr } from "../store";
-import { Card, Chip, Eyebrow, Field, Li, SubHead, tint } from "../ui";
+import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint } from "../ui";
 
 // Фото артистов: точное совпадение имени в открытом каталоге, заглушки убраны.
 // Дашь Spotify-ключи — база пересоберётся тем же пайплайном.
@@ -325,7 +325,9 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                       "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)",
                   }}
                 />
-              ) : null}
+              ) : (
+                <LetterMark name={a.name} />
+              )}
               <span
                 style={{
                   font: "600 13px/1.25 'Golos Text',sans-serif",
@@ -461,7 +463,9 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
                   "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)",
               }}
             />
-          ) : null}
+          ) : (
+            <LetterMark name={a.name} size={124} cut={12} />
+          )}
           <div style={{ minWidth: 0, flex: 1 }}>
             <Eyebrow>{a.catRu ? String(a.catRu) : a.cat}</Eyebrow>
             <div
@@ -473,10 +477,7 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
                 marginTop: 8,
               }}
             >
-              <h1
-                className="gtr-oswald"
-                style={{ font: "700 28px/1.05 Oswald,sans-serif", margin: 0 }}
-              >
+              <h1 className="gtr-trash" style={{ fontSize: 30, lineHeight: 1.05, margin: 0 }}>
                 {a.name}
               </h1>
               <Chip

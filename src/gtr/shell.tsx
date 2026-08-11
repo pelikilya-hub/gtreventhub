@@ -172,10 +172,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
           <span />
           <span />
         </button>
-        <span
-          className="gtr-oswald"
-          style={{ font: "700 15px/1 Oswald,sans-serif", letterSpacing: ".08em" }}
-        >
+        <span className="gtr-logo" style={{ fontSize: 17, lineHeight: 1 }}>
           GTR <span style={{ color: "var(--gtr-red)" }}>EVENT</span>
         </span>
       </header>
@@ -184,13 +181,8 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
       {/* ---------- сайдбар ---------- */}
       <aside className="gtr-sidebar">
         <div
-          className="gtr-oswald gtr-neon"
-          style={{
-            font: "700 21px/1 Oswald,sans-serif",
-            letterSpacing: ".08em",
-            padding: "0 11px",
-            marginBottom: 22,
-          }}
+          className="gtr-logo gtr-neon"
+          style={{ fontSize: 24, lineHeight: 1, padding: "0 11px", marginBottom: 22 }}
         >
           GTR <span style={{ color: "#E5231B" }}>EVENT</span>
         </div>

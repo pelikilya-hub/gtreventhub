@@ -103,6 +103,31 @@ export const Field = ({
   </div>
 );
 
+// Буква-значок вместо фото: рваная панк-буква на красной подложке.
+// Латиницу рисует All Ages, кириллицу подхватывает Trashed из стека.
+export const LetterMark = ({
+  name,
+  size = 34,
+  cut = 6,
+}: {
+  name: string;
+  size?: number;
+  cut?: number;
+}) => (
+  <span
+    className="gtr-lettermark"
+    aria-hidden="true"
+    style={{
+      width: size,
+      height: size,
+      fontSize: Math.round(size * 0.56),
+      clipPath: `polygon(0 0, calc(100% - ${cut}px) 0, 100% ${cut}px, 100% 100%, 0 100%)`,
+    }}
+  >
+    {(name.trim()[0] || "?")}
+  </span>
+);
+
 // Пункт списка с квадратным маркером в цвет секции
 export const Li = ({ children, color }: { children: ReactNode; color?: string }) => (
   <div className="gtr-li">

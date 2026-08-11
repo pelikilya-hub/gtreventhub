@@ -1,57 +1,68 @@
 [
-  {
-    "venueId": "VEN-0061",
-    "amount": 1000,
-    "unit": "час",
-    "currency": "THB",
-    "covers": "Event-пространство, аренда за час",
-    "kind": "published",
-    "source": "База GTR · контакт CNT-0003, Event Space Team",
-    "collected": "2026-08-06",
-    "note": "Единственная опубликованная ставка в базе. Ранее в коде стоял ориентир 25 000 за event-день — источника у него нет, поэтому заменён на подтверждённую почасовую."
-  },
-  {
-    "venueId": "VEN-0013",
-    "amount": 400000,
-    "unit": "событие",
-    "currency": "THB",
-    "covers": "Приватный выкуп клуба, ночь",
-    "kind": "gtr-estimate",
-    "source": "",
-    "collected": "2026-08-10",
-    "note": "Ориентир GTR, площадкой не подтверждён. Запросить private-hire deck и условия промоутера. Проверка сайта 2026-08-10: На сайте только цены входа/бара, ставки выкупа нет."
-  },
-  {
-    "venueId": "VEN-0033",
-    "amount": 180000,
-    "unit": "событие",
-    "currency": "THB",
-    "covers": "Бальный зал, полный день",
-    "kind": "gtr-estimate",
-    "source": "",
-    "collected": "2026-08-10",
-    "note": "Ориентир GTR, площадкой не подтверждён. Запросить AV-пакет и тех-райдер у команды продаж курорта."
-  },
-  {
-    "venueId": "VEN-0001",
-    "amount": 0,
-    "unit": "событие",
-    "currency": "THB",
-    "covers": "Аренда площадки",
-    "kind": "inquiry",
-    "source": "https://www.catchbeachclub.com/",
-    "collected": "2026-08-10",
-    "note": "Сайт обойдён, ставок на приватные события не публикует. Нужен прямой запрос площадке."
-  },
-  {
-    "venueId": "VEN-0003",
-    "amount": 0,
-    "unit": "событие",
-    "currency": "THB",
-    "covers": "Аренда площадки",
-    "kind": "inquiry",
-    "source": "https://carpediemphuket.com/private-events/",
-    "collected": "2026-08-10",
-    "note": "Отдельная страница приватных событий без цен. Нужен прямой запрос площадке."
-  }
+ {
+  "venueId": "VEN-0061",
+  "amount": 1000,
+  "unit": "час",
+  "currency": "THB",
+  "covers": "Event-пространство, аренда за час",
+  "kind": "published",
+  "source": "База GTR · контакт CNT-0003, Event Space Team",
+  "collected": "2026-08-06",
+  "note": "Единственная опубликованная ставка в базе. Ранее в коде стоял ориентир 25 000 за event-день — источника у него нет, поэтому заменён на подтверждённую почасовую."
+ },
+ {
+  "venueId": "VEN-0013",
+  "amount": 400000,
+  "unit": "событие",
+  "currency": "THB",
+  "covers": "Приватный выкуп клуба, ночь",
+  "kind": "gtr-estimate",
+  "source": "",
+  "collected": "2026-08-10",
+  "note": "Ориентир GTR, площадкой не подтверждён. Запросить private-hire deck и условия промоутера. Проверка сайта 2026-08-10: На сайте только цены входа/бара, ставки выкупа нет."
+ },
+ {
+  "venueId": "VEN-0033",
+  "amount": 180000,
+  "unit": "событие",
+  "currency": "THB",
+  "covers": "Бальный зал, полный день",
+  "kind": "gtr-estimate",
+  "source": "",
+  "collected": "2026-08-10",
+  "note": "Ориентир GTR, площадкой не подтверждён. Запросить AV-пакет и тех-райдер у команды продаж курорта."
+ },
+ {
+  "venueId": "VEN-0001",
+  "amount": 0,
+  "unit": "событие",
+  "currency": "THB",
+  "covers": "Аренда площадки",
+  "kind": "inquiry",
+  "source": "https://www.catchbeachclub.com/",
+  "collected": "2026-08-10",
+  "note": "Сайт обойдён, ставок на приватные события не публикует. Нужен прямой запрос площадке."
+ },
+ {
+  "venueId": "VEN-0003",
+  "amount": 0,
+  "unit": "событие",
+  "currency": "THB",
+  "covers": "Аренда площадки",
+  "kind": "inquiry",
+  "source": "https://carpediemphuket.com/private-events/",
+  "collected": "2026-08-10",
+  "note": "Отдельная страница приватных событий без цен. Нужен прямой запрос площадке."
+ },
+ {
+  "venueId": "VEN-0085",
+  "amount": 2150,
+  "unit": "час",
+  "currency": "THB",
+  "covers": "YouTube-студия Summit Tower, аренда за час (полный день 8ч — 12 900)",
+  "kind": "published",
+  "source": "https://phuketcoworkingspace.com/product/youtube-recording-studio-rental-1-hour/",
+  "collected": "2026-08-12",
+  "note": "Опубликованная цена продукта на сайте. Коворкинг-абонемент от 1 500/мес. Ставку событийной аренды всей площадки уточнить запросом."
+ }
 ]

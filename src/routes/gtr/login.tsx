@@ -108,6 +108,7 @@ function LoginPage() {
                 БЫСТРЫЙ ВХОД · ДЕМО-РОЛИ
               </Eyebrow>
               <div
+                className="gtr-md-stack"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",

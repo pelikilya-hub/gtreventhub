@@ -121,8 +121,8 @@ footer{margin-top:26px;padding-top:11px;border-top:1px solid #E3E3E3;
 </style></head><body>
 <header>
   <div>
-    <div class="brand">GTR <span>EVENT</span></div>
-    <div class="sub">ОПЕРАЦИОННАЯ ПЛАТФОРМА ПЛОЩАДОК ПХУКЕТА</div>
+    <img src="/brand/GTR_horizontal_light.svg" alt="GTR" style="height:40px;width:auto">
+    <div class="sub">GTR EVENT · ОПЕРАЦИОННАЯ ПЛАТФОРМА ПЛОЩАДОК ПХУКЕТА</div>
   </div>
   <div class="doc"><b>${esc(no)}</b>${esc(today)}</div>
 </header>

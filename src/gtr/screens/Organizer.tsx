@@ -247,12 +247,12 @@ function TopBar({ children }: { children?: React.ReactNode }) {
         zIndex: 5,
       }}
     >
-      <span
-        className="gtr-oswald gtr-neon"
-        style={{ font: "700 20px/1 Oswald,sans-serif", letterSpacing: ".08em" }}
-      >
-        GTR <span style={{ color: "#E5231B" }}>EVENT</span>
-      </span>
+      <img
+        className="gtr-neon"
+        src="/brand/GTR_primary_dark_clean.svg"
+        alt="GTR"
+        style={{ height: 34, width: "auto" }}
+      />
       <Chip color="rgba(255,255,255,.5)">ВИТРИНА ОРГАНИЗАТОРА</Chip>
       <div style={{ marginLeft: "auto", display: "flex", gap: 10, alignItems: "center" }}>
         {children}

@@ -416,7 +416,7 @@
     var(--gtr-red-hot) 65%,
     transparent
   );
-  box-shadow: 0 0 8px 1px rgba(255, 42, 42, 0.55);
+  box-shadow: 0 0 8px 1px rgba(255, 52, 39, 0.55);
   animation: gtrscan 5.5s linear infinite;
 }
 

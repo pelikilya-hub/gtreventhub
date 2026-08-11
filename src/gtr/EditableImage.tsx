@@ -70,7 +70,9 @@ export function EditableImage({
             justifyContent: "center",
             color: "rgba(255,255,255,.14)",
             font: "500 11px/1 'JetBrains Mono',monospace",
-            background: "var(--gtr-card2)",
+            // фирменный паттерн из бренд-кита вместо пустого прямоугольника
+            background:
+              "linear-gradient(rgba(10,11,13,.82), rgba(10,11,13,.82)), url(/brand/GTR_pattern_dark.svg) center / 480px auto",
           }}
         >
           нет фото

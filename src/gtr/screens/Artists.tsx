@@ -13,7 +13,7 @@ import {
   type ArtistBase,
 } from "../data/app-data";
 import { useGtr } from "../store";
-import { Card, Chip, Eyebrow, tint } from "../ui";
+import { Card, Chip, Eyebrow, Field, Li, SubHead, tint } from "../ui";
 
 const KIND_LABEL: Record<string, string> = {
   all: "Все записи",
@@ -382,39 +382,20 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
         </div>
       </Card>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <Card style={{ padding: 18 }}>
           <Eyebrow style={{ marginBottom: 10 }}>КОНТАКТ И БУКИНГ</Eyebrow>
-          {[
-            ["Статус", String(a.statusRu || a.status || "—")],
-            ["Менеджмент", String(a.mgmtRu || a.mgmt || "—")],
-            ["База", String(a.baseRu || a.base || "—")],
-            ["Телефон", a.phone || "—"],
-            ["Email", a.email || "—"],
-            ["Верифицировано", a.verified || "—"],
-          ].map(([k, v]) => (
-            <div
-              key={k}
-              style={{
-                display: "flex",
-                gap: 10,
-                padding: "7px 0",
-                borderBottom: "1px solid rgba(255,255,255,.05)",
-              }}
-            >
-              <span className="gtr-eyebrow" style={{ width: 120, flex: "none", paddingTop: 2 }}>
-                {k}
-              </span>
-              <span
-                style={{
-                  font: "500 11.5px/1.5 'Golos Text',sans-serif",
-                  color: "var(--gtr-t2)",
-                  wordBreak: "break-word",
-                }}
-              >
-                {v}
-              </span>
-            </div>
+          {(
+            [
+              ["Статус", String(a.statusRu || a.status || "—"), false],
+              ["Менеджмент", String(a.mgmtRu || a.mgmt || "—"), false],
+              ["База", String(a.baseRu || a.base || "—"), false],
+              ["Телефон", a.phone || "—", true],
+              ["Email", a.email || "—", true],
+              ["Верифицировано", a.verified || "—", true],
+            ] as [string, string, boolean][]
+          ).map(([k, v, mono]) => (
+            <Field key={k} k={k} v={v} mono={mono} />
           ))}
           {a.evidence ? (
             <div
@@ -435,35 +416,21 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
           </Eyebrow>
           {rider ? (
             <>
-              <div className="gtr-eyebrow" style={{ margin: "8px 0 6px", color: "#22D3C7" }}>
-                ТЕХНИЧЕСКИЙ
-              </div>
+              <SubHead color="#22D3C7" style={{ margin: "8px 0 7px" }}>
+                Технический
+              </SubHead>
               {rider.tech.map((t) => (
-                <div
-                  key={t}
-                  style={{
-                    font: "500 10.5px/1.55 'Golos Text',sans-serif",
-                    color: "var(--gtr-t2)",
-                    padding: "2px 0",
-                  }}
-                >
-                  · {t}
-                </div>
+                <Li key={t} color="#22D3C7">
+                  {t}
+                </Li>
               ))}
-              <div className="gtr-eyebrow" style={{ margin: "12px 0 6px", color: "#FFD166" }}>
-                ГОСТЕПРИИМСТВО
-              </div>
+              <SubHead color="#FFD166" style={{ margin: "14px 0 7px" }}>
+                Гостеприимство
+              </SubHead>
               {rider.hosp.map((t) => (
-                <div
-                  key={t}
-                  style={{
-                    font: "500 10.5px/1.55 'Golos Text',sans-serif",
-                    color: "var(--gtr-t2)",
-                    padding: "2px 0",
-                  }}
-                >
-                  · {t}
-                </div>
+                <Li key={t} color="#FFD166">
+                  {t}
+                </Li>
               ))}
             </>
           ) : (

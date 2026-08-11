@@ -82,6 +82,43 @@ export const Eyebrow = ({ children, style }: { children: ReactNode; style?: CSSP
   </div>
 );
 
+// Поле «лейбл — значение»: на десктопе в строку, на телефоне столбиком.
+// mono — для телефонов, дат и идентификаторов.
+export const Field = ({
+  k,
+  v,
+  mono,
+  color,
+}: {
+  k: ReactNode;
+  v: ReactNode;
+  mono?: boolean;
+  color?: string;
+}) => (
+  <div className="gtr-field">
+    <span className="gtr-eyebrow gtr-field-k">{k}</span>
+    <span className={`gtr-field-v ${mono ? "mono" : ""}`} style={color ? { color } : undefined}>
+      {v}
+    </span>
+  </div>
+);
+
+// Пункт списка с квадратным маркером в цвет секции
+export const Li = ({ children, color }: { children: ReactNode; color?: string }) => (
+  <div className="gtr-li">
+    <i style={color ? { background: color } : undefined} />
+    <span style={{ minWidth: 0 }}>{children}</span>
+  </div>
+);
+
+// Подзаголовок внутри карточки
+export const SubHead = ({ children, color, style }: { children: ReactNode; color?: string; style?: CSSProperties }) => (
+  <div className="gtr-subhead" style={style}>
+    <i style={color ? { background: color } : undefined} />
+    {children}
+  </div>
+);
+
 export const Card = ({
   children,
   hover,

@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 
 import { AMBER, CONTACT, GREEN, PH, RED, richOf, SPACES, V } from "../data/app-data";
 import { EditableImage } from "../EditableImage";
-import { Card, Chip, Eyebrow } from "../ui";
+import { Card, Chip, Eyebrow, Field } from "../ui";
 
 const confColor = (c: string) => (c === "High" ? GREEN : c === "Medium" ? AMBER : RED);
 const isQuar = (x: { confidence: string; status?: string }) =>
@@ -258,7 +258,10 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
         </div>
       </Card>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 14 }}>
+      <div
+        className="gtr-md-stack"
+        style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 14 }}
+      >
         <div style={{ display: "grid", gap: 14, alignContent: "start" }}>
           <Card style={{ padding: 18 }}>
             <Eyebrow style={{ marginBottom: 10 }}>ПРОФИЛЬ ПЛОЩАДКИ</Eyebrow>
@@ -273,27 +276,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             ]
               .filter(([, val]) => val)
               .map(([k, val]) => (
-                <div
-                  key={k}
-                  style={{
-                    display: "flex",
-                    gap: 12,
-                    padding: "8px 0",
-                    borderBottom: "1px solid rgba(255,255,255,.05)",
-                  }}
-                >
-                  <span className="gtr-eyebrow" style={{ width: 140, flex: "none", paddingTop: 2 }}>
-                    {k}
-                  </span>
-                  <span
-                    style={{
-                      font: "500 11.5px/1.55 'Golos Text',sans-serif",
-                      color: "var(--gtr-t2)",
-                    }}
-                  >
-                    {String(val)}
-                  </span>
-                </div>
+                <Field key={k} k={k} v={String(val)} />
               ))}
           </Card>
 
@@ -377,40 +360,17 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               ["Тип источника", v.sourceType, GREEN],
               ["Верифицировано", v.verified || "—", v.verified ? GREEN : RED],
             ].map(([k, val, c]) => (
-              <div
+              <Field
                 key={String(k)}
-                style={{
-                  display: "flex",
-                  gap: 9,
-                  padding: "7px 0",
-                  borderBottom: "1px solid rgba(255,255,255,.05)",
-                  alignItems: "baseline",
-                }}
-              >
-                <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    flex: "none",
-                    borderRadius: 0,
-                    background: String(c),
-                    position: "relative",
-                    top: 1,
-                  }}
-                />
-                <span className="gtr-eyebrow" style={{ width: 105, flex: "none" }}>
-                  {k}
-                </span>
-                <span
-                  style={{
-                    font: "500 10.5px/1.5 'Golos Text',sans-serif",
-                    color: "var(--gtr-t2)",
-                    wordBreak: "break-all",
-                  }}
-                >
-                  {String(val)}
-                </span>
-              </div>
+                mono
+                k={
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+                    <span style={{ width: 8, height: 8, flex: "none", background: String(c) }} />
+                    {k}
+                  </span>
+                }
+                v={String(val)}
+              />
             ))}
           </Card>
 
@@ -434,23 +394,34 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               ].map(([k, val, c]) => (
                 <div
                   key={String(k)}
-                  style={{ display: "flex", gap: 9, padding: "6px 0", alignItems: "baseline" }}
+                  style={{
+                    display: "flex",
+                    gap: 9,
+                    padding: "7px 0",
+                    alignItems: "baseline",
+                    borderBottom: "1px solid rgba(255,255,255,.04)",
+                  }}
                 >
                   <span
                     style={{
                       width: 7,
                       height: 7,
                       flex: "none",
-                      borderRadius: 0,
                       background: String(c),
+                      boxShadow: `0 0 6px -1px ${String(c)}`,
                     }}
                   />
-                  <span style={{ flex: 1, font: "500 11px/1.4 'Golos Text',sans-serif" }}>{k}</span>
+                  <span style={{ flex: 1, font: "500 11.5px/1.4 'Golos Text',sans-serif" }}>
+                    {k}
+                  </span>
                   <span
                     className="gtr-mono"
                     style={{
-                      font: "500 9.5px/1.3 'JetBrains Mono',monospace",
-                      color: "var(--gtr-t3)",
+                      font: "600 10px/1.4 'JetBrains Mono',monospace",
+                      color: String(c),
+                      textAlign: "right",
+                      maxWidth: "46%",
+                      overflowWrap: "anywhere",
                     }}
                   >
                     {String(val)}

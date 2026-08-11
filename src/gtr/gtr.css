@@ -787,3 +787,57 @@
   /* палитра и инспектор конструктора теряют sticky — в столбике он мешает */
   .gtr-md-unstick { position: static !important; max-height: none !important; }
 }
+
+/* ---------- поле «лейбл — значение» в карточках ---------- */
+.gtr-field {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.gtr-field-k { width: 128px; flex: none; padding-top: 2px; }
+.gtr-field-v {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font: 500 12px/1.55 "Golos Text", sans-serif;
+  color: rgba(234, 234, 234, 0.78);
+}
+.gtr-field-v.mono {
+  font: 500 11.5px/1.55 "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* пункт списка с квадратным маркером — вместо «·» */
+.gtr-li {
+  display: flex;
+  gap: 9px;
+  padding: 3px 0;
+  font: 500 11.5px/1.6 "Golos Text", sans-serif;
+  color: rgba(234, 234, 234, 0.78);
+}
+.gtr-li > i {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  margin-top: 6px;
+  background: var(--gtr-red);
+}
+
+/* подзаголовок внутри карточки: квадрат-метка + моно */
+.gtr-subhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 700 10px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gtr-t1);
+}
+.gtr-subhead > i { width: 8px; height: 8px; flex: none; background: var(--gtr-red); }
+
+@media (max-width: 860px) {
+  /* на телефоне лейбл над значением: колонка лейбла съедала всю ширину */
+  .gtr-field { flex-direction: column; gap: 3px; }
+  .gtr-field-k { width: auto; padding-top: 0; }
+}

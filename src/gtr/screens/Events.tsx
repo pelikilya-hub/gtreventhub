@@ -31,7 +31,7 @@ const FORMATS = [
   "Бренд-активация",
 ];
 
-export function EventsScreen() {
+export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
   const { user, drafts, createDraft, deleteDraft } = useGtr();
   const navigate = useNavigate();
 
@@ -44,7 +44,8 @@ export function EventsScreen() {
 
   const [q, setQ] = useState("");
   const [stage, setStage] = useState<"all" | EventStage>("all");
-  const [creating, setCreating] = useState(false);
+  // Паспорт площадки открывает мастер сразу с выбранной площадкой
+  const [creating, setCreating] = useState(Boolean(newForVenue));
 
   const list = useMemo(() => {
     const needle = q.toLowerCase().trim();
@@ -103,7 +104,7 @@ export function EventsScreen() {
       {creating ? (
         <NewEvent
           isAdmin={isAdmin}
-          ownVenue={user.venueId}
+          ownVenue={newForVenue || user.venueId}
           onCancel={() => setCreating(false)}
           onCreate={(init) => {
             const id = createDraft(init);
@@ -343,7 +344,8 @@ function NewEvent({
     brief?: BriefAnswers;
   }) => void;
 }) {
-  const [venueId, setVenueId] = useState(isAdmin ? "" : ownVenue);
+  // ownVenue приходит и из паспорта площадки — тогда он есть и у админа
+  const [venueId, setVenueId] = useState(ownVenue || "");
   const [presetId, setPresetId] = useState<string | "blank" | "">("");
   const [vibeId, setVibeId] = useState("");
   const [format, setFormat] = useState(""); // для пустого события

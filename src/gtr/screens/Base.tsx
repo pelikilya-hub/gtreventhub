@@ -1,9 +1,22 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
-import { AMBER, CONTACT, GREEN, PH, RED, richOf, SPACES, V } from "../data/app-data";
+import {
+  AMBER,
+  CONTACT,
+  fmtThb,
+  GREEN,
+  PH,
+  RATE_COLOR,
+  RATE_LABEL,
+  rateOf,
+  RED,
+  richOf,
+  SPACES,
+  V,
+} from "../data/app-data";
 import { EditableImage } from "../EditableImage";
-import { Card, Chip, Eyebrow, Field } from "../ui";
+import { Card, Chip, Eyebrow, Field, tint } from "../ui";
 
 const confColor = (c: string) => (c === "High" ? GREEN : c === "Medium" ? AMBER : RED);
 const isQuar = (x: { confidence: string; status?: string }) =>
@@ -181,6 +194,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
 
   const rich = richOf(v.id);
   const sp = SPACES(v.id);
+  const rate = rateOf(v.id);
   const ct = CONTACT(v.id);
   const R = v.readiness;
 
@@ -239,6 +253,35 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             }}
           >
             {v.type} · {v.area} · {v.district}
+          </div>
+          <div
+            style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 14 }}
+          >
+            <button
+              className="gtr-btn gtr-btn-red"
+              onClick={() =>
+                navigate({
+                  to: "/gtr/$screen",
+                  params: { screen: "events" },
+                  search: { vid: v.id },
+                })
+              }
+            >
+              Собрать событие здесь →
+            </button>
+            {rate ? (
+              <span
+                className="gtr-mono"
+                style={{
+                  font: "700 12px/1 'JetBrains Mono',monospace",
+                  color: RATE_COLOR[rate.kind],
+                }}
+              >
+                {rate.amount
+                  ? `аренда ${fmtThb(rate.amount)} / ${rate.unit}`
+                  : "аренда по запросу"}
+              </span>
+            ) : null}
           </div>
           {rich.credit ? (
             <div
@@ -317,7 +360,10 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           {rich.gallery?.length ? (
             <Card style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>ОФИЦИАЛЬНАЯ ГАЛЕРЕЯ</Eyebrow>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
+              <div
+                className="gtr-gallery"
+                style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}
+              >
                 {rich.gallery.slice(0, 8).map((src) => (
                   <img
                     key={src}
@@ -340,15 +386,84 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
 
         <div style={{ display: "grid", gap: 14, alignContent: "start" }}>
           <Card style={{ padding: 18 }}>
+            {rate ? (
+              <div
+                style={{
+                  marginBottom: 14,
+                  padding: "10px 12px",
+                  border: `1px solid ${tint(RATE_COLOR[rate.kind], 0.4)}`,
+                  borderLeft: `3px solid ${RATE_COLOR[rate.kind]}`,
+                  background: tint(RATE_COLOR[rate.kind], 0.07),
+                }}
+              >
+                <Eyebrow style={{ marginBottom: 6 }}>АРЕНДА</Eyebrow>
+                <div
+                  className="gtr-mono"
+                  style={{ font: "700 16px/1 'JetBrains Mono',monospace", color: "#fff" }}
+                >
+                  {rate.amount ? `${fmtThb(rate.amount)} / ${rate.unit}` : "по запросу"}
+                </div>
+                <div
+                  className="gtr-mono"
+                  style={{
+                    marginTop: 6,
+                    font: "600 9px/1.4 'JetBrains Mono',monospace",
+                    color: RATE_COLOR[rate.kind],
+                    letterSpacing: ".08em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {RATE_LABEL[rate.kind]}
+                </div>
+                {rate.covers ? (
+                  <div
+                    style={{
+                      marginTop: 5,
+                      font: "500 10.5px/1.5 'Golos Text',sans-serif",
+                      color: "var(--gtr-t2)",
+                    }}
+                  >
+                    {rate.covers}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
             <Eyebrow style={{ marginBottom: 10 }}>ИСТОЧНИКИ И КОНТАКТ</Eyebrow>
             {[
               [
                 "Официальный сайт",
-                v.website || v.source || "—",
+                (() => {
+                  const u = v.website || v.source;
+                  return u ? (
+                    <a
+                      href={u.startsWith("http") ? u : `https://${u}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ color: "inherit" }}
+                    >
+                      {u}
+                    </a>
+                  ) : (
+                    "—"
+                  );
+                })(),
                 v.website || v.source ? GREEN : RED,
               ],
               ["Instagram", v.social || "не указан", v.social ? AMBER : "rgba(255,255,255,.3)"],
-              ["Телефон", v.phone || ct?.phone || "—", v.phone || ct?.phone ? GREEN : RED],
+              [
+                "Телефон",
+                (() => {
+                  const t = v.phone || ct?.phone;
+                  return t ? (
+                    <a href={`tel:${String(t).replace(/[^+\d]/g, "")}`} style={{ color: "inherit" }}>
+                      {t}
+                    </a>
+                  ) : (
+                    "—"
+                  );
+                })(),
+                v.phone || ct?.phone ? GREEN : RED,
+              ],
               [
                 "Email",
                 v.email || ct?.email || "—",
@@ -366,7 +481,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     {k}
                   </span>
                 }
-                v={String(val)}
+                v={val}
               />
             ))}
           </Card>

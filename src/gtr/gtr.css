@@ -882,6 +882,10 @@
   font-weight: 400;
   letter-spacing: 0.01em;
 }
+/* трэш-полька: заглавная буква — красная */
+.gtr-trash::first-letter {
+  color: var(--gtr-red);
+}
 .gtr-figure {
   font-family: "Glitch GTR", "JetBrains Mono", monospace;
   font-weight: 400;
@@ -899,4 +903,9 @@
   border: 1px solid rgba(229, 35, 27, 0.35);
   text-transform: uppercase;
   user-select: none;
+}
+
+/* галерея паспорта: на телефоне 2 колонки вместо 4 */
+@media (max-width: 860px) {
+  .gtr-gallery { grid-template-columns: repeat(2, 1fr) !important; }
 }

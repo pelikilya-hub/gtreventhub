@@ -333,7 +333,7 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
     case "constructor":
       return <ConstructorScreen draftId={search.draft} />;
     case "events":
-      return <EventsScreen />;
+      return <EventsScreen newForVenue={search.vid} />;
     case "inquiries":
       return <InquiriesScreen />;
     case "spaces":

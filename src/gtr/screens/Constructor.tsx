@@ -22,6 +22,7 @@ import {
   packagePrice,
   packagesOf,
   presetsFor,
+  draftTitle,
   RATE_COLOR,
   RATE_LABEL,
   TIER_LABEL,
@@ -105,6 +106,8 @@ export function ConstructorScreen({
   // vid падал на дефолтную VEN-0013 — смета, пресеты и проверки считались по
   // чужой площадке, хотя на канвасе была площадка события.
   const explicitDraft = draftId ? draftOf(draftId) : undefined;
+  // Без события и своей площадки не подставляем чужую — просим выбрать
+  const noContext = !explicitDraft && !venueId && !user.venueId;
   const vid = explicitDraft?.venueId || venueId || user.venueId || "VEN-0013";
   const v = V(vid);
   const R = v.readiness;
@@ -289,6 +292,73 @@ export function ConstructorScreen({
       .sort((a, b) => rank(a.prio) - rank(b.prio))
       .slice(0, 8);
   }, [artBase, artQ, vibeMatches]);
+
+  // У GTR-админа своей площадки нет: без выбранного события конструктор
+  // раньше молча открывал VEN-0013 (Illuzion), как будто других площадок
+  // не существует. Теперь событие выбирается явно — площадка, залы и смета
+  // тянутся из него.
+  if (noContext) {
+    return (
+      <div style={{ maxWidth: 760, margin: "0 auto" }}>
+        <h1 className="gtr-oswald gtr-h1" style={{ marginBottom: 6 }}>
+          Конструктор события
+        </h1>
+        <div
+          style={{
+            font: "500 12px/1.6 'Golos Text',sans-serif",
+            color: "var(--gtr-t2)",
+            marginBottom: 16,
+          }}
+        >
+          Каждое событие привязано к своей площадке: залы, слоты и смета берутся из её данных.
+          Откройте существующее событие или создайте новое с выбором площадки.
+        </div>
+        {shared.drafts.length ? (
+          <Card style={{ padding: 14, marginBottom: 14 }}>
+            <Eyebrow style={{ marginBottom: 10 }}>СОБЫТИЯ · {shared.drafts.length}</Eyebrow>
+            <div style={{ display: "grid", gap: 6 }}>
+              {shared.drafts.map((d) => (
+                <button
+                  key={d.id}
+                  className="gtr-pal-btn"
+                  onClick={() =>
+                    navigate({
+                      to: "/gtr/$screen",
+                      params: { screen: "constructor" },
+                      search: { draft: d.id },
+                    })
+                  }
+                >
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: "block", fontWeight: 600, fontSize: 12 }}>
+                      {draftTitle(d)}
+                    </span>
+                    <span
+                      className="gtr-mono"
+                      style={{
+                        display: "block",
+                        marginTop: 3,
+                        font: "500 9.5px/1.3 'JetBrains Mono',monospace",
+                        color: "rgba(255,255,255,.4)",
+                      }}
+                    >
+                      {V(d.venueId).name ?? d.venueId}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </Card>
+        ) : null}
+        <button
+          className="gtr-btn gtr-btn-red"
+          onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "events" } })}
+        >
+          + Новое событие · выбрать площадку
+        </button>
+      </div>
+    );
+  }
 
   // Событий у площадки ещё нет — предлагаем создать. Все хуки выше уже
   // отработали, поэтому ранний возврат здесь безопасен.

@@ -194,10 +194,13 @@
   --gtr-side: #0c0d10;
   --gtr-card: #0f1013;
   --gtr-card2: #131417;
+  --gtr-graphite: #17171a; /* поверхности из бренд-кита */
+  --gtr-raised: #1e1e22;
+  --gtr-steel: #8a8d93;
 
   /* ---- единственный акцент: аварийный красный ---- */
   --gtr-red: #e5231b;
-  --gtr-red-hot: #ff2a2a;
+  --gtr-red-hot: #ff3427; /* pulse из бренд-кита */
   --gtr-red-deep: #8f1610;
   --gtr-green: #2ecc71;
   --gtr-amber: #f5a623;

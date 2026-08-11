@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GTR — Брендбук v1.0</title>
+<link rel="icon" href="/favicon.ico">
+<style>
+@font-face { font-family:'Oswald'; font-weight:700; font-display:swap; src:url(/fonts/gtr/Oswald-700-cyrillic.woff2) format('woff2'); unicode-range:U+0400-045F,U+0490-0491; }
+@font-face { font-family:'Oswald'; font-weight:700; font-display:swap; src:url(/fonts/gtr/Oswald-700-latin.woff2) format('woff2'); unicode-range:U+0000-00FF; }
+@font-face { font-family:'Golos Text'; font-weight:400; font-display:swap; src:url(/fonts/gtr/GolosText-400-cyrillic.woff2) format('woff2'); unicode-range:U+0400-045F; }
+@font-face { font-family:'Golos Text'; font-weight:400; font-display:swap; src:url(/fonts/gtr/GolosText-400-latin.woff2) format('woff2'); unicode-range:U+0000-00FF; }
+@font-face { font-family:'Golos Text'; font-weight:600; font-display:swap; src:url(/fonts/gtr/GolosText-600-cyrillic.woff2) format('woff2'); unicode-range:U+0400-045F; }
+@font-face { font-family:'Golos Text'; font-weight:600; font-display:swap; src:url(/fonts/gtr/GolosText-600-latin.woff2) format('woff2'); unicode-range:U+0000-00FF; }
+@font-face { font-family:'JetBrains Mono'; font-weight:500; font-display:swap; src:url(/fonts/gtr/JetBrainsMono-500-cyrillic.woff2) format('woff2'); unicode-range:U+0400-045F; }
+@font-face { font-family:'JetBrains Mono'; font-weight:500; font-display:swap; src:url(/fonts/gtr/JetBrainsMono-500-latin.woff2) format('woff2'); unicode-range:U+0000-00FF; }
+@font-face { font-family:'Glitch GTR'; font-display:swap; src:url(/fonts/gtr/GlitchCity.woff2) format('woff2'); }
+@font-face { font-family:'Trashed GTR'; font-display:swap; src:url(/fonts/gtr/Trashed.woff2) format('woff2'); }
+@font-face { font-family:'AllAges GTR'; font-display:swap; src:url(/fonts/gtr/AllAges.woff2) format('woff2'); }
+
+:root {
+  --void:#0A0B0D; --deep:#0F1013; --graphite:#17171A; --raised:#1E1E22;
+  --red:#E5231B; --pulse:#FF3427; --white:#FFF; --steel:#8A8D93;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-snap-type: y mandatory; }
+body { background:var(--void); color:var(--white); font-family:'Golos Text',sans-serif; -webkit-font-smoothing:antialiased; }
+body::before { content:""; position:fixed; inset:0; z-index:50; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+body::after { content:""; position:fixed; inset:0; z-index:50; pointer-events:none; opacity:.35;
+  background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.16) 2px 3px); }
+
+section { min-height:100dvh; scroll-snap-align:start; position:relative; overflow:hidden;
+  display:flex; flex-direction:column; justify-content:center; padding:56px min(7vw,80px); }
+.no { position:absolute; top:26px; right:min(7vw,80px); font:500 11px/1 'JetBrains Mono',monospace; color:var(--steel); letter-spacing:.15em; }
+.eyebrow { font:500 11px/1 'JetBrains Mono',monospace; letter-spacing:.22em; text-transform:uppercase; color:var(--red); margin-bottom:18px; }
+h2 { font:700 clamp(2rem,6vw,4.2rem)/0.92 'Oswald',sans-serif; text-transform:uppercase; letter-spacing:-.02em; margin-bottom:30px; text-wrap:balance; }
+p.lead { font:400 clamp(.95rem,1.6vw,1.15rem)/1.65 'Golos Text',sans-serif; color:#c9cbd0; max-width:640px; }
+.mono { font-family:'JetBrains Mono',monospace; }
+
+.laser { position:absolute; left:0; right:0; height:1px; pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--pulse) 35%,var(--pulse) 65%,transparent);
+  box-shadow:0 0 8px 1px rgba(255,52,39,.55); animation:scan 6s linear infinite; }
+@keyframes scan { 0%{transform:translateY(0);opacity:0} 8%{opacity:1} 92%{opacity:1} 100%{transform:translateY(70vh);opacity:0} }
+.impulse { position:absolute; width:6px; top:-10%; bottom:-10%; background:var(--red); opacity:.85; }
+.impulse.thin { width:2px; opacity:.5; }
+@keyframes strobe { 0%,88%,100%{opacity:.15} 89%,91%,93%{opacity:.9} 90%,92%{opacity:.2} }
+.strobe { animation:strobe 5s steps(1,end) infinite; }
+.grid-bg { position:absolute; inset:0; opacity:.14; pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.25) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.25) 1px,transparent 1px);
+  background-size:72px 72px; }
+.card { background:var(--deep); border:1px solid rgba(255,255,255,.09); padding:22px; }
+.cut { clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%); }
+.tag { display:inline-block; font:700 9px/1 'JetBrains Mono',monospace; letter-spacing:.14em; color:var(--red);
+  border:1.5px solid var(--red); padding:4px 6px; transform:rotate(-2deg); text-transform:uppercase; }
+
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.g3 { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+.g5 { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; }
+@media (max-width:820px){ .g2,.g3{grid-template-columns:1fr} .g5{grid-template-columns:repeat(2,1fr)} }
+
+.swatch { aspect-ratio:1/1.15; display:flex; flex-direction:column; justify-content:flex-end; padding:12px; border:1px solid rgba(255,255,255,.1); }
+.swatch b { font:700 12px/1.2 'Oswald',sans-serif; letter-spacing:.05em; text-transform:uppercase; }
+.swatch span { font:500 10px/1.6 'JetBrains Mono',monospace; color:var(--steel); }
+
+.btn { position:relative; border:1px solid rgba(255,255,255,.17); color:#fff; padding:11px 16px; cursor:pointer;
+  font:600 10.5px/1 'JetBrains Mono',monospace; letter-spacing:.09em; text-transform:uppercase;
+  background-color:rgba(255,255,255,.05);
+  background-image:linear-gradient(90deg,var(--red) 0 50%,transparent 50% 100%);
+  background-size:200% 100%; background-position:100% 0; background-repeat:no-repeat;
+  clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+  transition:background-position .24s cubic-bezier(.2,.75,.25,1),border-color .18s; }
+.btn:hover { background-position:0 0; border-color:var(--red); }
+.btn.red { background-color:var(--red); border-color:var(--red); }
+.rule { font:400 13px/1.7 'Golos Text',sans-serif; color:#c9cbd0; padding:9px 0 9px 18px; position:relative; border-bottom:1px solid rgba(255,255,255,.06); }
+.rule::before { content:""; position:absolute; left:0; top:16px; width:7px; height:7px; background:var(--red); }
+footer { padding:34px min(7vw,80px); font:500 10px/1.7 'JetBrains Mono',monospace; color:var(--steel); border-top:1px solid rgba(255,255,255,.08); }
+@media (prefers-reduced-motion:reduce){ .laser,.strobe{animation:none} }
+</style>
+</head>
+<body>
+
+<!-- 01 обложка -->
+<section>
+  <div class="grid-bg"></div>
+  <div class="impulse" style="left:58%"></div>
+  <div class="impulse thin strobe" style="left:63%"></div>
+  <div class="laser" style="top:12%"></div>
+  <div class="no">GTR BRAND · 01 / 08</div>
+  <img src="/brand/GTR_exact_expressive_dark.svg" alt="GTR" style="width:min(680px,88%);position:relative">
+  <p class="lead" style="margin-top:34px">Брендбук v1.0 · Экспрессивная мастер-система.
+  Прямоугольная рама, массивный леттеринг GTR, красно-чёрная энергия trash polka
+  и полное имя — Global Transformation Reality.</p>
+  <div style="margin-top:22px" class="mono" ><span class="tag">Мастер-система</span></div>
+</section>
+
+<!-- 02 знак -->
+<section>
+  <div class="no">ЗНАК · 02 / 08</div>
+  <div class="eyebrow">Логотип</div>
+  <h2>Экспрессивный — для сцены.<br>Чистый — для интерфейса</h2>
+  <div class="g2">
+    <div class="card cut">
+      <img src="/brand/GTR_exact_expressive_dark.svg" alt="экспрессивный знак" style="width:100%">
+      <div class="mono" style="margin-top:12px;font-size:10px;color:var(--steel)">EXPRESSIVE · hero, сцена, постер, обложка · минимум 180px / 35мм</div>
+    </div>
+    <div class="card cut" style="display:flex;flex-direction:column;justify-content:center;gap:16px">
+      <img src="/brand/GTR_primary_dark_clean.svg" alt="чистый знак" style="width:78%;margin:0 auto">
+      <div class="mono" style="font-size:10px;color:var(--steel);text-align:center">CLEAN · интерфейс, печать, гравировка, размеры меньше 180px</div>
+    </div>
+  </div>
+  <p class="lead" style="margin-top:22px">Знак не перерисовывается, не растягивается и не вращается.
+  Охранное поле равно ширине центрального красного импульса. GTR пишется без дефиса.</p>
+</section>
+
+<!-- 03 символ -->
+<section>
+  <div class="impulse thin" style="left:12%"></div>
+  <div class="no">СИМВОЛ · 03 / 08</div>
+  <div class="eyebrow">Символ и иконки</div>
+  <h2>G в раме с импульсом</h2>
+  <div class="g3" style="max-width:760px">
+    <div class="card cut" style="display:grid;place-items:center;padding:34px"><img src="/brand/GTR_symbol_dark.svg" style="width:96px" alt="символ"></div>
+    <div class="card cut" style="display:grid;place-items:center;padding:34px;background:var(--graphite)"><img src="/brand/GTR_app_icon.svg" style="width:96px" alt="иконка приложения"></div>
+    <div class="card cut" style="display:grid;place-items:center;padding:34px;background:#fff"><img src="/brand/GTR_symbol_light.svg" style="width:96px" alt="символ на белом"></div>
+  </div>
+  <p class="lead" style="margin-top:22px">Аватар, фавикон, значок приложения — минимум 64px.
+  Символ живёт там, куда полный знак не помещается.</p>
+</section>
+
+<!-- 04 палитра -->
+<section>
+  <div class="no">ЦВЕТ · 04 / 08</div>
+  <div class="eyebrow">Фирменная палитра</div>
+  <h2>Красный — импульс,<br>а не заливка</h2>
+  <div class="g5">
+    <div class="swatch" style="background:var(--void)"><b>Void</b><span>#0A0B0D</span></div>
+    <div class="swatch" style="background:var(--graphite)"><b>Graphite</b><span>#17171A</span></div>
+    <div class="swatch" style="background:#fff;color:#111"><b style="color:#111">White</b><span style="color:#666">#FFFFFF</span></div>
+    <div class="swatch" style="background:var(--red)"><b>GTR Red</b><span style="color:#ffd6d3">#E5231B</span></div>
+    <div class="swatch" style="background:var(--pulse)"><b>Pulse</b><span style="color:#ffd6d3">#FF3427</span></div>
+  </div>
+  <div class="g2" style="margin-top:18px;max-width:640px">
+    <div class="swatch" style="background:#3130FF;aspect-ratio:auto;padding:12px"><b>Club Blue</b><span style="color:#c9c9ff">#3130FF · только клубный свет</span></div>
+    <div class="swatch" style="background:#7A2CFF;aspect-ratio:auto;padding:12px"><b>Club Purple</b><span style="color:#e2ccff">#7A2CFF · только клубный свет</span></div>
+  </div>
+</section>
+
+<!-- 05 типографика -->
+<section>
+  <div class="laser" style="top:8%"></div>
+  <div class="no">ШРИФТ · 05 / 08</div>
+  <div class="eyebrow">Типографика</div>
+  <h2 style="margin-bottom:16px">Oswald · Golos · JetBrains Mono</h2>
+  <div class="card cut" style="max-width:860px;display:grid;gap:14px">
+    <div style="font:700 34px/1 'Oswald',sans-serif;text-transform:uppercase">Oswald — заголовки и структура</div>
+    <div style="font:400 15px/1.6 'Golos Text',sans-serif;color:#c9cbd0">Golos Text — интерфейс и тексты. Читается на бегу, между саундчеком и открытием дверей.</div>
+    <div class="mono" style="font-size:13px;color:var(--steel)">JETBRAINS MONO — данные, идентификаторы, телеметрия: VEN-0033 · ฿180 000 / событие</div>
+  </div>
+  <div class="eyebrow" style="margin:26px 0 12px">Продуктовые акценты</div>
+  <div class="g3" style="max-width:860px">
+    <div class="card"><div style="font:400 30px/1 'Glitch GTR'">GLITCH 0123</div><div class="mono" style="font-size:9.5px;color:var(--steel);margin-top:8px">цифры телеметрии</div></div>
+    <div class="card"><div style="font:400 30px/1 'Trashed GTR'"><span style="color:var(--red)">T</span>rashed <span style="color:var(--red)">N</span>ames</div><div class="mono" style="font-size:9.5px;color:var(--steel);margin-top:8px">имена артистов и площадок · красная заглавная</div></div>
+    <div class="card"><div style="font:400 30px/1 'AllAges GTR'">A B C</div><div class="mono" style="font-size:9.5px;color:var(--steel);margin-top:8px">буквы-значки без фото</div></div>
+  </div>
+</section>
+
+<!-- 06 паттерн и текстуры -->
+<section style="background:var(--deep)">
+  <div class="no">ФАКТУРА · 06 / 08</div>
+  <div class="eyebrow">Паттерн и текстуры</div>
+  <h2>Зерно, развёртка, импульс</h2>
+  <div class="g2">
+    <div class="card cut" style="padding:0;min-height:240px;background:url(/brand/GTR_pattern_dark.svg) center/cover"></div>
+    <div style="display:grid;gap:12px">
+      <div class="rule">Зерно и скан-линии поверх всех поверхностей продукта.</div>
+      <div class="rule">Красные импульсы — вертикальные полосы и лазерные линии.</div>
+      <div class="rule">Штрих-код и аварийная штриховка — служебные разделители.</div>
+      <div class="rule">Геометрия 90° и срезанный угол-фаска. Никаких скруглений.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 компоненты -->
+<section>
+  <div class="impulse thin strobe" style="left:84%"></div>
+  <div class="no">ПРОДУКТ · 07 / 08</div>
+  <div class="eyebrow">Бренд в интерфейсе</div>
+  <h2>Как это живёт в продукте</h2>
+  <div class="card cut" style="max-width:760px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+    <button class="btn red">+ В лайнап события</button>
+    <button class="btn">Spotify ↗</button>
+    <button class="btn">Экспорт</button>
+    <span class="tag">Черновик</span>
+    <span class="mono" style="font-size:12px;color:var(--pulse)">฿460 000</span>
+  </div>
+  <p class="lead" style="margin-top:22px">Кнопки заливаются красным слева, карточки несут фаску,
+  статусы говорят цветом провенанса: зелёный — подтверждено, янтарный — уточнить, красный — нет данных.
+  Стенд: gtr-event-hub.netlify.app</p>
+</section>
+
+<!-- 08 правила -->
+<section>
+  <div class="laser" style="top:16%"></div>
+  <div class="no">ПРАВИЛА · 08 / 08</div>
+  <div class="eyebrow">Неизменные правила</div>
+  <h2>Что нельзя никогда</h2>
+  <div style="max-width:680px">
+    <div class="rule">GTR пишется без дефиса.</div>
+    <div class="rule">Никаких Nissan, машин, гонок и автомобильного хрома.</div>
+    <div class="rule">Красный — импульс и действие, а не сплошная заливка.</div>
+    <div class="rule">Синий и фиолетовый — только клубный свет, никогда вместо красного.</div>
+    <div class="rule">Знак не растягивать, не вращать, не перерисовывать.</div>
+    <div class="rule">Экспрессивный знак — от 180px; меньше — чистая версия или символ.</div>
+  </div>
+</section>
+
+<footer>
+  GTR — GLOBAL TRANSFORMATION REALITY · БРЕНДБУК v1.0 · 11.08.2026 · токены: /brand/ · дизайн-система продукта: gtr.css
+</footer>
+</body>
+</html>

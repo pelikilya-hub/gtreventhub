@@ -172,19 +172,22 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
           <span />
           <span />
         </button>
-        <span className="gtr-logo" style={{ fontSize: 17, lineHeight: 1 }}>
-          GTR <span style={{ color: "var(--gtr-red)" }}>EVENT</span>
-        </span>
+        <img
+          src="/brand/GTR_primary_dark_clean.svg"
+          alt="GTR — Global Transformation Reality"
+          style={{ height: 30, width: "auto" }}
+        />
       </header>
       {navOpen ? <div className="gtr-scrim" onClick={() => setNavOpen(false)} /> : null}
 
       {/* ---------- сайдбар ---------- */}
       <aside className="gtr-sidebar">
-        <div
-          className="gtr-logo gtr-neon"
-          style={{ fontSize: 24, lineHeight: 1, padding: "0 11px", marginBottom: 22 }}
-        >
-          GTR <span style={{ color: "#E5231B" }}>EVENT</span>
+        <div className="gtr-neon" style={{ padding: "0 11px", marginBottom: 22 }}>
+          <img
+            src="/brand/GTR_primary_dark_clean.svg"
+            alt="GTR — Global Transformation Reality"
+            style={{ height: 44, width: "auto", display: "block" }}
+          />
         </div>
 
         {/* пользователь */}

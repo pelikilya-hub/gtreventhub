@@ -86,12 +86,12 @@ function LoginPage() {
         style={{ width: "100%", maxWidth: 420, position: "relative" }}
       >
         <div style={{ textAlign: "center", marginBottom: 26 }}>
-          <div
-            className="gtr-logo gtr-neon"
-            style={{ fontSize: 40, lineHeight: 1, color: "#fff" }}
-          >
-            GTR <span style={{ color: "#E5231B" }}>EVENT</span>
-          </div>
+          <img
+            className="gtr-neon"
+            src="/brand/GTR_exact_expressive_dark.svg"
+            alt="GTR — Global Transformation Reality"
+            style={{ width: "min(340px, 82%)", display: "block", margin: "0 auto" }}
+          />
           <Eyebrow style={{ marginTop: 10 }}>
             ОПЕРАЦИОННАЯ ПЛАТФОРМА · ПХУКЕТ
           </Eyebrow>

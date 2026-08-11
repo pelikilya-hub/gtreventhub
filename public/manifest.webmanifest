@@ -1,0 +1,16 @@
+{
+  "name": "GTR Event — операционная платформа площадок Пхукета",
+  "short_name": "GTR Event",
+  "description": "Конструктор события, смета с комиссией GTR, каталоги площадок, артистов и подрядчиков.",
+  "lang": "ru",
+  "start_url": "/gtr",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0b0d",
+  "theme_color": "#0a0b0d",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

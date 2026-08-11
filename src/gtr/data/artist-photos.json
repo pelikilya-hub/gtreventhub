@@ -1,0 +1,1576 @@
+{
+ "meta": {
+  "source": "Deezer API, точное совпадение имени, заглушки отфильтрованы",
+  "note": "Для фото именно из Spotify нужен Client ID/Secret — пересборка тем же пайплайном, поле source сменится на spotify.",
+  "collected": "2026-08-11",
+  "count": 174
+ },
+ "photos": {
+  "MC-0002": {
+   "name": "DJ Meet",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/63fea09fc9b3205f2f1c1bd0e227829b/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/63fea09fc9b3205f2f1c1bd0e227829b/250x250-000000-80-0-0.jpg",
+   "fans": 8,
+   "deezerId": 1668350,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0006": {
+   "name": "LION",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/ae8e3aff9543a84fb64ba223c5e32155/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/ae8e3aff9543a84fb64ba223c5e32155/250x250-000000-80-0-0.jpg",
+   "fans": 4,
+   "deezerId": 214218025,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0008": {
+   "name": "Rudi",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/334415daa41ddcf2baf4a6a76864c3a8/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/334415daa41ddcf2baf4a6a76864c3a8/250x250-000000-80-0-0.jpg",
+   "fans": 684,
+   "deezerId": 411246,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0009": {
+   "name": "Vadim Almazov",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/99d68b20f32b2e81469ab22275d494b9/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/99d68b20f32b2e81469ab22275d494b9/250x250-000000-80-0-0.jpg",
+   "fans": 2,
+   "deezerId": 145292642,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0011": {
+   "name": "LONNER",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/a27ee2b96f64a06a471e9fd246befbe7/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/a27ee2b96f64a06a471e9fd246befbe7/250x250-000000-80-0-0.jpg",
+   "fans": 6,
+   "deezerId": 801342,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0012": {
+   "name": "TISSANAI",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/45eb63339585195cf05b729eb8cafc1c/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/45eb63339585195cf05b729eb8cafc1c/250x250-000000-80-0-0.jpg",
+   "fans": 1,
+   "deezerId": 204923227,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0013": {
+   "name": "Rory Spencer",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/fed35af884965599841448a657c65e9f/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/fed35af884965599841448a657c65e9f/250x250-000000-80-0-0.jpg",
+   "fans": 2,
+   "deezerId": 173843257,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0014": {
+   "name": "Sami Galetto",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/a4e01d88e8c185a8bac7b20c1e42060f/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/a4e01d88e8c185a8bac7b20c1e42060f/250x250-000000-80-0-0.jpg",
+   "fans": 1,
+   "deezerId": 200052237,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0015": {
+   "name": "Taz Mutcha",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/0fbec02f7ae2e7cbf4ce0ee7f39006cb/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/0fbec02f7ae2e7cbf4ce0ee7f39006cb/250x250-000000-80-0-0.jpg",
+   "fans": 1,
+   "deezerId": 56429422,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0016": {
+   "name": "Hebdonis",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/3f6bfb8de24a8774e550933188a68243/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/3f6bfb8de24a8774e550933188a68243/250x250-000000-80-0-0.jpg",
+   "fans": 7,
+   "deezerId": 11954705,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0018": {
+   "name": "Tuslay",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/633b428e91289433ed828a09408341d8/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/633b428e91289433ed828a09408341d8/250x250-000000-80-0-0.jpg",
+   "fans": 40,
+   "deezerId": 90761562,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0019": {
+   "name": "Chris J",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/324fc943e899723c20c44dced9c0f0ad/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/324fc943e899723c20c44dced9c0f0ad/250x250-000000-80-0-0.jpg",
+   "fans": 361,
+   "deezerId": 339852,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0039": {
+   "name": "ZOM",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/68875ae45355bdac13786aa20dd9510b/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/68875ae45355bdac13786aa20dd9510b/250x250-000000-80-0-0.jpg",
+   "fans": 89,
+   "deezerId": 5256095,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0042": {
+   "name": "Konvex",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/ca4d82f2056da26488b31847cdfbfa18/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/ca4d82f2056da26488b31847cdfbfa18/250x250-000000-80-0-0.jpg",
+   "fans": 86,
+   "deezerId": 1660097,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0044": {
+   "name": "Jennifer Loveless",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/d0682f0cbcb23a27e6af6f89f4e7cba2/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/d0682f0cbcb23a27e6af6f89f4e7cba2/250x250-000000-80-0-0.jpg",
+   "fans": 144,
+   "deezerId": 11154642,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0072": {
+   "name": "Reme",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/7bdff0d1e4e42aab705d4db2acb4d821/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/7bdff0d1e4e42aab705d4db2acb4d821/250x250-000000-80-0-0.jpg",
+   "fans": 64,
+   "deezerId": 5052374,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0073": {
+   "name": "Balinsky",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/7c86e1b1d5d67304f41b2fc9f3a2b5ae/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/7c86e1b1d5d67304f41b2fc9f3a2b5ae/250x250-000000-80-0-0.jpg",
+   "fans": 20,
+   "deezerId": 6962497,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0076": {
+   "name": "Taz Mutcha",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/0fbec02f7ae2e7cbf4ce0ee7f39006cb/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/0fbec02f7ae2e7cbf4ce0ee7f39006cb/250x250-000000-80-0-0.jpg",
+   "fans": 1,
+   "deezerId": 56429422,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0077": {
+   "name": "Robbie Akbal",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/12955b24d60173f2bc05dffd97f1f9f7/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/12955b24d60173f2bc05dffd97f1f9f7/250x250-000000-80-0-0.jpg",
+   "fans": 264,
+   "deezerId": 5827779,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0080": {
+   "name": "Chambord",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/3e6f7a45eef282c688e6d8246cd2bbce/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/3e6f7a45eef282c688e6d8246cd2bbce/250x250-000000-80-0-0.jpg",
+   "fans": 435,
+   "deezerId": 66564362,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0082": {
+   "name": "Somma",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/12623ed02b9cca8c49103dfb167cae20/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/12623ed02b9cca8c49103dfb167cae20/250x250-000000-80-0-0.jpg",
+   "fans": 2413,
+   "deezerId": 1336257,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0083": {
+   "name": "LONNER",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/a27ee2b96f64a06a471e9fd246befbe7/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/a27ee2b96f64a06a471e9fd246befbe7/250x250-000000-80-0-0.jpg",
+   "fans": 6,
+   "deezerId": 801342,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0085": {
+   "name": "Trikk",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/be15292053c4648e4fca886ac86f1afa/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/be15292053c4648e4fca886ac86f1afa/250x250-000000-80-0-0.jpg",
+   "fans": 1589,
+   "deezerId": 1610486,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0087": {
+   "name": "Bushwacka!",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/64625df836cd6eea54211ee7a6ff0cdc/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/64625df836cd6eea54211ee7a6ff0cdc/250x250-000000-80-0-0.jpg",
+   "fans": 255,
+   "deezerId": 14755,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0088": {
+   "name": "Bonobo",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/ceb51b6de1f57f093cc569ec8127646d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/ceb51b6de1f57f093cc569ec8127646d/250x250-000000-80-0-0.jpg",
+   "fans": 38,
+   "deezerId": 13463103,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0089": {
+   "name": "WhoMadeWho",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/45dc56f1c4084e18a6d7022f7f22b034/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/45dc56f1c4084e18a6d7022f7f22b034/250x250-000000-80-0-0.jpg",
+   "fans": 34333,
+   "deezerId": 1854,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0090": {
+   "name": "Joseph Capriati",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/f3f673823ccb5c53b75debe36d350307/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/f3f673823ccb5c53b75debe36d350307/250x250-000000-80-0-0.jpg",
+   "fans": 47740,
+   "deezerId": 164467,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0091": {
+   "name": "MoBlack",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/0591de1d4d1c3338a03f8109b9a37620/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/0591de1d4d1c3338a03f8109b9a37620/250x250-000000-80-0-0.jpg",
+   "fans": 6120,
+   "deezerId": 4242609,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0092": {
+   "name": "Sven Väth",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/03e76fd7db150f6a5f147fffe0d12c0a/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/03e76fd7db150f6a5f147fffe0d12c0a/250x250-000000-80-0-0.jpg",
+   "fans": 68710,
+   "deezerId": 6567,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0093": {
+   "name": "Birds of Mind",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/2ec38fbe467a332cfb808c9ef3dd4c64/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/2ec38fbe467a332cfb808c9ef3dd4c64/250x250-000000-80-0-0.jpg",
+   "fans": 1383,
+   "deezerId": 10713529,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0094": {
+   "name": "Peggy Gou",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/5a7ecd46b78038fbc212012fca631cc8/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/5a7ecd46b78038fbc212012fca631cc8/250x250-000000-80-0-0.jpg",
+   "fans": 201658,
+   "deezerId": 9549148,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0097": {
+   "name": "Damian Lazarus",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/606e899a0fa825ceb4eb79320f265e8a/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/606e899a0fa825ceb4eb79320f265e8a/250x250-000000-80-0-0.jpg",
+   "fans": 16326,
+   "deezerId": 169453,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0098": {
+   "name": "Bedouin",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/fc43f02123b87fe85ccfd8d663e06a32/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/fc43f02123b87fe85ccfd8d663e06a32/250x250-000000-80-0-0.jpg",
+   "fans": 6476,
+   "deezerId": 1427899,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0099": {
+   "name": "Fahlberg",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/2af9b871ea358c5409c01cbcab27ec38/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/2af9b871ea358c5409c01cbcab27ec38/250x250-000000-80-0-0.jpg",
+   "fans": 436,
+   "deezerId": 11902995,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0101": {
+   "name": "Joe Rolét",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/5d56b062b500210ec738f9a20727a3c7/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/5d56b062b500210ec738f9a20727a3c7/250x250-000000-80-0-0.jpg",
+   "fans": 43,
+   "deezerId": 12240024,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0102": {
+   "name": "Sam Collins",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/b25a58325baa7d072bc6a50f7bcee570/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/b25a58325baa7d072bc6a50f7bcee570/250x250-000000-80-0-0.jpg",
+   "fans": 1192,
+   "deezerId": 88469,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0104": {
+   "name": "HUGEL",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/92ba3d7067745c012ecc9c9a50ed65e5/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/92ba3d7067745c012ecc9c9a50ed65e5/250x250-000000-80-0-0.jpg",
+   "fans": 43,
+   "deezerId": 404251992,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0105": {
+   "name": "MEDUZA",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/86041d772b4df6ea9603ac0327b36126/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/86041d772b4df6ea9603ac0327b36126/250x250-000000-80-0-0.jpg",
+   "fans": 74,
+   "deezerId": 68959402,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0106": {
+   "name": "Timmy Trumpet",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/4286a6cb7feff213d6c96a876a40ed88/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/4286a6cb7feff213d6c96a876a40ed88/250x250-000000-80-0-0.jpg",
+   "fans": 541723,
+   "deezerId": 661247,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0108": {
+   "name": "French Montana",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/b01031c9ce30ebb1a1b77d3472ce72e5/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/b01031c9ce30ebb1a1b77d3472ce72e5/250x250-000000-80-0-0.jpg",
+   "fans": 1184107,
+   "deezerId": 367387,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0109": {
+   "name": "Nic Fanciulli",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/1fe2ac178428436f2e621cecb6d160f5/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/1fe2ac178428436f2e621cecb6d160f5/250x250-000000-80-0-0.jpg",
+   "fans": 30968,
+   "deezerId": 187358,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0110": {
+   "name": "Claptone",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/381fa235263f35530b97062f38202e30/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/381fa235263f35530b97062f38202e30/250x250-000000-80-0-0.jpg",
+   "fans": 97974,
+   "deezerId": 1446147,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0111": {
+   "name": "Paco Osuna",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/749a5f884c1d253f830ad777a7c173bf/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/749a5f884c1d253f830ad777a7c173bf/250x250-000000-80-0-0.jpg",
+   "fans": 22231,
+   "deezerId": 54279,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0114": {
+   "name": "James Hype",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/9e567fe860f1caca9be09512edee3dc8/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/9e567fe860f1caca9be09512edee3dc8/250x250-000000-80-0-0.jpg",
+   "fans": 32260,
+   "deezerId": 8205210,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0116": {
+   "name": "Nelly",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/e5823cad1f2c32e9ff341ddf537988af/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/e5823cad1f2c32e9ff341ddf537988af/250x250-000000-80-0-0.jpg",
+   "fans": 15,
+   "deezerId": 12484434,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0117": {
+   "name": "Tiësto",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/b6ff15612b6ef51e5a552e4bd6abefd6/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/b6ff15612b6ef51e5a552e4bd6abefd6/250x250-000000-80-0-0.jpg",
+   "fans": 4087332,
+   "deezerId": 434,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0118": {
+   "name": "Martin Garrix",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/4cab1c0cbe0edc1b3d2234873abc485e/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/4cab1c0cbe0edc1b3d2234873abc485e/250x250-000000-80-0-0.jpg",
+   "fans": 7586431,
+   "deezerId": 3968561,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0119": {
+   "name": "Marshmello",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/7990773a89df9f06fc2b871ad1de00bf/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/7990773a89df9f06fc2b871ad1de00bf/250x250-000000-80-0-0.jpg",
+   "fans": 3101590,
+   "deezerId": 7890702,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0120": {
+   "name": "Jason Derulo",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/955a40075bfd5d5501f266bd0cc79381/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/955a40075bfd5d5501f266bd0cc79381/250x250-000000-80-0-0.jpg",
+   "fans": 5599309,
+   "deezerId": 249599,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0121": {
+   "name": "Tyga",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/94f19f580600ea7d1c603e8794c04dd6/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/94f19f580600ea7d1c603e8794c04dd6/250x250-000000-80-0-0.jpg",
+   "fans": 3524562,
+   "deezerId": 304545,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0122": {
+   "name": "A$AP Rocky",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/5eebb137c5f4d0eb8fb5f9227e1b6288/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/5eebb137c5f4d0eb8fb5f9227e1b6288/250x250-000000-80-0-0.jpg",
+   "fans": 2098893,
+   "deezerId": 1518490,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0123": {
+   "name": "Marco Carola",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/1eaba6cf0c7f429d8e8e1c9232974710/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/1eaba6cf0c7f429d8e8e1c9232974710/250x250-000000-80-0-0.jpg",
+   "fans": 122860,
+   "deezerId": 131259,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0124": {
+   "name": "Dimitri Vegas & Like Mike",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/00d5711cc1fa5db0a6f3ff4c2876a1cb/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/00d5711cc1fa5db0a6f3ff4c2876a1cb/250x250-000000-80-0-0.jpg",
+   "fans": 2198533,
+   "deezerId": 262271,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0125": {
+   "name": "Afrojack",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/73ac0571eb4a75e4158b146b44b02f7b/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/73ac0571eb4a75e4158b146b44b02f7b/250x250-000000-80-0-0.jpg",
+   "fans": 2165678,
+   "deezerId": 169361,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0126": {
+   "name": "Steve Aoki",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/0383b9ee7f3d44c3bf84d9401189458e/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/0383b9ee7f3d44c3bf84d9401189458e/250x250-000000-80-0-0.jpg",
+   "fans": 2106634,
+   "deezerId": 310557,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0129": {
+   "name": "The Element",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/041930aff7d568c8167323734157786b/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/041930aff7d568c8167323734157786b/250x250-000000-80-0-0.jpg",
+   "fans": 1402,
+   "deezerId": 290786,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0130": {
+   "name": "CASSIMM",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/9a60b91f01f393ab7cc6da8f9b15f741/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/9a60b91f01f393ab7cc6da8f9b15f741/250x250-000000-80-0-0.jpg",
+   "fans": 1326,
+   "deezerId": 5588799,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0131": {
+   "name": "Martin Ikin",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/f613e9830bfcdec1031e5230f47f7072/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/f613e9830bfcdec1031e5230f47f7072/250x250-000000-80-0-0.jpg",
+   "fans": 4389,
+   "deezerId": 5222432,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0132": {
+   "name": "Mark Knight",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/61c7a3b9e83879a5683ef76d285aa230/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/61c7a3b9e83879a5683ef76d285aa230/250x250-000000-80-0-0.jpg",
+   "fans": 52805,
+   "deezerId": 4599,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0133": {
+   "name": "Tony Romera",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/a09e76f5786d49b451007c605c22ad66/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/a09e76f5786d49b451007c605c22ad66/250x250-000000-80-0-0.jpg",
+   "fans": 16234,
+   "deezerId": 371669,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0134": {
+   "name": "Jewel Kid",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/7f0f9cd0aa7b957f70e4a67a14875110/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/7f0f9cd0aa7b957f70e4a67a14875110/250x250-000000-80-0-0.jpg",
+   "fans": 1640,
+   "deezerId": 164979,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0135": {
+   "name": "James Hurr",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/121e755d5c216330ef487c7059512aa7/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/121e755d5c216330ef487c7059512aa7/250x250-000000-80-0-0.jpg",
+   "fans": 563,
+   "deezerId": 4606095,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0136": {
+   "name": "Matt Sassari",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/b4b5c189e53b3ebf14f9bafe44481da8/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/b4b5c189e53b3ebf14f9bafe44481da8/250x250-000000-80-0-0.jpg",
+   "fans": 6719,
+   "deezerId": 1721301,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0139": {
+   "name": "Mazzeo",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/9bed56d92677c6051a59f3796d41480e/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/9bed56d92677c6051a59f3796d41480e/250x250-000000-80-0-0.jpg",
+   "fans": 5,
+   "deezerId": 7299438,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0140": {
+   "name": "Kay",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/351b4afcc04d969958e117d108a3af96/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/351b4afcc04d969958e117d108a3af96/250x250-000000-80-0-0.jpg",
+   "fans": 88,
+   "deezerId": 121983722,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0141": {
+   "name": "The TOYS",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/83e64337ef6292963066e6602580b928/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/83e64337ef6292963066e6602580b928/250x250-000000-80-0-0.jpg",
+   "fans": 2138,
+   "deezerId": 66407,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0142": {
+   "name": "Musketeers",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/ed2dba063ce48184b8ec473e55454b7d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/ed2dba063ce48184b8ec473e55454b7d/250x250-000000-80-0-0.jpg",
+   "fans": 76112,
+   "deezerId": 3633941,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0143": {
+   "name": "WHAL & DOLPH",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/4740d7e804e64cfb6901bddb55dccde0/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/4740d7e804e64cfb6901bddb55dccde0/250x250-000000-80-0-0.jpg",
+   "fans": 186,
+   "deezerId": 11895021,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0144": {
+   "name": "bowkylion",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/9395b2aa0365d45b68ec9a9238dcccbe/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/9395b2aa0365d45b68ec9a9238dcccbe/250x250-000000-80-0-0.jpg",
+   "fans": 606,
+   "deezerId": 12014886,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0145": {
+   "name": "Chart Suchart",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/620f76e044918314d0896f0bc3f48fe8/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/620f76e044918314d0896f0bc3f48fe8/250x250-000000-80-0-0.jpg",
+   "fans": 19,
+   "deezerId": 14887115,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0146": {
+   "name": "Valentina Ploy",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/73a01e01cc6444f8ed1056c18a5b69b4/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/73a01e01cc6444f8ed1056c18a5b69b4/250x250-000000-80-0-0.jpg",
+   "fans": 250,
+   "deezerId": 12508614,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0147": {
+   "name": "Pae Arak",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/71c8ebe27207ca9eb814a58059358f2e/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/71c8ebe27207ca9eb814a58059358f2e/250x250-000000-80-0-0.jpg",
+   "fans": 9,
+   "deezerId": 64817112,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0148": {
+   "name": "Pango",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/e0c980f3e5b3342a8e1423a229097295/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/e0c980f3e5b3342a8e1423a229097295/250x250-000000-80-0-0.jpg",
+   "fans": 826,
+   "deezerId": 3692611,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0149": {
+   "name": "Plastic Plastic",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/cd9d0988580f64e1e6deca49cb230b6d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/cd9d0988580f64e1e6deca49cb230b6d/250x250-000000-80-0-0.jpg",
+   "fans": 7564,
+   "deezerId": 3692621,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0150": {
+   "name": "Mints",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/2194972e81d6ae012064a0a0b0510fe6/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/2194972e81d6ae012064a0a0b0510fe6/250x250-000000-80-0-0.jpg",
+   "fans": 27,
+   "deezerId": 1234498,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0151": {
+   "name": "De Flamingo",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/488e31ea4c61db406d104ec946cda38f/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/488e31ea4c61db406d104ec946cda38f/250x250-000000-80-0-0.jpg",
+   "fans": 159,
+   "deezerId": 10139942,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0152": {
+   "name": "LANDOKMAI",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/dbfe7e1c1fb1e3e10f66055002df300c/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/dbfe7e1c1fb1e3e10f66055002df300c/250x250-000000-80-0-0.jpg",
+   "fans": 260,
+   "deezerId": 68659092,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0153": {
+   "name": "HENS",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/2fc7dd1000adb3ca9a26db0a9c070e2c/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/2fc7dd1000adb3ca9a26db0a9c070e2c/250x250-000000-80-0-0.jpg",
+   "fans": 1,
+   "deezerId": 215201795,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0154": {
+   "name": "Hers",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/3531c97e6a124490d472dea41d766845/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/3531c97e6a124490d472dea41d766845/250x250-000000-80-0-0.jpg",
+   "fans": 2,
+   "deezerId": 10330822,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0155": {
+   "name": "Morvasu",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/0cf602b1aa3763e0c8bbe38c4668ce6b/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/0cf602b1aa3763e0c8bbe38c4668ce6b/250x250-000000-80-0-0.jpg",
+   "fans": 39,
+   "deezerId": 53365122,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0156": {
+   "name": "QLER",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/33045e92059ac60fa1d4ed362ad996b0/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/33045e92059ac60fa1d4ed362ad996b0/250x250-000000-80-0-0.jpg",
+   "fans": 82,
+   "deezerId": 13222825,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0157": {
+   "name": "Loserpop",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/d1a3c63ac29c2403da196d3ebfad681a/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/d1a3c63ac29c2403da196d3ebfad681a/250x250-000000-80-0-0.jpg",
+   "fans": 76,
+   "deezerId": 88183792,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0158": {
+   "name": "Mirrr",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/c1c69d5157dcba6b3e667906a7fa2347/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/c1c69d5157dcba6b3e667906a7fa2347/250x250-000000-80-0-0.jpg",
+   "fans": 146,
+   "deezerId": 54642452,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0159": {
+   "name": "Uncle Ben",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/9188e5e9d3bd9571c3942f1394129f97/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/9188e5e9d3bd9571c3942f1394129f97/250x250-000000-80-0-0.jpg",
+   "fans": 50,
+   "deezerId": 807129,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0160": {
+   "name": "Gabe Watkins",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/7b1cc66f3d5c4c152015abc4e544d7f6/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/7b1cc66f3d5c4c152015abc4e544d7f6/250x250-000000-80-0-0.jpg",
+   "fans": 81,
+   "deezerId": 4824034,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0161": {
+   "name": "Newery",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/de90f57eafe9586d2fb040316e3c1b3b/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/de90f57eafe9586d2fb040316e3c1b3b/250x250-000000-80-0-0.jpg",
+   "fans": 25,
+   "deezerId": 92878792,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0163": {
+   "name": "PONCHET",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/6b3fdb73c1137bb0b1058cbc23763f0d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/6b3fdb73c1137bb0b1058cbc23763f0d/250x250-000000-80-0-0.jpg",
+   "fans": 182,
+   "deezerId": 14871735,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0164": {
+   "name": "TeyaTaye",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/39dd0c9cee2935402caf73fba7324760/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/39dd0c9cee2935402caf73fba7324760/250x250-000000-80-0-0.jpg",
+   "fans": 2,
+   "deezerId": 154030892,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0165": {
+   "name": "YourMOOD",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/6e73c35f32a50383c52412a45cbe2fb6/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/6e73c35f32a50383c52412a45cbe2fb6/250x250-000000-80-0-0.jpg",
+   "fans": 35,
+   "deezerId": 112832372,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0166": {
+   "name": "Marc Tatchapon",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/9bc103df1e8e04998139f5405cbeeafb/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/9bc103df1e8e04998139f5405cbeeafb/250x250-000000-80-0-0.jpg",
+   "fans": 34,
+   "deezerId": 10983548,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0167": {
+   "name": "WANWANWAN",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/1b5c20a4ea2d5fa2458ae6bd23f5f15a/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/1b5c20a4ea2d5fa2458ae6bd23f5f15a/250x250-000000-80-0-0.jpg",
+   "fans": 6,
+   "deezerId": 265822982,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0168": {
+   "name": "NONT TANONT",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/b5d352c1dd32d42a73f0d2a5d2cb2997/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/b5d352c1dd32d42a73f0d2a5d2cb2997/250x250-000000-80-0-0.jpg",
+   "fans": 680,
+   "deezerId": 10571343,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0169": {
+   "name": "Sarah Salola",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/a035ce7568fbffde36ed8571fbf43b26/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/a035ce7568fbffde36ed8571fbf43b26/250x250-000000-80-0-0.jpg",
+   "fans": 71,
+   "deezerId": 167210607,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0170": {
+   "name": "BLUE PONGTIWAT",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/f554ba445e14617daf2d2be57a39e78b/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/f554ba445e14617daf2d2be57a39e78b/250x250-000000-80-0-0.jpg",
+   "fans": 19,
+   "deezerId": 342258321,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0171": {
+   "name": "MEAN Band",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/e20bcd57075ea32dff24e524753be0e8/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/e20bcd57075ea32dff24e524753be0e8/250x250-000000-80-0-0.jpg",
+   "fans": 22,
+   "deezerId": 198917577,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0172": {
+   "name": "OABNITHI",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/a80ac3f530bd858dfcc817ca60401516/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/a80ac3f530bd858dfcc817ca60401516/250x250-000000-80-0-0.jpg",
+   "fans": 7,
+   "deezerId": 202025327,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0173": {
+   "name": "Gun Napat",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/354fe91245114ca2a74150e6f444cba6/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/354fe91245114ca2a74150e6f444cba6/250x250-000000-80-0-0.jpg",
+   "fans": 44,
+   "deezerId": 6575231,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0174": {
+   "name": "JEEP",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/fc600e6cf40587d4035856d9770c1dae/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/fc600e6cf40587d4035856d9770c1dae/250x250-000000-80-0-0.jpg",
+   "fans": 45,
+   "deezerId": 288897201,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0175": {
+   "name": "LADIIPRANG",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/e54d65cf074fbc0ec0c6aa504bb80f5d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/e54d65cf074fbc0ec0c6aa504bb80f5d/250x250-000000-80-0-0.jpg",
+   "fans": 7,
+   "deezerId": 153742452,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0177": {
+   "name": "Slapkiss",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/e1042191e630c9faa37cba71c5dc3e9a/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/e1042191e630c9faa37cba71c5dc3e9a/250x250-000000-80-0-0.jpg",
+   "fans": 36,
+   "deezerId": 57091122,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0178": {
+   "name": "PEAKSayaa!",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/ce5441bace5254619264bfaa03220d8a/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/ce5441bace5254619264bfaa03220d8a/250x250-000000-80-0-0.jpg",
+   "fans": 4,
+   "deezerId": 182371537,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0179": {
+   "name": "Rooftop",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/164bcc33abd1001846d954d835ea7f2b/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/164bcc33abd1001846d954d835ea7f2b/250x250-000000-80-0-0.jpg",
+   "fans": 371,
+   "deezerId": 2001111,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0180": {
+   "name": "MOBYE",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/9b934cfe38ea43fb438d4fe3df3a6587/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/9b934cfe38ea43fb438d4fe3df3a6587/250x250-000000-80-0-0.jpg",
+   "fans": 9,
+   "deezerId": 214216145,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0182": {
+   "name": "TACE",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/3532152f42b518364e2852a2a1e38cf7/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/3532152f42b518364e2852a2a1e38cf7/250x250-000000-80-0-0.jpg",
+   "fans": 16,
+   "deezerId": 4016421,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0183": {
+   "name": "FETCH",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/caa0e113ff3ae9dc5462757adedee08b/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/caa0e113ff3ae9dc5462757adedee08b/250x250-000000-80-0-0.jpg",
+   "fans": 27,
+   "deezerId": 179822,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0188": {
+   "name": "Dept",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/7c6ceaf1b805844a290e748147ba088d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/7c6ceaf1b805844a290e748147ba088d/250x250-000000-80-0-0.jpg",
+   "fans": 1541,
+   "deezerId": 1448996,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0189": {
+   "name": "Death Of Heather",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/77dd2b80bd0382e2baff415bd2245fe0/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/77dd2b80bd0382e2baff415bd2245fe0/250x250-000000-80-0-0.jpg",
+   "fans": 90,
+   "deezerId": 15207787,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0190": {
+   "name": "Gene Kasidit",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/a927ba31b1223e0c0e4dc4b5fe14fc12/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/a927ba31b1223e0c0e4dc4b5fe14fc12/250x250-000000-80-0-0.jpg",
+   "fans": 8733,
+   "deezerId": 4080310,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0193": {
+   "name": "Penguin Villa",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/0526fb9322bd239cbb0ef1d15b71266e/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/0526fb9322bd239cbb0ef1d15b71266e/250x250-000000-80-0-0.jpg",
+   "fans": 1734,
+   "deezerId": 4103436,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0194": {
+   "name": "Polycat",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/21e325c662f858675fadd3d363a5e0e2/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/21e325c662f858675fadd3d363a5e0e2/250x250-000000-80-0-0.jpg",
+   "fans": 13238,
+   "deezerId": 251578,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0195": {
+   "name": "Postbox",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/6fa530619eb779ee5ae786711a767f11/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/6fa530619eb779ee5ae786711a767f11/250x250-000000-80-0-0.jpg",
+   "fans": 202,
+   "deezerId": 7986868,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0197": {
+   "name": "Rattana",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/7b1a5e477d640f8a56ee0deb7ab558d5/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/7b1a5e477d640f8a56ee0deb7ab558d5/250x250-000000-80-0-0.jpg",
+   "fans": 6,
+   "deezerId": 127635332,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0198": {
+   "name": "SLUR",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/85ffa99431aae75f483da48e3b9c8919/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/85ffa99431aae75f483da48e3b9c8919/250x250-000000-80-0-0.jpg",
+   "fans": 21840,
+   "deezerId": 1586310,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0199": {
+   "name": "Spoonfulz",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/f651bebf715c18dc0ed2ff503db6eea6/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/f651bebf715c18dc0ed2ff503db6eea6/250x250-000000-80-0-0.jpg",
+   "fans": 2929,
+   "deezerId": 4103434,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0200": {
+   "name": "Summer Stop",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/d0601c5b9906f861d793ef439a7fa65e/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/d0601c5b9906f861d793ef439a7fa65e/250x250-000000-80-0-0.jpg",
+   "fans": 1125,
+   "deezerId": 4103910,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0201": {
+   "name": "Syd Vethaka",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/0b10eaea2d84a4738eafdb9cff3cbb06/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/0b10eaea2d84a4738eafdb9cff3cbb06/250x250-000000-80-0-0.jpg",
+   "fans": 1,
+   "deezerId": 229506535,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0202": {
+   "name": "Tattoo Colour",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/1e06da1785599b28f725cc46dd4c640d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/1e06da1785599b28f725cc46dd4c640d/250x250-000000-80-0-0.jpg",
+   "fans": 109724,
+   "deezerId": 4068142,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0203": {
+   "name": "Television off",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/314f8b03c714b0521d7a1495a1ebe170/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/314f8b03c714b0521d7a1495a1ebe170/250x250-000000-80-0-0.jpg",
+   "fans": 36,
+   "deezerId": 137887992,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0204": {
+   "name": "The Jukks",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/a299292f79526df438bb9fbe29e201f6/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/a299292f79526df438bb9fbe29e201f6/250x250-000000-80-0-0.jpg",
+   "fans": 19580,
+   "deezerId": 4053215,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0205": {
+   "name": "The Richman Toy",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/457b15661a9f184edf1288d21a3c7fd6/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/457b15661a9f184edf1288d21a3c7fd6/250x250-000000-80-0-0.jpg",
+   "fans": 36442,
+   "deezerId": 4053218,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0206": {
+   "name": "TOFU",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/7ee9101f94b072f3ee2e6e67e1e50a0e/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/7ee9101f94b072f3ee2e6e67e1e50a0e/250x250-000000-80-0-0.jpg",
+   "fans": 347,
+   "deezerId": 1400522,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0207": {
+   "name": "Two Pills After Meal",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/6bf09a761b6d2f11bda93a6d69c1e0e3/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/6bf09a761b6d2f11bda93a6d69c1e0e3/250x250-000000-80-0-0.jpg",
+   "fans": 709,
+   "deezerId": 7761110,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0208": {
+   "name": "wadfah",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/764ce18bfea427921ab92e03ef30219a/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/764ce18bfea427921ab92e03ef30219a/250x250-000000-80-0-0.jpg",
+   "fans": 34,
+   "deezerId": 136051362,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0209": {
+   "name": "WAV",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/2e17e54c33e29b255753a852cad5ea8d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/2e17e54c33e29b255753a852cad5ea8d/250x250-000000-80-0-0.jpg",
+   "fans": 77,
+   "deezerId": 12050650,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0210": {
+   "name": "YODSARUN",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/444593be38de3342680608ae73503fbc/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/444593be38de3342680608ae73503fbc/250x250-000000-80-0-0.jpg",
+   "fans": 1,
+   "deezerId": 181044307,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0211": {
+   "name": "The Parkinson",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/4d43d47a4ad9c0a0ff96b33e1af75d3f/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/4d43d47a4ad9c0a0ff96b33e1af75d3f/250x250-000000-80-0-0.jpg",
+   "fans": 2564,
+   "deezerId": 6888525,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0212": {
+   "name": "Wan Thanakrit",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/b0947d3d6d8a358568df265c6d79cb8d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/b0947d3d6d8a358568df265c6d79cb8d/250x250-000000-80-0-0.jpg",
+   "fans": 85,
+   "deezerId": 6575235,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0214": {
+   "name": "Toh Nap A Lean",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/7d685de19d15e6d4672619117e2912fe/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/7d685de19d15e6d4672619117e2912fe/250x250-000000-80-0-0.jpg",
+   "fans": 0,
+   "deezerId": 75233112,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0215": {
+   "name": "MVL",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/3f3be2dd5e31b8bef5bdbf2331130a47/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/3f3be2dd5e31b8bef5bdbf2331130a47/250x250-000000-80-0-0.jpg",
+   "fans": 53,
+   "deezerId": 5926907,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0216": {
+   "name": "Funky Wah Wah",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/9b02ec3a4b9d742786a00fc2547ccba4/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/9b02ec3a4b9d742786a00fc2547ccba4/250x250-000000-80-0-0.jpg",
+   "fans": 273,
+   "deezerId": 4467710,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0218": {
+   "name": "Groove Riders",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/1754eb482684be032e83997e69af12a8/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/1754eb482684be032e83997e69af12a8/250x250-000000-80-0-0.jpg",
+   "fans": 46270,
+   "deezerId": 175112,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0219": {
+   "name": "Mild",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/dc54fe4765ab902479316e8cb8c57050/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/dc54fe4765ab902479316e8cb8c57050/250x250-000000-80-0-0.jpg",
+   "fans": 21302,
+   "deezerId": 1531216,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0220": {
+   "name": "Sqweez Animal",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/82ec87225d514a4ba94a9241c845bbe5/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/82ec87225d514a4ba94a9241c845bbe5/250x250-000000-80-0-0.jpg",
+   "fans": 3589,
+   "deezerId": 4520407,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0221": {
+   "name": "Zom Marie",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/f9b6341bf97764e7fb97cb8bddef18a5/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/f9b6341bf97764e7fb97cb8bddef18a5/250x250-000000-80-0-0.jpg",
+   "fans": 339,
+   "deezerId": 7920570,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0222": {
+   "name": "Friday",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/06cae595d86d8afdbf9e36326f980a80/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/06cae595d86d8afdbf9e36326f980a80/250x250-000000-80-0-0.jpg",
+   "fans": 11713,
+   "deezerId": 1217064,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0223": {
+   "name": "La Ong Fong",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/0d25efb2632c5f1a33427e88806e37df/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/0d25efb2632c5f1a33427e88806e37df/250x250-000000-80-0-0.jpg",
+   "fans": 61,
+   "deezerId": 8413816,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0228": {
+   "name": "Lesha Svik",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/9eb74a6180aef1ded70ed000fe44d050/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/9eb74a6180aef1ded70ed000fe44d050/250x250-000000-80-0-0.jpg",
+   "fans": 61308,
+   "deezerId": 7821372,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0229": {
+   "name": "Dolphin",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/a156300d45aa94480588dbb48e0424e4/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/a156300d45aa94480588dbb48e0424e4/250x250-000000-80-0-0.jpg",
+   "fans": 3713,
+   "deezerId": 184748,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0230": {
+   "name": "Rita Dakota",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/e7b4a72c37048d83b0aa2fb2af96ad7c/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/e7b4a72c37048d83b0aa2fb2af96ad7c/250x250-000000-80-0-0.jpg",
+   "fans": 1408,
+   "deezerId": 8354770,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0231": {
+   "name": "MACAN",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/f228eb5b70ee5ef5295ca1fac4e5455a/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/f228eb5b70ee5ef5295ca1fac4e5455a/250x250-000000-80-0-0.jpg",
+   "fans": 61177,
+   "deezerId": 8720732,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0237": {
+   "name": "Little Big",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/13c1ad2030111bc866b6c33097505c4e/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/13c1ad2030111bc866b6c33097505c4e/250x250-000000-80-0-0.jpg",
+   "fans": 113826,
+   "deezerId": 4606326,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0240": {
+   "name": "Zivert",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/b70e5ade40eb6f1ddf44ed6e749045ae/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/b70e5ade40eb6f1ddf44ed6e749045ae/250x250-000000-80-0-0.jpg",
+   "fans": 298577,
+   "deezerId": 12250622,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0242": {
+   "name": "Feduk",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/6e09d9b1b937c5d70c0b3b23c0851a87/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/6e09d9b1b937c5d70c0b3b23c0851a87/250x250-000000-80-0-0.jpg",
+   "fans": 61182,
+   "deezerId": 7446926,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0243": {
+   "name": "Eldzhey",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/323dae988c88cda6b6b90fd7b0bc0f71/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/323dae988c88cda6b6b90fd7b0bc0f71/250x250-000000-80-0-0.jpg",
+   "fans": 12236,
+   "deezerId": 8042959,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0244": {
+   "name": "Timati",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/f0bccca90f610b37b92c8500655ea197/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/f0bccca90f610b37b92c8500655ea197/250x250-000000-80-0-0.jpg",
+   "fans": 178515,
+   "deezerId": 271715,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0246": {
+   "name": "Basta",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/45a0922d655861c8200333765ad85e30/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/45a0922d655861c8200333765ad85e30/250x250-000000-80-0-0.jpg",
+   "fans": 9,
+   "deezerId": 394235591,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0247": {
+   "name": "Splean",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/addcf4545931d0b08d2819b05a8db7c8/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/addcf4545931d0b08d2819b05a8db7c8/250x250-000000-80-0-0.jpg",
+   "fans": 8953,
+   "deezerId": 2018001,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0250": {
+   "name": "Nogu Svelo!",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/4758457a8395a92e89ab182cefbc4ba7/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/4758457a8395a92e89ab182cefbc4ba7/250x250-000000-80-0-0.jpg",
+   "fans": 1163,
+   "deezerId": 14689733,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0251": {
+   "name": "Philipp Kirkorov",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/775952a2d6f266872cc1bc48eb1773ca/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/775952a2d6f266872cc1bc48eb1773ca/250x250-000000-80-0-0.jpg",
+   "fans": 105,
+   "deezerId": 6594954,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0254": {
+   "name": "Nikolay Baskov",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/50e88b16e8d4f4e13e6d36166348c31d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/50e88b16e8d4f4e13e6d36166348c31d/250x250-000000-80-0-0.jpg",
+   "fans": 463,
+   "deezerId": 1710643,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0255": {
+   "name": "TOKIO",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/0be302a8d031241a0b5b5f769721ca3d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/0be302a8d031241a0b5b5f769721ca3d/250x250-000000-80-0-0.jpg",
+   "fans": 5525,
+   "deezerId": 1203889,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0256": {
+   "name": "Soso Pavliashvili",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/158055b989a3b5f9035ddf974953be45/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/158055b989a3b5f9035ddf974953be45/250x250-000000-80-0-0.jpg",
+   "fans": 76,
+   "deezerId": 3152241,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0257": {
+   "name": "Slava",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/3952edf9b1af8d29b07cf2290815b259/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/3952edf9b1af8d29b07cf2290815b259/250x250-000000-80-0-0.jpg",
+   "fans": 1015,
+   "deezerId": 484846,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0259": {
+   "name": "Nyusha",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/80639bc872672c27c750c6c102eda2e6/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/80639bc872672c27c750c6c102eda2e6/250x250-000000-80-0-0.jpg",
+   "fans": 52576,
+   "deezerId": 4153481,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0260": {
+   "name": "Mumiy Troll",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/5d3d8539b1c2502287102aa4403cbcc2/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/5d3d8539b1c2502287102aa4403cbcc2/250x250-000000-80-0-0.jpg",
+   "fans": 162579,
+   "deezerId": 296604,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0263": {
+   "name": "Marcel",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/07ec3b0aa7ea3b6f41ec5a82c65e6047/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/07ec3b0aa7ea3b6f41ec5a82c65e6047/250x250-000000-80-0-0.jpg",
+   "fans": 2879,
+   "deezerId": 263319771,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0264": {
+   "name": "Leningrad",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/efad4f0dd5c481b4be8b330464bf4ff4/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/efad4f0dd5c481b4be8b330464bf4ff4/250x250-000000-80-0-0.jpg",
+   "fans": 189,
+   "deezerId": 225276225,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0265": {
+   "name": "Leonid Agutin",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/78062a2a2b2d6dbdd2eaca1569823d88/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/78062a2a2b2d6dbdd2eaca1569823d88/250x250-000000-80-0-0.jpg",
+   "fans": 1975,
+   "deezerId": 1198437,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0266": {
+   "name": "Kasta",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/4643acf1c8a8e03d34f05702c3f0264b/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/4643acf1c8a8e03d34f05702c3f0264b/250x250-000000-80-0-0.jpg",
+   "fans": 2835,
+   "deezerId": 2795521,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0267": {
+   "name": "Kristina Si",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/b2a9100acf138a670be45a63084191ea/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/b2a9100acf138a670be45a63084191ea/250x250-000000-80-0-0.jpg",
+   "fans": 10406,
+   "deezerId": 4783409,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0268": {
+   "name": "Igor Nikolaev",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/5c6a5bd4cb735d89b79d77ebf2b1b22f/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/5c6a5bd4cb735d89b79d77ebf2b1b22f/250x250-000000-80-0-0.jpg",
+   "fans": 297,
+   "deezerId": 2358341,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0269": {
+   "name": "Intars Busulis",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/e7b29377a582b8183e9d283aa1902e9e/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/e7b29377a582b8183e9d283aa1902e9e/250x250-000000-80-0-0.jpg",
+   "fans": 892,
+   "deezerId": 301744,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0272": {
+   "name": "Elena Temnikova",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/f8882223a256addbc8ff7779653108c8/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/f8882223a256addbc8ff7779653108c8/250x250-000000-80-0-0.jpg",
+   "fans": 2092,
+   "deezerId": 4339775,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0277": {
+   "name": "Gradusy",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/f665ecde6784ef720fc9e504b0d46c82/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/f665ecde6784ef720fc9e504b0d46c82/250x250-000000-80-0-0.jpg",
+   "fans": 648,
+   "deezerId": 7610844,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0278": {
+   "name": "Vladimir Presnyakov",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/365094f9e4b30fd2a82ed6a77d65c894/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/365094f9e4b30fd2a82ed6a77d65c894/250x250-000000-80-0-0.jpg",
+   "fans": 75,
+   "deezerId": 2673051,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0279": {
+   "name": "Vera Brezhneva",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/f8c1b26a721aef0a16d715cf7b429bec/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/f8c1b26a721aef0a16d715cf7b429bec/250x250-000000-80-0-0.jpg",
+   "fans": 5559,
+   "deezerId": 4339442,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0293": {
+   "name": "GMM Grammy",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/d59ca233e22805c514c95651fdc80643/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/d59ca233e22805c514c95651fdc80643/250x250-000000-80-0-0.jpg",
+   "fans": 57,
+   "deezerId": 339826101,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0311": {
+   "name": "Funky Wah Wah",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/9b02ec3a4b9d742786a00fc2547ccba4/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/9b02ec3a4b9d742786a00fc2547ccba4/250x250-000000-80-0-0.jpg",
+   "fans": 273,
+   "deezerId": 4467710,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0067": {
+   "name": "Andrew Bond",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/d8e7c6204ab1f2132de145235da14d27/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/d8e7c6204ab1f2132de145235da14d27/250x250-000000-80-0-0.jpg",
+   "fans": 1091,
+   "deezerId": 1687165,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0086": {
+   "name": "Franky Wah",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/61d718897e2093ee16f67e37d693be9c/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/61d718897e2093ee16f67e37d693be9c/250x250-000000-80-0-0.jpg",
+   "fans": 3615,
+   "deezerId": 13682227,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0095": {
+   "name": "Floyd Lavine",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/b158c16913aaa07b19bf187ba2455259/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/b158c16913aaa07b19bf187ba2455259/250x250-000000-80-0-0.jpg",
+   "fans": 1118,
+   "deezerId": 4599335,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0103": {
+   "name": "Wiz Khalifa",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/a1dc970ad2ad6afa42580c692b8a8a8d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/a1dc970ad2ad6afa42580c692b8a8a8d/250x250-000000-80-0-0.jpg",
+   "fans": 6905453,
+   "deezerId": 74804,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0181": {
+   "name": "TITI Nichaphat",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/4f6e8782ba74f839c215eece85dc6b5d/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/4f6e8782ba74f839c215eece85dc6b5d/250x250-000000-80-0-0.jpg",
+   "fans": 1,
+   "deezerId": 190553007,
+   "source": "deezer",
+   "match": "exact-name"
+  },
+  "MC-0245": {
+   "name": "MOT",
+   "photo": "https://cdn-images.dzcdn.net/images/artist/3a1c7bf8f24b028b89f8b14ee5507ffb/1000x1000-000000-80-0-0.jpg",
+   "photoMed": "https://cdn-images.dzcdn.net/images/artist/3a1c7bf8f24b028b89f8b14ee5507ffb/250x250-000000-80-0-0.jpg",
+   "fans": 1872,
+   "deezerId": 1024301,
+   "source": "deezer",
+   "match": "exact-name"
+  }
+ }
+}

@@ -12,8 +12,14 @@ import {
   type Artist,
   type ArtistBase,
 } from "../data/app-data";
+import photosRaw from "../data/artist-photos.json";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow, Field, Li, SubHead, tint } from "../ui";
+
+// Фото артистов: точное совпадение имени в открытом каталоге, заглушки убраны.
+// Дашь Spotify-ключи — база пересоберётся тем же пайплайном.
+type ArtistPhoto = { photo: string; photoMed: string; source: string };
+const PHOTOS = (photosRaw as { photos: Record<string, ArtistPhoto> }).photos;
 
 const KIND_LABEL: Record<string, string> = {
   all: "Все записи",
@@ -49,7 +55,9 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
   const [q, setQ] = useState("");
   // Исполнители и контрагенты — разные сущности и разные задачи, поэтому
   // разведены на верхнем уровне, а не спрятаны в общий фильтр по типу
-  const [scope, setScope] = useState<"performers" | "counterparties">("performers");
+  const [scope, setScope] = useState<"performers" | "counterparties">(
+    "performers",
+  );
   const [kind, setKind] = useState("all");
   const [pool, setPool] = useState("all");
   const [style, setStyle] = useState("all");
@@ -73,28 +81,43 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
     const rank = (p: string) => (p === "A" ? 0 : p === "B" ? 1 : 2);
     return base.artists
       .filter((a) => {
-        if (scope === "performers" ? !isPerformer(a) : isPerformer(a)) return false;
+        if (scope === "performers" ? !isPerformer(a) : isPerformer(a))
+          return false;
         if (kind !== "all" && a.kind !== kind) return false;
         if (pool !== "all" && a.group !== pool) return false;
         if (style !== "all" && !(a.styles || []).includes(style)) return false;
-        if (qq && !`${a.name} ${a.role} ${(a.styles || []).join(" ")}`.toLowerCase().includes(qq))
+        if (
+          qq &&
+          !`${a.name} ${a.role} ${(a.styles || []).join(" ")}`
+            .toLowerCase()
+            .includes(qq)
+        )
           return false;
         return true;
       })
-      .sort((a, b) => rank(a.prio) - rank(b.prio) || a.name.localeCompare(b.name, "ru"));
+      .sort(
+        (a, b) =>
+          rank(a.prio) - rank(b.prio) || a.name.localeCompare(b.name, "ru"),
+      );
   }, [base, q, scope, kind, pool, style]);
 
   if (!base)
     return (
       <div
         className="gtr-mono"
-        style={{ padding: 60, textAlign: "center", color: "rgba(255,255,255,.4)" }}
+        style={{
+          padding: 60,
+          textAlign: "center",
+          color: "rgba(255,255,255,.4)",
+        }}
       >
         Загрузка базы артистов…
       </div>
     );
 
-  const selected = artistId ? base.artists.find((a) => a.id === artistId) : null;
+  const selected = artistId
+    ? base.artists.find((a) => a.id === artistId)
+    : null;
   if (selected) return <ArtistCard a={selected} onBack={() => openArtist()} />;
 
   const topStyles = base.meta.styles.slice(0, 14);
@@ -103,13 +126,23 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
 
   return (
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 14 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          gap: 12,
+          marginBottom: 14,
+        }}
+      >
         <h1 className="gtr-oswald gtr-h1">
           {scope === "performers" ? "Артисты и диджеи" : "Контрагенты"}
         </h1>
         <span
           className="gtr-mono"
-          style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+          style={{
+            font: "600 12px/1 'JetBrains Mono',monospace",
+            color: "var(--gtr-t3)",
+          }}
         >
           {filtered.length} / {base.meta.total}
         </span>
@@ -148,9 +181,19 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                 color: on ? "#fff" : "rgba(255,255,255,.6)",
               }}
             >
-              <span style={{ width: 8, height: 8, borderRadius: 0, background: color }} />
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 0,
+                  background: color,
+                }}
+              />
               {label}
-              <span className="gtr-mono" style={{ fontSize: 10, opacity: 0.65 }}>
+              <span
+                className="gtr-mono"
+                style={{ fontSize: 10, opacity: 0.65 }}
+              >
                 {n}
               </span>
             </button>
@@ -158,12 +201,16 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
         })}
       </div>
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+      <div
+        style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}
+      >
         <input
           className="gtr-input"
           style={{ maxWidth: 260 }}
           placeholder={
-            scope === "performers" ? "Поиск по имени и стилю…" : "Поиск по названию и роли…"
+            scope === "performers"
+              ? "Поиск по имени и стилю…"
+              : "Поиск по названию и роли…"
           }
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -197,7 +244,10 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
         >
           {Object.entries(POOL_LABEL).map(([k, l]) => (
             <option key={k} value={k}>
-              {l} {k !== "all" && base.meta.byGroup[k] ? `· ${base.meta.byGroup[k]}` : ""}
+              {l}{" "}
+              {k !== "all" && base.meta.byGroup[k]
+                ? `· ${base.meta.byGroup[k]}`
+                : ""}
             </option>
           ))}
         </select>
@@ -212,23 +262,25 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
           marginBottom: 16,
         }}
       >
-        {[["all", filtered.length] as [string, number], ...topStyles].map(([s, n]) => (
-          <button
-            key={s}
-            onClick={() => setStyle(String(s))}
-            style={{
-              border: `1px solid ${style === s ? "#E5231B" : "rgba(255,255,255,.12)"}`,
-              background: style === s ? "rgba(229,35,27,.14)" : "transparent",
-              color: style === s ? "#fff" : "rgba(255,255,255,.55)",
-              borderRadius: 0,
-              padding: "6px 10px",
-              cursor: "pointer",
-              font: "500 10.5px/1 'Golos Text',sans-serif",
-            }}
-          >
-            {s === "all" ? "Все стили" : `${s} · ${n}`}
-          </button>
-        ))}
+        {[["all", filtered.length] as [string, number], ...topStyles].map(
+          ([s, n]) => (
+            <button
+              key={s}
+              onClick={() => setStyle(String(s))}
+              style={{
+                border: `1px solid ${style === s ? "#E5231B" : "rgba(255,255,255,.12)"}`,
+                background: style === s ? "rgba(229,35,27,.14)" : "transparent",
+                color: style === s ? "#fff" : "rgba(255,255,255,.55)",
+                borderRadius: 0,
+                padding: "6px 10px",
+                cursor: "pointer",
+                font: "500 10.5px/1 'Golos Text',sans-serif",
+              }}
+            >
+              {s === "all" ? "Все стили" : `${s} · ${n}`}
+            </button>
+          ),
+        )}
       </div>
 
       <div
@@ -240,7 +292,12 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
         }}
       >
         {filtered.slice(0, 90).map((a) => (
-          <Card key={a.id} hover style={{ padding: "14px 16px" }} onClick={() => openArtist(a.id)}>
+          <Card
+            key={a.id}
+            hover
+            style={{ padding: "14px 16px" }}
+            onClick={() => openArtist(a.id)}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               {/* цветная метка типа: артист, лейбл, агентство, площадка */}
               <span
@@ -253,11 +310,39 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                   background: entityColor(a.kind),
                 }}
               />
-              <span style={{ font: "600 13px/1.25 'Golos Text',sans-serif", flex: 1, minWidth: 0 }}>
+              {PHOTOS[a.id] ? (
+                <img
+                  src={PHOTOS[a.id].photoMed}
+                  alt=""
+                  loading="lazy"
+                  style={{
+                    width: 34,
+                    height: 34,
+                    flex: "none",
+                    objectFit: "cover",
+                    filter: "grayscale(.25) contrast(1.06)",
+                    clipPath:
+                      "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)",
+                  }}
+                />
+              ) : null}
+              <span
+                style={{
+                  font: "600 13px/1.25 'Golos Text',sans-serif",
+                  flex: 1,
+                  minWidth: 0,
+                }}
+              >
                 {a.name}
               </span>
               <Chip
-                color={a.prio === "A" ? GREEN : a.prio === "B" ? AMBER : "rgba(255,255,255,.4)"}
+                color={
+                  a.prio === "A"
+                    ? GREEN
+                    : a.prio === "B"
+                      ? AMBER
+                      : "rgba(255,255,255,.4)"
+                }
               >
                 {a.prio || "—"}
               </Chip>
@@ -273,7 +358,10 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
             </div>
             <div
               className="gtr-mono"
-              style={{ font: "500 9.5px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+              style={{
+                font: "500 9.5px/1.4 'JetBrains Mono',monospace",
+                color: "var(--gtr-t3)",
+              }}
             >
               {a.tier || a.cat} · {a.base || "—"}
             </div>
@@ -283,7 +371,12 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
       {filtered.length > 90 ? (
         <div
           className="gtr-mono"
-          style={{ marginTop: 14, textAlign: "center", color: "var(--gtr-t3)", fontSize: 11 }}
+          style={{
+            marginTop: 14,
+            textAlign: "center",
+            color: "var(--gtr-t3)",
+            fontSize: 11,
+          }}
         >
           Показаны первые 90 — уточните фильтры
         </div>
@@ -304,85 +397,189 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
       </button>
 
       <Card
-        style={{ position: "relative", overflow: "hidden", padding: "24px 26px", marginBottom: 16 }}
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          padding: "24px 26px",
+          marginBottom: 16,
+        }}
       >
         <div className="gtr-beam" />
-        <div style={{ position: "relative" }}>
-          <Eyebrow>{a.catRu ? String(a.catRu) : a.cat}</Eyebrow>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              flexWrap: "wrap",
-              marginTop: 8,
-            }}
-          >
-            <h1
-              className="gtr-oswald"
-              style={{ font: "700 28px/1.05 Oswald,sans-serif", margin: 0 }}
-            >
-              {a.name}
-            </h1>
-            <Chip color={a.prio === "A" ? GREEN : a.prio === "B" ? AMBER : "rgba(255,255,255,.4)"}>
-              ПРИОРИТЕТ {a.prio || "—"}
-            </Chip>
-            {a.tier ? <Chip color="#7B4DFF">{a.tier.toUpperCase()}</Chip> : null}
-          </div>
-          <div
-            style={{
-              marginTop: 9,
-              font: "500 12px/1.5 'Golos Text',sans-serif",
-              color: "var(--gtr-t2)",
-            }}
-          >
-            {a.role}
-          </div>
-          {a.rel ? (
-            <div
-              className="gtr-mono"
+        {PHOTOS[a.id] ? (
+          <>
+            {/* фото как атмосферная подложка справа, гаснет к тексту */}
+            <img
+              src={PHOTOS[a.id].photo}
+              alt=""
+              aria-hidden="true"
               style={{
-                marginTop: 6,
-                font: "500 10.5px/1.4 'JetBrains Mono',monospace",
-                color: "var(--gtr-t3)",
+                position: "absolute",
+                top: 0,
+                right: 0,
+                bottom: 0,
+                width: "52%",
+                objectFit: "cover",
+                objectPosition: "center 20%",
+                opacity: 0.5,
+                filter: "grayscale(.45) contrast(1.1)",
+                maskImage: "linear-gradient(90deg, transparent, #000 55%)",
+                WebkitMaskImage:
+                  "linear-gradient(90deg, transparent, #000 55%)",
+              }}
+            />
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "linear-gradient(90deg, transparent 55%, rgba(229,35,27,.14)), linear-gradient(0deg, rgba(10,11,13,.55), transparent 45%)",
+              }}
+            />
+          </>
+        ) : null}
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            gap: 18,
+            alignItems: "flex-start",
+          }}
+        >
+          {PHOTOS[a.id] ? (
+            <img
+              src={PHOTOS[a.id].photo}
+              alt={`Фото: ${a.name}`}
+              style={{
+                width: 124,
+                height: 124,
+                flex: "none",
+                objectFit: "cover",
+                border: "1px solid var(--gtr-border2)",
+                boxShadow: "0 10px 30px rgba(0,0,0,.5)",
+                clipPath:
+                  "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)",
+              }}
+            />
+          ) : null}
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <Eyebrow>{a.catRu ? String(a.catRu) : a.cat}</Eyebrow>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                flexWrap: "wrap",
+                marginTop: 8,
               }}
             >
-              {String(a.relRu || a.rel)}
-            </div>
-          ) : null}
-          <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 12 }}>
-            {(a.styles || []).map((s) => (
-              <Chip key={s} color="rgba(255,255,255,.55)">
-                {s}
-              </Chip>
-            ))}
-          </div>
-          <div style={{ display: "flex", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
-            <button
-              className={`gtr-btn ${inLineup ? "" : "gtr-btn-red"}`}
-              onClick={() =>
-                setLineup((ids) => (inLineup ? ids.filter((x) => x !== a.id) : [...ids, a.id]))
-              }
-            >
-              {inLineup ? "Убрать из лайнапа" : "+ В лайнап события"}
-            </button>
-            {LINKS.filter(([k]) => a[k]).map(([k, label]) => (
-              <a
-                key={String(k)}
-                className="gtr-btn"
-                style={{ textDecoration: "none" }}
-                href={String(a[k])}
-                target="_blank"
-                rel="noreferrer"
+              <h1
+                className="gtr-oswald"
+                style={{ font: "700 28px/1.05 Oswald,sans-serif", margin: 0 }}
               >
-                {label} ↗
-              </a>
-            ))}
+                {a.name}
+              </h1>
+              <Chip
+                color={
+                  a.prio === "A"
+                    ? GREEN
+                    : a.prio === "B"
+                      ? AMBER
+                      : "rgba(255,255,255,.4)"
+                }
+              >
+                ПРИОРИТЕТ {a.prio || "—"}
+              </Chip>
+              {a.tier ? (
+                <Chip color="#7B4DFF">{a.tier.toUpperCase()}</Chip>
+              ) : null}
+            </div>
+            <div
+              style={{
+                marginTop: 9,
+                font: "500 12px/1.5 'Golos Text',sans-serif",
+                color: "var(--gtr-t2)",
+              }}
+            >
+              {a.role}
+            </div>
+            {a.rel ? (
+              <div
+                className="gtr-mono"
+                style={{
+                  marginTop: 6,
+                  font: "500 10.5px/1.4 'JetBrains Mono',monospace",
+                  color: "var(--gtr-t3)",
+                }}
+              >
+                {String(a.relRu || a.rel)}
+              </div>
+            ) : null}
+            <div
+              style={{
+                display: "flex",
+                gap: 7,
+                flexWrap: "wrap",
+                marginTop: 12,
+              }}
+            >
+              {(a.styles || []).map((s) => (
+                <Chip key={s} color="rgba(255,255,255,.55)">
+                  {s}
+                </Chip>
+              ))}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                marginTop: 16,
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                className={`gtr-btn ${inLineup ? "" : "gtr-btn-red"}`}
+                onClick={() =>
+                  setLineup((ids) =>
+                    inLineup ? ids.filter((x) => x !== a.id) : [...ids, a.id],
+                  )
+                }
+              >
+                {inLineup ? "Убрать из лайнапа" : "+ В лайнап события"}
+              </button>
+              {LINKS.filter(([k]) => a[k]).map(([k, label]) => (
+                <a
+                  key={String(k)}
+                  className="gtr-btn"
+                  style={{ textDecoration: "none" }}
+                  href={String(a[k])}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {label} ↗
+                </a>
+              ))}
+            </div>
+            {PHOTOS[a.id] ? (
+              <div
+                className="gtr-mono"
+                style={{
+                  marginTop: 10,
+                  font: "500 8.5px/1 'JetBrains Mono',monospace",
+                  color: "var(--gtr-t3)",
+                }}
+              >
+                фото: {PHOTOS[a.id].source}
+              </div>
+            ) : null}
           </div>
         </div>
       </Card>
 
-      <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div
+        className="gtr-md-stack"
+        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
+      >
         <Card style={{ padding: 18 }}>
           <Eyebrow style={{ marginBottom: 10 }}>КОНТАКТ И БУКИНГ</Eyebrow>
           {(
@@ -434,7 +631,12 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
               ))}
             </>
           ) : (
-            <div style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <div
+              style={{
+                font: "500 11px/1.5 'Golos Text',sans-serif",
+                color: "var(--gtr-t3)",
+              }}
+            >
               Для этой записи шаблон райдера GTR не назначен.
             </div>
           )}

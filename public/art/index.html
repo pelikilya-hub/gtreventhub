@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<!--
+    IMPULSE — generative art of GTR, built on the algorithmic-art template.
+    Template structure and Anthropic studio chrome preserved;
+    algorithm, parameters and palette express the IMPULSE philosophy.
+-->
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИМПУЛЬС — генеративный арт GTR</title>
+    <script src="/vendor/p5.min.js"></script>
+    <style>
+        /* Anthropic Brand Colors (studio chrome — kept per template) */
+        :root {
+            --anthropic-dark: #141413;
+            --anthropic-light: #faf9f5;
+            --anthropic-mid-gray: #b0aea5;
+            --anthropic-light-gray: #e8e6dc;
+            --anthropic-orange: #d97757;
+            --anthropic-blue: #6a9bcc;
+            --anthropic-green: #788c5d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--anthropic-light) 0%, #f5f3ee 100%);
+            min-height: 100vh;
+            color: var(--anthropic-dark);
+        }
+        .container { display: flex; min-height: 100vh; padding: 20px; gap: 20px; }
+        .sidebar {
+            width: 320px; flex-shrink: 0; background: rgba(255,255,255,.95);
+            backdrop-filter: blur(10px); padding: 24px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(20,20,19,.1); overflow-y: auto; overflow-x: hidden;
+        }
+        .sidebar h1 { font-family: Georgia, 'Lora', serif; font-size: 24px; font-weight: 500; margin-bottom: 8px; }
+        .sidebar .subtitle { color: var(--anthropic-mid-gray); font-size: 14px; margin-bottom: 32px; line-height: 1.4; }
+        .control-section { margin-bottom: 32px; }
+        .control-section h3 {
+            font-size: 16px; font-weight: 600; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .control-section h3::before { content: '•'; color: var(--anthropic-orange); font-weight: bold; }
+        .seed-input {
+            width: 100%; background: var(--anthropic-light); padding: 12px; border-radius: 8px;
+            font-family: 'Courier New', monospace; font-size: 14px; margin-bottom: 12px;
+            border: 1px solid var(--anthropic-light-gray); text-align: center;
+        }
+        .seed-input:focus {
+            outline: none; border-color: var(--anthropic-orange);
+            box-shadow: 0 0 0 2px rgba(217,119,87,.1); background: white;
+        }
+        .seed-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .regen-button { margin-bottom: 0; }
+        .control-group { margin-bottom: 20px; }
+        .control-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+        .slider-container { display: flex; align-items: center; gap: 12px; }
+        .slider-container input[type="range"] {
+            flex: 1; height: 4px; background: var(--anthropic-light-gray);
+            border-radius: 2px; outline: none; -webkit-appearance: none;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 16px; height: 16px;
+            background: var(--anthropic-orange); border-radius: 50%; cursor: pointer;
+            transition: all .2s ease;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); background: #c86641; }
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 16px; height: 16px; background: var(--anthropic-orange);
+            border-radius: 50%; border: none; cursor: pointer;
+        }
+        .value-display {
+            font-family: 'Courier New', monospace; font-size: 12px;
+            color: var(--anthropic-mid-gray); min-width: 60px; text-align: right;
+        }
+        .button {
+            background: var(--anthropic-orange); color: white; border: none;
+            padding: 10px 16px; border-radius: 6px; font-size: 14px; font-weight: 500;
+            cursor: pointer; transition: all .2s ease; width: 100%;
+        }
+        .button:hover { background: #c86641; transform: translateY(-1px); }
+        .button:active { transform: translateY(0); }
+        .button.secondary { background: var(--anthropic-blue); }
+        .button.secondary:hover { background: #5a8bb8; }
+        .button.tertiary { background: var(--anthropic-green); }
+        .button.tertiary:hover { background: #6b7b52; }
+        .button-row { display: flex; gap: 8px; }
+        .button-row .button { flex: 1; }
+        .canvas-area { flex: 1; display: flex; align-items: center; justify-content: center; min-width: 0; }
+        #canvas-container {
+            width: 100%; max-width: 1000px; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 20px 40px rgba(20,20,19,.1); background: #0A0B0D;
+        }
+        #canvas-container canvas { display: block; width: 100% !important; height: auto !important; }
+        .loading { display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--anthropic-mid-gray); padding: 60px; }
+        @media (max-width: 600px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .canvas-area { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1>ИМПУЛЬС</h1>
+            <div class="subtitle">Генеративное движение GTR: разряды энергии в тишине зала.
+            Один сид — одна ночь. Философия: IMPULSE.md</div>
+
+            <!-- Seed Section (ALWAYS KEEP THIS) -->
+            <div class="control-section">
+                <h3>Сид</h3>
+                <input type="number" id="seed-input" class="seed-input" value="97" onchange="updateSeed()">
+                <div class="seed-controls">
+                    <button class="button secondary" onclick="previousSeed()">← Пред</button>
+                    <button class="button secondary" onclick="nextSeed()">След →</button>
+                </div>
+                <button class="button tertiary regen-button" onclick="randomSeedAndUpdate()">↻ Случайный</button>
+            </div>
+
+            <!-- Parameters -->
+            <div class="control-section">
+                <h3>Параметры</h3>
+                <div class="control-group">
+                    <label>Импульсы</label>
+                    <div class="slider-container">
+                        <input type="range" id="impulses" min="1" max="4" step="1" value="2" oninput="updateParam('impulses', this.value)">
+                        <span class="value-display" id="impulses-value">2</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Глубина разряда</label>
+                    <div class="slider-container">
+                        <input type="range" id="depth" min="2" max="6" step="1" value="4" oninput="updateParam('depth', this.value)">
+                        <span class="value-display" id="depth-value">4</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Осадок (брызги)</label>
+                    <div class="slider-container">
+                        <input type="range" id="splatter" min="200" max="3000" step="100" value="1400" oninput="updateParam('splatter', this.value)">
+                        <span class="value-display" id="splatter-value">1400</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Срыв (глитч)</label>
+                    <div class="slider-container">
+                        <input type="range" id="chaos" min="0" max="1" step="0.05" value="0.45" oninput="updateParam('chaos', this.value)">
+                        <span class="value-display" id="chaos-value">0.45</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions (ALWAYS KEEP THIS) -->
+            <div class="control-section">
+                <h3>Действия</h3>
+                <div class="button-row">
+                    <button class="button" onclick="resetParameters()">Сброс</button>
+                    <button class="button secondary" onclick="savePNG()">PNG</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-area">
+            <div id="canvas-container">
+                <div class="loading">Заряд копится…</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════
+        // ИМПУЛЬС — параметры
+        // ═══════════════════════════════════════════════════════════════════
+        let params = {
+            seed: 97,           // по числу площадок сети
+            impulses: 2,
+            depth: 4,
+            splatter: 1400,
+            chaos: 0.45,
+        };
+        let defaultParams = {...params};
+
+        // Палитра движения — фиксирована философией, не настраивается
+        const VOID = '#0A0B0D', RED = '#E5231B', PULSE = '#FF3427', WHITE = '#EAEAEA';
+        const TILT = 24;        // градус служебных линий — ДНК дизайн-системы
+        const NIGHT_HOURS = 6;  // слот 22:00–04:00
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Алгоритм
+        // ═══════════════════════════════════════════════════════════════════
+        let flickers = [];  // живой слой: точки послесвечения импульса
+
+        function setup() {
+            let canvas = createCanvas(1200, 1200);
+            canvas.parent('canvas-container');
+            pixelDensity(1);
+            initializeSystem();
+            document.querySelector('.loading').style.display = 'none';
+        }
+
+        function initializeSystem() {
+            randomSeed(params.seed);
+            noiseSeed(params.seed);
+            flickers = [];
+            background(VOID);
+            etchStructuralBands();
+            const anchors = strikeImpulses();
+            for (const a of anchors) dischargeFrom(a);
+            seismoLine();
+            scatterSediment(anchors);
+            scarGlyphs();
+            afterglowArc();
+            scanlines();
+        }
+
+        // Структурные полосы: счёт по модулю 97 — тонкая сетка поля
+        function etchStructuralBands() {
+            const n = 97;
+            stroke(255, 255, 255, 7);
+            strokeWeight(1);
+            for (let i = 0; i < n; i++) {
+                const x = (i * width / n) + random(-1.5, 1.5);
+                line(x, 0, x, height);
+            }
+        }
+
+        // Импульсы: вертикали-носители энергии с глитч-сдвигами
+        function strikeImpulses() {
+            const anchors = [];
+            for (let k = 0; k < params.impulses; k++) {
+                const x0 = width * random(0.18, 0.82);
+                const w = random(4, 26) * (k === 0 ? 1.6 : 1);
+                const col = k === 0 ? RED : (random() < 0.5 ? RED : PULSE);
+                let y = 0;
+                while (y < height) {
+                    const seg = random(30, 170);
+                    const dx = random() < params.chaos ? random(-w * 2.2, w * 2.2) : 0;
+                    noStroke();
+                    fill(red(color(col)), green(color(col)), blue(color(col)), random(190, 255));
+                    rect(x0 + dx - w / 2, y, w * random(0.55, 1.0), seg);
+                    if (random() < params.chaos * 0.5) {
+                        // эхо импульса — белая нить рядом
+                        fill(234, 234, 234, random(40, 110));
+                        rect(x0 + dx + w, y + random(seg), max(1, w * 0.12), seg * random(0.3, 0.9));
+                    }
+                    y += seg + (random() < params.chaos ? random(8, 60) : 0);
+                }
+                const ay = height * random(0.25, 0.75);
+                anchors.push({ x: x0, y: ay, main: k === 0 });
+                for (let f = 0; f < 26; f++)
+                    flickers.push({ x: x0 + random(-w, w), y: random(height), r: random(1, 3.5) });
+            }
+            return anchors;
+        }
+
+        // Разряд: рекурсивная молния из точки пробоя
+        function dischargeFrom(a) {
+            const dirs = a.main ? [0, PI] : [random(TWO_PI)];
+            for (const base of dirs)
+                lightning(a.x, a.y, base + random(-0.4, 0.4), params.depth,
+                          a.main ? random(5, 7) : random(2.5, 4.5));
+        }
+
+        function lightning(x, y, angle, depth, w) {
+            if (depth <= 0 || w < 0.4) return;
+            const segments = floor(random(4, 9));
+            let px = x, py = y, pa = angle;
+            for (let s = 0; s < segments; s++) {
+                const len = random(24, 110) * (depth / params.depth);
+                // излом: выбор между порядком и срывом
+                pa += random() < params.chaos ? random(-1.15, 1.15) : random(-0.28, 0.28);
+                const nx = px + cos(pa) * len;
+                const ny = py + sin(pa) * len;
+                const isRed = w > 2.2;
+                stroke(isRed ? color(RED) : color(WHITE));
+                strokeWeight(w * random(0.7, 1.1));
+                line(px, py, nx, ny);
+                if (random() < 0.5) {
+                    stroke(255, 52, 39, 60);
+                    strokeWeight(w * 2.4);
+                    line(px, py, nx, ny);   // ореол pulse
+                }
+                if (random() < 0.35)
+                    lightning(nx, ny, pa + random(-1.3, 1.3), depth - 1, w * random(0.4, 0.62));
+                px = nx; py = ny;
+            }
+        }
+
+        // Сейсмолиния баса: спокойна в тишине, рвётся на разрядах
+        function seismoLine() {
+            const yBase = height * random(0.62, 0.86);
+            const tilt = radians(TILT) * 0.12;   // едва заметный служебный наклон
+            noFill();
+            stroke(234, 234, 234, 150);
+            strokeWeight(1.2);
+            beginShape();
+            for (let x = 0; x < width; x += 3) {
+                const n = noise(x * 0.004, params.seed * 0.01);
+                const burst = pow(noise(x * 0.02 + 500, params.seed), 6) * 300;
+                vertex(x, yBase + x * tilt * 0.05 + (n - 0.5) * 26 - burst * (random() < 0.5 ? 1 : 0.4));
+            }
+            endShape();
+        }
+
+        // Осадок: брызги со степенным распределением, сгущение у пробоев
+        function scatterSediment(anchors) {
+            noStroke();
+            for (let i = 0; i < params.splatter; i++) {
+                const a = random(anchors);
+                const spread = pow(random(), 2.2) * width * 0.38;
+                const ang = random(TWO_PI);
+                const x = a.x + cos(ang) * spread;
+                const y = a.y + sin(ang) * spread * random(0.5, 1.4);
+                const r = pow(random(), 3.2) * 11 + 0.6;   // крупные капли редки
+                const roll = random();
+                if (roll < 0.52) fill(229, 35, 27, random(120, 230));
+                else if (roll < 0.8) fill(255, 52, 39, random(90, 190));
+                else fill(234, 234, 234, random(60, 150));
+                circle(x, y, r);
+                if (r > 6 && random() < 0.7) {
+                    // подтёк от крупной капли
+                    const drip = random(8, 40);
+                    rect(x - r * 0.12, y, r * 0.24, drip);
+                }
+            }
+        }
+
+        // Глифы-шрамы: служебные метки, штампы на кофре
+        function scarGlyphs() {
+            const count = floor(random(3, 7));
+            for (let i = 0; i < count; i++) {
+                const x = random(width * 0.08, width * 0.92);
+                const y = random(height * 0.08, height * 0.92);
+                const s = random(8, 26);
+                push();
+                translate(x, y);
+                rotate(random() < 0.6 ? radians(-TILT) : random(-0.3, 0.3));
+                stroke(random() < 0.4 ? color(RED) : color(WHITE));
+                strokeWeight(random(1, 2.4));
+                if (random() < 0.5) { line(-s, 0, s, 0); line(0, -s, 0, s); }  // крест
+                else for (let t = -s; t < s; t += 5) line(t, -s * 0.4, t + 4, s * 0.4); // штриховка
+                pop();
+            }
+        }
+
+        // Дуга послесвечения: шесть часов ночи, от 22:00 до 04:00
+        function afterglowArc() {
+            const cx = width * random(0.3, 0.7);
+            const cy = height * 1.15;
+            const r0 = height * random(0.55, 0.75);
+            noFill();
+            const span = TWO_PI * (NIGHT_HOURS / 24);           // шесть часов из суток
+            const a0 = -HALF_PI - span / 2;
+            for (let i = 0; i < 22; i++) {
+                stroke(229, 35, 27, 26 - i);
+                strokeWeight(1);
+                arc(cx, cy, (r0 + i * 6) * 2, (r0 + i * 6) * 2, a0, a0 + span);
+            }
+        }
+
+        // Развёртка: фактура старого монитора
+        function scanlines() {
+            noStroke();
+            fill(0, 0, 0, 34);
+            for (let y = 0; y < height; y += 3) rect(0, y, width, 1);
+            // зерно
+            for (let i = 0; i < 2600; i++) {
+                fill(255, 255, 255, random(4, 14));
+                rect(random(width), random(height), 1, 1);
+            }
+        }
+
+        // Живой слой: послесвечение мерцает, композиция дышит
+        function draw() {
+            if (frameCount % 3 !== 0) return;
+            noStroke();
+            for (const f of flickers) {
+                if (random() < 0.08) {
+                    fill(255, 52, 39, random(30, 120));
+                    circle(f.x, f.y, f.r * random(0.6, 1.6));
+                } else if (random() < 0.02) {
+                    fill(10, 11, 13, 200);
+                    circle(f.x, f.y, f.r * 2);
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // UI-обработчики
+        // ═══════════════════════════════════════════════════════════════════
+        function updateParam(name, value) {
+            params[name] = parseFloat(value);
+            document.getElementById(name + '-value').textContent = value;
+            initializeSystem();
+        }
+
+        function savePNG() { saveCanvas('gtr-impulse-' + params.seed, 'png'); }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Сид-контролы (по шаблону)
+        // ═══════════════════════════════════════════════════════════════════
+        function updateSeedDisplay() { document.getElementById('seed-input').value = params.seed; }
+        function updateSeed() {
+            const v = parseInt(document.getElementById('seed-input').value);
+            if (v && v > 0) { params.seed = v; initializeSystem(); }
+            else updateSeedDisplay();
+        }
+        function previousSeed() { params.seed = Math.max(1, params.seed - 1); updateSeedDisplay(); initializeSystem(); }
+        function nextSeed() { params.seed = params.seed + 1; updateSeedDisplay(); initializeSystem(); }
+        function randomSeedAndUpdate() { params.seed = Math.floor(Math.random() * 999999) + 1; updateSeedDisplay(); initializeSystem(); }
+        function resetParameters() {
+            params = {...defaultParams};
+            for (const k of ['impulses', 'depth', 'splatter', 'chaos']) {
+                document.getElementById(k).value = params[k];
+                document.getElementById(k + '-value').textContent = params[k];
+            }
+            updateSeedDisplay();
+            initializeSystem();
+        }
+        window.addEventListener('load', updateSeedDisplay);
+    </script>
+</body>
+</html>

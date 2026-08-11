@@ -70,7 +70,8 @@ export function quoteDocument({
       </section>`
     : "";
 
-  return `<!doctype html><html lang="ru"><head><meta charset="utf-8">
+  const origin = typeof location !== "undefined" ? location.origin : "";
+  return `<!doctype html><html lang="ru"><head><base href="${origin}/"><meta charset="utf-8">
 <title>${esc(no)} · ${esc(venue)}</title>
 <style>
 @font-face{font-family:Oswald;font-weight:600;src:url(/fonts/gtr/Oswald-600-cyrillic.woff2) format('woff2');font-display:swap}

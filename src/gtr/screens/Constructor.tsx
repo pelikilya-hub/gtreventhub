@@ -27,6 +27,7 @@ import {
   RATE_LABEL,
   TIER_LABEL,
   TIER_NOTE,
+  richOf,
   tierPlans,
   turnkeyPackages,
   equipGroups,
@@ -58,6 +59,8 @@ import {
 } from "../data/brief";
 import { notifyRequestFn } from "../notify";
 import { quoteDocument } from "../quote-doc";
+import { eventDeckDocument } from "../event-deck";
+import { drawImpulse } from "../impulse";
 import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow, Icon, tint } from "../ui";
 
@@ -445,6 +448,49 @@ export function ConstructorScreen({
   const openQuestions = questions.filter((qq) => qq.required && !qq.ok);
   // Экспорт сметы: печатный документ, из которого браузер делает PDF.
   // Если попапы заблокированы — не молчим, а отдаём текстовый файл.
+  // Клиентская дека: брендовые слайды с ИМПУЛЬС-обложкой в PDF
+  const openDeck = () => {
+    const cv = document.createElement("canvas");
+    cv.width = 1600;
+    cv.height = 1120;
+    const ctx = cv.getContext("2d");
+    if (ctx) drawImpulse(ctx, 1600, 1120, draft.id, { density: 1.2 });
+    const coverArt = cv.toDataURL("image/png");
+
+    const slotNode = g.nodes.find((n) => n.kind === "slot");
+    const rich = richOf(vid);
+    const win = window.open("", "_blank", "width=1200,height=850");
+    if (!win) return;
+    win.document.write(
+      eventDeckDocument({
+        title: draftTitle(draft),
+        venue: v.name || vid,
+        area: [v.type, v.area].filter(Boolean).join(" · "),
+        when: slotNode?.sub || slotNode?.title || "дата уточняется",
+        guests: draft.guests || "",
+        vibe: eventVibe?.label,
+        coverArt,
+        heroImg: rich?.hero,
+        rooms: g.nodes
+          .filter((n) => n.kind === "room")
+          .map((n) => ({ name: n.title, meta: n.sub || "" })),
+        artists: g.nodes
+          .filter((n) => n.kind === "artist")
+          .map((n) => ({ name: n.title, sub: n.sub || "", badge: n.badge || "АРТИСТ" })),
+        modules: g.nodes
+          .filter((n) =>
+            ["promo", "decor", "interactive", "gear", "content", "sound", "light"].includes(n.kind),
+          )
+          .map((n) => ({ kind: n.kind, title: n.title, sub: n.sub || "" })),
+        quote,
+        tiers: tierPlans(g, vid),
+      }),
+    );
+    win.document.close();
+    win.focus();
+    win.setTimeout(() => win.print(), 400);
+  };
+
   const exportQuote = () => {
     const when = g.nodes.find((n) => n.kind === "slot")?.sub || "дата уточняется";
     const rooms =
@@ -1595,6 +1641,14 @@ export function ConstructorScreen({
               }}
             >
               <Eyebrow>СМЕТА СОБЫТИЯ</Eyebrow>
+              <button
+                className="gtr-btn"
+                style={{ padding: "5px 9px", fontSize: 9.5, marginRight: 6 }}
+                onClick={openDeck}
+                title="Клиентская презентация события в PDF"
+              >
+                ДЕКА
+              </button>
               <button
                 className="gtr-btn"
                 style={{ padding: "4px 8px", fontSize: 9.5 }}

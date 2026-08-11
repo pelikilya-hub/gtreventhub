@@ -19,6 +19,18 @@ export const Route = createRootRoute({
         content:
           "GTR Event: конструктор события, смета с комиссией, каталоги площадок, артистов и подрядчиков Пхукета.",
       },
+      // Ссылку кидают в мессенджеры — без og-тегов превью там пустое
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "GTR Event" },
+      { property: "og:locale", content: "ru_RU" },
+      { property: "og:title", content: "GTR Event — операционная платформа площадок Пхукета" },
+      {
+        property: "og:description",
+        content:
+          "Конструктор события, смета с комиссией GTR, каталоги 97 площадок, 312 артистов, подрядчиков и оборудования.",
+      },
+      { name: "twitter:card", content: "summary" },
+      { name: "theme-color", content: "#0A0B0D" },
     ],
   }),
   shellComponent: RootShell,

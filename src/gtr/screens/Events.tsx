@@ -20,6 +20,7 @@ import { BRIEF, vibeOf, vibeQuestionFor, type BriefAnswers } from "../data/brief
 import { buildPresetDraft, EVENT_PRESETS, presetBlockCount } from "../data/presets";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow, tint } from "../ui";
+import { ImpulseArt } from "../impulse";
 
 const FORMATS = [
   "Клубная ночь",
@@ -185,6 +186,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                 onClick={() => open(d.id)}
                 style={{
                   padding: "16px 18px",
+                  paddingLeft: 26,
                   display: "grid",
                   gap: 9,
                   cursor: "pointer",
@@ -192,6 +194,12 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                   overflow: "hidden",
                 }}
               >
+                <div
+                  aria-hidden="true"
+                  style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 14 }}
+                >
+                  <ImpulseArt seed={d.id} density={0.4} />
+                </div>
                 {/* полоса вайба: направление события видно в списке с одного взгляда */}
                 {vibe?.colors ? (
                   <span

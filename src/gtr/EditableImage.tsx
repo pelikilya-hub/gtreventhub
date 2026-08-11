@@ -1,6 +1,7 @@
 import { useRef, useState, type CSSProperties } from "react";
 
 import { DEFAULT_PHOTO, photoFilter, photoTransform, useContent, type PhotoEdit } from "./content";
+import { ImpulseArt } from "./impulse";
 import { Eyebrow } from "./ui";
 
 // Фото площадки с неразрушающими правками (кадр + экспозиция) и, в режиме
@@ -61,21 +62,23 @@ export function EditableImage({
           }}
         />
       ) : (
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "rgba(255,255,255,.14)",
-            font: "500 11px/1 'JetBrains Mono',monospace",
-            // фирменный паттерн из бренд-кита вместо пустого прямоугольника
-            background:
-              "linear-gradient(rgba(10,11,13,.82), rgba(10,11,13,.82)), url(/brand/GTR_pattern_dark.svg) center / 480px auto",
-          }}
-        >
-          нет фото
+        <div style={{ width: "100%", height: "100%", position: "relative" }}>
+          {/* нет фото — генеративный ИМПУЛЬС, сид = ID площадки:
+              у каждой площадки своя, но всегда одна и та же ночь */}
+          <ImpulseArt seed={vid} density={0.7} />
+          <div
+            className="gtr-mono"
+            style={{
+              position: "absolute",
+              right: 8,
+              bottom: 6,
+              font: "500 8px/1 'JetBrains Mono',monospace",
+              color: "rgba(255,255,255,.25)",
+              letterSpacing: ".12em",
+            }}
+          >
+            IMPULSE · {vid}
+          </div>
         </div>
       )}
       {overlay ? <div style={{ position: "absolute", inset: 0, background: overlay }} /> : null}

@@ -533,6 +533,7 @@ export function DashScreen() {
 
       {/* ---------- кольцо + KPI ---------- */}
       <div
+        className="gtr-md-stack"
         style={{
           display: "grid",
           gridTemplateColumns: "minmax(300px,380px) 1fr",
@@ -613,6 +614,7 @@ export function DashScreen() {
 
       {/* ---------- действия + сайд ---------- */}
       <div
+        className="gtr-md-stack"
         style={{
           display: "grid",
           gridTemplateColumns: "1fr minmax(280px,330px)",

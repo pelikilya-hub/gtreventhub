@@ -173,9 +173,12 @@ export function CalendarScreen() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr minmax(280px,330px)", gap: 18 }}>
+      <div
+        className="gtr-md-stack"
+        style={{ display: "grid", gridTemplateColumns: "1fr minmax(280px,330px)", gap: 18 }}
+      >
         <div>
-          <Card style={{ overflow: "hidden" }}>
+          <Card className="gtr-cal-scroll" style={{ overflow: "hidden" }}>
             <div
               style={{
                 display: "grid",

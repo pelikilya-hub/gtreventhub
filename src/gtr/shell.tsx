@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useMemo, useRef } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { logoutFn, type SessionUser } from "./auth";
@@ -61,7 +61,13 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
   const navigate = useNavigate();
   const venue = user.venueId ? V(user.venueId) : null;
 
-  const go = (id: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: id } });
+  // Мобильное меню: на узком экране сайдбар живёт как выезжающая панель
+  const [navOpen, setNavOpen] = useState(false);
+
+  const go = (id: ScreenId) => {
+    setNavOpen(false);
+    navigate({ to: "/gtr/$screen", params: { screen: id } });
+  };
 
   // Живые проблемы/задержки по всем событиям площадки — для счётчика и тостов.
   // Событий теперь может быть несколько, поэтому счётчик собирается по всем.
@@ -153,23 +159,30 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
   );
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div className={`gtr-shell ${navOpen ? "nav-open" : ""}`}>
+      {/* ---------- мобильная шапка ---------- */}
+      <header className="gtr-topbar">
+        <button
+          className="gtr-burger"
+          aria-label="Меню"
+          aria-expanded={navOpen}
+          onClick={() => setNavOpen((v) => !v)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+        <span
+          className="gtr-oswald"
+          style={{ font: "700 15px/1 Oswald,sans-serif", letterSpacing: ".08em" }}
+        >
+          GTR <span style={{ color: "var(--gtr-red)" }}>EVENT</span>
+        </span>
+      </header>
+      {navOpen ? <div className="gtr-scrim" onClick={() => setNavOpen(false)} /> : null}
+
       {/* ---------- сайдбар ---------- */}
-      <aside
-        style={{
-          width: 238,
-          flex: "none",
-          background: "var(--gtr-side)",
-          borderRight: "1px solid rgba(255,255,255,.06)",
-          padding: "20px 14px",
-          display: "flex",
-          flexDirection: "column",
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          overflowY: "auto",
-        }}
-      >
+      <aside className="gtr-sidebar">
         <div
           className="gtr-oswald gtr-neon"
           style={{
@@ -301,11 +314,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
       </aside>
 
       {/* ---------- контент ---------- */}
-      <main
-        key={screen}
-        className="gtr-fade"
-        style={{ flex: 1, minWidth: 0, padding: "22px 30px 40px" }}
-      >
+      <main key={screen} className="gtr-fade gtr-main">
         <Suspense
           fallback={
             <div

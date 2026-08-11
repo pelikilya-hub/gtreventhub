@@ -681,3 +681,109 @@
 @media (prefers-reduced-motion: reduce) {
   .gtr-seq > * { animation: none; }
 }
+
+/* ---------- каркас приложения ---------- */
+.gtr-shell { display: flex; min-height: 100dvh; }
+.gtr-sidebar {
+  width: 238px;
+  flex: none;
+  background: var(--gtr-side);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow-y: auto;
+}
+.gtr-main { flex: 1; min-width: 0; padding: 22px 30px 40px; }
+.gtr-topbar { display: none; }
+.gtr-scrim { display: none; }
+
+/* ---------- мобильный каркас ---------- */
+@media (max-width: 860px) {
+  .gtr-shell { display: block; }
+  .gtr-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: var(--gtr-z-panel);
+    background: rgba(12, 13, 16, 0.94);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px 14px;
+    padding-top: calc(10px + env(safe-area-inset-top));
+  }
+  .gtr-burger {
+    display: grid;
+    gap: 4px;
+    width: 44px;
+    height: 44px;
+    place-content: center;
+    background: transparent;
+    border: 1px solid var(--gtr-border2);
+    cursor: pointer;
+    padding: 0;
+  }
+  .gtr-burger span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--gtr-t1);
+    transition: transform 0.2s, opacity 0.2s;
+  }
+  .nav-open .gtr-burger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .nav-open .gtr-burger span:nth-child(2) { opacity: 0; }
+  .nav-open .gtr-burger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  .gtr-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: var(--gtr-z-modal);
+    width: min(300px, 85vw);
+    height: 100dvh;
+    transform: translateX(-105%);
+    transition: transform 0.24s cubic-bezier(0.2, 0.75, 0.25, 1);
+    box-shadow: 14px 0 40px rgba(0, 0, 0, 0.55);
+    padding-top: calc(20px + env(safe-area-inset-top));
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  .nav-open .gtr-sidebar { transform: none; }
+
+  .gtr-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--gtr-z-modal) - 1);
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  .gtr-main {
+    padding: 14px 14px calc(30px + env(safe-area-inset-bottom));
+  }
+
+  /* заголовки чуть плотнее на узком экране */
+  .gtr-h1 { font-size: clamp(1.35rem, 6.4vw, 1.8rem); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gtr-sidebar { transition: none; }
+  }
+}
+
+/* ---------- адаптивные раскладки ---------- */
+/* Инлайновые стили сильнее классов, поэтому переопределения с !important */
+@media (max-width: 860px) {
+  .gtr-md-stack { grid-template-columns: 1fr !important; }
+  /* без min-width:0 grid-ячейка раздувается до контента и тянет страницу */
+  .gtr-md-stack > * { min-width: 0; }
+  /* сетка месяца: не сжимаем дни в нитку, а прокручиваем внутри карточки */
+  .gtr-cal-scroll { overflow-x: auto; }
+  .gtr-cal-scroll > * { min-width: 640px; }
+  /* палитра и инспектор конструктора теряют sticky — в столбике он мешает */
+  .gtr-md-unstick { position: static !important; max-height: none !important; }
+}

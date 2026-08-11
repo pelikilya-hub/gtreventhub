@@ -678,6 +678,7 @@ export function ConstructorScreen({
       ) : null}
 
       <div
+        className="gtr-md-stack"
         style={{
           display: "grid",
           gridTemplateColumns: "230px 1fr 290px",
@@ -687,6 +688,7 @@ export function ConstructorScreen({
       >
         {/* ---------- палитра ---------- */}
         <Card
+          className="gtr-md-unstick"
           style={{
             padding: 12,
             position: "sticky",
@@ -1283,6 +1285,7 @@ export function ConstructorScreen({
 
         {/* ---------- инспектор ---------- */}
         <div
+          className="gtr-md-unstick"
           style={{
             display: "grid",
             gap: 12,

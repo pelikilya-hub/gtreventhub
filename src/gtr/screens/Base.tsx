@@ -16,7 +16,7 @@ import {
   V,
 } from "../data/app-data";
 import { EditableImage } from "../EditableImage";
-import { Card, Chip, Eyebrow, Field, tint } from "../ui";
+import { Card, Chip, Eyebrow, Field, tint, TrashTitle } from "../ui";
 
 const confColor = (c: string) => (c === "High" ? GREEN : c === "Medium" ? AMBER : RED);
 const isQuar = (x: { confidence: string; status?: string }) =>
@@ -237,9 +237,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               marginTop: 8,
             }}
           >
-            <h1 className="gtr-trash" style={{ fontSize: 29, lineHeight: 1.05, margin: 0 }}>
-              {v.name}
-            </h1>
+            <TrashTitle text={v.name} size={29} />
             <Chip color={confColor(v.confidence)}>ДОСТОВЕРНОСТЬ: {v.confidence.toUpperCase()}</Chip>
             {R ? (
               <Chip color={R.state === "Бронируемая" ? GREEN : AMBER}>{R.state.toUpperCase()}</Chip>

@@ -103,6 +103,35 @@ export const Field = ({
   </div>
 );
 
+// Трэш-заголовок: заглавная буква каждого слова — красная.
+// CSS ::first-letter красит только первую букву блока, поэтому слова
+// размечаются здесь.
+export const TrashTitle = ({
+  text,
+  size = 29,
+  style,
+}: {
+  text: string;
+  size?: number;
+  style?: CSSProperties;
+}) => (
+  <h1 className="gtr-trash" style={{ fontSize: size, lineHeight: 1.05, margin: 0, ...style }}>
+    {text.split(/(\s+)/).map((w, i) => {
+      if (!w || /^\s+$/.test(w)) return w;
+      const first = w[0];
+      const isUpper = first !== first.toLowerCase() && first === first.toUpperCase();
+      return isUpper ? (
+        <span key={i}>
+          <span style={{ color: "var(--gtr-red)" }}>{first}</span>
+          {w.slice(1)}
+        </span>
+      ) : (
+        <span key={i}>{w}</span>
+      );
+    })}
+  </h1>
+);
+
 // Буква-значок вместо фото: рваная панк-буква на красной подложке.
 // Латиницу рисует All Ages, кириллицу подхватывает Trashed из стека.
 export const LetterMark = ({

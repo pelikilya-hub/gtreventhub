@@ -14,7 +14,7 @@ import {
 } from "../data/app-data";
 import photosRaw from "../data/artist-photos.json";
 import { useGtr } from "../store";
-import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint } from "../ui";
+import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint, TrashTitle } from "../ui";
 
 // Фото артистов: точное совпадение имени в открытом каталоге, заглушки убраны.
 // Дашь Spotify-ключи — база пересоберётся тем же пайплайном.
@@ -477,9 +477,7 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
                 marginTop: 8,
               }}
             >
-              <h1 className="gtr-trash" style={{ fontSize: 30, lineHeight: 1.05, margin: 0 }}>
-                {a.name}
-              </h1>
+              <TrashTitle text={a.name} size={30} />
               <Chip
                 color={
                   a.prio === "A"

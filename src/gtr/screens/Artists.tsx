@@ -17,6 +17,7 @@ import mediaRaw from "../data/artist-media.json";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint, TrashTitle } from "../ui";
 import { openAppLink } from "../applink";
+import { liveStatusFn } from "../kv-api";
 
 // Фото артистов: точное совпадение имени в открытом каталоге, заглушки убраны.
 // Дашь Spotify-ключи — база пересоберётся тем же пайплайном.
@@ -70,10 +71,28 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
   const [style, setStyle] = useState("all");
   const navigate = useNavigate();
   const { shared, setLineup } = useGtr();
+  // Кто в эфире: Twitch-автодетект + ручные флаги артистов (Instagram Live)
+  const [liveMap, setLiveMap] = useState<Record<string, { live: boolean; kind: string; url?: string }>>({});
 
   useEffect(() => {
     loadArtists().then(setBase);
   }, []);
+
+  useEffect(() => {
+    if (!base) return;
+    const poll = () => {
+      const items = base.artists
+        .filter((a) => a.twitch)
+        .slice(0, 50)
+        .map((a) => ({ id: a.id, tw: a.twitch }));
+      liveStatusFn({ data: { items } })
+        .then((r) => setLiveMap(r.live))
+        .catch(() => {});
+    };
+    poll();
+    const t = setInterval(poll, 60000);
+    return () => clearInterval(t);
+  }, [base]);
 
   const openArtist = (id?: string) =>
     navigate({
@@ -125,7 +144,8 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
   const selected = artistId
     ? base.artists.find((a) => a.id === artistId)
     : null;
-  if (selected) return <ArtistCard a={selected} onBack={() => openArtist()} />;
+  if (selected)
+    return <ArtistCard a={selected} live={liveMap[selected.id]} onBack={() => openArtist()} />;
 
   const topStyles = base.meta.styles.slice(0, 14);
   const performerCount = base.artists.filter(isPerformer).length;
@@ -344,6 +364,12 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
               >
                 {a.name}
               </span>
+              {liveMap[a.id]?.live ? (
+                <span className="gtr-live-chip">
+                  <span className="gtr-live-dot" />
+                  LIVE
+                </span>
+              ) : null}
               {MEDIA[a.id] ? <Chip color="#FF3427">▶</Chip> : null}
               <Chip
                 color={
@@ -395,7 +421,15 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
   );
 }
 
-function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
+function ArtistCard({
+  a,
+  live,
+  onBack,
+}: {
+  a: Artist;
+  live?: { live: boolean; kind: string; url?: string };
+  onBack: () => void;
+}) {
   const { shared, setLineup } = useGtr();
   const inLineup = shared.lineup.includes(a.id);
   const rider = a.rider ? RIDERS[a.rider] : null;
@@ -612,6 +646,35 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
               >
                 {inLineup ? "Убрать из лайнапа" : "+ В лайнап события"}
               </button>
+              {live?.live ? (
+                <a
+                  className="gtr-btn gtr-live-btn"
+                  style={{ textDecoration: "none" }}
+                  href={live.url || (a.twitch ? `https://www.twitch.tv/${a.twitch}` : String(a.ig))}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openAppLink(live.url || (a.twitch ? `https://www.twitch.tv/${a.twitch}` : String(a.ig)));
+                  }}
+                >
+                  <span className="gtr-live-dot" /> В ЭФИРЕ — смотреть
+                </a>
+              ) : a.twitch ? (
+                <a
+                  className="gtr-btn"
+                  style={{ textDecoration: "none" }}
+                  href={`https://www.twitch.tv/${a.twitch}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openAppLink(`https://www.twitch.tv/${a.twitch}`);
+                  }}
+                >
+                  Twitch ↗
+                </a>
+              ) : null}
               {LINKS.filter(([k]) => a[k]).map(([k, label]) => (
                 <a
                   key={String(k)}

@@ -1781,6 +1781,7 @@ export type Artist = {
   group: string;
   styles: string[];
   bio?: string; // короткое описание для профиля (RU)
+  twitch?: string; // логин канала Twitch — для индикатора «в эфире»
   tier: string;
   rider: string;
   sp: string;

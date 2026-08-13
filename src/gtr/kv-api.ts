@@ -796,3 +796,98 @@ export const broadcastFn = createServerFn({ method: "POST" })
     }
     return { ok: true as const, sent };
   });
+
+// ---------- эфиры: Twitch (автодетект) + ручной флаг «я в эфире» ----------
+
+type LiveState = { live: boolean; kind: "tw" | "ig"; url?: string };
+
+// Публичный GQL твича (тот же, что у их веб-плеера): stream != null → эфир
+async function twitchLive(logins: string[]): Promise<Record<string, boolean>> {
+  if (!logins.length) return {};
+  try {
+    const body = logins.map((l) => ({
+      query: "query($l:String!){user(login:$l){login stream{id}}}",
+      variables: { l },
+    }));
+    const res = await fetch("https://gql.twitch.tv/gql", {
+      method: "POST",
+      headers: {
+        "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    const arr = (await res.json()) as { data?: { user?: { login: string; stream: unknown } } }[];
+    const out: Record<string, boolean> = {};
+    arr.forEach((r, i) => {
+      out[logins[i]] = Boolean(r?.data?.user && (r.data.user as { stream: unknown }).stream);
+    });
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+export const liveStatusFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { items: { id: string; tw?: string }[] }) => d)
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    const items = data.items.slice(0, 60);
+    const out: Record<string, LiveState> = {};
+    const misses: { id: string; tw: string }[] = [];
+
+    // Ручные флаги «я в эфире» — целиком (их единицы, ключи с TTL)
+    if (ns) {
+      const manualKeys = await kvListAll(ns, "live:ig:");
+      for (const k of manualKeys) {
+        const manual = await kvGetJson<{ url?: string; until: number }>(ns, k);
+        if (manual && manual.until > Date.now())
+          out[k.slice("live:ig:".length)] = { live: true, kind: "ig", url: manual.url };
+      }
+    }
+
+    for (const it of items) {
+      if (out[it.id]) continue;
+      if (!it.tw) continue;
+      const login = it.tw.toLowerCase();
+      if (ns) {
+        const cached = await kvGetJson<{ live: boolean }>(ns, `live:tw:${login}`);
+        if (cached) {
+          if (cached.live) out[it.id] = { live: true, kind: "tw", url: `https://www.twitch.tv/${login}` };
+          continue;
+        }
+      }
+      misses.push({ id: it.id, tw: login });
+    }
+
+    if (misses.length) {
+      const fresh = await twitchLive([...new Set(misses.map((m) => m.tw))]);
+      for (const m of misses) {
+        const live = Boolean(fresh[m.tw]);
+        if (ns)
+          await ns.put(`live:tw:${m.tw}`, JSON.stringify({ live }), { expirationTtl: 120 });
+        if (live) out[m.id] = { live: true, kind: "tw", url: `https://www.twitch.tv/${m.tw}` };
+      }
+    }
+    return { live: out };
+  });
+
+// Артист сам включает «я в эфире» (Instagram Live и т.п.): 4 часа или до /offair
+export const setLiveFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { on: boolean; url?: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns || !u.artistId) return { ok: false as const };
+    const key = `live:ig:${u.artistId}`;
+    if (!data.on) {
+      await ns.delete(key);
+      return { ok: true as const, on: false };
+    }
+    await ns.put(
+      key,
+      JSON.stringify({ url: (data.url || "").slice(0, 300), until: Date.now() + 4 * 3600 * 1000 }),
+      { expirationTtl: 4 * 3600 },
+    );
+    return { ok: true as const, on: true };
+  });

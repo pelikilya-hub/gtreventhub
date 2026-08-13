@@ -21,7 +21,7 @@ import {
 import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow, Icon, Ring } from "../ui";
 import { ImpulseArt } from "../impulse";
-import { createInviteFn, decideOfferFn, tgLinkFn, tgStatusFn } from "../kv-api";
+import { createInviteFn, decideOfferFn, setLiveFn, tgLinkFn, tgStatusFn } from "../kv-api";
 import { BossCabinet } from "./Boss";
 import { openAppLink } from "../applink";
 import { OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
@@ -1330,10 +1330,23 @@ function ArtistCabinet() {
   const [tg, setTg] = useState<{ configured: boolean; linked: boolean; bot: string } | null>(null);
   const [tgLink, setTgLink] = useState("");
   const [tgMsg, setTgMsg] = useState("");
+  // «Я в эфире»: зелёная кнопка в каталоге, ведёт зрителей на ваш стрим
+  const [onAir, setOnAir] = useState(false);
+  const [airUrl, setAirUrl] = useState("");
 
   useEffect(() => {
     tgStatusFn().then(setTg).catch(() => {});
   }, []);
+
+  const toggleAir = async () => {
+    const next = !onAir;
+    setOnAir(next);
+    try {
+      await setLiveFn({ data: { on: next, url: airUrl } });
+    } catch {
+      setOnAir(!next);
+    }
+  };
 
   const mine = shared.offers.filter((o) => o.to === user.email);
   const open = mine.filter((o) => o.status === "sent");
@@ -1405,6 +1418,34 @@ function ArtistCabinet() {
           </div>
         </div>
       </div>
+
+      {/* Эфир: зелёная кнопка в каталоге артистов */}
+      <Card style={{ padding: "16px 20px", marginBottom: 18, display: "grid", gap: 9 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <Eyebrow>ПРЯМОЙ ЭФИР</Eyebrow>
+          {onAir ? (
+            <span className="gtr-live-chip">
+              <span className="gtr-live-dot" /> В ЭФИРЕ
+            </span>
+          ) : null}
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          <input
+            className="gtr-input"
+            style={{ flex: "1 1 220px", minWidth: 0 }}
+            placeholder="Ссылка на эфир (Instagram Live, Twitch…) — можно пустую"
+            value={airUrl}
+            onChange={(e) => setAirUrl(e.target.value)}
+          />
+          <button className={`gtr-btn ${onAir ? "" : "gtr-btn-red"}`} onClick={toggleAir}>
+            {onAir ? "⏹ Завершить эфир" : "🔴 Я в эфире"}
+          </button>
+        </div>
+        <span style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+          Кнопка в каталоге станет зелёной, зрители перейдут прямо в эфир. Автоотключение через 4 часа.
+          Из Telegram: «🔴 Я в эфире» на клавиатуре бота.
+        </span>
+      </Card>
 
       {/* Telegram */}
       <Card style={{ padding: "16px 20px", marginBottom: 18, display: "grid", gap: 9 }}>

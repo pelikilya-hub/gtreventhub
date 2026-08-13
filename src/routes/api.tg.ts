@@ -120,6 +120,7 @@ const kbFor = (u: { role?: string }) => ({
       ]
     : [
         [{ text: "🎧 Предложения" }, { text: "🎟 Выступления" }],
+        [{ text: "🔴 Я в эфире" }, { text: "⏹ Завершить эфир" }],
         [{ text: "🌐 Кабинет" }, { text: "ℹ️ Помощь" }],
       ],
   resize_keyboard: true,
@@ -134,6 +135,8 @@ const BUTTON_CMDS: [RegExp, string][] = [
   [/^🎟|^выступлени/i, "/gigs"],
   [/^👥|^пригласи/i, "/invite_form"],
   [/^отмена$/i, "/cancel"],
+  [/^🔴|^я в эфире/i, "/live"],
+  [/^⏹|^заверши/i, "/offair"],
   [/^🌐|^кабинет/i, "/cabinet"],
   [/^ℹ️|^ℹ|^помощь/i, "/help"],
 ];
@@ -529,6 +532,31 @@ export const Route = createFileRoute("/api/tg")({
                   : undefined,
               );
             }
+            return Response.json({ ok: true });
+          }
+
+          // ---------- «я в эфире»: зелёная кнопка у артиста в каталоге ----------
+          if (cmd === "/live" || cmd === "/offair") {
+            if (!su.artistId) {
+              await reply(chatId, "Эта команда для артистов: к вашему аккаунту не привязана карточка каталога.");
+              return Response.json({ ok: true });
+            }
+            const key = `live:ig:${su.artistId}`;
+            if (cmd === "/offair") {
+              await ns.delete(key);
+              await reply(chatId, "⏹ Эфир завершён — индикатор в каталоге погашен.");
+              return Response.json({ ok: true });
+            }
+            const url = (text.match(/https?:\/\/\S+/) || [])[0] || "";
+            await ns.put(
+              key,
+              JSON.stringify({ url, until: Date.now() + 4 * 3600 * 1000 }),
+              { expirationTtl: 4 * 3600 },
+            );
+            await reply(
+              chatId,
+              `🔴 <b>Вы в эфире!</b> Кнопка в каталоге стала зелёной${url ? " и ведёт на вашу ссылку" : " и ведёт на ваш Instagram"}.\nАвтоотключение через 4 часа, раньше — «⏹ Завершить эфир».\nСо ссылкой: <code>/live https://instagram.com/…</code>`,
+            );
             return Response.json({ ok: true });
           }
 

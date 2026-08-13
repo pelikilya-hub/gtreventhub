@@ -24,6 +24,10 @@ export function appScheme(url: string): string | null {
       return `vnd.youtube://${host}${u.pathname}${u.search}`;
     }
     if (host === "youtu.be") return `vnd.youtube://watch?v=${path.slice(1)}`;
+    if (host === "twitch.tv" || host === "m.twitch.tv") {
+      const m = path.match(/^\/([A-Za-z0-9_]+)$/);
+      if (m) return `twitch://stream/${m[1]}`;
+    }
     if (host === "t.me" || host === "telegram.me") {
       const m = path.match(/^\/([A-Za-z0-9_]+)/);
       if (m) {

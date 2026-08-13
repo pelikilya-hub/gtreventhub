@@ -1705,6 +1705,13 @@
    "source": "фото из официального поста @weddingdjphuket",
    "match": "manual",
    "name": "DJ Mike Edwards"
+  },
+  "MC-0007": {
+   "photo": "/artists/MC-0007-avatar.jpg",
+   "photoMed": "/artists/MC-0007-avatar-med.jpg",
+   "source": "постер IGTV @jzen_music (ссылка от владельца)",
+   "match": "manual",
+   "name": "JZEN"
   }
  }
 }

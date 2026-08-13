@@ -6,7 +6,7 @@
 // Минимальный интерфейс KV, чтобы не тащить @cloudflare/workers-types
 export type KvNs = {
   get: (key: string) => Promise<string | null>;
-  put: (key: string, value: string) => Promise<void>;
+  put: (key: string, value: string, opts?: { expirationTtl?: number }) => Promise<void>;
   delete: (key: string) => Promise<void>;
   list: (opts?: {
     prefix?: string;

@@ -27,10 +27,19 @@ const sha256hex = async (t: string) => {
     .join("");
 };
 
+// Кириллица → латиница, чтобы логины выглядели аккуратно
+const TRANSLIT: Record<string, string> = {
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z",
+  и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r",
+  с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh",
+  щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+};
+
 const slugify = (name: string) =>
   name
     .toLowerCase()
-    .replace(/[^a-zа-яё0-9]+/gi, ".")
+    .replace(/[а-яё]/g, (c) => TRANSLIT[c] ?? "")
+    .replace(/[^a-z0-9]+/g, ".")
     .replace(/^\.+|\.+$/g, "")
     .slice(0, 24) || "guest";
 
@@ -123,7 +132,8 @@ const BUTTON_CMDS: [RegExp, string][] = [
   [/^📨|^заявки/i, "/requests"],
   [/^🎧|^предложени/i, "/offers"],
   [/^🎟|^выступлени/i, "/gigs"],
-  [/^👥|^пригласи/i, "/invite_hint"],
+  [/^👥|^пригласи/i, "/invite_form"],
+  [/^отмена$/i, "/cancel"],
   [/^🌐|^кабинет/i, "/cabinet"],
   [/^ℹ️|^ℹ|^помощь/i, "/help"],
 ];
@@ -133,9 +143,128 @@ const HELP_STAFF = [
   "/events — мои события и суммы смет",
   "/requests — заявки организаторов (взять/принять из чата)",
   "/offers — мои предложения артистам и их статусы",
+  "👥 Пригласить — форма: имя + @ник, бот соберёт пост с постером",
   "/guest &lt;код события&gt; &lt;имя&gt; — спец-гость в список",
   "/status — кто я",
 ].join("\n");
+
+const APP_HOST = "https://gtr-event-hub.gtr-event.workers.dev";
+const POSTER_URL = `${APP_HOST}/brand/invite-poster.jpg`;
+
+// Анкета приглашения в чате: шаг 1 — имя, шаг 2 — @ник
+type InviteForm = { step: "name" | "nick"; name?: string };
+const formKeyOf = (chatId: number) => `tgform:${chatId}`;
+
+// Финал приглашения: создаёт аккаунт и отдаёт отправителю ГОТОВЫЙ пост —
+// фирменный постер + личный призыв по нику + кнопка «Отправить». Один тап.
+async function finishInvite(
+  ns: KvNs,
+  chatId: number,
+  su: StoredUser,
+  name: string,
+  nick: string,
+  email?: string,
+) {
+  const login =
+    email || `${slugify(name)}-${Math.random().toString(36).slice(2, 6)}@team.gtr.events`;
+  if (await ns.get(`user:${login}`)) {
+    await reply(chatId, `Аккаунт <b>${tgEsc(login)}</b> уже существует.`);
+    return;
+  }
+  const pw = Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 6);
+  const teamOf = su.role === "organizer" ? su.email : "";
+  const invited = {
+    email: login,
+    name,
+    role: "organizer",
+    roleLabel: "Организатор",
+    venueId: "",
+    artistId: "",
+    teamOf,
+    tgNick: nick,
+    initials:
+      name
+        .split(/\s+/)
+        .map((w) => w[0] ?? "")
+        .join("")
+        .slice(0, 2)
+        .toUpperCase() || "ОР",
+    passHash: await sha256hex(pw),
+    created: Date.now(),
+    invitedBy: su.email,
+  };
+  await ns.put(`user:${login}`, JSON.stringify(invited));
+  const code = `tm-${Math.random().toString(36).slice(2, 10)}`;
+  await ns.put(`tglink:${code}`, login);
+  const welcome = [
+    `🎟 <b>${tgEsc(name)}, добро пожаловать в GTR Event!</b>`,
+    "",
+    teamOf
+      ? `Вы в команде организатора <b>${tgEsc(su.name ?? su.email)}</b> — его события уже у вас в кабинете. Ваш Telegram привязан, уведомления будут приходить сюда.`
+      : "Ваш Telegram привязан, уведомления будут приходить сюда.",
+    "",
+    "<b>Вход в кабинет:</b>",
+    `${APP_HOST}/gtr/login?invite=${encodeURIComponent(login)}`,
+    `Логин: ${tgEsc(login)}`,
+    `Пароль: ${tgEsc(pw)}`,
+    "",
+    "Команды бота: /events /offers /guest /help",
+  ].join("\n");
+  await ns.put(`invitemsg:${login}`, welcome);
+
+  const bot = (await ns.get("tg:bot")) || "Gtrcom1_bot";
+  const deep = `https://t.me/${bot}?start=${code}`;
+  const who = nick ? `@${nick}` : tgEsc(name);
+  const caption = [
+    `🎟 <b>${who}, это личное приглашение</b>`,
+    "",
+    `<b>${tgEsc(su.name ?? su.email)}</b> зовёт вас в GTR EVENT — платформу событий Пхукета: <b>97 площадок · 312 артистов · события под ключ</b>.`,
+    "",
+    "Один шаг — нажмите Start:",
+    deep,
+  ].join("\n");
+  const shareText = `${nick ? `@${nick}, ` : ""}личное приглашение в GTR EVENT от ${su.name ?? su.email}. 97 площадок · 312 артистов · события под ключ. Один шаг — нажмите Start: ${deep}`;
+  const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(POSTER_URL)}&text=${encodeURIComponent(shareText)}`;
+  const rows: { text: string; url: string }[][] = [
+    [{ text: nick ? `↗️ Отправить @${nick}` : "↗️ Отправить приглашение", url: shareUrl }],
+  ];
+  if (nick) rows.push([{ text: `💬 Открыть чат с @${nick}`, url: `https://t.me/${nick}` }]);
+  const ph = await tgApi("sendPhoto", {
+    chat_id: chatId,
+    photo: POSTER_URL,
+    caption,
+    parse_mode: "HTML",
+    reply_markup: { inline_keyboard: rows },
+  });
+  if (!ph.ok) await reply(chatId, caption, { inline_keyboard: rows });
+  await reply(
+    chatId,
+    `Пост готов ↑ Жмите кнопку — выберите чат — отправьте. Можно и просто переслать пост.\nАккаунт <b>${tgEsc(login)}</b> создан${teamOf ? ", человек в вашей команде" : ""}; доступы придут ему автоматически после Start.`,
+  );
+
+  // оповещение GTR-админам: кого добавили
+  const userKeys = await kvListAll(ns, "user:");
+  const allUsers = (
+    await Promise.all(userKeys.map((k) => kvGetJson<StoredUser>(ns, k)))
+  ).filter((x): x is StoredUser => Boolean(x));
+  const sent = new Set<string>();
+  const noteText = [
+    "<b>GTR EVENT · новый участник</b>",
+    "",
+    `<b>${tgEsc(su.name ?? su.email)}</b> пригласил(а): <b>${tgEsc(name)}</b>${nick ? ` (@${nick})` : ""}`,
+    `Логин: ${tgEsc(login)}${teamOf ? ` · команда ${tgEsc(teamOf)}` : ""}`,
+  ].join("\n");
+  for (const a of allUsers.filter((x) => x.role === "gtr")) {
+    const chat = await ns.get(`tg:${a.email}`);
+    if (chat && chat !== String(chatId) && !sent.has(chat)) {
+      sent.add(chat);
+      await tgApi("sendMessage", { chat_id: chat, text: noteText, parse_mode: "HTML" });
+    }
+  }
+  const channel = process.env.TELEGRAM_CHAT_ID;
+  if (channel && channel !== String(chatId) && !sent.has(channel))
+    await tgApi("sendMessage", { chat_id: channel, text: noteText, parse_mode: "HTML" });
+}
 
 const HELP_ARTIST = [
   "<b>Команды GTR Event</b>",
@@ -238,6 +367,67 @@ export const Route = createFileRoute("/api/tg")({
           }
           const su = u as StoredUser;
 
+          // ---------- анкета приглашения (имя → @ник) ----------
+          const formKey = formKeyOf(chatId);
+          const formRaw = await ns.get(formKey);
+
+          if (cmd === "/cancel") {
+            await ns.delete(formKey);
+            await reply(chatId, "Ок, отменил.", kbFor(su));
+            return Response.json({ ok: true });
+          }
+
+          if (cmd === "/invite_form" || cmd === "/invite_hint") {
+            if (!isStaff(su)) {
+              await reply(chatId, "Приглашения доступны команде GTR и организаторам.");
+              return Response.json({ ok: true });
+            }
+            await ns.put(formKey, JSON.stringify({ step: "name" } satisfies InviteForm), {
+              expirationTtl: 1800,
+            });
+            await reply(
+              chatId,
+              "👥 <b>Приглашение в GTR Event</b>\n\nШаг 1 из 2 — напишите <b>имя и фамилию</b> человека.\n\n/cancel — отменить",
+            );
+            return Response.json({ ok: true });
+          }
+
+          if (formRaw && cmd.startsWith("/")) await ns.delete(formKey);
+          if (formRaw && !cmd.startsWith("/") && isStaff(su)) {
+            const form = JSON.parse(formRaw) as InviteForm;
+            if (form.step === "name") {
+              const nm = text.replace(/\s+/g, " ").trim().slice(0, 60);
+              if (nm.length < 2 || nm.includes("@")) {
+                await reply(chatId, "Напишите имя и фамилию текстом, например: <b>Анна Ким</b>. /cancel — отменить");
+                return Response.json({ ok: true });
+              }
+              await ns.put(formKey, JSON.stringify({ step: "nick", name: nm } satisfies InviteForm), {
+                expirationTtl: 1800,
+              });
+              await reply(
+                chatId,
+                `Шаг 2 из 2 — <b>@ник в Telegram</b> для ${tgEsc(nm)} (например <code>@skabi4evsky</code>).\nЕсли ника нет — напишите «нет».`,
+              );
+              return Response.json({ ok: true });
+            }
+            const raw = text.trim();
+            let nick = "";
+            if (!/^(нет|не[тту]?|no|-)$/i.test(raw)) {
+              const mNick = raw.match(/^@?([A-Za-z0-9_]{5,32})$/);
+              if (!mNick) {
+                await reply(
+                  chatId,
+                  "Ник выглядит как <b>@имя</b> латиницей (5–32 символа). Попробуйте ещё раз или напишите «нет». /cancel — отменить",
+                );
+                return Response.json({ ok: true });
+              }
+              nick = mNick[1];
+            }
+            await ns.delete(formKey);
+            await finishInvite(ns, chatId, su, form.name ?? "Гость", nick);
+            return Response.json({ ok: true });
+          }
+
           if (cmd === "/help") {
             await reply(chatId, isStaff(su) ? HELP_STAFF : HELP_ARTIST, kbFor(su));
             return Response.json({ ok: true });
@@ -254,14 +444,6 @@ export const Route = createFileRoute("/api/tg")({
                 ],
               ],
             });
-            return Response.json({ ok: true });
-          }
-
-          if (cmd === "/invite_hint") {
-            await reply(
-              chatId,
-              "Пригласить человека в команду:\n\n<b>/invite Имя Фамилия email</b>\nнапример: <code>/invite Анна Ким anna@mail.com</code>\n\nБот создаст аккаунт и даст готовое сообщение для пересылки. Email можно не указывать — логин сгенерируется.",
-            );
             return Response.json({ ok: true });
           }
 
@@ -369,86 +551,17 @@ export const Route = createFileRoute("/api/tg")({
           const inv = text.match(/^\/invite\s+(.+)/i);
           if (inv && isStaff(su)) {
             const tokens = inv[1].trim().split(/\s+/);
-            const email = tokens.find((t) => t.includes("@"))?.toLowerCase();
-            const name = tokens.filter((t) => !t.includes("@")).join(" ").trim();
+            const nickTok = tokens.find((t) => /^@[A-Za-z0-9_]{5,32}$/.test(t));
+            const emailTok = tokens.find((t) => t !== nickTok && t.includes("@"));
+            const name = tokens.filter((t) => t !== nickTok && t !== emailTok).join(" ").trim();
             if (!name) {
-              await reply(chatId, "Формат: /invite Имя Фамилия [email]\nНапример: /invite Анна Ким anna@mail.com");
+              await reply(
+                chatId,
+                "Формат: /invite Имя Фамилия [@ник] [email]\nНапример: <code>/invite Анна Ким @anna_kim</code>\nИли просто нажмите «👥 Пригласить» — бот спросит по шагам.",
+              );
               return Response.json({ ok: true });
             }
-            const login = email || `${slugify(name)}-${Math.random().toString(36).slice(2, 6)}@team.gtr.events`;
-            if (await ns.get(`user:${login}`)) {
-              await reply(chatId, `Аккаунт <b>${tgEsc(login)}</b> уже существует.`);
-              return Response.json({ ok: true });
-            }
-            const pw = Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 6);
-            const teamOf = su.role === "organizer" ? su.email : "";
-            const invited = {
-              email: login,
-              name,
-              role: "organizer",
-              roleLabel: "Организатор",
-              venueId: "",
-              artistId: "",
-              teamOf,
-              initials:
-                name
-                  .split(/\s+/)
-                  .map((w) => w[0] ?? "")
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase() || "ОР",
-              passHash: await sha256hex(pw),
-              created: Date.now(),
-              invitedBy: su.email,
-            };
-            await ns.put(`user:${login}`, JSON.stringify(invited));
-            const code = `tm-${Math.random().toString(36).slice(2, 10)}`;
-            await ns.put(`tglink:${code}`, login);
-            const welcome = [
-              `🎟 <b>${tgEsc(name)}, добро пожаловать в GTR Event!</b>`,
-              "",
-              teamOf
-                ? `Вы в команде организатора <b>${tgEsc(su.name ?? su.email)}</b> — его события уже у вас в кабинете. Ваш Telegram привязан, уведомления будут приходить сюда.`
-                : "Ваш Telegram привязан, уведомления будут приходить сюда.",
-              "",
-              "<b>Вход в кабинет:</b>",
-              `https://gtr-event-hub.gtr-event.workers.dev/gtr/login?invite=${encodeURIComponent(login)}`,
-              `Логин: ${tgEsc(login)}`,
-              `Пароль: ${tgEsc(pw)}`,
-              "",
-              "Команды бота: /events /offers /guest /help",
-            ].join("\n");
-            await ns.put(`invitemsg:${login}`, welcome);
-            await reply(
-              chatId,
-              `Готово! Аккаунт <b>${tgEsc(login)}</b> создан${teamOf ? " и добавлен в вашу команду" : ""}. Перешлите человеку сообщение ниже ↓`,
-            );
-            await reply(
-              chatId,
-              `Привет, ${tgEsc(name)}! Приглашаю тебя в GTR Event. Жми — получишь доступы и инструкцию: https://t.me/${(await ns.get("tg:bot")) || "Gtrcom1_bot"}?start=${code}`,
-            );
-            // оповещение GTR-админам: кого добавили
-            const userKeys2 = await kvListAll(ns, "user:");
-            const allUsers = (
-              await Promise.all(userKeys2.map((k) => kvGetJson<StoredUser>(ns, k)))
-            ).filter((x): x is StoredUser => Boolean(x));
-            const sent = new Set<string>();
-            const noteText = [
-              "<b>GTR EVENT · новый участник</b>",
-              "",
-              `<b>${tgEsc(su.name ?? su.email)}</b> пригласил(а): <b>${tgEsc(name)}</b>`,
-              `Логин: ${tgEsc(login)}${teamOf ? ` · команда ${tgEsc(teamOf)}` : ""}`,
-            ].join("\n");
-            for (const a of allUsers.filter((x) => x.role === "gtr")) {
-              const chat = await ns.get(`tg:${a.email}`);
-              if (chat && !sent.has(chat)) {
-                sent.add(chat);
-                await tgApi("sendMessage", { chat_id: chat, text: noteText, parse_mode: "HTML" });
-              }
-            }
-            const channel = process.env.TELEGRAM_CHAT_ID;
-            if (channel && !sent.has(channel))
-              await tgApi("sendMessage", { chat_id: channel, text: noteText, parse_mode: "HTML" });
+            await finishInvite(ns, chatId, su, name, nickTok ? nickTok.slice(1) : "", emailTok?.toLowerCase());
             return Response.json({ ok: true });
           }
 

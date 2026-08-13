@@ -101,6 +101,33 @@ async function requestsFor(ns: KvNs, u: StoredUser | { email: string }) {
     );
 }
 
+// Постоянная клавиатура: кнопки вместо слэш-команд
+const kbFor = (u: { role?: string }) => ({
+  keyboard: isStaff(u)
+    ? [
+        [{ text: "📅 Мои события" }, { text: "📨 Заявки" }],
+        [{ text: "🎧 Предложения" }, { text: "👥 Пригласить" }],
+        [{ text: "🌐 Кабинет" }, { text: "ℹ️ Помощь" }],
+      ]
+    : [
+        [{ text: "🎧 Предложения" }, { text: "🎟 Выступления" }],
+        [{ text: "🌐 Кабинет" }, { text: "ℹ️ Помощь" }],
+      ],
+  resize_keyboard: true,
+  is_persistent: true,
+});
+
+// Кнопка-текст → команда
+const BUTTON_CMDS: [RegExp, string][] = [
+  [/^📅|^мои события/i, "/events"],
+  [/^📨|^заявки/i, "/requests"],
+  [/^🎧|^предложени/i, "/offers"],
+  [/^🎟|^выступлени/i, "/gigs"],
+  [/^👥|^пригласи/i, "/invite_hint"],
+  [/^🌐|^кабинет/i, "/cabinet"],
+  [/^ℹ️|^ℹ|^помощь/i, "/help"],
+];
+
 const HELP_STAFF = [
   "<b>Команды GTR Event</b>",
   "/events — мои события и суммы смет",
@@ -145,14 +172,17 @@ export const Route = createFileRoute("/api/tg")({
             await ns.put(`tgrev:${chatId}`, email);
             await ns.delete(`tglink:${start[1]}`);
             // персональное приглашение (инструкция с доступами) — один раз
+            const linkedUser = await kvGetJson<StoredUser>(ns, `user:${email}`);
+            const kb = linkedUser ? kbFor(linkedUser) : undefined;
             const welcome = await ns.get(`invitemsg:${email}`);
             if (welcome) {
               await ns.delete(`invitemsg:${email}`);
-              await reply(chatId, welcome);
+              await reply(chatId, welcome, kb);
             } else {
               await reply(
                 chatId,
-                `✅ Telegram привязан к аккаунту <b>${tgEsc(email)}</b>.\nСюда будут приходить предложения и заявки. Команды: /help`,
+                `✅ Telegram привязан к аккаунту <b>${tgEsc(email)}</b>.\nКнопки внизу — вся работа в один тап.`,
+                kb,
               );
             }
             return Response.json({ ok: true });
@@ -185,15 +215,20 @@ export const Route = createFileRoute("/api/tg")({
             return Response.json({ ok: true });
           }
 
-          const cmd = text.split(/[\s@]/)[0].toLowerCase();
+          let cmd = text.split(/[\s@]/)[0].toLowerCase();
+          if (!cmd.startsWith("/")) {
+            const hit = BUTTON_CMDS.find(([re]) => re.test(text.trim()));
+            if (hit) cmd = hit[1];
+          }
           const u = await userOfChat(ns, chatId);
 
-          if (cmd === "/start") {
+          if (cmd === "/start" || cmd === "/menu") {
             await reply(
               chatId,
               u
-                ? `Аккаунт уже привязан: <b>${tgEsc(u.email)}</b>. Команды — /help`
+                ? `Аккаунт: <b>${tgEsc(u.email)}</b>. Кнопки внизу — вся работа в один тап.`
                 : "Это бот GTR Event. Привяжите аккаунт: кнопка «Привязать Telegram» в кабинете → ссылка со стартовым кодом.",
+              u ? kbFor(u as StoredUser) : undefined,
             );
             return Response.json({ ok: true });
           }
@@ -204,7 +239,29 @@ export const Route = createFileRoute("/api/tg")({
           const su = u as StoredUser;
 
           if (cmd === "/help") {
-            await reply(chatId, isStaff(su) ? HELP_STAFF : HELP_ARTIST);
+            await reply(chatId, isStaff(su) ? HELP_STAFF : HELP_ARTIST, kbFor(su));
+            return Response.json({ ok: true });
+          }
+
+          if (cmd === "/cabinet") {
+            await reply(chatId, "Ваш кабинет GTR Event:", {
+              inline_keyboard: [
+                [
+                  {
+                    text: "🌐 Открыть кабинет",
+                    url: `https://gtr-event-hub.gtr-event.workers.dev/gtr/login?invite=${encodeURIComponent(su.email)}`,
+                  },
+                ],
+              ],
+            });
+            return Response.json({ ok: true });
+          }
+
+          if (cmd === "/invite_hint") {
+            await reply(
+              chatId,
+              "Пригласить человека в команду:\n\n<b>/invite Имя Фамилия email</b>\nнапример: <code>/invite Анна Ким anna@mail.com</code>\n\nБот создаст аккаунт и даст готовое сообщение для пересылки. Email можно не указывать — логин сгенерируется.",
+            );
             return Response.json({ ok: true });
           }
 

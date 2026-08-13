@@ -16,6 +16,7 @@ import photosRaw from "../data/artist-photos.json";
 import mediaRaw from "../data/artist-media.json";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint, TrashTitle } from "../ui";
+import { openAppLink } from "../applink";
 
 // Фото артистов: точное совпадение имени в открытом каталоге, заглушки убраны.
 // Дашь Spotify-ключи — база пересоберётся тем же пайплайном.
@@ -619,6 +620,10 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
                   href={String(a[k])}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openAppLink(String(a[k]));
+                  }}
                 >
                   {label} ↗
                 </a>

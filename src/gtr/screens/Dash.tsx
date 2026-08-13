@@ -23,6 +23,7 @@ import { Card, Chip, Dot, Eyebrow, Icon, Ring } from "../ui";
 import { ImpulseArt } from "../impulse";
 import { createInviteFn, decideOfferFn, tgLinkFn, tgStatusFn } from "../kv-api";
 import { BossCabinet } from "./Boss";
+import { openAppLink } from "../applink";
 import { OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
 
 type Action = [string, string, string, ScreenId, string, string];
@@ -1417,7 +1418,17 @@ function ArtistCabinet() {
                 Привяжите чат — предложения будут приходить с кнопками «Принять / Отклонить».
               </span>
               {tgLink ? (
-                <a className="gtr-btn gtr-btn-red" style={{ textDecoration: "none" }} href={tgLink} target="_blank" rel="noreferrer">
+                <a
+                  className="gtr-btn gtr-btn-red"
+                  style={{ textDecoration: "none" }}
+                  href={tgLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openAppLink(tgLink);
+                  }}
+                >
                   Открыть @{tg.bot} и привязать ↗
                 </a>
               ) : (

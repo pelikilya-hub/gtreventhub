@@ -13,6 +13,7 @@ import {
   type PublicUser,
 } from "../kv-api";
 import { notifyAssignFn } from "../notify";
+import { openAppLink } from "../applink";
 import {
   AMBER,
   CONTACT,
@@ -1424,7 +1425,17 @@ function TgPanel() {
             Бот @{tg.bot}: предложения, заявки и команда /guest — в личном чате.
           </span>
           {link ? (
-            <a className="gtr-btn gtr-btn-red" style={{ textDecoration: "none" }} href={link} target="_blank" rel="noreferrer">
+            <a
+              className="gtr-btn gtr-btn-red"
+              style={{ textDecoration: "none" }}
+              href={link}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => {
+                e.preventDefault();
+                openAppLink(link);
+              }}
+            >
               Открыть @{tg.bot} и привязать ↗
             </a>
           ) : (

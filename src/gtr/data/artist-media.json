@@ -1,0 +1,16 @@
+{
+  "_comment": "Hero-видео артистов: официальные Instagram-рилы. Рендерим через официальный embed (без перезаливки контента — атрибуция и права остаются у автора). igReel — код поста из URL instagram.com/reel/<код>/",
+  "media": {
+    "MC-0004": {
+      "igReel": "DE16dRvSZDQ",
+      "igUser": "alexvee__",
+      "added": "2026-08-13"
+    },
+    "MC-0137": {
+      "igReel": "DE16dRvSZDQ",
+      "igUser": "alexvee__",
+      "added": "2026-08-13",
+      "note": "тот же артист, что MC-0004 (дубль в базе)"
+    }
+  }
+}

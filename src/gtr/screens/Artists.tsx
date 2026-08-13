@@ -13,6 +13,7 @@ import {
   type ArtistBase,
 } from "../data/app-data";
 import photosRaw from "../data/artist-photos.json";
+import mediaRaw from "../data/artist-media.json";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint, TrashTitle } from "../ui";
 
@@ -20,6 +21,11 @@ import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint, TrashTitle }
 // Дашь Spotify-ключи — база пересоберётся тем же пайплайном.
 type ArtistPhoto = { photo: string; photoMed: string; source: string };
 const PHOTOS = (photosRaw as { photos: Record<string, ArtistPhoto> }).photos;
+
+// Hero-видео: официальные Instagram-рилы артистов через официальный embed —
+// контент остаётся у автора, мы не перезаливаем видео
+type ArtistMedia = { igReel: string; igUser: string };
+const MEDIA = (mediaRaw as unknown as { media: Record<string, ArtistMedia> }).media;
 
 const KIND_LABEL: Record<string, string> = {
   all: "Все записи",
@@ -337,6 +343,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
               >
                 {a.name}
               </span>
+              {MEDIA[a.id] ? <Chip color="#FF3427">▶</Chip> : null}
               <Chip
                 color={
                   a.prio === "A"
@@ -575,6 +582,8 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
         </div>
       </Card>
 
+      {MEDIA[a.id] ? <HeroReel media={MEDIA[a.id]} name={a.name} /> : null}
+
       <div
         className="gtr-md-stack"
         style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
@@ -642,5 +651,79 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
         </Card>
       </div>
     </div>
+  );
+}
+
+
+// Hero preview: вертикальный рил в рамке системы. Официальный embed
+// Instagram — видео играет с серверов IG, атрибуция и права у автора.
+function HeroReel({ media, name }: { media: ArtistMedia; name: string }) {
+  return (
+    <Card style={{ position: "relative", overflow: "hidden", padding: 18, marginBottom: 14 }}>
+      <div className="gtr-laser" style={{ top: 0, ["--gtr-run" as string]: "150px" }} />
+      <div
+        className="gtr-md-stack"
+        style={{ display: "grid", gridTemplateColumns: "minmax(260px,330px) 1fr", gap: 18 }}
+      >
+        <div
+          style={{
+            position: "relative",
+            border: "1px solid var(--gtr-border2)",
+            background: "#000",
+            clipPath: "polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%)",
+            boxShadow: "0 14px 40px rgba(0,0,0,.55)",
+          }}
+        >
+          <iframe
+            src={`https://www.instagram.com/reel/${media.igReel}/embed/`}
+            title={`Видео: ${name}`}
+            loading="lazy"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowFullScreen
+            style={{ display: "block", width: "100%", height: 560, border: 0, background: "#000" }}
+          />
+        </div>
+        <div style={{ display: "grid", gap: 10, alignContent: "start" }}>
+          <Eyebrow>HERO PREVIEW · ВИДЕО</Eyebrow>
+          <div style={{ font: "600 15px/1.4 'Golos Text',sans-serif" }}>
+            Живое превью выступления
+          </div>
+          <div style={{ font: "500 12px/1.65 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+            Официальный рил артиста — организатор слышит звук и видит подачу до брифа.
+            Видео играет напрямую из Instagram
+            {media.igUser ? <> (@{media.igUser})</> : null}, права остаются у автора.
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
+            <a
+              className="gtr-btn"
+              style={{ textDecoration: "none" }}
+              href={`https://www.instagram.com/reel/${media.igReel}/`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Открыть рил ↗
+            </a>
+            {media.igUser ? (
+              <a
+                className="gtr-btn"
+                style={{ textDecoration: "none" }}
+                href={`https://www.instagram.com/${media.igUser}/`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                @{media.igUser} ↗
+              </a>
+            ) : null}
+          </div>
+          <div
+            className="gtr-mono"
+            style={{ marginTop: 2, font: "500 9px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+          >
+            REEL {media.igReel} · превью добавляется в data/artist-media.json — пришлите
+            ссылку, и оно появится у следующего артиста
+          </div>
+        </div>
+      </div>
+    </Card>
   );
 }

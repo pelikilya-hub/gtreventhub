@@ -1,0 +1,126 @@
+---
+name: ig-media-harvest
+description: Собирает hero-видео и аватары для страниц артистов GTR Event из их официальных Instagram-профилей. Для каждого артиста с ig-ссылкой находит свежий рил через анонимные embed-страницы, скачивает mp4, режет 12-секундный беззвучный луп для шапки профиля, делает постер и квадратный аватар из лучшего кадра, прописывает данные в artist-media.json и artist-photos.json. Используй когда нужно наполнить медиа страницы артистов.
+---
+
+# Сбор медиа артистов из Instagram
+
+Конвейер уже отработан вручную на Alex Vee (MC-0004) — здесь тот же рецепт,
+шаг в шаг. Работай из корня репозитория gtreventhub.
+
+## Что нужно знать заранее
+
+- База артистов: `src/gtr/data/artists.json` (`artists[]`, поле `ig` — ссылка
+  на профиль). Медиа-карта: `src/gtr/data/artist-media.json` (`media`,
+  ключ — id артиста). Фото: `src/gtr/data/artist-photos.json` (`photos`).
+- Файлы медиа лежат в `public/artists/`:
+  `<ID>-hero.mp4`, `<ID>-hero.jpg` (постер), `<ID>-avatar.jpg` (720²),
+  `<ID>-avatar-med.jpg` (320²).
+- ffmpeg статический уже установлен:
+  `/tmp/claude-0/-home-user/13a63ce4-42e7-5fd5-beab-3488888af37f/scratchpad/ff/node_modules/ffmpeg-static/ffmpeg`
+  (если нет — `npm i ffmpeg-static` в любой временной папке).
+- Артистов, у которых в `artist-media.json` уже есть запись, НЕ трогаем.
+- Сеть ходит через прокси песочницы: обычный `curl` работает, браузер — нет.
+
+## Шаг 1 — кандидаты
+
+Артисты `kind == "artist"` с непустым `ig`, отсортированные по prio
+(A → B → C), без записи в artist-media.json. Обрабатывай батчем, который
+задан в задании (по умолчанию 10).
+
+## Шаг 2 — найти свежий рил профиля (анонимно, без логина)
+
+Логин в Instagram НЕ нужен и НЕ используется. Работают embed-страницы:
+
+```bash
+UA="Mozilla/5.0 (compatible; facebookexternalhit/1.1)"
+curl -sL --max-time 25 -A "$UA" "https://www.instagram.com/<username>/embed/" -o profile-embed.html
+```
+
+Из HTML вытащи коды постов: `grep -o '/p/[A-Za-z0-9_-]*\|/reel/[A-Za-z0-9_-]*'`.
+Если профильный embed пуст (бывает), попробуй
+`https://www.instagram.com/<username>/` с UA
+`Mozilla/5.0 (Windows NT 10.0...) Chrome/125` и поищи коды там же.
+Если кодов нет вообще — артист пропускается, в отчёт пишется причина.
+
+## Шаг 3 — достать mp4 из embed поста
+
+Для каждого кода (начиная с самого свежего, максимум 4 попытки на артиста):
+
+```bash
+curl -sL --max-time 25 -A "$UA" "https://www.instagram.com/p/<code>/embed/captioned/" -o post.html
+```
+
+В HTML ищи `video_url\":\"...\"` (экранированный JSON). Декодирование
+(проверено, копируй как есть):
+
+```python
+import re, codecs
+raw = open("post.html").read()
+m = re.search(r'video_url\\":\\"(.*?)\\"', raw)
+if m:
+    url = m.group(1).replace('\\\\/', '/').replace('\\/', '/')
+    url = codecs.decode(url, 'unicode_escape').replace('%253D', '%3D')
+```
+
+Нет `video_url` — это фото-пост: пропусти код, возьми следующий.
+Заодно сохрани username автора из `UsernameText">...<` — для атрибуции
+(должен совпадать с ожидаемым профилем артиста; если embed отдал чужой
+пост — пропусти).
+
+## Шаг 4 — скачать и порезать
+
+```bash
+curl -sL --max-time 60 -A "Mozilla/5.0" -o full.mp4 "<video_url>"
+# луп для шапки: 12 с (начало ~15% длительности), без звука, 720p, crf 27
+$FF -ss <старт> -t 12 -i full.mp4 -an -vf "scale=-2:720" -c:v libx264 \
+  -preset veryslow -crf 27 -pix_fmt yuv420p -movflags +faststart hero.mp4 -y
+# постер
+$FF -ss 0 -i hero.mp4 -frames:v 1 -q:v 4 hero.jpg -y
+```
+
+Файл `full.mp4` должен быть >200 КБ и типа «ISO Media» (`file full.mp4`),
+иначе это заглушка — пропусти пост.
+
+## Шаг 5 — аватар (только если у артиста нет фото в artist-photos.json)
+
+Вытащи 5-7 кадров по всей длительности (`-ss N -frames:v 1`), выбери лучший
+С ЛИЦОМ артиста (посмотри кадры глазами через Read). Квадрат:
+
+```bash
+$FF -ss <t> -i full.mp4 -frames:v 1 -vf "crop=<S>:<S>:<x>:<y>" -q:v 2 avatar.jpg -y
+$FF -i avatar.jpg -vf scale=320:320 -q:v 3 avatar-med.jpg -y
+```
+
+Для вертикали 720×1280 обычно `crop=720:720:0:60`. Если ни на одном кадре
+нет различимого лица — аватар не делаем (видео всё равно берём).
+
+## Шаг 6 — прописать в данные
+
+- `public/artists/<ID>-hero.mp4|jpg` (+ `-avatar` если сделан).
+- `artist-media.json` → `media[<ID>] = { igReel: <code>, igUser: <username>,
+  added: <YYYY-MM-DD>, heroVideo: "/artists/<ID>-hero.mp4",
+  heroPoster: "/artists/<ID>-hero.jpg" }`.
+- Если аватар сделан: `artist-photos.json` → `photos[<ID>] = { photo:
+  "/artists/<ID>-avatar.jpg", photoMed: "/artists/<ID>-avatar-med.jpg",
+  source: "кадр официального рила @<username>", match: "manual",
+  name: <имя артиста> }`.
+- У артиста может быть дубль в базе (одинаковое имя, другой id) — найди и
+  пропиши те же медиа обоим id.
+
+## Шаг 7 — финал каждого батча
+
+1. `npx tsc --noEmit` — типы не должны сломаться (JSON читается кодом).
+2. Отчёт в `harvest-report.md` в корне репо: таблица «артист — статус —
+  что собрано / причина пропуска».
+3. Один коммит: медиа-файлы + два JSON + отчёт. Сообщение:
+   «Медиа артистов из официальных IG: <N> hero-видео, <M> аватаров (ig-media-harvest)».
+   НЕ пушить и НЕ деплоить — это делает основная сессия после ревью.
+
+## Правила
+
+- Только официальные профили из поля `ig` базы — никаких сторонних аккаунтов.
+- Атрибуция обязательна: igUser в media-карте, «кадр официального рила @…» в фото.
+- Пропуск — это нормальный исход: закрытые профили, пустые embed, фото-посты.
+  Честно фиксируй в отчёте, не изобретай обходов и не подбирай «похожие» аккаунты.
+- Между запросами к Instagram — пауза 3-5 секунд, батч ≤ 15 артистов за прогон.

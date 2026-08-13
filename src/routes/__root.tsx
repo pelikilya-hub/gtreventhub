@@ -37,9 +37,10 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "icon", href: "/favicon.ico", sizes: "any" },
-      { rel: "icon", href: "/icon-256.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "icon", href: "/favicon.ico", sizes: "32x32" },
+      { rel: "icon", href: "/brand/GTR_favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/icon-256.png", type: "image/png", sizes: "256x256" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
     ],
   }),
   shellComponent: RootShell,

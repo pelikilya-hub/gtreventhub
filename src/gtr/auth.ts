@@ -156,7 +156,8 @@ export type StoredUser = SessionUser & {
   invitedBy: string;
 };
 
-const issueSession = async (sessionUser: SessionUser) => {
+// Только сервер: в клиентском бандле вызов бросит ошибку
+export const issueSession = createServerOnlyFn(async (sessionUser: SessionUser) => {
   setCookie(COOKIE, await makeToken(sessionUser), {
     httpOnly: true,
     sameSite: "lax",
@@ -164,7 +165,7 @@ const issueSession = async (sessionUser: SessionUser) => {
     maxAge: WEEK,
     secure: process.env.NODE_ENV === "production",
   });
-};
+});
 
 export const loginFn = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string; password: string }) => d)

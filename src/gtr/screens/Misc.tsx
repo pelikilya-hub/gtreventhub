@@ -7,6 +7,7 @@ import {
   inviteUserFn,
   listManagersFn,
   listUsersFn,
+  createInviteFn,
   tgLinkFn,
   tgStatusFn,
   type PublicUser,
@@ -401,6 +402,75 @@ export function InquiriesScreen() {
 }
 
 // ---------- залы и прайс ----------
+// Ссылки-приглашения: человек сам заводит аккаунт на /gtr/join.
+// Быстрее, чем вводить пароль за него: одна ссылка — до 10 вступлений.
+function InviteLinks() {
+  const [role, setRole] = useState<"organizer" | "sales" | "artist">("organizer");
+  const [link, setLink] = useState("");
+  const [msg, setMsg] = useState("");
+  const make = async () => {
+    setMsg("");
+    try {
+      const r = await createInviteFn({ data: { role } });
+      if (r.ok) {
+        const full = `${location.origin}${r.link}`;
+        setLink(full);
+        try {
+          await navigator.clipboard.writeText(full);
+          setMsg("Скопирована");
+        } catch {
+          setMsg("Скопируйте вручную");
+        }
+      } else setMsg(r.error ?? "Не получилось");
+    } catch {
+      setMsg("Сервер недоступен");
+    }
+  };
+  return (
+    <div style={{ display: "grid", gap: 8, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,.07)" }}>
+      <Eyebrow style={{ fontSize: 8.5 }}>ССЫЛКА-ПРИГЛАШЕНИЕ (АККАУНТ ЗАВОДИТ САМ ЧЕЛОВЕК)</Eyebrow>
+      <div style={{ display: "flex", gap: 7, flexWrap: "wrap", alignItems: "center" }}>
+        {(
+          [
+            ["organizer", "Организатор"],
+            ["sales", "Менеджер"],
+            ["artist", "Артист"],
+          ] as const
+        ).map(([r, label]) => (
+          <button
+            key={r}
+            onClick={() => setRole(r)}
+            style={{
+              borderRadius: 0,
+              padding: "7px 11px",
+              cursor: "pointer",
+              font: `${role === r ? 600 : 500} 10.5px/1 'Golos Text',sans-serif`,
+              border: `1px solid ${role === r ? "#E5231B" : "rgba(255,255,255,.14)"}`,
+              background: role === r ? "rgba(229,35,27,.14)" : "transparent",
+              color: role === r ? "#fff" : "rgba(255,255,255,.6)",
+            }}
+          >
+            {label}
+          </button>
+        ))}
+        <button className="gtr-btn" style={{ padding: "8px 12px" }} onClick={make}>
+          Создать ссылку
+        </button>
+        {msg ? <span style={{ font: "500 10px/1.3 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>{msg}</span> : null}
+      </div>
+      {link ? (
+        <input
+          className="gtr-input"
+          readOnly
+          value={link}
+          onFocus={(e) => e.currentTarget.select()}
+          style={{ padding: "7px 9px", fontSize: 10.5, maxWidth: 460 }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
 // ---------- канбан заявок ----------
 // Четыре стадии, перетаскивание карточек мышью + стрелки для тач-экранов.
 // Перенос в «Приняты» дополнительно утверждает событие заявки.
@@ -1668,6 +1738,8 @@ function TeamPanel() {
           </span>
         ) : null}
       </div>
+
+      <InviteLinks />
 
       {users?.length ? (
         <div style={{ display: "grid", gap: 6, marginTop: 4 }}>

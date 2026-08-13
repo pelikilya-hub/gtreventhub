@@ -508,3 +508,113 @@ export const tgActivateFn = createServerFn({ method: "POST" }).handler(async () 
   await ns.put("tg:bot", meBot.result.username);
   return { ok: true as const, bot: meBot.result.username };
 });
+
+// ---------- ссылки-приглашения в приложение ----------
+// Код приглашения живёт в KV; человек открывает /gtr/join?code=… и сам
+// заводит аккаунт (email + пароль). Telegram не обязателен.
+
+export type AppInvite = {
+  role: RoleId;
+  teamOf: string; // команда организатора-тимлида ("" — вне команды)
+  invitedBy: string;
+  inviterName: string;
+  created: number;
+  uses: number;
+  maxUses: number;
+  exp: number; // ms
+};
+
+export const createInviteFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { role?: RoleId; maxUses?: number }) => d)
+  .handler(async ({ data }) => {
+    const me = await currentUser();
+    if (!me || me.role === "artist")
+      return { ok: false as const, error: "Приглашать могут команда GTR и организаторы" };
+    const ns = await getKvNs();
+    if (!ns) return { ok: false as const, error: "Хранилище недоступно (локальный режим)" };
+
+    // организатор зовёт только в свою команду; роли раздаёт только админ
+    const role: RoleId = me.role === "gtr" ? (data.role ?? "organizer") : "organizer";
+    const invite: AppInvite = {
+      role,
+      teamOf: me.role === "organizer" ? me.email : "",
+      invitedBy: me.email,
+      inviterName: me.name,
+      created: Date.now(),
+      uses: 0,
+      maxUses: Math.min(50, Math.max(1, data.maxUses ?? 10)),
+      exp: Date.now() + 14 * 24 * 3600 * 1000,
+    };
+    const code = `join-${Math.random().toString(36).slice(2, 10)}`;
+    await ns.put(`invite:${code}`, JSON.stringify(invite));
+    return { ok: true as const, code, link: `/gtr/join?code=${code}` };
+  });
+
+export const inviteInfoFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { code: string }) => d)
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    if (!ns) return { ok: false as const, error: "Хранилище недоступно" };
+    const inv = await kvGetJson<AppInvite>(ns, `invite:${data.code}`);
+    if (!inv) return { ok: false as const, error: "Приглашение не найдено или отозвано" };
+    if (inv.exp < Date.now()) return { ok: false as const, error: "Срок приглашения истёк" };
+    if (inv.uses >= inv.maxUses)
+      return { ok: false as const, error: "Лимит приглашения исчерпан" };
+    return {
+      ok: true as const,
+      inviterName: inv.inviterName,
+      role: inv.role,
+      roleLabel: ROLE_LABELS[inv.role],
+      team: Boolean(inv.teamOf),
+    };
+  });
+
+export const joinFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { code: string; name: string; email: string; password: string }) => d)
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    if (!ns) return { ok: false as const, error: "Хранилище недоступно" };
+    const inv = await kvGetJson<AppInvite>(ns, `invite:${data.code}`);
+    if (!inv || inv.exp < Date.now() || inv.uses >= inv.maxUses)
+      return { ok: false as const, error: "Приглашение не действует" };
+
+    const email = data.email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return { ok: false as const, error: "Некорректный email" };
+    if (data.password.length < 6) return { ok: false as const, error: "Пароль от 6 символов" };
+    if (!data.name.trim()) return { ok: false as const, error: "Представьтесь" };
+    if (await ns.get(`user:${email}`))
+      return { ok: false as const, error: "Такой аккаунт уже есть — войдите" };
+
+    const stored: StoredUser = {
+      email,
+      name: data.name.trim(),
+      role: inv.role,
+      roleLabel: ROLE_LABELS[inv.role],
+      venueId: "",
+      artistId: "",
+      teamOf: inv.teamOf || undefined,
+      initials: initialsOf(data.name),
+      passHash: await sha256(data.password),
+      created: Date.now(),
+      invitedBy: inv.invitedBy,
+    };
+    await ns.put(`user:${email}`, JSON.stringify(stored));
+    await ns.put(`invite:${data.code}`, JSON.stringify({ ...inv, uses: inv.uses + 1 }));
+
+    notifyAdminsTg(
+      ns,
+      [
+        "<b>GTR EVENT · новый участник</b>",
+        "",
+        `<b>${tgEsc(stored.name)}</b> присоединился по ссылке`,
+        `Логин: ${tgEsc(email)} · роль: ${tgEsc(stored.roleLabel)}`,
+        `Пригласил: ${tgEsc(inv.inviterName)}${inv.teamOf ? ` · команда ${tgEsc(inv.teamOf)}` : ""}`,
+      ].join("\n"),
+    ).catch(() => {});
+
+    const { issueSession } = await import("./auth");
+    const { passHash: _p, created: _c, invitedBy: _i, ...sessionUser } = stored;
+    await issueSession(sessionUser);
+    return { ok: true as const, user: sessionUser };
+  });

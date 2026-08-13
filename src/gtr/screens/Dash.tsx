@@ -21,7 +21,7 @@ import {
 import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow, Icon, Ring } from "../ui";
 import { ImpulseArt } from "../impulse";
-import { decideOfferFn, tgLinkFn, tgStatusFn } from "../kv-api";
+import { createInviteFn, decideOfferFn, tgLinkFn, tgStatusFn } from "../kv-api";
 import { OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
 
 type Action = [string, string, string, ScreenId, string, string];
@@ -879,6 +879,7 @@ function SalesCabinet() {
             <button className="gtr-btn" style={{ padding: "9px 16px" }} onClick={() => go("events")}>
               Мои события →
             </button>
+            <InviteLinkButton />
           </div>
         </div>
       </div>
@@ -1525,6 +1526,57 @@ function ArtistCabinet() {
           ) : null}
         </Card>
       </div>
+    </div>
+  );
+}
+
+
+// Ссылка-приглашение в приложение: генерируется сервером, копируется в буфер.
+// Организатор зовёт в свою команду, менеджер и админ — в состав GTR.
+function InviteLinkButton() {
+  const [link, setLink] = useState("");
+  const [msg, setMsg] = useState("");
+  const [busy, setBusy] = useState(false);
+  const make = async () => {
+    setBusy(true);
+    setMsg("");
+    try {
+      const r = await createInviteFn({ data: {} });
+      if (r.ok) {
+        const full = `${location.origin}${r.link}`;
+        setLink(full);
+        try {
+          await navigator.clipboard.writeText(full);
+          setMsg("Ссылка скопирована — отправьте её человеку");
+        } catch {
+          setMsg("Скопируйте ссылку ниже");
+        }
+      } else setMsg(r.ok === false ? (r.error ?? "Не получилось") : "Не получилось");
+    } catch {
+      setMsg("Сервер недоступен (локальный режим)");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div style={{ display: "grid", gap: 6 }}>
+      <button className="gtr-btn" style={{ padding: "9px 16px", opacity: busy ? 0.6 : 1 }} disabled={busy} onClick={make}>
+        + Пригласить в команду
+      </button>
+      {link ? (
+        <input
+          className="gtr-input"
+          readOnly
+          value={link}
+          onFocus={(e) => e.currentTarget.select()}
+          style={{ padding: "6px 8px", fontSize: 9.5, width: 220 }}
+        />
+      ) : null}
+      {msg ? (
+        <span style={{ font: "500 9.5px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t3)", maxWidth: 220 }}>
+          {msg}
+        </span>
+      ) : null}
     </div>
   );
 }

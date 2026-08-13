@@ -351,6 +351,17 @@ export async function decideOfferCore(
   return next;
 }
 
+// Язык, на котором предложение уходит артисту в Telegram
+export type OfferLang = "ru" | "en" | "th";
+const OFFER_T: Record<
+  OfferLang,
+  { title: string; artist: string; venue: string; when: string; fee: string; note: string; from: string; acc: string; dec: string }
+> = {
+  ru: { title: "предложение выступить", artist: "Артист", venue: "Площадка", when: "Когда", fee: "Условия", note: "Комментарий", from: "От", acc: "✅ Принять", dec: "❌ Отклонить" },
+  en: { title: "performance offer", artist: "Artist", venue: "Venue", when: "When", fee: "Terms", note: "Note", from: "From", acc: "✅ Accept", dec: "❌ Decline" },
+  th: { title: "ข้อเสนอการแสดง", artist: "ศิลปิน", venue: "สถานที่", when: "วันเวลา", fee: "เงื่อนไข", note: "หมายเหตุ", from: "จาก", acc: "✅ รับข้อเสนอ", dec: "❌ ปฏิเสธ" },
+};
+
 export const sendOfferFn = createServerFn({ method: "POST" })
   .inputValidator(
     (d: {
@@ -362,6 +373,7 @@ export const sendOfferFn = createServerFn({ method: "POST" })
       date: string;
       fee: string;
       note: string;
+      lang?: OfferLang;
     }) => d,
   )
   .handler(async ({ data }) => {
@@ -396,17 +408,19 @@ export const sendOfferFn = createServerFn({ method: "POST" })
     };
     await ns.put(`offer:${offer.id}`, JSON.stringify(offer));
 
-    // уведомление: личный чат артиста с кнопками, иначе общий канал GTR
+    // уведомление: личный чат артиста с кнопками, иначе общий канал GTR.
+    // Язык выбирает отправитель (ru/en/th) — кнопки тоже переводятся
+    const T = OFFER_T[data.lang ?? "ru"] ?? OFFER_T.ru;
     const text = [
-      `<b>GTR EVENT · предложение выступить</b>`,
+      `<b>GTR EVENT · ${T.title}</b>`,
       "",
-      `<b>Артист:</b> ${tgEsc(offer.artistName)}`,
-      `<b>Площадка:</b> ${tgEsc(offer.venueName)}`,
-      offer.date ? `<b>Когда:</b> ${tgEsc(offer.date)}` : "",
-      offer.fee ? `<b>Условия:</b> ${tgEsc(offer.fee)}` : "",
-      offer.note ? `<b>Комментарий:</b> ${tgEsc(offer.note)}` : "",
+      `<b>${T.artist}:</b> ${tgEsc(offer.artistName)}`,
+      `<b>${T.venue}:</b> ${tgEsc(offer.venueName)}`,
+      offer.date ? `<b>${T.when}:</b> ${tgEsc(offer.date)}` : "",
+      offer.fee ? `<b>${T.fee}:</b> ${tgEsc(offer.fee)}` : "",
+      offer.note ? `<b>${T.note}:</b> ${tgEsc(offer.note)}` : "",
       "",
-      `<i>От: ${tgEsc(offer.fromName)}</i>`,
+      `<i>${T.from}: ${tgEsc(offer.fromName)}</i>`,
     ]
       .filter(Boolean)
       .join("\n");
@@ -419,8 +433,8 @@ export const sendOfferFn = createServerFn({ method: "POST" })
         reply_markup: {
           inline_keyboard: [
             [
-              { text: "✅ Принять", callback_data: `offer:${offer.id}:acc` },
-              { text: "❌ Отклонить", callback_data: `offer:${offer.id}:dec` },
+              { text: T.acc, callback_data: `offer:${offer.id}:acc` },
+              { text: T.dec, callback_data: `offer:${offer.id}:dec` },
             ],
           ],
         },
@@ -890,4 +904,88 @@ export const setLiveFn = createServerFn({ method: "POST" })
       { expirationTtl: 4 * 3600 },
     );
     return { ok: true as const, on: true };
+  });
+
+// ---------- настройки пользователя (язык предложений и т.п.) ----------
+
+export const getPrefsFn = createServerFn({ method: "GET" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || !ns) return { prefLang: "ru" as OfferLang };
+  const stored = await kvGetJson<StoredUser & { prefLang?: OfferLang }>(ns, `user:${u.email}`);
+  return { prefLang: stored?.prefLang ?? ("ru" as OfferLang) };
+});
+
+export const setPrefsFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { prefLang: OfferLang }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const };
+    const stored = await kvGetJson<StoredUser>(ns, `user:${u.email}`);
+    if (!stored) return { ok: false as const };
+    await ns.put(`user:${u.email}`, JSON.stringify({ ...stored, prefLang: data.prefLang }));
+    return { ok: true as const };
+  });
+
+// ---------- контакты для центра связи ----------
+// Организаторам и площадкам нужен канал связи с командой — отдаём карточки
+// без чувствительных полей (в отличие от полного listUsersFn для GTR)
+
+export type ContactUser = {
+  email: string;
+  name: string;
+  role: RoleId;
+  roleLabel: string;
+  teamOf?: string;
+  tgNick?: string;
+};
+
+export const contactsUsersFn = createServerFn({ method: "GET" }).handler(async () => {
+  const me = await currentUser();
+  const ns = await getKvNs();
+  if (!me || me.role === "artist" || !ns) return { users: [] as ContactUser[] };
+  const keys = await kvListAll(ns, "user:");
+  const users = (
+    await Promise.all(keys.map((k) => kvGetJson<StoredUser & { tgNick?: string }>(ns, k)))
+  ).filter((u): u is StoredUser & { tgNick?: string } => Boolean(u));
+  return {
+    users: users.map((u) => ({
+      email: u.email,
+      name: u.name,
+      role: u.role,
+      roleLabel: u.roleLabel,
+      teamOf: u.teamOf,
+      tgNick: u.tgNick,
+    })),
+  };
+});
+
+// ---------- статусы артистов: верификация GTR и work permit ----------
+
+export type ArtistFlags = { verified?: boolean; workPermit?: boolean };
+
+export const artistFlagsFn = createServerFn({ method: "GET" }).handler(async () => {
+  const ns = await getKvNs();
+  if (!ns) return { flags: {} as Record<string, ArtistFlags> };
+  const keys = await kvListAll(ns, "aflag:");
+  const flags: Record<string, ArtistFlags> = {};
+  for (const k of keys) {
+    const f = await kvGetJson<ArtistFlags>(ns, k);
+    if (f) flags[k.slice("aflag:".length)] = f;
+  }
+  return { flags };
+});
+
+export const setArtistFlagFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { artistId: string; patch: ArtistFlags }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns || u.role !== "gtr") return { ok: false as const };
+    const key = `aflag:${data.artistId}`;
+    const cur = (await kvGetJson<ArtistFlags>(ns, key)) ?? {};
+    const next = { ...cur, ...data.patch };
+    await ns.put(key, JSON.stringify(next));
+    return { ok: true as const, flags: next };
   });

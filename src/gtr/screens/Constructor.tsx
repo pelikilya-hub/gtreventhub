@@ -65,7 +65,7 @@ import { quoteDocument } from "../quote-doc";
 import { eventDeckDocument } from "../event-deck";
 import { drawImpulse } from "../impulse";
 import { useGtr } from "../store";
-import { sendOfferFn } from "../kv-api";
+import { getPrefsFn, sendOfferFn } from "../kv-api";
 import { Card, Chip, Dot, Eyebrow, Icon, tint } from "../ui";
 
 const VENDOR_KINDS: NodeKind[] = ["sound", "light", "decor", "content"];
@@ -2951,8 +2951,12 @@ function OfferPanel({
   const { shared, applyOffer } = useGtr();
   const [fee, setFee] = useState("");
   const [note, setNote] = useState("");
+  const [lang, setLang] = useState<"ru" | "en" | "th">("ru");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  useEffect(() => {
+    getPrefsFn().then((r) => setLang(r.prefLang)).catch(() => {});
+  }, []);
   if (!draft) return null;
 
   const existing = shared.offers.find(
@@ -2975,6 +2979,7 @@ function OfferPanel({
           date: draft.date || slot?.title || "",
           fee: fee.trim(),
           note: note.trim(),
+          lang,
         },
       });
       if (r.ok) {
@@ -3043,6 +3048,28 @@ function OfferPanel({
             value={note}
             onChange={(e) => setNote(e.target.value)}
           />
+          <div style={{ display: "flex", gap: 4 }}>
+            {(["ru", "en", "th"] as const).map((l) => (
+              <button
+                key={l}
+                className="gtr-pal-btn"
+                style={{
+                  flex: "0 0 auto",
+                  width: "auto",
+                  padding: "5px 10px",
+                  font: "600 9px/1 'JetBrains Mono',monospace",
+                  background: lang === l ? "rgba(229,35,27,.16)" : "transparent",
+                  color: lang === l ? "#fff" : "rgba(255,255,255,.5)",
+                }}
+                onClick={() => setLang(l)}
+              >
+                {l === "ru" ? "RU" : l === "en" ? "EN" : "TH"}
+              </button>
+            ))}
+            <span style={{ font: "500 9px/2 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+              язык сообщения артисту
+            </span>
+          </div>
           <button
             className="gtr-btn gtr-btn-red"
             style={{ padding: "8px 12px", opacity: busy ? 0.5 : 1 }}

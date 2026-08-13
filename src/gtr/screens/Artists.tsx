@@ -17,7 +17,7 @@ import mediaRaw from "../data/artist-media.json";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint, TrashTitle } from "../ui";
 import { openAppLink } from "../applink";
-import { liveStatusFn } from "../kv-api";
+import { artistFlagsFn, liveStatusFn, setArtistFlagFn } from "../kv-api";
 
 // Фото артистов: точное совпадение имени в открытом каталоге, заглушки убраны.
 // Дашь Spotify-ключи — база пересоберётся тем же пайплайном.
@@ -430,9 +430,19 @@ function ArtistCard({
   live?: { live: boolean; kind: string; url?: string };
   onBack: () => void;
 }) {
-  const { shared, setLineup } = useGtr();
+  const { user, shared, setLineup } = useGtr();
   const inLineup = shared.lineup.includes(a.id);
   const rider = a.rider ? RIDERS[a.rider] : null;
+  // Статусы допуска: верификация GTR и разрешение на работу (KV, правит GTR)
+  const [flags, setFlags] = useState<{ verified?: boolean; workPermit?: boolean }>({});
+  useEffect(() => {
+    artistFlagsFn().then((r) => setFlags(r.flags[a.id] ?? {})).catch(() => {});
+  }, [a.id]);
+  const toggleFlag = async (key: "verified" | "workPermit") => {
+    const next = { ...flags, [key]: !flags[key] };
+    setFlags(next);
+    await setArtistFlagFn({ data: { artistId: a.id, patch: { [key]: next[key] } } }).catch(() => {});
+  };
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto" }}>
@@ -575,6 +585,24 @@ function ArtistCard({
               {a.tier ? (
                 <Chip color="#7B4DFF">{a.tier.toUpperCase()}</Chip>
               ) : null}
+              <span
+                title={user.role === "gtr" ? "Нажмите, чтобы переключить" : undefined}
+                onClick={user.role === "gtr" ? () => toggleFlag("verified") : undefined}
+                style={{ cursor: user.role === "gtr" ? "pointer" : "default", display: "inline-flex" }}
+              >
+                <Chip color={flags.verified ? GREEN : "rgba(255,255,255,.35)"}>
+                  {flags.verified ? "ВЕРИФИЦИРОВАН ✓" : "БЕЗ ВЕРИФИКАЦИИ"}
+                </Chip>
+              </span>
+              <span
+                title={user.role === "gtr" ? "Нажмите, чтобы переключить" : undefined}
+                onClick={user.role === "gtr" ? () => toggleFlag("workPermit") : undefined}
+                style={{ cursor: user.role === "gtr" ? "pointer" : "default", display: "inline-flex" }}
+              >
+                <Chip color={flags.workPermit ? GREEN : AMBER}>
+                  {flags.workPermit ? "WORK PERMIT ✓" : "WORK PERMIT — НЕТ ДАННЫХ"}
+                </Chip>
+              </span>
             </div>
             <div
               style={{

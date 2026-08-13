@@ -21,8 +21,8 @@ import {
 import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow, Icon, Ring } from "../ui";
 import { ImpulseArt } from "../impulse";
-import { createInviteFn, decideOfferFn, setLiveFn, tgLinkFn, tgStatusFn } from "../kv-api";
-import { BossCabinet } from "./Boss";
+import { createInviteFn, decideOfferFn, getPrefsFn, setLiveFn, setPrefsFn, tgLinkFn, tgStatusFn } from "../kv-api";
+import { BossCabinet, PushPanel, TgChip } from "./Boss";
 import { openAppLink } from "../applink";
 import { OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
 
@@ -752,6 +752,11 @@ function SalesCabinet() {
   const go = (s: ScreenId, search?: Record<string, string>) =>
     navigate({ to: "/gtr/$screen", params: { screen: s }, search });
   const v = V(user.venueId);
+  // Язык, на котором уходят предложения артистам (Telegram)
+  const [prefLang, setPrefLang] = useState<"ru" | "en" | "th">("ru");
+  useEffect(() => {
+    getPrefsFn().then((r) => setPrefLang(r.prefLang)).catch(() => {});
+  }, []);
 
   const rows = useMemo(
     () =>
@@ -887,6 +892,32 @@ function SalesCabinet() {
           </div>
         </div>
       </div>
+
+      {/* ---------- настройки: push, Telegram, язык предложений ---------- */}
+      <Card style={{ padding: "14px 18px", marginBottom: 14, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <Eyebrow>НАСТРОЙКИ</Eyebrow>
+        <TgChip />
+        <PushPanel />
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 7, marginLeft: "auto" }}>
+          <span className="gtr-mono" style={{ font: "600 9px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".1em" }}>
+            ЯЗЫК ПРЕДЛОЖЕНИЙ
+          </span>
+          <select
+            className="gtr-input"
+            style={{ padding: "7px 10px", width: "auto" }}
+            value={prefLang}
+            onChange={(e) => {
+              const v2 = e.target.value as "ru" | "en" | "th";
+              setPrefLang(v2);
+              setPrefsFn({ data: { prefLang: v2 } }).catch(() => {});
+            }}
+          >
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+            <option value="th">ไทย</option>
+          </select>
+        </span>
+      </Card>
 
       {/* ---------- KPI кабинета ---------- */}
       <div

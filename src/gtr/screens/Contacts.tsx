@@ -15,7 +15,7 @@ import {
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow, tint } from "../ui";
 import { openAppLink } from "../applink";
-import { listUsersFn, type PublicUser } from "../kv-api";
+import { contactsUsersFn, type ContactUser } from "../kv-api";
 
 type Tab = "team" | "artists" | "venues" | "organizers";
 
@@ -87,15 +87,13 @@ function ContactRow({ r }: { r: Row }) {
 
 export function ContactsScreen() {
   const { user } = useGtr();
-  const [users, setUsers] = useState<PublicUser[]>([]);
+  const [users, setUsers] = useState<ContactUser[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
-  const [tab, setTab] = useState<Tab>(user.role === "gtr" ? "team" : "artists");
+  const [tab, setTab] = useState<Tab>(user.role === "artist" ? "artists" : "team");
   const [q, setQ] = useState("");
 
   useEffect(() => {
-    listUsersFn().then((r) => {
-      if (r.ok) setUsers(r.users);
-    });
+    contactsUsersFn().then((r) => setUsers(r.users));
     loadArtists().then((b) => setArtists(b.artists.filter(isPerformer)));
   }, []);
 

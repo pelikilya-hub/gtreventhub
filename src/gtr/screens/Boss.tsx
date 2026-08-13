@@ -59,7 +59,7 @@ const b64ToU8 = (s: string) => {
 };
 
 // ---------- Push-панель: разрешение → подписка → тест ----------
-function PushPanel() {
+export function PushPanel() {
   const [state, setState] = useState<"idle" | "busy" | "on" | "err">("idle");
   const [devices, setDevices] = useState(0);
   const [msg, setMsg] = useState("");
@@ -127,7 +127,7 @@ function PushPanel() {
 }
 
 // ---------- Telegram-статус ----------
-function TgChip() {
+export function TgChip() {
   const [linked, setLinked] = useState<boolean | null>(null);
   useEffect(() => {
     tgStatusFn().then((r: { linked?: boolean }) => setLinked(Boolean(r.linked)));

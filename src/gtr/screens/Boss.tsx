@@ -29,8 +29,10 @@ import {
   pushTestFn,
   tgLinkFn,
   tgStatusFn,
+  venueConfirmsFn,
   type GtrTask,
   type PublicUser,
+  type VenueConfirm,
 } from "../kv-api";
 import { VAPID_PUBLIC_KEY } from "../push";
 
@@ -476,6 +478,7 @@ export function BossCabinet() {
       </Card>
 
       <div className="gtr-boss-grid">
+        <SprintBlock go={go} />
         {/* -------- деньги -------- */}
         <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -607,5 +610,96 @@ export function BossCabinet() {
         </Card>
       </div>
     </div>
+  );
+}
+
+// Спринт недели: 15 площадок с подтверждёнными прайсами. Воронка
+// отправлено → открыто → подтверждено из vconfirm-записей, живьём.
+const SPRINT_GOAL = 15;
+function SprintBlock({ go }: { go: (s: ScreenId) => void }) {
+  const [confirms, setConfirms] = useState<Record<string, VenueConfirm>>({});
+  useEffect(() => {
+    const load = () =>
+      venueConfirmsFn().then((r) => setConfirms(r.confirms)).catch(() => {});
+    load();
+    const t = setInterval(load, 60000);
+    return () => clearInterval(t);
+  }, []);
+  const list = Object.values(confirms);
+  const sent = list.length;
+  const opened = list.filter((c) => c.status === "opened" || c.status === "confirmed").length;
+  const confirmed = list.filter((c) => c.status === "confirmed");
+  const bySender = new Map<string, number>();
+  for (const c of list) bySender.set(c.sentBy, (bySender.get(c.sentBy) ?? 0) + 1);
+  const pct = Math.min(100, Math.round((confirmed.length / SPRINT_GOAL) * 100));
+  const last = [...confirmed]
+    .sort((a, b) => (b.confirmedAt ?? 0) - (a.confirmedAt ?? 0))
+    .slice(0, 3);
+  return (
+    <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Eyebrow style={{ color: RED }}>ЦЕЛЬ НЕДЕЛИ · ПОДТВЕРЖДЁННЫЕ ПРАЙСЫ</Eyebrow>
+        <button className="gtr-btn gtr-btn-sm" onClick={() => go("base")}>
+          К базе →
+        </button>
+      </div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+        <span style={{ font: "700 26px/1 'Oswald',sans-serif", color: confirmed.length ? GREEN : "#fff" }}>
+          {confirmed.length}
+        </span>
+        <span style={{ font: mono(11, 600), color: "rgba(255,255,255,.45)" }}>/ {SPRINT_GOAL} площадок</span>
+      </div>
+      <div style={{ height: 6, background: "rgba(255,255,255,.08)" }}>
+        <div
+          style={{
+            width: `${pct}%`,
+            height: "100%",
+            background: GREEN,
+            transition: "width .4s",
+          }}
+        />
+      </div>
+      <div style={{ display: "flex", gap: 12 }}>
+        {[
+          ["ОТПРАВЛЕНО", sent, "rgba(255,255,255,.6)"],
+          ["ОТКРЫТО", opened, AMBER],
+          ["ПОДТВЕРЖДЕНО", confirmed.length, GREEN],
+        ].map(([l, n, c]) => (
+          <span key={l as string} style={{ font: mono(9.5, 600), color: c as string }}>
+            {l}: {n}
+          </span>
+        ))}
+      </div>
+      {last.length ? (
+        <div style={{ display: "grid", gap: 5 }}>
+          {last.map((c) => (
+            <div key={c.vid} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <Dot color={GREEN} />
+              <span style={{ flex: 1, minWidth: 0, font: golos(10.5), overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {V(c.vid)?.name ?? c.vid}
+                {c.rate?.amount ? ` · ${fmtThb(c.rate.amount)}` : ""}
+              </span>
+              <span style={{ font: mono(9), color: "rgba(255,255,255,.4)" }}>
+                {c.sentBy.split("@")[0]}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ font: golos(10.5), color: "rgba(255,255,255,.4)" }}>
+          Отправляйте площадкам ссылки подтверждения из паспорта — каждое
+          подтверждение появится здесь.
+        </div>
+      )}
+      {bySender.size ? (
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {[...bySender.entries()].map(([e, n]) => (
+            <span key={e} style={{ font: mono(9), color: "rgba(255,255,255,.45)" }}>
+              {e.split("@")[0]}: {n}
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </Card>
   );
 }

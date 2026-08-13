@@ -19,6 +19,7 @@ import { Route as GtrScreenRouteImport } from './routes/gtr/$screen'
 import { Route as GtrJoinRouteImport } from './routes/gtr/join'
 import { Route as GtrLoginRouteImport } from './routes/gtr/login'
 import { Route as GtrOrganizerRouteImport } from './routes/gtr/organizer'
+import { Route as GtrVRouteImport } from './routes/gtr/v'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -70,6 +71,11 @@ const GtrOrganizerRoute = GtrOrganizerRouteImport.update({
   path: '/organizer',
   getParentRoute: () => GtrRouteRoute,
 } as any)
+const GtrVRoute = GtrVRouteImport.update({
+  id: '/v',
+  path: '/v',
+  getParentRoute: () => GtrRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/gtr/join': typeof GtrJoinRoute
   '/gtr/login': typeof GtrLoginRoute
   '/gtr/organizer': typeof GtrOrganizerRoute
+  '/gtr/v': typeof GtrVRoute
   '/gtr/': typeof GtrIndexRoute
 }
 export interface FileRoutesByTo {
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/gtr/join': typeof GtrJoinRoute
   '/gtr/login': typeof GtrLoginRoute
   '/gtr/organizer': typeof GtrOrganizerRoute
+  '/gtr/v': typeof GtrVRoute
   '/gtr': typeof GtrIndexRoute
 }
 export interface FileRoutesById {
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/gtr/join': typeof GtrJoinRoute
   '/gtr/login': typeof GtrLoginRoute
   '/gtr/organizer': typeof GtrOrganizerRoute
+  '/gtr/v': typeof GtrVRoute
   '/gtr/': typeof GtrIndexRoute
 }
 export interface FileRouteTypes {
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/gtr/join'
     | '/gtr/login'
     | '/gtr/organizer'
+    | '/gtr/v'
     | '/gtr/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/gtr/join'
     | '/gtr/login'
     | '/gtr/organizer'
+    | '/gtr/v'
     | '/gtr'
   id:
     | '__root__'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/gtr/join'
     | '/gtr/login'
     | '/gtr/organizer'
+    | '/gtr/v'
     | '/gtr/'
   fileRoutesById: FileRoutesById
 }
@@ -225,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GtrOrganizerRouteImport
       parentRoute: typeof GtrRouteRoute
     }
+    '/gtr/v': {
+      id: '/gtr/v'
+      path: '/v'
+      fullPath: '/gtr/v'
+      preLoaderRoute: typeof GtrVRouteImport
+      parentRoute: typeof GtrRouteRoute
+    }
   }
 }
 
@@ -233,6 +252,7 @@ interface GtrRouteRouteChildren {
   GtrJoinRoute: typeof GtrJoinRoute
   GtrLoginRoute: typeof GtrLoginRoute
   GtrOrganizerRoute: typeof GtrOrganizerRoute
+  GtrVRoute: typeof GtrVRoute
   GtrIndexRoute: typeof GtrIndexRoute
 }
 
@@ -241,6 +261,7 @@ const GtrRouteRouteChildren: GtrRouteRouteChildren = {
   GtrJoinRoute: GtrJoinRoute,
   GtrLoginRoute: GtrLoginRoute,
   GtrOrganizerRoute: GtrOrganizerRoute,
+  GtrVRoute: GtrVRoute,
   GtrIndexRoute: GtrIndexRoute,
 }
 

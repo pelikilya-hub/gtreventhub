@@ -26,6 +26,7 @@ import { useGtr } from "../store";
 import { Card, Chip, Eyebrow, tint } from "../ui";
 import { GtrCalendar, GtrCapacity, humanDate } from "../pickers";
 import { ImpulseArt } from "../impulse";
+import { venueConfirmsFn, type VenueConfirm } from "../kv-api";
 
 const FORMATS = [
   "Клубная ночь",
@@ -489,6 +490,11 @@ function NewEvent({
   const [cluster, setCluster] = useState("");
   const [roomsSel, setRoomsSel] = useState<string[]>([]);
   const [zonesSel, setZonesSel] = useState<string[]>([]);
+  // Подтверждённые площадками прайсы — важнее наших оценок в подборе
+  const [confirms, setConfirms] = useState<Record<string, VenueConfirm>>({});
+  useEffect(() => {
+    venueConfirmsFn().then((r) => setConfirms(r.confirms)).catch(() => {});
+  }, []);
 
   const preset = EVENT_PRESETS.find((x) => x.id === presetId);
   const vibeQ = preset ? vibeQuestionFor(preset.format) : undefined;
@@ -805,6 +811,8 @@ function NewEvent({
                 const cap = capOf(v.capacity);
                 const score = v.readiness?.score;
                 const rate = rateOf(v.id);
+                const cf = confirms[v.id];
+                const cRate = cf?.status === "confirmed" ? cf.rate : undefined;
                 return (
                   <button
                     key={v.id}
@@ -827,7 +835,19 @@ function NewEvent({
                         {v.id} · {v.type || "—"} · {v.cluster || v.area}
                         {cap ? ` · до ${cap}` : ""}
                       </span>
-                      {rate ? (
+                      {cRate?.amount ? (
+                        <span
+                          style={{
+                            display: "block",
+                            marginTop: 2,
+                            font: "600 9px/1.3 'JetBrains Mono',monospace",
+                            color: "#2ECC71",
+                          }}
+                        >
+                          ✓ {fmtThb(cRate.amount)}
+                          {cRate.unit !== "событие" ? ` / ${cRate.unit}` : ""} · площадка
+                        </span>
+                      ) : rate ? (
                         <span
                           style={{
                             display: "block",

@@ -1018,3 +1018,179 @@ export const afishaVenuesFn = createServerFn({ method: "GET" }).handler(async ()
   const keys = await kvListAll(ns, "venueevents:");
   return { vids: keys.map((k) => k.slice("venueevents:".length)) };
 });
+
+// ---------- подтверждение данных площадкой: магик-ссылка без регистрации ----------
+// Команда отправляет менеджеру площадки персональную ссылку; тот открывает
+// страницу, правит вместимость/прайс и подтверждает. Токен — единственный
+// «пароль», живёт 30 дней. vlink:<token> → vid, vconfirm:<vid> → статус.
+
+export type VenueConfirmContact = { name: string; role: string; phone: string; email?: string };
+export type VenueConfirmRate = { amount: number; unit: string; covers: string };
+export type VenueConfirm = {
+  vid: string;
+  status: "sent" | "opened" | "confirmed";
+  sentBy: string;
+  sentAt: number;
+  openedAt?: number;
+  confirmedAt?: number;
+  contact?: VenueConfirmContact;
+  rate?: VenueConfirmRate;
+  capacity?: string;
+  notes?: string;
+};
+
+const randToken = () => {
+  const b = new Uint8Array(16);
+  crypto.getRandomValues(b);
+  return Array.from(b)
+    .map((x) => x.toString(16).padStart(2, "0"))
+    .join("");
+};
+
+export const createVenueLinkFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { vid: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns || (u.role !== "gtr" && u.role !== "sales"))
+      return { ok: false as const, error: "нет прав" };
+    const token = randToken();
+    await ns.put(
+      `vlink:${token}`,
+      JSON.stringify({ vid: data.vid, by: u.email, at: Date.now() }),
+      { expirationTtl: 60 * 60 * 24 * 30 },
+    );
+    const key = `vconfirm:${data.vid}`;
+    const cur = await kvGetJson<VenueConfirm>(ns, key);
+    if (!cur || cur.status !== "confirmed") {
+      await ns.put(
+        key,
+        JSON.stringify({
+          ...(cur ?? {}),
+          vid: data.vid,
+          status: cur?.status === "opened" ? "opened" : "sent",
+          sentBy: u.email,
+          sentAt: Date.now(),
+        } satisfies VenueConfirm),
+      );
+    }
+    return { ok: true as const, token };
+  });
+
+// Публичная: страница по токену. Отмечает «открыто» и отдаёт предзаполнение.
+export const venueLinkOpenFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { token: string }) => d)
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    if (!ns) return { ok: false as const };
+    const link = await kvGetJson<{ vid: string }>(ns, `vlink:${data.token}`);
+    if (!link) return { ok: false as const };
+    const key = `vconfirm:${link.vid}`;
+    const cur = await kvGetJson<VenueConfirm>(ns, key);
+    if (cur && cur.status === "sent")
+      await ns.put(key, JSON.stringify({ ...cur, status: "opened", openedAt: Date.now() }));
+    const { V, rateOf } = await import("./data/app-data");
+    const venue = V(link.vid);
+    const rate = rateOf(link.vid);
+    return {
+      ok: true as const,
+      vid: link.vid,
+      name: venue?.name ?? link.vid,
+      area: venue?.area ?? "",
+      capacity: cur?.capacity ?? venue?.capacity ?? "",
+      rate:
+        cur?.rate ??
+        (rate ? { amount: rate.amount, unit: rate.unit, covers: rate.covers } : null),
+      confirmed: cur?.status === "confirmed",
+      contact: cur?.contact ?? null,
+    };
+  });
+
+// Публичная: подтверждение. Имя и телефон обязательны — это контакт площадки.
+export const venueConfirmSubmitFn = createServerFn({ method: "POST" })
+  .inputValidator(
+    (d: {
+      token: string;
+      contact: VenueConfirmContact;
+      rate: VenueConfirmRate;
+      capacity: string;
+      notes?: string;
+    }) => d,
+  )
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    if (!ns) return { ok: false as const };
+    const link = await kvGetJson<{ vid: string; by: string }>(ns, `vlink:${data.token}`);
+    if (!link) return { ok: false as const };
+    if (!data.contact.name.trim() || !data.contact.phone.trim()) return { ok: false as const };
+    const key = `vconfirm:${link.vid}`;
+    const cur = await kvGetJson<VenueConfirm>(ns, key);
+    const next: VenueConfirm = {
+      vid: link.vid,
+      status: "confirmed",
+      sentBy: cur?.sentBy ?? link.by,
+      sentAt: cur?.sentAt ?? Date.now(),
+      openedAt: cur?.openedAt,
+      confirmedAt: Date.now(),
+      contact: {
+        name: data.contact.name.trim().slice(0, 120),
+        role: data.contact.role.trim().slice(0, 120),
+        phone: data.contact.phone.trim().slice(0, 60),
+        email: data.contact.email?.trim().slice(0, 120),
+      },
+      rate: {
+        amount: Math.max(0, Math.round(data.rate.amount)),
+        unit: data.rate.unit.slice(0, 30),
+        covers: data.rate.covers.trim().slice(0, 200),
+      },
+      capacity: data.capacity.trim().slice(0, 60),
+      notes: data.notes?.trim().slice(0, 500),
+    };
+    await ns.put(key, JSON.stringify(next));
+    // Телеграм: лично отправившему и в общий канал — подтверждение это событие
+    if (tgConfigured()) {
+      const { V } = await import("./data/app-data");
+      const name = V(link.vid)?.name ?? link.vid;
+      const text = [
+        "✅ <b>GTR EVENT · площадка подтвердила данные</b>",
+        "",
+        `<b>${tgEsc(name)}</b> (${tgEsc(link.vid)})`,
+        `<b>Вместимость:</b> ${tgEsc(next.capacity || "—")}`,
+        `<b>Прайс:</b> ฿${next.rate!.amount.toLocaleString("ru-RU")} / ${tgEsc(next.rate!.unit)}`,
+        next.rate!.covers ? `<b>Что входит:</b> ${tgEsc(next.rate!.covers)}` : "",
+        "",
+        `<b>Контакт:</b> ${tgEsc(next.contact!.name)}${next.contact!.role ? " · " + tgEsc(next.contact!.role) : ""}`,
+        `<b>Телефон:</b> ${tgEsc(next.contact!.phone)}`,
+        next.notes ? `<b>Комментарий:</b> ${tgEsc(next.notes)}` : "",
+      ]
+        .filter((l) => l !== "")
+        .join("\n");
+      const personal = await ns.get(`tg:${next.sentBy}`);
+      const common =
+        (typeof process !== "undefined" && process.env?.TELEGRAM_CHAT_ID) || "";
+      const chats = [...new Set([personal, common].filter(Boolean))] as string[];
+      for (const chat of chats)
+        await tgApi("sendMessage", {
+          chat_id: chat,
+          text,
+          parse_mode: "HTML",
+          disable_web_page_preview: true,
+        });
+    }
+    return { ok: true as const };
+  });
+
+// Команде: все статусы подтверждений — для базы, паспорта и спринт-дашборда
+export const venueConfirmsFn = createServerFn({ method: "GET" }).handler(async () => {
+  const me = await currentUser();
+  const ns = await getKvNs();
+  const empty = { confirms: {} as Record<string, VenueConfirm> };
+  if (!me || me.role === "artist" || me.role === "organizer" || !ns) return empty;
+  const keys = await kvListAll(ns, "vconfirm:");
+  const confirms: Record<string, VenueConfirm> = {};
+  for (const k of keys) {
+    const c = await kvGetJson<VenueConfirm>(ns, k);
+    if (c) confirms[k.slice("vconfirm:".length)] = c;
+  }
+  return { confirms };
+});

@@ -18,7 +18,13 @@ import {
 import { EditableImage } from "../EditableImage";
 import { Card, Chip, Eyebrow, Field, tint, TrashTitle } from "../ui";
 import { GtrLightbox } from "../lightbox";
-import { listAfishaFn, syncAfishaNowFn } from "../kv-api";
+import {
+  createVenueLinkFn,
+  listAfishaFn,
+  syncAfishaNowFn,
+  venueConfirmsFn,
+  type VenueConfirm,
+} from "../kv-api";
 import { useGtr } from "../store";
 
 const confColor = (c: string) => (c === "High" ? GREEN : c === "Medium" ? AMBER : RED);
@@ -30,6 +36,10 @@ export function BaseScreen() {
   const [cluster, setCluster] = useState("Все");
   const [tag, setTag] = useState("Все");
   const [q, setQ] = useState("");
+  const [confirms, setConfirms] = useState<Record<string, VenueConfirm>>({});
+  useEffect(() => {
+    venueConfirmsFn().then((r) => setConfirms(r.confirms)).catch(() => {});
+  }, []);
 
   const { clusters, tags } = useMemo(() => {
     const c: Record<string, number> = {};
@@ -168,6 +178,9 @@ export function BaseScreen() {
               <Chip color="rgba(255,255,255,.5)">{x.tag.toUpperCase()}</Chip>
               <Chip color={confColor(x.confidence)}>{x.confidence.toUpperCase()}</Chip>
               {x.readiness?.state === "Бронируемая" ? <Chip color={GREEN}>БРОНИРУЕМАЯ</Chip> : null}
+              {confirms[x.id]?.status === "confirmed" ? (
+                <Chip color={GREEN}>✓ ПРАЙС ПОДТВЕРЖДЁН</Chip>
+              ) : null}
             </div>
           </Card>
         ))}
@@ -180,6 +193,13 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
   const navigate = useNavigate();
   const v = vid ? V(vid) : undefined;
   const [lightbox, setLightbox] = useState<number | null>(null);
+  const [confirm, setConfirm] = useState<VenueConfirm | null>(null);
+  useEffect(() => {
+    if (!vid) return;
+    venueConfirmsFn()
+      .then((r) => setConfirm(r.confirms[vid] ?? null))
+      .catch(() => {});
+  }, [vid]);
   if (!v?.id)
     return (
       <div
@@ -201,6 +221,8 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
   const rate = rateOf(v.id);
   const ct = CONTACT(v.id);
   const R = v.readiness;
+  // Подтверждённые площадкой значения важнее наших оценок
+  const cRate = confirm?.status === "confirmed" ? (confirm.rate ?? null) : null;
 
   return (
     <div style={{ maxWidth: 1080, margin: "0 auto" }}>
@@ -246,6 +268,9 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             {R ? (
               <Chip color={R.state === "Бронируемая" ? GREEN : AMBER}>{R.state.toUpperCase()}</Chip>
             ) : null}
+            {confirm?.status === "confirmed" ? (
+              <Chip color={GREEN}>✓ ПОДТВЕРЖДЕНО ПЛОЩАДКОЙ</Chip>
+            ) : null}
           </div>
           <div
             style={{
@@ -271,7 +296,14 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             >
               Собрать событие здесь →
             </button>
-            {rate ? (
+            {cRate?.amount ? (
+              <span
+                className="gtr-mono"
+                style={{ font: "700 12px/1 'JetBrains Mono',monospace", color: GREEN }}
+              >
+                аренда {fmtThb(cRate.amount)} / {cRate.unit} · подтверждено площадкой
+              </span>
+            ) : rate ? (
               <span
                 className="gtr-mono"
                 style={{
@@ -311,7 +343,12 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               ["КОНЦЕПЦИЯ", v.concept],
               ["ФОРМАТЫ СОБЫТИЙ", v.events],
               ["ИНФРАСТРУКТУРА", v.facilities],
-              ["ВМЕСТИМОСТЬ", v.capacity],
+              [
+                "ВМЕСТИМОСТЬ",
+                confirm?.status === "confirmed" && confirm.capacity
+                  ? `${confirm.capacity} · подтверждено площадкой`
+                  : v.capacity,
+              ],
               ["МУЗЫКА", v.music],
               ["КЕЙТЕРИНГ", v.catering],
               ["ЗАМЕТКИ", v.notes],
@@ -399,15 +436,16 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
         </div>
 
         <div style={{ display: "grid", gap: 14, alignContent: "start" }}>
+          <VenueLinkBlock vid={v.id} confirm={confirm} />
           <Card style={{ padding: 18 }}>
-            {rate ? (
+            {cRate || rate ? (
               <div
                 style={{
                   marginBottom: 14,
                   padding: "10px 12px",
-                  border: `1px solid ${tint(RATE_COLOR[rate.kind], 0.4)}`,
-                  borderLeft: `3px solid ${RATE_COLOR[rate.kind]}`,
-                  background: tint(RATE_COLOR[rate.kind], 0.07),
+                  border: `1px solid ${tint(cRate ? GREEN : RATE_COLOR[rate!.kind], 0.4)}`,
+                  borderLeft: `3px solid ${cRate ? GREEN : RATE_COLOR[rate!.kind]}`,
+                  background: tint(cRate ? GREEN : RATE_COLOR[rate!.kind], 0.07),
                 }}
               >
                 <Eyebrow style={{ marginBottom: 6 }}>АРЕНДА</Eyebrow>
@@ -415,21 +453,31 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                   className="gtr-mono"
                   style={{ font: "700 16px/1 'JetBrains Mono',monospace", color: "#fff" }}
                 >
-                  {rate.amount ? `${fmtThb(rate.amount)} / ${rate.unit}` : "по запросу"}
+                  {cRate
+                    ? `${fmtThb(cRate.amount)} / ${cRate.unit}`
+                    : rate!.amount
+                      ? `${fmtThb(rate!.amount)} / ${rate!.unit}`
+                      : "по запросу"}
                 </div>
                 <div
                   className="gtr-mono"
                   style={{
                     marginTop: 6,
                     font: "600 9px/1.4 'JetBrains Mono',monospace",
-                    color: RATE_COLOR[rate.kind],
+                    color: cRate ? GREEN : RATE_COLOR[rate!.kind],
                     letterSpacing: ".08em",
                     textTransform: "uppercase",
                   }}
                 >
-                  {RATE_LABEL[rate.kind]}
+                  {cRate
+                    ? `Подтверждено площадкой${
+                        confirm?.confirmedAt
+                          ? " · " + new Date(confirm.confirmedAt).toLocaleDateString("ru-RU")
+                          : ""
+                      }`
+                    : RATE_LABEL[rate!.kind]}
                 </div>
-                {rate.covers ? (
+                {(cRate ? cRate.covers : rate!.covers) ? (
                   <div
                     style={{
                       marginTop: 5,
@@ -437,7 +485,21 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                       color: "var(--gtr-t2)",
                     }}
                   >
-                    {rate.covers}
+                    {cRate ? cRate.covers : rate!.covers}
+                  </div>
+                ) : null}
+                {confirm?.status === "confirmed" && confirm.contact ? (
+                  <div
+                    className="gtr-mono"
+                    style={{
+                      marginTop: 7,
+                      font: "500 10px/1.5 'JetBrains Mono',monospace",
+                      color: "var(--gtr-t2)",
+                    }}
+                  >
+                    {confirm.contact.name}
+                    {confirm.contact.role ? ` · ${confirm.contact.role}` : ""} ·{" "}
+                    {confirm.contact.phone}
                   </div>
                 ) : null}
               </div>
@@ -735,6 +797,105 @@ function AfishaBlock({ vid }: { vid: string }) {
           Источник этой площадки ещё не подключён — собираем Café del Mar и Illuzion, дальше расширяем.
         </span>
       )}
+    </Card>
+  );
+}
+
+// Ссылка подтверждения для менеджера площадки: команда создаёт, копирует
+// и шлёт в WhatsApp/Telegram. Статус показывает путь: отправлено → открыто
+// → подтверждено.
+function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm | null }) {
+  const { user } = useGtr();
+  const [link, setLink] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
+  if (user.role !== "gtr" && user.role !== "sales") return null;
+  const st = confirm?.status;
+  const make = async () => {
+    setBusy(true);
+    try {
+      const r = await createVenueLinkFn({ data: { vid } });
+      if (r.ok) {
+        const url = `${window.location.origin}/gtr/v?t=${r.token}`;
+        setLink(url);
+        try {
+          await navigator.clipboard.writeText(url);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2500);
+        } catch {
+          // буфер недоступен (http/старый браузер) — ссылка видна текстом
+        }
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+  const waText = encodeURIComponent(
+    `Hi! GTR Event brings events and organizers to Phuket venues. Please confirm your venue details (2 min): ${link}`,
+  );
+  return (
+    <Card style={{ padding: 18 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+        <Eyebrow>ПОДТВЕРЖДЕНИЕ ПЛОЩАДКОЙ</Eyebrow>
+        {st ? (
+          <Chip
+            color={st === "confirmed" ? GREEN : st === "opened" ? AMBER : "rgba(255,255,255,.5)"}
+          >
+            {st === "confirmed" ? "✓ ПОДТВЕРЖДЕНО" : st === "opened" ? "ОТКРЫТО" : "ОТПРАВЛЕНО"}
+          </Chip>
+        ) : null}
+      </div>
+      <div
+        style={{
+          font: "500 11px/1.55 'Golos Text',sans-serif",
+          color: "var(--gtr-t2)",
+          marginBottom: 10,
+        }}
+      >
+        Персональная ссылка для менеджера площадки: без регистрации проверит
+        вместимость и прайс, оставит контакт и подтвердит. EN / TH / RU.
+      </div>
+      <button className="gtr-btn" disabled={busy} onClick={make}>
+        {busy ? "…" : link ? "Новая ссылка" : "Создать ссылку"}
+      </button>
+      {link ? (
+        <>
+          <div
+            className="gtr-mono"
+            style={{
+              margin: "10px 0 8px",
+              font: "500 10px/1.5 'JetBrains Mono',monospace",
+              color: copied ? GREEN : "var(--gtr-t2)",
+              wordBreak: "break-all",
+            }}
+          >
+            {copied ? "Скопировано · " : ""}
+            {link}
+          </div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <a
+              className="gtr-btn"
+              style={{ textDecoration: "none" }}
+              href={`https://wa.me/?text=${waText}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              WhatsApp ↗
+            </a>
+            <a
+              className="gtr-btn"
+              style={{ textDecoration: "none" }}
+              href={`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(
+                "GTR Event — please confirm your venue details (2 min)",
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Telegram ↗
+            </a>
+          </div>
+        </>
+      ) : null}
     </Card>
   );
 }

@@ -6,10 +6,18 @@ https://gtr-event-hub.gtr-event.workers.dev — воркер `gtr-event-hub`,
 Тариф Workers Free: 100 000 запросов в день, кредитов и карты не требует.
 
 ```bash
-NITRO_PRESET=cloudflare_module npm run build
 CLOUDFLARE_API_TOKEN=<токен> CLOUDFLARE_ACCOUNT_ID=2e3f6f6ab8e81085ca7022ebeb583868 \
-  npx wrangler deploy --name gtr-event-hub
+  npm run deploy:cf
 ```
+
+`deploy:cf` = сборка (пресет cloudflare_module) + patch-wrangler.mjs
+(доклеивает биндинг KV в сгенерированный wrangler.json) + wrangler deploy.
+
+Общая база: Workers KV `gtr-event-store`
+(id a26fc466919d43e4a2e684d8765810b8, биндинг GTR_KV) — пользователи
+(user:<email>), события (draft:<id>), заявки (req:<id>). Выбирали D1,
+но токен «Edit Cloudflare Workers» не имеет прав на D1 — KV входит в
+шаблон. Для переезда на D1: добавить в токен право D1:Edit.
 
 Токен — аккаунт-токен (`cfat_…`), создан по шаблону «Edit Cloudflare Workers».
 В репозитории его не храним; проверка живости:

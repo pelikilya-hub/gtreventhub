@@ -7,7 +7,9 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build:cf": "NITRO_PRESET=cloudflare_module vite build && node scripts/patch-wrangler.mjs",
+    "deploy:cf": "npm run build:cf && wrangler deploy --name gtr-event-hub"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.168.25",

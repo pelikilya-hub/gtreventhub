@@ -105,3 +105,58 @@ export const notifyRequestFn = createServerFn({ method: "POST" })
       };
     }
   });
+
+// Уведомление о назначении заявки на менеджера: короткое, в тот же чат.
+// Личные chat-id менеджеров появятся, когда каждый напишет боту /start —
+// пока шлём в общий канал GTR.
+export const notifyAssignFn = createServerFn({ method: "POST" })
+  .inputValidator(
+    (d: {
+      title: string;
+      venueName: string;
+      date: string;
+      guests: string;
+      assigneeName: string;
+      assigneeEmail: string;
+      byName: string;
+    }) => d,
+  )
+  .handler(async ({ data }): Promise<NotifyResult> => {
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+    if (!token || !chatId)
+      return { ok: false, reason: "not-configured", detail: "Telegram не настроен" };
+
+    const text = [
+      "<b>GTR EVENT · заявка назначена</b>",
+      "",
+      `<b>Заявка:</b> ${esc(data.title || "без названия")}`,
+      `<b>Площадка:</b> ${esc(data.venueName)}`,
+      data.date ? `<b>Когда:</b> ${esc(data.date)}` : "",
+      data.guests ? `<b>Гостей:</b> ${esc(data.guests)}` : "",
+      "",
+      `<b>Ведёт:</b> ${esc(data.assigneeName)} (${esc(data.assigneeEmail)})`,
+      `<i>Назначил: ${esc(data.byName)}</i>`,
+    ]
+      .filter((l) => l !== "")
+      .join("\n");
+
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text,
+          parse_mode: "HTML",
+          disable_web_page_preview: true,
+        }),
+      });
+      const body = (await res.json().catch(() => null)) as { ok?: boolean; description?: string } | null;
+      if (!res.ok || !body?.ok)
+        return { ok: false, reason: "failed", detail: body?.description || `HTTP ${res.status}` };
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, reason: "failed", detail: e instanceof Error ? e.message : "сеть" };
+    }
+  });

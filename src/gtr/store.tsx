@@ -21,6 +21,7 @@ import {
   type Graph,
   type OrgRequest,
 } from "./data/app-data";
+import { deleteDraftKvFn, pullSharedFn, pushDraftFn, pushRequestFn } from "./kv-api";
 
 type Shared = {
   events: CalEvent[];
@@ -133,6 +134,53 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
     setShared(load());
   }, []);
 
+  // Синхронизация с общей базой (Workers KV): подтягиваем события и заявки
+  // кабинета при входе, затем фоном. Слияние — last-write-wins по updated/ts,
+  // локальные несохранённые записи не теряются.
+  useEffect(() => {
+    let alive = true;
+    const pull = async () => {
+      try {
+        const remote = await pullSharedFn();
+        if (!remote || !alive) return;
+        setShared((cur) => {
+          const byId = new Map(cur.drafts.map((d) => [d.id, d]));
+          for (const rd of remote.drafts) {
+            const loc = byId.get(rd.id);
+            if (!loc || (rd.updated ?? 0) >= (loc.updated ?? 0)) byId.set(rd.id, rd);
+          }
+          const reqById = new Map(cur.requests.map((r) => [r.id, r]));
+          for (const rr of remote.requests) {
+            const loc = reqById.get(rr.id);
+            if (!loc || (rr.ts ?? 0) >= (loc.ts ?? 0)) reqById.set(rr.id, rr);
+          }
+          const next = {
+            ...cur,
+            drafts: [...byId.values()].sort((a, b) => b.updated - a.updated),
+            requests: [...reqById.values()].sort((a, b) => b.ts - a.ts),
+          };
+          try {
+            window.localStorage.setItem(KEY, JSON.stringify(next));
+          } catch {
+            /* квота */
+          }
+          return next;
+        });
+      } catch {
+        /* сеть/локальный режим — молча работаем на localStorage */
+      }
+    };
+    pull();
+    const iv = setInterval(pull, 45_000);
+    const onFocus = () => pull();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      alive = false;
+      clearInterval(iv);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [user]);
+
   useEffect(() => {
     if (typeof BroadcastChannel === "undefined") return;
     const ch = new BroadcastChannel(CH);
@@ -225,31 +273,40 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
           brief: init.brief ?? {},
         };
         commit({ ...shared, drafts: [draft, ...shared.drafts] });
+        pushDraftFn({ data: draft }).catch(() => {});
         return id;
       },
-      updateDraft: (id, patch) =>
-        commit({
-          ...shared,
-          drafts: shared.drafts.map((d) =>
-            d.id === id ? { ...d, ...patch, updated: Date.now() } : d,
-          ),
-        }),
-      setDraftGraph: (id, fn) =>
-        commit({
-          ...shared,
-          drafts: shared.drafts.map((d) =>
-            d.id === id ? { ...d, graph: fn(d.graph), updated: Date.now() } : d,
-          ),
-        }),
-      deleteDraft: (id) =>
-        commit({ ...shared, drafts: shared.drafts.filter((d) => d.id !== id) }),
+      updateDraft: (id, patch) => {
+        const next = shared.drafts.map((d) =>
+          d.id === id ? { ...d, ...patch, updated: Date.now() } : d,
+        );
+        commit({ ...shared, drafts: next });
+        const changed = next.find((d) => d.id === id);
+        if (changed) pushDraftFn({ data: changed }).catch(() => {});
+      },
+      setDraftGraph: (id, fn) => {
+        const next = shared.drafts.map((d) =>
+          d.id === id ? { ...d, graph: fn(d.graph), updated: Date.now() } : d,
+        );
+        commit({ ...shared, drafts: next });
+        const changed = next.find((d) => d.id === id);
+        if (changed) pushDraftFn({ data: changed }).catch(() => {});
+      },
+      deleteDraft: (id) => {
+        commit({ ...shared, drafts: shared.drafts.filter((d) => d.id !== id) });
+        deleteDraftKvFn({ data: { id } }).catch(() => {});
+      },
 
-      addRequest: (req) => commit({ ...shared, requests: [req, ...shared.requests] }),
-      updateRequest: (id, patch) =>
-        commit({
-          ...shared,
-          requests: shared.requests.map((r) => (r.id === id ? { ...r, ...patch } : r)),
-        }),
+      addRequest: (req) => {
+        commit({ ...shared, requests: [req, ...shared.requests] });
+        pushRequestFn({ data: req }).catch(() => {});
+      },
+      updateRequest: (id, patch) => {
+        const next = shared.requests.map((r) => (r.id === id ? { ...r, ...patch } : r));
+        commit({ ...shared, requests: next });
+        const changed = next.find((r) => r.id === id);
+        if (changed) pushRequestFn({ data: changed }).catch(() => {});
+      },
     }),
     [user, shared, peers, commit],
   );

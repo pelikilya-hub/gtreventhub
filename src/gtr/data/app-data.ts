@@ -2104,6 +2104,8 @@ export type OrgRequest = {
   quoteTotal: number;
   lines: { label: string; note: string; amount: number }[];
   status: OrgRequestStatus;
+  assignee?: string; // email менеджера, ведущего заявку
+  assigneeName?: string;
   ts: number;
 };
 

@@ -1,12 +1,13 @@
 // Авторизация GTR Event: httpOnly-cookie сессия, подписанная HMAC-SHA256 (Web Crypto,
 // работает и в Node, и в Cloudflare Workers). Пользователи — демо-состав MVP.
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
 import {
   getCookie,
   setCookie,
   deleteCookie,
 } from "@tanstack/react-start/server";
 import type { RoleId } from "./data/app-data";
+import { getKvNs, kvGetJson } from "./kv-ns";
 
 export type SessionUser = {
   email: string;
@@ -146,23 +147,57 @@ const readToken = async (
   }
 };
 
+// Приглашённый пользователь в KV: сессионные поля + личный пароль
+export type StoredUser = SessionUser & {
+  passHash: string;
+  created: number;
+  invitedBy: string;
+};
+
+const issueSession = async (sessionUser: SessionUser) => {
+  setCookie(COOKIE, await makeToken(sessionUser), {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: WEEK,
+    secure: process.env.NODE_ENV === "production",
+  });
+};
+
 export const loginFn = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string; password: string }) => d)
   .handler(async ({ data }) => {
-    const user = USERS.find((u) => u.email === data.email.trim().toLowerCase());
+    const email = data.email.trim().toLowerCase();
+
+    // 1) Приглашённые менеджеры: личные аккаунты в KV со своими паролями
+    const ns = await getKvNs();
+    if (ns) {
+      const stored = await kvGetJson<StoredUser>(ns, `user:${email}`);
+      if (stored) {
+        if (stored.passHash !== (await sha256(data.password))) {
+          return { ok: false as const, error: "Неверный email или пароль" };
+        }
+        const { passHash: _p, created: _c, invitedBy: _i, ...sessionUser } = stored;
+        await issueSession(sessionUser);
+        return { ok: true as const, user: sessionUser };
+      }
+    }
+
+    // 2) Демо-состав: общий пароль стенда (или демо-пароль без гейта)
+    const user = USERS.find((u) => u.email === email);
     if (!user || (await expectedHash()) !== (await sha256(data.password))) {
       return { ok: false as const, error: "Неверный email или пароль" };
     }
     const { passHash: _ph, ...sessionUser } = user;
-    setCookie(COOKIE, await makeToken(sessionUser), {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: WEEK,
-      secure: process.env.NODE_ENV === "production",
-    });
+    await issueSession(sessionUser);
     return { ok: true as const, user: sessionUser };
   });
+
+// Текущий пользователь запроса — для проверок прав в других серверных
+// функциях. Только сервер: в клиентском бандле вызов бросит ошибку.
+export const currentUser = createServerOnlyFn(
+  async (): Promise<SessionUser | null> => readToken(getCookie(COOKIE)),
+);
 
 export const logoutFn = createServerFn({ method: "POST" }).handler(async () => {
   deleteCookie(COOKIE, { path: "/" });

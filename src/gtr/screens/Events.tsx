@@ -432,10 +432,12 @@ function NewEvent({
   }, []);
 
   // Подбор площадки: поиск + район + автофит под вместимость.
-  // Менеджер площадки работает со своей — выбор остаётся только у админа.
+  // Выбор открыт админу и менеджерам без закреплённой площадки;
+  // роль конкретной площадки работает со своей.
+  const canChoose = isAdmin || !ownVenue;
   const venues = useMemo(() => {
     const needle = vq.toLowerCase().trim();
-    const all = isAdmin ? PH.venues : PH.venues.filter((v) => v.id === ownVenue);
+    const all = canChoose ? PH.venues : PH.venues.filter((v) => v.id === ownVenue);
     return all
       .filter((v) => {
         if (cluster && (v.cluster || v.area || "").trim() !== cluster) return false;
@@ -449,7 +451,7 @@ function NewEvent({
           .includes(needle);
       })
       .sort((a, b) => (b.readiness?.score ?? 0) - (a.readiness?.score ?? 0));
-  }, [vq, cluster, guests, isAdmin, ownVenue]);
+  }, [vq, cluster, guests, canChoose, ownVenue]);
 
   const picked = venueId ? V(venueId) : null;
   const pickedCapShort = picked && guests && capOf(picked.capacity) && capOf(picked.capacity) < guests;
@@ -648,7 +650,7 @@ function NewEvent({
         <Step
           n={next()}
           title="Площадка"
-          note={isAdmin ? `${venues.length} подходит` : "закреплена за кабинетом"}
+          note={canChoose ? `${venues.length} подходит` : "закреплена за кабинетом"}
         />
         {picked ? (
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -664,7 +666,7 @@ function NewEvent({
             {pickedCapShort ? (
               <Chip color="#F5A623">МАЛА ДЛЯ {guests}</Chip>
             ) : null}
-            {isAdmin ? (
+            {canChoose ? (
               <button
                 className="gtr-btn"
                 style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10.5 }}

@@ -1,7 +1,9 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { can, PERMISSIONS } from "../auth";
+import { deleteUserFn, inviteUserFn, listManagersFn, listUsersFn, type PublicUser } from "../kv-api";
+import { notifyAssignFn } from "../notify";
 import {
   AMBER,
   CONTACT,
@@ -189,6 +191,7 @@ export function InquiriesScreen() {
                         {l.label}
                       </Chip>
                     ))}
+                    <AssignControl r={r} />
                     <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
                       <Chip
                         color={
@@ -346,6 +349,79 @@ export function InquiriesScreen() {
 }
 
 // ---------- залы и прайс ----------
+// Кто ведёт заявку: менеджер берёт на себя, GTR-админ может назначить любого
+// из приглашённых. Назначение уходит уведомлением в Telegram-канал GTR.
+function AssignControl({ r }: { r: import("../data/app-data").OrgRequest }) {
+  const { user, updateRequest } = useGtr();
+  const [pick, setPick] = useState(false);
+  const [managers, setManagers] = useState<{ email: string; name: string }[]>([]);
+
+  const assign = (email: string, name: string) => {
+    updateRequest(r.id, { assignee: email, assigneeName: name, status: r.status === "new" ? "seen" : r.status });
+    setPick(false);
+    notifyAssignFn({
+      data: {
+        title: r.title,
+        venueName: r.venueName,
+        date: r.date,
+        guests: r.guests,
+        assigneeName: name,
+        assigneeEmail: email,
+        byName: user.name,
+      },
+    }).catch(() => {});
+  };
+
+  if (r.assignee)
+    return (
+      <Chip color="#7B9EFF">
+        ВЕДЁТ: {(r.assigneeName || r.assignee).toUpperCase()}
+      </Chip>
+    );
+
+  return (
+    <span style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+      <button
+        className="gtr-btn"
+        style={{ padding: "5px 10px", fontSize: 10 }}
+        onClick={() => assign(user.email, user.name)}
+      >
+        Взять на себя
+      </button>
+      {user.role === "gtr" ? (
+        <button
+          className="gtr-btn"
+          style={{ padding: "5px 10px", fontSize: 10 }}
+          onClick={() => {
+            setPick((x) => !x);
+            if (!managers.length)
+              listManagersFn().then((res) => setManagers(res.managers)).catch(() => {});
+          }}
+        >
+          Назначить…
+        </button>
+      ) : null}
+      {pick
+        ? managers.map((m) => (
+            <button
+              key={m.email}
+              className="gtr-btn"
+              style={{ padding: "5px 10px", fontSize: 10, color: "#7B9EFF" }}
+              onClick={() => assign(m.email, m.name)}
+            >
+              {m.name}
+            </button>
+          ))
+        : null}
+      {pick && !managers.length ? (
+        <span style={{ font: "500 10px/1.3 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+          приглашённых пока нет
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
 export function SpacesScreen() {
   const { user } = useGtr();
   const vid = user.venueId || "VEN-0013";
@@ -949,6 +1025,7 @@ export function AccessScreen() {
           </div>
         ))}
       </Card>
+      {user.role === "gtr" ? <TeamPanel /> : null}
       <div
         className="gtr-mono"
         style={{
@@ -961,6 +1038,225 @@ export function AccessScreen() {
         {user.roleLabel}.
       </div>
     </div>
+  );
+}
+
+// ---------- команда: приглашения менеджеров (только GTR-админ) ----------
+// Аккаунты живут в общей базе (Workers KV): у каждого менеджера свой пароль
+// и свой кабинет. В локальном dev-режиме база недоступна — панель скажет об этом.
+function TeamPanel() {
+  const [users, setUsers] = useState<PublicUser[] | null>(null);
+  const [storeOk, setStoreOk] = useState(true);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [venueQ, setVenueQ] = useState("");
+  const [venueId, setVenueId] = useState("");
+  const [password, setPassword] = useState("");
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const refresh = () =>
+    listUsersFn()
+      .then((r) => {
+        setStoreOk(r.ok);
+        setUsers(r.users);
+      })
+      .catch(() => setStoreOk(false));
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  const genPassword = () => {
+    const abc = "abcdefghjkmnpqrstuvwxyz23456789";
+    let out = "";
+    for (let i = 0; i < 10; i++) out += abc[Math.floor(Math.random() * abc.length)];
+    setPassword(out);
+  };
+
+  const venueHits = venueQ.trim()
+    ? PH.venues
+        .filter((v) => `${v.name} ${v.id}`.toLowerCase().includes(venueQ.toLowerCase()))
+        .slice(0, 5)
+    : [];
+  const pickedVenue = venueId ? V(venueId) : null;
+
+  const invite = async () => {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const r = await inviteUserFn({
+        data: { name, email, role: "sales", venueId, password },
+      });
+      if (r.ok) {
+        setMsg({
+          ok: true,
+          text: `Менеджер приглашён. Вход: ${r.user.email} / пароль, который вы задали.`,
+        });
+        setName("");
+        setEmail("");
+        setPassword("");
+        setVenueId("");
+        setVenueQ("");
+        refresh();
+      } else {
+        setMsg({ ok: false, text: r.error ?? "Не получилось" });
+      }
+    } catch {
+      setMsg({ ok: false, text: "Сервер недоступен" });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Card style={{ marginTop: 16, padding: "18px 20px", display: "grid", gap: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <Eyebrow>КОМАНДА · ПРИГЛАШЕНИЯ МЕНЕДЖЕРОВ</Eyebrow>
+        {!storeOk ? <Chip color={AMBER}>ЛОКАЛЬНЫЙ РЕЖИМ — БАЗА НЕДОСТУПНА</Chip> : null}
+      </div>
+
+      <div
+        className="gtr-md-stack"
+        style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}
+      >
+        <input
+          className="gtr-input"
+          style={{ padding: "8px 11px", fontSize: 12 }}
+          placeholder="Имя и фамилия"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          className="gtr-input"
+          style={{ padding: "8px 11px", fontSize: 12 }}
+          placeholder="email@gtr.events"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <div style={{ display: "flex", gap: 6 }}>
+          <input
+            className="gtr-input"
+            style={{ flex: 1, padding: "8px 11px", fontSize: 12 }}
+            placeholder="Пароль (от 6 символов)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button className="gtr-btn" style={{ padding: "8px 10px", fontSize: 10.5 }} onClick={genPassword}>
+            Сгенерировать
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gap: 6 }}>
+        {pickedVenue ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Chip color="#E5231B">{pickedVenue.id}</Chip>
+            <span style={{ font: "500 11.5px/1.3 'Golos Text',sans-serif" }}>{pickedVenue.name}</span>
+            <button
+              className="gtr-btn"
+              style={{ padding: "4px 9px", fontSize: 10 }}
+              onClick={() => setVenueId("")}
+            >
+              Убрать
+            </button>
+          </div>
+        ) : (
+          <>
+            <input
+              className="gtr-input"
+              style={{ maxWidth: 360, padding: "8px 11px", fontSize: 12 }}
+              placeholder="Площадка менеджера (необязательно) — поиск…"
+              value={venueQ}
+              onChange={(e) => setVenueQ(e.target.value)}
+            />
+            {venueHits.map((v) => (
+              <button
+                key={v.id}
+                className="gtr-pal-btn"
+                style={{ padding: "7px 10px", maxWidth: 360 }}
+                onClick={() => {
+                  setVenueId(v.id);
+                  setVenueQ("");
+                }}
+              >
+                <span style={{ flex: 1, textAlign: "left", fontSize: 11.5 }}>
+                  {v.name}
+                  <span className="gtr-mono" style={{ marginLeft: 8, fontSize: 9, color: "rgba(255,255,255,.4)" }}>
+                    {v.id}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </>
+        )}
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <button
+          className="gtr-btn gtr-btn-red"
+          style={{ padding: "9px 15px", opacity: busy ? 0.5 : 1 }}
+          disabled={busy || !name.trim() || !email.trim() || password.length < 6 || !storeOk}
+          onClick={invite}
+        >
+          Пригласить менеджера
+        </button>
+        {msg ? (
+          <span
+            style={{
+              font: "500 11px/1.4 'Golos Text',sans-serif",
+              color: msg.ok ? GREEN : "#FF5B4D",
+            }}
+          >
+            {msg.text}
+          </span>
+        ) : null}
+      </div>
+
+      {users?.length ? (
+        <div style={{ display: "grid", gap: 6, marginTop: 4 }}>
+          <Eyebrow style={{ fontSize: 8.5 }}>ПРИГЛАШЁННЫЕ · {users.length}</Eyebrow>
+          {users.map((u) => (
+            <div
+              key={u.email}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "8px 10px",
+                border: "1px solid rgba(255,255,255,.08)",
+                background: "var(--gtr-card2)",
+              }}
+            >
+              <span className="gtr-lettermark" style={{ width: 30, height: 30, fontSize: 13 }}>
+                {u.initials}
+              </span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: "block", font: "600 11.5px/1.3 'Golos Text',sans-serif" }}>
+                  {u.name}
+                </span>
+                <span
+                  className="gtr-mono"
+                  style={{ display: "block", font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                >
+                  {u.email} · {u.roleLabel}
+                  {u.venueId ? ` · ${V(u.venueId).name ?? u.venueId}` : " · вся сеть"}
+                </span>
+              </span>
+              <button
+                className="gtr-btn"
+                style={{ padding: "5px 9px", fontSize: 10, color: "#E5231B" }}
+                onClick={() => {
+                  if (confirm(`Удалить доступ ${u.email}?`))
+                    deleteUserFn({ data: { email: u.email } }).then(refresh);
+                }}
+              >
+                Удалить
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </Card>
   );
 }
 

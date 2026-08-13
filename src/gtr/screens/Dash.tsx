@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import {
   AMBER,
@@ -739,7 +739,7 @@ export function DashScreen() {
 const MONTHS_S = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
 function SalesCabinet() {
-  const { user, myDrafts } = useGtr();
+  const { user, myDrafts, shared } = useGtr();
   const navigate = useNavigate();
   const go = (s: ScreenId, search?: Record<string, string>) =>
     navigate({ to: "/gtr/$screen", params: { screen: s }, search });
@@ -794,6 +794,11 @@ function SalesCabinet() {
   const maxMonth = Math.max(1, ...months.map((m) => m.sum));
 
   const latest = [...rows].sort((a, b) => b.d.updated - a.d.updated).slice(0, 5);
+
+  // Заявки, назначенные на этого менеджера
+  const myRequests = shared.requests
+    .filter((r) => r.assignee === user.email && r.status !== "declined")
+    .slice(0, 4);
 
   const kpis: [string, string, string, string][] = [
     ["В РАБОТЕ", String(inWork), inWork ? "черновики и отправленные" : "создайте первое событие", "#fff"],
@@ -1007,6 +1012,78 @@ function SalesCabinet() {
         </Card>
       </div>
 
+      {/* ---------- календарь кабинета + заявки на мне ---------- */}
+      <div
+        className="gtr-md-stack"
+        style={{ display: "grid", gridTemplateColumns: "minmax(300px,380px) 1fr", gap: 18, marginBottom: 18 }}
+      >
+        <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
+          <Eyebrow>КАЛЕНДАРЬ КАБИНЕТА</Eyebrow>
+          <CabinetMonth
+            rows={rows}
+            onOpen={(id) =>
+              navigate({ to: "/gtr/$screen", params: { screen: "constructor" }, search: { draft: id } })
+            }
+          />
+        </Card>
+        <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Eyebrow>ЗАЯВКИ НА МНЕ</Eyebrow>
+            <button
+              className="gtr-btn"
+              style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10 }}
+              onClick={() => go("inquiries")}
+            >
+              Все заявки →
+            </button>
+          </div>
+          {myRequests.length ? (
+            myRequests.map((r) => (
+              <div
+                key={r.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "9px 11px",
+                  border: "1px solid rgba(255,255,255,.08)",
+                  borderLeft: `2px solid ${r.status === "accepted" ? GREEN : AMBER}`,
+                  background: "var(--gtr-card2)",
+                  flexWrap: "wrap",
+                }}
+              >
+                <span style={{ flex: 1, minWidth: 160 }}>
+                  <span style={{ display: "block", font: "600 11.5px/1.3 'Golos Text',sans-serif" }}>
+                    {r.title || "Заявка"}
+                  </span>
+                  <span
+                    className="gtr-mono"
+                    style={{ display: "block", marginTop: 2, font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                  >
+                    {r.venueName} · {r.date || "дата не указана"} · {r.guests || "—"} гостей ·{" "}
+                    {r.organizerName || "организатор"}
+                  </span>
+                </span>
+                <span
+                  className="gtr-mono"
+                  style={{ font: "700 11px/1 'JetBrains Mono',monospace", color: "#2ECC71" }}
+                >
+                  {fmtThb(r.quoteTotal)}
+                </span>
+                <Chip color={r.status === "accepted" ? GREEN : AMBER}>
+                  {r.status === "accepted" ? "ПРИНЯТА" : "В РАБОТЕ"}
+                </Chip>
+              </div>
+            ))
+          ) : (
+            <span style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+              Назначенных заявок нет. Возьмите заявку на себя в разделе «Заявки организаторов» —
+              она появится здесь, а в Telegram-канал GTR уйдёт уведомление.
+            </span>
+          )}
+        </Card>
+      </div>
+
       {/* ---------- ближайшие + мои события ---------- */}
       <div
         className="gtr-md-stack"
@@ -1144,6 +1221,89 @@ function SalesCabinet() {
           )}
         </Card>
       </div>
+    </div>
+  );
+}
+
+
+// Месяц кабинета: дни с событиями менеджера подсвечены, клик открывает событие
+function CabinetMonth({
+  rows,
+  onOpen,
+}: {
+  rows: { d: import("../data/app-data").EventDraft }[];
+  onOpen: (draftId: string) => void;
+}) {
+  const now = new Date();
+  const [ym, setYm] = useState<[number, number]>([now.getFullYear(), now.getMonth()]);
+  const [y, m] = ym;
+  const monthNames = [
+    "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
+  ];
+  const shift = (new Date(y, m, 1).getDay() + 6) % 7;
+  const days = new Date(y, m + 1, 0).getDate();
+  const byDay = new Map<number, { id: string; title: string }[]>();
+  for (const { d } of rows) {
+    if (!d.dateIso) continue;
+    const [yy, mm, dd] = d.dateIso.split("-").map(Number);
+    if (yy === y && mm === m + 1)
+      byDay.set(dd, [...(byDay.get(dd) ?? []), { id: d.id, title: draftTitle(d) }]);
+  }
+  const todayKey =
+    now.getFullYear() === y && now.getMonth() === m ? now.getDate() : -1;
+
+  return (
+    <div className="gtr-cal" style={{ maxWidth: "none", border: "none", padding: 0, clipPath: "none", background: "transparent" }}>
+      <div className="gtr-cal-head">
+        <button type="button" className="gtr-cal-nav" onClick={() => {
+          const p = new Date(y, m - 1, 1);
+          setYm([p.getFullYear(), p.getMonth()]);
+        }}>
+          ‹
+        </button>
+        <span className="gtr-cal-title">
+          {monthNames[m]} <b>{y}</b>
+        </span>
+        <button type="button" className="gtr-cal-nav" onClick={() => {
+          const n = new Date(y, m + 1, 1);
+          setYm([n.getFullYear(), n.getMonth()]);
+        }}>
+          ›
+        </button>
+      </div>
+      <div className="gtr-cal-grid gtr-cal-week">
+        {["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"].map((w) => (
+          <span key={w}>{w}</span>
+        ))}
+      </div>
+      <div className="gtr-cal-grid">
+        {Array.from({ length: shift }, (_, i) => (
+          <span key={`x${i}`} />
+        ))}
+        {Array.from({ length: days }, (_, i) => {
+          const d = i + 1;
+          const evs = byDay.get(d);
+          return (
+            <button
+              key={d}
+              type="button"
+              className={`gtr-cal-day${evs ? " on" : ""}${d === todayKey ? " today" : ""}`}
+              title={evs?.map((e) => e.title).join("\n")}
+              style={evs ? undefined : { cursor: "default" }}
+              onClick={() => evs && onOpen(evs[0].id)}
+            >
+              {d}
+              {evs && evs.length > 1 ? (
+                <span style={{ position: "absolute", fontSize: 7, marginLeft: 2 }}>{evs.length}</span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+      <span style={{ font: "500 10px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+        Красные дни — ваши события; клик открывает конструктор.
+      </span>
     </div>
   );
 }

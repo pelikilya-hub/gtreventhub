@@ -20,6 +20,7 @@ import { BRIEF, vibeOf, vibeQuestionFor, type BriefAnswers } from "../data/brief
 import { buildPresetDraft, EVENT_PRESETS, presetBlockCount } from "../data/presets";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow, tint } from "../ui";
+import { GtrCalendar, GtrCapacity, humanDate } from "../pickers";
 import { ImpulseArt } from "../impulse";
 
 const FORMATS = [
@@ -33,15 +34,12 @@ const FORMATS = [
 ];
 
 export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
-  const { user, drafts, createDraft, deleteDraft } = useGtr();
+  const { user, myDrafts, createDraft, deleteDraft } = useGtr();
   const navigate = useNavigate();
 
-  // GTR-админ видит и создаёт события по всей сети, роль площадки — только свои
+  // Личный кабинет: менеджер видит только свои события, GTR-админ — все
   const isAdmin = user.role === "gtr";
-  const scoped = useMemo(
-    () => (isAdmin ? drafts : drafts.filter((d) => d.venueId === user.venueId)),
-    [drafts, isAdmin, user.venueId],
-  );
+  const scoped = myDrafts;
 
   const [q, setQ] = useState("");
   const [stage, setStage] = useState<"all" | EventStage>("all");
@@ -293,6 +291,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                     style={{ font: "500 9.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
                     {d.author || "GTR"}
+                    {isAdmin && d.owner ? ` (${d.owner})` : ""}
                     {d.updated ? ` · изменено ${new Date(d.updated).toLocaleDateString("ru-RU")}` : ""}
                   </span>
                   <button
@@ -334,6 +333,59 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
 }
 
 // ---------- создание события ----------
+// Мастер заявки: сценарий → дата и время → вместимость → площадка → вайб →
+// название. Дата и гости уходят в слот-узел графа, вместимость фильтрует
+// подбор площадки.
+const TIME_SLOTS = ["12:00", "16:00", "18:00", "19:00", "20:00", "22:00", "23:00"];
+
+const capOf = (s?: string) => {
+  const m = String(s || "").match(/(\d[\d\s]*)/);
+  return m ? parseInt(m[1].replace(/\s/g, ""), 10) : 0;
+};
+
+// Дата и время события записываются прямо в слот-узел графа
+const stampSlot = (g: Graph, dateH: string, time: string): Graph => {
+  if (!dateH && !time) return g;
+  const n = g.nodes.find((x) => x.kind === "slot");
+  if (!n) return g;
+  n.title = dateH ? `${dateH}${time ? " · " + time : ""}` : n.title;
+  n.sub = time ? `Начало в ${time}` : "Дата выбрана в заявке";
+  n.badge = "СЛОТ";
+  let seen = { d: false, t: false, st: false };
+  n.fields = n.fields.map(([k, v]) => {
+    if (k === "ДАТА") { seen.d = true; return ["ДАТА", dateH || v] as [string, string]; }
+    if (k === "ВРЕМЯ") { seen.t = true; return ["ВРЕМЯ", time || v] as [string, string]; }
+    if (k === "СТАТУС") { seen.st = true; return ["СТАТУС", "Выбран"] as [string, string]; }
+    return [k, v] as [string, string];
+  });
+  if (!seen.d) n.fields.push(["ДАТА", dateH || "—"]);
+  if (!seen.t) n.fields.push(["ВРЕМЯ", time || "—"]);
+  return g;
+};
+
+function Step({ n, title, note }: { n: number; title: string; note?: string }) {
+  return (
+    <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+      <span
+        className="gtr-mono"
+        style={{
+          font: "700 10px/1 'JetBrains Mono',monospace",
+          color: "var(--gtr-red)",
+          letterSpacing: ".08em",
+        }}
+      >
+        {String(n).padStart(2, "0")}
+      </span>
+      <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>{title}</span>
+      {note ? (
+        <span style={{ font: "500 10.5px/1.3 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+          — {note}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
 function NewEvent({
   isAdmin,
   ownVenue,
@@ -348,6 +400,8 @@ function NewEvent({
     format: string;
     title: string;
     guests?: string;
+    date?: string;
+    dateIso?: string;
     graph: Graph;
     brief?: BriefAnswers;
   }) => void;
@@ -358,28 +412,56 @@ function NewEvent({
   const [vibeId, setVibeId] = useState("");
   const [format, setFormat] = useState(""); // для пустого события
   const [title, setTitle] = useState("");
+  const [dateIso, setDateIso] = useState("");
+  const [time, setTime] = useState("");
+  const [guests, setGuests] = useState(0);
   const [vq, setVq] = useState("");
+  const [cluster, setCluster] = useState("");
 
   const preset = EVENT_PRESETS.find((x) => x.id === presetId);
   const vibeQ = preset ? vibeQuestionFor(preset.format) : undefined;
 
-  // Админ выбирает любую из 97 площадок, роль площадки — только свою
+  // Кластеры для фильтра подбора: топ районов сети по числу площадок
+  const clusters = useMemo(() => {
+    const cnt = new Map<string, number>();
+    for (const v of PH.venues) {
+      const c = (v.cluster || v.area || "").trim();
+      if (c) cnt.set(c, (cnt.get(c) ?? 0) + 1);
+    }
+    return [...cnt.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+  }, []);
+
+  // Подбор площадки: поиск + район + автофит под вместимость.
+  // Менеджер площадки работает со своей — выбор остаётся только у админа.
   const venues = useMemo(() => {
     const needle = vq.toLowerCase().trim();
     const all = isAdmin ? PH.venues : PH.venues.filter((v) => v.id === ownVenue);
-    if (!needle) return all.slice(0, 8);
     return all
-      .filter((v) => `${v.name} ${v.id} ${v.area} ${v.cluster}`.toLowerCase().includes(needle))
-      .slice(0, 8);
-  }, [vq, isAdmin, ownVenue]);
+      .filter((v) => {
+        if (cluster && (v.cluster || v.area || "").trim() !== cluster) return false;
+        if (guests) {
+          const cap = capOf(v.capacity);
+          if (cap && cap < guests) return false;
+        }
+        if (!needle) return true;
+        return `${v.name} ${v.id} ${v.area} ${v.cluster} ${v.type}`
+          .toLowerCase()
+          .includes(needle);
+      })
+      .sort((a, b) => (b.readiness?.score ?? 0) - (a.readiness?.score ?? 0));
+  }, [vq, cluster, guests, isAdmin, ownVenue]);
 
   const picked = venueId ? V(venueId) : null;
+  const pickedCapShort = picked && guests && capOf(picked.capacity) && capOf(picked.capacity) < guests;
   const ready = Boolean(
     venueId && (preset ? (vibeQ ? vibeId : true) : presetId === "blank" && format),
   );
 
   const create = () => {
     if (!venueId) return;
+    const dateH = dateIso ? humanDate(dateIso) : "";
+    const dateFull = dateH ? `${dateH}${time ? " · " + time : ""}` : "";
+    const guestsStr = guests ? String(guests) : "";
     if (preset) {
       const built = buildPresetDraft(venueId, preset, vibeId);
       const guestsLabel =
@@ -389,84 +471,35 @@ function NewEvent({
         venueId,
         format: preset.format,
         title: title.trim(),
-        guests: guestsLabel,
-        graph: built.graph,
+        guests: guestsStr || guestsLabel,
+        date: dateFull,
+        dateIso,
+        graph: stampSlot(built.graph, dateH, time),
         brief: built.brief,
       });
     } else {
-      onCreate({ venueId, format, title: title.trim(), graph: venueGraph(venueId) });
+      onCreate({
+        venueId,
+        format,
+        title: title.trim(),
+        guests: guestsStr,
+        date: dateFull,
+        dateIso,
+        graph: stampSlot(venueGraph(venueId), dateH, time),
+      });
     }
   };
 
+  let step = 0;
+  const next = () => ++step;
+
   return (
-    <Card style={{ padding: "20px 22px", marginBottom: 16, display: "grid", gap: 16 }}>
+    <Card style={{ padding: "20px 22px", marginBottom: 16, display: "grid", gap: 18 }}>
       <Eyebrow>НОВОЕ СОБЫТИЕ</Eyebrow>
 
-      {/* шаг 1 — площадка */}
-      <div style={{ display: "grid", gap: 7 }}>
-        <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>1. Площадка</span>
-        {picked ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Chip color="#E5231B">{picked.id}</Chip>
-            <span style={{ font: "500 12.5px/1.3 'Golos Text',sans-serif" }}>{picked.name}</span>
-            <span
-              className="gtr-mono"
-              style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-            >
-              {picked.type} · {picked.area}
-            </span>
-            {isAdmin ? (
-              <button
-                className="gtr-btn"
-                style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10.5 }}
-                onClick={() => setVenueId("")}
-              >
-                Изменить
-              </button>
-            ) : null}
-          </div>
-        ) : (
-          <>
-            <input
-              className="gtr-input"
-              style={{ padding: "8px 11px", fontSize: 12 }}
-              placeholder="Поиск по 97 площадкам: название, район, ID…"
-              value={vq}
-              onChange={(e) => setVq(e.target.value)}
-            />
-            <div style={{ display: "grid", gap: 5 }}>
-              {venues.map((v) => (
-                <button
-                  key={v.id}
-                  className="gtr-pal-btn"
-                  style={{ padding: "8px 10px" }}
-                  onClick={() => setVenueId(v.id)}
-                >
-                  <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                    <span style={{ display: "block", fontWeight: 600, fontSize: 11.5 }}>
-                      {v.name}
-                    </span>
-                    <span
-                      style={{
-                        display: "block",
-                        marginTop: 2,
-                        font: "500 9px/1.3 'JetBrains Mono',monospace",
-                        color: "rgba(255,255,255,.4)",
-                      }}
-                    >
-                      {v.id} · {v.type} · {v.cluster}
-                    </span>
-                  </span>
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* шаг 2 — сценарий: готовый каркас или пустое событие */}
-      <div style={{ display: "grid", gap: 7 }}>
-        <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>2. Сценарий</span>
+      {/* сценарий: готовый каркас или пустое событие */}
+      <div style={{ display: "grid", gap: 8 }}>
+        <Step n={next()} title="Сценарий" />
         <div
           style={{
             display: "grid",
@@ -504,10 +537,7 @@ function NewEvent({
                   {p.title}
                 </span>
                 <span
-                  style={{
-                    font: "500 10px/1.45 'Golos Text',sans-serif",
-                    color: "var(--gtr-t3)",
-                  }}
+                  style={{ font: "500 10px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
                 >
                   {p.desc}
                 </span>
@@ -540,7 +570,9 @@ function NewEvent({
               background: presetId === "blank" ? "rgba(229,35,27,.12)" : "transparent",
             }}
           >
-            <span style={{ font: "600 12px/1.3 'Golos Text',sans-serif", color: "rgba(255,255,255,.75)" }}>
+            <span
+              style={{ font: "600 12px/1.3 'Golos Text',sans-serif", color: "rgba(255,255,255,.75)" }}
+            >
               Пустое событие
             </span>
             <span style={{ font: "500 10px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
@@ -574,15 +606,192 @@ function NewEvent({
         ) : null}
       </div>
 
-      {/* шаг 3 — вайб пресета: направление и музыкальные стили */}
-      {preset && vibeQ ? (
-        <div style={{ display: "grid", gap: 7 }}>
-          <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>
-            3. {vibeQ.q}{" "}
-            <span style={{ color: "var(--gtr-t3)", fontWeight: 500 }}>
-              — задаёт палитру и музыкальные стили
+      {/* дата и время: полноценный календарь вместо текстового поля */}
+      <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 18 }}>
+        <div style={{ display: "grid", gap: 8, alignContent: "start" }}>
+          <Step n={next()} title="Дата" note={dateIso ? humanDate(dateIso) : "необязательно"} />
+          <GtrCalendar value={dateIso} onChange={setDateIso} />
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", maxWidth: 340 }}>
+            {TIME_SLOTS.map((t) => {
+              const on = time === t;
+              return (
+                <button
+                  key={t}
+                  className="gtr-mono"
+                  onClick={() => setTime(on ? "" : t)}
+                  style={{
+                    borderRadius: 0,
+                    padding: "6px 10px",
+                    cursor: "pointer",
+                    font: `${on ? 700 : 500} 10.5px/1 'JetBrains Mono',monospace`,
+                    border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.14)"}`,
+                    background: on ? "rgba(229,35,27,.16)" : "transparent",
+                    color: on ? "#fff" : "rgba(255,255,255,.55)",
+                  }}
+                >
+                  {t}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* вместимость: регулятор вместо свободного текста */}
+        <div style={{ display: "grid", gap: 8, alignContent: "start", minWidth: 0 }}>
+          <Step n={next()} title="Вместимость" note="фильтрует подбор площадки" />
+          <GtrCapacity value={guests} onChange={setGuests} />
+        </div>
+      </div>
+
+      {/* площадка: поиск + район + автофит под вместимость */}
+      <div style={{ display: "grid", gap: 8 }}>
+        <Step
+          n={next()}
+          title="Площадка"
+          note={isAdmin ? `${venues.length} подходит` : "закреплена за кабинетом"}
+        />
+        {picked ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <Chip color="#E5231B">{picked.id}</Chip>
+            <span style={{ font: "500 12.5px/1.3 'Golos Text',sans-serif" }}>{picked.name}</span>
+            <span
+              className="gtr-mono"
+              style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+            >
+              {picked.type} · {picked.area}
+              {picked.capacity ? ` · до ${capOf(picked.capacity)} гостей` : ""}
             </span>
-          </span>
+            {pickedCapShort ? (
+              <Chip color="#F5A623">МАЛА ДЛЯ {guests}</Chip>
+            ) : null}
+            {isAdmin ? (
+              <button
+                className="gtr-btn"
+                style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10.5 }}
+                onClick={() => setVenueId("")}
+              >
+                Изменить
+              </button>
+            ) : null}
+          </div>
+        ) : (
+          <>
+            <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+              <input
+                className="gtr-input"
+                style={{ flex: "1 1 220px", maxWidth: 320, padding: "8px 11px", fontSize: 12 }}
+                placeholder="Название, район, ID…"
+                value={vq}
+                onChange={(e) => setVq(e.target.value)}
+              />
+              {clusters.map(([c, cnt]) => {
+                const on = cluster === c;
+                return (
+                  <button
+                    key={c}
+                    onClick={() => setCluster(on ? "" : c)}
+                    style={{
+                      borderRadius: 0,
+                      padding: "7px 11px",
+                      cursor: "pointer",
+                      font: `${on ? 600 : 500} 10.5px/1 'Golos Text',sans-serif`,
+                      border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.12)"}`,
+                      background: on ? "rgba(229,35,27,.14)" : "transparent",
+                      color: on ? "#fff" : "rgba(255,255,255,.55)",
+                    }}
+                  >
+                    {c}
+                    <span className="gtr-mono" style={{ marginLeft: 6, fontSize: 9, opacity: 0.6 }}>
+                      {cnt}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))",
+                gap: 6,
+                maxHeight: 330,
+                overflowY: "auto",
+                paddingRight: 4,
+              }}
+            >
+              {venues.slice(0, 24).map((v) => {
+                const cap = capOf(v.capacity);
+                const score = v.readiness?.score;
+                return (
+                  <button
+                    key={v.id}
+                    className="gtr-pal-btn"
+                    style={{ padding: "9px 11px" }}
+                    onClick={() => setVenueId(v.id)}
+                  >
+                    <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                      <span style={{ display: "block", fontWeight: 600, fontSize: 11.5 }}>
+                        {v.name}
+                      </span>
+                      <span
+                        style={{
+                          display: "block",
+                          marginTop: 2,
+                          font: "500 9px/1.3 'JetBrains Mono',monospace",
+                          color: "rgba(255,255,255,.4)",
+                        }}
+                      >
+                        {v.id} · {v.type || "—"} · {v.cluster || v.area}
+                        {cap ? ` · до ${cap}` : ""}
+                      </span>
+                    </span>
+                    {guests && cap ? (
+                      <span
+                        className="gtr-mono"
+                        style={{
+                          flex: "none",
+                          font: "700 8.5px/1 'JetBrains Mono',monospace",
+                          color: "#2ECC71",
+                          border: "1px solid rgba(46,204,113,.4)",
+                          padding: "3px 6px",
+                        }}
+                      >
+                        ✓ {guests}
+                      </span>
+                    ) : score ? (
+                      <span
+                        className="gtr-mono"
+                        style={{
+                          flex: "none",
+                          font: "600 8.5px/1 'JetBrains Mono',monospace",
+                          color: "rgba(255,255,255,.35)",
+                        }}
+                      >
+                        {score}/100
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+              {!venues.length ? (
+                <span
+                  style={{
+                    font: "500 11px/1.5 'Golos Text',sans-serif",
+                    color: "var(--gtr-t3)",
+                    padding: "8px 2px",
+                  }}
+                >
+                  Под фильтры ничего не подошло — снимите район или уменьшите вместимость.
+                </span>
+              ) : null}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* вайб пресета: направление и музыкальные стили */}
+      {preset && vibeQ ? (
+        <div style={{ display: "grid", gap: 8 }}>
+          <Step n={next()} title={vibeQ.q} note="задаёт палитру и музыкальные стили" />
           <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
             {vibeQ.options.map((o) => {
               const on = vibeId === o.id;
@@ -634,12 +843,9 @@ function NewEvent({
         </div>
       ) : null}
 
-      {/* шаг 4 — название */}
-      <div style={{ display: "grid", gap: 7 }}>
-        <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>
-          {preset && vibeQ ? "4" : "3"}. Название{" "}
-          <span style={{ color: "var(--gtr-t3)", fontWeight: 500 }}>— необязательно</span>
-        </span>
+      {/* название */}
+      <div style={{ display: "grid", gap: 8 }}>
+        <Step n={next()} title="Название" note="необязательно" />
         <input
           className="gtr-input"
           style={{ padding: "8px 11px", fontSize: 12 }}
@@ -655,7 +861,7 @@ function NewEvent({
         />
       </div>
 
-      <div style={{ display: "flex", gap: 8 }}>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
         <button
           className="gtr-btn gtr-btn-red"
           style={{ padding: "9px 16px", opacity: ready ? 1 : 0.4 }}
@@ -667,6 +873,15 @@ function NewEvent({
         <button className="gtr-btn" style={{ padding: "9px 14px" }} onClick={onCancel}>
           Отмена
         </button>
+        {!ready ? (
+          <span style={{ font: "500 10.5px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            {!venueId
+              ? "Выберите площадку"
+              : preset && vibeQ && !vibeId
+                ? "Выберите вайб"
+                : "Выберите сценарий или формат"}
+          </span>
+        ) : null}
       </div>
     </Card>
   );

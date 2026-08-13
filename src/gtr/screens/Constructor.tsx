@@ -102,7 +102,7 @@ export function ConstructorScreen({
   intake?: EventIntake;
   onSubmitted?: (requestId: string) => void;
 } = {}) {
-  const { user, peers, shared, draftOf, draftsOf, createDraft, setDraftGraph, updateDraft, addRequest } =
+  const { user, peers, shared, myDrafts, draftOf, draftsOf, createDraft, setDraftGraph, updateDraft, addRequest } =
     useGtr();
   const navigate = useNavigate();
   // Площадку задаёт само событие. У GTR-админа своей площадки нет, и раньше
@@ -115,9 +115,10 @@ export function ConstructorScreen({
   const v = V(vid);
   const R = v.readiness;
 
-  // Без явного id открываем последнее событие площадки, а если событий нет —
-  // предлагаем создать, а не подсовываем единственный вечный граф.
-  const draft = explicitDraft ?? draftsOf(vid)[0];
+  // Без явного id открываем последнее СВОЁ событие площадки (кабинеты не
+  // подглядывают в чужие), а если событий нет — предлагаем создать.
+  const draft =
+    explicitDraft ?? draftsOf(vid).filter((d) => myDrafts.some((m) => m.id === d.id))[0];
   const g = draft?.graph ?? EMPTY_GRAPH;
 
   const [sel, setSel] = useState("n1");
@@ -316,11 +317,11 @@ export function ConstructorScreen({
           Каждое событие привязано к своей площадке: залы, слоты и смета берутся из её данных.
           Откройте существующее событие или создайте новое с выбором площадки.
         </div>
-        {shared.drafts.length ? (
+        {myDrafts.length ? (
           <Card style={{ padding: 14, marginBottom: 14 }}>
-            <Eyebrow style={{ marginBottom: 10 }}>СОБЫТИЯ · {shared.drafts.length}</Eyebrow>
+            <Eyebrow style={{ marginBottom: 10 }}>СОБЫТИЯ · {myDrafts.length}</Eyebrow>
             <div style={{ display: "grid", gap: 6 }}>
-              {shared.drafts.map((d) => (
+              {myDrafts.map((d) => (
                 <button
                   key={d.id}
                   className="gtr-pal-btn"

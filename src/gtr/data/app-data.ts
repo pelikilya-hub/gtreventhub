@@ -663,8 +663,10 @@ export type EventDraft = {
   title: string;
   format: string; // формат из брифа: клубная ночь, свадьба, корпоратив…
   guests: string;
-  date: string;
-  author: string; // кто создал — GTR-админ или роль площадки
+  date: string; // человекочитаемая дата: «21 авг 2026 · 20:00»
+  dateIso?: string; // ISO-дата для сортировок и «ближайших» (YYYY-MM-DD)
+  author: string; // имя создателя — для подписи в списках
+  owner?: string; // email создателя: личный кабинет видит только свои события
   created: number;
   updated: number;
   graph: Graph;

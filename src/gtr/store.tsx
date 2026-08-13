@@ -41,6 +41,7 @@ type GtrStore = {
   updateRequest: (id: string, patch: Partial<OrgRequest>) => void;
   // события конструктора
   drafts: EventDraft[];
+  myDrafts: EventDraft[]; // личный кабинет: свои события (админ GTR видит все)
   draftOf: (id: string) => EventDraft | undefined;
   draftsOf: (venueId: string) => EventDraft[];
   createDraft: (init: Partial<EventDraft> & { venueId: string }) => string;
@@ -191,6 +192,14 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
       setLineup: (fn) => commit({ ...shared, lineup: fn(shared.lineup) }),
 
       drafts: shared.drafts,
+      // Скоуп кабинета: менеджер видит только созданное им; события без
+      // владельца (старые и засеянные) остаются видимыми по площадке роли.
+      myDrafts:
+        user.role === "gtr"
+          ? shared.drafts
+          : shared.drafts.filter((d) =>
+              d.owner ? d.owner === user.email : d.venueId === user.venueId,
+            ),
       draftOf: (id) => shared.drafts.find((d) => d.id === id),
       draftsOf: (venueId) =>
         shared.drafts.filter((d) => d.venueId === venueId).sort((a, b) => b.updated - a.updated),
@@ -207,7 +216,9 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
           format: init.format ?? "",
           guests: init.guests ?? "",
           date: init.date ?? "",
-          author: init.author ?? user.roleLabel,
+          dateIso: init.dateIso ?? "",
+          author: init.author ?? user.name,
+          owner: init.owner ?? user.email, // личный кабинет: событие принадлежит создателю
           created: now,
           updated: now,
           graph: init.graph ?? venueGraph(init.venueId),

@@ -1,8 +1,26 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useMemo } from "react";
 
-import { AMBER, CONTACT, GREEN, PH, RED, richOf, SPACES, V, type ScreenId } from "../data/app-data";
+import {
+  AMBER,
+  computeQuote,
+  CONTACT,
+  draftTitle,
+  fmtThb,
+  GREEN,
+  PH,
+  RED,
+  richOf,
+  SPACES,
+  STAGE_COLOR,
+  STAGE_LABEL,
+  V,
+  type EventStage,
+  type ScreenId,
+} from "../data/app-data";
 import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow, Icon, Ring } from "../ui";
+import { ImpulseArt } from "../impulse";
 
 type Action = [string, string, string, ScreenId, string, string];
 type Kpi = [string, string | number, string, string, string];
@@ -55,6 +73,10 @@ export function DashScreen() {
   const R = v.readiness;
   const sp = SPACES(vid);
   const rich = richOf(vid);
+
+  // Кабинет Event-продаж — отдельный экран: профиль менеджера, свои события,
+  // воронка и пайплайн. Живые цифры вместо макетных.
+  if (user.role === "sales") return <SalesCabinet />;
 
   let d: DashData;
   if (user.role === "gtr") {
@@ -237,94 +259,6 @@ export function DashScreen() {
         ["Договор и комиссия", "Нет в «Готовности к бронированию»", "СДЕЛАТЬ", RED],
         ["Права на фото", "Только официальная галерея", "СДЕЛАТЬ", AMBER],
         ["Тех-райдер", "Не опубликован", "СДЕЛАТЬ", AMBER],
-      ].map(([title, desc, meta, color]) => ({ title, desc, meta, color })),
-    };
-  } else if (user.role === "sales") {
-    d = {
-      kicker: "КАБИНЕТ EVENT SALES",
-      name: v.name,
-      type: v.type,
-      area: `${v.area} · ${v.district}`,
-      capacity: "Arlang до 300 коктейль · 304 м²",
-      state: "БРОНЬ ПО ЗАПРОСУ",
-      stateColor: AMBER,
-      verified: `ПРОВЕРЕНО ${v.verified || ""}`,
-      heroImg: rich.hero,
-      heroCredit: rich.credit,
-      ringLabel: "ГОТОВНОСТЬ К КАТАЛОГУ",
-      ringValue: R?.score ?? 58,
-      ringNote: "Залы нормализованы частично: Arlang, Ava, Api",
-      ringCta: "Открыть залы",
-      ringGo: "spaces",
-      ringItems: [
-        ["3 зала в базе", GREEN],
-        ["Матрица вместимости подтверждена", GREEN],
-        ["Net-ставки — запрошены", AMBER],
-        ["Договор и комиссия — нет", RED],
-      ],
-      kpis: [
-        ["ЗАЛОВ В БАЗЕ", sp.length || 3, "", "#fff", "Arlang 304 м², Ava 95 м², Api 42 м²"],
-        ["ЗАЯВОК В РАБОТЕ", "5", "", AMBER, "Свадьбы, конференции, запуски"],
-        ["СРЕДНИЙ ОТВЕТ", "—", "", "#fff", "Норматив ответа не настроен"],
-        ["ГОТОВНОСТЬ", R?.score ?? 58, "/100", AMBER, "Бронь по запросу"],
-      ],
-      actions: [
-        [
-          "Прислать матрицу вместимости и net-ставки",
-          "Прайс-листа в «Готовности к бронированию» нет; без него нет расчёта для организатора",
-          "Залы и прайс",
-          "spaces",
-          "M3 21V8l9-5 9 5v13",
-          RED,
-        ],
-        [
-          "Импортировать полную матрицу залов",
-          "В базе 3 зала, у курорта их больше — нужны названия, м², сетапы, AV",
-          "Залы и прайс",
-          "spaces",
-          "M4 20V10 M10 20V4 M16 20v-7 M22 20H2",
-          RED,
-        ],
-        [
-          "Ответить на заявку на гала-ужин",
-          "Arlang Ballroom, 5 августа, 19:00–23:00 · ответ ожидается",
-          "Заявки",
-          "inquiries",
-          "M4 4h16v12H9l-5 4z",
-          AMBER,
-        ],
-        [
-          "Согласовать метод доступности",
-          "Сейчас: proposal request. Нужен hold и SLA ответа",
-          "Календарь",
-          "calendar",
-          "M3 6h18v15H3z M8 3v5 M16 3v5",
-          AMBER,
-        ],
-      ],
-      mainTitle: "Залы курорта в базе",
-      mainCta: "Все залы",
-      mainGo: "spaces",
-      mainRows: sp.map((x) => ({
-        title: x.name,
-        desc: [
-          x.type,
-          x.sqm && `${x.sqm} м²`,
-          x.capTheatre && `${x.capTheatre} театр`,
-          x.capCocktail && `${x.capCocktail} коктейль`,
-        ]
-          .filter(Boolean)
-          .join(" · "),
-        value: x.sqm ? `${x.sqm} м²` : "—",
-        status: String(x.bookable || "").toUpperCase(),
-        color: AMBER,
-      })),
-      sideTitle: "ЧТО ЗАПРОШЕНО GTR",
-      sideRows: [
-        ["Матрица вместимости", "Полная матрица сетапов по каждому залу", "P0", RED],
-        ["Net-ставки", "Нетто-ставки и партнёрские пакеты", "P0", RED],
-        ["Права на фото", "Official gallery only — нужны материалы с разрешением", "P1", AMBER],
-        ["AV и тех-райдер", "Свет, звук, экраны, схема подключения", "P1", AMBER],
       ].map(([title, desc, meta, color]) => ({ title, desc, meta, color })),
     };
   } else {
@@ -795,6 +729,421 @@ export function DashScreen() {
           ))}
         </div>
       </Card>
+    </div>
+  );
+}
+
+// ---------- Кабинет Event-продаж ----------
+// Личный кабинет менеджера: профиль, только свои события, воронка по
+// стадиям и пайплайн по месяцам. Все цифры считаются из событий кабинета.
+const MONTHS_S = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+
+function SalesCabinet() {
+  const { user, myDrafts } = useGtr();
+  const navigate = useNavigate();
+  const go = (s: ScreenId, search?: Record<string, string>) =>
+    navigate({ to: "/gtr/$screen", params: { screen: s }, search });
+  const v = V(user.venueId);
+
+  const rows = useMemo(
+    () =>
+      myDrafts.map((d) => ({
+        d,
+        quote: computeQuote(d.graph, d.venueId),
+        stage: (d.graph.stage ?? "draft") as EventStage,
+      })),
+    [myDrafts],
+  );
+
+  const pipeline = rows.reduce((s, r) => s + r.quote.total, 0);
+  const commission = rows.reduce((s, r) => s + r.quote.commission, 0);
+  const inWork = rows.filter((r) => r.stage !== "approved").length;
+  const approved = rows.filter((r) => r.stage === "approved").length;
+
+  const stages = (["draft", "sent", "approved"] as const).map((st) => {
+    const list = rows.filter((r) => r.stage === st);
+    return { st, count: list.length, sum: list.reduce((s, r) => s + r.quote.total, 0) };
+  });
+  const maxStage = Math.max(1, ...stages.map((x) => x.count));
+
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const upcoming = rows
+    .filter((r) => r.d.dateIso && r.d.dateIso >= todayIso)
+    .sort((a, b) => (a.d.dateIso! < b.d.dateIso! ? -1 : 1))
+    .slice(0, 4);
+
+  // Пайплайн по месяцам: полгода вперёд от текущего
+  const months = useMemo(() => {
+    const now = new Date();
+    const out: { key: string; label: string; sum: number; count: number }[] = [];
+    for (let i = 0; i < 6; i++) {
+      const dt = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
+      out.push({ key, label: MONTHS_S[dt.getMonth()], sum: 0, count: 0 });
+    }
+    for (const r of rows) {
+      const key = (r.d.dateIso || "").slice(0, 7);
+      const b = out.find((x) => x.key === key);
+      if (b) {
+        b.sum += r.quote.total;
+        b.count += 1;
+      }
+    }
+    return out;
+  }, [rows]);
+  const maxMonth = Math.max(1, ...months.map((m) => m.sum));
+
+  const latest = [...rows].sort((a, b) => b.d.updated - a.d.updated).slice(0, 5);
+
+  const kpis: [string, string, string, string][] = [
+    ["В РАБОТЕ", String(inWork), inWork ? "черновики и отправленные" : "создайте первое событие", "#fff"],
+    ["СОГЛАСОВАНО", String(approved), approved ? "подтверждённые события" : "пока нет", approved ? GREEN : "#fff"],
+    ["ПАЙПЛАЙН", pipeline ? fmtThb(pipeline) : "—", "сумма смет кабинета", "#fff"],
+    ["КОМИССИЯ GTR", commission ? fmtThb(commission) : "—", "с текущего пайплайна", commission ? GREEN : "#fff"],
+  ];
+
+  return (
+    <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+      {/* ---------- профиль менеджера ---------- */}
+      <div
+        className="gtr-card"
+        style={{ position: "relative", overflow: "hidden", padding: "24px 26px", marginBottom: 18 }}
+      >
+        <div
+          aria-hidden="true"
+          style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: "34%", opacity: 0.5 }}
+        >
+          <ImpulseArt seed={user.email} density={0.8} />
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(90deg, var(--gtr-graphite, #17171A), transparent 55%)",
+            }}
+          />
+        </div>
+        <div className="gtr-laser" style={{ top: 0, ["--gtr-run" as string]: "170px" }} />
+        <div
+          className="gtr-md-stack"
+          style={{
+            position: "relative",
+            display: "grid",
+            gridTemplateColumns: "auto 1fr auto",
+            gap: 20,
+            alignItems: "center",
+          }}
+        >
+          <span className="gtr-lettermark" style={{ width: 74, height: 74, fontSize: 34 }}>
+            {user.initials}
+          </span>
+          <div style={{ minWidth: 0 }}>
+            <Eyebrow>КАБИНЕТ EVENT SALES</Eyebrow>
+            <h1
+              className="gtr-oswald"
+              style={{ font: "700 28px/1.05 Oswald,sans-serif", letterSpacing: ".02em", margin: "8px 0 0" }}
+            >
+              {user.name}
+            </h1>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginTop: 9 }}>
+              <Chip color={AMBER}>{user.roleLabel.toUpperCase()}</Chip>
+              {v.name ? <Chip color="rgba(255,255,255,.5)">{v.name.toUpperCase()}</Chip> : null}
+              <span
+                className="gtr-mono"
+                style={{ font: "500 10.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+              >
+                {user.email} · событий: {rows.length}
+              </span>
+            </div>
+          </div>
+          <div style={{ display: "grid", gap: 8, alignContent: "center" }}>
+            <button
+              className="gtr-btn gtr-btn-red"
+              style={{ padding: "10px 16px" }}
+              onClick={() => go("events", user.venueId ? { vid: user.venueId } : undefined)}
+            >
+              + Новое событие
+            </button>
+            <button className="gtr-btn" style={{ padding: "9px 16px" }} onClick={() => go("events")}>
+              Мои события →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------- KPI кабинета ---------- */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))",
+          gap: 12,
+          marginBottom: 18,
+        }}
+      >
+        {kpis.map(([label, value, note, color]) => (
+          <Card key={label} style={{ padding: "16px 18px", display: "grid", gap: 7 }}>
+            <Eyebrow style={{ fontSize: 8.5 }}>{label}</Eyebrow>
+            <span
+              className="gtr-mono"
+              style={{
+                font: "700 24px/1 'JetBrains Mono',monospace",
+                color,
+                fontVariantNumeric: "tabular-nums",
+                overflowWrap: "anywhere",
+              }}
+            >
+              {value}
+            </span>
+            <span style={{ font: "500 10.5px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+              {note}
+            </span>
+          </Card>
+        ))}
+      </div>
+
+      {/* ---------- воронка + пайплайн по месяцам ---------- */}
+      <div
+        className="gtr-md-stack"
+        style={{ display: "grid", gridTemplateColumns: "minmax(280px,1fr) 1.4fr", gap: 18, marginBottom: 18 }}
+      >
+        <Card style={{ padding: "18px 20px", display: "grid", gap: 12, alignContent: "start" }}>
+          <Eyebrow>ВОРОНКА СОБЫТИЙ</Eyebrow>
+          {stages.map(({ st, count, sum }) => (
+            <div key={st} style={{ display: "grid", gap: 5 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                <Dot color={STAGE_COLOR[st]} />
+                <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>{STAGE_LABEL[st]}</span>
+                <span
+                  className="gtr-mono"
+                  style={{ font: "700 12px/1 'JetBrains Mono',monospace", color: "#fff" }}
+                >
+                  {count}
+                </span>
+                <span
+                  className="gtr-mono"
+                  style={{
+                    marginLeft: "auto",
+                    font: "500 10px/1 'JetBrains Mono',monospace",
+                    color: "var(--gtr-t3)",
+                  }}
+                >
+                  {sum ? fmtThb(sum) : "—"}
+                </span>
+              </div>
+              <div style={{ height: 8, background: "rgba(255,255,255,.06)" }}>
+                <div
+                  style={{
+                    height: "100%",
+                    width: `${(count / maxStage) * 100}%`,
+                    background: STAGE_COLOR[st],
+                    clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 100%, 0 100%)",
+                    transition: "width .4s",
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+          <span style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            Стадию события меняет конструктор: черновик → отправлено → согласовано.
+          </span>
+        </Card>
+
+        <Card style={{ padding: "18px 20px", display: "grid", gap: 12, alignContent: "start" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+            <Eyebrow>ПАЙПЛАЙН ПО МЕСЯЦАМ</Eyebrow>
+            <span
+              className="gtr-mono"
+              style={{ marginLeft: "auto", font: "500 9.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+            >
+              суммы смет с датой события
+            </span>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${months.length},1fr)`,
+              gap: 10,
+              alignItems: "end",
+              height: 130,
+            }}
+          >
+            {months.map((m) => (
+              <div key={m.key} style={{ display: "grid", gap: 6, alignContent: "end", height: "100%" }}>
+                <span
+                  className="gtr-mono"
+                  style={{
+                    font: "600 8.5px/1 'JetBrains Mono',monospace",
+                    color: m.sum ? "#fff" : "var(--gtr-t3)",
+                    textAlign: "center",
+                    overflowWrap: "anywhere",
+                  }}
+                >
+                  {m.sum ? `฿${Math.round(m.sum / 1000).toLocaleString("ru-RU")}k` : ""}
+                </span>
+                <div
+                  style={{
+                    height: Math.max(3, (m.sum / maxMonth) * 88),
+                    background: m.sum
+                      ? "linear-gradient(180deg, var(--gtr-red-hot,#FF3427), var(--gtr-red,#E5231B))"
+                      : "rgba(255,255,255,.07)",
+                    clipPath: "polygon(0 4px, calc(100% - 4px) 0, 100% 100%, 0 100%)",
+                  }}
+                  title={m.count ? `${m.count} соб. · ${fmtThb(m.sum)}` : "нет событий"}
+                />
+                <span
+                  className="gtr-mono"
+                  style={{
+                    font: "500 9px/1 'JetBrains Mono',monospace",
+                    color: "var(--gtr-t3)",
+                    textAlign: "center",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {m.label}
+                  {m.count ? ` · ${m.count}` : ""}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* ---------- ближайшие + мои события ---------- */}
+      <div
+        className="gtr-md-stack"
+        style={{ display: "grid", gridTemplateColumns: "minmax(280px,1fr) 1.4fr", gap: 18 }}
+      >
+        <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
+          <Eyebrow>БЛИЖАЙШИЕ СОБЫТИЯ</Eyebrow>
+          {upcoming.length ? (
+            upcoming.map(({ d }) => (
+              <button
+                key={d.id}
+                className="gtr-pal-btn"
+                style={{ padding: "9px 11px" }}
+                onClick={() =>
+                  navigate({
+                    to: "/gtr/$screen",
+                    params: { screen: "constructor" },
+                    search: { draft: d.id },
+                  })
+                }
+              >
+                <span
+                  className="gtr-mono"
+                  style={{
+                    flex: "none",
+                    font: "700 10px/1.3 'JetBrains Mono',monospace",
+                    color: "var(--gtr-red)",
+                    border: "1px solid rgba(229,35,27,.45)",
+                    padding: "5px 7px",
+                    textAlign: "center",
+                    minWidth: 46,
+                  }}
+                >
+                  {d.date ? d.date.split(" · ")[0] : d.dateIso}
+                </span>
+                <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                  <span style={{ display: "block", fontWeight: 600, fontSize: 11.5 }}>
+                    {draftTitle(d)}
+                  </span>
+                  <span
+                    style={{
+                      display: "block",
+                      marginTop: 2,
+                      font: "500 9px/1.3 'JetBrains Mono',monospace",
+                      color: "rgba(255,255,255,.4)",
+                    }}
+                  >
+                    {V(d.venueId).name ?? d.venueId}
+                    {d.date?.includes("·") ? ` · ${d.date.split(" · ")[1]}` : ""}
+                    {d.guests ? ` · ${d.guests} гостей` : ""}
+                  </span>
+                </span>
+              </button>
+            ))
+          ) : (
+            <span style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+              Дат впереди нет. Укажите дату в мастере события или в слоте конструктора — событие
+              появится здесь и в пайплайне по месяцам.
+            </span>
+          )}
+        </Card>
+
+        <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Eyebrow>МОИ СОБЫТИЯ</Eyebrow>
+            <button
+              className="gtr-btn"
+              style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10 }}
+              onClick={() => go("events")}
+            >
+              Все →
+            </button>
+          </div>
+          {latest.length ? (
+            latest.map(({ d, quote, stage }) => (
+              <button
+                key={d.id}
+                className="gtr-pal-btn"
+                style={{ padding: "10px 12px", position: "relative", overflow: "hidden" }}
+                onClick={() =>
+                  navigate({
+                    to: "/gtr/$screen",
+                    params: { screen: "constructor" },
+                    search: { draft: d.id },
+                  })
+                }
+              >
+                <span
+                  aria-hidden="true"
+                  style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 8 }}
+                >
+                  <ImpulseArt seed={d.id} density={0.35} />
+                </span>
+                <span style={{ flex: 1, minWidth: 0, textAlign: "left", paddingLeft: 10 }}>
+                  <span style={{ display: "block", fontWeight: 600, fontSize: 12 }}>
+                    {draftTitle(d)}
+                  </span>
+                  <span
+                    style={{
+                      display: "block",
+                      marginTop: 3,
+                      font: "500 9px/1.3 'JetBrains Mono',monospace",
+                      color: "rgba(255,255,255,.4)",
+                    }}
+                  >
+                    {V(d.venueId).name ?? d.venueId}
+                    {d.date ? ` · ${d.date}` : ""}
+                  </span>
+                </span>
+                <span
+                  className="gtr-mono"
+                  style={{
+                    flex: "none",
+                    font: "600 8.5px/1 'JetBrains Mono',monospace",
+                    color: STAGE_COLOR[stage],
+                    border: `1px solid ${STAGE_COLOR[stage]}55`,
+                    padding: "4px 7px",
+                  }}
+                >
+                  {STAGE_LABEL[stage].toUpperCase()}
+                </span>
+                <span
+                  className="gtr-mono"
+                  style={{ flex: "none", font: "700 11px/1 'JetBrains Mono',monospace", color: quote.total ? "#fff" : "var(--gtr-t3)" }}
+                >
+                  {quote.total ? fmtThb(quote.total) : "—"}
+                </span>
+              </button>
+            ))
+          ) : (
+            <span style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+              В кабинете пока пусто. Нажмите «+ Новое событие» — мастер проведёт по шагам: сценарий,
+              дата, вместимость, площадка.
+            </span>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }

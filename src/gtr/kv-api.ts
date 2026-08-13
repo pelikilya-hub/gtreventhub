@@ -1194,3 +1194,24 @@ export const venueConfirmsFn = createServerFn({ method: "GET" }).handler(async (
   }
   return { confirms };
 });
+
+// ---------- профиль стиля площадки: корпус афиш как источник правды ----------
+// Палитра и образцы собираются из кэшированных постеров; на этом корпусе
+// будет работать генератор афиш будущих событий (бриф → готовый вариант).
+
+export type StyleProfile = {
+  vid: string;
+  colors: string[]; // доминирующие цвета постеров, hex
+  posters: number; // размер корпуса
+  artists: string[]; // артисты, замеченные в афишах площадки
+  updatedAt: number;
+};
+
+export const styleProfileFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { vid: string }) => d)
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    if (!ns) return { profile: null as StyleProfile | null };
+    const profile = await kvGetJson<StyleProfile>(ns, `styleprofile:${data.vid}`);
+    return { profile };
+  });

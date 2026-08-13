@@ -8,7 +8,8 @@ export type VenueAfishaEvent = {
   id: string;
   title: string;
   dateIso: string; // YYYY-MM-DD
-  poster?: string;
+  poster?: string; // наш кэш /api/poster?k=… либо внешний URL до кэширования
+  posterSrc?: string; // оригинальный URL постера — провенанс и корпус стиля
   url: string;
   room?: string;
   artistIds: string[]; // совпадения с нашей базой
@@ -72,6 +73,17 @@ const og = (html: string, prop: string) => {
   return m ? m[1] : "";
 };
 
+// Постер страницы: og:image, иначе первый контентный <img> (Webflow-сайты
+// вроде Café del Mar og-тегов не ставят — постер лежит просто в разметке)
+function pickPoster(html: string): string {
+  const meta = og(html, "image");
+  if (meta) return meta;
+  const imgs = [...html.matchAll(/<img[^>]+src=["']([^"']+\.(?:jpe?g|png|webp)[^"']*)["']/gi)].map(
+    (x) => x[1],
+  );
+  return imgs.find((u) => !/logo|icon|favicon|arrow|badge|32x32|256x256/i.test(u)) ?? "";
+}
+
 // событийная страница → карточка события
 async function eventFromPage(url: string, slug: string, source: string, room?: string) {
   const dateIso = dateFromSlug(slug);
@@ -79,7 +91,7 @@ async function eventFromPage(url: string, slug: string, source: string, room?: s
   try {
     const html = await fetchText(url);
     const title = (og(html, "title") || slug.replace(/-/g, " ")).replace(/\s*[|–-]\s*(Café del Mar|Illuzion).*/i, "").trim();
-    const poster = og(html, "image");
+    const poster = pickPoster(html);
     return {
       id: slug,
       title,
@@ -100,7 +112,7 @@ async function syncCafeDelMar(): Promise<VenueAfishaEvent[]> {
   const slugs = [...new Set(html.match(/events\/[a-z0-9-]+/g) ?? [])]
     .map((s) => s.slice("events/".length))
     .filter((s) => s && s !== "events")
-    .slice(0, 18);
+    .slice(0, 12);
   const out: VenueAfishaEvent[] = [];
   for (const slug of slugs) {
     const ev = await eventFromPage(
@@ -117,12 +129,66 @@ async function syncIlluzion(): Promise<VenueAfishaEvent[]> {
   const html = await fetchText("https://www.illuzionphuket.com/events/");
   const links = [
     ...new Set(html.match(/https:\/\/www\.illuzionphuket\.com\/event\/[a-z0-9-]+\//g) ?? []),
-  ].slice(0, 18);
+  ].slice(0, 12);
   const out: VenueAfishaEvent[] = [];
   for (const url of links) {
     const slug = url.split("/event/")[1].replace(/\/$/, "");
     const ev = await eventFromPage(url, slug, "illuzionphuket.com", /shelter/.test(slug) ? "Shelter" : undefined);
     if (ev) out.push(ev);
+  }
+  return out;
+}
+
+// Дата из HTML страницы: «December 31», «August 28, 2026» — для сайтов,
+// которые не кладут дату в слуг (WordPress/Webflow-лендинги событий)
+function dateFromHtml(html: string): string | null {
+  const m = html.match(
+    /(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s*(\d{4}))?/i,
+  );
+  if (!m) return null;
+  const mon = MONTHS[m[1].slice(0, 3).toLowerCase()];
+  const day = m[2];
+  const now = new Date();
+  let year = m[3] ? parseInt(m[3], 10) : now.getFullYear();
+  const iso = `${year}-${mon}-${day.padStart(2, "0")}`;
+  if (!m[3] && new Date(iso).getTime() < now.getTime() - 35 * 86400e3) year += 1;
+  return `${year}-${mon}-${day.padStart(2, "0")}`;
+}
+
+// Carpe Diem: события — страницы в корне сайта, дата в теле страницы
+async function syncCarpeDiem(): Promise<VenueAfishaEvent[]> {
+  const html = await fetchText("https://carpediemphuket.com/events/");
+  const links = [...new Set(html.match(/https:\/\/carpediemphuket\.com\/[a-z0-9-]+\//g) ?? [])]
+    .filter(
+      (u) =>
+        !/\/(events|event|contact|menu|menus|about|gallery|privacy|terms|booking|reservations|blog|category|tag|wp-[a-z]+)\/$/.test(
+          u,
+        ),
+    )
+    .slice(0, 8);
+  const out: VenueAfishaEvent[] = [];
+  for (const url of links) {
+    const slug = url.replace(/\/$/, "").split("/").pop() ?? "";
+    try {
+      const page = await fetchText(url);
+      const dateIso = dateFromSlug(slug) ?? dateFromHtml(page);
+      if (!dateIso) continue; // еженедельные резидентства без даты пропускаем
+      const title = (og(page, "title") || slug.replace(/-/g, " "))
+        .replace(/\s*[|–-]\s*Carpe Diem.*/i, "")
+        .trim();
+      const poster = pickPoster(page);
+      out.push({
+        id: slug,
+        title,
+        dateIso,
+        poster: poster || undefined,
+        url,
+        artistIds: matchArtists(`${slug.replace(/-/g, " ")} ${title}`),
+        source: "carpediemphuket.com",
+      });
+    } catch {
+      // страница недоступна — пропускаем
+    }
   }
   return out;
 }
@@ -139,17 +205,77 @@ const dedupe = (list: VenueAfishaEvent[]) => {
     .sort((a, b) => a.dateIso.localeCompare(b.dateIso));
 };
 
+// ---------- кэш постеров: чужой og:image → наш KV, отдаётся /api/poster ----------
+// Хотлинк на сайты площадок ненадёжен (защита, переезды, https). Скачиваем
+// постер один раз в KV (base64) — и он же становится корпусом стиля площадки
+// для будущего генератора афиш. Лимит на прогон — бюджет subrequests воркера.
+
+const POSTER_MAX_BYTES = 2_500_000;
+const POSTERS_PER_RUN = 10;
+
+const toB64 = (buf: ArrayBuffer) => {
+  const u8 = new Uint8Array(buf);
+  let s = "";
+  const CH = 0x8000;
+  for (let i = 0; i < u8.length; i += CH)
+    s += String.fromCharCode(...u8.subarray(i, i + CH));
+  return btoa(s);
+};
+
+async function cachePosters(ns: KvNs, vid: string, events: VenueAfishaEvent[], budget: { left: number }) {
+  const have = new Set(await kvListAllLocal(ns, `poster:${vid}:`));
+  for (const ev of events) {
+    const src = ev.posterSrc ?? ev.poster;
+    if (!src || !/^https?:/.test(src)) continue;
+    ev.posterSrc = src;
+    const key = `poster:${vid}:${ev.id}`;
+    if (have.has(key)) {
+      ev.poster = `/api/poster?k=${encodeURIComponent(`${vid}:${ev.id}`)}`;
+      continue;
+    }
+    if (budget.left <= 0) continue; // докачаем в следующий прогон крона
+    budget.left--;
+    try {
+      const res = await fetch(src, { headers: { "user-agent": UA } });
+      if (!res.ok) continue;
+      const ct = res.headers.get("content-type") ?? "image/jpeg";
+      if (!ct.startsWith("image/")) continue;
+      const buf = await res.arrayBuffer();
+      if (buf.byteLength === 0 || buf.byteLength > POSTER_MAX_BYTES) continue;
+      await ns.put(key, JSON.stringify({ ct, b64: toB64(buf) }));
+      ev.poster = `/api/poster?k=${encodeURIComponent(`${vid}:${ev.id}`)}`;
+    } catch {
+      // постер не скачался — остаётся внешний URL, попробуем в другой раз
+    }
+  }
+}
+
+// локальная копия kvListAll — не тянем kv-api в воркерный модуль
+async function kvListAllLocal(ns: KvNs, prefix: string): Promise<string[]> {
+  const names: string[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await ns.list({ prefix, cursor });
+    names.push(...page.keys.map((k) => k.name));
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  return names;
+}
+
 // Полный проход: по адаптеру на площадку. Возвращает счётчики для отчёта.
 export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
   const jobs: [string, () => Promise<VenueAfishaEvent[]>][] = [
     ["VEN-0002", syncCafeDelMar],
     ["VEN-0013", syncIlluzion],
+    ["VEN-0003", syncCarpeDiem],
   ];
   const counts: Record<string, number> = {};
+  const posterBudget = { left: POSTERS_PER_RUN };
   for (const [vid, run] of jobs) {
     try {
       const events = dedupe(await run());
       counts[vid] = events.length;
+      await cachePosters(ns, vid, events, posterBudget);
       await ns.put(
         `venueevents:${vid}`,
         JSON.stringify({ events, syncedAt: Date.now(), source: events[0]?.source ?? "" } satisfies VenueAfisha),

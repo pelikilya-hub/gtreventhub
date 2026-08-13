@@ -21,8 +21,10 @@ import { GtrLightbox } from "../lightbox";
 import {
   createVenueLinkFn,
   listAfishaFn,
+  styleProfileFn,
   syncAfishaNowFn,
   venueConfirmsFn,
+  type StyleProfile,
   type VenueConfirm,
 } from "../kv-api";
 import { useGtr } from "../store";
@@ -129,11 +131,20 @@ export function BaseScreen() {
           gap: 12,
         }}
       >
-        {rows.map((x) => (
+        {rows.map((x) => {
+          const hero = richOf(x.id).hero;
+          const initials = x.name
+            .split(/\s+/)
+            .filter((w) => /^[A-Za-zА-Яа-я]/.test(w))
+            .slice(0, 2)
+            .map((w) => w[0])
+            .join("")
+            .toUpperCase();
+          return (
           <Card
             key={x.id}
             hover
-            style={{ padding: "15px 17px" }}
+            style={{ padding: 0, overflow: "hidden" }}
             onClick={() =>
               navigate({
                 to: "/gtr/$screen",
@@ -142,48 +153,138 @@ export function BaseScreen() {
               })
             }
           >
-            <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-              <span
-                style={{ flex: 1, minWidth: 0, font: "600 13.5px/1.3 'Golos Text',sans-serif" }}
+            {/* фото заведения; фолбэк-плашка всегда под ним — если фото нет
+                или не загрузилось, карточка остаётся фирменной, не «битой» */}
+            <div style={{ position: "relative", aspectRatio: "16/7", overflow: "hidden" }}>
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "repeating-linear-gradient(135deg, rgba(255,255,255,.028) 0 2px, transparent 2px 9px), linear-gradient(160deg, #17181C 0%, #0C0D10 100%)",
+                }}
               >
-                {x.name}
-              </span>
+                <span
+                  className="gtr-oswald"
+                  style={{
+                    position: "absolute",
+                    right: 14,
+                    bottom: 2,
+                    font: "700 52px/1 Oswald,sans-serif",
+                    color: "rgba(255,255,255,.07)",
+                    letterSpacing: ".04em",
+                    userSelect: "none",
+                  }}
+                >
+                  {initials}
+                </span>
+                <span
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    width: 3,
+                    height: "100%",
+                    background: "linear-gradient(180deg,#E5231B,transparent 80%)",
+                    opacity: 0.7,
+                  }}
+                />
+                <span
+                  className="gtr-mono"
+                  style={{
+                    position: "absolute",
+                    left: 14,
+                    bottom: 10,
+                    font: "600 8.5px/1 'JetBrains Mono',monospace",
+                    color: "rgba(255,255,255,.3)",
+                    letterSpacing: ".14em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {x.tag}
+                </span>
+              </div>
+              {hero ? (
+                <>
+                  <img
+                    src={hero}
+                    alt=""
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                      filter: "saturate(.9) contrast(1.02)",
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background:
+                        "linear-gradient(180deg, rgba(10,11,13,.05) 45%, rgba(10,11,13,.9) 100%)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                </>
+              ) : null}
               {x.readiness ? (
                 <span
                   className="gtr-mono"
                   style={{
-                    font: "700 14px/1 'JetBrains Mono',monospace",
+                    position: "absolute",
+                    top: 9,
+                    right: 9,
+                    font: "700 11px/1 'JetBrains Mono',monospace",
+                    padding: "4px 7px",
+                    background: "rgba(10,11,13,.72)",
+                    backdropFilter: "blur(3px)",
                     color:
                       x.readiness.score >= 70
                         ? GREEN
                         : x.readiness.score >= 55
                           ? AMBER
-                          : "var(--gtr-t3)",
+                          : "rgba(255,255,255,.5)",
                   }}
                 >
                   {x.readiness.score}
                 </span>
               ) : null}
             </div>
-            <div
-              style={{
-                margin: "6px 0 8px",
-                font: "500 10.5px/1.45 'Golos Text',sans-serif",
-                color: "var(--gtr-t2)",
-              }}
-            >
-              {x.type} · {x.area}
-            </div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <Chip color="rgba(255,255,255,.5)">{x.tag.toUpperCase()}</Chip>
-              <Chip color={confColor(x.confidence)}>{x.confidence.toUpperCase()}</Chip>
-              {x.readiness?.state === "Бронируемая" ? <Chip color={GREEN}>БРОНИРУЕМАЯ</Chip> : null}
-              {confirms[x.id]?.status === "confirmed" ? (
-                <Chip color={GREEN}>✓ ПРАЙС ПОДТВЕРЖДЁН</Chip>
-              ) : null}
+            <div style={{ padding: "11px 15px 14px" }}>
+              <div
+                style={{ font: "600 13.5px/1.3 'Golos Text',sans-serif" }}
+              >
+                {x.name}
+              </div>
+              <div
+                style={{
+                  margin: "5px 0 8px",
+                  font: "500 10.5px/1.45 'Golos Text',sans-serif",
+                  color: "var(--gtr-t2)",
+                }}
+              >
+                {x.type} · {x.area}
+              </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                <Chip color={confColor(x.confidence)}>{x.confidence.toUpperCase()}</Chip>
+                {x.readiness?.state === "Бронируемая" ? (
+                  <Chip color={GREEN}>БРОНИРУЕМАЯ</Chip>
+                ) : null}
+                {confirms[x.id]?.status === "confirmed" ? (
+                  <Chip color={GREEN}>✓ ПРАЙС ПОДТВЕРЖДЁН</Chip>
+                ) : null}
+              </div>
             </div>
           </Card>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -683,6 +784,12 @@ function AfishaBlock({ vid }: { vid: string }) {
   const navigate = useNavigate();
   const [data, setData] = useState<{ events: AfishaEvent[]; syncedAt: number } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [style, setStyle] = useState<StyleProfile | null>(null);
+  useEffect(() => {
+    styleProfileFn({ data: { vid } })
+      .then((r) => setStyle(r.profile))
+      .catch(() => {});
+  }, [vid]);
   const load = () =>
     listAfishaFn({ data: { vid } })
       .then((r) => setData(r as { events: AfishaEvent[]; syncedAt: number }))
@@ -706,6 +813,16 @@ function AfishaBlock({ vid }: { vid: string }) {
             style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
           >
             обновлено {new Date(data.syncedAt).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+          </span>
+        ) : null}
+        {style?.colors.length ? (
+          <span
+            title={`Стиль площадки · корпус ${style.posters} афиш`}
+            style={{ display: "flex", gap: 3, alignItems: "center" }}
+          >
+            {style.colors.slice(0, 6).map((c) => (
+              <span key={c} style={{ width: 9, height: 9, background: c }} />
+            ))}
           </span>
         ) : null}
         {user.role === "gtr" ? (

@@ -120,13 +120,14 @@ export const AMBER = "#F5A623";
 export const RED = "#E5231B";
 
 // ---------- роли ----------
-export type RoleId = "pr" | "owner" | "sales" | "gtr" | "artist";
+export type RoleId = "pr" | "owner" | "sales" | "gtr" | "artist" | "organizer";
 export const ROLES: [RoleId, string, string, string][] = [
   ["pr", "PR-директор", "VEN-0013", "ПД"],
   ["owner", "Владелец", "VEN-0061", "ВЛ"],
   ["sales", "Event-продажи", "VEN-0033", "ПР"],
   ["gtr", "GTR-админ", "", "АД"],
   ["artist", "Артист", "", "АР"],
+  ["organizer", "Организатор", "", "ОР"],
 ];
 
 // ---------- навигация ----------
@@ -2138,6 +2139,7 @@ export type OrgRequest = {
   venueName: string;
   organizerName: string;
   organizerContact: string;
+  organizerEmail?: string; // аккаунт организатора: видит свои заявки в кабинете
   title: string; // формат события
   date: string; // желаемая дата/слот
   guests: string; // ожидаемое число гостей

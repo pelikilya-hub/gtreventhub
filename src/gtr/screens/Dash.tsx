@@ -78,7 +78,7 @@ export function DashScreen() {
 
   // Кабинет Event-продаж — отдельный экран: профиль менеджера, свои события,
   // воронка и пайплайн. Живые цифры вместо макетных.
-  if (user.role === "sales") return <SalesCabinet />;
+  if (user.role === "sales" || user.role === "organizer") return <SalesCabinet />;
   // Кабинет артиста: предложения, подтверждённые выступления, Telegram
   if (user.role === "artist") return <ArtistCabinet />;
 
@@ -799,9 +799,13 @@ function SalesCabinet() {
 
   const latest = [...rows].sort((a, b) => b.d.updated - a.d.updated).slice(0, 5);
 
-  // Заявки, назначенные на этого менеджера
+  // Менеджеру — назначенные на него; организатору — отправленные им
   const myRequests = shared.requests
-    .filter((r) => r.assignee === user.email && r.status !== "declined")
+    .filter((r) =>
+      user.role === "organizer"
+        ? r.organizerEmail === user.email
+        : r.assignee === user.email && r.status !== "declined",
+    )
     .slice(0, 4);
 
   const kpis: [string, string, string, string][] = [
@@ -846,7 +850,7 @@ function SalesCabinet() {
             {user.initials}
           </span>
           <div style={{ minWidth: 0 }}>
-            <Eyebrow>КАБИНЕТ EVENT SALES</Eyebrow>
+            <Eyebrow>{user.role === "organizer" ? "КАБИНЕТ ОРГАНИЗАТОРА" : "КАБИНЕТ EVENT SALES"}</Eyebrow>
             <h1
               className="gtr-oswald"
               style={{ font: "700 28px/1.05 Oswald,sans-serif", letterSpacing: ".02em", margin: "8px 0 0" }}
@@ -868,7 +872,7 @@ function SalesCabinet() {
             <button
               className="gtr-btn gtr-btn-red"
               style={{ padding: "10px 16px" }}
-              onClick={() => go("events", user.venueId ? { vid: user.venueId } : undefined)}
+              onClick={() => go("events", { vid: user.venueId || "new" })}
             >
               + Новое событие
             </button>
@@ -1032,7 +1036,7 @@ function SalesCabinet() {
         </Card>
         <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Eyebrow>ЗАЯВКИ НА МНЕ</Eyebrow>
+            <Eyebrow>{user.role === "organizer" ? "МОИ ЗАЯВКИ ПЛОЩАДКАМ" : "ЗАЯВКИ НА МНЕ"}</Eyebrow>
             <button
               className="gtr-btn"
               style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10 }}
@@ -1081,8 +1085,9 @@ function SalesCabinet() {
             ))
           ) : (
             <span style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              Назначенных заявок нет. Возьмите заявку на себя в разделе «Заявки организаторов» —
-              она появится здесь, а в Telegram-канал GTR уйдёт уведомление.
+              {user.role === "organizer"
+                ? "Заявок пока нет. Соберите событие в конструкторе и отправьте запрос площадке — статус будет виден здесь."
+                : "Назначенных заявок нет. Возьмите заявку на себя в разделе «Заявки организаторов» — она появится здесь, а в Telegram-канал GTR уйдёт уведомление."}
             </span>
           )}
         </Card>

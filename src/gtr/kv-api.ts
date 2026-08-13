@@ -20,6 +20,7 @@ const ROLE_LABELS: Record<RoleId, string> = {
   sales: "Event-продажи",
   gtr: "GTR-админ",
   artist: "Артист / диджей",
+  organizer: "Организатор",
 };
 
 const initialsOf = (name: string) =>
@@ -37,7 +38,10 @@ const canSeeDraft = (u: SessionUser, d: EventDraft) =>
   u.role === "gtr" || (d.owner ? d.owner === u.email : d.venueId === u.venueId);
 
 const canSeeRequest = (u: SessionUser, r: OrgRequest) =>
-  u.role === "gtr" || r.venueId === u.venueId || r.assignee === u.email;
+  u.role === "gtr" ||
+  (Boolean(u.venueId) && r.venueId === u.venueId) ||
+  r.assignee === u.email ||
+  r.organizerEmail === u.email;
 
 // ---------- пользователи ----------
 

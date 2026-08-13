@@ -612,6 +612,7 @@ export function ConstructorScreen({
     const when = g.nodes.find((n) => n.kind === "slot")?.sub || org.date || "дата уточняется";
     const id = `REQ-${Date.now().toString(36)}`;
     addRequest({
+      organizerEmail: user.role === "organizer" ? user.email : undefined,
       id,
       draftId: draft.id,
       venueId: vid,

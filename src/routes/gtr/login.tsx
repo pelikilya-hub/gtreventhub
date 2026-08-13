@@ -40,7 +40,12 @@ const DEMO = [
 function LoginPage() {
   const { demo } = Route.useLoaderData();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("pr@gtr.events");
+  // Пригласительная ссылка: /gtr/login?invite=email — поле входа уже заполнено
+  const invited =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("invite") || ""
+      : "";
+  const [email, setEmail] = useState(invited || "pr@gtr.events");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

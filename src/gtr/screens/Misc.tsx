@@ -1252,7 +1252,7 @@ export function AccessScreen() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr repeat(5, minmax(84px,1fr))",
+            gridTemplateColumns: "2fr repeat(6, minmax(76px,1fr))",
             gap: 8,
             padding: "13px 20px",
             borderBottom: "1px solid rgba(255,255,255,.08)",
@@ -1275,7 +1275,7 @@ export function AccessScreen() {
             key={p.key}
             style={{
               display: "grid",
-              gridTemplateColumns: "2fr repeat(5, minmax(84px,1fr))",
+              gridTemplateColumns: "2fr repeat(6, minmax(76px,1fr))",
               gap: 8,
               padding: "11px 20px",
               borderBottom: "1px solid rgba(255,255,255,.05)",
@@ -1379,7 +1379,7 @@ function TgPanel() {
 function TeamPanel() {
   const [users, setUsers] = useState<PublicUser[] | null>(null);
   const [storeOk, setStoreOk] = useState(true);
-  const [role, setRole] = useState<"sales" | "artist" | "owner">("sales");
+  const [role, setRole] = useState<"sales" | "artist" | "owner" | "organizer">("sales");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [venueQ, setVenueQ] = useState("");
@@ -1482,6 +1482,7 @@ function TeamPanel() {
             ["sales", "Менеджер GTR"],
             ["artist", "Артист / диджей"],
             ["owner", "Площадка (владелец)"],
+            ["organizer", "Организатор"],
           ] as const
         ).map(([r, label]) => (
           <button
@@ -1648,7 +1649,13 @@ function TeamPanel() {
           }
           onClick={invite}
         >
-          {role === "artist" ? "Пригласить артиста" : role === "owner" ? "Пригласить площадку" : "Пригласить менеджера"}
+          {role === "artist"
+            ? "Пригласить артиста"
+            : role === "owner"
+              ? "Пригласить площадку"
+              : role === "organizer"
+                ? "Пригласить организатора"
+                : "Пригласить менеджера"}
         </button>
         {msg ? (
           <span

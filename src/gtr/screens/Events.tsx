@@ -45,8 +45,10 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
 
   const [q, setQ] = useState("");
   const [stage, setStage] = useState<"all" | EventStage>("all");
-  // Паспорт площадки открывает мастер сразу с выбранной площадкой
+  // Паспорт площадки открывает мастер с выбранной площадкой;
+  // vid="new" (кнопка кабинета) — мастер сразу, без преселекта
   const [creating, setCreating] = useState(Boolean(newForVenue));
+  const presetVenue = newForVenue === "new" ? "" : newForVenue;
 
   const list = useMemo(() => {
     const needle = q.toLowerCase().trim();
@@ -105,7 +107,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
       {creating ? (
         <NewEvent
           isAdmin={isAdmin}
-          ownVenue={newForVenue || user.venueId}
+          ownVenue={presetVenue || user.venueId}
           onCancel={() => setCreating(false)}
           onCreate={(init) => {
             const id = createDraft(init);

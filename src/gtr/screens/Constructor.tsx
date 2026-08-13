@@ -126,6 +126,10 @@ export function ConstructorScreen({
   const g = draft?.graph ?? EMPTY_GRAPH;
 
   const [sel, setSel] = useState("n1");
+  // Панель взаимодействия: граф ничем не перекрыт, панель выезжает только
+  // по длительному нажатию на блок (или кнопкой в шапке)
+  const [panelOpen, setPanelOpen] = useState(false);
+  const holdRef = useRef<{ t: number; x: number; y: number } | null>(null);
   // «Куда ставим?» — блок не добавляется, пока не выбран зал/зона
   const [placing, setPlacing] = useState<{
     kind: NodeKind;
@@ -459,14 +463,37 @@ export function ConstructorScreen({
     );
   }
 
+  const cancelHold = () => {
+    if (holdRef.current) {
+      clearTimeout(holdRef.current.t);
+      holdRef.current = null;
+    }
+  };
   const onPointerDown = (e: React.PointerEvent, n: GraphNode) => {
     const r = canvasRef.current?.getBoundingClientRect();
     if (!r) return;
     dragRef.current = { id: n.id, dx: e.clientX - r.left - n.x, dy: e.clientY - r.top - n.y };
     setSel(n.id);
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    // длительное нажатие (~0.5с) без движения → панель взаимодействия
+    cancelHold();
+    holdRef.current = {
+      t: window.setTimeout(() => {
+        holdRef.current = null;
+        dragRef.current = null;
+        setPanelOpen(true);
+      }, 500),
+      x: e.clientX,
+      y: e.clientY,
+    };
   };
   const onPointerMove = (e: React.PointerEvent) => {
+    // сдвиг больше 7px — это перетаскивание, не длительное нажатие
+    if (
+      holdRef.current &&
+      (Math.abs(e.clientX - holdRef.current.x) > 7 || Math.abs(e.clientY - holdRef.current.y) > 7)
+    )
+      cancelHold();
     const d = dragRef.current;
     const r = canvasRef.current?.getBoundingClientRect();
     if (!d || !r) return;
@@ -475,6 +502,7 @@ export function ConstructorScreen({
     mutate((gr) => ({ ...gr, nodes: gr.nodes.map((n) => (n.id === d.id ? { ...n, x, y } : n)) }));
   };
   const onPointerUp = () => {
+    cancelHold();
     dragRef.current = null;
   };
 
@@ -833,6 +861,14 @@ export function ConstructorScreen({
           Бриф · {briefProgress(briefFormat, briefAnswers).done}/
           {briefProgress(briefFormat, briefAnswers).total}
         </button>
+        <button
+          className={panelOpen ? "gtr-btn gtr-btn-red" : "gtr-btn"}
+          style={{ padding: "6px 12px", fontSize: 11 }}
+          title="Смета, контроль, история. Или удержите блок на графе"
+          onClick={() => setPanelOpen((x) => !x)}
+        >
+          Панель события ⧉
+        </button>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
           <Eyebrow>УЧАСТНИКИ ОНЛАЙН</Eyebrow>
           <div style={{ display: "flex", gap: 5 }}>
@@ -969,7 +1005,7 @@ export function ConstructorScreen({
         className="gtr-md-stack"
         style={{
           display: "grid",
-          gridTemplateColumns: "230px 1fr 290px",
+          gridTemplateColumns: "230px 1fr",
           gap: 14,
           alignItems: "start",
         }}
@@ -1440,6 +1476,7 @@ export function ConstructorScreen({
                   key={n.id}
                   className="gtr-node"
                   onPointerDown={(e) => onPointerDown(e, n)}
+                  onContextMenu={(e) => e.preventDefault()}
                   style={{
                     left: n.x,
                     top: n.y,
@@ -1571,18 +1608,20 @@ export function ConstructorScreen({
           </div>
         </Card>
 
-        {/* ---------- инспектор ---------- */}
-        <div
-          className="gtr-md-unstick"
-          style={{
-            display: "grid",
-            gap: 12,
-            position: "sticky",
-            top: 16,
-            maxHeight: "calc(100vh - 40px)",
-            overflowY: "auto",
-          }}
-        >
+        {/* ---------- панель взаимодействия: выезжает по длительному нажатию ---------- */}
+        {panelOpen ? <div className="gtr-cons-scrim" onClick={() => setPanelOpen(false)} /> : null}
+        <div className={`gtr-cons-drawer ${panelOpen ? "open" : ""}`}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Eyebrow>ПАНЕЛЬ СОБЫТИЯ</Eyebrow>
+            <button
+              className="gtr-btn"
+              style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 11 }}
+              onClick={() => setPanelOpen(false)}
+              aria-label="Закрыть панель"
+            >
+              ✕
+            </button>
+          </div>
           {selNode ? (
             <Card style={{ padding: 14 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>

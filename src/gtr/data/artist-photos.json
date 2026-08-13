@@ -1686,6 +1686,13 @@
    "source": "кадр официального рила @valeri_emberche",
    "match": "manual",
    "name": "Valeri Emberche"
+  },
+  "MC-0021": {
+   "photo": "/artists/MC-0021-avatar.jpg",
+   "photoMed": "/artists/MC-0021-avatar-med.jpg",
+   "source": "кадр рила @sergeycauselove (ссылка от владельца)",
+   "match": "manual",
+   "name": "Inna Ra"
   }
  }
 }

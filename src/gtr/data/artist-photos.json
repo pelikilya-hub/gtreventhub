@@ -1644,6 +1644,20 @@
    "fans": 0,
    "source": "wikipedia",
    "match": "exact-title (Russian singer and model (born 1981))"
+  },
+  "MC-0004": {
+   "photo": "/artists/MC-0004-avatar.jpg",
+   "photoMed": "/artists/MC-0004-avatar-med.jpg",
+   "source": "кадр официального рила @alexvee__",
+   "match": "manual",
+   "name": "Alex Vee"
+  },
+  "MC-0137": {
+   "photo": "/artists/MC-0004-avatar.jpg",
+   "photoMed": "/artists/MC-0004-avatar-med.jpg",
+   "source": "кадр официального рила @alexvee__",
+   "match": "manual",
+   "name": "Alex Vee"
   }
  }
 }

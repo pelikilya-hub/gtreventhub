@@ -418,6 +418,7 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
           <>
             {/* фрагмент официального рила — живой фон шапки, как видео площадки */}
             <video
+              className="gtr-heromedia"
               src={MEDIA[a.id].heroVideo}
               poster={MEDIA[a.id].heroPoster}
               autoPlay
@@ -441,6 +442,7 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
               }}
             />
             <div
+              className="gtr-heromedia-shade"
               aria-hidden="true"
               style={{
                 position: "absolute",
@@ -455,6 +457,7 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
           <>
             {/* фото как атмосферная подложка справа, гаснет к тексту */}
             <img
+              className="gtr-heromedia"
               src={PHOTOS[a.id].photo}
               alt=""
               aria-hidden="true"
@@ -474,6 +477,7 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
               }}
             />
             <div
+              className="gtr-heromedia-shade"
               aria-hidden="true"
               style={{
                 position: "absolute",
@@ -572,6 +576,9 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
                 </Chip>
               ))}
             </div>
+          </div>
+        </div>
+        <div style={{ position: "relative", marginTop: 4 }}>
             <div
               style={{
                 display: "flex",
@@ -629,7 +636,6 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
                 {PHOTOS[a.id] ? <>фото: {PHOTOS[a.id].source}</> : null}
               </div>
             ) : null}
-          </div>
         </div>
       </Card>
 

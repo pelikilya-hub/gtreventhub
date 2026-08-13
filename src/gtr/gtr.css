@@ -1042,3 +1042,24 @@
   background: #fff;
   border: 2px solid var(--gtr-red);
 }
+
+/* шапка профиля артиста на телефоне: hero-видео/фото полноширинным блоком
+   сверху, текст и кнопки — под ним (а не поверх) */
+@media (max-width: 860px) {
+  .gtr-heromedia {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    display: block;
+    width: calc(100% + 52px) !important;
+    height: 250px !important;
+    margin: -24px -26px 14px !important;
+    opacity: 1 !important;
+    -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent) !important;
+    mask-image: linear-gradient(180deg, #000 70%, transparent) !important;
+  }
+  .gtr-heromedia-shade {
+    display: none !important;
+  }
+}

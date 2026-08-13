@@ -13,3 +13,6 @@ dist
 .env
 .env.*
 !.env.example
+
+# изолированные worktree фоновых агентов
+.claude/worktrees/

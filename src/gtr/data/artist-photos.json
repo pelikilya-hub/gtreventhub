@@ -16,13 +16,11 @@
    "match": "exact-name"
   },
   "MC-0006": {
-   "name": "LION",
-   "photo": "https://cdn-images.dzcdn.net/images/artist/ae8e3aff9543a84fb64ba223c5e32155/1000x1000-000000-80-0-0.jpg",
-   "photoMed": "https://cdn-images.dzcdn.net/images/artist/ae8e3aff9543a84fb64ba223c5e32155/250x250-000000-80-0-0.jpg",
-   "fans": 4,
-   "deezerId": 214218025,
-   "source": "deezer",
-   "match": "exact-name"
+   "photo": "/artists/MC-0006-avatar.jpg",
+   "photoMed": "/artists/MC-0006-avatar-med.jpg",
+   "source": "кадр официального рила @thelionmusic (Illuzion)",
+   "match": "manual",
+   "name": "LION"
   },
   "MC-0008": {
    "name": "Rudi",

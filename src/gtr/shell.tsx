@@ -109,8 +109,16 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sig]);
 
-  const navVenue = user.role === "gtr" ? NAV_VENUE.filter(([id]) => id === "dash") : NAV_VENUE;
-  const navNet = user.role === "gtr" ? NAV_NET : NAV_NET.filter(([id]) => id !== "admin");
+  const navVenue =
+    user.role === "gtr" || user.role === "artist"
+      ? NAV_VENUE.filter(([id]) => id === "dash")
+      : NAV_VENUE;
+  const navNet =
+    user.role === "gtr"
+      ? NAV_NET
+      : user.role === "artist"
+        ? NAV_NET.filter(([id]) => id === "artists")
+        : NAV_NET.filter(([id]) => id !== "admin");
 
   const NavGroup = ({ label, items }: { label: string; items: typeof NAV_VENUE }) => (
     <div style={{ marginBottom: 18 }}>

@@ -47,6 +47,9 @@ import {
   type LogEntry,
   type NodeKind,
   type NodeStatus,
+  OFFER_COLOR,
+  OFFER_LABEL,
+  type EventDraft,
 } from "../data/app-data";
 import {
   briefProgress,
@@ -62,6 +65,7 @@ import { quoteDocument } from "../quote-doc";
 import { eventDeckDocument } from "../event-deck";
 import { drawImpulse } from "../impulse";
 import { useGtr } from "../store";
+import { sendOfferFn } from "../kv-api";
 import { Card, Chip, Dot, Eyebrow, Icon, tint } from "../ui";
 
 const VENDOR_KINDS: NodeKind[] = ["sound", "light", "decor", "content"];
@@ -1497,6 +1501,16 @@ export function ConstructorScreen({
                   Открыть карточку артиста →
                 </button>
               ) : null}
+              {selNode.kind === "artist" && selNode.fields.find((f) => f[0] === "КАРТОЧКА")?.[1] ? (
+                <OfferPanel
+                  key={selNode.id}
+                  draft={draft}
+                  artistId={selNode.fields.find((f) => f[0] === "КАРТОЧКА")![1]}
+                  artistName={selNode.title}
+                  venueName={v.name || vid}
+                  vid={vid}
+                />
+              ) : null}
 
               {/* Статус узла: участник может отметить задержку/проблему */}
               <div
@@ -1786,6 +1800,8 @@ export function ConstructorScreen({
           </Card>
 
           <TierCompare graph={g} venueId={vid} />
+
+          {draft ? <GuestPanel draft={draft} /> : null}
 
           <Card style={{ padding: 14 }}>
             <Eyebrow style={{ marginBottom: 9 }}>СВЯЗИ · {g.links.length}</Eyebrow>
@@ -2679,6 +2695,220 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
           ) : null}
         </div>
       )}
+    </Card>
+  );
+}
+
+// ---------- предложение артисту ----------
+// Менеджер отправляет предложение с узла артиста; статус приходит из общей
+// базы: артист отвечает в своём кабинете или кнопками в Telegram.
+function OfferPanel({
+  draft,
+  artistId,
+  artistName,
+  venueName,
+  vid,
+}: {
+  draft: EventDraft | undefined;
+  artistId: string;
+  artistName: string;
+  venueName: string;
+  vid: string;
+}) {
+  const { shared, applyOffer } = useGtr();
+  const [fee, setFee] = useState("");
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  if (!draft) return null;
+
+  const existing = shared.offers.find(
+    (o) => o.draftId === draft.id && o.artistId === artistId && o.status !== "declined",
+  );
+  const last = shared.offers.find((o) => o.draftId === draft.id && o.artistId === artistId);
+
+  const send = async () => {
+    setBusy(true);
+    setMsg("");
+    try {
+      const slot = draft.graph.nodes.find((n: { kind: string }) => n.kind === "slot");
+      const r = await sendOfferFn({
+        data: {
+          draftId: draft.id,
+          artistId,
+          artistName,
+          venueId: vid,
+          venueName,
+          date: draft.date || slot?.title || "",
+          fee: fee.trim(),
+          note: note.trim(),
+        },
+      });
+      if (r.ok) {
+        applyOffer(r.offer);
+        setMsg(
+          r.tgDirect
+            ? "Отправлено артисту в Telegram — кнопки Принять/Отклонить уже у него."
+            : r.hasAccount
+              ? "Предложение в кабинете артиста. Telegram не привязан — продублируйте вручную."
+              : "Сохранено. У артиста пока нет аккаунта — пригласите его в «Доступы и роли», предложение дождётся.",
+        );
+      } else setMsg(r.error ?? "Не получилось");
+    } catch {
+      setMsg("Сервер недоступен (локальный режим)");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div
+      style={{
+        marginTop: 10,
+        paddingTop: 10,
+        borderTop: "1px solid rgba(255,255,255,.07)",
+        display: "grid",
+        gap: 7,
+      }}
+    >
+      <Eyebrow style={{ fontSize: 8.5 }}>ПРЕДЛОЖЕНИЕ АРТИСТУ</Eyebrow>
+      {existing ? (
+        <div
+          className="gtr-mono"
+          style={{
+            font: "600 10px/1.5 'JetBrains Mono',monospace",
+            color: OFFER_COLOR[existing.status],
+          }}
+        >
+          {OFFER_LABEL[existing.status].toUpperCase()}
+          {existing.decidedTs
+            ? ` · ${new Date(existing.decidedTs).toLocaleDateString("ru-RU")}`
+            : ` · ждём ответа`}
+          {existing.fee ? ` · ${existing.fee}` : ""}
+        </div>
+      ) : (
+        <>
+          {last?.status === "declined" ? (
+            <div
+              className="gtr-mono"
+              style={{ font: "500 9.5px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+            >
+              Прошлое предложение отклонено — можно отправить новое.
+            </div>
+          ) : null}
+          <input
+            className="gtr-input"
+            style={{ padding: "7px 9px", fontSize: 11 }}
+            placeholder="Гонорар / условия (например: ฿25 000 + трансфер)"
+            value={fee}
+            onChange={(e) => setFee(e.target.value)}
+          />
+          <input
+            className="gtr-input"
+            style={{ padding: "7px 9px", fontSize: 11 }}
+            placeholder="Комментарий (необязательно)"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+          <button
+            className="gtr-btn gtr-btn-red"
+            style={{ padding: "8px 12px", opacity: busy ? 0.5 : 1 }}
+            disabled={busy}
+            onClick={send}
+          >
+            Отправить предложение →
+          </button>
+        </>
+      )}
+      {msg ? (
+        <div style={{ font: "500 10px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+          {msg}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+// ---------- спец-гости события ----------
+// Гостевой список пополняется из приложения и командой /guest в Telegram —
+// код события написан прямо в блоке.
+function GuestPanel({ draft }: { draft: EventDraft }) {
+  const { user, updateDraft } = useGtr();
+  const [name, setName] = useState("");
+  const list = draft.guestList ?? [];
+
+  const add = () => {
+    const n = name.trim();
+    if (!n) return;
+    updateDraft(draft.id, {
+      guestList: [...list, { name: n, by: user.email, via: "app", ts: Date.now() }],
+    });
+    setName("");
+  };
+
+  return (
+    <Card style={{ padding: 14 }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+        <Eyebrow style={{ marginBottom: 9 }}>СПЕЦ-ГОСТИ · {list.length}</Eyebrow>
+        <span
+          className="gtr-mono"
+          style={{
+            marginLeft: "auto",
+            font: "500 8.5px/1 'JetBrains Mono',monospace",
+            color: "var(--gtr-t3)",
+          }}
+        >
+          /guest {draft.id} Имя — из Telegram
+        </span>
+      </div>
+      <div style={{ display: "grid", gap: 5, maxHeight: 150, overflowY: "auto" }}>
+        {list.map((gst, i) => (
+          <div
+            key={`${gst.ts}-${i}`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+              font: "500 11px/1.3 'Golos Text',sans-serif",
+            }}
+          >
+            <span style={{ flex: 1, minWidth: 0 }}>{gst.name}</span>
+            <span
+              className="gtr-mono"
+              style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: gst.via === "tg" ? "#7B9EFF" : "var(--gtr-t3)" }}
+            >
+              {gst.via === "tg" ? "TG" : "APP"}
+            </span>
+            <button
+              className="gtr-btn"
+              style={{ padding: "3px 7px", fontSize: 10, color: "#E5231B" }}
+              onClick={() =>
+                updateDraft(draft.id, { guestList: list.filter((_, j) => j !== i) })
+              }
+            >
+              ×
+            </button>
+          </div>
+        ))}
+        {!list.length ? (
+          <span style={{ font: "500 10px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            Артисты и команда добавляют гостей списком — здесь или через бота.
+          </span>
+        ) : null}
+      </div>
+      <div style={{ display: "flex", gap: 6, marginTop: 9 }}>
+        <input
+          className="gtr-input"
+          style={{ flex: 1, padding: "7px 9px", fontSize: 11 }}
+          placeholder="Имя гостя"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && add()}
+        />
+        <button className="gtr-btn" style={{ padding: "7px 11px" }} onClick={add}>
+          Добавить
+        </button>
+      </div>
     </Card>
   );
 }

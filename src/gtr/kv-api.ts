@@ -3,8 +3,9 @@
 // null/недоступно — клиент продолжает работать на localStorage.
 import { createServerFn } from "@tanstack/react-start";
 import { currentUser, type SessionUser, type StoredUser } from "./auth";
-import type { EventDraft, OrgRequest, RoleId } from "./data/app-data";
+import type { EventDraft, Offer, OrgRequest, RoleId } from "./data/app-data";
 import { getKvNs, kvGetJson, kvListAll, type KvNs } from "./kv-ns";
+import { tgApi, tgConfigured, tgEsc, tgWebhookSecret } from "./tg";
 
 const sha256 = async (s: string) => {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
@@ -18,6 +19,7 @@ const ROLE_LABELS: Record<RoleId, string> = {
   owner: "Владелец",
   sales: "Event-продажи",
   gtr: "GTR-админ",
+  artist: "Артист / диджей",
 };
 
 const initialsOf = (name: string) =>
@@ -43,7 +45,14 @@ export type PublicUser = Omit<StoredUser, "passHash">;
 
 export const inviteUserFn = createServerFn({ method: "POST" })
   .inputValidator(
-    (d: { name: string; email: string; role: RoleId; venueId: string; password: string }) => d,
+    (d: {
+      name: string;
+      email: string;
+      role: RoleId;
+      venueId: string;
+      artistId?: string;
+      password: string;
+    }) => d,
   )
   .handler(async ({ data }) => {
     const me = await currentUser();
@@ -65,6 +74,7 @@ export const inviteUserFn = createServerFn({ method: "POST" })
       role: data.role,
       roleLabel: ROLE_LABELS[data.role],
       venueId: data.venueId || "",
+      artistId: data.artistId || "",
       initials: initialsOf(data.name),
       passHash: await sha256(data.password),
       created: Date.now(),
@@ -185,3 +195,215 @@ export const pushRequestFn = createServerFn({ method: "POST" })
     await ns.put(`req:${data.id}`, JSON.stringify(data));
     return { ok: true as const };
   });
+
+// ---------- предложения артистам ----------
+
+const canSeeOffer = (u: SessionUser, o: Offer) =>
+  u.role === "gtr" || o.from === u.email || (o.to !== "" && o.to === u.email);
+
+// Ядро решения по предложению: используется и серверной функцией (кнопки в
+// приложении), и вебхуком Telegram. Обновляет предложение, узел артиста в
+// графе события и шлёт уведомление менеджеру.
+export async function decideOfferCore(
+  ns: KvNs,
+  offer: Offer,
+  accept: boolean,
+  byLabel: string,
+): Promise<Offer> {
+  const next: Offer = {
+    ...offer,
+    status: accept ? "accepted" : "declined",
+    decidedTs: Date.now(),
+  };
+  await ns.put(`offer:${offer.id}`, JSON.stringify(next));
+
+  // отметка на узле артиста в графе события
+  const draft = await kvGetJson<EventDraft>(ns, `draft:${offer.draftId}`);
+  if (draft) {
+    const node = draft.graph.nodes.find(
+      (n) => n.kind === "artist" && n.fields.some((f) => f[0] === "КАРТОЧКА" && f[1] === offer.artistId),
+    );
+    if (node) {
+      node.badge = accept ? "OK" : "ОТКАЗ";
+      const st = node.fields.find((f) => f[0] === "СТАТУС");
+      const val = accept ? "Подтверждён артистом" : "Отказ артиста";
+      if (st) st[1] = val;
+      else node.fields.push(["СТАТУС", val]);
+      draft.updated = Date.now();
+      await ns.put(`draft:${draft.id}`, JSON.stringify(draft));
+    }
+  }
+
+  const chatId = await ns.get(`tg:${offer.from}`);
+  const text = [
+    `<b>GTR EVENT · ответ артиста</b>`,
+    "",
+    `<b>${tgEsc(offer.artistName)}</b> ${accept ? "принял(а) ✅" : "отклонил(а) ❌"} предложение`,
+    `<b>Событие:</b> ${tgEsc(offer.venueName)}${offer.date ? ` · ${tgEsc(offer.date)}` : ""}`,
+    offer.fee ? `<b>Условия:</b> ${tgEsc(offer.fee)}` : "",
+    `<i>${tgEsc(byLabel)}</i>`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const target = chatId || process.env.TELEGRAM_CHAT_ID;
+  if (target) await tgApi("sendMessage", { chat_id: target, text, parse_mode: "HTML" });
+  return next;
+}
+
+export const sendOfferFn = createServerFn({ method: "POST" })
+  .inputValidator(
+    (d: {
+      draftId: string;
+      artistId: string;
+      artistName: string;
+      venueId: string;
+      venueName: string;
+      date: string;
+      fee: string;
+      note: string;
+    }) => d,
+  )
+  .handler(async ({ data }) => {
+    const me = await currentUser();
+    if (!me || me.role === "artist")
+      return { ok: false as const, error: "Только команда GTR и площадки" };
+    const ns = await getKvNs();
+    if (!ns) return { ok: false as const, error: "Хранилище недоступно (локальный режим)" };
+
+    // аккаунт артиста, если он приглашён — по artistId карточки
+    const keys = await kvListAll(ns, "user:");
+    const users = (
+      await Promise.all(keys.map((k) => kvGetJson<StoredUser>(ns, k)))
+    ).filter((u): u is StoredUser => Boolean(u));
+    const artistUser = users.find((u) => u.role === "artist" && u.artistId === data.artistId);
+
+    const offer: Offer = {
+      id: `OF-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`,
+      draftId: data.draftId,
+      artistId: data.artistId,
+      artistName: data.artistName,
+      to: artistUser?.email ?? "",
+      from: me.email,
+      fromName: me.name,
+      venueId: data.venueId,
+      venueName: data.venueName,
+      date: data.date,
+      fee: data.fee,
+      note: data.note,
+      status: "sent",
+      ts: Date.now(),
+    };
+    await ns.put(`offer:${offer.id}`, JSON.stringify(offer));
+
+    // уведомление: личный чат артиста с кнопками, иначе общий канал GTR
+    const text = [
+      `<b>GTR EVENT · предложение выступить</b>`,
+      "",
+      `<b>Артист:</b> ${tgEsc(offer.artistName)}`,
+      `<b>Площадка:</b> ${tgEsc(offer.venueName)}`,
+      offer.date ? `<b>Когда:</b> ${tgEsc(offer.date)}` : "",
+      offer.fee ? `<b>Условия:</b> ${tgEsc(offer.fee)}` : "",
+      offer.note ? `<b>Комментарий:</b> ${tgEsc(offer.note)}` : "",
+      "",
+      `<i>От: ${tgEsc(offer.fromName)}</i>`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    const artistChat = offer.to ? await ns.get(`tg:${offer.to}`) : null;
+    if (artistChat) {
+      await tgApi("sendMessage", {
+        chat_id: artistChat,
+        text,
+        parse_mode: "HTML",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "✅ Принять", callback_data: `offer:${offer.id}:acc` },
+              { text: "❌ Отклонить", callback_data: `offer:${offer.id}:dec` },
+            ],
+          ],
+        },
+      });
+    } else if (process.env.TELEGRAM_CHAT_ID) {
+      await tgApi("sendMessage", {
+        chat_id: process.env.TELEGRAM_CHAT_ID,
+        text: text + "\n\n<i>Личный Telegram артиста не привязан — передайте вручную.</i>",
+        parse_mode: "HTML",
+      });
+    }
+    return { ok: true as const, offer, hasAccount: Boolean(offer.to), tgDirect: Boolean(artistChat) };
+  });
+
+export const decideOfferFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; accept: boolean }) => d)
+  .handler(async ({ data }) => {
+    const me = await currentUser();
+    const ns = await getKvNs();
+    if (!me || !ns) return { ok: false as const };
+    const offer = await kvGetJson<Offer>(ns, `offer:${data.id}`);
+    if (!offer) return { ok: false as const };
+    if (!(me.role === "gtr" || (offer.to && offer.to === me.email)))
+      return { ok: false as const };
+    const next = await decideOfferCore(ns, offer, data.accept, `Решение в приложении · ${me.name}`);
+    return { ok: true as const, offer: next };
+  });
+
+export const pullOffersFn = createServerFn({ method: "GET" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || !ns) return null;
+  const keys = await kvListAll(ns, "offer:");
+  const offers = (
+    await Promise.all(keys.map((k) => kvGetJson<Offer>(ns, k)))
+  ).filter((o): o is Offer => Boolean(o));
+  return { offers: offers.filter((o) => canSeeOffer(u, o)).sort((a, b) => b.ts - a.ts) };
+});
+
+// ---------- привязка Telegram ----------
+
+export const tgStatusFn = createServerFn({ method: "GET" }).handler(async () => {
+  const me = await currentUser();
+  const ns = await getKvNs();
+  if (!me || !ns) return { configured: false, linked: false, bot: "" };
+  const [chat, bot] = await Promise.all([ns.get(`tg:${me.email}`), ns.get("tg:bot")]);
+  return { configured: tgConfigured(), linked: Boolean(chat), bot: bot || "" };
+});
+
+export const tgLinkFn = createServerFn({ method: "POST" }).handler(async () => {
+  const me = await currentUser();
+  const ns = await getKvNs();
+  if (!me || !ns) return { ok: false as const, error: "Нужен вход и общая база" };
+  const bot = await ns.get("tg:bot");
+  if (!bot)
+    return { ok: false as const, error: "Бот не активирован — админ должен запустить вебхук" };
+  const code = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  await ns.put(`tglink:${code}`, me.email);
+  return { ok: true as const, link: `https://t.me/${bot}?start=${code}` };
+});
+
+// Активация бота (GTR-админ): узнаём username и вешаем вебхук на воркер.
+// Токен приложение читает только из окружения — через чат он не проходит.
+export const tgActivateFn = createServerFn({ method: "POST" }).handler(async () => {
+  const me = await currentUser();
+  if (me?.role !== "gtr") return { ok: false as const, error: "Только GTR-админ" };
+  const ns = await getKvNs();
+  if (!ns) return { ok: false as const, error: "Хранилище недоступно" };
+  if (!tgConfigured())
+    return {
+      ok: false as const,
+      error: "TELEGRAM_BOT_TOKEN не задан в переменных воркера (dash.cloudflare.com → Workers → gtr-event-hub → Settings)",
+    };
+  const meBot = await tgApi<{ username: string }>("getMe", {});
+  if (!meBot.ok || !meBot.result)
+    return { ok: false as const, error: `getMe: ${meBot.description || "ошибка"}` };
+  const { getRequestUrl } = await import("@tanstack/react-start/server");
+  const origin = new URL(getRequestUrl().href).origin;
+  const hook = await tgApi("setWebhook", {
+    url: `${origin}/api/tg`,
+    secret_token: await tgWebhookSecret(),
+    allowed_updates: ["message", "callback_query"],
+  });
+  if (!hook.ok) return { ok: false as const, error: `setWebhook: ${hook.description}` };
+  await ns.put("tg:bot", meBot.result.username);
+  return { ok: true as const, bot: meBot.result.username };
+});

@@ -1244,7 +1244,7 @@ export function AccessScreen() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr repeat(4, minmax(96px,1fr))",
+            gridTemplateColumns: "2fr repeat(5, minmax(84px,1fr))",
             gap: 8,
             padding: "13px 20px",
             borderBottom: "1px solid rgba(255,255,255,.08)",
@@ -1267,7 +1267,7 @@ export function AccessScreen() {
             key={p.key}
             style={{
               display: "grid",
-              gridTemplateColumns: "2fr repeat(4, minmax(96px,1fr))",
+              gridTemplateColumns: "2fr repeat(5, minmax(84px,1fr))",
               gap: 8,
               padding: "11px 20px",
               borderBottom: "1px solid rgba(255,255,255,.05)",
@@ -1321,10 +1321,15 @@ export function AccessScreen() {
 function TeamPanel() {
   const [users, setUsers] = useState<PublicUser[] | null>(null);
   const [storeOk, setStoreOk] = useState(true);
+  const [role, setRole] = useState<"sales" | "artist" | "owner">("sales");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [venueQ, setVenueQ] = useState("");
   const [venueId, setVenueId] = useState("");
+  const [artQ, setArtQ] = useState("");
+  const [artistId, setArtistId] = useState("");
+  const [artistName, setArtistName] = useState("");
+  const [artBase, setArtBase] = useState<{ id: string; name: string; role?: string }[] | null>(null);
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -1347,6 +1352,20 @@ function TeamPanel() {
     setPassword(out);
   };
 
+  const artHits =
+    role === "artist" && artQ.trim() && artBase
+      ? artBase
+          .filter((a) => a.name.toLowerCase().includes(artQ.toLowerCase()))
+          .slice(0, 5)
+      : [];
+  const loadArts = () => {
+    if (!artBase)
+      import("../data/artists.json").then((m) => {
+        const arts = (m.default as unknown as { artists: { id: string; name: string; kind?: string; role?: string }[] }).artists;
+        setArtBase(arts.filter((a) => a.kind === "artist").map(({ id, name, role: r }) => ({ id, name, role: r })));
+      });
+  };
+
   const venueHits = venueQ.trim()
     ? PH.venues
         .filter((v) => `${v.name} ${v.id}`.toLowerCase().includes(venueQ.toLowerCase()))
@@ -1359,7 +1378,14 @@ function TeamPanel() {
     setMsg(null);
     try {
       const r = await inviteUserFn({
-        data: { name, email, role: "sales", venueId, password },
+        data: {
+          name: role === "artist" && !name.trim() ? artistName : name,
+          email,
+          role,
+          venueId: role === "artist" ? "" : venueId,
+          artistId: role === "artist" ? artistId : "",
+          password,
+        },
       });
       if (r.ok) {
         setMsg({
@@ -1371,6 +1397,9 @@ function TeamPanel() {
         setPassword("");
         setVenueId("");
         setVenueQ("");
+        setArtistId("");
+        setArtistName("");
+        setArtQ("");
         refresh();
       } else {
         setMsg({ ok: false, text: r.error ?? "Не получилось" });
@@ -1388,6 +1417,88 @@ function TeamPanel() {
         <Eyebrow>КОМАНДА · ПРИГЛАШЕНИЯ МЕНЕДЖЕРОВ</Eyebrow>
         {!storeOk ? <Chip color={AMBER}>ЛОКАЛЬНЫЙ РЕЖИМ — БАЗА НЕДОСТУПНА</Chip> : null}
       </div>
+
+      <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+        {(
+          [
+            ["sales", "Менеджер GTR"],
+            ["artist", "Артист / диджей"],
+            ["owner", "Площадка (владелец)"],
+          ] as const
+        ).map(([r, label]) => (
+          <button
+            key={r}
+            onClick={() => {
+              setRole(r);
+              if (r === "artist") loadArts();
+            }}
+            style={{
+              borderRadius: 0,
+              padding: "8px 13px",
+              cursor: "pointer",
+              font: `${role === r ? 600 : 500} 11px/1 'Golos Text',sans-serif`,
+              border: `1px solid ${role === r ? "#E5231B" : "rgba(255,255,255,.14)"}`,
+              background: role === r ? "rgba(229,35,27,.14)" : "transparent",
+              color: role === r ? "#fff" : "rgba(255,255,255,.6)",
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {role === "artist" ? (
+        <div style={{ display: "grid", gap: 6 }}>
+          {artistId ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Chip color="#7B4DFF">{artistId}</Chip>
+              <span style={{ font: "500 11.5px/1.3 'Golos Text',sans-serif" }}>{artistName}</span>
+              <button
+                className="gtr-btn"
+                style={{ padding: "4px 9px", fontSize: 10 }}
+                onClick={() => {
+                  setArtistId("");
+                  setArtistName("");
+                }}
+              >
+                Убрать
+              </button>
+            </div>
+          ) : (
+            <>
+              <input
+                className="gtr-input"
+                style={{ maxWidth: 360, padding: "8px 11px", fontSize: 12 }}
+                placeholder={artBase ? "Карточка артиста в базе — поиск по имени…" : "Загрузка базы артистов…"}
+                value={artQ}
+                onChange={(e) => setArtQ(e.target.value)}
+              />
+              {artHits.map((a) => (
+                <button
+                  key={a.id}
+                  className="gtr-pal-btn"
+                  style={{ padding: "7px 10px", maxWidth: 360 }}
+                  onClick={() => {
+                    setArtistId(a.id);
+                    setArtistName(a.name);
+                    setArtQ("");
+                  }}
+                >
+                  <span style={{ flex: 1, textAlign: "left", fontSize: 11.5 }}>
+                    {a.name}
+                    <span
+                      className="gtr-mono"
+                      style={{ marginLeft: 8, fontSize: 9, color: "rgba(255,255,255,.4)" }}
+                    >
+                      {a.id}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+      ) : null}
 
       <div
         className="gtr-md-stack"
@@ -1422,7 +1533,7 @@ function TeamPanel() {
       </div>
 
       <div style={{ display: "grid", gap: 6 }}>
-        {pickedVenue ? (
+        {role === "artist" ? null : pickedVenue ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Chip color="#E5231B">{pickedVenue.id}</Chip>
             <span style={{ font: "500 11.5px/1.3 'Golos Text',sans-serif" }}>{pickedVenue.name}</span>
@@ -1469,10 +1580,17 @@ function TeamPanel() {
         <button
           className="gtr-btn gtr-btn-red"
           style={{ padding: "9px 15px", opacity: busy ? 0.5 : 1 }}
-          disabled={busy || !name.trim() || !email.trim() || password.length < 6 || !storeOk}
+          disabled={
+            busy ||
+            (!name.trim() && !(role === "artist" && artistName)) ||
+            !email.trim() ||
+            password.length < 6 ||
+            (role === "artist" && !artistId) ||
+            !storeOk
+          }
           onClick={invite}
         >
-          Пригласить менеджера
+          {role === "artist" ? "Пригласить артиста" : role === "owner" ? "Пригласить площадку" : "Пригласить менеджера"}
         </button>
         {msg ? (
           <span

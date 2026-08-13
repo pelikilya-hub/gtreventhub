@@ -120,12 +120,13 @@ export const AMBER = "#F5A623";
 export const RED = "#E5231B";
 
 // ---------- роли ----------
-export type RoleId = "pr" | "owner" | "sales" | "gtr";
+export type RoleId = "pr" | "owner" | "sales" | "gtr" | "artist";
 export const ROLES: [RoleId, string, string, string][] = [
   ["pr", "PR-директор", "VEN-0013", "ПД"],
   ["owner", "Владелец", "VEN-0061", "ВЛ"],
   ["sales", "Event-продажи", "VEN-0033", "ПР"],
   ["gtr", "GTR-админ", "", "АД"],
+  ["artist", "Артист", "", "АР"],
 ];
 
 // ---------- навигация ----------
@@ -671,6 +672,40 @@ export type EventDraft = {
   updated: number;
   graph: Graph;
   brief: Record<string, string[]>; // ответы ветвящегося брифа
+  guestList?: EventGuest[]; // спец-гости: из приложения и из Telegram
+};
+
+export type EventGuest = { name: string; by: string; via: "app" | "tg"; ts: number };
+
+// ---------- предложение артисту ----------
+export type OfferStatus = "sent" | "accepted" | "declined";
+export type Offer = {
+  id: string;
+  draftId: string;
+  artistId: string; // карточка каталога (MC-…)
+  artistName: string;
+  to: string; // email аккаунта артиста; "" — аккаунта ещё нет
+  from: string; // email менеджера
+  fromName: string;
+  venueId: string;
+  venueName: string;
+  date: string;
+  fee: string; // гонорар / условия, свободный текст
+  note: string;
+  status: OfferStatus;
+  ts: number;
+  decidedTs?: number;
+};
+
+export const OFFER_LABEL: Record<OfferStatus, string> = {
+  sent: "Отправлено",
+  accepted: "Принято",
+  declined: "Отклонено",
+};
+export const OFFER_COLOR: Record<OfferStatus, string> = {
+  sent: AMBER,
+  accepted: GREEN,
+  declined: RED,
 };
 
 export const draftTitle = (d: EventDraft) => d.title || d.format || "Событие без названия";

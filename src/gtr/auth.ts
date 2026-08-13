@@ -15,6 +15,7 @@ export type SessionUser = {
   role: RoleId;
   roleLabel: string;
   venueId: string; // пусто для GTR-админа (кросс-сетевой доступ)
+  artistId?: string; // роль artist: карточка каталога (MC-…)
   initials: string;
 };
 
@@ -226,52 +227,52 @@ export const PERMISSIONS: {
   {
     key: "dash",
     label: "Дашборд площадки",
-    roles: { pr: true, owner: true, sales: true, gtr: true },
+    roles: { pr: true, owner: true, sales: true, gtr: true, artist: false },
   },
   {
     key: "calendar.edit",
     label: "Календарь: изменять программу",
-    roles: { pr: true, owner: true, sales: true, gtr: true },
+    roles: { pr: true, owner: true, sales: true, gtr: true, artist: false },
   },
   {
     key: "constructor.edit",
     label: "Конструктор: собирать событие",
-    roles: { pr: true, owner: true, sales: true, gtr: true },
+    roles: { pr: true, owner: true, sales: true, gtr: true, artist: false },
   },
   {
     key: "inquiries.reply",
     label: "Отвечать на заявки организаторов",
-    roles: { pr: true, owner: true, sales: true, gtr: false },
+    roles: { pr: true, owner: true, sales: true, gtr: false, artist: false },
   },
   {
     key: "finance.view",
     label: "Финансы: видеть условия и ставки",
-    roles: { pr: false, owner: true, sales: true, gtr: true },
+    roles: { pr: false, owner: true, sales: true, gtr: true, artist: false },
   },
   {
     key: "venue.edit",
     label: "Паспорт площадки: редактирование",
-    roles: { pr: true, owner: true, sales: false, gtr: true },
+    roles: { pr: true, owner: true, sales: false, gtr: true, artist: false },
   },
   {
     key: "network.view",
     label: "База · Пхукет (сеть)",
-    roles: { pr: true, owner: true, sales: true, gtr: true },
+    roles: { pr: true, owner: true, sales: true, gtr: true, artist: false },
   },
   {
     key: "network.manage",
     label: "Управление реестром сети",
-    roles: { pr: false, owner: false, sales: false, gtr: true },
+    roles: { pr: false, owner: false, sales: false, gtr: true, artist: false },
   },
   {
     key: "venue.delete",
     label: "Удаление площадки",
-    roles: { pr: false, owner: false, sales: false, gtr: true },
+    roles: { pr: false, owner: false, sales: false, gtr: true, artist: false },
   },
   {
     key: "roles.manage",
     label: "Назначение ролей и приглашения",
-    roles: { pr: false, owner: false, sales: false, gtr: true },
+    roles: { pr: false, owner: false, sales: false, gtr: true, artist: false },
   },
 ];
 

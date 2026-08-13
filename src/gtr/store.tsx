@@ -19,15 +19,17 @@ import {
   type CalEvent,
   type EventDraft,
   type Graph,
+  type Offer,
   type OrgRequest,
 } from "./data/app-data";
-import { deleteDraftKvFn, pullSharedFn, pushDraftFn, pushRequestFn } from "./kv-api";
+import { deleteDraftKvFn, pullOffersFn, pullSharedFn, pushDraftFn, pushRequestFn } from "./kv-api";
 
 type Shared = {
   events: CalEvent[];
   drafts: EventDraft[]; // события конструктора
   lineup: string[];
   requests: OrgRequest[];
+  offers: Offer[]; // предложения артистам
 };
 
 export type Peer = { id: string; name: string; roleLabel: string; initials: string; ts: number };
@@ -39,6 +41,7 @@ type GtrStore = {
   setEvents: (fn: (list: CalEvent[]) => CalEvent[]) => void;
   setLineup: (fn: (ids: string[]) => string[]) => void;
   addRequest: (req: OrgRequest) => void;
+  applyOffer: (offer: Offer) => void; // upsert после send/decide
   updateRequest: (id: string, patch: Partial<OrgRequest>) => void;
   // события конструктора
   drafts: EventDraft[];
@@ -79,6 +82,7 @@ const defaultShared = (): Shared => ({
   drafts: seedDrafts(),
   lineup: [],
   requests: [],
+  offers: [],
 });
 
 // Миграция: в старом формате граф лежал в graphs[venueId]. Переносим каждый
@@ -115,6 +119,7 @@ const load = (): Shared => {
       drafts,
       lineup: Array.isArray(parsed.lineup) ? (parsed.lineup as string[]) : [],
       requests: Array.isArray(parsed.requests) ? (parsed.requests as OrgRequest[]) : [],
+      offers: Array.isArray(parsed.offers) ? (parsed.offers as Offer[]) : [],
     };
   } catch {
     return defaultShared();
@@ -141,7 +146,10 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
     let alive = true;
     const pull = async () => {
       try {
-        const remote = await pullSharedFn();
+        const [remote, remoteOffers] = await Promise.all([
+          pullSharedFn(),
+          pullOffersFn().catch(() => null),
+        ]);
         if (!remote || !alive) return;
         setShared((cur) => {
           const byId = new Map(cur.drafts.map((d) => [d.id, d]));
@@ -154,10 +162,16 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
             const loc = reqById.get(rr.id);
             if (!loc || (rr.ts ?? 0) >= (loc.ts ?? 0)) reqById.set(rr.id, rr);
           }
+          const offById = new Map(cur.offers.map((o) => [o.id, o]));
+          for (const ro of remoteOffers?.offers ?? []) {
+            const loc = offById.get(ro.id);
+            if (!loc || (ro.decidedTs ?? ro.ts) >= (loc.decidedTs ?? loc.ts)) offById.set(ro.id, ro);
+          }
           const next = {
             ...cur,
             drafts: [...byId.values()].sort((a, b) => b.updated - a.updated),
             requests: [...reqById.values()].sort((a, b) => b.ts - a.ts),
+            offers: [...offById.values()].sort((a, b) => b.ts - a.ts),
           };
           try {
             window.localStorage.setItem(KEY, JSON.stringify(next));
@@ -301,6 +315,11 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
         commit({ ...shared, requests: [req, ...shared.requests] });
         pushRequestFn({ data: req }).catch(() => {});
       },
+      applyOffer: (offer) =>
+        commit({
+          ...shared,
+          offers: [offer, ...shared.offers.filter((o) => o.id !== offer.id)],
+        }),
       updateRequest: (id, patch) => {
         const next = shared.requests.map((r) => (r.id === id ? { ...r, ...patch } : r));
         commit({ ...shared, requests: next });

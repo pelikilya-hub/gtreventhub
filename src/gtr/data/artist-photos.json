@@ -1717,6 +1717,13 @@
    "source": "кадр официального рила @kpklivemusic",
    "match": "manual",
    "name": "KPK Live Music"
+  },
+  "MC-0011": {
+   "photo": "/artists/MC-0011-avatar.jpg",
+   "photoMed": "/artists/MC-0011-avatar-med.jpg",
+   "source": "кадр промо @cafedelmarphuket (ссылка от владельца)",
+   "match": "manual",
+   "name": "LONNER"
   }
  }
 }

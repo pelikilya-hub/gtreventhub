@@ -130,10 +130,17 @@ export const Route = createFileRoute("/api/tg")({
             await ns.put(`tg:${email}`, String(chatId));
             await ns.put(`tgrev:${chatId}`, email);
             await ns.delete(`tglink:${start[1]}`);
-            await reply(
-              chatId,
-              `✅ Telegram привязан к аккаунту <b>${tgEsc(email)}</b>.\nСюда будут приходить предложения и заявки. Команды: /guest &lt;код события&gt; &lt;имя&gt; — добавить спец-гостя.`,
-            );
+            // персональное приглашение (инструкция с доступами) — один раз
+            const welcome = await ns.get(`invitemsg:${email}`);
+            if (welcome) {
+              await ns.delete(`invitemsg:${email}`);
+              await reply(chatId, welcome);
+            } else {
+              await reply(
+                chatId,
+                `✅ Telegram привязан к аккаунту <b>${tgEsc(email)}</b>.\nСюда будут приходить предложения и заявки. Команды: /help`,
+              );
+            }
             return Response.json({ ok: true });
           }
 

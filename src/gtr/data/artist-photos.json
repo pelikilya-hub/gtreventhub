@@ -1658,6 +1658,27 @@
    "source": "кадр официального рила @alexvee__",
    "match": "manual",
    "name": "Alex Vee"
+  },
+  "MC-0030": {
+   "photo": "/artists/MC-0030-avatar.jpg",
+   "photoMed": "/artists/MC-0030-avatar-med.jpg",
+   "source": "кадр официального рила @firaphuket",
+   "match": "manual",
+   "name": "Fira Phuket"
+  },
+  "MC-0032": {
+   "photo": "/artists/MC-0032-avatar.jpg",
+   "photoMed": "/artists/MC-0032-avatar-med.jpg",
+   "source": "кадр официального рила @illuzion_phuket",
+   "match": "manual",
+   "name": "Illuzion Phuket / Shelter"
+  },
+  "MC-0033": {
+   "photo": "/artists/MC-0033-avatar.jpg",
+   "photoMed": "/artists/MC-0033-avatar-med.jpg",
+   "source": "кадр официального рила @cafedelmarphuket",
+   "match": "manual",
+   "name": "Café del Mar Phuket"
   }
  }
 }

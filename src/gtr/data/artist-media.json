@@ -1,20 +1,48 @@
 {
-  "_comment": "Hero-медиа артистов. heroVideo — короткий фрагмент официального рила (беззвучный луп для фона шапки профиля, как видео площадки Illuzion), igReel/igUser — исходник для атрибуции и ссылок. Фрагменты лежат в public/artists/.",
-  "media": {
-    "MC-0004": {
-      "igReel": "DE16dRvSZDQ",
-      "igUser": "alexvee__",
-      "added": "2026-08-13",
-      "heroVideo": "/artists/MC-0004-hero.mp4",
-      "heroPoster": "/artists/MC-0004-hero.jpg"
-    },
-    "MC-0137": {
-      "igReel": "DE16dRvSZDQ",
-      "igUser": "alexvee__",
-      "added": "2026-08-13",
-      "note": "тот же артист, что MC-0004 (дубль в базе)",
-      "heroVideo": "/artists/MC-0004-hero.mp4",
-      "heroPoster": "/artists/MC-0004-hero.jpg"
-    }
+ "_comment": "Hero-медиа артистов. heroVideo — короткий фрагмент официального рила (беззвучный луп для фона шапки профиля, как видео площадки Illuzion), igReel/igUser — исходник для атрибуции и ссылок. Фрагменты лежат в public/artists/.",
+ "media": {
+  "MC-0004": {
+   "igReel": "DE16dRvSZDQ",
+   "igUser": "alexvee__",
+   "added": "2026-08-13",
+   "heroVideo": "/artists/MC-0004-hero.mp4",
+   "heroPoster": "/artists/MC-0004-hero.jpg"
+  },
+  "MC-0137": {
+   "igReel": "DE16dRvSZDQ",
+   "igUser": "alexvee__",
+   "added": "2026-08-13",
+   "note": "тот же артист, что MC-0004 (дубль в базе)",
+   "heroVideo": "/artists/MC-0004-hero.mp4",
+   "heroPoster": "/artists/MC-0004-hero.jpg"
+  },
+  "MC-0003": {
+   "igReel": "DCBAlTuP5UJ",
+   "igUser": "weddingdjphuket",
+   "added": "2026-08-13",
+   "heroVideo": "/artists/MC-0003-hero.mp4",
+   "heroPoster": "/artists/MC-0003-hero.jpg"
+  },
+  "MC-0030": {
+   "igReel": "DJMGHo1BCzR",
+   "igUser": "firaphuket",
+   "added": "2026-08-13",
+   "heroVideo": "/artists/MC-0030-hero.mp4",
+   "heroPoster": "/artists/MC-0030-hero.jpg"
+  },
+  "MC-0032": {
+   "igReel": "DRy9qqOkRiF",
+   "igUser": "illuzion_phuket",
+   "added": "2026-08-13",
+   "heroVideo": "/artists/MC-0032-hero.mp4",
+   "heroPoster": "/artists/MC-0032-hero.jpg"
+  },
+  "MC-0033": {
+   "igReel": "DJj4bTRukyV",
+   "igUser": "cafedelmarphuket",
+   "added": "2026-08-13",
+   "heroVideo": "/artists/MC-0033-hero.mp4",
+   "heroPoster": "/artists/MC-0033-hero.jpg"
   }
+ }
 }

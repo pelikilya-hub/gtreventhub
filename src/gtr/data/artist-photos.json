@@ -70,13 +70,11 @@
    "match": "exact-name"
   },
   "MC-0016": {
-   "name": "Hebdonis",
-   "photo": "https://cdn-images.dzcdn.net/images/artist/3f6bfb8de24a8774e550933188a68243/1000x1000-000000-80-0-0.jpg",
-   "photoMed": "https://cdn-images.dzcdn.net/images/artist/3f6bfb8de24a8774e550933188a68243/250x250-000000-80-0-0.jpg",
-   "fans": 7,
-   "deezerId": 11954705,
-   "source": "deezer",
-   "match": "exact-name"
+   "photo": "/artists/MC-0016-avatar.jpg",
+   "photoMed": "/artists/MC-0016-avatar-med.jpg",
+   "source": "кадр официального рила @hebdonis",
+   "match": "manual",
+   "name": "Hebdonis"
   },
   "MC-0018": {
    "name": "Tuslay",

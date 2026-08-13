@@ -1679,6 +1679,13 @@
    "source": "кадр официального рила @cafedelmarphuket",
    "match": "manual",
    "name": "Café del Mar Phuket"
+  },
+  "MC-0059": {
+   "photo": "/artists/MC-0059-avatar.jpg",
+   "photoMed": "/artists/MC-0059-avatar-med.jpg",
+   "source": "кадр официального рила @valeri_emberche",
+   "match": "manual",
+   "name": "Valeri Emberche"
   }
  }
 }

@@ -43,6 +43,20 @@
    "added": "2026-08-13",
    "heroVideo": "/artists/MC-0033-hero.mp4",
    "heroPoster": "/artists/MC-0033-hero.jpg"
+  },
+  "MC-0042": {
+   "igReel": "DRSpKA9jM6p",
+   "igUser": "konvexmusic",
+   "added": "2026-08-13",
+   "heroVideo": "/artists/MC-0042-hero.mp4",
+   "heroPoster": "/artists/MC-0042-hero.jpg"
+  },
+  "MC-0045": {
+   "igReel": "DIa4rTbugnf",
+   "igUser": "yulianiko",
+   "added": "2026-08-13",
+   "heroVideo": "/artists/MC-0045-hero.mp4",
+   "heroPoster": "/artists/MC-0045-hero.jpg"
   }
  }
 }

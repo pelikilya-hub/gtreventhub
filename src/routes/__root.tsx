@@ -5,6 +5,7 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
 
@@ -63,6 +64,26 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
+  // После деплоя старые чанки исчезают: если открытая PWA пробует лениво
+  // подгрузить экран старой сборки — перезагружаемся на свежую (один раз,
+  // чтобы не зациклиться)
+  useEffect(() => {
+    const onPreloadError = (e: Event) => {
+      e.preventDefault();
+      const KEY = "gtr-reload-guard";
+      if (sessionStorage.getItem(KEY) !== "1") {
+        sessionStorage.setItem(KEY, "1");
+        location.reload();
+      }
+    };
+    const clearGuard = () => sessionStorage.removeItem("gtr-reload-guard");
+    window.addEventListener("vite:preloadError", onPreloadError);
+    const t = setTimeout(clearGuard, 15000);
+    return () => {
+      window.removeEventListener("vite:preloadError", onPreloadError);
+      clearTimeout(t);
+    };
+  }, []);
   return (
     <>
       <Outlet />

@@ -1521,7 +1521,7 @@ const ILZ = "https://www.illuzionphuket.com/wp-content/uploads/";
 export const ILZ_RICH: RichVenue = {
   src: "ILLUZIONPHUKET.COM/EVENTS",
   credit: "Illuzion Phuket · официальная галерея",
-  hero: ILZ + "2020/06/Illuzion-Club-Phuket-Party-Events-1.jpg",
+  hero: "/venues/VEN-0013-hero.jpg", // зеркало у нас — не зависит от чужого CDN
   video: "https://cwsdn.b-cdn.net/Illuzion/illuzion-intro-2025.mp4",
   gallery: ["9", "6", "1", "41", "36", "39", "50", "34"].map(
     (n) => ILZ + "2024/08/Illuzion-best-club-in-thailand-and-in-asia-" + n + "-1024x683.jpg",

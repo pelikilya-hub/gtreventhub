@@ -2,7 +2,7 @@
   "VEN-0001": {
     "src": "CATCHBEACHCLUB.COM",
     "credit": "Catch Beach Club · официальный сайт",
-    "hero": "https://www.catchbeachclub.com/wp-content/uploads/2024/01/CATCH-6-scaled.webp",
+    "hero": "/venues/VEN-0001-hero.jpg",
     "gallery": [
       "https://www.catchbeachclub.com/wp-content/uploads/2024/01/CATCH-59-2-1024x683.webp",
       "https://www.catchbeachclub.com/wp-content/uploads/2024/01/CATCH-56-1024x683.webp",
@@ -44,7 +44,7 @@
   "VEN-0002": {
     "src": "PHUKET.CAFEDELMAR.COM",
     "credit": "Café del Mar Phuket · официальный сайт",
-    "hero": "https://cdn.prod.website-files.com/675969a2220618a361236fac/6a4c79738c44b95a055b2318_website%20graph%20image.jpg",
+    "hero": "/venues/VEN-0002-hero.jpg",
     "video": "https://cdn.prod.website-files.com/675969a2220618a361236fac%2F69d49572e964e06b3d5c2256_Website%20Video%202026%20v4%20Low%20Qulaity_mp4.mp4",
     "badge": "#37 CLUB IN THE WORLD",
     "gallery": [
@@ -102,7 +102,7 @@
   "VEN-0050": {
     "src": "FIRAPHUKET.COM",
     "credit": "FIRA Phuket · официальный сайт",
-    "hero": "https://firaphuket.com/wp-content/uploads/2025/03/fira-beach-club-pool.jpg",
+    "hero": "/venues/VEN-0050-hero.jpg",
     "video": "https://cwsdn.b-cdn.net/Fira/fira-home-new-june-2025.mp4",
     "gallery": [
       "https://firaphuket.com/wp-content/uploads/2025/03/fira-beach-club-gallery-015-980x653.jpg",
@@ -145,7 +145,7 @@
   "VEN-0003": {
     "src": "CARPEDIEMPHUKET.COM",
     "credit": "Phuket 101 · editorial gallery (Media Manifest)",
-    "hero": "https://content.phuket101.net/wp-content/uploads/20220306155700/carpe-diem-beach-club-phuket-8.jpg",
+    "hero": "/venues/VEN-0003-hero.jpg",
     "gallery": [
       "https://content.phuket101.net/wp-content/uploads/20220306153938/carpe-diem-beach-club-phuket-7.jpg",
       "https://content.phuket101.net/wp-content/uploads/20220306160701/carpe-diem-beach-club-bangtao-phuket-2.jpg",
@@ -187,7 +187,7 @@
   "VEN-0055": {
     "src": "THEPARADISEBEACHPHUKET.COM",
     "credit": "Paradise Beach Phuket · официальный сайт",
-    "hero": "https://theparadisebeachphuket.com/wp-content/uploads/2025/11/543204118_122135716928912301_4664089922346794440_n.jpg",
+    "hero": "/venues/VEN-0055-hero.jpg",
     "gallery": [
       "https://theparadisebeachphuket.com/wp-content/uploads/2025/11/Paradise-Beach-FB-1-scaled.jpg",
       "https://theparadisebeachphuket.com/wp-content/uploads/2025/11/Paradise-Beach-activity-2-scaled.jpg",
@@ -229,7 +229,7 @@
   "VEN-0046": {
     "src": "BANYANTREE.COM",
     "credit": "RAVA Beach Club · Banyan Tree Phuket",
-    "hero": "https://www.banyantree.com/_next/image?url=https%3A%2F%2Fwww.banyantree.com%2Fassets%2F2025-07%2F2.jpg&w=1920&q=75",
+    "hero": "/venues/VEN-0046-hero.jpg",
     "gallery": [
       "https://www.banyantree.com/_next/image?url=https%3A%2F%2Fwww.banyantree.com%2Fassets%2F2026-02%2FRava%20Bar%20Young%20%26%20Fun.jpg&w=1920&q=75",
       "https://www.banyantree.com/_next/image?url=https%3A%2F%2Fwww.banyantree.com%2Fassets%2F2026-02%2FRava%20Master%20Grill%20-%20seating_0.jpg&w=1920&q=75",
@@ -265,7 +265,7 @@
   "VEN-0006": {
     "src": "YONABEACH.COM",
     "credit": "Phuket 101 · editorial (Media Manifest) / yonabeach.com",
-    "hero": "https://content.phuket101.net/wp-content/uploads/20230110110834/yona-floating-beach-club-phuket-4.jpg",
+    "hero": "/venues/VEN-0006-hero.jpg",
     "gallery": [
       "https://content.phuket101.net/wp-content/uploads/20230110110751/yona-floating-beach-club-phuket-1.jpg",
       "https://content.phuket101.net/wp-content/uploads/20230113140058/yona-floating-beach-club-phuket-5-1.jpg",
@@ -316,7 +316,7 @@
   "VEN-0066": {
     "src": "ROYALPHUKETMARINA.COM",
     "credit": "Royal Phuket Marina · официальный сайт",
-    "hero": "https://royalphuketmarina.com/wp-content/uploads/2022/05/Marina-Hero-Shot-S.jpg",
+    "hero": "/venues/VEN-0066-hero.jpg",
     "gallery": [
       "https://royalphuketmarina.com/wp-content/uploads/2024/10/MainSlideRPM-scaled.jpg",
       "https://royalphuketmarina.com/wp-content/uploads/2026/01/LINE_ALBUM_2026.1.16_260116_1.jpg",
@@ -352,7 +352,7 @@
   "VEN-0069": {
     "src": "MARRIOTT.COM",
     "credit": "Phuket Marriott Resort & Spa, Merlin Beach · официальная галерея",
-    "hero": "https://cache.marriott.com/is/image/marriotts7prod/mc-hktmb-tropical-resort-15295-30353:Wide-Hor?wid=1336&fit=constrain",
+    "hero": "/venues/VEN-0069-hero.jpg",
     "afisha": [
       [
         "ON REQ",
@@ -378,7 +378,7 @@
   "VEN-0033": {
     "src": "IHG.COM",
     "credit": "InterContinental Phuket Resort · официальная галерея",
-    "hero": "https://digital.ihg.com/is/image/ihg/intercontinental-phuket-8557129233-2x1?wid=1600",
+    "hero": "/venues/VEN-0033-hero.jpg",
     "gallery": [
       "https://digital.ihg.com/is/image/ihg/intercontinental-phuket-8362089681-34x15?hei=450"
     ],
@@ -405,5 +405,317 @@
   },
   "VEN-0013": {
     "hero": "/venues/VEN-0013-hero.jpg"
+  },
+  "VEN-0086": {
+    "hero": "/venues/VEN-0086-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0022": {
+    "hero": "/venues/VEN-0022-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0083": {
+    "hero": "/venues/VEN-0083-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0087": {
+    "hero": "/venues/VEN-0087-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0020": {
+    "hero": "/venues/VEN-0020-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0072": {
+    "hero": "/venues/VEN-0072-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0043": {
+    "hero": "/venues/VEN-0043-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0052": {
+    "hero": "/venues/VEN-0052-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0017": {
+    "hero": "/venues/VEN-0017-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0062": {
+    "hero": "/venues/VEN-0062-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0027": {
+    "hero": "/venues/VEN-0027-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0030": {
+    "hero": "/venues/VEN-0030-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0029": {
+    "hero": "/venues/VEN-0029-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0023": {
+    "hero": "/venues/VEN-0023-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0019": {
+    "hero": "/venues/VEN-0019-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0007": {
+    "hero": "/venues/VEN-0007-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0082": {
+    "hero": "/venues/VEN-0082-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0028": {
+    "hero": "/venues/VEN-0028-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0015": {
+    "hero": "/venues/VEN-0015-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0058": {
+    "hero": "/venues/VEN-0058-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0016": {
+    "hero": "/venues/VEN-0016-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0018": {
+    "hero": "/venues/VEN-0018-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0060": {
+    "hero": "/venues/VEN-0060-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0014": {
+    "hero": "/venues/VEN-0014-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0081": {
+    "hero": "/venues/VEN-0081-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0021": {
+    "hero": "/venues/VEN-0021-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0078": {
+    "hero": "/venues/VEN-0078-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0034": {
+    "hero": "/venues/VEN-0034-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0025": {
+    "hero": "/venues/VEN-0025-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0008": {
+    "hero": "/venues/VEN-0008-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0079": {
+    "hero": "/venues/VEN-0079-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0073": {
+    "hero": "/venues/VEN-0073-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0012": {
+    "hero": "/venues/VEN-0012-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0035": {
+    "hero": "/venues/VEN-0035-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0009": {
+    "hero": "/venues/VEN-0009-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0036": {
+    "hero": "/venues/VEN-0036-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0075": {
+    "hero": "/venues/VEN-0075-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0054": {
+    "hero": "/venues/VEN-0054-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0070": {
+    "hero": "/venues/VEN-0070-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0031": {
+    "hero": "/venues/VEN-0031-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0067": {
+    "hero": "/venues/VEN-0067-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0077": {
+    "hero": "/venues/VEN-0077-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0051": {
+    "hero": "/venues/VEN-0051-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0049": {
+    "hero": "/venues/VEN-0049-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0040": {
+    "hero": "/venues/VEN-0040-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0048": {
+    "hero": "/venues/VEN-0048-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0039": {
+    "hero": "/venues/VEN-0039-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0004": {
+    "hero": "/venues/VEN-0004-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0059": {
+    "hero": "/venues/VEN-0059-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0068": {
+    "hero": "/venues/VEN-0068-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0076": {
+    "hero": "/venues/VEN-0076-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0074": {
+    "hero": "/venues/VEN-0074-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0063": {
+    "hero": "/venues/VEN-0063-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0061": {
+    "hero": "/venues/VEN-0061-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0080": {
+    "hero": "/venues/VEN-0080-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0026": {
+    "hero": "/venues/VEN-0026-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0005": {
+    "hero": "/venues/VEN-0005-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0088": {
+    "hero": "/venues/VEN-0088-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0091": {
+    "hero": "/venues/VEN-0091-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0092": {
+    "hero": "/venues/VEN-0092-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0093": {
+    "hero": "/venues/VEN-0093-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0094": {
+    "hero": "/venues/VEN-0094-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0095": {
+    "hero": "/venues/VEN-0095-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0096": {
+    "hero": "/venues/VEN-0096-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0097": {
+    "hero": "/venues/VEN-0097-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0053": {
+    "hero": "/venues/VEN-0053-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0057": {
+    "hero": "/venues/VEN-0057-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0042": {
+    "hero": "/venues/VEN-0042-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0032": {
+    "hero": "/venues/VEN-0032-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0056": {
+    "hero": "/venues/VEN-0056-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0041": {
+    "hero": "/venues/VEN-0041-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0065": {
+    "hero": "/venues/VEN-0065-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0071": {
+    "hero": "/venues/VEN-0071-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0064": {
+    "hero": "/venues/VEN-0064-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0044": {
+    "hero": "/venues/VEN-0044-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0047": {
+    "hero": "/venues/VEN-0047-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0011": {
+    "hero": "/venues/VEN-0011-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0010": {
+    "hero": "/venues/VEN-0010-hero.jpg",
+    "credit": "web"
   }
 }

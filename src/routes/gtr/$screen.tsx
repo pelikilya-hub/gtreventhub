@@ -18,6 +18,7 @@ const SCREENS: ScreenId[] = [
   "base",
   "venueCard",
   "access",
+  "contacts",
   "admin",
 ];
 

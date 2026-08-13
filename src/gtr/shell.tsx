@@ -29,6 +29,7 @@ import {
   VenueScreen,
 } from "./screens/Misc";
 import { BaseScreen, VenueCardScreen } from "./screens/Base";
+import { ContactsScreen } from "./screens/Contacts";
 
 const ArtistsScreen = lazy(() =>
   import("./screens/Artists").then((m) => ({ default: m.ArtistsScreen })),
@@ -365,6 +366,8 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
       return <VenueCardScreen vid={search.vid} />;
     case "access":
       return <AccessScreen />;
+    case "contacts":
+      return <ContactsScreen />;
     case "admin":
       return <AdminScreen />;
     default:

@@ -721,6 +721,29 @@ function ArtistCard({
         </div>
       </Card>
 
+      {/* Spotify-плеер: живое превью треков прямо в профиле (нужна
+          настоящая artist-ссылка, поисковые /search не встраиваются) */}
+      {(() => {
+        const m = String(a.sp || "").match(
+          /open\.spotify\.com\/(artist|album|playlist|track)\/([A-Za-z0-9]+)/,
+        );
+        if (!m) return null;
+        return (
+          <Card style={{ padding: 0, margin: "14px 0", overflow: "hidden" }}>
+            <iframe
+              title={`Spotify · ${a.name}`}
+              src={`https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=gtr&theme=0`}
+              width="100%"
+              height="152"
+              frameBorder="0"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+              style={{ display: "block", background: "#0A0B0D" }}
+            />
+          </Card>
+        );
+      })()}
+
       <div
         className="gtr-md-stack"
         style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}

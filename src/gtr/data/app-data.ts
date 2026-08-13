@@ -145,6 +145,7 @@ export type ScreenId =
   | "base"
   | "venueCard"
   | "access"
+  | "contacts"
   | "admin";
 
 export const NAV_VENUE: [ScreenId, string, string, string][] = [
@@ -197,6 +198,7 @@ export const NAV_NET: [ScreenId, string, string, string][] = [
     "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z",
     "97",
   ],
+  ["contacts", "Центр связи", "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z", ""],
   ["access", "Доступы и роли", "M7 11V7a5 5 0 0 1 10 0v4 M5 11h14v10H5z M12 15v3", ""],
   ["admin", "GTR-админ", "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z", ""],
 ];

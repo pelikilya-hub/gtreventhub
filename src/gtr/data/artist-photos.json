@@ -1712,6 +1712,13 @@
    "source": "постер IGTV @jzen_music (ссылка от владельца)",
    "match": "manual",
    "name": "JZEN"
+  },
+  "MC-0026": {
+   "photo": "/artists/MC-0026-avatar.jpg",
+   "photoMed": "/artists/MC-0026-avatar-med.jpg",
+   "source": "кадр официального рила @kpklivemusic",
+   "match": "manual",
+   "name": "KPK Live Music"
   }
  }
 }

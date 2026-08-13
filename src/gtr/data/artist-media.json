@@ -1,16 +1,20 @@
 {
-  "_comment": "Hero-видео артистов: официальные Instagram-рилы. Рендерим через официальный embed (без перезаливки контента — атрибуция и права остаются у автора). igReel — код поста из URL instagram.com/reel/<код>/",
+  "_comment": "Hero-медиа артистов. heroVideo — короткий фрагмент официального рила (беззвучный луп для фона шапки профиля, как видео площадки Illuzion), igReel/igUser — исходник для атрибуции и ссылок. Фрагменты лежат в public/artists/.",
   "media": {
     "MC-0004": {
       "igReel": "DE16dRvSZDQ",
       "igUser": "alexvee__",
-      "added": "2026-08-13"
+      "added": "2026-08-13",
+      "heroVideo": "/artists/MC-0004-hero.mp4",
+      "heroPoster": "/artists/MC-0004-hero.jpg"
     },
     "MC-0137": {
       "igReel": "DE16dRvSZDQ",
       "igUser": "alexvee__",
       "added": "2026-08-13",
-      "note": "тот же артист, что MC-0004 (дубль в базе)"
+      "note": "тот же артист, что MC-0004 (дубль в базе)",
+      "heroVideo": "/artists/MC-0004-hero.mp4",
+      "heroPoster": "/artists/MC-0004-hero.jpg"
     }
   }
 }

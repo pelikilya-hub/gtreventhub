@@ -717,5 +717,37 @@
   "VEN-0010": {
     "hero": "/venues/VEN-0010-hero.jpg",
     "credit": "web"
+  },
+  "VEN-0045": {
+    "hero": "/venues/VEN-0045-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0037": {
+    "hero": "/venues/VEN-0037-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0038": {
+    "hero": "/venues/VEN-0038-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0024": {
+    "hero": "/venues/VEN-0024-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0085": {
+    "hero": "/venues/VEN-0085-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0084": {
+    "hero": "/venues/VEN-0084-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0089": {
+    "hero": "/venues/VEN-0089-hero.jpg",
+    "credit": "web"
+  },
+  "VEN-0090": {
+    "hero": "/venues/VEN-0090-hero.jpg",
+    "credit": "web"
   }
 }

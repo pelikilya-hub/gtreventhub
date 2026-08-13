@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GtrRouteRouteImport } from './routes/gtr/route'
+import { Route as ApiAfishaRouteImport } from './routes/api.afisha'
 import { Route as ApiPushRouteImport } from './routes/api.push'
 import { Route as ApiTgRouteImport } from './routes/api.tg'
 import { Route as GtrIndexRouteImport } from './routes/gtr/index'
@@ -27,6 +28,11 @@ const IndexRoute = IndexRouteImport.update({
 const GtrRouteRoute = GtrRouteRouteImport.update({
   id: '/gtr',
   path: '/gtr',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAfishaRoute = ApiAfishaRouteImport.update({
+  id: '/api/afisha',
+  path: '/api/afisha',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPushRoute = ApiPushRouteImport.update({
@@ -68,6 +74,7 @@ const GtrOrganizerRoute = GtrOrganizerRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
+  '/api/afisha': typeof ApiAfishaRoute
   '/api/push': typeof ApiPushRoute
   '/api/tg': typeof ApiTgRoute
   '/gtr/$screen': typeof GtrScreenRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/afisha': typeof ApiAfishaRoute
   '/api/push': typeof ApiPushRoute
   '/api/tg': typeof ApiTgRoute
   '/gtr/$screen': typeof GtrScreenRoute
@@ -90,6 +98,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
+  '/api/afisha': typeof ApiAfishaRoute
   '/api/push': typeof ApiPushRoute
   '/api/tg': typeof ApiTgRoute
   '/gtr/$screen': typeof GtrScreenRoute
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/gtr'
+    | '/api/afisha'
     | '/api/push'
     | '/api/tg'
     | '/gtr/$screen'
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/api/afisha'
     | '/api/push'
     | '/api/tg'
     | '/gtr/$screen'
@@ -124,6 +135,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/gtr'
+    | '/api/afisha'
     | '/api/push'
     | '/api/tg'
     | '/gtr/$screen'
@@ -136,6 +148,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GtrRouteRoute: typeof GtrRouteRouteWithChildren
+  ApiAfishaRoute: typeof ApiAfishaRoute
   ApiPushRoute: typeof ApiPushRoute
   ApiTgRoute: typeof ApiTgRoute
 }
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/gtr'
       fullPath: '/gtr'
       preLoaderRoute: typeof GtrRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/afisha': {
+      id: '/api/afisha'
+      path: '/api/afisha'
+      fullPath: '/api/afisha'
+      preLoaderRoute: typeof ApiAfishaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/push': {
@@ -231,6 +251,7 @@ const GtrRouteRouteWithChildren = GtrRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GtrRouteRoute: GtrRouteRouteWithChildren,
+  ApiAfishaRoute: ApiAfishaRoute,
   ApiPushRoute: ApiPushRoute,
   ApiTgRoute: ApiTgRoute,
 }

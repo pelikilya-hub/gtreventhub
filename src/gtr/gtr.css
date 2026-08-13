@@ -1189,3 +1189,72 @@
 @media (prefers-reduced-motion: reduce) {
   .gtr-live-dot { animation: none; }
 }
+
+/* ---------- лайтбокс галереи ---------- */
+.gtr-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(6, 6, 8, 0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: gtr-lb-in 0.18s ease-out;
+  touch-action: pan-y;
+}
+@keyframes gtr-lb-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.gtr-lightbox-img {
+  max-width: min(96vw, 1400px);
+  max-height: calc(100vh - max(64px, env(safe-area-inset-top) + env(safe-area-inset-bottom) + 40px));
+  object-fit: contain;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.7);
+  transition: transform 0.05s linear;
+}
+.gtr-lightbox-x {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top));
+  right: calc(12px + env(safe-area-inset-right));
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(10, 11, 13, 0.7);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+.gtr-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: 96px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 42px;
+  cursor: pointer;
+  padding: 0 8px;
+}
+.gtr-lightbox-nav:hover { color: #e5231b; }
+.gtr-lightbox-bar {
+  position: absolute;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  background: rgba(10, 11, 13, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  max-width: 92vw;
+  white-space: nowrap;
+  overflow: hidden;
+}
+@media (max-width: 700px) {
+  .gtr-lightbox-nav { display: none; } /* на тач-экранах — свайпы */
+}

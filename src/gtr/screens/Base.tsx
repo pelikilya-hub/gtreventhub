@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   AMBER,
@@ -17,6 +17,9 @@ import {
 } from "../data/app-data";
 import { EditableImage } from "../EditableImage";
 import { Card, Chip, Eyebrow, Field, tint, TrashTitle } from "../ui";
+import { GtrLightbox } from "../lightbox";
+import { listAfishaFn, syncAfishaNowFn } from "../kv-api";
+import { useGtr } from "../store";
 
 const confColor = (c: string) => (c === "High" ? GREEN : c === "Medium" ? AMBER : RED);
 const isQuar = (x: { confidence: string; status?: string }) =>
@@ -176,6 +179,7 @@ export function BaseScreen() {
 export function VenueCardScreen({ vid }: { vid?: string }) {
   const navigate = useNavigate();
   const v = vid ? V(vid) : undefined;
+  const [lightbox, setLightbox] = useState<number | null>(null);
   if (!v?.id)
     return (
       <div
@@ -362,24 +366,36 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 className="gtr-gallery"
                 style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}
               >
-                {rich.gallery.slice(0, 8).map((src) => (
+                {rich.gallery.slice(0, 8).map((src, gi) => (
                   <img
                     key={src}
                     src={src}
                     alt=""
                     loading="lazy"
+                    onClick={() => setLightbox(gi)}
                     style={{
                       width: "100%",
                       aspectRatio: "3/2",
                       objectFit: "cover",
                       borderRadius: 0,
                       border: "1px solid rgba(255,255,255,.08)",
+                      cursor: "zoom-in",
                     }}
                   />
                 ))}
               </div>
+              {lightbox !== null ? (
+                <GtrLightbox
+                  images={rich.gallery}
+                  index={lightbox}
+                  credit={rich.credit}
+                  onClose={() => setLightbox(null)}
+                />
+              ) : null}
             </Card>
           ) : null}
+
+          <AfishaBlock vid={v.id} />
         </div>
 
         <div style={{ display: "grid", gap: 14, alignContent: "start" }}>
@@ -585,5 +601,140 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
         </div>
       </div>
     </div>
+  );
+}
+
+// ---------- Афиша площадки: события с официальных источников ----------
+type AfishaEvent = {
+  id: string;
+  title: string;
+  dateIso: string;
+  poster?: string;
+  url: string;
+  room?: string;
+  artistIds: string[];
+  source: string;
+};
+
+function AfishaBlock({ vid }: { vid: string }) {
+  const { user } = useGtr();
+  const navigate = useNavigate();
+  const [data, setData] = useState<{ events: AfishaEvent[]; syncedAt: number } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const load = () =>
+    listAfishaFn({ data: { vid } })
+      .then((r) => setData(r as { events: AfishaEvent[]; syncedAt: number }))
+      .catch(() => {});
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vid]);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = (data?.events ?? []).filter((e) => e.dateIso >= today).slice(0, 8);
+  if (!upcoming.length && user.role !== "gtr") return null;
+
+  return (
+    <Card style={{ padding: 18 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+        <Eyebrow>АФИША</Eyebrow>
+        {data?.syncedAt ? (
+          <span
+            className="gtr-mono"
+            style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+          >
+            обновлено {new Date(data.syncedAt).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+          </span>
+        ) : null}
+        {user.role === "gtr" ? (
+          <button
+            className="gtr-btn gtr-btn-sm"
+            style={{ marginLeft: "auto", opacity: busy ? 0.5 : 1 }}
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              try {
+                await syncAfishaNowFn();
+                await load();
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            {busy ? "Собираю…" : "⟳ Обновить"}
+          </button>
+        ) : null}
+      </div>
+      {upcoming.length ? (
+        <div
+          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(150px,1fr))", gap: 10 }}
+        >
+          {upcoming.map((e) => (
+            <a
+              key={e.id}
+              href={e.url}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                textDecoration: "none",
+                color: "inherit",
+                border: "1px solid rgba(255,255,255,.09)",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {e.poster ? (
+                <img
+                  src={e.poster}
+                  alt=""
+                  loading="lazy"
+                  style={{ width: "100%", aspectRatio: "4/5", objectFit: "cover" }}
+                />
+              ) : null}
+              <span style={{ padding: "8px 10px", display: "grid", gap: 3 }}>
+                <span
+                  className="gtr-mono"
+                  style={{ font: "700 9.5px/1 'JetBrains Mono',monospace", color: "#FF3427" }}
+                >
+                  {e.dateIso.slice(5).split("-").reverse().join(".")}
+                  {e.room ? ` · ${e.room.toUpperCase()}` : ""}
+                </span>
+                <span style={{ font: "600 11.5px/1.35 'Golos Text',sans-serif", color: "#fff" }}>
+                  {e.title}
+                </span>
+                {e.artistIds.length ? (
+                  <span style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                    {e.artistIds.map((id) => (
+                      <button
+                        key={id}
+                        className="gtr-mono"
+                        style={{
+                          font: "600 8.5px/1 'JetBrains Mono',monospace",
+                          color: "#2ECC71",
+                          border: "1px solid rgba(46,204,113,.4)",
+                          background: "transparent",
+                          padding: "3px 6px",
+                          cursor: "pointer",
+                        }}
+                        onClick={(ev) => {
+                          ev.preventDefault();
+                          navigate({ to: "/gtr/$screen", params: { screen: "artists" }, search: { artist: id } });
+                        }}
+                      >
+                        НАШ АРТИСТ ↗
+                      </button>
+                    ))}
+                  </span>
+                ) : null}
+              </span>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <span style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+          Источник этой площадки ещё не подключён — собираем Café del Mar и Illuzion, дальше расширяем.
+        </span>
+      )}
+    </Card>
   );
 }

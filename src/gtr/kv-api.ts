@@ -6,6 +6,7 @@ import { currentUser, type SessionUser, type StoredUser } from "./auth";
 import type { EventDraft, Offer, OrgRequest, RoleId } from "./data/app-data";
 import { getKvNs, kvGetJson, kvListAll, type KvNs } from "./kv-ns";
 import { tgApi, tgConfigured, tgEsc, tgWebhookSecret } from "./tg";
+import type { VenueAfisha } from "./afisha";
 
 const sha256 = async (s: string) => {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
@@ -989,3 +990,23 @@ export const setArtistFlagFn = createServerFn({ method: "POST" })
     await ns.put(key, JSON.stringify(next));
     return { ok: true as const, flags: next };
   });
+
+// ---------- афиши площадок (собирает агент из официальных источников) ----------
+
+export const listAfishaFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { vid: string }) => d)
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    if (!ns) return { events: [], syncedAt: 0, source: "" } as VenueAfisha;
+    const rec = await kvGetJson<VenueAfisha>(ns, `venueevents:${data.vid}`);
+    return rec ?? ({ events: [], syncedAt: 0, source: "" } as VenueAfisha);
+  });
+
+export const syncAfishaNowFn = createServerFn({ method: "POST" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || u.role !== "gtr" || !ns) return { ok: false as const };
+  const { syncAfisha } = await import("./afisha");
+  const counts = await syncAfisha(ns);
+  return { ok: true as const, counts };
+});

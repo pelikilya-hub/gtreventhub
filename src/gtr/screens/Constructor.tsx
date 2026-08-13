@@ -1652,6 +1652,72 @@ export function ConstructorScreen({
                   ),
                 )}
               </div>
+              {["artist", "sound", "light", "decor", "content", "gear", "interactive"].includes(
+                selNode.kind,
+              ) ? (
+                <div style={{ marginTop: 10, display: "grid", gap: 5 }}>
+                  <span className="gtr-eyebrow" style={{ fontSize: 8.5 }}>
+                    ЗАЛ / ЗОНА БЛОКА
+                  </span>
+                  <select
+                    className="gtr-input"
+                    style={{ padding: "7px 9px", fontSize: 11.5 }}
+                    value={
+                      g.links.find(
+                        (l) =>
+                          l.to === selNode.id &&
+                          g.nodes.find((x) => x.id === l.from)?.kind === "room",
+                      )?.from ?? ""
+                    }
+                    onChange={(e) => {
+                      const roomId = e.target.value;
+                      const room = g.nodes.find((x) => x.id === roomId);
+                      mutate((gr) => {
+                        const links = gr.links.filter(
+                          (l) =>
+                            !(
+                              l.to === selNode.id &&
+                              gr.nodes.find((x) => x.id === l.from)?.kind === "room"
+                            ),
+                        );
+                        if (room) links.push({ from: room.id, to: selNode.id });
+                        return {
+                          ...gr,
+                          links,
+                          nodes: gr.nodes.map((n) =>
+                            n.id === selNode.id
+                              ? {
+                                  ...n,
+                                  fields: room
+                                    ? [
+                                        ...n.fields.filter((f) => f[0] !== "ЗАЛ"),
+                                        ["ЗАЛ", room.title] as [string, string],
+                                      ]
+                                    : n.fields.filter((f) => f[0] !== "ЗАЛ"),
+                                }
+                              : n,
+                          ),
+                          log: pushLog(
+                            gr,
+                            room
+                              ? `«${selNode.title}» → ${room.title}`
+                              : `«${selNode.title}» откреплён от зала`,
+                          ),
+                        };
+                      });
+                    }}
+                  >
+                    <option value="">Вся площадка</option>
+                    {g.nodes
+                      .filter((n) => n.kind === "room")
+                      .map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.badge === "ЗОНА" ? `Зона · ${r.title}` : r.title}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              ) : null}
               {selNode.kind === "artist" && selNode.fields.find((f) => f[0] === "КАРТОЧКА")?.[1] ? (
                 <button
                   className="gtr-btn"

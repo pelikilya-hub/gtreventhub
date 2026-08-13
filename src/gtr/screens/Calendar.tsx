@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
 import {
@@ -22,6 +23,7 @@ export function CalendarScreen() {
 
   const [month, setMonth] = useState(7);
   const [year, setYear] = useState(2026);
+  const navigate = useNavigate();
   const [selDay, setSelDay] = useState(8);
   const [room, setRoom] = useState("all");
   const [dragId, setDragId] = useState<string | null>(null);
@@ -457,7 +459,7 @@ export function CalendarScreen() {
                         {start}–{end} · {meta}
                       </span>
                     </span>
-                    <span style={{ color: "rgba(255,255,255,.4)", fontWeight: 700 }}>+</span>
+                  <span style={{ color: "rgba(255,255,255,.4)", fontWeight: 700 }}>+</span>
                   </button>
                 ),
               )}
@@ -488,6 +490,21 @@ export function CalendarScreen() {
                     >
                       {(a.styles || []).slice(0, 2).join(" · ")} · из лайнапа
                     </span>
+                  </span>
+                  <span
+                    role="link"
+                    title="Открыть страницу артиста"
+                    style={{ color: "#7B4DFF", fontWeight: 700, padding: "0 4px" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate({
+                        to: "/gtr/$screen",
+                        params: { screen: "artists" },
+                        search: { artist: a.id },
+                      });
+                    }}
+                  >
+                    ↗
                   </span>
                   <span style={{ color: "rgba(255,255,255,.4)", fontWeight: 700 }}>+</span>
                 </button>

@@ -1689,7 +1689,18 @@ function TeamPanel() {
                   style={{ display: "block", font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                 >
                   {u.email} · {u.roleLabel}
-                  {u.venueId ? ` · ${V(u.venueId).name ?? u.venueId}` : " · вся сеть"}
+                  {u.artistId ? (
+                    <a
+                      href={`/gtr/artists?artist=${u.artistId}`}
+                      style={{ color: "#7B4DFF", marginLeft: 6, textDecoration: "none" }}
+                    >
+                      карточка {u.artistId} ↗
+                    </a>
+                  ) : u.venueId ? (
+                    ` · ${V(u.venueId).name ?? u.venueId}`
+                  ) : (
+                    " · вся сеть"
+                  )}
                 </span>
               </span>
               <button

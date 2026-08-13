@@ -14,6 +14,7 @@ import {
   SPACES,
   V,
   venueGraph,
+  zonesOf,
   type EventStage,
   type Graph,
 } from "../data/app-data";
@@ -339,8 +340,6 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
 // подбор площадки.
 const TIME_SLOTS = ["12:00", "16:00", "18:00", "19:00", "20:00", "22:00", "23:00"];
 
-const ZONES = ["Вход", "Фойе", "Терраса", "У бассейна", "Улица"];
-
 const spaceMeta = (sp: Record<string, unknown>) =>
   [sp.sqm && `${sp.sqm} м²`, sp.capTheatre && `${sp.capTheatre} театр`, sp.capCocktail && `${sp.capCocktail} коктейль`]
     .filter(Boolean)
@@ -383,6 +382,25 @@ const applyRooms = (g: Graph, keepNames: string[], zones: string[]): Graph => {
     });
     if (venue) g.links.push({ from: venue.id, to: id });
   });
+
+  // Блоки пресета (артисты, декор, промо-интерактив…) закрепляются за первым
+  // залом события — или зоной, если залы площадки не нормализованы.
+  // «Висящих в воздухе» блоков не остаётся.
+  const firstRoom = g.nodes.find((n) => n.kind === "room");
+  if (firstRoom) {
+    const PLACEABLE = ["artist", "sound", "light", "decor", "content", "gear", "interactive"];
+    for (const n of g.nodes) {
+      if (!PLACEABLE.includes(n.kind)) continue;
+      const hasRoomLink = g.links.some(
+        (l) => l.to === n.id && g.nodes.find((x) => x.id === l.from)?.kind === "room",
+      );
+      if (!hasRoomLink) {
+        g.links = g.links.filter((l) => l.to !== n.id);
+        g.links.push({ from: firstRoom.id, to: n.id });
+      }
+      if (!n.fields.some((f) => f[0] === "ЗАЛ")) n.fields.push(["ЗАЛ", firstRoom.title]);
+    }
+  }
   return g;
 };
 
@@ -904,7 +922,7 @@ function NewEvent({
             </span>
           )}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {ZONES.map((z) => {
+            {zonesOf(venueId).map((z) => {
               const on = zonesSel.includes(z);
               return (
                 <button

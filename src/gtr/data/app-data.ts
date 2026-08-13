@@ -677,6 +677,14 @@ export type EventDraft = {
 
 export type EventGuest = { name: string; by: string; via: "app" | "tg"; ts: number };
 
+// ---------- зоны площадки ----------
+// Выведены из типа объекта (venue-zones.json): пляжному клубу — пляж и
+// бассейн, ночному — танцпол и chill-out, марине — причал и палуба.
+import venueZonesRaw from "./venue-zones.json";
+const VENUE_ZONES = (venueZonesRaw as unknown as { zones: Record<string, string[]> }).zones;
+export const zonesOf = (venueId: string): string[] =>
+  VENUE_ZONES[venueId] ?? ["Вход", "Фойе", "Терраса"];
+
 // ---------- предложение артисту ----------
 export type OfferStatus = "sent" | "accepted" | "declined";
 export type Offer = {

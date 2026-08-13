@@ -1010,3 +1010,11 @@ export const syncAfishaNowFn = createServerFn({ method: "POST" }).handler(async 
   const counts = await syncAfisha(ns);
   return { ok: true as const, counts };
 });
+
+// Площадки, по которым агент уже собирает афиши (для зелёных точек в селекторе)
+export const afishaVenuesFn = createServerFn({ method: "GET" }).handler(async () => {
+  const ns = await getKvNs();
+  if (!ns) return { vids: [] as string[] };
+  const keys = await kvListAll(ns, "venueevents:");
+  return { vids: keys.map((k) => k.slice("venueevents:".length)) };
+});

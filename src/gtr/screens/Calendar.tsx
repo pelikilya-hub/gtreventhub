@@ -12,14 +12,32 @@ import {
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow } from "../ui";
 import { useEffect } from "react";
+import { PH, V, draftTitle } from "../data/app-data";
+import { afishaVenuesFn, listAfishaFn } from "../kv-api";
 
 const WD = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
 const WD_FULL = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
 
 export function CalendarScreen() {
   const { user, shared, setEvents } = useGtr();
-  const vid = user.venueId || "VEN-0013";
-  const rooms = roomsOf(vid);
+  // Режим: «наши события» (по умолчанию для штаба) или календарь площадки
+  const [scope, setScope] = useState<string>(user.venueId || "ours");
+  const [pickOpen, setPickOpen] = useState(false);
+  const [pickQ, setPickQ] = useState("");
+  const [afishaVids, setAfishaVids] = useState<string[]>([]);
+  const [afisha, setAfisha] = useState<{ id: string; title: string; dateIso: string; url: string; artistIds: string[] }[]>([]);
+  const vid = scope === "ours" ? "" : scope;
+  const rooms = roomsOf(vid || "VEN-0013");
+
+  useEffect(() => {
+    afishaVenuesFn().then((r) => setAfishaVids(r.vids)).catch(() => {});
+  }, []);
+  useEffect(() => {
+    if (!vid) return setAfisha([]);
+    listAfishaFn({ data: { vid } })
+      .then((r) => setAfisha((r.events as typeof afisha) ?? []))
+      .catch(() => setAfisha([]));
+  }, [vid]);
 
   const [month, setMonth] = useState(7);
   const [year, setYear] = useState(2026);
@@ -55,6 +73,29 @@ export function CalendarScreen() {
     [shared.events, vid, month, year, room],
   );
 
+  // Наши события: черновики с датой; в режиме площадки — только её
+  const oursMonth = useMemo(() => {
+    return shared.drafts
+      .filter((d) => d.dateIso)
+      .filter((d) => (vid ? d.venueId === vid : true))
+      .map((d) => {
+        const [y, m, dd] = (d.dateIso as string).split("-").map(Number);
+        return { y, m: m - 1, d: dd, id: d.id, title: draftTitle(d), venueId: d.venueId };
+      })
+      .filter((x) => x.y === year && x.m === month);
+  }, [shared.drafts, vid, year, month]);
+
+  const afishaMonth = useMemo(
+    () =>
+      afisha
+        .map((e) => {
+          const [y, m, dd] = e.dateIso.split("-").map(Number);
+          return { ...e, y, m: m - 1, d: dd };
+        })
+        .filter((x) => x.y === year && x.m === month),
+    [afisha, year, month],
+  );
+
   const first = new Date(year, month, 1);
   const offset = (first.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -63,6 +104,8 @@ export function CalendarScreen() {
   const dayList = allEvents
     .filter((e) => e.day === selDay)
     .sort((a, b) => a.start.localeCompare(b.start));
+  const oursDay = oursMonth.filter((e) => e.d === selDay);
+  const afishaDay = afishaMonth.filter((e) => e.d === selDay);
 
   const shift = (id: string, mins: number) =>
     setEvents((list) =>
@@ -106,7 +149,10 @@ export function CalendarScreen() {
 
   const loadCounts = Array.from(
     { length: daysInMonth },
-    (_, i) => allEvents.filter((e) => e.day === i + 1).length,
+    (_, i) =>
+      allEvents.filter((e) => e.day === i + 1).length +
+      oursMonth.filter((e) => e.d === i + 1).length +
+      afishaMonth.filter((e) => e.d === i + 1).length,
   );
   const dSel = new Date(year, month, selDay);
   const statusBg = (e: CalEvent) =>
@@ -127,9 +173,171 @@ export function CalendarScreen() {
           marginBottom: 16,
         }}
       >
-        <h1 className="gtr-oswald gtr-h1">
-          Календарь и программа
-        </h1>
+        {user.role === "gtr" ? (
+          // Селектор области: «наши события» или календарь любой из 97 площадок
+          <div style={{ position: "relative" }}>
+            <button
+              className="gtr-oswald gtr-h1"
+              onClick={() => {
+                setPickOpen((v) => !v);
+                setPickQ("");
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                margin: 0,
+                padding: 0,
+                background: "transparent",
+                border: "none",
+                color: "#fff",
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+            >
+              <span
+                style={{
+                  width: 9,
+                  height: 9,
+                  flex: "none",
+                  borderRadius: 0,
+                  background: scope === "ours" ? "#E5231B" : "#2ECC71",
+                }}
+              />
+              {scope === "ours" ? "Наши события" : (V(scope)?.name ?? scope)}
+              <span
+                className="gtr-mono"
+                style={{
+                  font: "600 11px/1 'JetBrains Mono',monospace",
+                  color: "rgba(255,255,255,.45)",
+                }}
+              >
+                {pickOpen ? "▲" : "▼"}
+              </span>
+            </button>
+            {pickOpen ? (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 8px)",
+                  left: 0,
+                  zIndex: 40,
+                  width: 310,
+                  maxHeight: 380,
+                  overflowY: "auto",
+                  background: "var(--gtr-card)",
+                  border: "1px solid rgba(255,255,255,.16)",
+                  boxShadow: "0 18px 44px rgba(0,0,0,.6)",
+                }}
+              >
+                <input
+                  autoFocus
+                  value={pickQ}
+                  onChange={(e) => setPickQ(e.target.value)}
+                  placeholder="Поиск по 97 площадкам…"
+                  style={{
+                    width: "100%",
+                    padding: "11px 13px",
+                    background: "rgba(255,255,255,.03)",
+                    border: "none",
+                    borderBottom: "1px solid rgba(255,255,255,.1)",
+                    color: "#fff",
+                    font: "500 12px/1 'Golos Text',sans-serif",
+                    outline: "none",
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    setScope("ours");
+                    setRoom("all");
+                    setPickOpen(false);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 9,
+                    width: "100%",
+                    padding: "10px 13px",
+                    background: scope === "ours" ? "rgba(229,35,27,.14)" : "transparent",
+                    border: "none",
+                    borderBottom: "1px solid rgba(255,255,255,.06)",
+                    color: "#fff",
+                    cursor: "pointer",
+                    font: "600 12px/1.2 'Golos Text',sans-serif",
+                    textAlign: "left",
+                  }}
+                >
+                  <span style={{ width: 7, height: 7, flex: "none", background: "#E5231B" }} />
+                  <span style={{ flex: 1 }}>Наши события</span>
+                  <span
+                    className="gtr-mono"
+                    style={{
+                      font: "600 8.5px/1 'JetBrains Mono',monospace",
+                      color: "rgba(255,255,255,.4)",
+                    }}
+                  >
+                    GTR
+                  </span>
+                </button>
+                {PH.venues
+                  .filter((v) => v.name.toLowerCase().includes(pickQ.trim().toLowerCase()))
+                  .map((v) => {
+                    const hasFeed = afishaVids.includes(v.id);
+                    return (
+                      <button
+                        key={v.id}
+                        onClick={() => {
+                          setScope(v.id);
+                          setRoom("all");
+                          setPickOpen(false);
+                        }}
+                        title={hasFeed ? "Афиши подключены" : undefined}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 9,
+                          width: "100%",
+                          padding: "9px 13px",
+                          background: scope === v.id ? "rgba(255,255,255,.06)" : "transparent",
+                          border: "none",
+                          borderBottom: "1px solid rgba(255,255,255,.04)",
+                          color: "rgba(255,255,255,.85)",
+                          cursor: "pointer",
+                          font: "500 11.5px/1.25 'Golos Text',sans-serif",
+                          textAlign: "left",
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 7,
+                            height: 7,
+                            flex: "none",
+                            background: hasFeed ? "#2ECC71" : "rgba(255,255,255,.18)",
+                          }}
+                        />
+                        <span style={{ flex: 1, minWidth: 0 }}>{v.name}</span>
+                        {hasFeed ? (
+                          <span
+                            className="gtr-mono"
+                            style={{
+                              font: "600 8.5px/1 'JetBrains Mono',monospace",
+                              color: "#2ECC71",
+                            }}
+                          >
+                            АФИШИ
+                          </span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <h1 className="gtr-oswald gtr-h1">
+            Календарь и программа
+          </h1>
+        )}
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <button className="gtr-btn" onClick={prevMonth}>
             ‹
@@ -148,6 +356,7 @@ export function CalendarScreen() {
             ›
           </button>
         </div>
+        {vid ? (
         <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginLeft: "auto" }}>
           {[["all", "Все залы", "#fff"] as [string, string, string], ...rooms].map(
             ([k, label, color]) => (
@@ -173,6 +382,27 @@ export function CalendarScreen() {
             ),
           )}
         </div>
+        ) : (
+          // Легенда слоёв в режиме «наши события»
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginLeft: "auto" }}>
+            {[["#E5231B", "События команды GTR"]].map(([c, label]) => (
+              <span
+                key={label}
+                className="gtr-mono"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  font: "600 9.5px/1 'JetBrains Mono',monospace",
+                  color: "rgba(255,255,255,.55)",
+                }}
+              >
+                <span style={{ width: 7, height: 7, background: c as string }} />
+                {label}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div
@@ -209,6 +439,35 @@ export function CalendarScreen() {
               {Array.from({ length: daysInMonth }).map((_, i) => {
                 const n = i + 1;
                 const items = allEvents.filter((e) => e.day === n);
+                // Три слоя одного дня: наши (красные), программа площадки
+                // (по статусу), афиши с сайтов (зелёные)
+                const cellChips = [
+                  ...oursMonth
+                    .filter((e) => e.d === n)
+                    .map((e) => ({
+                      key: `ours-${e.id}`,
+                      title: e.title,
+                      dot: "#E5231B",
+                      bg: "rgba(229,35,27,.2)",
+                      dragId: null as string | null,
+                    })),
+                  ...items.map((e) => ({
+                    key: e.id,
+                    title: e.title,
+                    dot: roomColor(e.room),
+                    bg: statusBg(e),
+                    dragId: e.id as string | null,
+                  })),
+                  ...afishaMonth
+                    .filter((e) => e.d === n)
+                    .map((e) => ({
+                      key: `af-${e.id}`,
+                      title: e.title,
+                      dot: "#2ECC71",
+                      bg: "rgba(46,204,113,.13)",
+                      dragId: null as string | null,
+                    })),
+                ];
                 const on = selDay === n;
                 return (
                   <div
@@ -239,7 +498,7 @@ export function CalendarScreen() {
                       >
                         {n}
                       </span>
-                      {items.length ? (
+                      {cellChips.length ? (
                         <span
                           className="gtr-mono"
                           style={{
@@ -250,25 +509,25 @@ export function CalendarScreen() {
                             padding: "3px 5px",
                           }}
                         >
-                          {items.length}
+                          {cellChips.length}
                         </span>
                       ) : null}
                     </div>
                     <div style={{ display: "grid", gap: 4 }}>
-                      {items.slice(0, 3).map((e) => (
+                      {cellChips.slice(0, 3).map((c) => (
                         <div
-                          key={e.id}
-                          draggable
-                          onDragStart={() => setDragId(e.id)}
+                          key={c.key}
+                          draggable={!!c.dragId}
+                          onDragStart={c.dragId ? () => setDragId(c.dragId as string) : undefined}
                           style={{
                             display: "flex",
                             alignItems: "center",
                             gap: 5,
                             padding: "4px 5px",
                             borderRadius: 0,
-                            cursor: "grab",
+                            cursor: c.dragId ? "grab" : "pointer",
                             font: "500 9.5px/1.2 'Golos Text',sans-serif",
-                            background: statusBg(e),
+                            background: c.bg,
                           }}
                         >
                           <span
@@ -277,7 +536,7 @@ export function CalendarScreen() {
                               height: 6,
                               flex: "none",
                               borderRadius: 0,
-                              background: roomColor(e.room),
+                              background: c.dot,
                             }}
                           />
                           <span
@@ -287,11 +546,11 @@ export function CalendarScreen() {
                               whiteSpace: "nowrap",
                             }}
                           >
-                            {e.title}
+                            {c.title}
                           </span>
                         </div>
                       ))}
-                      {items.length > 3 ? (
+                      {cellChips.length > 3 ? (
                         <div
                           className="gtr-mono"
                           style={{
@@ -299,7 +558,7 @@ export function CalendarScreen() {
                             color: "rgba(255,255,255,.35)",
                           }}
                         >
-                          +{items.length - 3} ещё
+                          +{cellChips.length - 3} ещё
                         </div>
                       ) : null}
                     </div>
@@ -336,11 +595,54 @@ export function CalendarScreen() {
               {selDay} {MONTHS[month].toUpperCase()} · {WD_FULL[dSel.getDay()].toUpperCase()}
             </Eyebrow>
             <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
-              {dayList.length === 0 ? (
+              {oursDay.map((e) => (
+                <div
+                  key={`ours-${e.id}`}
+                  style={{
+                    background: "rgba(229,35,27,.1)",
+                    border: "1px solid rgba(229,35,27,.45)",
+                    borderRadius: 0,
+                    padding: "10px 12px",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                    <span style={{ flex: 1, font: "600 12px/1.3 'Golos Text',sans-serif" }}>
+                      {e.title}
+                    </span>
+                    <Chip color="#E5231B">НАШЕ</Chip>
+                  </div>
+                  <div
+                    className="gtr-mono"
+                    style={{
+                      margin: "7px 0 8px",
+                      font: "500 10.5px/1 'JetBrains Mono',monospace",
+                      color: "var(--gtr-t2)",
+                    }}
+                  >
+                    {V(e.venueId)?.name ?? "Площадка не выбрана"}
+                  </div>
+                  <button
+                    className="gtr-btn"
+                    style={{ padding: "5px 9px", fontSize: 10 }}
+                    onClick={() =>
+                      navigate({
+                        to: "/gtr/$screen",
+                        params: { screen: "constructor" },
+                        search: { draft: e.id },
+                      })
+                    }
+                  >
+                    Открыть в конструкторе ↗
+                  </button>
+                </div>
+              ))}
+              {dayList.length === 0 && oursDay.length === 0 && afishaDay.length === 0 ? (
                 <div
                   style={{ font: "500 11.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
                 >
-                  Свободный день — добавьте формат из палитры ниже.
+                  {vid
+                    ? "Свободный день — добавьте формат из палитры ниже."
+                    : "На этот день наших событий нет — создайте в конструкторе."}
                 </div>
               ) : (
                 dayList.map((e) => (
@@ -424,9 +726,64 @@ export function CalendarScreen() {
                   </div>
                 ))
               )}
+              {afishaDay.map((e) => (
+                <div
+                  key={`af-${e.id}`}
+                  style={{
+                    background: "rgba(46,204,113,.07)",
+                    border: "1px solid rgba(46,204,113,.4)",
+                    borderRadius: 0,
+                    padding: "10px 12px",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                    <span style={{ flex: 1, font: "600 12px/1.3 'Golos Text',sans-serif" }}>
+                      {e.title}
+                    </span>
+                    <Chip color="#2ECC71">АФИША</Chip>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                    {e.artistIds.length ? (
+                      <button
+                        className="gtr-btn"
+                        style={{
+                          padding: "5px 9px",
+                          fontSize: 10,
+                          color: "#2ECC71",
+                          borderColor: "rgba(46,204,113,.5)",
+                        }}
+                        onClick={() =>
+                          navigate({
+                            to: "/gtr/$screen",
+                            params: { screen: "artists" },
+                            search: { artist: e.artistIds[0] },
+                          })
+                        }
+                      >
+                        НАШ АРТИСТ ↗
+                      </button>
+                    ) : null}
+                    <a
+                      className="gtr-mono"
+                      href={e.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        font: "600 10px/1 'JetBrains Mono',monospace",
+                        color: "rgba(255,255,255,.55)",
+                        textDecoration: "none",
+                        marginLeft: "auto",
+                      }}
+                    >
+                      Источник ↗
+                    </a>
+                  </div>
+                </div>
+              ))}
             </div>
           </Card>
 
+          {vid ? (
           <Card style={{ padding: "16px 18px" }}>
             <Eyebrow style={{ marginBottom: 10 }}>ПАЛИТРА ФОРМАТОВ · В ДЕНЬ {selDay}</Eyebrow>
             <div style={{ display: "grid", gap: 7 }}>
@@ -511,6 +868,7 @@ export function CalendarScreen() {
               ))}
             </div>
           </Card>
+          ) : null}
         </div>
       </div>
     </div>

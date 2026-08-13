@@ -16,6 +16,7 @@ export type SessionUser = {
   roleLabel: string;
   venueId: string; // пусто для GTR-админа (кросс-сетевой доступ)
   artistId?: string; // роль artist: карточка каталога (MC-…)
+  teamOf?: string; // email тимлида-организатора, чью команду пополнил
   initials: string;
 };
 

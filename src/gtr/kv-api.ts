@@ -35,13 +35,33 @@ const initialsOf = (name: string) =>
 // Видит ли пользователь событие: владелец, его площадка (для событий без
 // владельца — старых и засеянных) или GTR-админ
 const canSeeDraft = (u: SessionUser, d: EventDraft) =>
-  u.role === "gtr" || (d.owner ? d.owner === u.email : d.venueId === u.venueId);
+  u.role === "gtr" ||
+  (d.owner ? d.owner === u.email || d.owner === u.teamOf : Boolean(u.venueId) && d.venueId === u.venueId);
 
 const canSeeRequest = (u: SessionUser, r: OrgRequest) =>
   u.role === "gtr" ||
   (Boolean(u.venueId) && r.venueId === u.venueId) ||
   r.assignee === u.email ||
   r.organizerEmail === u.email;
+
+// Уведомление GTR-админам: личные чаты всех admin-аккаунтов + общий канал
+async function notifyAdminsTg(ns: KvNs, text: string) {
+  const keys = await kvListAll(ns, "user:");
+  const users = (
+    await Promise.all(keys.map((k) => kvGetJson<StoredUser>(ns, k)))
+  ).filter((u): u is StoredUser => Boolean(u));
+  const sent = new Set<string>();
+  for (const a of users.filter((u) => u.role === "gtr")) {
+    const chat = await ns.get(`tg:${a.email}`);
+    if (chat && !sent.has(chat)) {
+      sent.add(chat);
+      await tgApi("sendMessage", { chat_id: chat, text, parse_mode: "HTML" });
+    }
+  }
+  const channel = process.env.TELEGRAM_CHAT_ID;
+  if (channel && !sent.has(channel))
+    await tgApi("sendMessage", { chat_id: channel, text, parse_mode: "HTML" });
+}
 
 // ---------- пользователи ----------
 
@@ -143,6 +163,20 @@ export const pullSharedFn = createServerFn({ method: "GET" }).handler(async () =
   const ns = await getKvNs();
   if (!u || !ns) return null;
 
+  // Команда: тимлид видит события участников, участники — события тимлида
+  const owners = new Set<string>([u.email]);
+  if (u.teamOf) owners.add(u.teamOf);
+  if (u.role !== "gtr") {
+    const userKeys = await kvListAll(ns, "user:");
+    const users = (
+      await Promise.all(userKeys.map((k) => kvGetJson<StoredUser>(ns, k)))
+    ).filter((x): x is StoredUser => Boolean(x));
+    for (const m of users) {
+      if (m.teamOf && (m.teamOf === u.email || (u.teamOf && m.teamOf === u.teamOf)))
+        owners.add(m.email);
+    }
+  }
+
   const [draftKeys, reqKeys] = await Promise.all([
     kvListAll(ns, "draft:"),
     kvListAll(ns, "req:"),
@@ -152,10 +186,19 @@ export const pullSharedFn = createServerFn({ method: "GET" }).handler(async () =
     Promise.all(reqKeys.map((k) => kvGetJson<OrgRequest>(ns, k))),
   ]);
   return {
-    drafts: drafts.filter((d): d is EventDraft => Boolean(d)).filter((d) => canSeeDraft(u, d)),
+    drafts: drafts
+      .filter((d): d is EventDraft => Boolean(d))
+      .filter((d) =>
+        u.role === "gtr"
+          ? true
+          : d.owner
+            ? owners.has(d.owner)
+            : Boolean(u.venueId) && d.venueId === u.venueId,
+      ),
     requests: requests
       .filter((r): r is OrgRequest => Boolean(r))
       .filter((r) => canSeeRequest(u, r)),
+    owners: [...owners],
   };
 });
 
@@ -170,6 +213,23 @@ export const pushDraftFn = createServerFn({ method: "POST" })
     const target = existing ?? data;
     if (!canSeeDraft(u, target)) return { ok: false as const };
     await ns.put(`draft:${data.id}`, JSON.stringify(data));
+    // Новое событие организатора — оповещение GTR-админам
+    if (!existing && u.role === "organizer") {
+      const { V } = await import("./data/app-data");
+      notifyAdminsTg(
+        ns,
+        [
+          "<b>GTR EVENT · новое событие организатора</b>",
+          "",
+          `<b>${tgEsc(data.title || data.format || "Событие")}</b> · ${tgEsc(data.id)}`,
+          `Площадка: ${tgEsc(V(data.venueId).name ?? data.venueId)}`,
+          data.date ? `Когда: ${tgEsc(data.date)}` : "",
+          `Создал: ${tgEsc(u.name)} (${tgEsc(u.email)})`,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+      ).catch(() => {});
+    }
     return { ok: true as const };
   });
 

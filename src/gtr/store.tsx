@@ -130,6 +130,8 @@ const Ctx = createContext<GtrStore | null>(null);
 
 export function GtrProvider({ user, children }: { user: SessionUser; children: ReactNode }) {
   const [shared, setShared] = useState<Shared>(defaultShared);
+  // Команда: чьи события видит кабинет (тимлид + участники, с сервера)
+  const [teamOwners, setTeamOwners] = useState<string[]>([]);
   const [peers, setPeers] = useState<Peer[]>([]);
   const chRef = useRef<BroadcastChannel | null>(null);
   const tabId = useRef(`${Math.random().toString(36).slice(2, 9)}`);
@@ -151,6 +153,8 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
           pullOffersFn().catch(() => null),
         ]);
         if (!remote || !alive) return;
+        if (Array.isArray((remote as { owners?: string[] }).owners))
+          setTeamOwners((remote as { owners: string[] }).owners);
         setShared((cur) => {
           const byId = new Map(cur.drafts.map((d) => [d.id, d]));
           for (const rd of remote.drafts) {
@@ -260,7 +264,11 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
         user.role === "gtr"
           ? shared.drafts
           : shared.drafts.filter((d) =>
-              d.owner ? d.owner === user.email : d.venueId === user.venueId,
+              d.owner
+                ? d.owner === user.email ||
+                  d.owner === user.teamOf ||
+                  teamOwners.includes(d.owner)
+                : Boolean(user.venueId) && d.venueId === user.venueId,
             ),
       draftOf: (id) => shared.drafts.find((d) => d.id === id),
       draftsOf: (venueId) =>
@@ -327,7 +335,7 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
         if (changed) pushRequestFn({ data: changed }).catch(() => {});
       },
     }),
-    [user, shared, peers, commit],
+    [user, shared, peers, teamOwners, commit],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

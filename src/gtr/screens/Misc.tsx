@@ -2,7 +2,15 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { can, PERMISSIONS } from "../auth";
-import { deleteUserFn, inviteUserFn, listManagersFn, listUsersFn, type PublicUser } from "../kv-api";
+import {
+  deleteUserFn,
+  inviteUserFn,
+  listManagersFn,
+  listUsersFn,
+  tgLinkFn,
+  tgStatusFn,
+  type PublicUser,
+} from "../kv-api";
 import { notifyAssignFn } from "../notify";
 import {
   AMBER,
@@ -1299,6 +1307,7 @@ export function AccessScreen() {
           </div>
         ))}
       </Card>
+      <TgPanel />
       {user.role === "gtr" ? <TeamPanel /> : null}
       <div
         className="gtr-mono"
@@ -1312,6 +1321,55 @@ export function AccessScreen() {
         {user.roleLabel}.
       </div>
     </div>
+  );
+}
+
+// ---------- привязка Telegram (все роли) ----------
+// Предложения, заявки и /guest работают в личном чате с ботом GTR.
+function TgPanel() {
+  const [tg, setTg] = useState<{ configured: boolean; linked: boolean; bot: string } | null>(null);
+  const [link, setLink] = useState("");
+  const [msg, setMsg] = useState("");
+  useEffect(() => {
+    tgStatusFn().then(setTg).catch(() => {});
+  }, []);
+  const getLink = async () => {
+    setMsg("");
+    try {
+      const r = await tgLinkFn();
+      if (r.ok) setLink(r.link);
+      else setMsg(r.error ?? "Не получилось");
+    } catch {
+      setMsg("Сервер недоступен");
+    }
+  };
+  return (
+    <Card style={{ marginTop: 16, padding: "14px 20px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+      <Eyebrow>TELEGRAM</Eyebrow>
+      {tg?.linked ? (
+        <Chip color={GREEN}>ПРИВЯЗАН · УВЕДОМЛЕНИЯ ИДУТ В ЧАТ</Chip>
+      ) : tg?.bot ? (
+        <>
+          <span style={{ font: "500 11.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+            Бот @{tg.bot}: предложения, заявки и команда /guest — в личном чате.
+          </span>
+          {link ? (
+            <a className="gtr-btn gtr-btn-red" style={{ textDecoration: "none" }} href={link} target="_blank" rel="noreferrer">
+              Открыть @{tg.bot} и привязать ↗
+            </a>
+          ) : (
+            <button className="gtr-btn" onClick={getLink}>
+              Привязать Telegram
+            </button>
+          )}
+        </>
+      ) : (
+        <span style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+          {tg ? "Бот не активирован." : "Проверяем статус…"}
+        </span>
+      )}
+      {msg ? <span style={{ font: "500 10.5px/1.4 'Golos Text',sans-serif", color: "#FF5B4D" }}>{msg}</span> : null}
+    </Card>
   );
 }
 

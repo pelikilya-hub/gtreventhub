@@ -22,6 +22,7 @@ import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow, Icon, Ring } from "../ui";
 import { ImpulseArt } from "../impulse";
 import { createInviteFn, decideOfferFn, tgLinkFn, tgStatusFn } from "../kv-api";
+import { BossCabinet } from "./Boss";
 import { OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
 
 type Action = [string, string, string, ScreenId, string, string];
@@ -81,6 +82,8 @@ export function DashScreen() {
   if (user.role === "sales" || user.role === "organizer") return <SalesCabinet />;
   // Кабинет артиста: предложения, подтверждённые выступления, Telegram
   if (user.role === "artist") return <ArtistCabinet />;
+  // BOSS: дашборд контроля всей операции
+  if (user.boss) return <BossCabinet />;
 
   let d: DashData;
   if (user.role === "gtr") {

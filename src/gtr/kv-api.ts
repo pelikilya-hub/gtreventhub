@@ -618,3 +618,181 @@ export const joinFn = createServerFn({ method: "POST" })
     await issueSession(sessionUser);
     return { ok: true as const, user: sessionUser };
   });
+
+// ---------- задачи команды (BOSS ставит, команда выполняет) ----------
+
+export type GtrTask = {
+  id: string;
+  title: string;
+  note?: string;
+  assignee: string; // email исполнителя
+  assigneeName: string;
+  due?: string; // ISO-дата дедлайна
+  status: "new" | "doing" | "done";
+  by: string; // кто поставил
+  byName: string;
+  ts: number;
+  updated: number;
+};
+
+export const pullTasksFn = createServerFn({ method: "GET" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || !ns) return { tasks: [] as GtrTask[] };
+  const keys = await kvListAll(ns, "task:");
+  const tasks = (await Promise.all(keys.map((k) => kvGetJson<GtrTask>(ns, k)))).filter(
+    (t): t is GtrTask => Boolean(t),
+  );
+  const mine = u.role === "gtr" ? tasks : tasks.filter((t) => t.assignee === u.email || t.by === u.email);
+  return { tasks: mine.sort((a, b) => b.updated - a.updated) };
+});
+
+export const pushTaskFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { task: GtrTask }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const };
+    const prev = await kvGetJson<GtrTask>(ns, `task:${data.task.id}`);
+    // Ставить и переназначать может GTR/BOSS; исполнитель — двигать статус своей
+    const mineToMove = prev && prev.assignee === u.email;
+    if (u.role !== "gtr" && !mineToMove) return { ok: false as const };
+    const task: GtrTask = { ...data.task, updated: Date.now() };
+    await ns.put(`task:${task.id}`, JSON.stringify(task));
+
+    // Уведомления: новое назначение — исполнителю; «готово» — постановщику
+    const assigneeChanged = !prev || prev.assignee !== task.assignee;
+    if (assigneeChanged && task.assignee) {
+      const chat = await ns.get(`tg:${task.assignee}`);
+      if (chat)
+        tgApi("sendMessage", {
+          chat_id: chat,
+          text: [
+            "📌 <b>Новая задача от " + tgEsc(task.byName) + "</b>",
+            "",
+            `<b>${tgEsc(task.title)}</b>`,
+            task.note ? tgEsc(task.note) : "",
+            task.due ? `Срок: ${tgEsc(task.due)}` : "",
+          ]
+            .filter(Boolean)
+            .join("\n"),
+          parse_mode: "HTML",
+        }).catch(() => {});
+      const { sendPushTo } = await import("./push");
+      sendPushTo(ns, task.assignee, {
+        title: `Задача от ${task.byName}`,
+        body: task.title,
+        url: "/gtr/dash",
+      }).catch(() => {});
+    }
+    if (prev && prev.status !== "done" && task.status === "done") {
+      const chat = await ns.get(`tg:${task.by}`);
+      if (chat)
+        tgApi("sendMessage", {
+          chat_id: chat,
+          text: `✅ <b>${tgEsc(task.assigneeName)}</b> закрыл(а) задачу: <b>${tgEsc(task.title)}</b>`,
+          parse_mode: "HTML",
+        }).catch(() => {});
+      const { sendPushTo } = await import("./push");
+      sendPushTo(ns, task.by, {
+        title: "Задача выполнена",
+        body: `${task.assigneeName}: ${task.title}`,
+        url: "/gtr/dash",
+      }).catch(() => {});
+    }
+    return { ok: true as const };
+  });
+
+export const deleteTaskFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns || u.role !== "gtr") return { ok: false as const };
+    await ns.delete(`task:${data.id}`);
+    return { ok: true as const };
+  });
+
+// ---------- Web Push: подписки и лента ----------
+
+export const pushSubscribeFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { sub: { endpoint: string; keys?: { p256dh?: string; auth?: string } } }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns || !data.sub?.endpoint) return { ok: false as const };
+    const key = `push:${u.email}`;
+    const subs = (await kvGetJson<{ endpoint: string }[]>(ns, key)) ?? [];
+    if (!subs.some((s) => s.endpoint === data.sub.endpoint)) {
+      subs.push(data.sub);
+      await ns.put(key, JSON.stringify(subs.slice(-5))); // максимум 5 устройств
+    }
+    return { ok: true as const, devices: Math.min(subs.length, 5) };
+  });
+
+export const pushStatusFn = createServerFn({ method: "GET" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || !ns) return { devices: 0 };
+  const subs = (await kvGetJson<unknown[]>(ns, `push:${u.email}`)) ?? [];
+  return { devices: subs.length };
+});
+
+export const pushTestFn = createServerFn({ method: "POST" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || !ns) return { ok: false as const, reason: "нет сессии" };
+  const { sendPushTo, pushConfigured } = await import("./push");
+  if (!pushConfigured()) return { ok: false as const, reason: "VAPID не настроен" };
+  const r = await sendPushTo(ns, u.email, {
+    title: "GTR EVENT · проверка",
+    body: "Push работает. Так придут заявки, задачи и события.",
+    url: "/gtr/dash",
+  });
+  return r.ok
+    ? { ok: true as const, sent: r.sent ?? 0 }
+    : { ok: false as const, reason: r.reason ?? "нет подписок" };
+});
+
+// ---------- рассылка (центр связи BOSS) ----------
+
+export const broadcastFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { text: string; audience: "all" | "team" | "artists" | "organizers" }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns || u.role !== "gtr") return { ok: false as const, sent: 0 };
+    const text = data.text.trim().slice(0, 1500);
+    if (!text) return { ok: false as const, sent: 0 };
+    const keys = await kvListAll(ns, "user:");
+    const users = (await Promise.all(keys.map((k) => kvGetJson<StoredUser>(ns, k)))).filter(
+      (x): x is StoredUser => Boolean(x),
+    );
+    const fit = (r: RoleId) =>
+      data.audience === "all"
+        ? true
+        : data.audience === "artists"
+          ? r === "artist"
+          : data.audience === "organizers"
+            ? r === "organizer"
+            : r === "sales" || r === "gtr" || r === "pr" || r === "owner";
+    const seen = new Set<string>();
+    let sent = 0;
+    for (const p of users.filter((x) => fit(x.role) && x.email !== u.email)) {
+      const chat = await ns.get(`tg:${p.email}`);
+      if (chat && !seen.has(chat)) {
+        seen.add(chat);
+        const r = await tgApi("sendMessage", {
+          chat_id: chat,
+          text: `📣 <b>${tgEsc(u.name)}</b>:\n\n${tgEsc(text)}`,
+          parse_mode: "HTML",
+        });
+        if (r.ok) sent++;
+      }
+      const { sendPushTo } = await import("./push");
+      sendPushTo(ns, p.email, { title: `📣 ${u.name}`, body: text.slice(0, 140), url: "/gtr/dash" }).catch(
+        () => {},
+      );
+    }
+    return { ok: true as const, sent };
+  });

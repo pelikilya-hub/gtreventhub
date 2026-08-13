@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GtrRouteRouteImport } from './routes/gtr/route'
+import { Route as ApiPushRouteImport } from './routes/api.push'
 import { Route as ApiTgRouteImport } from './routes/api.tg'
 import { Route as GtrIndexRouteImport } from './routes/gtr/index'
 import { Route as GtrScreenRouteImport } from './routes/gtr/$screen'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const GtrRouteRoute = GtrRouteRouteImport.update({
   id: '/gtr',
   path: '/gtr',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushRoute = ApiPushRouteImport.update({
+  id: '/api/push',
+  path: '/api/push',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTgRoute = ApiTgRouteImport.update({
@@ -62,6 +68,7 @@ const GtrOrganizerRoute = GtrOrganizerRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
+  '/api/push': typeof ApiPushRoute
   '/api/tg': typeof ApiTgRoute
   '/gtr/$screen': typeof GtrScreenRoute
   '/gtr/join': typeof GtrJoinRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/push': typeof ApiPushRoute
   '/api/tg': typeof ApiTgRoute
   '/gtr/$screen': typeof GtrScreenRoute
   '/gtr/join': typeof GtrJoinRoute
@@ -82,6 +90,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
+  '/api/push': typeof ApiPushRoute
   '/api/tg': typeof ApiTgRoute
   '/gtr/$screen': typeof GtrScreenRoute
   '/gtr/join': typeof GtrJoinRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/gtr'
+    | '/api/push'
     | '/api/tg'
     | '/gtr/$screen'
     | '/gtr/join'
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/api/push'
     | '/api/tg'
     | '/gtr/$screen'
     | '/gtr/join'
@@ -113,6 +124,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/gtr'
+    | '/api/push'
     | '/api/tg'
     | '/gtr/$screen'
     | '/gtr/join'
@@ -124,6 +136,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GtrRouteRoute: typeof GtrRouteRouteWithChildren
+  ApiPushRoute: typeof ApiPushRoute
   ApiTgRoute: typeof ApiTgRoute
 }
 
@@ -141,6 +154,13 @@ declare module '@tanstack/react-router' {
       path: '/gtr'
       fullPath: '/gtr'
       preLoaderRoute: typeof GtrRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push': {
+      id: '/api/push'
+      path: '/api/push'
+      fullPath: '/api/push'
+      preLoaderRoute: typeof ApiPushRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/tg': {
@@ -211,6 +231,7 @@ const GtrRouteRouteWithChildren = GtrRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GtrRouteRoute: GtrRouteRouteWithChildren,
+  ApiPushRoute: ApiPushRoute,
   ApiTgRoute: ApiTgRoute,
 }
 export const routeTree = rootRouteImport

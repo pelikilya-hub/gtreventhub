@@ -118,8 +118,18 @@ td{padding:9px 8px;border-bottom:1px solid #F0F0F0;vertical-align:top}
 footer{margin-top:26px;padding-top:11px;border-top:1px solid #E3E3E3;
   font-size:9.5px;line-height:1.6;color:#777}
 @page{size:A4;margin:14mm}
-@media print{body{padding:0}}
+@media print{body{padding:0}.appbar{display:none!important}}
+.appbar{position:fixed;top:0;left:0;right:0;z-index:99;display:flex;gap:8px;align-items:center;
+  padding:9px 14px;background:#0B0B0D;box-shadow:0 2px 12px rgba(0,0,0,.35)}
+.appbar button{font:600 11px/1 'Golos Text',system-ui,sans-serif;letter-spacing:.03em;
+  padding:9px 14px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;cursor:pointer}
+.appbar .go{background:#E5231B;border-color:#E5231B}
+body{padding-top:76px}
 </style></head><body>
+<div class="appbar">
+  <button onclick="window.close();setTimeout(function(){if(!window.closed){if(history.length>1)history.back();else location.href='/gtr/dash'}},200)">← В приложение</button>
+  <button class="go" onclick="window.print()">Скачать PDF</button>
+</div>
 <header>
   <div>
     <img src="/brand/GTR_horizontal_light.svg" alt="GTR" style="height:40px;width:auto">

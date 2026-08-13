@@ -17,6 +17,7 @@ export type SessionUser = {
   venueId: string; // пусто для GTR-админа (кросс-сетевой доступ)
   artistId?: string; // роль artist: карточка каталога (MC-…)
   teamOf?: string; // email тимлида-организатора, чью команду пополнил
+  boss?: boolean; // BOSS: дашборд контроля поверх прав GTR-админа
   initials: string;
 };
 
@@ -200,6 +201,15 @@ export const loginFn = createServerFn({ method: "POST" })
 // функциях. Только сервер: в клиентском бандле вызов бросит ошибку.
 export const currentUser = createServerOnlyFn(
   async (): Promise<SessionUser | null> => readToken(getCookie(COOKIE)),
+);
+
+// Для файловых роутов (вебхуки, push-лента), где нет контекста server-fn:
+// достаём и проверяем сессию прямо из заголовка Cookie
+export const userFromCookieHeader = createServerOnlyFn(
+  async (cookieHeader: string | null): Promise<SessionUser | null> => {
+    const m = (cookieHeader ?? "").match(new RegExp(`(?:^|;\\s*)${COOKIE}=([^;]+)`));
+    return m ? readToken(decodeURIComponent(m[1])) : null;
+  },
 );
 
 export const logoutFn = createServerFn({ method: "POST" }).handler(async () => {

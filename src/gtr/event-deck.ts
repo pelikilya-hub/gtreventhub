@@ -186,7 +186,17 @@ h2{font:700 34px/0.95 'Oswald',sans-serif;text-transform:uppercase;
 .final .brand{height:22mm;margin-bottom:10mm}
 .contact{font:500 13px/2 'JetBrains Mono',monospace;color:#c9cbd0}
 .contact b{color:#FF3427}
+.appbar{position:fixed;top:0;left:0;right:0;z-index:99;display:flex;gap:8px;align-items:center;
+  padding:9px 14px;background:#0B0B0D;box-shadow:0 2px 12px rgba(0,0,0,.6)}
+.appbar button{font:600 11px/1 'Golos Text',system-ui,sans-serif;letter-spacing:.03em;
+  padding:9px 14px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;cursor:pointer}
+.appbar .go{background:#E5231B;border-color:#E5231B}
+@media print{.appbar{display:none!important}}
 </style></head><body>
+<div class="appbar">
+  <button onclick="window.close();setTimeout(function(){if(!window.closed){if(history.length>1)history.back();else location.href='/gtr/dash'}},200)">← В приложение</button>
+  <button class="go" onclick="window.print()">Скачать PDF</button>
+</div>
 
 <section class="slide cover">
   <img class="art" src="${coverArt}" alt="">

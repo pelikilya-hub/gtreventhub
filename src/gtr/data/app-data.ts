@@ -1876,7 +1876,7 @@ export type VenueRate = {
 
 export const RATE_LABEL: Record<RateKind, string> = {
   published: "Опубликованная ставка",
-  quoted: "Подтверждено площадкой",
+  quoted: "Подтверждённая цена",
   "gtr-estimate": "Ориентир GTR",
   inquiry: "По запросу",
 };

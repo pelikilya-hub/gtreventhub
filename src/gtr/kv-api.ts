@@ -193,6 +193,43 @@ export const pushRequestFn = createServerFn({ method: "POST" })
       if (!u || !canSeeRequest(u, existing)) return { ok: false as const };
     }
     await ns.put(`req:${data.id}`, JSON.stringify(data));
+
+    // Новая заявка: личные уведомления сотрудникам площадки (и в общий канал)
+    if (!existing && data.status === "new") {
+      const text = [
+        "<b>GTR EVENT · новая заявка</b>",
+        "",
+        `<b>${tgEsc(data.title || "Заявка")}</b> · ${tgEsc(data.venueName)}`,
+        `${tgEsc(data.date || "дата не указана")} · ${tgEsc(data.guests || "—")} гостей`,
+        `<b>Смета:</b> ${tgEsc(String(data.quoteTotal))} THB · орг.: ${tgEsc(data.organizerName || "—")}`,
+      ].join("\n");
+      const markup = {
+        inline_keyboard: [
+          [
+            { text: "Взять на себя", callback_data: `req:${data.id}:take` },
+            { text: "✅ Принять", callback_data: `req:${data.id}:acc` },
+          ],
+        ],
+      };
+      const keys = await kvListAll(ns, "user:");
+      const users = (
+        await Promise.all(keys.map((k) => kvGetJson<StoredUser>(ns, k)))
+      ).filter((u): u is StoredUser => Boolean(u));
+      const staff = users.filter(
+        (u) => u.role !== "artist" && (u.role === "gtr" || u.venueId === data.venueId),
+      );
+      const sent = new Set<string>();
+      for (const st of staff) {
+        const chat = await ns.get(`tg:${st.email}`);
+        if (chat && !sent.has(chat)) {
+          sent.add(chat);
+          await tgApi("sendMessage", { chat_id: chat, text, parse_mode: "HTML", reply_markup: markup });
+        }
+      }
+      const channel = process.env.TELEGRAM_CHAT_ID;
+      if (channel && !sent.has(channel))
+        await tgApi("sendMessage", { chat_id: channel, text, parse_mode: "HTML" });
+    }
     return { ok: true as const };
   });
 

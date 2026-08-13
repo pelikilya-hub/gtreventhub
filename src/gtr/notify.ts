@@ -10,6 +10,7 @@
 // Если переменных нет или Telegram недоступен, заявка всё равно сохраняется —
 // уведомление это доставка, а не условие приёма заявки.
 import { createServerFn } from "@tanstack/react-start";
+import { getKvNs } from "./kv-ns";
 
 export type NotifyResult =
   | { ok: true }
@@ -123,7 +124,10 @@ export const notifyAssignFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<NotifyResult> => {
     const token = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
+    // приоритет — личный чат назначенного менеджера, фолбэк — общий канал
+    const ns = await getKvNs();
+    const personal = ns ? await ns.get(`tg:${data.assigneeEmail}`) : null;
+    const chatId = personal || process.env.TELEGRAM_CHAT_ID;
     if (!token || !chatId)
       return { ok: false, reason: "not-configured", detail: "Telegram не настроен" };
 

@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "events.gtr.app",
+    "sha256_cert_fingerprints": ["93:11:3B:EB:93:F7:06:82:14:6E:5E:61:2C:48:79:B1:7C:BF:BD:33:6E:6A:B3:A2:83:75:E0:A5:D8:E8:A9:2A"]
+  }
+}]

@@ -21,7 +21,7 @@ import {
   V,
 } from "../data/app-data";
 import { useGtr } from "../store";
-import { Card, Chip, Dot, Eyebrow } from "../ui";
+import { Card, Chip, Dot, Eyebrow, tint } from "../ui";
 
 const Title = ({ children }: { children: string }) => (
   <h1 className="gtr-oswald gtr-h1" style={{ marginBottom: 16 }}>
@@ -51,8 +51,14 @@ export function InquiriesScreen() {
   const rows = inqOf(vid);
   const [replied, setReplied] = useState<number[]>([]);
 
-  // Входящие запросы организаторов (собраны на витрине, падают со сметой)
-  const incoming = shared.requests.filter((r) => r.venueId === vid).sort((a, b) => b.ts - a.ts);
+  // Входящие запросы организаторов (собраны на витрине, падают со сметой).
+  // GTR-админ видит все по сети, роль площадки — свои и назначенные на себя.
+  const incoming = (
+    user.role === "gtr"
+      ? shared.requests
+      : shared.requests.filter((r) => r.venueId === vid || r.assignee === user.email)
+  ).sort((a, b) => b.ts - a.ts);
+  const [view, setView] = useState<"kanban" | "list">("kanban");
 
   // Принять запрос: помечаем и переводим в «Утверждено» именно то событие, из
   // которого заявка собрана. У заявок старого формата draftId нет — тогда
@@ -60,7 +66,7 @@ export function InquiriesScreen() {
   const acceptRequest = (id: string, name: string) => {
     updateRequest(id, { status: "accepted" });
     const req = shared.requests.find((r) => r.id === id);
-    const targetId = req?.draftId ?? draftsOf(vid)[0]?.id;
+    const targetId = req?.draftId ?? draftsOf(req?.venueId || vid)[0]?.id;
     if (!targetId) return;
     setDraftGraph(targetId, (gr) => ({
       ...gr,
@@ -118,10 +124,48 @@ export function InquiriesScreen() {
             +{incoming.length} ЧЕРЕЗ GTR
           </Chip>
         ) : null}
+        <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+          {(
+            [
+              ["kanban", "Канбан"],
+              ["list", "Список"],
+            ] as const
+          ).map(([v, label]) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              style={{
+                borderRadius: 0,
+                padding: "7px 12px",
+                cursor: "pointer",
+                font: `${view === v ? 600 : 500} 10.5px/1 'JetBrains Mono',monospace`,
+                letterSpacing: ".07em",
+                textTransform: "uppercase",
+                border: `1px solid ${view === v ? "#E5231B" : "rgba(255,255,255,.14)"}`,
+                background: view === v ? "rgba(229,35,27,.14)" : "transparent",
+                color: view === v ? "#fff" : "rgba(255,255,255,.55)",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </span>
       </div>
+
+      {view === "kanban" ? (
+        <RequestsKanban
+          requests={incoming}
+          isAdmin={user.role === "gtr"}
+          onMove={(r, status) => {
+            if (status === r.status) return;
+            if (status === "accepted") acceptRequest(r.id, r.title);
+            else updateRequest(r.id, { status });
+          }}
+        />
+      ) : null}
       <div style={{ display: "grid", gridTemplateColumns: "1fr minmax(270px,320px)", gap: 16 }}>
         <div style={{ display: "grid", gap: 16, alignContent: "start" }}>
-          {incoming.length ? (
+          {view === "list" && incoming.length ? (
             <Card style={{ borderColor: "rgba(46,204,113,.3)" }}>
               <div
                 className="gtr-oswald"
@@ -349,6 +393,236 @@ export function InquiriesScreen() {
 }
 
 // ---------- залы и прайс ----------
+// ---------- канбан заявок ----------
+// Четыре стадии, перетаскивание карточек мышью + стрелки для тач-экранов.
+// Перенос в «Приняты» дополнительно утверждает событие заявки.
+const KANBAN_COLS: [import("../data/app-data").OrgRequestStatus, string, string][] = [
+  ["new", "Новые", "#2ECC71"],
+  ["seen", "В работе", AMBER],
+  ["accepted", "Приняты", GREEN],
+  ["declined", "Отклонены", RED],
+];
+
+function RequestsKanban({
+  requests,
+  isAdmin,
+  onMove,
+}: {
+  requests: import("../data/app-data").OrgRequest[];
+  isAdmin: boolean;
+  onMove: (
+    r: import("../data/app-data").OrgRequest,
+    status: import("../data/app-data").OrgRequestStatus,
+  ) => void;
+}) {
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overCol, setOverCol] = useState<string | null>(null);
+
+  if (!requests.length)
+    return (
+      <Card style={{ padding: "26px 24px", marginBottom: 16, textAlign: "center" }}>
+        <div style={{ font: "500 12.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+          Заявок пока нет. Они появляются, когда организатор отправляет запрос с витрины —
+          и сразу встают в колонку «Новые».
+        </div>
+      </Card>
+    );
+
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(4, minmax(230px, 1fr))",
+        gap: 12,
+        marginBottom: 18,
+        overflowX: "auto",
+        paddingBottom: 4,
+      }}
+    >
+      {KANBAN_COLS.map(([st, label, color]) => {
+        const cards = requests.filter((r) => r.status === st);
+        const hot = overCol === st && dragId;
+        return (
+          <div
+            key={st}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setOverCol(st);
+            }}
+            onDragLeave={() => setOverCol((c) => (c === st ? null : c))}
+            onDrop={(e) => {
+              e.preventDefault();
+              const r = requests.find((x) => x.id === dragId);
+              if (r) onMove(r, st);
+              setDragId(null);
+              setOverCol(null);
+            }}
+            style={{
+              display: "grid",
+              gap: 8,
+              alignContent: "start",
+              padding: 10,
+              minHeight: 160,
+              background: hot ? tint(color, 0.08) : "rgba(255,255,255,.02)",
+              border: `1px ${hot ? "dashed" : "solid"} ${hot ? color : "rgba(255,255,255,.07)"}`,
+              borderTop: `2px solid ${color}`,
+              transition: "background .15s, border-color .15s",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Dot color={color} />
+              <span
+                className="gtr-oswald"
+                style={{
+                  font: "600 12px/1 Oswald,sans-serif",
+                  letterSpacing: ".08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {label}
+              </span>
+              <span
+                className="gtr-mono"
+                style={{ marginLeft: "auto", font: "700 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+              >
+                {cards.length}
+              </span>
+            </div>
+            {cards.map((r) => (
+              <KanbanCard
+                key={r.id}
+                r={r}
+                col={st}
+                color={color}
+                isAdmin={isAdmin}
+                dragging={dragId === r.id}
+                onDragStart={() => setDragId(r.id)}
+                onDragEnd={() => {
+                  setDragId(null);
+                  setOverCol(null);
+                }}
+                onMove={onMove}
+              />
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function KanbanCard({
+  r,
+  col,
+  color,
+  isAdmin,
+  dragging,
+  onDragStart,
+  onDragEnd,
+  onMove,
+}: {
+  r: import("../data/app-data").OrgRequest;
+  col: import("../data/app-data").OrgRequestStatus;
+  color: string;
+  isAdmin: boolean;
+  dragging: boolean;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  onMove: (
+    r: import("../data/app-data").OrgRequest,
+    status: import("../data/app-data").OrgRequestStatus,
+  ) => void;
+}) {
+  const idx = KANBAN_COLS.findIndex(([sName]) => sName === col);
+  const prev = KANBAN_COLS[idx - 1]?.[0];
+  const next = KANBAN_COLS[idx + 1]?.[0];
+  return (
+    <div
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = "move";
+        onDragStart();
+      }}
+      onDragEnd={onDragEnd}
+      style={{
+        display: "grid",
+        gap: 7,
+        padding: "10px 11px",
+        cursor: "grab",
+        background: "var(--gtr-card2)",
+        border: "1px solid rgba(255,255,255,.09)",
+        borderLeft: `2px solid ${color}`,
+        opacity: dragging ? 0.4 : 1,
+        clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)",
+      }}
+    >
+      <div style={{ font: "600 12px/1.35 'Golos Text',sans-serif" }}>{r.title || "Заявка"}</div>
+      <div
+        className="gtr-mono"
+        style={{ font: "500 9px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+      >
+        {isAdmin ? `${r.venueName} · ` : ""}
+        {r.organizerName || "организатор"}
+        {r.date ? ` · ${r.date}` : ""}
+        {r.guests ? ` · ${r.guests} гостей` : ""}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        <span
+          className="gtr-mono"
+          style={{ font: "700 12px/1 'JetBrains Mono',monospace", color: "#fff" }}
+        >
+          {fmtThb(r.quoteTotal)}
+        </span>
+        <span
+          className="gtr-mono"
+          style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+        >
+          ком. {fmtThb(r.quoteCommission)}
+        </span>
+        {r.assignee ? (
+          <span
+            className="gtr-mono"
+            style={{
+              marginLeft: "auto",
+              font: "600 8.5px/1 'JetBrains Mono',monospace",
+              color: "#7B9EFF",
+              border: "1px solid rgba(123,158,255,.4)",
+              padding: "3px 6px",
+            }}
+          >
+            {(r.assigneeName || r.assignee).toUpperCase()}
+          </span>
+        ) : null}
+      </div>
+      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+        {prev ? (
+          <button
+            className="gtr-btn"
+            style={{ padding: "4px 9px", fontSize: 11 }}
+            title={`В «${KANBAN_COLS[idx - 1][1]}»`}
+            onClick={() => onMove(r, prev)}
+          >
+            ←
+          </button>
+        ) : null}
+        {next ? (
+          <button
+            className="gtr-btn"
+            style={{ padding: "4px 9px", fontSize: 11 }}
+            title={`В «${KANBAN_COLS[idx + 1][1]}»`}
+            onClick={() => onMove(r, next)}
+          >
+            →
+          </button>
+        ) : null}
+        <span style={{ marginLeft: "auto" }}>
+          <AssignControl r={r} />
+        </span>
+      </div>
+    </div>
+  );
+}
+
 // Кто ведёт заявку: менеджер берёт на себя, GTR-админ может назначить любого
 // из приглашённых. Назначение уходит уведомлением в Telegram-канал GTR.
 function AssignControl({ r }: { r: import("../data/app-data").OrgRequest }) {

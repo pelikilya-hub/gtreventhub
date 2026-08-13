@@ -550,6 +550,20 @@ function ArtistCard({ a, onBack }: { a: Artist; onBack: () => void }) {
             >
               {a.role}
             </div>
+            {a.bio ? (
+              <div
+                style={{
+                  marginTop: 8,
+                  maxWidth: 560,
+                  font: "400 12.5px/1.6 'Golos Text',sans-serif",
+                  color: "rgba(255,255,255,.68)",
+                  borderLeft: "2px solid rgba(229,35,27,.55)",
+                  paddingLeft: 12,
+                }}
+              >
+                {a.bio}
+              </div>
+            ) : null}
             {a.rel ? (
               <div
                 className="gtr-mono"

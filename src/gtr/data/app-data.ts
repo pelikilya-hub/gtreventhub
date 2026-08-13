@@ -1780,6 +1780,7 @@ export type Artist = {
   verified: string;
   group: string;
   styles: string[];
+  bio?: string; // короткое описание для профиля (RU)
   tier: string;
   rider: string;
   sp: string;

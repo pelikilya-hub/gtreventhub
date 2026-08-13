@@ -37,6 +37,9 @@ const ArtistsScreen = lazy(() =>
 const VendorsScreen = lazy(() =>
   import("./screens/Vendors").then((m) => ({ default: m.VendorsScreen })),
 );
+const AfishaGenScreen = lazy(() =>
+  import("./screens/AfishaGen").then((m) => ({ default: m.AfishaGenScreen })),
+);
 
 export type GtrSearch = { vid?: string; artist?: string; draft?: string };
 
@@ -120,12 +123,15 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
             // во всех модулях; экраны конкретной площадки живут в паспорте
             NAV_VENUE.filter(([id]) => !["venue", "spaces"].includes(id))
           : NAV_VENUE;
-  const navNet =
+  // Генератор афиш — только BOSS и организаторы/продюсер
+  const canAfishaGen = Boolean(user.boss) || user.role === "organizer";
+  const navNet = (
     user.role === "gtr"
       ? NAV_NET
       : user.role === "artist"
         ? NAV_NET.filter(([id]) => id === "artists")
-        : NAV_NET.filter(([id]) => id !== "admin");
+        : NAV_NET.filter(([id]) => id !== "admin")
+  ).filter(([id]) => id !== "afishagen" || canAfishaGen);
 
   const NavGroup = ({ label, items }: { label: string; items: typeof NAV_VENUE }) => (
     <div style={{ marginBottom: 18 }}>
@@ -372,6 +378,8 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
       return <AccessScreen />;
     case "contacts":
       return <ContactsScreen />;
+    case "afishagen":
+      return <AfishaGenScreen />;
     case "admin":
       return <AdminScreen />;
     default:

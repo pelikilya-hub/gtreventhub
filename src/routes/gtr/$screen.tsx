@@ -19,6 +19,7 @@ const SCREENS: ScreenId[] = [
   "venueCard",
   "access",
   "contacts",
+  "afishagen",
   "admin",
 ];
 

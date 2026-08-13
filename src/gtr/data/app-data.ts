@@ -146,6 +146,7 @@ export type ScreenId =
   | "venueCard"
   | "access"
   | "contacts"
+  | "afishagen"
   | "admin";
 
 export const NAV_VENUE: [ScreenId, string, string, string][] = [
@@ -199,6 +200,12 @@ export const NAV_NET: [ScreenId, string, string, string][] = [
     "97",
   ],
   ["contacts", "Центр связи", "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z", ""],
+  [
+    "afishagen",
+    "Генератор афиш",
+    "M4 3h16v18H4z M4 8h16 M8 12l3 3 5-5",
+    "",
+  ],
   ["access", "Доступы и роли", "M7 11V7a5 5 0 0 1 10 0v4 M5 11h14v10H5z M12 15v3", ""],
   ["admin", "GTR-админ", "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z", ""],
 ];

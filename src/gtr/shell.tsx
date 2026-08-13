@@ -111,11 +111,15 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
   }, [sig]);
 
   const navVenue =
-    user.role === "gtr" || user.role === "artist"
+    user.role === "artist"
       ? NAV_VENUE.filter(([id]) => id === "dash")
       : user.role === "organizer"
         ? NAV_VENUE.filter(([id]) => ["dash", "events", "constructor"].includes(id))
-        : NAV_VENUE;
+        : user.role === "gtr"
+          ? // BOSS и GTR-админ: полный операционный набор — тест и работа
+            // во всех модулях; экраны конкретной площадки живут в паспорте
+            NAV_VENUE.filter(([id]) => !["venue", "spaces"].includes(id))
+          : NAV_VENUE;
   const navNet =
     user.role === "gtr"
       ? NAV_NET

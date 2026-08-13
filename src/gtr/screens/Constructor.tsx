@@ -126,6 +126,15 @@ export function ConstructorScreen({
   const g = draft?.graph ?? EMPTY_GRAPH;
 
   const [sel, setSel] = useState("n1");
+  // «Куда ставим?» — блок не добавляется, пока не выбран зал/зона
+  const [placing, setPlacing] = useState<{
+    kind: NodeKind;
+    title: string;
+    sub: string;
+    badge: string;
+    fields: [string, string][];
+    linkFromVenue: boolean;
+  } | null>(null);
   const [linkFrom, setLinkFrom] = useState<string | null>(null);
   const [openCat, setOpenCat] = useState<NodeKind | null>(null);
   const [artBase, setArtBase] = useState<ArtistBase | null>(null);
@@ -161,6 +170,60 @@ export function ConstructorScreen({
   const setStage = (next: EventStage, action: string) =>
     mutate((gr) => ({ ...gr, stage: next, log: pushLog(gr, action) }));
 
+  // Блоки, которые живут в конкретном зале или зоне: перед добавлением
+  // задаётся вопрос «Куда ставим?» — интерактив на вход, артист в зал.
+  const PLACEABLE: NodeKind[] = [
+    "artist",
+    "sound",
+    "light",
+    "decor",
+    "content",
+    "gear",
+    "interactive",
+  ];
+
+  // Фактическое добавление: с привязкой к залу (room) или к площадке
+  const performAdd = (
+    kind: NodeKind,
+    title: string,
+    sub: string,
+    badge: string,
+    fields: [string, string][],
+    linkFromVenue: boolean,
+    room?: { id: string; title: string },
+  ) => {
+    const id = `n${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+    const finalFields: [string, string][] = room
+      ? [...fields.filter((f) => f[0] !== "ЗАЛ"), ["ЗАЛ", room.title]]
+      : fields;
+    mutate((gr) => {
+      const roomNode = room ? gr.nodes.find((n) => n.id === room.id) : undefined;
+      // ставим рядом со своим залом: колонка справа, стопкой вниз
+      const siblings = roomNode
+        ? gr.links.filter((l) => l.from === roomNode.id).length
+        : 0;
+      const pos = roomNode
+        ? { x: roomNode.x + 250, y: roomNode.y + siblings * 96 }
+        : freeSlot(gr.nodes);
+      const venue = gr.nodes.find((n) => n.kind === "venue");
+      const link = roomNode
+        ? [{ from: roomNode.id, to: id }]
+        : linkFromVenue && venue
+          ? [{ from: venue.id, to: id }]
+          : [];
+      return {
+        nodes: [...gr.nodes, { id, kind, x: pos.x, y: pos.y, title, sub, badge, fields: finalFields }],
+        links: [...gr.links, ...link],
+        log: pushLog(
+          gr,
+          room ? `«${title}» → ${room.title}` : `Добавлен блок «${title}»`,
+        ),
+      };
+    });
+    setSel(id); // сразу выделяем добавленный блок — инспектор показывает его поля
+    return id;
+  };
+
   const addNode = (
     kind: NodeKind,
     title: string,
@@ -169,18 +232,17 @@ export function ConstructorScreen({
     fields: [string, string][],
     linkFromVenue = false,
   ) => {
-    const id = `n${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
-    mutate((gr) => {
-      const { x, y } = freeSlot(gr.nodes);
-      const venue = gr.nodes.find((n) => n.kind === "venue");
-      return {
-        nodes: [...gr.nodes, { id, kind, x, y, title, sub, badge, fields }],
-        links: linkFromVenue && venue ? [...gr.links, { from: venue.id, to: id }] : gr.links,
-        log: pushLog(gr, `Добавлен блок «${title}»`),
-      };
-    });
-    setSel(id); // сразу выделяем добавленный блок — инспектор показывает его поля
-    return id;
+    const rooms = g.nodes.filter((n) => n.kind === "room");
+    if (PLACEABLE.includes(kind) && rooms.length > 1) {
+      // несколько залов/зон — спрашиваем, куда ставим
+      setPlacing({ kind, title, sub, badge, fields, linkFromVenue });
+      return "";
+    }
+    // один зал — закрепляем без вопроса; нет залов — к площадке
+    const room = PLACEABLE.includes(kind) && rooms.length === 1
+      ? { id: rooms[0].id, title: rooms[0].title }
+      : undefined;
+    return performAdd(kind, title, sub, badge, fields, linkFromVenue, room);
   };
 
   // Добавить артиста из базы/лайнапа узлом графа с авто-связью к площадке.
@@ -607,6 +669,110 @@ export function ConstructorScreen({
 
   return (
     <div style={{ maxWidth: 1420, margin: "0 auto" }}>
+      {placing ? (
+        <div
+          onClick={() => setPlacing(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 90,
+            background: "rgba(10,11,13,.78)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <div
+            className="gtr-card"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(440px, 100%)",
+              padding: "20px 22px",
+              display: "grid",
+              gap: 12,
+              clipPath: "polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)",
+              border: "1px solid rgba(229,35,27,.5)",
+            }}
+          >
+            <Eyebrow>КУДА СТАВИМ</Eyebrow>
+            <div style={{ font: "600 14px/1.35 'Golos Text',sans-serif" }}>
+              «{placing.title}» — в какой зал или зону?
+            </div>
+            <div style={{ display: "grid", gap: 6 }}>
+              {g.nodes
+                .filter((n) => n.kind === "room")
+                .map((r) => (
+                  <button
+                    key={r.id}
+                    className="gtr-pal-btn"
+                    style={{ padding: "10px 12px" }}
+                    onClick={() => {
+                      performAdd(
+                        placing.kind,
+                        placing.title,
+                        placing.sub,
+                        placing.badge,
+                        placing.fields,
+                        placing.linkFromVenue,
+                        { id: r.id, title: r.title },
+                      );
+                      setPlacing(null);
+                    }}
+                  >
+                    <span style={{ flex: 1, textAlign: "left" }}>
+                      <span style={{ display: "block", fontWeight: 600, fontSize: 12.5 }}>
+                        {r.title}
+                      </span>
+                      <span
+                        style={{
+                          display: "block",
+                          marginTop: 2,
+                          font: "500 9px/1.3 'JetBrains Mono',monospace",
+                          color: "rgba(255,255,255,.4)",
+                        }}
+                      >
+                        {r.badge === "ЗОНА" ? "зона площадки" : r.sub || "зал"}
+                      </span>
+                    </span>
+                    <span
+                      className="gtr-mono"
+                      style={{
+                        flex: "none",
+                        font: "700 9px/1 'JetBrains Mono',monospace",
+                        color: r.badge === "ЗОНА" ? "#7B9EFF" : "#E5231B",
+                      }}
+                    >
+                      {r.badge === "ЗОНА" ? "ЗОНА" : "ЗАЛ"}
+                    </span>
+                  </button>
+                ))}
+              <button
+                className="gtr-pal-btn"
+                style={{ padding: "9px 12px", opacity: 0.75 }}
+                onClick={() => {
+                  performAdd(
+                    placing.kind,
+                    placing.title,
+                    placing.sub,
+                    placing.badge,
+                    placing.fields,
+                    true,
+                  );
+                  setPlacing(null);
+                }}
+              >
+                <span style={{ flex: 1, textAlign: "left", fontSize: 11.5 }}>
+                  Вся площадка — без привязки к залу
+                </span>
+              </button>
+            </div>
+            <button className="gtr-btn" style={{ padding: "7px 12px" }} onClick={() => setPlacing(null)}>
+              Отмена
+            </button>
+          </div>
+        </div>
+      ) : null}
       <div
         style={{
           display: "flex",

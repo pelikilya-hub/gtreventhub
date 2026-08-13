@@ -2,7 +2,7 @@
 // До этого экрана событие было намертво привязано к площадке в единственном
 // экземпляре — создать второе или начать с чистого листа было нечем.
 import { useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   computeQuote,
@@ -11,6 +11,7 @@ import {
   PH,
   STAGE_COLOR,
   STAGE_LABEL,
+  SPACES,
   V,
   venueGraph,
   type EventStage,
@@ -338,6 +339,53 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
 // подбор площадки.
 const TIME_SLOTS = ["12:00", "16:00", "18:00", "19:00", "20:00", "22:00", "23:00"];
 
+const ZONES = ["Вход", "Фойе", "Терраса", "У бассейна", "Улица"];
+
+const spaceMeta = (sp: Record<string, unknown>) =>
+  [sp.sqm && `${sp.sqm} м²`, sp.capTheatre && `${sp.capTheatre} театр`, sp.capCocktail && `${sp.capCocktail} коктейль`]
+    .filter(Boolean)
+    .join(" · ") || String(sp.type ?? "зал");
+
+// Залы события = выбранные в брифе; остальные узлы-залы убираются, их связи
+// переезжают на первый оставшийся зал. Зоны добавляются узлами с меткой ЗОНА.
+const applyRooms = (g: Graph, keepNames: string[], zones: string[]): Graph => {
+  const venue = g.nodes.find((n) => n.kind === "venue");
+  if (keepNames.length) {
+    const removed = g.nodes.filter((n) => n.kind === "room" && !keepNames.includes(n.title));
+    const removedIds = new Set(removed.map((r) => r.id));
+    if (removedIds.size) {
+      g.nodes = g.nodes.filter((n) => !removedIds.has(n.id));
+      const kept = g.nodes.filter((n) => n.kind === "room");
+      const fallback = kept[0]?.id ?? venue?.id;
+      g.links = g.links.flatMap((l) => {
+        if (removedIds.has(l.from))
+          return fallback && l.to !== fallback ? [{ from: fallback, to: l.to }] : [];
+        if (removedIds.has(l.to)) return [];
+        return [l];
+      });
+    }
+  }
+  const baseCount = g.nodes.filter((n) => n.kind === "room").length;
+  zones.forEach((z, i) => {
+    const id = `z${i + 1}`;
+    g.nodes.push({
+      id,
+      kind: "room",
+      x: 276,
+      y: 26 + (baseCount + i) * 150,
+      title: z,
+      sub: "Зона площадки",
+      badge: "ЗОНА",
+      fields: [
+        ["ТИП", "Зона"],
+        ["ГДЕ", z],
+      ],
+    });
+    if (venue) g.links.push({ from: venue.id, to: id });
+  });
+  return g;
+};
+
 const capOf = (s?: string) => {
   const m = String(s || "").match(/(\d[\d\s]*)/);
   return m ? parseInt(m[1].replace(/\s/g, ""), 10) : 0;
@@ -417,6 +465,8 @@ function NewEvent({
   const [guests, setGuests] = useState(0);
   const [vq, setVq] = useState("");
   const [cluster, setCluster] = useState("");
+  const [roomsSel, setRoomsSel] = useState<string[]>([]);
+  const [zonesSel, setZonesSel] = useState<string[]>([]);
 
   const preset = EVENT_PRESETS.find((x) => x.id === presetId);
   const vibeQ = preset ? vibeQuestionFor(preset.format) : undefined;
@@ -432,9 +482,9 @@ function NewEvent({
   }, []);
 
   // Подбор площадки: поиск + район + автофит под вместимость.
-  // Выбор открыт админу и менеджерам без закреплённой площадки;
-  // роль конкретной площадки работает со своей.
-  const canChoose = isAdmin || !ownVenue;
+  // Выбирать может любой кабинет — своя площадка лишь преселект
+  // (раньше «пустое событие» намертво запирало площадку — это был баг).
+  const canChoose = true;
   const venues = useMemo(() => {
     const needle = vq.toLowerCase().trim();
     const all = canChoose ? PH.venues : PH.venues.filter((v) => v.id === ownVenue);
@@ -454,6 +504,15 @@ function NewEvent({
   }, [vq, cluster, guests, canChoose, ownVenue]);
 
   const picked = venueId ? V(venueId) : null;
+  const venueRooms = useMemo(
+    () => (venueId ? SPACES(venueId).map((sp) => ({ name: String(sp.name), sub: spaceMeta(sp) })) : []),
+    [venueId],
+  );
+  // при смене площадки залы выбираются заново: по умолчанию — первый зал
+  useEffect(() => {
+    setRoomsSel(venueRooms.length ? [venueRooms[0].name] : []);
+    setZonesSel([]);
+  }, [venueId]); // eslint-disable-line react-hooks/exhaustive-deps
   const pickedCapShort = picked && guests && capOf(picked.capacity) && capOf(picked.capacity) < guests;
   const ready = Boolean(
     venueId && (preset ? (vibeQ ? vibeId : true) : presetId === "blank" && format),
@@ -476,7 +535,7 @@ function NewEvent({
         guests: guestsStr || guestsLabel,
         date: dateFull,
         dateIso,
-        graph: stampSlot(built.graph, dateH, time),
+        graph: stampSlot(applyRooms(built.graph, roomsSel, zonesSel), dateH, time),
         brief: built.brief,
       });
     } else {
@@ -487,7 +546,7 @@ function NewEvent({
         guests: guestsStr,
         date: dateFull,
         dateIso,
-        graph: stampSlot(venueGraph(venueId), dateH, time),
+        graph: stampSlot(applyRooms(venueGraph(venueId), roomsSel, zonesSel), dateH, time),
       });
     }
   };
@@ -789,6 +848,88 @@ function NewEvent({
           </>
         )}
       </div>
+
+      {/* залы и зоны: что арендуем и где ставим программу */}
+      {picked ? (
+        <div style={{ display: "grid", gap: 8 }}>
+          <Step
+            n={next()}
+            title="Залы и зоны"
+            note="сюда будут закрепляться артисты, интерактив и оборудование"
+          />
+          {venueRooms.length ? (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill,minmax(215px,1fr))",
+                gap: 7,
+              }}
+            >
+              {venueRooms.map((r) => {
+                const on = roomsSel.includes(r.name);
+                return (
+                  <button
+                    key={r.name}
+                    onClick={() =>
+                      setRoomsSel((cur) =>
+                        on ? cur.filter((x) => x !== r.name) : [...cur, r.name],
+                      )
+                    }
+                    style={{
+                      borderRadius: 0,
+                      padding: "10px 12px",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      display: "grid",
+                      gap: 4,
+                      border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.12)"}`,
+                      background: on ? "rgba(229,35,27,.12)" : "var(--gtr-card2)",
+                    }}
+                  >
+                    <span style={{ font: "600 12px/1.3 'Golos Text',sans-serif", color: on ? "#fff" : "rgba(255,255,255,.8)" }}>
+                      {on ? "✓ " : ""}
+                      {r.name}
+                    </span>
+                    <span className="gtr-mono" style={{ font: "500 9px/1.3 'JetBrains Mono',monospace", color: "rgba(255,255,255,.4)" }}>
+                      {r.sub}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <span style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+              Залы этой площадки ещё не нормализованы в базе — событие соберётся по площадке
+              целиком, зоны можно включить ниже.
+            </span>
+          )}
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {ZONES.map((z) => {
+              const on = zonesSel.includes(z);
+              return (
+                <button
+                  key={z}
+                  onClick={() =>
+                    setZonesSel((cur) => (on ? cur.filter((x) => x !== z) : [...cur, z]))
+                  }
+                  style={{
+                    borderRadius: 0,
+                    padding: "7px 12px",
+                    cursor: "pointer",
+                    font: `${on ? 600 : 500} 10.5px/1 'Golos Text',sans-serif`,
+                    border: `1px ${on ? "solid #E5231B" : "dashed rgba(255,255,255,.2)"}`,
+                    background: on ? "rgba(229,35,27,.14)" : "transparent",
+                    color: on ? "#fff" : "rgba(255,255,255,.55)",
+                  }}
+                >
+                  {on ? "✓ " : "+ "}
+                  {z}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
 
       {/* вайб пресета: направление и музыкальные стили */}
       {preset && vibeQ ? (

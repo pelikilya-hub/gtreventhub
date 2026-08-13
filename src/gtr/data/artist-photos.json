@@ -1693,6 +1693,20 @@
    "source": "кадр рила @sergeycauselove (ссылка от владельца)",
    "match": "manual",
    "name": "Inna Ra"
+  },
+  "MC-0017": {
+   "photo": "/artists/MC-0017-avatar.jpg",
+   "photoMed": "/artists/MC-0017-avatar-med.jpg",
+   "source": "кадр официального рила @dj_limmie",
+   "match": "manual",
+   "name": "DJ Limmie"
+  },
+  "MC-0003": {
+   "photo": "/artists/MC-0003-avatar.jpg",
+   "photoMed": "/artists/MC-0003-avatar-med.jpg",
+   "source": "фото из официального поста @weddingdjphuket",
+   "match": "manual",
+   "name": "DJ Mike Edwards"
   }
  }
 }

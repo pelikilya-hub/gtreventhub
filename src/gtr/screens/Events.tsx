@@ -9,6 +9,8 @@ import {
   draftTitle,
   fmtThb,
   PH,
+  RATE_COLOR,
+  rateOf,
   STAGE_COLOR,
   STAGE_LABEL,
   SPACES,
@@ -802,6 +804,7 @@ function NewEvent({
               {venues.slice(0, 24).map((v) => {
                 const cap = capOf(v.capacity);
                 const score = v.readiness?.score;
+                const rate = rateOf(v.id);
                 return (
                   <button
                     key={v.id}
@@ -824,6 +827,20 @@ function NewEvent({
                         {v.id} · {v.type || "—"} · {v.cluster || v.area}
                         {cap ? ` · до ${cap}` : ""}
                       </span>
+                      {rate ? (
+                        <span
+                          style={{
+                            display: "block",
+                            marginTop: 2,
+                            font: "600 9px/1.3 'JetBrains Mono',monospace",
+                            color: RATE_COLOR[rate.kind],
+                          }}
+                        >
+                          {fmtThb(rate.amount)}
+                          {rate.unit !== "событие" ? ` / ${rate.unit}` : ""}
+                          {rate.kind === "gtr-estimate" ? " ~" : ""}
+                        </span>
+                      ) : null}
                     </span>
                     {guests && cap ? (
                       <span

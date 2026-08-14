@@ -1509,7 +1509,8 @@ export const myBookingsFn = createServerFn({ method: "GET" }).handler(async () =
 // ---------- Meta (Facebook/Instagram): авторизация страницы BOSS ----------
 // Официальный Graph API вместо закрытого анонимного доступа: токен страницы
 // даёт посты, медиа и события — легально и стабильно.
-export type MetaCfg = { pageId: string; token: string; pageName?: string; igUser?: string };
+export type MetaPage = { id: string; name: string; token: string; igId?: string; igUser?: string };
+export type MetaCfg = { pages: MetaPage[] };
 
 export const metaCfgFn = createServerFn({ method: "GET" }).handler(async () => {
   const u = await currentUser();
@@ -1517,10 +1518,11 @@ export const metaCfgFn = createServerFn({ method: "GET" }).handler(async () => {
   if (!u || !ns) return { connected: false as const, pageName: "", igUser: "" };
   if (u.role !== "gtr" && !u.boss) return { connected: false as const, pageName: "", igUser: "" };
   const cfg = await kvGetJson<MetaCfg>(ns, "setting:meta");
+  const pages = cfg?.pages ?? [];
   return {
-    connected: Boolean(cfg?.token),
-    pageName: cfg?.pageName ?? "",
-    igUser: cfg?.igUser ?? "",
+    connected: pages.length > 0,
+    pageName: pages.map((p) => p.name).join(" · "),
+    igUser: pages.map((p) => p.igUser).filter(Boolean).join(", "),
   };
 });
 
@@ -1538,30 +1540,36 @@ export const setMetaCfgFn = createServerFn({ method: "POST" })
       `https://graph.facebook.com/v21.0/me?fields=id,name&access_token=${encodeURIComponent(token)}`,
     ).then((r) => r.json() as Promise<{ id?: string; name?: string; error?: { message: string } }>);
     if (me.error) return { ok: false as const, reason: `Meta: ${me.error.message.slice(0, 120)}` };
-    // если это user-token — берём первую страницу; если page-token — me и есть страница
-    let pageId = me.id ?? "";
-    let pageName = me.name ?? "";
-    let pageToken = token;
+    // user-token → забираем ВСЕ страницы с их page-токенами и IG Business
     const acc = await fetch(
-      `https://graph.facebook.com/v21.0/me/accounts?fields=id,name,access_token&access_token=${encodeURIComponent(token)}`,
-    ).then((r) => r.json() as Promise<{ data?: { id: string; name: string; access_token: string }[] }>)
-      .catch(() => ({ data: [] as { id: string; name: string; access_token: string }[] }));
-    if (acc.data?.length) {
-      pageId = acc.data[0].id;
-      pageName = acc.data[0].name;
-      pageToken = acc.data[0].access_token;
-    }
-    // привязанный Instagram Business, если есть
-    const ig = await fetch(
-      `https://graph.facebook.com/v21.0/${pageId}?fields=instagram_business_account{username}&access_token=${encodeURIComponent(pageToken)}`,
-    ).then((r) => r.json() as Promise<{ instagram_business_account?: { username?: string } }>)
-      .catch(() => ({} as { instagram_business_account?: { username?: string } }));
-    const igUser = ig.instagram_business_account?.username ?? "";
-    await ns.put(
-      "setting:meta",
-      JSON.stringify({ pageId, token: pageToken, pageName, igUser } satisfies MetaCfg),
-    );
-    return { ok: true as const, pageName, igUser };
+      `https://graph.facebook.com/v21.0/me/accounts?fields=id,name,access_token,instagram_business_account%7Bid,username%7D&access_token=${encodeURIComponent(token)}`,
+    ).then(
+      (r) =>
+        r.json() as Promise<{
+          data?: {
+            id: string;
+            name: string;
+            access_token: string;
+            instagram_business_account?: { id: string; username: string };
+          }[];
+        }>,
+    ).catch(() => ({ data: [] as never[] }));
+    const pages: MetaPage[] = (acc.data ?? []).map((p) => ({
+      id: p.id,
+      name: p.name.trim(),
+      token: p.access_token,
+      igId: p.instagram_business_account?.id,
+      igUser: p.instagram_business_account?.username,
+    }));
+    // page-token без списка страниц: сам объект и есть страница
+    if (!pages.length && me.id) pages.push({ id: me.id, name: me.name ?? "", token });
+    if (!pages.length) return { ok: false as const, reason: "у токена нет доступных страниц" };
+    await ns.put("setting:meta", JSON.stringify({ pages } satisfies MetaCfg));
+    return {
+      ok: true as const,
+      pageName: pages.map((p) => p.name).join(" · "),
+      igUser: pages.map((p) => p.igUser).filter(Boolean).join(", "),
+    };
   });
 
 // Подтяжка последних публикаций страницы/IG в KV — «реально отслеживаем»
@@ -1571,29 +1579,29 @@ export const metaSyncFn = createServerFn({ method: "POST" }).handler(async () =>
   if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
   if (u.role !== "gtr" && !u.boss) return { ok: false as const, reason: "только BOSS / GTR-админ" };
   const cfg = await kvGetJson<MetaCfg>(ns, "setting:meta");
-  if (!cfg?.token) return { ok: false as const, reason: "страница не авторизована" };
-  const out: { kind: string; id: string; text: string; media?: string; url?: string; ts?: string }[] = [];
-  const posts = await fetch(
-    `https://graph.facebook.com/v21.0/${cfg.pageId}/posts?fields=id,message,created_time,permalink_url,full_picture&limit=10&access_token=${encodeURIComponent(cfg.token)}`,
-  ).then((r) => r.json() as Promise<{ data?: { id: string; message?: string; created_time?: string; permalink_url?: string; full_picture?: string }[]; error?: { message: string } }>);
-  if (posts.error) return { ok: false as const, reason: `Meta: ${posts.error.message.slice(0, 120)}` };
-  for (const p of posts.data ?? [])
-    out.push({ kind: "fb", id: p.id, text: (p.message ?? "").slice(0, 300), media: p.full_picture, url: p.permalink_url, ts: p.created_time });
-  if (cfg.igUser) {
-    const igAcc = await fetch(
-      `https://graph.facebook.com/v21.0/${cfg.pageId}?fields=instagram_business_account&access_token=${encodeURIComponent(cfg.token)}`,
-    ).then((r) => r.json() as Promise<{ instagram_business_account?: { id: string } }>).catch(() => null);
-    const igId = igAcc?.instagram_business_account?.id;
-    if (igId) {
+  if (!cfg?.pages?.length) return { ok: false as const, reason: "страница не авторизована" };
+  const out: { kind: string; page: string; id: string; text: string; media?: string; url?: string; ts?: string }[] = [];
+  const errs: string[] = [];
+  for (const pg of cfg.pages) {
+    const posts = await fetch(
+      `https://graph.facebook.com/v21.0/${pg.id}/posts?fields=id,message,created_time,permalink_url,full_picture&limit=10&access_token=${encodeURIComponent(pg.token)}`,
+    ).then((r) => r.json() as Promise<{ data?: { id: string; message?: string; created_time?: string; permalink_url?: string; full_picture?: string }[]; error?: { message: string } }>)
+      .catch(() => null);
+    if (!posts || posts.error) {
+      errs.push(`${pg.name}: ${posts?.error?.message?.slice(0, 80) ?? "недоступна"}`);
+    } else
+      for (const p of posts.data ?? [])
+        out.push({ kind: "fb", page: pg.name, id: p.id, text: (p.message ?? "").slice(0, 300), media: p.full_picture, url: p.permalink_url, ts: p.created_time });
+    if (pg.igId) {
       const media = await fetch(
-        `https://graph.facebook.com/v21.0/${igId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&limit=10&access_token=${encodeURIComponent(cfg.token)}`,
+        `https://graph.facebook.com/v21.0/${pg.igId}/media?fields=id,caption,media_url,thumbnail_url,permalink,timestamp&limit=10&access_token=${encodeURIComponent(pg.token)}`,
       ).then((r) => r.json() as Promise<{ data?: { id: string; caption?: string; media_url?: string; thumbnail_url?: string; permalink?: string; timestamp?: string }[] }>).catch(() => null);
       for (const m of media?.data ?? [])
-        out.push({ kind: "ig", id: m.id, text: (m.caption ?? "").slice(0, 300), media: m.thumbnail_url ?? m.media_url, url: m.permalink, ts: m.timestamp });
+        out.push({ kind: "ig", page: pg.name, id: m.id, text: (m.caption ?? "").slice(0, 300), media: m.thumbnail_url ?? m.media_url, url: m.permalink, ts: m.timestamp });
     }
   }
   await ns.put("metafeed", JSON.stringify({ items: out, syncedAt: Date.now() }));
-  return { ok: true as const, count: out.length };
+  return { ok: true as const, count: out.length, note: errs.join(" · ") || undefined };
 });
 
 // ---------- PromptPay: реквизит для QR-оплат (правит только BOSS/GTR) ----------

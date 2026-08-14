@@ -8,6 +8,7 @@ import {
   draftTitle,
   fmtThb,
   GREEN,
+  loadArtists,
   PH,
   RED,
   richOf,
@@ -23,9 +24,10 @@ import { FAMILY_LABEL } from "../match";
 import { useTranslation } from "react-i18next";
 import { ArtistStudio } from "./ArtistStudio";
 import i18n, { setUiLang, UI_LANGS, type UiLang } from "../i18n";
-import { Card, Chip, Dot, Eyebrow, Icon, Ring } from "../ui";
+import { Card, Chip, Dot, Eyebrow, Icon, Ring, TrashTitle } from "../ui";
 import { ImpulseArt } from "../impulse";
 import {
+  allAfishaFn,
   createInviteFn,
   decideOfferFn,
   getPrefsFn,
@@ -1709,76 +1711,181 @@ function VisitorCabinet() {
   const navigate = useNavigate();
   const go = (s: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: s } });
   const [mp, setMp] = useState<import("../spotify").MusicProfile | null>(null);
+  const [feed, setFeed] = useState<{ id: string; vid: string; title: string; dateIso: string; poster?: string; artistIds: string[] }[]>([]);
+  const [heads, setHeads] = useState<{ id: string; name: string; styles: string[]; photo?: string; music?: string }[]>([]);
   useEffect(() => {
     musicProfileFn().then((r) => setMp(r.profile)).catch(() => {});
+    allAfishaFn().then((r) => setFeed(r.items.slice(0, 10))).catch(() => {});
+    // хедлайнеры: приоритетные артисты с фото — витрина, не список
+    Promise.all([loadArtists(), import("../data/artist-photos.json"), import("../data/artist-players.json")]).then(
+      ([base, ph, pl]) => {
+        const photos = (ph as { default: { photos: Record<string, { photo: string }> } }).default.photos;
+        const players = (pl as { default: Record<string, { kind: string; ref: string }> }).default;
+        const linkOf = (id: string, sp?: string) => {
+          const p = players[id];
+          if (!p) return sp;
+          if (p.kind === "spotify") return `https://open.spotify.com/artist/${p.ref}`;
+          if (p.kind === "sc") return p.ref;
+          return sp;
+        };
+        setHeads(
+          base.artists
+            .filter((a) => a.prio === "A" && photos[a.id] && (a.styles ?? []).length)
+            .slice(0, 6)
+            .map((a) => ({
+              id: a.id,
+              name: a.name,
+              styles: (a.styles ?? []).slice(0, 2),
+              photo: photos[a.id]?.photo,
+              music: linkOf(a.id, a.sp as string | undefined),
+            })),
+        );
+      },
+    ).catch(() => {});
   }, []);
-  const TILES: [ScreenId, string, string][] = [
-    ["tonight", "Сегодня на Пхукете", "Куда пойти вечером: события, бронь стола, маршрут по местам"],
-    ["feed", "События Пхукета", "Афиши 104 заведений, обновляются каждые 6 часов"],
-    ["map", "Карта", "Все заведения острова точками — от Патонга до Ката"],
-    ["promo", "Бронь столов", "Заявка за минуту — подтверждение в Telegram"],
-    ["aimatch", "ИИ подбор", "Куда идти под ваш музыкальный вкус — уже работает"],
-  ];
+
+  const openEvent = (e: { vid: string; artistIds: string[] }) =>
+    e.artistIds.length
+      ? navigate({ to: "/gtr/$screen", params: { screen: "artists" }, search: { artist: e.artistIds[0] } })
+      : navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid: e.vid } });
+
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const tonightCount = feed.filter((e) => e.dateIso === todayIso).length;
+
   return (
     <div style={{ maxWidth: 980, margin: "0 auto" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-        <h1 className="gtr-oswald gtr-h1">{user.name}</h1>
-        <Chip color="#E5231B">{t(user.roleLabel)}</Chip>
-      </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))",
-          gap: 12,
-          marginBottom: 16,
-        }}
-      >
-        {TILES.map(([s, title, sub]) => (
-          <Card key={s} hover style={{ padding: "18px 20px" }} onClick={() => go(s)}>
-            <div style={{ font: "700 14px/1.3 Oswald,sans-serif", textTransform: "uppercase" }}>
-              {t(title)}
+      {/* ---- HERO: вайб вечера — живое видео площадки ---- */}
+      <Card style={{ position: "relative", overflow: "hidden", padding: 0, marginBottom: 16 }}>
+        <div style={{ position: "relative", minHeight: "min(46vh, 380px)" }}>
+          <video
+            src="https://cwsdn.b-cdn.net/Illuzion/illuzion-intro-2025.mp4"
+            poster="/venues/VEN-0013-hero.jpg"
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "saturate(1.08) contrast(1.05)" }}
+          />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,11,13,.18) 30%, rgba(10,11,13,.92) 100%)" }} />
+          <div className="gtr-laser" style={{ ["--gtr-run" as string]: "340px" }} />
+          <div style={{ position: "relative", padding: "26px 22px", display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: "min(46vh, 380px)" }}>
+            <div className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "rgba(255,255,255,.75)", letterSpacing: ".16em", marginBottom: 10 }}>
+              {user.name.toUpperCase()} · PHUKET
             </div>
-            <div style={{ marginTop: 6, font: "500 11px/1.55 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-              {t(sub)}
+            <TrashTitle text={t("Сегодня вечером")} size={40} />
+            <div style={{ margin: "10px 0 16px", font: "500 13px/1.5 'Golos Text',sans-serif", color: "rgba(255,255,255,.82)", maxWidth: 420 }}>
+              {tonightCount
+                ? `${tonightCount} ${t("событий и весь остров открыт — собери свой вечер")}`
+                : t("Остров открыт — собери свой вечер: клубы, пляжные вечеринки, живая музыка")}
             </div>
-          </Card>
-        ))}
-      </div>
-      <Card style={{ padding: "16px 20px", marginBottom: 14, display: "grid", gap: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span className="gtr-eq" aria-hidden><span /><span /><span /><span /></span>
-          <Eyebrow>{t("МУЗЫКАЛЬНЫЙ ПРОФИЛЬ")}</Eyebrow>
-          {mp ? <Chip color="#2ECC71">{t("СОБРАН")}</Chip> : null}
+            <div>
+              <button className="gtr-btn-wow" onClick={() => go("tonight")}>
+                {t("Выбрать вечер")} →
+              </button>
+            </div>
+          </div>
         </div>
-        {mp ? (
-          <>
-            <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
-              {mp.genres.slice(0, 5).map(([fam]) => (
-                <Chip key={fam} color="rgba(255,255,255,.55)">{FAMILY_LABEL[fam] ?? fam}</Chip>
-              ))}
-            </div>
-            <button className="gtr-btn" style={{ justifySelf: "start" }} onClick={() => go("aimatch")}>
-              {t("Мои рекомендации")} →
-            </button>
-          </>
-        ) : (
-          <>
-            <div style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-              {t("Выберите любимые жанры за 30 секунд — и получите заведения и события под свой вкус.")}
-            </div>
-            <button className="gtr-btn gtr-btn-red" style={{ justifySelf: "start" }} onClick={() => go("aimatch")}>
-              {t("Собрать мой профиль")} →
-            </button>
-          </>
-        )}
       </Card>
-      <Card style={{ padding: "16px 20px", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-        <Eyebrow>{t("НАСТРОЙКИ")}</Eyebrow>
+
+      {/* ---- афиша: ближайшие события, клик — в артиста ---- */}
+      {feed.length ? (
+        <>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
+            <span className="gtr-eq" aria-hidden><span /><span /><span /><span /></span>
+            <Eyebrow>{t("БЛИЖАЙШИЕ СОБЫТИЯ")}</Eyebrow>
+          </div>
+          <div className="gtr-hscroll" style={{ marginBottom: 18 }}>
+            {feed.map((e) => (
+              <Card key={e.vid + e.id} hover style={{ padding: 0, overflow: "hidden", width: 168 }} onClick={() => openEvent(e)}>
+                <div style={{ position: "relative", aspectRatio: "4/5", background: "#101116" }}>
+                  {e.poster ? (
+                    <img src={e.poster} alt="" loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                      onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                  ) : null}
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 50%, rgba(10,11,13,.95))" }} />
+                  {e.artistIds.length ? (
+                    <span className="gtr-mono" style={{ position: "absolute", top: 7, left: 7, font: "700 8px/1 'JetBrains Mono',monospace", padding: "4px 6px", background: "rgba(229,35,27,.9)", letterSpacing: ".08em" }}>
+                      {t("НАШ АРТИСТ")}
+                    </span>
+                  ) : null}
+                  <div style={{ position: "absolute", left: 9, right: 9, bottom: 8 }}>
+                    <div style={{ font: "600 11.5px/1.3 'Golos Text',sans-serif" }}>{e.title.slice(0, 44)}</div>
+                    <div className="gtr-mono" style={{ marginTop: 3, font: "500 8.5px/1.3 'JetBrains Mono',monospace", color: "rgba(255,255,255,.65)" }}>
+                      {e.dateIso.slice(8, 10)}.{e.dateIso.slice(5, 7)} · {V(e.vid)?.name?.slice(0, 20)}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </>
+      ) : null}
+
+      {/* ---- хедлайнеры: артисты, в которых проваливаешься ---- */}
+      {heads.length ? (
+        <>
+          <Eyebrow style={{ marginBottom: 10 }}>{t("ХЕДЛАЙНЕРЫ СЦЕНЫ")}</Eyebrow>
+          <div className="gtr-hscroll" style={{ marginBottom: 18 }}>
+            {heads.map((a) => (
+              <Card key={a.id} hover style={{ padding: 0, overflow: "hidden", width: 148 }}
+                onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "artists" }, search: { artist: a.id } })}>
+                <div style={{ position: "relative", aspectRatio: "1/1", background: "#101116" }}>
+                  {a.photo ? (
+                    <img src={a.photo} alt="" loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "saturate(.95)" }}
+                      onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                  ) : null}
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 55%, rgba(10,11,13,.94))" }} />
+                  {a.music ? (
+                    <button
+                      aria-label={t("Слушать превью")}
+                      onClick={(ev) => { ev.stopPropagation(); window.open(a.music, "_blank"); }}
+                      style={{ position: "absolute", top: 8, right: 8, width: 32, height: 32, border: "none", cursor: "pointer",
+                        background: "rgba(229,35,27,.92)", color: "#fff", font: "700 12px/1 Oswald", display: "grid", placeItems: "center",
+                        clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)" }}>
+                      ▶
+                    </button>
+                  ) : null}
+                  <div style={{ position: "absolute", left: 9, right: 9, bottom: 8 }}>
+                    <div style={{ font: "700 12px/1.2 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".03em" }}>{a.name}</div>
+                    <div className="gtr-mono" style={{ marginTop: 3, font: "500 8px/1.3 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase" }}>
+                      {a.styles.join(" · ")}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </>
+      ) : null}
+
+      {/* ---- мой вкус + быстрые ходы ---- */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 12, marginBottom: 16 }}>
+        <Card hover style={{ padding: "16px 18px" }} onClick={() => go("aimatch")}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span className="gtr-eq" aria-hidden><span /><span /><span /><span /></span>
+            <span style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Мой вкус")}</span>
+            {mp ? <Chip color="#2ECC71">{t("СОБРАН")}</Chip> : null}
+          </div>
+          <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+            {mp
+              ? mp.genres.slice(0, 3).map(([f]) => FAMILY_LABEL[f] ?? f).join(" · ")
+              : t("Выбери жанры — получи свои места")}
+          </div>
+        </Card>
+        <Card hover style={{ padding: "16px 18px" }} onClick={() => go("map")}>
+          <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Карта")}</div>
+          <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{t("Весь остров точками")}</div>
+        </Card>
+        <Card hover style={{ padding: "16px 18px" }} onClick={() => go("promo")}>
+          <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Стол на вечер")}</div>
+          <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{t("Бронь в пару касаний")}</div>
+        </Card>
+      </div>
+
+      <Card style={{ padding: "12px 16px", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         <PushPanel />
         <span style={{ display: "inline-flex", alignItems: "center", gap: 7, marginLeft: "auto" }}>
-          <span className="gtr-mono" style={{ font: "600 9px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".1em" }}>
-            {t("ЯЗЫК ПРИЛОЖЕНИЯ")}
-          </span>
           <select
             className="gtr-input"
             style={{ padding: "7px 10px", width: "auto" }}

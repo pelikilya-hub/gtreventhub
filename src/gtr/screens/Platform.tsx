@@ -7,13 +7,20 @@ import { useTranslation } from "react-i18next";
 
 import { loadArtists, PH, V, type Artist } from "../data/app-data";
 import {
+  aiMatchFn,
   allAfishaFn,
   bookTableFn,
   contactTeamFn,
   artistFlagsFn,
+  musicProfileFn,
   myBookingsFn,
+  type MatchArtist,
+  type MatchEvent,
+  type MatchVenue,
   type TableBooking,
 } from "../kv-api";
+import { FAMILY_LABEL } from "../match";
+import type { MusicProfile } from "../spotify";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow } from "../ui";
 
@@ -159,51 +166,264 @@ export function FeedScreen() {
 export function AiMatchScreen() {
   const { t } = useTranslation();
   const { user } = useGtr();
+  const navigate = useNavigate();
+  const [vid, setVid] = useState("VEN-0002");
+  const [res, setRes] = useState<{
+    mode: "none" | "listener" | "team";
+    profileReady: boolean;
+    venues: MatchVenue[];
+    events: MatchEvent[];
+    artists: MatchArtist[];
+  } | null>(null);
+  const [profile, setProfile] = useState<MusicProfile | null>(null);
   const [state, setState] = useState("");
-  const isVenueSide = ["gtr", "pr", "owner", "sales", "organizer"].includes(user.role);
+  const notReady =
+    typeof window !== "undefined" && window.location.search.includes("spotify=notready");
+  const spotifyOk =
+    typeof window !== "undefined" && window.location.search.includes("spotify=ok");
+
+  useEffect(() => {
+    aiMatchFn({ data: { vid } }).then(setRes).catch(() => {});
+  }, [vid]);
+  useEffect(() => {
+    musicProfileFn().then((r) => setProfile(r.profile)).catch(() => {});
+  }, []);
+
   const join = async () => {
     setState("…");
     try {
       const r = await contactTeamFn({
-        data: { text: `[ИИ-подбор · лист ожидания] ${user.email} · роль ${user.role}` },
+        data: { text: `[ИИ-подбор · лист ожидания Spotify] ${user.email} · роль ${user.role}` },
       });
       setState(r.ok ? t("Вы в списке раннего доступа") : (r.reason ?? "…"));
     } catch {
       setState(t("Сервер недоступен"));
     }
   };
-  return (
-    <div style={{ maxWidth: 760, margin: "0 auto" }}>
-      <h1 className="gtr-oswald gtr-h1" style={{ marginBottom: 14 }}>{t("ИИ подбор")}</h1>
-      <Card style={{ padding: "24px 26px", display: "grid", gap: 12 }}>
-        <div style={{ display: "flex", gap: 4 }}>
-          {["#E5231B", "#F5A623", "#2ECC71", "#7B4DFF", "#3AA0FF"].map((c) => (
-            <span key={c} style={{ width: 22, height: 6, background: c }} />
+
+  const scoreChip = (score: number) => (
+    <span
+      className="gtr-mono"
+      style={{ font: "700 11px/1 'JetBrains Mono',monospace", color: GREEN }}
+    >
+      {Math.min(99, Math.round(score * 60 + 30))}%
+    </span>
+  );
+
+  // -------- команда: подбор артистов под площадку --------
+  if (res?.mode === "team") {
+    return (
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
+          <h1 className="gtr-oswald gtr-h1">{t("ИИ подбор артистов")}</h1>
+          <select
+            className="gtr-input"
+            style={{ width: "auto", marginLeft: "auto" }}
+            value={vid}
+            onChange={(e) => setVid(e.target.value)}
+          >
+            {[...PH.venues].sort((a, b) => a.name.localeCompare(b.name)).map((v) => (
+              <option key={v.id} value={v.id}>{v.name}</option>
+            ))}
+          </select>
+        </div>
+        <div className="gtr-mono" style={{ font: "500 10px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 12 }}>
+          {t("Вектор площадки: музыка, концепция и корпус её афиш. Верифицированные артисты и артисты с медиа — выше.")}
+        </div>
+        <div style={{ display: "grid", gap: 8 }}>
+          {(res.artists ?? []).map((a, i) => (
+            <Card
+              key={a.id}
+              hover
+              style={{ padding: "12px 16px", display: "flex", gap: 12, alignItems: "center" }}
+              onClick={() =>
+                navigate({ to: "/gtr/$screen", params: { screen: "artists" }, search: { artist: a.id } })
+              }
+            >
+              <span className="gtr-mono" style={{ font: "700 13px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", width: 24 }}>
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ font: "600 13px/1.3 'Golos Text',sans-serif" }}>{a.name}</span>
+                <span style={{ display: "flex", gap: 5, marginTop: 4, flexWrap: "wrap" }}>
+                  {a.reasons.map((r) => (
+                    <Chip key={r} color="rgba(255,255,255,.5)">{FAMILY_LABEL[r] ?? r}</Chip>
+                  ))}
+                  {a.verified ? <Chip color={GREEN}>✓ GTR</Chip> : null}
+                </span>
+              </span>
+              {scoreChip(a.score)}
+            </Card>
           ))}
-        </div>
-        <div style={{ font: "700 16px/1.35 Oswald,sans-serif", textTransform: "uppercase" }}>
-          {isVenueSide ? t("Подбор артистов под ваш формат") : t("Подбор событий под ваш музыкальный вкус")}
-        </div>
-        <div style={{ font: "500 12px/1.65 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-          {isVenueSide
-            ? t("Движок сопоставит жанры и корпус афиш вашей площадки с 312 артистами базы и гастролёрами по Азии — и предложит лайнап до того, как их забукают конкуренты.")
-            : t("Подключите музыкальный профиль — движок сопоставит ваши жанры и любимых артистов с афишами 97 заведений и предложит, куда идти сегодня.")}
-        </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-          <Chip color={AMBER}>{t("ФАЗА B · SPOTIFY-АНАЛИЗ")}</Chip>
-          <Chip color="rgba(255,255,255,.4)">SOUNDCLOUD — {t("по одобрению API")}</Chip>
-        </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <button className="gtr-btn gtr-btn-red" onClick={() => void join()} disabled={Boolean(state)}>
-            {t("Хочу первым доступ")}
-          </button>
-          {state ? (
-            <span className="gtr-mono" style={{ font: "500 10px/1.3 'JetBrains Mono',monospace", color: GREEN }}>
-              {state}
-            </span>
+          {!res.artists?.length ? (
+            <Card style={{ padding: 20 }}>
+              <div style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+                {t("Для этой площадки пока мало жанровых данных — заполните «музыку» в паспорте или дождитесь афиш.")}
+              </div>
+            </Card>
           ) : null}
         </div>
-      </Card>
+      </div>
+    );
+  }
+
+  // -------- слушатель --------
+  const maxW = profile?.genres?.[0]?.[1] ?? 1;
+  return (
+    <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <h1 className="gtr-oswald gtr-h1" style={{ marginBottom: 14 }}>{t("ИИ подбор")}</h1>
+
+      {!profile ? (
+        <Card style={{ padding: "24px 26px", display: "grid", gap: 12 }}>
+          <div style={{ display: "flex", gap: 4 }}>
+            {["#E5231B", "#F5A623", "#2ECC71", "#7B4DFF", "#3AA0FF"].map((c) => (
+              <span key={c} style={{ width: 22, height: 6, background: c }} />
+            ))}
+          </div>
+          <div style={{ font: "700 16px/1.35 Oswald,sans-serif", textTransform: "uppercase" }}>
+            {t("Подбор событий под ваш музыкальный вкус")}
+          </div>
+          <div style={{ font: "500 12px/1.65 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+            {t("Подключите музыкальный профиль — движок сопоставит ваши жанры и любимых артистов с афишами 97 заведений и предложит, куда идти сегодня.")}
+          </div>
+          {notReady ? (
+            <Chip color={AMBER}>{t("Ключи Spotify подключаются — попробуйте позже или встаньте в список")}</Chip>
+          ) : null}
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <a className="gtr-btn gtr-btn-red" style={{ textDecoration: "none" }} href="/api/spotify-login">
+              {t("Подключить Spotify")} →
+            </a>
+            <button className="gtr-btn" onClick={() => void join()} disabled={Boolean(state)}>
+              {t("Хочу первым доступ")}
+            </button>
+            {state ? (
+              <span className="gtr-mono" style={{ font: "500 10px/1.3 'JetBrains Mono',monospace", color: GREEN }}>
+                {state}
+              </span>
+            ) : null}
+          </div>
+        </Card>
+      ) : (
+        <>
+          {spotifyOk ? (
+            <div style={{ marginBottom: 10 }}>
+              <Chip color={GREEN}>{t("Spotify подключён — профиль обновлён")}</Chip>
+            </div>
+          ) : null}
+          <Card style={{ padding: "20px 24px", marginBottom: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <Eyebrow>{t("ВАШ МУЗЫКАЛЬНЫЙ ПРОФИЛЬ")}</Eyebrow>
+              {profile.displayName ? (
+                <span className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+                  Spotify · {profile.displayName}
+                </span>
+              ) : null}
+              <a
+                className="gtr-btn"
+                style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10, textDecoration: "none" }}
+                href="/api/spotify-login"
+              >
+                {t("Обновить")}
+              </a>
+            </div>
+            <div style={{ display: "grid", gap: 6 }}>
+              {profile.genres.slice(0, 7).map(([fam, w]) => (
+                <div key={fam} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ width: 110, flex: "none", font: "600 10.5px/1 'Golos Text',sans-serif" }}>
+                    {FAMILY_LABEL[fam] ?? fam}
+                  </span>
+                  <span style={{ flex: 1, height: 8, background: "rgba(255,255,255,.07)" }}>
+                    <span
+                      style={{
+                        display: "block",
+                        width: `${Math.round((w / maxW) * 100)}%`,
+                        height: "100%",
+                        background: "linear-gradient(90deg,#E5231B,#F5A623)",
+                        transition: "width .8s cubic-bezier(.2,.8,.2,1)",
+                      }}
+                    />
+                  </span>
+                </div>
+              ))}
+            </div>
+            {profile.topArtists.length ? (
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
+                {profile.topArtists.slice(0, 10).map((a) => (
+                  <span
+                    key={a.name}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, border: "1px solid rgba(255,255,255,.12)", padding: "4px 9px 4px 4px" }}
+                  >
+                    {a.image ? (
+                      <img src={a.image} alt="" style={{ width: 22, height: 22, objectFit: "cover" }} />
+                    ) : null}
+                    <span style={{ font: "500 10.5px/1 'Golos Text',sans-serif" }}>{a.name}</span>
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </Card>
+
+          <Eyebrow style={{ marginBottom: 8 }}>{t("ЗАВЕДЕНИЯ ПОД ВАШ ВКУС")}</Eyebrow>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 10, marginBottom: 18 }}>
+            {(res?.venues ?? []).map((m) => {
+              const v = V(m.vid);
+              return (
+                <Card
+                  key={m.vid}
+                  hover
+                  style={{ padding: "14px 16px" }}
+                  onClick={() =>
+                    navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid: m.vid } })
+                  }
+                >
+                  <div style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
+                    <span style={{ flex: 1, font: "600 12.5px/1.3 'Golos Text',sans-serif" }}>{v?.name ?? m.vid}</span>
+                    {scoreChip(m.score)}
+                  </div>
+                  <div style={{ display: "flex", gap: 5, marginTop: 7, flexWrap: "wrap" }}>
+                    {m.reasons.map((r) => (
+                      <Chip key={r} color="rgba(255,255,255,.5)">{FAMILY_LABEL[r] ?? r}</Chip>
+                    ))}
+                  </div>
+                </Card>
+              );
+            })}
+            {!res?.venues?.length ? (
+              <Card style={{ padding: 16 }}>
+                <div style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+                  {t("Считаем совпадения…")}
+                </div>
+              </Card>
+            ) : null}
+          </div>
+
+          {res?.events?.length ? (
+            <>
+              <Eyebrow style={{ marginBottom: 8 }}>{t("СОБЫТИЯ ПОД ВАШ ВКУС")}</Eyebrow>
+              <div style={{ display: "grid", gap: 8 }}>
+                {res.events.map((e) => (
+                  <Card
+                    key={`${e.vid}-${e.id}`}
+                    hover
+                    style={{ padding: "12px 16px", display: "flex", gap: 12, alignItems: "center" }}
+                    onClick={() =>
+                      navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid: e.vid } })
+                    }
+                  >
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ font: "600 12.5px/1.3 'Golos Text',sans-serif" }}>{e.title}</span>
+                      <span className="gtr-mono" style={{ display: "block", marginTop: 4, font: "500 9.5px/1.3 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
+                        {V(e.vid)?.name ?? e.vid} · {e.dateIso}
+                      </span>
+                    </span>
+                    {scoreChip(e.score)}
+                  </Card>
+                ))}
+              </div>
+            </>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }

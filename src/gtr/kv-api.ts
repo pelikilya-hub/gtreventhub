@@ -1503,3 +1503,142 @@ export const myBookingsFn = createServerFn({ method: "GET" }).handler(async () =
   const mine = u.role === "gtr" ? all : all.filter((b) => b.by === u.email);
   return { bookings: mine.sort((a, b) => b.ts - a.ts).slice(0, 30) };
 });
+
+// ---------- фаза B: музыкальный профиль и ИИ-подбор ----------
+
+export const musicProfileFn = createServerFn({ method: "GET" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || !ns) return { profile: null as import("./spotify").MusicProfile | null };
+  const profile = await kvGetJson<import("./spotify").MusicProfile>(ns, `mprofile:${u.email}`);
+  return { profile };
+});
+
+export type MatchVenue = { vid: string; score: number; reasons: string[] };
+export type MatchEvent = {
+  vid: string;
+  id: string;
+  title: string;
+  dateIso: string;
+  poster?: string;
+  score: number;
+  reasons: string[];
+};
+export type MatchArtist = {
+  id: string;
+  name: string;
+  score: number;
+  reasons: string[];
+  verified: boolean;
+  hasMedia: boolean;
+};
+
+// Подбор: слушателю — площадки и события под вкус; команде — артисты под
+// площадку. Вектора собираются из music площадок, стилей артистов и афиш.
+export const aiMatchFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { vid?: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    const empty = {
+      mode: "none" as "none" | "listener" | "team",
+      profileReady: false,
+      venues: [] as MatchVenue[],
+      events: [] as MatchEvent[],
+      artists: [] as MatchArtist[],
+    };
+    if (!u || !ns) return empty;
+    const { normalizeGenres, scoreVectors } = await import("./match");
+    const { PH, loadArtists } = await import("./data/app-data");
+    const base = await loadArtists();
+    const styleOf = new Map(base.artists.map((a) => [a.id, (a.styles ?? []).join(" ")]));
+
+    // афиши: какие артисты замечены на какой площадке
+    const evKeys = await kvListAll(ns, "venueevents:");
+    const afishaBy = new Map<string, VenueAfisha["events"]>();
+    for (const k of evKeys) {
+      const rec = await kvGetJson<VenueAfisha>(ns, k);
+      if (rec) afishaBy.set(k.slice("venueevents:".length), rec.events);
+    }
+    const venueVec = (vid: string) => {
+      const v = PH.venues.find((x) => x.id === vid);
+      const parts: string[] = [v?.music ?? "", v?.concept ?? "", v?.events ?? ""];
+      for (const e of afishaBy.get(vid) ?? [])
+        for (const aid of e.artistIds) parts.push(styleOf.get(aid) ?? "");
+      return normalizeGenres(parts.filter(Boolean));
+    };
+
+    const teamSide = ["gtr", "pr", "owner", "sales", "organizer"].includes(u.role);
+    if (teamSide) {
+      const vid = data.vid || "VEN-0002";
+      const target = venueVec(vid);
+      const flagsKeys = await kvListAll(ns, "aflag:");
+      const verified = new Set<string>();
+      for (const k of flagsKeys) {
+        const f = await kvGetJson<ArtistFlags>(ns, k);
+        if (f?.verified) verified.add(k.slice("aflag:".length));
+      }
+      const artists: MatchArtist[] = base.artists
+        .filter((a) => (a.styles ?? []).length && a.kind !== "venue")
+        .map((a) => {
+          const { score, reasons } = scoreVectors(normalizeGenres(a.styles ?? []), target);
+          const hasMedia = Boolean(a.ig || a.sp);
+          const bonus = (verified.has(a.id) ? 0.2 : 0) + (hasMedia ? 0.1 : 0);
+          return {
+            id: a.id,
+            name: a.name,
+            score: score + (score > 0 ? bonus : 0),
+            reasons,
+            verified: verified.has(a.id),
+            hasMedia,
+          };
+        })
+        .filter((x) => x.score > 0.15)
+        .sort((x, y) => y.score - x.score)
+        .slice(0, 12);
+      return { ...empty, mode: "team" as const, artists };
+    }
+
+    // слушатель: нужен музыкальный профиль (верифицированные данные Spotify)
+    const profile = await kvGetJson<import("./spotify").MusicProfile>(ns, `mprofile:${u.email}`);
+    if (!profile) return { ...empty, mode: "listener" as const };
+    const userVec = new Map(profile.genres);
+    const venues: MatchVenue[] = PH.venues
+      .map((v) => {
+        const { score, reasons } = scoreVectors(userVec, venueVec(v.id));
+        return { vid: v.id, score, reasons };
+      })
+      .filter((x) => x.score > 0.12)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8);
+    const today = new Date().toISOString().slice(0, 10);
+    const events: MatchEvent[] = [];
+    for (const [vid, list] of afishaBy)
+      for (const e of list) {
+        if (e.dateIso < today) continue;
+        const vec = normalizeGenres([
+          e.title,
+          ...e.artistIds.map((aid) => styleOf.get(aid) ?? ""),
+          PH.venues.find((x) => x.id === vid)?.music ?? "",
+        ]);
+        const { score, reasons } = scoreVectors(userVec, vec);
+        if (score > 0.12)
+          events.push({
+            vid,
+            id: e.id,
+            title: e.title,
+            dateIso: e.dateIso,
+            poster: e.poster,
+            score,
+            reasons,
+          });
+      }
+    events.sort((a, b) => b.score - a.score);
+    return {
+      ...empty,
+      mode: "listener" as const,
+      profileReady: true,
+      venues,
+      events: events.slice(0, 8),
+    };
+  });

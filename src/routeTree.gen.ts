@@ -17,6 +17,8 @@ import { Route as ApiAphotoRouteImport } from './routes/api.aphoto'
 import { Route as ApiAvideoRouteImport } from './routes/api.avideo'
 import { Route as ApiPosterRouteImport } from './routes/api.poster'
 import { Route as ApiPushRouteImport } from './routes/api.push'
+import { Route as ApiSpotifyCallbackRouteImport } from './routes/api.spotify-callback'
+import { Route as ApiSpotifyLoginRouteImport } from './routes/api.spotify-login'
 import { Route as ApiSprintReportRouteImport } from './routes/api.sprint-report'
 import { Route as ApiTgRouteImport } from './routes/api.tg'
 import { Route as ApiVphotoRouteImport } from './routes/api.vphoto'
@@ -66,6 +68,16 @@ const ApiPosterRoute = ApiPosterRouteImport.update({
 const ApiPushRoute = ApiPushRouteImport.update({
   id: '/api/push',
   path: '/api/push',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSpotifyCallbackRoute = ApiSpotifyCallbackRouteImport.update({
+  id: '/api/spotify-callback',
+  path: '/api/spotify-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSpotifyLoginRoute = ApiSpotifyLoginRouteImport.update({
+  id: '/api/spotify-login',
+  path: '/api/spotify-login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSprintReportRoute = ApiSprintReportRouteImport.update({
@@ -128,6 +140,8 @@ export interface FileRoutesByFullPath {
   '/api/avideo': typeof ApiAvideoRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
+  '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
+  '/api/spotify-login': typeof ApiSpotifyLoginRoute
   '/api/sprint-report': typeof ApiSprintReportRoute
   '/api/tg': typeof ApiTgRoute
   '/api/vphoto': typeof ApiVphotoRoute
@@ -147,6 +161,8 @@ export interface FileRoutesByTo {
   '/api/avideo': typeof ApiAvideoRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
+  '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
+  '/api/spotify-login': typeof ApiSpotifyLoginRoute
   '/api/sprint-report': typeof ApiSprintReportRoute
   '/api/tg': typeof ApiTgRoute
   '/api/vphoto': typeof ApiVphotoRoute
@@ -168,6 +184,8 @@ export interface FileRoutesById {
   '/api/avideo': typeof ApiAvideoRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
+  '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
+  '/api/spotify-login': typeof ApiSpotifyLoginRoute
   '/api/sprint-report': typeof ApiSprintReportRoute
   '/api/tg': typeof ApiTgRoute
   '/api/vphoto': typeof ApiVphotoRoute
@@ -190,6 +208,8 @@ export interface FileRouteTypes {
     | '/api/avideo'
     | '/api/poster'
     | '/api/push'
+    | '/api/spotify-callback'
+    | '/api/spotify-login'
     | '/api/sprint-report'
     | '/api/tg'
     | '/api/vphoto'
@@ -209,6 +229,8 @@ export interface FileRouteTypes {
     | '/api/avideo'
     | '/api/poster'
     | '/api/push'
+    | '/api/spotify-callback'
+    | '/api/spotify-login'
     | '/api/sprint-report'
     | '/api/tg'
     | '/api/vphoto'
@@ -229,6 +251,8 @@ export interface FileRouteTypes {
     | '/api/avideo'
     | '/api/poster'
     | '/api/push'
+    | '/api/spotify-callback'
+    | '/api/spotify-login'
     | '/api/sprint-report'
     | '/api/tg'
     | '/api/vphoto'
@@ -250,6 +274,8 @@ export interface RootRouteChildren {
   ApiAvideoRoute: typeof ApiAvideoRoute
   ApiPosterRoute: typeof ApiPosterRoute
   ApiPushRoute: typeof ApiPushRoute
+  ApiSpotifyCallbackRoute: typeof ApiSpotifyCallbackRoute
+  ApiSpotifyLoginRoute: typeof ApiSpotifyLoginRoute
   ApiSprintReportRoute: typeof ApiSprintReportRoute
   ApiTgRoute: typeof ApiTgRoute
   ApiVphotoRoute: typeof ApiVphotoRoute
@@ -311,6 +337,20 @@ declare module '@tanstack/react-router' {
       path: '/api/push'
       fullPath: '/api/push'
       preLoaderRoute: typeof ApiPushRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/spotify-callback': {
+      id: '/api/spotify-callback'
+      path: '/api/spotify-callback'
+      fullPath: '/api/spotify-callback'
+      preLoaderRoute: typeof ApiSpotifyCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/spotify-login': {
+      id: '/api/spotify-login'
+      path: '/api/spotify-login'
+      fullPath: '/api/spotify-login'
+      preLoaderRoute: typeof ApiSpotifyLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/sprint-report': {
@@ -419,6 +459,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAvideoRoute: ApiAvideoRoute,
   ApiPosterRoute: ApiPosterRoute,
   ApiPushRoute: ApiPushRoute,
+  ApiSpotifyCallbackRoute: ApiSpotifyCallbackRoute,
+  ApiSpotifyLoginRoute: ApiSpotifyLoginRoute,
   ApiSprintReportRoute: ApiSprintReportRoute,
   ApiTgRoute: ApiTgRoute,
   ApiVphotoRoute: ApiVphotoRoute,

@@ -14,6 +14,7 @@ import {
 } from "../data/app-data";
 import photosRaw from "../data/artist-photos.json";
 import mediaRaw from "../data/artist-media.json";
+import playersRaw from "../data/artist-players.json";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint, TrashTitle } from "../ui";
 import { GtrLightbox } from "../lightbox";
@@ -35,6 +36,28 @@ const PHOTOS = (photosRaw as { photos: Record<string, ArtistPhoto> }).photos;
 // контент остаётся у автора, мы не перезаливаем видео
 type ArtistMedia = { igReel: string; igUser: string; heroVideo?: string; heroPoster?: string };
 const MEDIA = (mediaRaw as unknown as { media: Record<string, ArtistMedia> }).media;
+
+// Плееры: Deezer top-tracks / Spotify artist / SoundCloud / Mixcloud —
+// подобраны офлайн-пайплайном по точному совпадению имени, ключей не требуют
+type ArtistPlayer = { kind: "deezer" | "spotify" | "sc" | "mixcloud"; ref: string };
+const PLAYERS = playersRaw as Record<string, ArtistPlayer>;
+
+const playerEmbed = (p: ArtistPlayer): { src: string; h: number; label: string } =>
+  p.kind === "deezer"
+    ? { src: `https://widget.deezer.com/widget/dark/artist/${p.ref}/top_tracks`, h: 300, label: "Deezer · топ-треки" }
+    : p.kind === "spotify"
+      ? { src: `https://open.spotify.com/embed/artist/${p.ref}`, h: 352, label: "Spotify" }
+      : p.kind === "sc"
+        ? {
+            src: `https://w.soundcloud.com/player/?url=${encodeURIComponent(p.ref)}&color=%23e5231b&auto_play=false&show_teaser=false`,
+            h: 400,
+            label: "SoundCloud",
+          }
+        : {
+            src: `https://player-widget.mixcloud.com/widget/iframe/?feed=${encodeURIComponent(p.ref)}&light=0`,
+            h: 180,
+            label: "Mixcloud",
+          };
 
 const KIND_LABEL: Record<string, string> = {
   all: "Все записи",
@@ -322,94 +345,175 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))",
-          gap: 11,
+          gap: 12,
         }}
       >
-        {filtered.slice(0, 90).map((a) => (
-          <Card
-            key={a.id}
-            hover
-            style={{ padding: "14px 16px" }}
-            onClick={() => openArtist(a.id)}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              {/* цветная метка типа: артист, лейбл, агентство, площадка */}
-              <span
-                title={ENTITY_KIND_LABEL[a.kind] ?? a.kind}
-                style={{
-                  width: 8,
-                  height: 8,
-                  flex: "none",
-                  borderRadius: 0,
-                  background: entityColor(a.kind),
-                }}
-              />
-              {PHOTOS[a.id] ? (
-                <img
-                  src={PHOTOS[a.id].photoMed}
-                  alt=""
-                  loading="lazy"
+        {filtered.slice(0, 90).map((a) => {
+          const photo = PHOTOS[a.id]?.photo;
+          const initials = a.name
+            .split(/\s+/)
+            .filter((w) => /^[A-Za-zА-Яа-я]/.test(w))
+            .slice(0, 2)
+            .map((w) => w[0])
+            .join("")
+            .toUpperCase();
+          return (
+            <Card
+              key={a.id}
+              hover
+              style={{ padding: 0, overflow: "hidden" }}
+              onClick={() => openArtist(a.id)}
+            >
+              {/* фото артиста в стиле карточек базы площадок; фолбэк-плашка
+                  всегда под ним — карточка остаётся фирменной, не «битой» */}
+              <div style={{ position: "relative", aspectRatio: "16/9", overflow: "hidden" }}>
+                <div
                   style={{
-                    width: 34,
-                    height: 34,
-                    flex: "none",
-                    objectFit: "cover",
-                    filter: "grayscale(.25) contrast(1.06)",
-                    clipPath:
-                      "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)",
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                      "repeating-linear-gradient(135deg, rgba(255,255,255,.028) 0 2px, transparent 2px 9px), linear-gradient(160deg, #17181C 0%, #0C0D10 100%)",
                   }}
-                />
-              ) : (
-                <LetterMark name={a.name} />
-              )}
-              <span
-                style={{
-                  font: "600 13px/1.25 'Golos Text',sans-serif",
-                  flex: 1,
-                  minWidth: 0,
-                }}
-              >
-                {a.name}
-              </span>
-              {liveMap[a.id]?.live ? (
-                <span className="gtr-live-chip">
-                  <span className="gtr-live-dot" />
-                  LIVE
+                >
+                  <span
+                    className="gtr-oswald"
+                    style={{
+                      position: "absolute",
+                      right: 14,
+                      bottom: 2,
+                      font: "700 52px/1 Oswald,sans-serif",
+                      color: "rgba(255,255,255,.07)",
+                      letterSpacing: ".04em",
+                      userSelect: "none",
+                    }}
+                  >
+                    {initials}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      top: 0,
+                      width: 3,
+                      height: "100%",
+                      background: `linear-gradient(180deg,${entityColor(a.kind)},transparent 80%)`,
+                      opacity: 0.75,
+                    }}
+                  />
+                  <span
+                    className="gtr-mono"
+                    style={{
+                      position: "absolute",
+                      left: 14,
+                      bottom: 10,
+                      font: "600 8.5px/1 'JetBrains Mono',monospace",
+                      color: "rgba(255,255,255,.3)",
+                      letterSpacing: ".14em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {ENTITY_KIND_LABEL[a.kind] ?? a.kind}
+                  </span>
+                </div>
+                {photo ? (
+                  <>
+                    <img
+                      src={photo}
+                      alt=""
+                      loading="lazy"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = "none";
+                      }}
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        objectPosition: "center 22%",
+                        display: "block",
+                        filter: "saturate(.92) contrast(1.04)",
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        background:
+                          "linear-gradient(180deg, rgba(10,11,13,.05) 45%, rgba(10,11,13,.9) 100%)",
+                        pointerEvents: "none",
+                      }}
+                    />
+                  </>
+                ) : null}
+                <span
+                  className="gtr-mono"
+                  style={{
+                    position: "absolute",
+                    top: 9,
+                    right: 9,
+                    font: "700 11px/1 'JetBrains Mono',monospace",
+                    padding: "4px 7px",
+                    background: "rgba(10,11,13,.72)",
+                    backdropFilter: "blur(3px)",
+                    color:
+                      a.prio === "A"
+                        ? GREEN
+                        : a.prio === "B"
+                          ? AMBER
+                          : "rgba(255,255,255,.5)",
+                  }}
+                >
+                  {a.prio || "—"}
                 </span>
-              ) : null}
-              {MEDIA[a.id] ? <Chip color="#FF3427">▶</Chip> : null}
-              <Chip
-                color={
-                  a.prio === "A"
-                    ? GREEN
-                    : a.prio === "B"
-                      ? AMBER
-                      : "rgba(255,255,255,.4)"
-                }
-              >
-                {a.prio || "—"}
-              </Chip>
-            </div>
-            <div
-              style={{
-                margin: "6px 0",
-                font: "500 10.5px/1.4 'Golos Text',sans-serif",
-                color: "var(--gtr-t2)",
-              }}
-            >
-              {(a.styles || []).slice(0, 3).join(" · ") || a.role}
-            </div>
-            <div
-              className="gtr-mono"
-              style={{
-                font: "500 9.5px/1.4 'JetBrains Mono',monospace",
-                color: "var(--gtr-t3)",
-              }}
-            >
-              {a.tier || a.cat} · {a.base || "—"}
-            </div>
-          </Card>
-        ))}
+                {liveMap[a.id]?.live ? (
+                  <span
+                    className="gtr-live-chip"
+                    style={{ position: "absolute", top: 9, left: 9 }}
+                  >
+                    <span className="gtr-live-dot" />
+                    LIVE
+                  </span>
+                ) : null}
+              </div>
+              <div style={{ padding: "11px 15px 14px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span
+                    style={{
+                      font: "600 13.5px/1.3 'Golos Text',sans-serif",
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                  >
+                    {a.name}
+                  </span>
+                  {PLAYERS[a.id] || MEDIA[a.id] ? <Chip color="#FF3427">▶</Chip> : null}
+                </div>
+                <div
+                  style={{
+                    margin: "5px 0 8px",
+                    font: "500 10.5px/1.45 'Golos Text',sans-serif",
+                    color: "var(--gtr-t2)",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {(a.styles || []).slice(0, 3).join(" · ") || a.role}
+                </div>
+                <div
+                  className="gtr-mono"
+                  style={{
+                    font: "500 9.5px/1.4 'JetBrains Mono',monospace",
+                    color: "var(--gtr-t3)",
+                  }}
+                >
+                  {a.tier || a.cat} · {a.base || "—"}
+                </div>
+              </div>
+            </Card>
+          );
+        })}
       </div>
       {filtered.length > 90 ? (
         <div
@@ -775,6 +879,48 @@ function ArtistCard({
             ) : null}
         </div>
       </Card>
+
+      {/* Плеер: музыка артиста прямо в профиле — Deezer/Spotify/SC/Mixcloud */}
+      {PLAYERS[a.id]
+        ? (() => {
+            const emb = playerEmbed(PLAYERS[a.id]);
+            return (
+              <Card style={{ padding: "16px 20px", margin: "14px 0" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    gap: 10,
+                    marginBottom: 12,
+                  }}
+                >
+                  <Eyebrow>СЛУШАТЬ</Eyebrow>
+                  <span
+                    className="gtr-mono"
+                    style={{
+                      font: "500 9px/1 'JetBrains Mono',monospace",
+                      color: "var(--gtr-t3)",
+                      textTransform: "uppercase",
+                      letterSpacing: ".1em",
+                    }}
+                  >
+                    {emb.label}
+                  </span>
+                </div>
+                <iframe
+                  title={`Плеер: ${a.name}`}
+                  src={emb.src}
+                  width="100%"
+                  height={emb.h}
+                  frameBorder="0"
+                  allow="encrypted-media; clipboard-write"
+                  loading="lazy"
+                  style={{ display: "block", border: "1px solid var(--gtr-border2)", background: "#0C0D10" }}
+                />
+              </Card>
+            );
+          })()
+        : null}
 
       {/* Сеты артиста — добавляет сам через кабинет */}
       {P?.sets?.length ? (

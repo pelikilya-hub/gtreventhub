@@ -1,0 +1,990 @@
+{
+ "MC-0002": {
+  "kind": "deezer",
+  "ref": "1668350"
+ },
+ "MC-0004": {
+  "kind": "spotify",
+  "ref": "2j2S2NBgQFdeQJSpUeadCi"
+ },
+ "MC-0006": {
+  "kind": "deezer",
+  "ref": "214218025"
+ },
+ "MC-0007": {
+  "kind": "deezer",
+  "ref": "349808"
+ },
+ "MC-0008": {
+  "kind": "deezer",
+  "ref": "411246"
+ },
+ "MC-0009": {
+  "kind": "deezer",
+  "ref": "145292642"
+ },
+ "MC-0011": {
+  "kind": "deezer",
+  "ref": "801342"
+ },
+ "MC-0012": {
+  "kind": "deezer",
+  "ref": "204923227"
+ },
+ "MC-0013": {
+  "kind": "deezer",
+  "ref": "173843257"
+ },
+ "MC-0014": {
+  "kind": "deezer",
+  "ref": "200052237"
+ },
+ "MC-0015": {
+  "kind": "deezer",
+  "ref": "56429422"
+ },
+ "MC-0016": {
+  "kind": "deezer",
+  "ref": "11954705"
+ },
+ "MC-0018": {
+  "kind": "deezer",
+  "ref": "90761562"
+ },
+ "MC-0019": {
+  "kind": "deezer",
+  "ref": "339852"
+ },
+ "MC-0038": {
+  "kind": "deezer",
+  "ref": "1218711"
+ },
+ "MC-0039": {
+  "kind": "deezer",
+  "ref": "5256095"
+ },
+ "MC-0042": {
+  "kind": "deezer",
+  "ref": "1660097"
+ },
+ "MC-0044": {
+  "kind": "deezer",
+  "ref": "11154642"
+ },
+ "MC-0045": {
+  "kind": "spotify",
+  "ref": "3RUNl0j2ISAQdC2Fxhj2q3"
+ },
+ "MC-0052": {
+  "kind": "deezer",
+  "ref": "93711602"
+ },
+ "MC-0065": {
+  "kind": "deezer",
+  "ref": "1648746"
+ },
+ "MC-0067": {
+  "kind": "deezer",
+  "ref": "1687165"
+ },
+ "MC-0069": {
+  "kind": "deezer",
+  "ref": "5506592"
+ },
+ "MC-0072": {
+  "kind": "deezer",
+  "ref": "5052374"
+ },
+ "MC-0073": {
+  "kind": "deezer",
+  "ref": "6962497"
+ },
+ "MC-0076": {
+  "kind": "deezer",
+  "ref": "56429422"
+ },
+ "MC-0077": {
+  "kind": "deezer",
+  "ref": "5827779"
+ },
+ "MC-0080": {
+  "kind": "deezer",
+  "ref": "66564362"
+ },
+ "MC-0082": {
+  "kind": "deezer",
+  "ref": "1336257"
+ },
+ "MC-0083": {
+  "kind": "deezer",
+  "ref": "801342"
+ },
+ "MC-0085": {
+  "kind": "deezer",
+  "ref": "1610486"
+ },
+ "MC-0086": {
+  "kind": "deezer",
+  "ref": "13682227"
+ },
+ "MC-0087": {
+  "kind": "deezer",
+  "ref": "14755"
+ },
+ "MC-0088": {
+  "kind": "deezer",
+  "ref": "13463103"
+ },
+ "MC-0089": {
+  "kind": "deezer",
+  "ref": "1854"
+ },
+ "MC-0090": {
+  "kind": "deezer",
+  "ref": "164467"
+ },
+ "MC-0091": {
+  "kind": "deezer",
+  "ref": "4242609"
+ },
+ "MC-0092": {
+  "kind": "deezer",
+  "ref": "6567"
+ },
+ "MC-0093": {
+  "kind": "deezer",
+  "ref": "10713529"
+ },
+ "MC-0094": {
+  "kind": "deezer",
+  "ref": "9549148"
+ },
+ "MC-0095": {
+  "kind": "deezer",
+  "ref": "4599335"
+ },
+ "MC-0096": {
+  "kind": "spotify",
+  "ref": "4admDxmnri5Zco0xYrJ0ji"
+ },
+ "MC-0097": {
+  "kind": "deezer",
+  "ref": "169453"
+ },
+ "MC-0098": {
+  "kind": "deezer",
+  "ref": "1427899"
+ },
+ "MC-0099": {
+  "kind": "deezer",
+  "ref": "11902995"
+ },
+ "MC-0101": {
+  "kind": "deezer",
+  "ref": "12240024"
+ },
+ "MC-0102": {
+  "kind": "deezer",
+  "ref": "88469"
+ },
+ "MC-0103": {
+  "kind": "deezer",
+  "ref": "74804"
+ },
+ "MC-0104": {
+  "kind": "deezer",
+  "ref": "404251992"
+ },
+ "MC-0105": {
+  "kind": "deezer",
+  "ref": "68959402"
+ },
+ "MC-0106": {
+  "kind": "deezer",
+  "ref": "661247"
+ },
+ "MC-0107": {
+  "kind": "spotify",
+  "ref": "1btv9qmIpbp7q1ixCYNdHu"
+ },
+ "MC-0108": {
+  "kind": "deezer",
+  "ref": "367387"
+ },
+ "MC-0109": {
+  "kind": "deezer",
+  "ref": "187358"
+ },
+ "MC-0110": {
+  "kind": "deezer",
+  "ref": "1446147"
+ },
+ "MC-0111": {
+  "kind": "deezer",
+  "ref": "54279"
+ },
+ "MC-0112": {
+  "kind": "deezer",
+  "ref": "255342292"
+ },
+ "MC-0113": {
+  "kind": "spotify",
+  "ref": "0NGAZxHanS9e0iNHpR8f2W"
+ },
+ "MC-0114": {
+  "kind": "deezer",
+  "ref": "8205210"
+ },
+ "MC-0115": {
+  "kind": "spotify",
+  "ref": "540vIaP2JwjQb9dm3aArA4"
+ },
+ "MC-0116": {
+  "kind": "spotify",
+  "ref": "2gBjLmx6zQnFGQJCAQpRgw"
+ },
+ "MC-0117": {
+  "kind": "deezer",
+  "ref": "434"
+ },
+ "MC-0118": {
+  "kind": "deezer",
+  "ref": "3968561"
+ },
+ "MC-0119": {
+  "kind": "deezer",
+  "ref": "7890702"
+ },
+ "MC-0120": {
+  "kind": "deezer",
+  "ref": "249599"
+ },
+ "MC-0121": {
+  "kind": "spotify",
+  "ref": "5LHRHt1k9lMyONurDHEdrp"
+ },
+ "MC-0122": {
+  "kind": "deezer",
+  "ref": "1518490"
+ },
+ "MC-0123": {
+  "kind": "deezer",
+  "ref": "131259"
+ },
+ "MC-0124": {
+  "kind": "deezer",
+  "ref": "262271"
+ },
+ "MC-0125": {
+  "kind": "deezer",
+  "ref": "169361"
+ },
+ "MC-0126": {
+  "kind": "deezer",
+  "ref": "310557"
+ },
+ "MC-0127": {
+  "kind": "spotify",
+  "ref": "1VJ0briNOlXRtJUAzoUJdt"
+ },
+ "MC-0129": {
+  "kind": "deezer",
+  "ref": "1442501"
+ },
+ "MC-0130": {
+  "kind": "deezer",
+  "ref": "5588799"
+ },
+ "MC-0131": {
+  "kind": "deezer",
+  "ref": "5222432"
+ },
+ "MC-0132": {
+  "kind": "deezer",
+  "ref": "4599"
+ },
+ "MC-0133": {
+  "kind": "deezer",
+  "ref": "371669"
+ },
+ "MC-0134": {
+  "kind": "deezer",
+  "ref": "164979"
+ },
+ "MC-0135": {
+  "kind": "deezer",
+  "ref": "4606095"
+ },
+ "MC-0136": {
+  "kind": "deezer",
+  "ref": "1721301"
+ },
+ "MC-0139": {
+  "kind": "deezer",
+  "ref": "7299438"
+ },
+ "MC-0140": {
+  "kind": "deezer",
+  "ref": "121983722"
+ },
+ "MC-0141": {
+  "kind": "deezer",
+  "ref": "66407"
+ },
+ "MC-0142": {
+  "kind": "deezer",
+  "ref": "3633941"
+ },
+ "MC-0143": {
+  "kind": "deezer",
+  "ref": "11895021"
+ },
+ "MC-0144": {
+  "kind": "deezer",
+  "ref": "12014886"
+ },
+ "MC-0145": {
+  "kind": "deezer",
+  "ref": "14887115"
+ },
+ "MC-0146": {
+  "kind": "deezer",
+  "ref": "12508614"
+ },
+ "MC-0147": {
+  "kind": "deezer",
+  "ref": "64817112"
+ },
+ "MC-0148": {
+  "kind": "deezer",
+  "ref": "3692611"
+ },
+ "MC-0149": {
+  "kind": "deezer",
+  "ref": "3692621"
+ },
+ "MC-0150": {
+  "kind": "deezer",
+  "ref": "1234498"
+ },
+ "MC-0151": {
+  "kind": "deezer",
+  "ref": "10139942"
+ },
+ "MC-0152": {
+  "kind": "deezer",
+  "ref": "68659092"
+ },
+ "MC-0153": {
+  "kind": "deezer",
+  "ref": "215201795"
+ },
+ "MC-0154": {
+  "kind": "deezer",
+  "ref": "10330822"
+ },
+ "MC-0155": {
+  "kind": "deezer",
+  "ref": "53365122"
+ },
+ "MC-0156": {
+  "kind": "deezer",
+  "ref": "13222825"
+ },
+ "MC-0157": {
+  "kind": "deezer",
+  "ref": "88183792"
+ },
+ "MC-0158": {
+  "kind": "deezer",
+  "ref": "54642452"
+ },
+ "MC-0159": {
+  "kind": "deezer",
+  "ref": "807129"
+ },
+ "MC-0160": {
+  "kind": "deezer",
+  "ref": "4824034"
+ },
+ "MC-0161": {
+  "kind": "deezer",
+  "ref": "92878792"
+ },
+ "MC-0163": {
+  "kind": "deezer",
+  "ref": "14871735"
+ },
+ "MC-0164": {
+  "kind": "deezer",
+  "ref": "154030892"
+ },
+ "MC-0165": {
+  "kind": "deezer",
+  "ref": "112832372"
+ },
+ "MC-0166": {
+  "kind": "deezer",
+  "ref": "10983548"
+ },
+ "MC-0167": {
+  "kind": "deezer",
+  "ref": "265822982"
+ },
+ "MC-0168": {
+  "kind": "deezer",
+  "ref": "10571343"
+ },
+ "MC-0169": {
+  "kind": "deezer",
+  "ref": "167210607"
+ },
+ "MC-0170": {
+  "kind": "deezer",
+  "ref": "342258321"
+ },
+ "MC-0171": {
+  "kind": "deezer",
+  "ref": "198917577"
+ },
+ "MC-0172": {
+  "kind": "deezer",
+  "ref": "202025327"
+ },
+ "MC-0173": {
+  "kind": "deezer",
+  "ref": "6575231"
+ },
+ "MC-0174": {
+  "kind": "deezer",
+  "ref": "288897201"
+ },
+ "MC-0175": {
+  "kind": "deezer",
+  "ref": "153742452"
+ },
+ "MC-0176": {
+  "kind": "deezer",
+  "ref": "222217675"
+ },
+ "MC-0177": {
+  "kind": "deezer",
+  "ref": "57091122"
+ },
+ "MC-0178": {
+  "kind": "deezer",
+  "ref": "182371537"
+ },
+ "MC-0179": {
+  "kind": "deezer",
+  "ref": "2001111"
+ },
+ "MC-0180": {
+  "kind": "deezer",
+  "ref": "214216145"
+ },
+ "MC-0181": {
+  "kind": "deezer",
+  "ref": "190553007"
+ },
+ "MC-0182": {
+  "kind": "deezer",
+  "ref": "4016421"
+ },
+ "MC-0183": {
+  "kind": "deezer",
+  "ref": "179822"
+ },
+ "MC-0188": {
+  "kind": "deezer",
+  "ref": "1448996"
+ },
+ "MC-0189": {
+  "kind": "deezer",
+  "ref": "15207787"
+ },
+ "MC-0190": {
+  "kind": "deezer",
+  "ref": "4080310"
+ },
+ "MC-0193": {
+  "kind": "deezer",
+  "ref": "4103436"
+ },
+ "MC-0194": {
+  "kind": "deezer",
+  "ref": "251578"
+ },
+ "MC-0195": {
+  "kind": "deezer",
+  "ref": "7986868"
+ },
+ "MC-0197": {
+  "kind": "deezer",
+  "ref": "127635332"
+ },
+ "MC-0198": {
+  "kind": "deezer",
+  "ref": "1586310"
+ },
+ "MC-0199": {
+  "kind": "deezer",
+  "ref": "4103434"
+ },
+ "MC-0200": {
+  "kind": "deezer",
+  "ref": "4103910"
+ },
+ "MC-0201": {
+  "kind": "deezer",
+  "ref": "229506535"
+ },
+ "MC-0202": {
+  "kind": "deezer",
+  "ref": "4068142"
+ },
+ "MC-0203": {
+  "kind": "deezer",
+  "ref": "137887992"
+ },
+ "MC-0204": {
+  "kind": "deezer",
+  "ref": "4053215"
+ },
+ "MC-0205": {
+  "kind": "deezer",
+  "ref": "4053218"
+ },
+ "MC-0206": {
+  "kind": "deezer",
+  "ref": "1400522"
+ },
+ "MC-0207": {
+  "kind": "deezer",
+  "ref": "7761110"
+ },
+ "MC-0208": {
+  "kind": "deezer",
+  "ref": "136051362"
+ },
+ "MC-0209": {
+  "kind": "deezer",
+  "ref": "12050650"
+ },
+ "MC-0210": {
+  "kind": "deezer",
+  "ref": "181044307"
+ },
+ "MC-0211": {
+  "kind": "deezer",
+  "ref": "6888525"
+ },
+ "MC-0212": {
+  "kind": "deezer",
+  "ref": "6575235"
+ },
+ "MC-0214": {
+  "kind": "deezer",
+  "ref": "75233112"
+ },
+ "MC-0215": {
+  "kind": "deezer",
+  "ref": "5926907"
+ },
+ "MC-0216": {
+  "kind": "deezer",
+  "ref": "4467710"
+ },
+ "MC-0218": {
+  "kind": "deezer",
+  "ref": "175112"
+ },
+ "MC-0219": {
+  "kind": "deezer",
+  "ref": "1531216"
+ },
+ "MC-0220": {
+  "kind": "deezer",
+  "ref": "4520407"
+ },
+ "MC-0221": {
+  "kind": "deezer",
+  "ref": "7920570"
+ },
+ "MC-0222": {
+  "kind": "deezer",
+  "ref": "1217064"
+ },
+ "MC-0223": {
+  "kind": "deezer",
+  "ref": "8413816"
+ },
+ "MC-0226": {
+  "kind": "deezer",
+  "ref": "9120140"
+ },
+ "MC-0228": {
+  "kind": "deezer",
+  "ref": "7821372"
+ },
+ "MC-0229": {
+  "kind": "deezer",
+  "ref": "184748"
+ },
+ "MC-0230": {
+  "kind": "deezer",
+  "ref": "8354770"
+ },
+ "MC-0231": {
+  "kind": "deezer",
+  "ref": "8720732"
+ },
+ "MC-0232": {
+  "kind": "deezer",
+  "ref": "13830297"
+ },
+ "MC-0234": {
+  "kind": "deezer",
+  "ref": "127845692"
+ },
+ "MC-0237": {
+  "kind": "deezer",
+  "ref": "4606326"
+ },
+ "MC-0240": {
+  "kind": "deezer",
+  "ref": "12250622"
+ },
+ "MC-0242": {
+  "kind": "deezer",
+  "ref": "7446926"
+ },
+ "MC-0243": {
+  "kind": "deezer",
+  "ref": "8042959"
+ },
+ "MC-0244": {
+  "kind": "deezer",
+  "ref": "271715"
+ },
+ "MC-0245": {
+  "kind": "deezer",
+  "ref": "1024301"
+ },
+ "MC-0246": {
+  "kind": "deezer",
+  "ref": "394235591"
+ },
+ "MC-0247": {
+  "kind": "deezer",
+  "ref": "2018001"
+ },
+ "MC-0248": {
+  "kind": "deezer",
+  "ref": "282468041"
+ },
+ "MC-0250": {
+  "kind": "deezer",
+  "ref": "14689733"
+ },
+ "MC-0251": {
+  "kind": "deezer",
+  "ref": "6594954"
+ },
+ "MC-0254": {
+  "kind": "deezer",
+  "ref": "1710643"
+ },
+ "MC-0255": {
+  "kind": "deezer",
+  "ref": "1203889"
+ },
+ "MC-0256": {
+  "kind": "deezer",
+  "ref": "3152241"
+ },
+ "MC-0257": {
+  "kind": "deezer",
+  "ref": "484846"
+ },
+ "MC-0259": {
+  "kind": "deezer",
+  "ref": "4153481"
+ },
+ "MC-0260": {
+  "kind": "deezer",
+  "ref": "296604"
+ },
+ "MC-0263": {
+  "kind": "deezer",
+  "ref": "263319771"
+ },
+ "MC-0264": {
+  "kind": "deezer",
+  "ref": "225276225"
+ },
+ "MC-0265": {
+  "kind": "deezer",
+  "ref": "1198437"
+ },
+ "MC-0266": {
+  "kind": "deezer",
+  "ref": "2795521"
+ },
+ "MC-0267": {
+  "kind": "deezer",
+  "ref": "4783409"
+ },
+ "MC-0268": {
+  "kind": "deezer",
+  "ref": "2358341"
+ },
+ "MC-0269": {
+  "kind": "deezer",
+  "ref": "301744"
+ },
+ "MC-0272": {
+  "kind": "deezer",
+  "ref": "4339775"
+ },
+ "MC-0274": {
+  "kind": "deezer",
+  "ref": "1643223"
+ },
+ "MC-0275": {
+  "kind": "deezer",
+  "ref": "1184236"
+ },
+ "MC-0277": {
+  "kind": "deezer",
+  "ref": "7610844"
+ },
+ "MC-0278": {
+  "kind": "deezer",
+  "ref": "2673051"
+ },
+ "MC-0279": {
+  "kind": "deezer",
+  "ref": "4339442"
+ },
+ "MC-0293": {
+  "kind": "deezer",
+  "ref": "339826101"
+ },
+ "MC-0311": {
+  "kind": "deezer",
+  "ref": "4467710"
+ },
+ "MC-0005": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/mksanto"
+ },
+ "MC-0010": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/lutang"
+ },
+ "MC-0017": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/limmie"
+ },
+ "MC-0021": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/inna-ra"
+ },
+ "MC-0022": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/ifir"
+ },
+ "MC-0023": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/adamantine"
+ },
+ "MC-0024": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/thrive-live-music"
+ },
+ "MC-0025": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/rai-maia"
+ },
+ "MC-0036": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/alekseyjustie"
+ },
+ "MC-0040": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/ivan-shumkov"
+ },
+ "MC-0048": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/marcus-cato"
+ },
+ "MC-0050": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/lewis-aung"
+ },
+ "MC-0051": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/katyacolt"
+ },
+ "MC-0054": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/mvxood"
+ },
+ "MC-0056": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/nia-obsedo"
+ },
+ "MC-0057": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/lhzvr"
+ },
+ "MC-0058": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/somabluu"
+ },
+ "MC-0062": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/artemidus"
+ },
+ "MC-0071": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/javi_sampol"
+ },
+ "MC-0074": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/holusound"
+ },
+ "MC-0075": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/sasha-belov"
+ },
+ "MC-0078": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/joe-gradante"
+ },
+ "MC-0079": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/lazykay"
+ },
+ "MC-0081": {
+  "kind": "mixcloud",
+  "ref": "/krypto/"
+ },
+ "MC-0084": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/mksanto"
+ },
+ "MC-0128": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/ron-poe"
+ },
+ "MC-0137": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/alex-vee"
+ },
+ "MC-0162": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/tonhon"
+ },
+ "MC-0184": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/copter"
+ },
+ "MC-0185": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/gizzdear"
+ },
+ "MC-0186": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/jduck"
+ },
+ "MC-0187": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/barbies"
+ },
+ "MC-0191": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/image-suthita"
+ },
+ "MC-0192": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/djjust"
+ },
+ "MC-0196": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/phufa"
+ },
+ "MC-0217": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/fung"
+ },
+ "MC-0225": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/taomild"
+ },
+ "MC-0227": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/guf"
+ },
+ "MC-0233": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/grigory-leps"
+ },
+ "MC-0235": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/zemfira"
+ },
+ "MC-0238": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/diana-arbenina"
+ },
+ "MC-0241": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/egor-kreed"
+ },
+ "MC-0252": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/polina-gagarina"
+ },
+ "MC-0253": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/umaturman"
+ },
+ "MC-0258": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/sergey-lazarev"
+ },
+ "MC-0262": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/mitya-fomin"
+ },
+ "MC-0270": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/ivanushkiinternational"
+ },
+ "MC-0271": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/zhenya-lyubich"
+ },
+ "MC-0273": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/eva-polna"
+ },
+ "MC-0276": {
+  "kind": "sc",
+  "ref": "https://soundcloud.com/dima-bilan"
+ },
+ "MC-0239": {
+  "kind": "deezer",
+  "ref": "1365309"
+ },
+ "MC-0261": {
+  "kind": "deezer",
+  "ref": "4509815"
+ },
+ "MC-0249": {
+  "kind": "deezer",
+  "ref": "4571117"
+ }
+}

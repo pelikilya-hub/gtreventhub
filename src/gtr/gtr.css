@@ -1483,3 +1483,76 @@
     backdrop-filter: blur(14px) saturate(1.15);
   }
 }
+
+/* ---------- игровая плавность: переход экрана как смена сцены ---------- */
+@keyframes gtrscreenin {
+  from { opacity: 0; transform: translateY(14px) scale(0.988); filter: blur(7px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.gtr-main.gtr-fade { animation: gtrscreenin 0.5s cubic-bezier(0.32, 0.72, 0, 1) both; }
+html { -webkit-tap-highlight-color: transparent; }
+.gtr-app { touch-action: manipulation; }
+
+/* ---------- мобильная игровая графика (тест: iPhone 12 Pro Max) ---------- */
+@media (max-width: 860px) {
+  /* перф: blur на скроллящихся карточках роняет кадры —
+     на мобиле карточки плотные и мгновенные, стекло уходит на fixed-слои */
+  .gtr-app .gtr-card {
+    background: rgba(15, 16, 19, 0.93);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  /* атмосфера легче: два орба, мягче blur — стабильные кадры */
+  .gtr-atmo span { filter: blur(56px); opacity: 0.5; }
+  .gtr-atmo span:nth-child(3),
+  .gtr-atmo span:nth-child(4) { display: none; }
+
+  /* тач-физика: всё нажимаемое отвечает пружинным сжатием */
+  .gtr-btn,
+  .gtr-card-hover,
+  .gtr-nav-item { transition: transform 0.14s cubic-bezier(0.32, 0.72, 0, 1); }
+  .gtr-btn:active,
+  .gtr-nav-item:active { transform: scale(0.96); }
+  .gtr-card-hover:active { transform: scale(0.975); }
+
+  /* шапка — тяжёлое стекло (fixed: производительности не мешает) */
+  .gtr-topbar {
+    background: rgba(10, 11, 13, 0.7);
+    -webkit-backdrop-filter: blur(18px) saturate(1.25);
+    backdrop-filter: blur(18px) saturate(1.25);
+  }
+  /* дровер меню — стеклянная панель с пружинным выездом */
+  .gtr-sidebar {
+    background: rgba(12, 13, 16, 0.78);
+    -webkit-backdrop-filter: blur(26px) saturate(1.25);
+    backdrop-filter: blur(26px) saturate(1.25);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .gtr-scrim {
+    background: rgba(0, 0, 0, 0.42);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+  }
+  /* пункты меню выезжают каскадом, как игровое меню паузы */
+  .nav-open .gtr-sidebar .gtr-nav-item {
+    animation: gtrnavin 0.42s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  .nav-open .gtr-sidebar .gtr-nav-item:nth-of-type(1) { animation-delay: 0.03s; }
+  .nav-open .gtr-sidebar .gtr-nav-item:nth-of-type(2) { animation-delay: 0.06s; }
+  .nav-open .gtr-sidebar .gtr-nav-item:nth-of-type(3) { animation-delay: 0.09s; }
+  .nav-open .gtr-sidebar .gtr-nav-item:nth-of-type(4) { animation-delay: 0.12s; }
+  .nav-open .gtr-sidebar .gtr-nav-item:nth-of-type(5) { animation-delay: 0.15s; }
+  .nav-open .gtr-sidebar .gtr-nav-item:nth-of-type(6) { animation-delay: 0.18s; }
+  .nav-open .gtr-sidebar .gtr-nav-item:nth-of-type(7) { animation-delay: 0.21s; }
+  .nav-open .gtr-sidebar .gtr-nav-item:nth-of-type(8) { animation-delay: 0.24s; }
+  .nav-open .gtr-sidebar .gtr-nav-item:nth-of-type(9) { animation-delay: 0.27s; }
+  .nav-open .gtr-sidebar .gtr-nav-item:nth-of-type(10) { animation-delay: 0.3s; }
+}
+@keyframes gtrnavin {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-main.gtr-fade,
+  .nav-open .gtr-sidebar .gtr-nav-item { animation: none; }
+}

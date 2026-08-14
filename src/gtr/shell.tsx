@@ -39,6 +39,9 @@ import {
   AiMatchScreen,
   CommunityScreen,
   FeedScreen,
+} from "./screens/Platform";
+import { TonightScreen } from "./screens/Tonight";
+import {
   MyShowsScreen,
   PromoScreen,
   VisasScreen,
@@ -405,6 +408,8 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
       return <MapScreen />;
     case "feed":
       return <FeedScreen />;
+    case "tonight":
+      return <TonightScreen />;
     case "aimatch":
       return <AiMatchScreen />;
     case "community":

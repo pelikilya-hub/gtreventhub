@@ -160,6 +160,7 @@ export type ScreenId =
   | "afishagen"
   | "map"
   | "feed"
+  | "tonight"
   | "aimatch"
   | "community"
   | "visas"
@@ -231,6 +232,7 @@ export const NAV_NET: [ScreenId, string, string, string][] = [
 // ---------- три вариации меню платформы (фаза A) ----------
 export const NAV_ARTIST: [ScreenId, string, string, string][] = [
   ["dash", "Мой профиль", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", ""],
+  ["tonight", "Сегодня", "M12 3v2 M12 19v2 M3 12h2 M19 12h2 M5.6 5.6l1.4 1.4 M17 17l1.4 1.4 M5.6 18.4 7 17 M17 7l1.4-1.4 M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z", ""],
   ["feed", "События", "M4 4h16v16H4z M4 9h16 M9 13h6", ""],
   ["base", "Заведения", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "104"],
   ["aimatch", "ИИ подбор", "M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6l-6-4.4h7.6z", ""],
@@ -241,6 +243,7 @@ export const NAV_ARTIST: [ScreenId, string, string, string][] = [
 ];
 export const NAV_VISITOR: [ScreenId, string, string, string][] = [
   ["dash", "Мой профиль", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", ""],
+  ["tonight", "Сегодня", "M12 3v2 M12 19v2 M3 12h2 M19 12h2 M5.6 5.6l1.4 1.4 M17 17l1.4 1.4 M5.6 18.4 7 17 M17 7l1.4-1.4 M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z", ""],
   ["feed", "События", "M4 4h16v16H4z M4 9h16 M9 13h6", ""],
   ["base", "Заведения", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "104"],
   ["aimatch", "ИИ подбор", "M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6l-6-4.4h7.6z", ""],
@@ -249,6 +252,7 @@ export const NAV_VISITOR: [ScreenId, string, string, string][] = [
   ["map", "Карта", "M1 6v16l7-4 8 4 7-4V2l-7 4-8-4z M8 2v16 M16 6v16", ""],
 ];
 export const NAV_PLATFORM_VENUE: [ScreenId, string, string, string][] = [
+  ["tonight", "Сегодня", "M12 3v2 M12 19v2 M3 12h2 M19 12h2 M5.6 5.6l1.4 1.4 M17 17l1.4 1.4 M5.6 18.4 7 17 M17 7l1.4-1.4 M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z", ""],
   ["artists", "Дашборд артистов", "M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z M21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z", "312"],
   ["aimatch", "ИИ подбор артистов", "M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6l-6-4.4h7.6z", ""],
   ["vendors", "Каталог подрядчиков", "M4 13a8 8 0 0 1 16 0 M4 13v5a2 2 0 0 0 2 2h2v-7H4z M20 13v5a2 2 0 0 1-2 2h-2v-7h4z", "12"],

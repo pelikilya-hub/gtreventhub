@@ -19,12 +19,22 @@ import {
   type ScreenId,
 } from "../data/app-data";
 import { useGtr } from "../store";
+import { FAMILY_LABEL } from "../match";
 import { useTranslation } from "react-i18next";
 import { ArtistStudio } from "./ArtistStudio";
 import i18n, { setUiLang, UI_LANGS, type UiLang } from "../i18n";
 import { Card, Chip, Dot, Eyebrow, Icon, Ring } from "../ui";
 import { ImpulseArt } from "../impulse";
-import { createInviteFn, decideOfferFn, getPrefsFn, setLiveFn, setPrefsFn, tgLinkFn, tgStatusFn } from "../kv-api";
+import {
+  createInviteFn,
+  decideOfferFn,
+  getPrefsFn,
+  musicProfileFn,
+  setLiveFn,
+  setPrefsFn,
+  tgLinkFn,
+  tgStatusFn,
+} from "../kv-api";
 import { BossCabinet, PushPanel, TgChip } from "./Boss";
 import { openAppLink } from "../applink";
 import { OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
@@ -1698,11 +1708,16 @@ function VisitorCabinet() {
   const { user } = useGtr();
   const navigate = useNavigate();
   const go = (s: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: s } });
+  const [mp, setMp] = useState<import("../spotify").MusicProfile | null>(null);
+  useEffect(() => {
+    musicProfileFn().then((r) => setMp(r.profile)).catch(() => {});
+  }, []);
   const TILES: [ScreenId, string, string][] = [
+    ["tonight", "Сегодня на Пхукете", "Куда пойти вечером: события, бронь стола, маршрут по местам"],
     ["feed", "События Пхукета", "Афиши 104 заведений, обновляются каждые 6 часов"],
     ["map", "Карта", "Все заведения острова точками — от Патонга до Ката"],
     ["promo", "Бронь столов", "Заявка за минуту — подтверждение в Telegram"],
-    ["aimatch", "ИИ подбор", "Куда идти под ваш музыкальный вкус — фаза B"],
+    ["aimatch", "ИИ подбор", "Куда идти под ваш музыкальный вкус — уже работает"],
   ];
   return (
     <div style={{ maxWidth: 980, margin: "0 auto" }}>
@@ -1730,11 +1745,32 @@ function VisitorCabinet() {
         ))}
       </div>
       <Card style={{ padding: "16px 20px", marginBottom: 14, display: "grid", gap: 10 }}>
-        <Eyebrow>{t("МУЗЫКАЛЬНЫЙ ПРОФИЛЬ")}</Eyebrow>
-        <div style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-          {t("Подключение Spotify и визуальная статистика вашего вкуса — фаза B. Как только запустим, здесь появится кнопка подключения.")}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span className="gtr-eq" aria-hidden><span /><span /><span /><span /></span>
+          <Eyebrow>{t("МУЗЫКАЛЬНЫЙ ПРОФИЛЬ")}</Eyebrow>
+          {mp ? <Chip color="#2ECC71">{t("СОБРАН")}</Chip> : null}
         </div>
-        <span><Chip color="#F5A623">{t("СКОРО")}</Chip></span>
+        {mp ? (
+          <>
+            <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+              {mp.genres.slice(0, 5).map(([fam]) => (
+                <Chip key={fam} color="rgba(255,255,255,.55)">{FAMILY_LABEL[fam] ?? fam}</Chip>
+              ))}
+            </div>
+            <button className="gtr-btn" style={{ justifySelf: "start" }} onClick={() => go("aimatch")}>
+              {t("Мои рекомендации")} →
+            </button>
+          </>
+        ) : (
+          <>
+            <div style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+              {t("Выберите любимые жанры за 30 секунд — и получите заведения и события под свой вкус.")}
+            </div>
+            <button className="gtr-btn gtr-btn-red" style={{ justifySelf: "start" }} onClick={() => go("aimatch")}>
+              {t("Собрать мой профиль")} →
+            </button>
+          </>
+        )}
       </Card>
       <Card style={{ padding: "16px 20px", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         <Eyebrow>{t("НАСТРОЙКИ")}</Eyebrow>

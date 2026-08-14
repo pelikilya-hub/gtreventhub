@@ -265,12 +265,11 @@ async function kvListAllLocal(ns: KvNs, prefix: string): Promise<string[]> {
 // Полный проход: по адаптеру на площадку. Возвращает счётчики для отчёта.
 // Resident Advisor: открытый GraphQL, событList по id площадки. Даёт
 // подтверждённые международные лайнапы — организаторы видят занятые даты.
-const RA_VENUES: [string, number][] = [
-  ["VEN-0002", 137028], // Café del Mar Phuket
-  ["VEN-0013", 162517], // Illuzion
-  ["VEN-0015", 160713], // Shelter
-  ["VEN-0055", 114662], // Paradise Beach
-];
+// Карта id собрана автоматически точным поиском по каталогу (ra-map).
+import raMapRaw from "./data/ra-venues.json";
+const RA_VENUES: [string, number][] = Object.entries(
+  raMapRaw as Record<string, { raId: number }>,
+).map(([vid, m]) => [vid, m.raId]);
 
 async function syncResidentAdvisor(raId: number): Promise<VenueAfishaEvent[]> {
   const res = await fetch("https://ra.co/graphql", {

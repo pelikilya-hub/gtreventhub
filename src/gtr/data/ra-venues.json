@@ -1,0 +1,46 @@
+{
+ "VEN-0003": {
+  "raId": 225458,
+  "raName": "Carpe Diem Beach Club - Phuket"
+ },
+ "VEN-0001": {
+  "raId": 127444,
+  "raName": "Catch Beach Club"
+ },
+ "VEN-0004": {
+  "raId": 104496,
+  "raName": "Xana Beach Club"
+ },
+ "VEN-0002": {
+  "raId": 137028,
+  "raName": "Café del Mar Phuket"
+ },
+ "VEN-0050": {
+  "raId": 281864,
+  "raName": "Fira Beach Club Phuket"
+ },
+ "VEN-0055": {
+  "raId": 114662,
+  "raName": "Paradise Beach Phuket"
+ },
+ "VEN-0010": {
+  "raId": 254838,
+  "raName": "Fuga Beach Club"
+ },
+ "VEN-0015": {
+  "raId": 160713,
+  "raName": "Shelter Phuket"
+ },
+ "VEN-0016": {
+  "raId": 279956,
+  "raName": "Armania Phuket"
+ },
+ "VEN-0013": {
+  "raId": 162517,
+  "raName": "Illuzion Phuket"
+ },
+ "VEN-0029": {
+  "raId": 208213,
+  "raName": "Blue tree phuket"
+ }
+}

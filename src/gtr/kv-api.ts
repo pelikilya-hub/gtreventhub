@@ -1215,3 +1215,17 @@ export const styleProfileFn = createServerFn({ method: "GET" })
     const profile = await kvGetJson<StyleProfile>(ns, `styleprofile:${data.vid}`);
     return { profile };
   });
+
+// Фото, загруженные самой площадкой через форму подтверждения
+export const venuePhotosFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { vid: string }) => d)
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    if (!ns) return { photos: [] as string[] };
+    const keys = await kvListAll(ns, `vphoto:${data.vid}:`);
+    return {
+      photos: keys.map(
+        (k) => `/api/vphoto?k=${encodeURIComponent(k.slice("vphoto:".length))}`,
+      ),
+    };
+  });

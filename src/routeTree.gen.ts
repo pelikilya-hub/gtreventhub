@@ -12,9 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GtrRouteRouteImport } from './routes/gtr/route'
 import { Route as ApiAfishaRouteImport } from './routes/api.afisha'
+import { Route as ApiAfishaSendRouteImport } from './routes/api.afisha-send'
 import { Route as ApiPosterRouteImport } from './routes/api.poster'
 import { Route as ApiPushRouteImport } from './routes/api.push'
+import { Route as ApiSprintReportRouteImport } from './routes/api.sprint-report'
 import { Route as ApiTgRouteImport } from './routes/api.tg'
+import { Route as ApiVphotoRouteImport } from './routes/api.vphoto'
 import { Route as GtrIndexRouteImport } from './routes/gtr/index'
 import { Route as GtrScreenRouteImport } from './routes/gtr/$screen'
 import { Route as GtrJoinRouteImport } from './routes/gtr/join'
@@ -37,6 +40,11 @@ const ApiAfishaRoute = ApiAfishaRouteImport.update({
   path: '/api/afisha',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAfishaSendRoute = ApiAfishaSendRouteImport.update({
+  id: '/api/afisha-send',
+  path: '/api/afisha-send',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPosterRoute = ApiPosterRouteImport.update({
   id: '/api/poster',
   path: '/api/poster',
@@ -47,9 +55,19 @@ const ApiPushRoute = ApiPushRouteImport.update({
   path: '/api/push',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSprintReportRoute = ApiSprintReportRouteImport.update({
+  id: '/api/sprint-report',
+  path: '/api/sprint-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTgRoute = ApiTgRouteImport.update({
   id: '/api/tg',
   path: '/api/tg',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVphotoRoute = ApiVphotoRouteImport.update({
+  id: '/api/vphoto',
+  path: '/api/vphoto',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GtrIndexRoute = GtrIndexRouteImport.update({
@@ -87,9 +105,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
   '/api/afisha': typeof ApiAfishaRoute
+  '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
+  '/api/sprint-report': typeof ApiSprintReportRoute
   '/api/tg': typeof ApiTgRoute
+  '/api/vphoto': typeof ApiVphotoRoute
   '/gtr/$screen': typeof GtrScreenRoute
   '/gtr/join': typeof GtrJoinRoute
   '/gtr/login': typeof GtrLoginRoute
@@ -100,9 +121,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/afisha': typeof ApiAfishaRoute
+  '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
+  '/api/sprint-report': typeof ApiSprintReportRoute
   '/api/tg': typeof ApiTgRoute
+  '/api/vphoto': typeof ApiVphotoRoute
   '/gtr/$screen': typeof GtrScreenRoute
   '/gtr/join': typeof GtrJoinRoute
   '/gtr/login': typeof GtrLoginRoute
@@ -115,9 +139,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
   '/api/afisha': typeof ApiAfishaRoute
+  '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
+  '/api/sprint-report': typeof ApiSprintReportRoute
   '/api/tg': typeof ApiTgRoute
+  '/api/vphoto': typeof ApiVphotoRoute
   '/gtr/$screen': typeof GtrScreenRoute
   '/gtr/join': typeof GtrJoinRoute
   '/gtr/login': typeof GtrLoginRoute
@@ -131,9 +158,12 @@ export interface FileRouteTypes {
     | '/'
     | '/gtr'
     | '/api/afisha'
+    | '/api/afisha-send'
     | '/api/poster'
     | '/api/push'
+    | '/api/sprint-report'
     | '/api/tg'
+    | '/api/vphoto'
     | '/gtr/$screen'
     | '/gtr/join'
     | '/gtr/login'
@@ -144,9 +174,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/api/afisha'
+    | '/api/afisha-send'
     | '/api/poster'
     | '/api/push'
+    | '/api/sprint-report'
     | '/api/tg'
+    | '/api/vphoto'
     | '/gtr/$screen'
     | '/gtr/join'
     | '/gtr/login'
@@ -158,9 +191,12 @@ export interface FileRouteTypes {
     | '/'
     | '/gtr'
     | '/api/afisha'
+    | '/api/afisha-send'
     | '/api/poster'
     | '/api/push'
+    | '/api/sprint-report'
     | '/api/tg'
+    | '/api/vphoto'
     | '/gtr/$screen'
     | '/gtr/join'
     | '/gtr/login'
@@ -173,9 +209,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GtrRouteRoute: typeof GtrRouteRouteWithChildren
   ApiAfishaRoute: typeof ApiAfishaRoute
+  ApiAfishaSendRoute: typeof ApiAfishaSendRoute
   ApiPosterRoute: typeof ApiPosterRoute
   ApiPushRoute: typeof ApiPushRoute
+  ApiSprintReportRoute: typeof ApiSprintReportRoute
   ApiTgRoute: typeof ApiTgRoute
+  ApiVphotoRoute: typeof ApiVphotoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -201,6 +240,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAfishaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/afisha-send': {
+      id: '/api/afisha-send'
+      path: '/api/afisha-send'
+      fullPath: '/api/afisha-send'
+      preLoaderRoute: typeof ApiAfishaSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/poster': {
       id: '/api/poster'
       path: '/api/poster'
@@ -215,11 +261,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPushRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/sprint-report': {
+      id: '/api/sprint-report'
+      path: '/api/sprint-report'
+      fullPath: '/api/sprint-report'
+      preLoaderRoute: typeof ApiSprintReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/tg': {
       id: '/api/tg'
       path: '/api/tg'
       fullPath: '/api/tg'
       preLoaderRoute: typeof ApiTgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/vphoto': {
+      id: '/api/vphoto'
+      path: '/api/vphoto'
+      fullPath: '/api/vphoto'
+      preLoaderRoute: typeof ApiVphotoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gtr/': {
@@ -293,9 +353,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GtrRouteRoute: GtrRouteRouteWithChildren,
   ApiAfishaRoute: ApiAfishaRoute,
+  ApiAfishaSendRoute: ApiAfishaSendRoute,
   ApiPosterRoute: ApiPosterRoute,
   ApiPushRoute: ApiPushRoute,
+  ApiSprintReportRoute: ApiSprintReportRoute,
   ApiTgRoute: ApiTgRoute,
+  ApiVphotoRoute: ApiVphotoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

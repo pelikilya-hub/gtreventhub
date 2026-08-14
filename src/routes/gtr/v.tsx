@@ -35,6 +35,10 @@ const T: Record<Lang, Record<string, string>> = {
     unitHour: "hour",
     covers: "What's included",
     notes: "Notes (optional)",
+    photos: "VENUE PHOTOS",
+    photosNote: "Add 3–6 photos — organizers will see your venue at its best.",
+    photosAdd: "Add photos",
+    photosLimit: "Photo limit reached (6)",
     submit: "CONFIRM DETAILS",
     done: "Thank you! Details confirmed.",
     doneSub: "Our team will be in touch. Update anytime via the same link.",
@@ -60,6 +64,10 @@ const T: Record<Lang, Record<string, string>> = {
     unitHour: "ชั่วโมง",
     covers: "รวมอะไรบ้าง",
     notes: "หมายเหตุ",
+    photos: "รูปภาพสถานที่",
+    photosNote: "เพิ่มรูป 3–6 รูป เพื่อให้ผู้จัดงานเห็นสถานที่ของคุณอย่างดีที่สุด",
+    photosAdd: "เพิ่มรูปภาพ",
+    photosLimit: "ครบจำนวนรูปแล้ว (6)",
     submit: "ยืนยันข้อมูล",
     done: "ขอบคุณ! ยืนยันข้อมูลเรียบร้อย",
     doneSub: "ทีมงานจะติดต่อกลับ แก้ไขได้ทุกเมื่อผ่านลิงก์เดิม",
@@ -85,6 +93,10 @@ const T: Record<Lang, Record<string, string>> = {
     unitHour: "час",
     covers: "Что входит",
     notes: "Комментарий",
+    photos: "ФОТО ПЛОЩАДКИ",
+    photosNote: "Добавьте 3–6 фото — организаторы увидят площадку с лучшей стороны.",
+    photosAdd: "Добавить фото",
+    photosLimit: "Достигнут лимит фото (6)",
     submit: "ПОДТВЕРДИТЬ ДАННЫЕ",
     done: "Спасибо! Данные подтверждены.",
     doneSub: "Команда свяжется с вами. Обновить можно по той же ссылке.",
@@ -113,6 +125,49 @@ function VenueConfirmPage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [done, setDone] = useState(false);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(0);
+
+  // клиентское сжатие до 1600px — фото с телефона уходят быстро
+  const compress = (f: File) =>
+    new Promise<Blob | null>((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const sc = Math.min(1, 1600 / Math.max(img.width, img.height));
+        const cv = document.createElement("canvas");
+        cv.width = Math.round(img.width * sc);
+        cv.height = Math.round(img.height * sc);
+        cv.getContext("2d")?.drawImage(img, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(img.src);
+        cv.toBlob((b) => resolve(b), "image/jpeg", 0.82);
+      };
+      img.onerror = () => resolve(null);
+      img.src = URL.createObjectURL(f);
+    });
+
+  const addPhotos = async (files: FileList | null) => {
+    if (!files) return;
+    const room = 6 - photos.length;
+    const list = [...files].slice(0, Math.max(0, room));
+    setUploading((u) => u + list.length);
+    for (const f of list) {
+      try {
+        const blob = await compress(f);
+        if (!blob) continue;
+        const res = await fetch(`/api/vphoto?t=${encodeURIComponent(token)}`, {
+          method: "POST",
+          headers: { "content-type": "image/jpeg" },
+          body: blob,
+        });
+        const j = (await res.json()) as { ok?: boolean; path?: string };
+        if (j.ok && j.path) setPhotos((p) => [...p, j.path as string]);
+      } catch {
+        // одно не ушло — остальные продолжаем
+      } finally {
+        setUploading((u) => u - 1);
+      }
+    }
+  };
 
   const submit = async () => {
     if (!name.trim() || !phone.trim()) return setErr(t.required);
@@ -326,6 +381,60 @@ function VenueConfirmPage() {
                   onChange={(e) => setNotes(e.target.value)}
                 />
               </div>
+            </div>
+
+            <div className="gtr-card" style={{ padding: "20px 22px", display: "grid", gap: 10 }}>
+              <Eyebrow>{t.photos}</Eyebrow>
+              <div
+                style={{
+                  font: "500 11px/1.55 'Golos Text',sans-serif",
+                  color: "var(--gtr-t2)",
+                }}
+              >
+                {t.photosNote}
+              </div>
+              {photos.length ? (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {photos.map((p) => (
+                    <img
+                      key={p}
+                      src={p}
+                      alt=""
+                      style={{
+                        width: 76,
+                        height: 76,
+                        objectFit: "cover",
+                        border: "1px solid rgba(255,255,255,.15)",
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : null}
+              <label
+                className="gtr-btn"
+                style={{
+                  justifySelf: "start",
+                  cursor: photos.length >= 6 ? "not-allowed" : "pointer",
+                  opacity: photos.length >= 6 ? 0.5 : 1,
+                }}
+              >
+                {uploading > 0
+                  ? `… ${uploading}`
+                  : photos.length >= 6
+                    ? t.photosLimit
+                    : `+ ${t.photosAdd} (${photos.length}/6)`}
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  disabled={photos.length >= 6}
+                  style={{ display: "none" }}
+                  onChange={(e) => {
+                    void addPhotos(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
             </div>
 
             {err ? (

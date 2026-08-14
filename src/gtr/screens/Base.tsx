@@ -24,6 +24,7 @@ import {
   styleProfileFn,
   syncAfishaNowFn,
   venueConfirmsFn,
+  venuePhotosFn,
   type StyleProfile,
   type VenueConfirm,
 } from "../kv-api";
@@ -295,10 +296,15 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
   const v = vid ? V(vid) : undefined;
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [confirm, setConfirm] = useState<VenueConfirm | null>(null);
+  const [vphotos, setVphotos] = useState<string[]>([]);
+  const [vpLightbox, setVpLightbox] = useState<number | null>(null);
   useEffect(() => {
     if (!vid) return;
     venueConfirmsFn()
       .then((r) => setConfirm(r.confirms[vid] ?? null))
+      .catch(() => {});
+    venuePhotosFn({ data: { vid } })
+      .then((r) => setVphotos(r.photos))
       .catch(() => {});
   }, [vid]);
   if (!v?.id)
@@ -528,6 +534,44 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                   index={lightbox}
                   credit={rich.credit}
                   onClose={() => setLightbox(null)}
+                />
+              ) : null}
+            </Card>
+          ) : null}
+
+          {vphotos.length ? (
+            <Card style={{ padding: 18 }}>
+              <Eyebrow style={{ marginBottom: 10 }}>
+                ФОТО ОТ ПЛОЩАДКИ · {vphotos.length}
+              </Eyebrow>
+              <div
+                className="gtr-gallery"
+                style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}
+              >
+                {vphotos.map((src, gi) => (
+                  <img
+                    key={src}
+                    src={src}
+                    alt=""
+                    loading="lazy"
+                    onClick={() => setVpLightbox(gi)}
+                    style={{
+                      width: "100%",
+                      aspectRatio: "3/2",
+                      objectFit: "cover",
+                      borderRadius: 0,
+                      border: "1px solid rgba(46,204,113,.25)",
+                      cursor: "zoom-in",
+                    }}
+                  />
+                ))}
+              </div>
+              {vpLightbox !== null ? (
+                <GtrLightbox
+                  images={vphotos}
+                  index={vpLightbox}
+                  credit="Фото загружены площадкой"
+                  onClose={() => setVpLightbox(null)}
                 />
               ) : null}
             </Card>

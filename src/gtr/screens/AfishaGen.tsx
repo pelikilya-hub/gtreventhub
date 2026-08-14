@@ -326,6 +326,43 @@ export function AfishaGenScreen() {
     }, "image/png");
   };
 
+  const [tgState, setTgState] = useState<"idle" | "busy" | "ok" | "err">("idle");
+  const [tgMsg, setTgMsg] = useState("");
+  const sendTg = () => {
+    const cv = canvasRef.current;
+    if (!cv || tgState === "busy") return;
+    setTgState("busy");
+    cv.toBlob(async (blob) => {
+      if (!blob) return setTgState("err");
+      try {
+        const caption = [
+          artist?.name,
+          title,
+          venue?.name,
+          dateLabel,
+        ]
+          .filter(Boolean)
+          .join(" · ");
+        const res = await fetch(
+          `/api/afisha-send?caption=${encodeURIComponent(caption)}`,
+          { method: "POST", headers: { "content-type": "image/png" }, body: blob },
+        );
+        const j = (await res.json()) as { ok?: boolean; personal?: boolean; reason?: string };
+        if (j.ok) {
+          setTgState("ok");
+          setTgMsg(j.personal ? "Ушло вам в Telegram" : "Ушло в общий канал");
+        } else {
+          setTgState("err");
+          setTgMsg(j.reason ?? "не отправилось");
+        }
+      } catch {
+        setTgState("err");
+        setTgMsg("сеть");
+      }
+      setTimeout(() => setTgState("idle"), 4000);
+    }, "image/png");
+  };
+
   if (!allowed)
     return (
       <div
@@ -585,9 +622,29 @@ export function AfishaGenScreen() {
                 </div>
               ) : null}
             </div>
-            <button className="gtr-btn gtr-btn-red" onClick={download} disabled={rendering}>
-              Скачать PNG · {SIZES[size].w}×{SIZES[size].h}
-            </button>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <button className="gtr-btn gtr-btn-red" onClick={download} disabled={rendering}>
+                Скачать PNG · {SIZES[size].w}×{SIZES[size].h}
+              </button>
+              <button
+                className="gtr-btn"
+                onClick={sendTg}
+                disabled={rendering || tgState === "busy"}
+                style={
+                  tgState === "ok"
+                    ? { borderColor: "rgba(46,204,113,.6)", color: "#2ECC71" }
+                    : undefined
+                }
+              >
+                {tgState === "busy"
+                  ? "Отправляю…"
+                  : tgState === "ok"
+                    ? `✓ ${tgMsg}`
+                    : tgState === "err"
+                      ? `⚠ ${tgMsg}`
+                      : "В Telegram →"}
+              </button>
+            </div>
           </Card>
         </div>
 

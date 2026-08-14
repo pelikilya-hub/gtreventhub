@@ -464,10 +464,12 @@
    screen-блендинг, медленные несинхронные орбиты — дым и лучи в зале. */
 .gtr-atmo {
   position: fixed;
-  inset: 0;
+  inset: -30px; /* запас, чтобы параллакс не оголял края */
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  /* сенсоры движения: наклон телефона ведёт свет за собой */
+  transform: translate3d(var(--gtr-tilt-x, 0px), var(--gtr-tilt-y, 0px), 0);
 }
 .gtr-atmo span {
   position: absolute;
@@ -523,6 +525,9 @@
 
 /* контент — поверх атмосферы */
 .gtr-main, .gtr-sidebar { position: relative; z-index: 1; }
+.gtr-main {
+  transform: translate3d(calc(var(--gtr-tilt-x, 0px) * -0.22), calc(var(--gtr-tilt-y, 0px) * -0.22), 0);
+}
 
 /* ---------- дизайнерский слой 2: музыка в движении ---------- */
 
@@ -1489,7 +1494,7 @@
   from { opacity: 0; transform: translateY(14px) scale(0.988); filter: blur(7px); }
   to { opacity: 1; transform: none; filter: none; }
 }
-.gtr-main.gtr-fade { animation: gtrscreenin 0.5s cubic-bezier(0.32, 0.72, 0, 1) both; }
+.gtr-screenin { animation: gtrscreenin 0.5s cubic-bezier(0.32, 0.72, 0, 1) both; }
 html { -webkit-tap-highlight-color: transparent; }
 .gtr-app { touch-action: manipulation; }
 
@@ -1553,6 +1558,6 @@ html { -webkit-tap-highlight-color: transparent; }
   to { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .gtr-main.gtr-fade,
+  .gtr-screenin,
   .nav-open .gtr-sidebar .gtr-nav-item { animation: none; }
 }

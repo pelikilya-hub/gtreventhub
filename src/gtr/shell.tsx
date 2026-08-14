@@ -41,6 +41,7 @@ import {
   FeedScreen,
 } from "./screens/Platform";
 import { TonightScreen } from "./screens/Tonight";
+import { useDeviceTilt } from "./motion";
 import {
   MyShowsScreen,
   PromoScreen,
@@ -87,6 +88,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
 
   // Мобильное меню: на узком экране сайдбар живёт как выезжающая панель
   const [navOpen, setNavOpen] = useState(false);
+  useDeviceTilt(); // гироскоп: наклон телефона двигает атмосферный свет
 
   const go = (id: ScreenId) => {
     setNavOpen(false);
@@ -358,7 +360,8 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
       </aside>
 
       {/* ---------- контент ---------- */}
-      <main key={screen} className="gtr-fade gtr-main">
+      <main className="gtr-main">
+        <div key={screen} className="gtr-screenin">
         <Suspense
           fallback={
             <div
@@ -371,6 +374,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
         >
           <ScreenSwitch screen={screen} search={search} />
         </Suspense>
+        </div>
       </main>
     </div>
   );

@@ -459,6 +459,103 @@
 }
 .gtr-presence { animation: gtrpulse 2s ease-out infinite; }
 
+/* ---------- дизайнерский слой 2: музыка в движении ---------- */
+
+/* жанровый бар: налив слева каскадом + блик, пробегающий по градиенту */
+@keyframes gtrbarfill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes gtrsheen {
+  0% { transform: translateX(-130%) skewX(-18deg); }
+  55%, 100% { transform: translateX(420%) skewX(-18deg); }
+}
+.gtr-genrebar {
+  position: relative;
+  overflow: hidden;
+  transform-origin: left center;
+  animation: gtrbarfill 0.85s cubic-bezier(0.16, 0.84, 0.28, 1) both;
+  animation-delay: var(--gtr-d, 0s);
+}
+.gtr-genrebar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 30%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: gtrsheen 3.6s ease-in-out infinite;
+  animation-delay: calc(var(--gtr-d, 0s) + 0.9s);
+}
+
+/* фирменный эквалайзер: четыре столбика в ритме */
+@keyframes gtreq {
+  0%, 100% { transform: scaleY(0.28); }
+  35% { transform: scaleY(1); }
+  65% { transform: scaleY(0.5); }
+}
+.gtr-eq {
+  display: inline-flex;
+  gap: 2px;
+  align-items: flex-end;
+  height: 11px;
+  flex: none;
+}
+.gtr-eq span {
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--gtr-red-hot, #ff3427), var(--gtr-red, #e5231b));
+  transform-origin: bottom;
+  animation: gtreq 0.9s ease-in-out infinite;
+}
+.gtr-eq span:nth-child(2) { animation-delay: 0.18s; height: 78%; }
+.gtr-eq span:nth-child(3) { animation-delay: 0.34s; height: 92%; }
+.gtr-eq span:nth-child(4) { animation-delay: 0.5s; height: 64%; }
+
+/* поп выбранного чипа: короткий упругий скейл с красной вспышкой */
+@keyframes gtrpop {
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(229, 35, 27, 0.55); }
+  55% { transform: scale(1.05); }
+  100% { transform: scale(1); box-shadow: 0 0 0 8px rgba(229, 35, 27, 0); }
+}
+.gtr-pop { animation: gtrpop 0.32s cubic-bezier(0.2, 0.8, 0.3, 1.35) both; }
+
+/* карточка рекомендации: левая кромка разгорается при наведении */
+.gtr-reco { position: relative; }
+.gtr-reco::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--gtr-red, #e5231b), transparent 85%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.gtr-reco:hover::before { opacity: 1; }
+
+/* лазерная подводка секции: линия выезжает из-под заголовка */
+@keyframes gtrunderline {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.gtr-sweep {
+  position: relative;
+  display: inline-block;
+}
+.gtr-sweep::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--gtr-red, #e5231b), transparent);
+  transform-origin: left;
+  animation: gtrunderline 0.6s 0.15s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
 /* ---------- примитивы ---------- */
 .gtr-card {
   background: var(--gtr-card);
@@ -672,6 +769,11 @@
   .gtr-neon,
   .gtr-glowbar,
   .gtr-presence,
+  .gtr-genrebar,
+  .gtr-genrebar::after,
+  .gtr-eq span,
+  .gtr-pop,
+  .gtr-sweep::after,
   .gtr-alert { animation: none; }
   .gtr-vibe-card,
   .gtr-vibe-card:hover,

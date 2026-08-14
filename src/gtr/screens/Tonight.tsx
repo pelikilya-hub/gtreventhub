@@ -278,11 +278,16 @@ export function TonightScreen() {
               {v.name}
             </span>
             {n.hours ? (
-              <span
-                className="gtr-mono"
-                style={{ font: "600 9.5px/1 'JetBrains Mono',monospace", color: GREEN, whiteSpace: "nowrap" }}
-              >
-                {n.hours.split("·")[0].trim()}
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flex: "none" }}>
+                <span className="gtr-eq" aria-hidden>
+                  <span /><span /><span /><span />
+                </span>
+                <span
+                  className="gtr-mono"
+                  style={{ font: "600 9.5px/1 'JetBrains Mono',monospace", color: GREEN, whiteSpace: "nowrap" }}
+                >
+                  {n.hours.split("·")[0].trim()}
+                </span>
               </span>
             ) : null}
           </div>

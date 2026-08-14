@@ -313,6 +313,7 @@ export function AiMatchScreen() {
               return (
                 <button
                   key={fam}
+                  className={on ? "gtr-pop" : undefined}
                   onClick={() =>
                     setPicks((p) =>
                       on ? p.filter((x) => x !== fam) : p.length < 6 ? [...p, fam] : p,
@@ -367,6 +368,9 @@ export function AiMatchScreen() {
           ) : null}
           <Card style={{ padding: "20px 24px", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <span className="gtr-eq" aria-hidden>
+                <span /><span /><span /><span />
+              </span>
               <Eyebrow>{t("ВАШ МУЗЫКАЛЬНЫЙ ПРОФИЛЬ")}</Eyebrow>
               {profile.displayName ? (
                 <span className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
@@ -395,19 +399,20 @@ export function AiMatchScreen() {
               )}
             </div>
             <div style={{ display: "grid", gap: 6 }}>
-              {profile.genres.slice(0, 7).map(([fam, w]) => (
+              {profile.genres.slice(0, 7).map(([fam, w], i) => (
                 <div key={fam} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ width: 110, flex: "none", font: "600 10.5px/1 'Golos Text',sans-serif" }}>
                     {FAMILY_LABEL[fam] ?? fam}
                   </span>
                   <span style={{ flex: 1, height: 8, background: "rgba(255,255,255,.07)" }}>
                     <span
+                      className="gtr-genrebar"
                       style={{
                         display: "block",
                         width: `${Math.round((w / maxW) * 100)}%`,
                         height: "100%",
                         background: "linear-gradient(90deg,#E5231B,#F5A623)",
-                        transition: "width .8s cubic-bezier(.2,.8,.2,1)",
+                        ["--gtr-d" as string]: `${i * 0.09}s`,
                       }}
                     />
                   </span>
@@ -431,14 +436,15 @@ export function AiMatchScreen() {
             ) : null}
           </Card>
 
-          <Eyebrow style={{ marginBottom: 8 }}>{t("ЗАВЕДЕНИЯ ПОД ВАШ ВКУС")}</Eyebrow>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 10, marginBottom: 18 }}>
+          <Eyebrow style={{ marginBottom: 8 }}><span className="gtr-sweep">{t("ЗАВЕДЕНИЯ ПОД ВАШ ВКУС")}</span></Eyebrow>
+          <div className="gtr-seq" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 10, marginBottom: 18 }}>
             {(res?.venues ?? []).map((m) => {
               const v = V(m.vid);
               return (
                 <Card
                   key={m.vid}
                   hover
+                  className="gtr-reco"
                   style={{ padding: "14px 16px" }}
                   onClick={() =>
                     navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid: m.vid } })
@@ -467,7 +473,7 @@ export function AiMatchScreen() {
 
           {res?.events?.length ? (
             <>
-              <Eyebrow style={{ marginBottom: 8 }}>{t("СОБЫТИЯ ПОД ВАШ ВКУС")}</Eyebrow>
+              <Eyebrow style={{ marginBottom: 8 }}><span className="gtr-sweep">{t("СОБЫТИЯ ПОД ВАШ ВКУС")}</span></Eyebrow>
               <div style={{ display: "grid", gap: 8 }}>
                 {res.events.map((e) => (
                   <Card

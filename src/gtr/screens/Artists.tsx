@@ -43,15 +43,18 @@ type ArtistPlayer = { kind: "deezer" | "spotify" | "sc" | "mixcloud"; ref: strin
 const PLAYERS = playersRaw as Record<string, ArtistPlayer>;
 
 // Встроенные плееры сняты (виджеты сервисов разнобойные) — вместо них
-// прямая ссылка на подтверждённый музыкальный профиль артиста
-const playerLink = (p: ArtistPlayer): { url: string; label: string } =>
-  p.kind === "deezer"
-    ? { url: `https://www.deezer.com/artist/${p.ref}`, label: "Музыка · Deezer" }
-    : p.kind === "spotify"
-      ? { url: `https://open.spotify.com/artist/${p.ref}`, label: "Музыка · Spotify" }
-      : p.kind === "sc"
-        ? { url: p.ref, label: "Музыка · SoundCloud" }
-        : { url: `https://www.mixcloud.com${p.ref}`, label: "Музыка · Mixcloud" };
+// прямая ссылка на музыку. Spotify — основной инструмент: прямой профиль,
+// если известен; SoundCloud — для локальной сцены; остальным — Spotify-поиск.
+const playerLink = (p: ArtistPlayer, spFallback?: string): { url: string; label: string } =>
+  p.kind === "spotify"
+    ? { url: `https://open.spotify.com/artist/${p.ref}`, label: "Музыка · Spotify" }
+    : p.kind === "sc"
+      ? { url: p.ref, label: "Музыка · SoundCloud" }
+      : spFallback
+        ? { url: spFallback, label: "Музыка · Spotify" }
+        : p.kind === "mixcloud"
+          ? { url: `https://www.mixcloud.com${p.ref}`, label: "Музыка · Mixcloud" }
+          : { url: `https://www.deezer.com/artist/${p.ref}`, label: "Музыка" };
 
 const KIND_LABEL: Record<string, string> = {
   all: "Все записи",
@@ -830,7 +833,7 @@ function ArtistCard({
               ) : null}
               {PLAYERS[a.id]
                 ? (() => {
-                    const pl = playerLink(PLAYERS[a.id]);
+                    const pl = playerLink(PLAYERS[a.id], String(a.sp || "") || undefined);
                     return (
                       <a
                         className="gtr-btn"
@@ -854,7 +857,8 @@ function ArtistCard({
                 const pk = PLAYERS[a.id]?.kind;
                 if (pk === "spotify" && k === "sp") return false;
                 if (pk === "sc" && k === "sc") return false;
-                if (pk === "deezer" && k === "sp" && String(linkOf(k)).includes("/search/")) return false;
+                // deezer/mixcloud идут через Spotify-фолбэк — прячем дубль sp
+                if ((pk === "deezer" || pk === "mixcloud") && k === "sp") return false;
                 return true;
               }).map(([k, label]) => (
                 <a

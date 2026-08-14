@@ -206,7 +206,7 @@ export function AiMatchScreen() {
       className="gtr-mono"
       style={{ font: "700 11px/1 'JetBrains Mono',monospace", color: GREEN }}
     >
-      {Math.min(99, Math.round(score * 60 + 30))}%
+      {Math.min(99, Math.max(5, Math.round(score * 100)))}%
     </span>
   );
 

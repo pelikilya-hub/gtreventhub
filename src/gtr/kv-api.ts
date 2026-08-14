@@ -1583,11 +1583,12 @@ export const aiMatchFn = createServerFn({ method: "GET" })
         .map((a) => {
           const { score, reasons } = scoreVectors(normalizeGenres(a.styles ?? []), target);
           const hasMedia = Boolean(a.ig || a.sp);
-          const bonus = (verified.has(a.id) ? 0.2 : 0) + (hasMedia ? 0.1 : 0);
+          // бонусы малые: шкала Ружички 0..1, верификация не должна ломать её
+          const bonus = (verified.has(a.id) ? 0.08 : 0) + (hasMedia ? 0.04 : 0);
           return {
             id: a.id,
             name: a.name,
-            score: score + (score > 0 ? bonus : 0),
+            score: Math.min(0.99, score + (score > 0 ? bonus : 0)),
             reasons,
             verified: verified.has(a.id),
             hasMedia,

@@ -50,23 +50,33 @@ export const weightedVector = (items: { genres: string[]; weight: number }[]): G
   return v;
 };
 
-// Совпадение векторов: сумма минимумов по семействам (0..1-ish) + причины
+// Совпадение векторов: взвешенный Жаккар (Ружичка) — пересечение к
+// объединению по семействам. Строго 0..1: 1 только при полном совпадении
+// профилей, поэтому проценты в интерфейсе различимы, а не «у всех 99%».
 export const scoreVectors = (
   a: GenreVector,
   b: GenreVector,
 ): { score: number; reasons: string[] } => {
-  let score = 0;
+  let inter = 0;
+  let union = 0;
   const hits: [string, number][] = [];
-  for (const [fam, av] of a) {
-    const bv = b.get(fam);
-    if (bv) {
-      const m = Math.min(av, bv);
-      score += m;
-      hits.push([fam, m]);
-    }
+  const fams = new Set([...a.keys(), ...b.keys()]);
+  for (const fam of fams) {
+    const av = a.get(fam) ?? 0;
+    const bv = b.get(fam) ?? 0;
+    const m = Math.min(av, bv);
+    inter += m;
+    union += Math.max(av, bv);
+    if (m > 0) hits.push([fam, m]);
   }
   hits.sort((x, y) => y[1] - x[1]);
-  return { score, reasons: hits.slice(0, 3).map(([f]) => f) };
+  // поправка на бедность доказательств: совпадение по одному семейству —
+  // не «идеальные 100%», уверенность растёт с шириной пересечения
+  const evidence = 0.72 + 0.28 * Math.min(1, hits.length / 3);
+  return {
+    score: union > 0 ? (inter / union) * evidence : 0,
+    reasons: hits.slice(0, 3).map(([f]) => f),
+  };
 };
 
 export const FAMILY_LABEL: Record<string, string> = {

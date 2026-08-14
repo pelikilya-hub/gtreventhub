@@ -29,15 +29,17 @@ import {
   type VenueConfirm,
 } from "../kv-api";
 import { useGtr } from "../store";
+import { useTranslation } from "react-i18next";
 
 const confColor = (c: string) => (c === "High" ? GREEN : c === "Medium" ? AMBER : RED);
 const isQuar = (x: { confidence: string; status?: string }) =>
   x.confidence === "Low" || /verify|Closed/i.test(x.status || "");
 
 export function BaseScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const [cluster, setCluster] = useState("Все");
-  const [tag, setTag] = useState("Все");
+  const [cluster, setCluster] = useState(t("Все"));
+  const [tag, setTag] = useState(t("Все"));
   const [q, setQ] = useState("");
   const [confirms, setConfirms] = useState<Record<string, VenueConfirm>>({});
   useEffect(() => {
@@ -61,8 +63,8 @@ export function BaseScreen() {
     .filter(
       (x) =>
         !isQuar(x) &&
-        (cluster === "Все" || x.cluster === cluster) &&
-        (tag === "Все" || x.tag === tag) &&
+        (cluster === t("Все") || x.cluster === cluster) &&
+        (tag === t("Все") || x.tag === tag) &&
         (!q.trim() ||
           `${x.name} ${x.area} ${x.type}`.toLowerCase().includes(q.toLowerCase().trim())),
     )
@@ -78,7 +80,7 @@ export function BaseScreen() {
     onPick: (v: string) => void;
   }) => (
     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-      {[["Все", PH.venues.length] as [string, number], ...items].map(([label, n]) => (
+      {[[t("Все"), PH.venues.length] as [string, number], ...items].map(([label, n]) => (
         <button
           key={label}
           onClick={() => onPick(label)}
@@ -102,13 +104,13 @@ export function BaseScreen() {
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 6 }}>
         <h1 className="gtr-oswald gtr-h1">
-          База · Пхукет
+          {t("База · Пхукет")}
         </h1>
         <span
           className="gtr-mono"
           style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
-          {rows.length} / {PH.meta.total} · обновлено {PH.meta.updated}
+          {rows.length} / {PH.meta.total} · {t("обновлено")} {PH.meta.updated}
         </span>
       </div>
       <div style={{ margin: "12px 0 8px" }}>
@@ -120,7 +122,7 @@ export function BaseScreen() {
       <input
         className="gtr-input"
         style={{ maxWidth: 300, marginBottom: 16 }}
-        placeholder="Поиск по названию и району…"
+        placeholder={t("Поиск по названию и району…")}
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
@@ -276,10 +278,10 @@ export function BaseScreen() {
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 <Chip color={confColor(x.confidence)}>{x.confidence.toUpperCase()}</Chip>
                 {x.readiness?.state === "Бронируемая" ? (
-                  <Chip color={GREEN}>БРОНИРУЕМАЯ</Chip>
+                  <Chip color={GREEN}>{t("БРОНИРУЕМАЯ")}</Chip>
                 ) : null}
                 {confirms[x.id]?.status === "confirmed" ? (
-                  <Chip color={GREEN}>✓ ПРАЙС ПОДТВЕРЖДЁН</Chip>
+                  <Chip color={GREEN}>{t("✓ ПРАЙС ПОДТВЕРЖДЁН")}</Chip>
                 ) : null}
               </div>
             </div>
@@ -292,6 +294,7 @@ export function BaseScreen() {
 }
 
 export function VenueCardScreen({ vid }: { vid?: string }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const v = vid ? V(vid) : undefined;
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -338,7 +341,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
         style={{ marginBottom: 14 }}
         onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "base" } })}
       >
-        ← К базе Пхукета
+        {t("← К базе Пхукета")}
       </button>
 
       <Card
@@ -376,7 +379,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               <Chip color={R.state === "Бронируемая" ? GREEN : AMBER}>{R.state.toUpperCase()}</Chip>
             ) : null}
             {confirm?.status === "confirmed" ? (
-              <Chip color={GREEN}>✓ ПОДТВЕРЖДЕНО ПЛОЩАДКОЙ</Chip>
+              <Chip color={GREEN}>{t("✓ ПОДТВЕРЖДЕНО ПЛОЩАДКОЙ")}</Chip>
             ) : null}
           </div>
           <div
@@ -401,7 +404,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 })
               }
             >
-              Собрать событие здесь →
+              {t("Собрать событие здесь →")}
             </button>
             {cRate?.amount ? (
               <span
@@ -445,7 +448,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
       >
         <div style={{ display: "grid", gap: 14, alignContent: "start" }}>
           <Card style={{ padding: 18 }}>
-            <Eyebrow style={{ marginBottom: 10 }}>ПРОФИЛЬ ПЛОЩАДКИ</Eyebrow>
+            <Eyebrow style={{ marginBottom: 10 }}>{t("ПРОФИЛЬ ПЛОЩАДКИ")}</Eyebrow>
             {[
               ["КОНЦЕПЦИЯ", v.concept],
               ["ФОРМАТЫ СОБЫТИЙ", v.events],
@@ -505,7 +508,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
 
           {rich.gallery?.length ? (
             <Card style={{ padding: 18 }}>
-              <Eyebrow style={{ marginBottom: 10 }}>ОФИЦИАЛЬНАЯ ГАЛЕРЕЯ</Eyebrow>
+              <Eyebrow style={{ marginBottom: 10 }}>{t("ОФИЦИАЛЬНАЯ ГАЛЕРЕЯ")}</Eyebrow>
               <div
                 className="gtr-gallery"
                 style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}
@@ -542,7 +545,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           {vphotos.length ? (
             <Card style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>
-                ФОТО ОТ ПЛОЩАДКИ · {vphotos.length}
+                {t("ФОТО ОТ ПЛОЩАДКИ")} · {vphotos.length}
               </Eyebrow>
               <div
                 className="gtr-gallery"
@@ -593,7 +596,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                   background: tint(cRate ? GREEN : RATE_COLOR[rate!.kind], 0.07),
                 }}
               >
-                <Eyebrow style={{ marginBottom: 6 }}>АРЕНДА</Eyebrow>
+                <Eyebrow style={{ marginBottom: 6 }}>{t("АРЕНДА")}</Eyebrow>
                 <div
                   className="gtr-mono"
                   style={{ font: "700 16px/1 'JetBrains Mono',monospace", color: "#fff" }}

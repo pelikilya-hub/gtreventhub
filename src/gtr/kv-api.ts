@@ -694,11 +694,26 @@ export const pushTaskFn = createServerFn({ method: "POST" })
           parse_mode: "HTML",
         }).catch(() => {});
       const { sendPushTo } = await import("./push");
-      sendPushTo(ns, task.assignee, {
+      const pushRes = await sendPushTo(ns, task.assignee, {
         title: `Задача от ${task.byName}`,
         body: task.title,
         url: "/gtr/dash",
-      }).catch(() => {});
+      }).catch(() => ({ ok: false as const }));
+      // Ни бота, ни push-подписок — честно говорим постановщику и дублируем
+      // в общий канал, чтобы задача не потерялась в тишине
+      if (!chat && !pushRes.ok) {
+        const warn = [
+          `⚠️ <b>Задача не доставлена ${tgEsc(task.assigneeName)}</b>`,
+          `«${tgEsc(task.title)}»`,
+          "",
+          "У исполнителя не привязан Telegram (@Gtrcom1_bot → /start) и не включён push в настройках кабинета. Передайте задачу лично.",
+        ].join("\n");
+        const byChat = await ns.get(`tg:${task.by}`);
+        const common =
+          (typeof process !== "undefined" && process.env?.TELEGRAM_CHAT_ID) || "";
+        for (const c of new Set([byChat, common].filter(Boolean) as string[]))
+          tgApi("sendMessage", { chat_id: c, text: warn, parse_mode: "HTML" }).catch(() => {});
+      }
     }
     if (prev && prev.status !== "done" && task.status === "done") {
       const chat = await ns.get(`tg:${task.by}`);

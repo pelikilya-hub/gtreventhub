@@ -10,6 +10,7 @@ import {
   type CalEvent,
 } from "../data/app-data";
 import { useGtr } from "../store";
+import { useTranslation } from "react-i18next";
 import { Card, Chip, Eyebrow } from "../ui";
 import { useEffect } from "react";
 import { PH, V, draftTitle } from "../data/app-data";
@@ -19,6 +20,7 @@ const WD = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
 const WD_FULL = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
 
 export function CalendarScreen() {
+  const { t } = useTranslation();
   const { user, shared, setEvents } = useGtr();
   // Режим: «наши события» (по умолчанию для штаба) или календарь площадки
   const [scope, setScope] = useState<string>(user.venueId || "ours");
@@ -204,7 +206,7 @@ export function CalendarScreen() {
                   background: scope === "ours" ? "#E5231B" : "#2ECC71",
                 }}
               />
-              {scope === "ours" ? "Наши события" : (V(scope)?.name ?? scope)}
+              {scope === "ours" ? t("Наши события") : (V(scope)?.name ?? scope)}
               <span
                 className="gtr-mono"
                 style={{
@@ -234,7 +236,7 @@ export function CalendarScreen() {
                   autoFocus
                   value={pickQ}
                   onChange={(e) => setPickQ(e.target.value)}
-                  placeholder="Поиск по 97 площадкам…"
+                  placeholder={t("Поиск по 97 площадкам…")}
                   style={{
                     width: "100%",
                     padding: "11px 13px",
@@ -268,7 +270,7 @@ export function CalendarScreen() {
                   }}
                 >
                   <span style={{ width: 7, height: 7, flex: "none", background: "#E5231B" }} />
-                  <span style={{ flex: 1 }}>Наши события</span>
+                  <span style={{ flex: 1 }}>{t("Наши события")}</span>
                   <span
                     className="gtr-mono"
                     style={{
@@ -324,7 +326,7 @@ export function CalendarScreen() {
                               color: "#2ECC71",
                             }}
                           >
-                            АФИШИ
+                            {t("АФИШИ")}
                           </span>
                         ) : null}
                       </button>
@@ -335,7 +337,7 @@ export function CalendarScreen() {
           </div>
         ) : (
           <h1 className="gtr-oswald gtr-h1">
-            Календарь и программа
+            {t("Календарь и программа")}
           </h1>
         )}
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -350,7 +352,7 @@ export function CalendarScreen() {
               textAlign: "center",
             }}
           >
-            {MONTHS[month]} {year}
+            {t(MONTHS[month])} {year}
           </span>
           <button className="gtr-btn" onClick={nextMonth}>
             ›
@@ -358,7 +360,7 @@ export function CalendarScreen() {
         </div>
         {vid ? (
         <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginLeft: "auto" }}>
-          {[["all", "Все залы", "#fff"] as [string, string, string], ...rooms].map(
+          {[["all", t("Все залы"), "#fff"] as [string, string, string], ...rooms].map(
             ([k, label, color]) => (
               <button
                 key={k}
@@ -385,7 +387,7 @@ export function CalendarScreen() {
         ) : (
           // Легенда слоёв в режиме «наши события»
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginLeft: "auto" }}>
-            {[["#E5231B", "События команды GTR"]].map(([c, label]) => (
+            {[["#E5231B", t("События команды GTR")]].map(([c, label]) => (
               <span
                 key={label}
                 className="gtr-mono"
@@ -420,7 +422,7 @@ export function CalendarScreen() {
             >
               {WD.map((w) => (
                 <div key={w} className="gtr-eyebrow" style={{ padding: "10px 9px" }}>
-                  {w}
+                  {t(w)}
                 </div>
               ))}
             </div>
@@ -569,12 +571,12 @@ export function CalendarScreen() {
           </Card>
 
           <Card style={{ marginTop: 14, padding: "12px 16px" }}>
-            <Eyebrow style={{ marginBottom: 8 }}>ЗАГРУЗКА МЕСЯЦА</Eyebrow>
+            <Eyebrow style={{ marginBottom: 8 }}>{t("ЗАГРУЗКА МЕСЯЦА")}</Eyebrow>
             <div style={{ display: "flex", gap: 2, alignItems: "flex-end", height: 34 }}>
               {loadCounts.map((c, i) => (
                 <div
                   key={i}
-                  title={`${i + 1} ${MONTHS[month]}: ${c}`}
+                  title={`${i + 1} ${t(MONTHS[month])}: ${c}`}
                   style={{
                     flex: 1,
                     borderRadius: 0,
@@ -592,7 +594,7 @@ export function CalendarScreen() {
         <div style={{ display: "grid", gap: 14, alignContent: "start" }}>
           <Card style={{ padding: "16px 18px" }}>
             <Eyebrow>
-              {selDay} {MONTHS[month].toUpperCase()} · {WD_FULL[dSel.getDay()].toUpperCase()}
+              {selDay} {t(MONTHS[month]).toUpperCase()} · {t(WD_FULL[dSel.getDay()]).toUpperCase()}
             </Eyebrow>
             <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
               {oursDay.map((e) => (
@@ -609,7 +611,7 @@ export function CalendarScreen() {
                     <span style={{ flex: 1, font: "600 12px/1.3 'Golos Text',sans-serif" }}>
                       {e.title}
                     </span>
-                    <Chip color="#E5231B">НАШЕ</Chip>
+                    <Chip color="#E5231B">{t("НАШЕ")}</Chip>
                   </div>
                   <div
                     className="gtr-mono"
@@ -632,7 +634,7 @@ export function CalendarScreen() {
                       })
                     }
                   >
-                    Открыть в конструкторе ↗
+                    {t("Открыть в конструкторе ↗")}
                   </button>
                 </div>
               ))}
@@ -641,8 +643,8 @@ export function CalendarScreen() {
                   style={{ font: "500 11.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
                 >
                   {vid
-                    ? "Свободный день — добавьте формат из палитры ниже."
-                    : "На этот день наших событий нет — создайте в конструкторе."}
+                    ? t("Свободный день — добавьте формат из палитры ниже.")
+                    : t("На этот день наших событий нет — создайте в конструкторе.")}
                 </div>
               ) : (
                 dayList.map((e) => (
@@ -678,10 +680,10 @@ export function CalendarScreen() {
                         }
                       >
                         {e.status === "confirmed"
-                          ? "ПОДТВЕРЖДЕНО"
+                          ? t("ПОДТВЕРЖДЕНО")
                           : e.status === "hold"
                             ? "HOLD"
-                            : "ЗАЯВКА"}
+                            : t("ЗАЯВКА")}
                       </Chip>
                     </div>
                     <div
@@ -720,7 +722,7 @@ export function CalendarScreen() {
                         }}
                         onClick={() => setEvents((list) => list.filter((x) => x.id !== e.id))}
                       >
-                        Удалить
+                        {t("Удалить")}
                       </button>
                     </div>
                   </div>
@@ -740,7 +742,7 @@ export function CalendarScreen() {
                     <span style={{ flex: 1, font: "600 12px/1.3 'Golos Text',sans-serif" }}>
                       {e.title}
                     </span>
-                    <Chip color="#2ECC71">АФИША</Chip>
+                    <Chip color="#2ECC71">{t("АФИША")}</Chip>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
                     {e.artistIds.length ? (
@@ -760,7 +762,7 @@ export function CalendarScreen() {
                           })
                         }
                       >
-                        НАШ АРТИСТ ↗
+                        {t("НАШ АРТИСТ ↗")}
                       </button>
                     ) : null}
                     <a
@@ -775,7 +777,7 @@ export function CalendarScreen() {
                         marginLeft: "auto",
                       }}
                     >
-                      Источник ↗
+                      {t("Источник ↗")}
                     </a>
                   </div>
                 </div>
@@ -785,7 +787,7 @@ export function CalendarScreen() {
 
           {vid ? (
           <Card style={{ padding: "16px 18px" }}>
-            <Eyebrow style={{ marginBottom: 10 }}>ПАЛИТРА ФОРМАТОВ · В ДЕНЬ {selDay}</Eyebrow>
+            <Eyebrow style={{ marginBottom: 10 }}>{t("ПАЛИТРА ФОРМАТОВ · В ДЕНЬ")} {selDay}</Eyebrow>
             <div style={{ display: "grid", gap: 7 }}>
               {calPaletteOf(vid).map(
                 ([title, evRoom, start, end, meta]) => (

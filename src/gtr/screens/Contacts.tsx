@@ -13,6 +13,7 @@ import {
   type Artist,
 } from "../data/app-data";
 import { useGtr } from "../store";
+import { useTranslation } from "react-i18next";
 import { Card, Chip, Eyebrow, tint } from "../ui";
 import { openAppLink } from "../applink";
 import { contactsUsersFn, type ContactUser } from "../kv-api";
@@ -42,6 +43,7 @@ function ActionBtn({ label, onClick }: { label: string; onClick: () => void }) {
 }
 
 function ContactRow({ r }: { r: Row }) {
+  const { t } = useTranslation();
   const tgUrl = r.tg
     ? r.tg.startsWith("http")
       ? r.tg
@@ -68,7 +70,7 @@ function ContactRow({ r }: { r: Row }) {
       <span style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
         {tgUrl ? <ActionBtn label="Telegram" onClick={() => openAppLink(tgUrl)} /> : null}
         {r.phone ? (
-          <ActionBtn label="Позвонить" onClick={() => (window.location.href = `tel:${r.phone!.replace(/[^+\d]/g, "")}`)} />
+          <ActionBtn label={t("Позвонить")} onClick={() => (window.location.href = `tel:${r.phone!.replace(/[^+\d]/g, "")}`)} />
         ) : null}
         {r.wa ? (
           <ActionBtn
@@ -77,7 +79,7 @@ function ContactRow({ r }: { r: Row }) {
           />
         ) : null}
         {r.email ? (
-          <ActionBtn label="Написать" onClick={() => (window.location.href = `mailto:${r.email}`)} />
+          <ActionBtn label={t("Написать")} onClick={() => (window.location.href = `mailto:${r.email}`)} />
         ) : null}
         {r.ig ? <ActionBtn label="Instagram" onClick={() => openAppLink(r.ig!)} /> : null}
       </span>
@@ -86,6 +88,7 @@ function ContactRow({ r }: { r: Row }) {
 }
 
 export function ContactsScreen() {
+  const { t } = useTranslation();
   const { user } = useGtr();
   const [users, setUsers] = useState<ContactUser[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
@@ -148,16 +151,16 @@ export function ContactsScreen() {
   }, [tab, users, artists, q]);
 
   const TABS: [Tab, string, number][] = [
-    ["team", "Команда", users.filter((u) => u.role !== "artist" && u.role !== "organizer").length],
-    ["organizers", "Организаторы", users.filter((u) => u.role === "organizer").length],
-    ["artists", "Артисты", artists.length],
-    ["venues", "Площадки", PH.venues.length],
+    ["team", t("Команда"), users.filter((u) => u.role !== "artist" && u.role !== "organizer").length],
+    ["organizers", t("Организаторы"), users.filter((u) => u.role === "organizer").length],
+    ["artists", t("Артисты"), artists.length],
+    ["venues", t("Площадки"), PH.venues.length],
   ];
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 12 }}>
-        <h1 className="gtr-oswald gtr-h1">Центр связи</h1>
+        <h1 className="gtr-oswald gtr-h1">{t("Центр связи")}</h1>
         <span style={{ font: mono(10), color: "var(--gtr-t3)" }}>{rows.length} контактов</span>
       </div>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
@@ -182,7 +185,7 @@ export function ContactsScreen() {
       <input
         className="gtr-input"
         style={{ width: "100%", marginBottom: 10 }}
-        placeholder="Поиск по имени…"
+        placeholder={t("Поиск по имени…")}
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
@@ -197,7 +200,7 @@ export function ContactsScreen() {
       </Card>
       {user.role === "gtr" ? (
         <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8 }}>
-          <Eyebrow>РАССЫЛКА ВСЕМ</Eyebrow>
+          <Eyebrow>{t("РАССЫЛКА ВСЕМ")}</Eyebrow>
           <Chip color={AMBER}>В ДАШБОРДЕ BOSS — «СВЯЗЬ И УВЕДОМЛЕНИЯ»</Chip>
         </div>
       ) : null}

@@ -19,6 +19,8 @@ import {
   type ScreenId,
 } from "../data/app-data";
 import { useGtr } from "../store";
+import { useTranslation } from "react-i18next";
+import i18n, { setUiLang, UI_LANGS, type UiLang } from "../i18n";
 import { Card, Chip, Dot, Eyebrow, Icon, Ring } from "../ui";
 import { ImpulseArt } from "../impulse";
 import { createInviteFn, decideOfferFn, getPrefsFn, setLiveFn, setPrefsFn, tgLinkFn, tgStatusFn } from "../kv-api";
@@ -67,6 +69,7 @@ type DashData = {
 };
 
 export function DashScreen() {
+  const { t } = useTranslation();
   const { user, shared } = useGtr();
   const navigate = useNavigate();
   const go = (s: ScreenId, vid?: string) =>
@@ -519,7 +522,7 @@ export function DashScreen() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 12 }}>
           {d.kpis.map(([label, value, suffix, color, note]) => (
-            <Card key={label} hover style={{ padding: "16px 18px" }}>
+            <Card key={t(label)} hover style={{ padding: "16px 18px" }}>
               <Eyebrow>{label}</Eyebrow>
               <div style={{ marginTop: 10 }}>
                 <span
@@ -547,7 +550,7 @@ export function DashScreen() {
                   color: "var(--gtr-t3)",
                 }}
               >
-                {note}
+                {t(note)}
               </div>
             </Card>
           ))}
@@ -747,6 +750,7 @@ export function DashScreen() {
 const MONTHS_S = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
 function SalesCabinet() {
+  const { t } = useTranslation();
   const { user, myDrafts, shared } = useGtr();
   const navigate = useNavigate();
   const go = (s: ScreenId, search?: Record<string, string>) =>
@@ -818,10 +822,10 @@ function SalesCabinet() {
     .slice(0, 4);
 
   const kpis: [string, string, string, string][] = [
-    ["В РАБОТЕ", String(inWork), inWork ? "черновики и отправленные" : "создайте первое событие", "#fff"],
-    ["СОГЛАСОВАНО", String(approved), approved ? "подтверждённые события" : "пока нет", approved ? GREEN : "#fff"],
-    ["ПАЙПЛАЙН", pipeline ? fmtThb(pipeline) : "—", "сумма смет кабинета", "#fff"],
-    ["КОМИССИЯ GTR", commission ? fmtThb(commission) : "—", "с текущего пайплайна", commission ? GREEN : "#fff"],
+    ["В РАБОТЕ", String(inWork), inWork ? t("черновики и отправленные") : t("создайте первое событие"), "#fff"],
+    ["СОГЛАСОВАНО", String(approved), approved ? t("подтверждённые события") : t("пока нет"), approved ? GREEN : "#fff"],
+    ["ПАЙПЛАЙН", pipeline ? fmtThb(pipeline) : "—", t("сумма смет кабинета"), "#fff"],
+    ["КОМИССИЯ GTR", commission ? fmtThb(commission) : "—", t("с текущего пайплайна"), commission ? GREEN : "#fff"],
   ];
 
   return (
@@ -859,7 +863,7 @@ function SalesCabinet() {
             {user.initials}
           </span>
           <div style={{ minWidth: 0 }}>
-            <Eyebrow>{user.role === "organizer" ? "КАБИНЕТ ОРГАНИЗАТОРА" : "КАБИНЕТ EVENT SALES"}</Eyebrow>
+            <Eyebrow>{user.role === "organizer" ? "КАБИНЕТ ОРГАНИЗАТОРА" : t("КАБИНЕТ EVENT SALES")}</Eyebrow>
             <h1
               className="gtr-oswald"
               style={{ font: "700 28px/1.05 Oswald,sans-serif", letterSpacing: ".02em", margin: "8px 0 0" }}
@@ -883,10 +887,10 @@ function SalesCabinet() {
               style={{ padding: "10px 16px" }}
               onClick={() => go("events", { vid: user.venueId || "new" })}
             >
-              + Новое событие
+              {t("+ Новое событие")}
             </button>
             <button className="gtr-btn" style={{ padding: "9px 16px" }} onClick={() => go("events")}>
-              Мои события →
+              {t("Мои события →")}
             </button>
             <InviteLinkButton />
           </div>
@@ -895,12 +899,12 @@ function SalesCabinet() {
 
       {/* ---------- настройки: push, Telegram, язык предложений ---------- */}
       <Card style={{ padding: "14px 18px", marginBottom: 14, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <Eyebrow>НАСТРОЙКИ</Eyebrow>
+        <Eyebrow>{t("НАСТРОЙКИ")}</Eyebrow>
         <TgChip />
         <PushPanel />
         <span style={{ display: "inline-flex", alignItems: "center", gap: 7, marginLeft: "auto" }}>
           <span className="gtr-mono" style={{ font: "600 9px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".1em" }}>
-            ЯЗЫК ПРЕДЛОЖЕНИЙ
+            {t("ЯЗЫК ПРЕДЛОЖЕНИЙ")}
           </span>
           <select
             className="gtr-input"
@@ -915,6 +919,21 @@ function SalesCabinet() {
             <option value="ru">Русский</option>
             <option value="en">English</option>
             <option value="th">ไทย</option>
+          </select>
+        </span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+          <span className="gtr-mono" style={{ font: "600 9px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".1em" }}>
+            {t("ЯЗЫК ПРИЛОЖЕНИЯ")}
+          </span>
+          <select
+            className="gtr-input"
+            style={{ padding: "7px 10px", width: "auto" }}
+            value={i18n.language as UiLang}
+            onChange={(e) => setUiLang(e.target.value as UiLang)}
+          >
+            {UI_LANGS.map(([code, label]) => (
+              <option key={code} value={code}>{label}</option>
+            ))}
           </select>
         </span>
       </Card>
@@ -955,7 +974,7 @@ function SalesCabinet() {
         style={{ display: "grid", gridTemplateColumns: "minmax(280px,1fr) 1.4fr", gap: 18, marginBottom: 18 }}
       >
         <Card style={{ padding: "18px 20px", display: "grid", gap: 12, alignContent: "start" }}>
-          <Eyebrow>ВОРОНКА СОБЫТИЙ</Eyebrow>
+          <Eyebrow>{t("ВОРОНКА СОБЫТИЙ")}</Eyebrow>
           {stages.map(({ st, count, sum }) => (
             <div key={st} style={{ display: "grid", gap: 5 }}>
               <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
@@ -992,13 +1011,13 @@ function SalesCabinet() {
             </div>
           ))}
           <span style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-            Стадию события меняет конструктор: черновик → отправлено → согласовано.
+            {t("Стадию события меняет конструктор: черновик → отправлено → согласовано.")}
           </span>
         </Card>
 
         <Card style={{ padding: "18px 20px", display: "grid", gap: 12, alignContent: "start" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <Eyebrow>ПАЙПЛАЙН ПО МЕСЯЦАМ</Eyebrow>
+            <Eyebrow>{t("ПАЙПЛАЙН ПО МЕСЯЦАМ")}</Eyebrow>
             <span
               className="gtr-mono"
               style={{ marginLeft: "auto", font: "500 9.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
@@ -1036,7 +1055,7 @@ function SalesCabinet() {
                       : "rgba(255,255,255,.07)",
                     clipPath: "polygon(0 4px, calc(100% - 4px) 0, 100% 100%, 0 100%)",
                   }}
-                  title={m.count ? `${m.count} соб. · ${fmtThb(m.sum)}` : "нет событий"}
+                  title={m.count ? `${m.count} соб. · ${fmtThb(m.sum)}` : t("нет событий")}
                 />
                 <span
                   className="gtr-mono"
@@ -1062,7 +1081,7 @@ function SalesCabinet() {
         style={{ display: "grid", gridTemplateColumns: "minmax(300px,380px) 1fr", gap: 18, marginBottom: 18 }}
       >
         <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
-          <Eyebrow>КАЛЕНДАРЬ КАБИНЕТА</Eyebrow>
+          <Eyebrow>{t("КАЛЕНДАРЬ КАБИНЕТА")}</Eyebrow>
           <CabinetMonth
             rows={rows}
             onOpen={(id) =>
@@ -1072,13 +1091,13 @@ function SalesCabinet() {
         </Card>
         <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Eyebrow>{user.role === "organizer" ? "МОИ ЗАЯВКИ ПЛОЩАДКАМ" : "ЗАЯВКИ НА МНЕ"}</Eyebrow>
+            <Eyebrow>{user.role === "organizer" ? t("МОИ ЗАЯВКИ ПЛОЩАДКАМ") : t("ЗАЯВКИ НА МНЕ")}</Eyebrow>
             <button
               className="gtr-btn"
               style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10 }}
               onClick={() => go("inquiries")}
             >
-              Все заявки →
+              {t("Все заявки →")}
             </button>
           </div>
           {myRequests.length ? (
@@ -1260,7 +1279,7 @@ function SalesCabinet() {
             ))
           ) : (
             <span style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              В кабинете пока пусто. Нажмите «+ Новое событие» — мастер проведёт по шагам: сценарий,
+              В кабинете пока пусто. Нажмите «{t("+ Новое событие")}» — мастер проведёт по шагам: сценарий,
               дата, вместимость, площадка.
             </span>
           )}
@@ -1620,6 +1639,7 @@ function ArtistCabinet() {
 // Ссылка-приглашение в приложение: генерируется сервером, копируется в буфер.
 // Организатор зовёт в свою команду, менеджер и админ — в состав GTR.
 function InviteLinkButton() {
+  const { t } = useTranslation();
   const [link, setLink] = useState("");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
@@ -1647,7 +1667,7 @@ function InviteLinkButton() {
   return (
     <div style={{ display: "grid", gap: 6 }}>
       <button className="gtr-btn" style={{ padding: "9px 16px", opacity: busy ? 0.6 : 1 }} disabled={busy} onClick={make}>
-        + Пригласить в команду
+        {t("+ Пригласить в команду")}
       </button>
       {link ? (
         <input

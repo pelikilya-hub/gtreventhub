@@ -15,6 +15,8 @@ import {
 import { useContent } from "./content";
 import { GtrProvider, useGtr } from "./store";
 import { Eyebrow, Icon } from "./ui";
+import "./i18n";
+import { useTranslation } from "react-i18next";
 
 import { DashScreen } from "./screens/Dash";
 import { CalendarScreen } from "./screens/Calendar";
@@ -60,6 +62,7 @@ export function GtrShell({
 }
 
 function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch }) {
+  const { t } = useTranslation();
   const { user, peers, draftsOf } = useGtr();
   const { editMode, setEditMode } = useContent();
   const navigate = useNavigate();
@@ -143,7 +146,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
           return (
             <button key={id} className={`gtr-nav-item ${on ? "on" : ""}`} onClick={() => go(id)}>
               <Icon d={icon} size={15} />
-              <span style={{ flex: 1, minWidth: 0 }}>{title}</span>
+              <span style={{ flex: 1, minWidth: 0 }}>{t(title)}</span>
               {alarm ? (
                 <span
                   className="gtr-mono gtr-presence"
@@ -185,7 +188,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
       <header className="gtr-topbar">
         <button
           className="gtr-burger"
-          aria-label="Меню"
+          aria-label={t("Меню")}
           aria-expanded={navOpen}
           onClick={() => setNavOpen((v) => !v)}
         >
@@ -241,7 +244,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
           </span>
           <span style={{ minWidth: 0, flex: 1 }}>
             <span style={{ display: "block", font: "600 11.5px/1.2 'Golos Text',sans-serif" }}>
-              {user.roleLabel}
+              {t(user.roleLabel)}
             </span>
             <span
               style={{
@@ -254,18 +257,18 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                 textOverflow: "ellipsis",
               }}
             >
-              {venue ? venue.name : "Сеть · 97 площадок"}
+              {venue ? venue.name : t("Сеть · 97 площадок")}
             </span>
           </span>
         </div>
 
-        <NavGroup label="ПЛОЩАДКА" items={navVenue} />
-        <NavGroup label="СЕТЬ GTR" items={navNet} />
+        <NavGroup label={t("ПЛОЩАДКА")} items={navVenue} />
+        <NavGroup label={t("СЕТЬ GTR")} items={navNet} />
 
         <div style={{ marginTop: "auto" }}>
           {peers.length > 0 ? (
             <div style={{ padding: "0 11px", marginBottom: 12 }}>
-              <Eyebrow style={{ marginBottom: 8 }}>СЕЙЧАС В СИСТЕМЕ</Eyebrow>
+              <Eyebrow style={{ marginBottom: 8 }}>{t("СЕЙЧАС В СИСТЕМЕ")}</Eyebrow>
               <div style={{ display: "flex", gap: 6 }}>
                 {peers.slice(0, 5).map((p) => (
                   <span
@@ -305,7 +308,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
             }
           >
             <Icon d="M12 20h9 M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" size={15} />
-            <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>Режим правки</span>
+            <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>{t("Режим правки")}</span>
             <span
               className="gtr-mono"
               style={{
@@ -313,7 +316,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                 color: editMode ? "#E5231B" : "rgba(255,255,255,.4)",
               }}
             >
-              {editMode ? "ВКЛ" : "ВЫКЛ"}
+              {editMode ? t("ВКЛ") : t("ВЫКЛ")}
             </span>
           </button>
           <button
@@ -324,7 +327,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
             }}
           >
             <Icon d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9" size={15} />
-            Выйти · {user.email}
+            {t("Выйти")} · {user.email}
           </button>
         </div>
       </aside>
@@ -337,7 +340,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
               style={{ padding: 60, textAlign: "center", color: "rgba(255,255,255,.4)" }}
               className="gtr-mono"
             >
-              Загрузка…
+              {t("Загрузка…")}
             </div>
           }
         >

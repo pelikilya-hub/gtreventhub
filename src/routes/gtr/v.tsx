@@ -109,18 +109,39 @@ const T: Record<Lang, Record<string, string>> = {
 function VenueConfirmPage() {
   const info = Route.useLoaderData();
   const { t: token } = Route.useSearch();
-  const [lang, setLang] = useState<Lang>("en");
+  const [lang, setLangRaw] = useState<Lang>("en");
   const t = T[lang];
+
+  // На EN/TH русские предзаполнения из нашей базы неуместны: вместимость
+  // сводим к числу, русское описание «что входит» убираем (плейсхолдер
+  // подскажет на языке страницы). Названия площадок не трогаем.
+  const setLang = (l: Lang) => {
+    setLangRaw(l);
+    if (l !== "ru") {
+      setCapacity((c) => {
+        const digits = c.match(/\d[\d\s–-]*/)?.[0]?.trim();
+        return /[а-яА-ЯЁё]/.test(c) ? (digits ?? "") : c;
+      });
+      setCovers((c) => (/[а-яА-ЯЁё]/.test(c) ? "" : c));
+    }
+  };
 
   const ok = info.ok === true;
   const [name, setName] = useState(ok ? (info.contact?.name ?? "") : "");
   const [role, setRole] = useState(ok ? (info.contact?.role ?? "") : "");
   const [phone, setPhone] = useState(ok ? (info.contact?.phone ?? "") : "");
   const [email, setEmail] = useState(ok ? (info.contact?.email ?? "") : "");
-  const [capacity, setCapacity] = useState(ok ? info.capacity : "");
+  // стартовый язык — EN, поэтому кириллические подсказки чистим сразу
+  const [capacity, setCapacity] = useState(() => {
+    const c = ok ? info.capacity : "";
+    return /[а-яА-ЯЁё]/.test(c) ? (c.match(/\d[\d\s–-]*/)?.[0]?.trim() ?? "") : c;
+  });
   const [amount, setAmount] = useState(ok && info.rate ? String(info.rate.amount) : "");
   const [unit, setUnit] = useState(ok && info.rate ? info.rate.unit : "событие");
-  const [covers, setCovers] = useState(ok && info.rate ? info.rate.covers : "");
+  const [covers, setCovers] = useState(() => {
+    const c = ok && info.rate ? info.rate.covers : "";
+    return /[а-яА-ЯЁё]/.test(c) ? "" : c;
+  });
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");

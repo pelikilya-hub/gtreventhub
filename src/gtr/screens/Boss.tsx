@@ -17,6 +17,7 @@ import {
   type ScreenId,
 } from "../data/app-data";
 import { useGtr } from "../store";
+import { useTranslation } from "react-i18next";
 import { Card, Chip, Dot, Eyebrow, tint } from "../ui";
 import {
   broadcastFn,
@@ -62,6 +63,7 @@ const b64ToU8 = (s: string) => {
 
 // ---------- Push-панель: разрешение → подписка → тест ----------
 export function PushPanel() {
+  const { t } = useTranslation();
   const [state, setState] = useState<"idle" | "busy" | "on" | "err">("idle");
   const [devices, setDevices] = useState(0);
   const [msg, setMsg] = useState("");
@@ -110,15 +112,15 @@ export function PushPanel() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
       <Chip color={state === "on" ? GREEN : "rgba(255,255,255,.4)"}>
-        PUSH {state === "on" ? `ВКЛ · ${devices}` : "ВЫКЛ"}
+        PUSH {state === "on" ? `${t("ВКЛ")} · ${devices}` : t("ВЫКЛ")}
       </Chip>
       {state !== "on" ? (
         <button className="gtr-btn gtr-btn-sm" onClick={enable} disabled={state === "busy"}>
-          {state === "busy" ? "Включаю…" : "Включить push"}
+          {state === "busy" ? t("Включаю…") : t("Включить push")}
         </button>
       ) : (
         <button className="gtr-btn gtr-btn-sm" onClick={test}>
-          Тест
+          {t("Тест")}
         </button>
       )}
       {msg ? (
@@ -130,6 +132,7 @@ export function PushPanel() {
 
 // ---------- Telegram-статус ----------
 export function TgChip() {
+  const { t } = useTranslation();
   const [linked, setLinked] = useState<boolean | null>(null);
   useEffect(() => {
     tgStatusFn().then((r: { linked?: boolean }) => setLinked(Boolean(r.linked)));
@@ -140,10 +143,10 @@ export function TgChip() {
   }, []);
   if (linked === null) return null;
   return linked ? (
-    <Chip color={GREEN}>TELEGRAM ВКЛ</Chip>
+    <Chip color={GREEN}>TELEGRAM {t("ВКЛ")}</Chip>
   ) : (
     <button className="gtr-btn gtr-btn-sm" onClick={link}>
-      Привязать Telegram
+      {t("Привязать Telegram")}
     </button>
   );
 }

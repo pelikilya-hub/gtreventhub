@@ -42,20 +42,21 @@ const MEDIA = (mediaRaw as unknown as { media: Record<string, ArtistMedia> }).me
 type ArtistPlayer = { kind: "deezer" | "spotify" | "sc" | "mixcloud"; ref: string };
 const PLAYERS = playersRaw as Record<string, ArtistPlayer>;
 
+// Единый мини-формат: один компактный плеер на профиль, без дублей
 const playerEmbed = (p: ArtistPlayer): { src: string; h: number; label: string } =>
   p.kind === "deezer"
-    ? { src: `https://widget.deezer.com/widget/dark/artist/${p.ref}/top_tracks`, h: 300, label: "Deezer · топ-треки" }
+    ? { src: `https://widget.deezer.com/widget/dark/artist/${p.ref}/top_tracks`, h: 200, label: "Deezer · топ-треки" }
     : p.kind === "spotify"
-      ? { src: `https://open.spotify.com/embed/artist/${p.ref}`, h: 352, label: "Spotify" }
+      ? { src: `https://open.spotify.com/embed/artist/${p.ref}?utm_source=gtr&theme=0`, h: 152, label: "Spotify" }
       : p.kind === "sc"
         ? {
-            src: `https://w.soundcloud.com/player/?url=${encodeURIComponent(p.ref)}&color=%23e5231b&auto_play=false&show_teaser=false`,
-            h: 400,
+            src: `https://w.soundcloud.com/player/?url=${encodeURIComponent(p.ref)}&color=%23e5231b&auto_play=false&show_teaser=false&visual=false`,
+            h: 166,
             label: "SoundCloud",
           }
         : {
-            src: `https://player-widget.mixcloud.com/widget/iframe/?feed=${encodeURIComponent(p.ref)}&light=0`,
-            h: 180,
+            src: `https://player-widget.mixcloud.com/widget/iframe/?feed=${encodeURIComponent(p.ref)}&light=0&mini=1&hide_cover=1`,
+            h: 60,
             label: "Mixcloud",
           };
 
@@ -991,29 +992,6 @@ function ArtistCard({
           ) : null}
         </Card>
       ) : null}
-
-      {/* Spotify-плеер: живое превью треков прямо в профиле (нужна
-          настоящая artist-ссылка, поисковые /search не встраиваются) */}
-      {(() => {
-        const m = String(a.sp || "").match(
-          /open\.spotify\.com\/(artist|album|playlist|track)\/([A-Za-z0-9]+)/,
-        );
-        if (!m) return null;
-        return (
-          <Card style={{ padding: 0, margin: "14px 0", overflow: "hidden" }}>
-            <iframe
-              title={`Spotify · ${a.name}`}
-              src={`https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=gtr&theme=0`}
-              width="100%"
-              height="152"
-              frameBorder="0"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-              style={{ display: "block", background: "#0A0B0D" }}
-            />
-          </Card>
-        );
-      })()}
 
       <div
         className="gtr-md-stack"

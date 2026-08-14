@@ -23,6 +23,8 @@ import {
   broadcastFn,
   deleteTaskFn,
   metaCfgFn,
+  metaExchangeFn,
+  metaFeedFn,
   metaSyncFn,
   promptpayCfgFn,
   setMetaCfgFn,
@@ -632,6 +634,9 @@ function MetaCard() {
   const [igUser, setIgUser] = useState("");
   const [connected, setConnected] = useState(false);
   const [state, setState] = useState("");
+  const [appId, setAppId] = useState("");
+  const [appSecret, setAppSecret] = useState("");
+  const [feed, setFeed] = useState<{ page: string; text: string; url?: string; ts?: string; kind: string }[]>([]);
   useEffect(() => {
     metaCfgFn()
       .then((r) => {
@@ -640,7 +645,18 @@ function MetaCard() {
         setIgUser(r.igUser);
       })
       .catch(() => {});
+    metaFeedFn().then((r) => setFeed(r.items.slice(0, 6))).catch(() => {});
   }, []);
+  const exchange = async () => {
+    setState("Обмениваю токены на долгоживущие…");
+    try {
+      const r = await metaExchangeFn({ data: { appId, appSecret } });
+      setState((r.ok ? "✓ " : "") + r.note);
+      if (r.ok) setAppSecret("");
+    } catch {
+      setState("Сервер недоступен");
+    }
+  };
   const save = async () => {
     setState("Проверяю токен у Meta…");
     try {
@@ -691,6 +707,28 @@ function MetaCard() {
           </button>
         ) : null}
       </div>
+      {connected ? (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+          <input
+            className="gtr-input"
+            style={{ flex: "1 1 140px" }}
+            placeholder="App ID (Settings → Basic)"
+            value={appId}
+            onChange={(e) => setAppId(e.target.value)}
+          />
+          <input
+            className="gtr-input"
+            style={{ flex: "1 1 200px" }}
+            type="password"
+            placeholder="App Secret (Show → скопировать)"
+            value={appSecret}
+            onChange={(e) => setAppSecret(e.target.value)}
+          />
+          <button className="gtr-btn" onClick={exchange}>
+            Сделать токены вечными
+          </button>
+        </div>
+      ) : null}
       <div
         className="gtr-mono"
         style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
@@ -698,6 +736,45 @@ function MetaCard() {
         {state ||
           "Токен проверяется живым запросом к Meta: подхватываем страницу, её IG Business и последние публикации. Инструкция по выдаче токена — в Telegram."}
       </div>
+      {feed.length ? (
+        <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
+          <Eyebrow>ЛЕНТА СТРАНИЦ · {feed.length}</Eyebrow>
+          {feed.map((f) => (
+            <a
+              key={f.url ?? f.text}
+              href={f.url}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: "flex",
+                gap: 10,
+                alignItems: "baseline",
+                padding: "6px 0",
+                borderBottom: "1px solid rgba(255,255,255,.05)",
+                color: "inherit",
+                textDecoration: "none",
+              }}
+            >
+              <span
+                className="gtr-mono"
+                style={{ font: "600 9px/1.3 'JetBrains Mono',monospace", color: "var(--gtr-t3)", flex: "none" }}
+              >
+                {f.kind.toUpperCase()} · {(f.ts ?? "").slice(0, 10)}
+              </span>
+              <span
+                style={{
+                  font: "500 11px/1.4 'Golos Text',sans-serif",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {f.page}: {f.text || "медиа-публикация"}
+              </span>
+            </a>
+          ))}
+        </div>
+      ) : null}
     </Card>
   );
 }

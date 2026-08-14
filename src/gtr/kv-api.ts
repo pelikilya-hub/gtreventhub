@@ -1578,30 +1578,35 @@ export const metaSyncFn = createServerFn({ method: "POST" }).handler(async () =>
   const ns = await getKvNs();
   if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
   if (u.role !== "gtr" && !u.boss) return { ok: false as const, reason: "только BOSS / GTR-админ" };
-  const cfg = await kvGetJson<MetaCfg>(ns, "setting:meta");
-  if (!cfg?.pages?.length) return { ok: false as const, reason: "страница не авторизована" };
-  const out: { kind: string; page: string; id: string; text: string; media?: string; url?: string; ts?: string }[] = [];
-  const errs: string[] = [];
-  for (const pg of cfg.pages) {
-    const posts = await fetch(
-      `https://graph.facebook.com/v21.0/${pg.id}/published_posts?fields=id,message,created_time,permalink_url,full_picture&limit=10&access_token=${encodeURIComponent(pg.token)}`,
-    ).then((r) => r.json() as Promise<{ data?: { id: string; message?: string; created_time?: string; permalink_url?: string; full_picture?: string }[]; error?: { message: string } }>)
-      .catch(() => null);
-    if (!posts || posts.error) {
-      errs.push(`${pg.name}: ${posts?.error?.message?.slice(0, 80) ?? "недоступна"}`);
-    } else
-      for (const p of posts.data ?? [])
-        out.push({ kind: "fb", page: pg.name, id: p.id, text: (p.message ?? "").slice(0, 300), media: p.full_picture, url: p.permalink_url, ts: p.created_time });
-    if (pg.igId) {
-      const media = await fetch(
-        `https://graph.facebook.com/v21.0/${pg.igId}/media?fields=id,caption,media_url,thumbnail_url,permalink,timestamp&limit=10&access_token=${encodeURIComponent(pg.token)}`,
-      ).then((r) => r.json() as Promise<{ data?: { id: string; caption?: string; media_url?: string; thumbnail_url?: string; permalink?: string; timestamp?: string }[] }>).catch(() => null);
-      for (const m of media?.data ?? [])
-        out.push({ kind: "ig", page: pg.name, id: m.id, text: (m.caption ?? "").slice(0, 300), media: m.thumbnail_url ?? m.media_url, url: m.permalink, ts: m.timestamp });
-    }
-  }
-  await ns.put("metafeed", JSON.stringify({ items: out, syncedAt: Date.now() }));
-  return { ok: true as const, count: out.length, note: errs.join(" · ") || undefined };
+  const { metaSyncCore } = await import("./meta");
+  const r = await metaSyncCore(ns);
+  return r.ok
+    ? { ok: true as const, count: r.count, note: r.note }
+    : { ok: false as const, reason: r.note ?? "синк не прошёл" };
+});
+
+// Обмен токенов на долгоживущие по App ID/Secret (страницы — бессрочные)
+export const metaExchangeFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { appId: string; appSecret: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, note: "нужен вход" };
+    if (u.role !== "gtr" && !u.boss) return { ok: false as const, note: "только BOSS / GTR-админ" };
+    if (!data.appId.trim() || data.appSecret.trim().length < 16)
+      return { ok: false as const, note: "нужны App ID и App Secret из настроек приложения" };
+    const { metaExchangeCore } = await import("./meta");
+    return metaExchangeCore(ns, data.appId.trim(), data.appSecret.trim());
+  });
+
+// Лента подключённых страниц для дашборда BOSS
+export const metaFeedFn = createServerFn({ method: "GET" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || !ns) return { items: [] as import("./meta").MetaFeedItem[], syncedAt: 0 };
+  if (u.role !== "gtr" && !u.boss) return { items: [] as import("./meta").MetaFeedItem[], syncedAt: 0 };
+  const feed = await kvGetJson<{ items: import("./meta").MetaFeedItem[]; syncedAt: number }>(ns, "metafeed");
+  return feed ?? { items: [], syncedAt: 0 };
 });
 
 // ---------- PromptPay: реквизит для QR-оплат (правит только BOSS/GTR) ----------

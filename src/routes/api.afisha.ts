@@ -14,7 +14,10 @@ export const Route = createFileRoute("/api/afisha")({
         const ns = await getKvNs();
         if (!ns) return Response.json({ ok: false, reason: "no kv" });
         const counts = await syncAfisha(ns);
-        return Response.json({ ok: true, counts });
+        // заодно обновляем ленту страниц Meta — если подключены
+        const { metaSyncCore } = await import("../gtr/meta");
+        const meta = await metaSyncCore(ns).catch(() => null);
+        return Response.json({ ok: true, counts, meta: meta?.count ?? null });
       },
     },
   },

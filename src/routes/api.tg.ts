@@ -221,12 +221,12 @@ async function finishInvite(
   const caption = [
     `🎟 <b>${who}, это личное приглашение</b>`,
     "",
-    `<b>${tgEsc(su.name ?? su.email)}</b> зовёт вас в GTR EVENT — платформу событий Пхукета: <b>97 площадок · 312 артистов · события под ключ</b>.`,
+    `<b>${tgEsc(su.name ?? su.email)}</b> зовёт вас в GTR EVENT — платформу событий Пхукета: <b>104 площадки · 312 артистов · события под ключ</b>.`,
     "",
     "Один шаг — нажмите Start:",
     deep,
   ].join("\n");
-  const shareText = `${nick ? `@${nick}, ` : ""}личное приглашение в GTR EVENT от ${su.name ?? su.email}. 97 площадок · 312 артистов · события под ключ. Один шаг — нажмите Start: ${deep}`;
+  const shareText = `${nick ? `@${nick}, ` : ""}личное приглашение в GTR EVENT от ${su.name ?? su.email}. 104 площадки · 312 артистов · события под ключ. Один шаг — нажмите Start: ${deep}`;
   const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(POSTER_URL)}&text=${encodeURIComponent(shareText)}`;
   const rows: { text: string; url: string }[][] = [
     [{ text: nick ? `↗️ Отправить @${nick}` : "↗️ Отправить приглашение", url: shareUrl }],

@@ -9,6 +9,7 @@ import {
   PH,
   RATE_COLOR,
   RATE_LABEL,
+  nightOf,
   rateOf,
   RED,
   richOf,
@@ -328,6 +329,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
     );
 
   const rich = richOf(v.id);
+  const night = nightOf(v.id);
   const sp = SPACES(v.id);
   const rate = rateOf(v.id);
   const ct = CONTACT(v.id);
@@ -483,6 +485,48 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 <Field key={k} k={k} v={String(val)} />
               ))}
           </Card>
+
+          {night.hours || night.entry || night.best || night.fact ? (
+            <Card style={{ padding: 18 }}>
+              <Eyebrow style={{ marginBottom: 10 }}>{t("НОЧНАЯ ЖИЗНЬ")}</Eyebrow>
+              {(
+                [
+                  ["ЧАСЫ", night.hours],
+                  ["ВХОД", night.entry],
+                  ["ЛУЧШИЕ ВЕЧЕРА", night.best],
+                  ["МУЗЫКА ПО ГАЙДАМ", night.music],
+                ] as [string, string | undefined][]
+              )
+                .filter(([, val]) => val)
+                .map(([k, val]) => (
+                  <Field key={k} k={t(k)} v={String(val)} />
+                ))}
+              {night.fact ? (
+                <div
+                  style={{
+                    marginTop: 8,
+                    font: "500 11.5px/1.6 'Golos Text',sans-serif",
+                    color: "var(--gtr-t2)",
+                  }}
+                >
+                  {night.fact}
+                </div>
+              ) : null}
+              {night.src ? (
+                <div
+                  className="gtr-mono"
+                  style={{
+                    marginTop: 7,
+                    font: "500 9px/1.4 'JetBrains Mono',monospace",
+                    color: "var(--gtr-t3)",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {t("ИСТОЧНИК")}: {night.src}
+                </div>
+              ) : null}
+            </Card>
+          ) : null}
 
           {sp.length ? (
             <Card style={{ padding: 18 }}>

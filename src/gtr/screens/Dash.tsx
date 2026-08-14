@@ -1699,7 +1699,7 @@ function VisitorCabinet() {
   const navigate = useNavigate();
   const go = (s: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: s } });
   const TILES: [ScreenId, string, string][] = [
-    ["feed", "События Пхукета", "Афиши 97 заведений, обновляются каждые 6 часов"],
+    ["feed", "События Пхукета", "Афиши 104 заведений, обновляются каждые 6 часов"],
     ["map", "Карта", "Все заведения острова точками — от Патонга до Ката"],
     ["promo", "Бронь столов", "Заявка за минуту — подтверждение в Telegram"],
     ["aimatch", "ИИ подбор", "Куда идти под ваш музыкальный вкус — фаза B"],

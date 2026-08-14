@@ -176,7 +176,7 @@ export function CalendarScreen() {
         }}
       >
         {user.role === "gtr" ? (
-          // Селектор области: «наши события» или календарь любой из 97 площадок
+          // Селектор области: «наши события» или календарь любой из 104 площадок
           <div style={{ position: "relative" }}>
             <button
               className="gtr-oswald gtr-h1"
@@ -236,7 +236,7 @@ export function CalendarScreen() {
                   autoFocus
                   value={pickQ}
                   onChange={(e) => setPickQ(e.target.value)}
-                  placeholder={t("Поиск по 97 площадкам…")}
+                  placeholder={t("Поиск по 104 площадкам…")}
                   style={{
                     width: "100%",
                     padding: "11px 13px",

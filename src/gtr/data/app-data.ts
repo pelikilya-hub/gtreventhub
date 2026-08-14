@@ -1,5 +1,6 @@
 // Статические данные GTR Event, извлечённые из дизайн-хендоффа (GTR EVENT.dc.html)
 import venuesRaw from "./venues.json";
+import nightRaw from "./venue-night.json";
 import richRaw from "./rich.json";
 import vendorPackagesRaw from "./vendor-packages.json";
 import equipmentRaw from "./equipment.json";
@@ -85,6 +86,16 @@ export type Research = {
   missing: string;
   priority: string;
   [k: string]: unknown;
+};
+
+// Ночная жизнь: факты из свипа гайдов (phuket101, phuket.net, TripAdvisor и др.)
+export type NightInfo = {
+  hours?: string; // часы работы вечером
+  entry?: string; // вход: free / цена / депозит
+  best?: string; // лучшие вечера / резидентные ночи
+  music?: string; // музыкальная политика по гайдам
+  fact?: string; // 1-2 предложения: чем известно место
+  src?: string; // источник
 };
 
 export type RichVenue = {
@@ -204,7 +215,7 @@ export const NAV_NET: [ScreenId, string, string, string][] = [
     "base",
     "База · Пхукет",
     "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z",
-    "97",
+    "104",
   ],
   ["contacts", "Центр связи", "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z", ""],
   [
@@ -221,7 +232,7 @@ export const NAV_NET: [ScreenId, string, string, string][] = [
 export const NAV_ARTIST: [ScreenId, string, string, string][] = [
   ["dash", "Мой профиль", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", ""],
   ["feed", "События", "M4 4h16v16H4z M4 9h16 M9 13h6", ""],
-  ["base", "Заведения", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "97"],
+  ["base", "Заведения", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "104"],
   ["aimatch", "ИИ подбор", "M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6l-6-4.4h7.6z", ""],
   ["community", "Комьюнити", "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75", ""],
   ["visas", "Визы", "M4 3h16v18H4z M8 7h8 M8 11h8 M8 15h5", ""],
@@ -231,7 +242,7 @@ export const NAV_ARTIST: [ScreenId, string, string, string][] = [
 export const NAV_VISITOR: [ScreenId, string, string, string][] = [
   ["dash", "Мой профиль", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", ""],
   ["feed", "События", "M4 4h16v16H4z M4 9h16 M9 13h6", ""],
-  ["base", "Заведения", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "97"],
+  ["base", "Заведения", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "104"],
   ["aimatch", "ИИ подбор", "M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6l-6-4.4h7.6z", ""],
   ["promo", "Промо и бронь", "M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-7 M22 7H2v5h20z M12 22V7 M12 7a3 3 0 1 1 3-3c0 2-3 3-3 3z M12 7a3 3 0 1 0-3-3c0 2 3 3 3 3z", ""],
   ["community", "Комьюнити · PRO", "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75", ""],
@@ -1613,6 +1624,9 @@ export const ILZ_RICH: RichVenue = {
     "Тематические ночи: Notorious Friday (hip-hop live) · Elevation (tech-house). 300+ VIP-столов.",
   badge: "DJ MAG TOP-9 В МИРЕ · №1 В АЗИИ",
 };
+
+const NIGHT_ALL = nightRaw as Record<string, NightInfo>;
+export const nightOf = (vid: string): NightInfo => NIGHT_ALL[vid] ?? {};
 
 export const richOf = (vid: string): RichVenue =>
   vid === "VEN-0013" ? ILZ_RICH : (RICH_ALL[vid] ?? {});

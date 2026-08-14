@@ -334,6 +334,42 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
       counts[vid] = -1; // источник недоступен — прошлые данные не трогаем
     }
   }
+  // FB-события площадок, давших доступ к своей странице (vmeta:*):
+  // официальный Graph API, токены вечные, события — прямо от источника
+  for (const key of await kvListAllLocal(ns, "vmeta:")) {
+    const vid = key.slice("vmeta:".length);
+    try {
+      const vm = JSON.parse((await ns.get(key)) ?? "null") as {
+        pageId: string;
+        token: string;
+      } | null;
+      if (!vm?.token) continue;
+      const j = (await fetch(
+        `https://graph.facebook.com/v21.0/${vm.pageId}/events?fields=id,name,start_time,cover,ticket_uri&limit=12&access_token=${encodeURIComponent(vm.token)}`,
+      ).then((r) => r.json())) as {
+        data?: { id: string; name: string; start_time?: string; cover?: { source?: string }; ticket_uri?: string }[];
+      };
+      const today = new Date().toISOString().slice(0, 10);
+      const fbEvents: VenueAfishaEvent[] = (j.data ?? [])
+        .map((e) => ({
+          id: `fb-${e.id}`,
+          title: e.name,
+          dateIso: String(e.start_time ?? "").slice(0, 10),
+          poster: e.cover?.source,
+          posterSrc: e.cover?.source,
+          url: e.ticket_uri || `https://www.facebook.com/events/${e.id}`,
+          artistIds: matchArtists(e.name),
+          source: "facebook",
+        }))
+        .filter((e) => e.dateIso >= today);
+      if (fbEvents.length) {
+        const cur = byVid.get(vid) ?? [];
+        const fresh = fbEvents.filter((e) => !cur.some((c) => c.dateIso === e.dateIso && c.title.toLowerCase().slice(0, 10) === e.title.toLowerCase().slice(0, 10)));
+        byVid.set(vid, dedupe([...cur, ...fresh]));
+      }
+    } catch {}
+  }
+
   // Resident Advisor поверх сайтов: одинаковые события (та же дата и
   // пересечение названий) не дублируем — RA дополняет, а не затирает
   for (const [vid, raId] of RA_VENUES) {

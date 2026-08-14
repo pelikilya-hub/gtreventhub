@@ -1506,6 +1506,64 @@ export const myBookingsFn = createServerFn({ method: "GET" }).handler(async () =
 
 // ---------- фаза B: музыкальный профиль и ИИ-подбор ----------
 
+// ---------- FB-афиши площадки: токен их страницы по магик-ссылке ----------
+// Площадка вставляет токен своей FB-страницы в форму подтверждения — её
+// события идут в наш календарь официально. Обмениваем на вечный сразу.
+export type VenueMeta = { pageId: string; pageName: string; token: string; igId?: string };
+
+export const venueFbConnectFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string; fbToken: string }) => d)
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    if (!ns) return { ok: false as const, reason: "no kv" };
+    const link = await kvGetJson<{ vid: string; by: string }>(ns, `vlink:${data.token}`);
+    if (!link) return { ok: false as const, reason: "link" };
+    const fbToken = data.fbToken.trim();
+    if (fbToken.length < 30) return { ok: false as const, reason: "token" };
+    const G = "https://graph.facebook.com/v21.0";
+    // чей токен: страница напрямую или user → первая страница
+    const me = await fetch(`${G}/me?fields=id,name&access_token=${encodeURIComponent(fbToken)}`)
+      .then((r) => r.json() as Promise<{ id?: string; name?: string; error?: { message: string } }>)
+      .catch(() => null);
+    if (!me?.id || me.error) return { ok: false as const, reason: me?.error?.message?.slice(0, 100) ?? "meta" };
+    let page: VenueMeta = { pageId: me.id, pageName: me.name ?? "", token: fbToken };
+    const acc = await fetch(
+      `${G}/me/accounts?fields=id,name,access_token,instagram_business_account%7Bid%7D&access_token=${encodeURIComponent(fbToken)}`,
+    )
+      .then(
+        (r) =>
+          r.json() as Promise<{
+            data?: { id: string; name: string; access_token: string; instagram_business_account?: { id: string } }[];
+          }>,
+      )
+      .catch(() => null);
+    if (acc?.data?.length) {
+      const p = acc.data[0];
+      page = { pageId: p.id, pageName: p.name, token: p.access_token, igId: p.instagram_business_account?.id };
+    }
+    // сразу меняем на вечный, если App-креды настроены
+    const app = await kvGetJson<{ appId: string; appSecret: string }>(ns, "setting:metaapp");
+    if (app?.appId) {
+      const ex = await fetch(
+        `${G}/oauth/access_token?grant_type=fb_exchange_token&client_id=${encodeURIComponent(app.appId)}&client_secret=${encodeURIComponent(app.appSecret)}&fb_exchange_token=${encodeURIComponent(page.token)}`,
+      )
+        .then((r) => r.json() as Promise<{ access_token?: string }>)
+        .catch(() => null);
+      if (ex?.access_token) page.token = ex.access_token;
+    }
+    await ns.put(`vmeta:${link.vid}`, JSON.stringify(page));
+    const { V } = await import("./data/app-data");
+    await notifyAdminsTg(
+      ns,
+      [
+        "📡 <b>GTR · площадка подключила FB-афиши</b>",
+        `${tgEsc(V(link.vid).name)} → страница «${tgEsc(page.pageName)}»`,
+        "События их страницы теперь идут в календарь автоматически.",
+      ].join("\n"),
+    );
+    return { ok: true as const, pageName: page.pageName };
+  });
+
 // ---------- Meta (Facebook/Instagram): авторизация страницы BOSS ----------
 // Официальный Graph API вместо закрытого анонимного доступа: токен страницы
 // даёт посты, медиа и события — легально и стабильно.

@@ -4,7 +4,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { venueConfirmSubmitFn, venueLinkOpenFn } from "@/gtr/kv-api";
+import { venueConfirmSubmitFn, venueFbConnectFn, venueLinkOpenFn } from "@/gtr/kv-api";
 import { Eyebrow } from "@/gtr/ui";
 
 export const Route = createFileRoute("/gtr/v")({
@@ -39,6 +39,13 @@ const T: Record<Lang, Record<string, string>> = {
     photosNote: "Add 3–6 photos — organizers will see your venue at its best.",
     photosAdd: "Add photos",
     photosLimit: "Photo limit reached (6)",
+    fb: "YOUR EVENTS IN THE APP",
+    fbNote: "Connect your Facebook page — your events will appear automatically in the GTR Event app (thousands of Phuket guests, free promo).",
+    fbSteps: "1) Open developers.facebook.com/tools/explorer  2) Get Page Access Token → choose your page  3) Copy the token and paste below.",
+    fbPlaceholder: "Paste your page access token",
+    fbConnect: "CONNECT EVENTS",
+    fbOk: "Connected! Your events will appear within 6 hours.",
+    fbFail: "Could not connect — check the token",
     submit: "CONFIRM DETAILS",
     done: "Thank you! Details confirmed.",
     doneSub: "Our team will be in touch. Update anytime via the same link.",
@@ -68,6 +75,13 @@ const T: Record<Lang, Record<string, string>> = {
     photosNote: "เพิ่มรูป 3–6 รูป เพื่อให้ผู้จัดงานเห็นสถานที่ของคุณอย่างดีที่สุด",
     photosAdd: "เพิ่มรูปภาพ",
     photosLimit: "ครบจำนวนรูปแล้ว (6)",
+    fb: "อีเวนต์ของคุณในแอป",
+    fbNote: "เชื่อมต่อเพจ Facebook — อีเวนต์ของคุณจะปรากฏในแอป GTR Event อัตโนมัติ (โปรโมตฟรีถึงแขกภูเก็ตหลายพันคน)",
+    fbSteps: "1) เปิด developers.facebook.com/tools/explorer  2) Get Page Access Token → เลือกเพจ  3) คัดลอกโทเคนแล้ววางด้านล่าง",
+    fbPlaceholder: "วางโทเคนเพจของคุณ",
+    fbConnect: "เชื่อมต่ออีเวนต์",
+    fbOk: "เชื่อมต่อแล้ว! อีเวนต์จะปรากฏภายใน 6 ชั่วโมง",
+    fbFail: "เชื่อมต่อไม่ได้ — ตรวจสอบโทเคน",
     submit: "ยืนยันข้อมูล",
     done: "ขอบคุณ! ยืนยันข้อมูลเรียบร้อย",
     doneSub: "ทีมงานจะติดต่อกลับ แก้ไขได้ทุกเมื่อผ่านลิงก์เดิม",
@@ -97,6 +111,13 @@ const T: Record<Lang, Record<string, string>> = {
     photosNote: "Добавьте 3–6 фото — организаторы увидят площадку с лучшей стороны.",
     photosAdd: "Добавить фото",
     photosLimit: "Достигнут лимит фото (6)",
+    fb: "ВАШИ СОБЫТИЯ В ПРИЛОЖЕНИИ",
+    fbNote: "Подключите страницу Facebook — ваши события автоматически появятся в приложении GTR Event (тысячи гостей Пхукета, бесплатное промо).",
+    fbSteps: "1) Откройте developers.facebook.com/tools/explorer  2) Get Page Access Token → выберите свою страницу  3) Скопируйте токен и вставьте ниже.",
+    fbPlaceholder: "Вставьте токен вашей страницы",
+    fbConnect: "ПОДКЛЮЧИТЬ СОБЫТИЯ",
+    fbOk: "Подключено! События появятся в течение 6 часов.",
+    fbFail: "Не удалось подключить — проверьте токен",
     submit: "ПОДТВЕРДИТЬ ДАННЫЕ",
     done: "Спасибо! Данные подтверждены.",
     doneSub: "Команда свяжется с вами. Обновить можно по той же ссылке.",
@@ -187,6 +208,24 @@ function VenueConfirmPage() {
       } finally {
         setUploading((u) => u - 1);
       }
+    }
+  };
+
+  const [fbToken, setFbToken] = useState("");
+  const [fbBusy, setFbBusy] = useState(false);
+  const [fbState, setFbState] = useState<"" | "ok" | "fail">("");
+  const connectFb = async () => {
+    if (!token) return;
+    setFbBusy(true);
+    setFbState("");
+    try {
+      const r = await venueFbConnectFn({ data: { token, fbToken } });
+      setFbState(r.ok ? "ok" : "fail");
+      if (r.ok) setFbToken("");
+    } catch {
+      setFbState("fail");
+    } finally {
+      setFbBusy(false);
     }
   };
 
@@ -456,6 +495,47 @@ function VenueConfirmPage() {
                   }}
                 />
               </label>
+            </div>
+
+            {/* FB-афиши: площадка подключает свою страницу — её события
+                идут в календарь GTR официально, токен меняем на вечный */}
+            <div style={{ display: "grid", gap: 8 }}>
+              <Eyebrow>{t.fb}</Eyebrow>
+              <div style={{ font: "500 12px/1.55 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+                {t.fbNote}
+              </div>
+              <div
+                className="gtr-mono"
+                style={{ font: "500 10px/1.6 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+              >
+                {t.fbSteps}
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <input
+                  className="gtr-input"
+                  style={{ flex: "1 1 220px" }}
+                  placeholder={t.fbPlaceholder}
+                  value={fbToken}
+                  onChange={(e) => setFbToken(e.target.value)}
+                />
+                <button
+                  className="gtr-btn"
+                  disabled={fbBusy || !fbToken.trim()}
+                  onClick={() => void connectFb()}
+                >
+                  {fbBusy ? "…" : t.fbConnect}
+                </button>
+              </div>
+              {fbState ? (
+                <div
+                  style={{
+                    font: "600 11.5px/1.4 'Golos Text',sans-serif",
+                    color: fbState === "ok" ? "#3DDC84" : "#E5231B",
+                  }}
+                >
+                  {fbState === "ok" ? t.fbOk : t.fbFail}
+                </div>
+              ) : null}
             </div>
 
             {err ? (

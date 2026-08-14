@@ -42,6 +42,7 @@ import {
 } from "./screens/Platform";
 import { TonightScreen } from "./screens/Tonight";
 import { useDeviceTilt } from "./motion";
+import { GtrPlayerBar } from "./player";
 import {
   MyShowsScreen,
   PromoScreen,
@@ -229,7 +230,8 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
           style={{ height: 30, width: "auto" }}
         />
       </header>
-      {navOpen ? <div className="gtr-scrim" onClick={() => setNavOpen(false)} /> : null}
+      {/* скрим всегда в DOM: видимость через CSS-фейд, чтобы меню не моргало */}
+      <div className="gtr-scrim" aria-hidden={!navOpen} onClick={() => setNavOpen(false)} />
 
       {/* ---------- сайдбар ---------- */}
       <aside className="gtr-sidebar">
@@ -376,6 +378,9 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
         </Suspense>
         </div>
       </main>
+
+      {/* ---------- GTR SOUND: плеер в футере мобильной версии ---------- */}
+      <GtrPlayerBar />
     </div>
   );
 }

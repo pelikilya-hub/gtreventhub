@@ -958,12 +958,21 @@
   }
   .nav-open .gtr-sidebar { transform: none; }
 
+  /* скрим всегда в DOM и фейдится opacity: резкое появление blur-слоя
+     читалось как «моргание» меню */
   .gtr-scrim {
     display: block;
     position: fixed;
     inset: 0;
     z-index: calc(var(--gtr-z-modal) - 1);
     background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .nav-open .gtr-scrim {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .gtr-main {
@@ -1526,11 +1535,17 @@ html { -webkit-tap-highlight-color: transparent; }
     -webkit-backdrop-filter: blur(18px) saturate(1.25);
     backdrop-filter: blur(18px) saturate(1.25);
   }
-  /* дровер меню — стеклянная панель с пружинным выездом */
+  /* дровер меню — пружинный выезд. Стекла на движущейся панели НЕТ:
+     backdrop-filter + анимация transform мерцает на iOS (панель «моргала»).
+     Вместо него — плотный клубный градиент и красная световая кромка. */
   .gtr-sidebar {
-    background: rgba(12, 13, 16, 0.78);
-    -webkit-backdrop-filter: blur(26px) saturate(1.25);
-    backdrop-filter: blur(26px) saturate(1.25);
+    background:
+      radial-gradient(120% 60% at 100% 0%, rgba(229, 35, 27, 0.14), transparent 55%),
+      linear-gradient(168deg, #14151a 0%, #0c0d10 46%, #16090a 100%);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-right: 1px solid rgba(229, 35, 27, 0.32);
+    box-shadow: 14px 0 44px rgba(0, 0, 0, 0.6), 1px 0 14px rgba(229, 35, 27, 0.18);
     transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
   }
   .gtr-scrim {
@@ -1611,4 +1626,133 @@ html { -webkit-tap-highlight-color: transparent; }
 
 @media (prefers-reduced-motion: reduce) {
   .gtr-btn-wow, .gtr-btn-wow::after { animation: none; }
+}
+
+/* ---------- GTR SOUND: плеер в футере мобильной версии ---------- */
+/* Скин: стеклянная панель (fixed — blur безопасен), красная play-кнопка со
+   срезанным углом, живой эквалайзер от реального спектра, тонкая линия
+   прогресса. Свечение кнопки и атмосфера дышат от --gtr-pulse (бас трека). */
+.gtr-playbar { display: none; }
+
+@media (max-width: 860px) {
+  .gtr-playbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--gtr-z-panel);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    background: rgba(10, 11, 13, 0.72);
+    -webkit-backdrop-filter: blur(20px) saturate(1.25);
+    backdrop-filter: blur(20px) saturate(1.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  /* контент не прячется за плеером */
+  .gtr-main {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .gtr-playbar-progress {
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.07);
+  }
+  .gtr-playbar-progress > div {
+    height: 100%;
+    background: linear-gradient(90deg, #e5231b, #ff3427);
+    transform: scaleX(0);
+    transform-origin: left;
+    box-shadow: 0 0 8px rgba(229, 35, 27, 0.7);
+  }
+
+  .gtr-play-btn {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(135deg, #e5231b, #ff3427);
+    border: 0;
+    cursor: pointer;
+    padding: 0;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+    box-shadow: 0 0 calc(10px + var(--gtr-pulse, 0) * 30px) rgba(229, 35, 27, calc(0.35 + var(--gtr-pulse, 0) * 0.45));
+    transition: transform 0.14s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .gtr-play-btn:active { transform: scale(0.92); }
+
+  .gtr-playbar-meta {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+    cursor: pointer;
+  }
+  .gtr-playbar-title {
+    font: 600 13px/1.15 Oswald, sans-serif;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gtr-playbar-sub {
+    font: 500 8.5px/1 'JetBrains Mono', monospace;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.45);
+  }
+  .playing .gtr-playbar-sub { color: rgba(255, 82, 72, 0.85); }
+
+  /* эквалайзер: столбики двигает JS реальным спектром (scaleY) */
+  .gtr-playbar-eq {
+    flex: none;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 22px;
+  }
+  .gtr-playbar-eq span {
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, #ff3427, #e5231b);
+    transform: scaleY(0.15);
+    transform-origin: bottom;
+    opacity: 0.9;
+  }
+
+  .gtr-next-btn {
+    flex: none;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    color: rgba(255, 255, 255, 0.75);
+    background: transparent;
+    border: 1px solid var(--gtr-border2);
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.14s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .gtr-next-btn:active { transform: scale(0.92); }
+
+  /* ритм продукта: атмосферный свет и кромка шапки дышат с басом */
+  .gtr-atmo span {
+    opacity: calc(0.5 + var(--gtr-pulse, 0) * 0.4);
+  }
+  .gtr-topbar {
+    border-bottom-color: rgba(229, 35, 27, calc(0.1 + var(--gtr-pulse, 0) * 0.55));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-play-btn { box-shadow: 0 0 10px rgba(229, 35, 27, 0.35); }
 }

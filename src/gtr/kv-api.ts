@@ -1584,7 +1584,7 @@ export const metaSyncFn = createServerFn({ method: "POST" }).handler(async () =>
   const errs: string[] = [];
   for (const pg of cfg.pages) {
     const posts = await fetch(
-      `https://graph.facebook.com/v21.0/${pg.id}/posts?fields=id,message,created_time,permalink_url,full_picture&limit=10&access_token=${encodeURIComponent(pg.token)}`,
+      `https://graph.facebook.com/v21.0/${pg.id}/published_posts?fields=id,message,created_time,permalink_url,full_picture&limit=10&access_token=${encodeURIComponent(pg.token)}`,
     ).then((r) => r.json() as Promise<{ data?: { id: string; message?: string; created_time?: string; permalink_url?: string; full_picture?: string }[]; error?: { message: string } }>)
       .catch(() => null);
     if (!posts || posts.error) {

@@ -459,6 +459,71 @@
 }
 .gtr-presence { animation: gtrpulse 2s ease-out infinite; }
 
+/* ---------- атмосфера вечеринки: рассеивание и воздух ---------- */
+/* Дрейфующие пятна клубного света за всем контентом: тяжёлый blur,
+   screen-блендинг, медленные несинхронные орбиты — дым и лучи в зале. */
+.gtr-atmo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.gtr-atmo span {
+  position: absolute;
+  width: 44vmax;
+  height: 44vmax;
+  border-radius: 50%;
+  filter: blur(90px);
+  mix-blend-mode: screen;
+  will-change: transform;
+  opacity: 0.55;
+}
+.gtr-atmo span:nth-child(1) {
+  left: -12vmax;
+  top: -10vmax;
+  background: radial-gradient(circle, rgba(229, 35, 27, 0.32), transparent 62%);
+  animation: gtrdrift1 34s ease-in-out infinite;
+}
+.gtr-atmo span:nth-child(2) {
+  right: -16vmax;
+  top: 8vmax;
+  background: radial-gradient(circle, rgba(123, 77, 255, 0.26), transparent 60%);
+  animation: gtrdrift2 44s ease-in-out infinite;
+}
+.gtr-atmo span:nth-child(3) {
+  left: 18vmax;
+  bottom: -18vmax;
+  background: radial-gradient(circle, rgba(245, 166, 35, 0.2), transparent 60%);
+  animation: gtrdrift3 39s ease-in-out infinite;
+}
+.gtr-atmo span:nth-child(4) {
+  right: 10vmax;
+  bottom: -8vmax;
+  width: 30vmax;
+  height: 30vmax;
+  background: radial-gradient(circle, rgba(0, 190, 255, 0.14), transparent 58%);
+  animation: gtrdrift1 52s ease-in-out infinite reverse;
+}
+@keyframes gtrdrift1 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(9vmax, 6vmax, 0) scale(1.15); }
+  66% { transform: translate3d(-4vmax, 10vmax, 0) scale(0.92); }
+}
+@keyframes gtrdrift2 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  40% { transform: translate3d(-11vmax, 7vmax, 0) scale(0.88); }
+  70% { transform: translate3d(-3vmax, -6vmax, 0) scale(1.12); }
+}
+@keyframes gtrdrift3 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  45% { transform: translate3d(7vmax, -9vmax, 0) scale(1.18); }
+  75% { transform: translate3d(-8vmax, -2vmax, 0) scale(0.95); }
+}
+
+/* контент — поверх атмосферы */
+.gtr-main, .gtr-sidebar { position: relative; z-index: 1; }
+
 /* ---------- дизайнерский слой 2: музыка в движении ---------- */
 
 /* жанровый бар: налив слева каскадом + блик, пробегающий по градиенту */
@@ -579,9 +644,10 @@
 .gtr-card-hover:hover {
   border-color: var(--gtr-red);
   box-shadow:
-    0 0 0 1px rgba(229, 35, 27, 0.35),
-    0 0 22px -6px rgba(229, 35, 27, 0.7);
-  transform: translate(-1px, -1px);
+    0 0 0 1px rgba(229, 35, 27, 0.28),
+    0 18px 52px rgba(229, 35, 27, 0.14),
+    0 8px 30px rgba(0, 0, 0, 0.55);
+  transform: translate(-1px, -2px);
 }
 .gtr-card-hover:active { transform: translate(0, 0); }
 
@@ -769,6 +835,7 @@
   .gtr-neon,
   .gtr-glowbar,
   .gtr-presence,
+  .gtr-atmo span,
   .gtr-genrebar,
   .gtr-genrebar::after,
   .gtr-eq span,
@@ -1407,3 +1474,12 @@
 }
 .leaflet-container { background: #0a0b0d; font-family: 'Golos Text', sans-serif; }
 .leaflet-container a.leaflet-popup-close-button { color: rgba(255,255,255,.6); }
+
+/* стекло: карточки полупрозрачны, дрейфующий свет просвечивает сквозь них */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .gtr-app .gtr-card {
+    background: rgba(15, 16, 19, 0.66);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+    backdrop-filter: blur(14px) saturate(1.15);
+  }
+}

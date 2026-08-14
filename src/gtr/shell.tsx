@@ -205,6 +205,10 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
 
   return (
     <div className={`gtr-shell ${navOpen ? "nav-open" : ""}`}>
+      {/* атмосфера вечеринки: дрейфующий рассеянный свет за всем контентом */}
+      <div className="gtr-atmo" aria-hidden>
+        <span /><span /><span /><span />
+      </div>
       {/* ---------- мобильная шапка ---------- */}
       <header className="gtr-topbar">
         <button

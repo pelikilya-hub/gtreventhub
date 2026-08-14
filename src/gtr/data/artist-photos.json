@@ -1835,6 +1835,243 @@
    "deezerId": 4571117,
    "source": "Deezer API, алиас вручную",
    "match": "alias"
+  },
+  "MC-0005": {
+   "name": "MK.Santo",
+   "photo": "/artists/MC-0005-avatar.jpg",
+   "photoMed": "/artists/MC-0005-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0023": {
+   "name": "DJ Adamantine / Dawn Razor",
+   "photo": "/artists/MC-0023-avatar.jpg",
+   "photoMed": "/artists/MC-0023-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0024": {
+   "name": "Thrive Live Music",
+   "photo": "/artists/MC-0024-avatar.jpg",
+   "photoMed": "/artists/MC-0024-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0025": {
+   "name": "Rai Maia",
+   "photo": "/artists/MC-0025-avatar.jpg",
+   "photoMed": "/artists/MC-0025-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0036": {
+   "name": "Aleksey Justie",
+   "photo": "/artists/MC-0036-avatar.jpg",
+   "photoMed": "/artists/MC-0036-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0040": {
+   "name": "Ivan Shumkov",
+   "photo": "/artists/MC-0040-avatar.jpg",
+   "photoMed": "/artists/MC-0040-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0050": {
+   "name": "Lewis Aung",
+   "photo": "/artists/MC-0050-avatar.jpg",
+   "photoMed": "/artists/MC-0050-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0051": {
+   "name": "Katya Colt",
+   "photo": "/artists/MC-0051-avatar.jpg",
+   "photoMed": "/artists/MC-0051-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0054": {
+   "name": "MVXOOD",
+   "photo": "/artists/MC-0054-avatar.jpg",
+   "photoMed": "/artists/MC-0054-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0056": {
+   "name": "Nia Obsedo",
+   "photo": "/artists/MC-0056-avatar.jpg",
+   "photoMed": "/artists/MC-0056-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0058": {
+   "name": "Soma Bluu",
+   "photo": "/artists/MC-0058-avatar.jpg",
+   "photoMed": "/artists/MC-0058-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0062": {
+   "name": "Artemidus",
+   "photo": "/artists/MC-0062-avatar.jpg",
+   "photoMed": "/artists/MC-0062-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0071": {
+   "name": "Javi Sampol",
+   "photo": "/artists/MC-0071-avatar.jpg",
+   "photoMed": "/artists/MC-0071-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0074": {
+   "name": "Holu Sound",
+   "photo": "/artists/MC-0074-avatar.jpg",
+   "photoMed": "/artists/MC-0074-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0075": {
+   "name": "Sasha Belov",
+   "photo": "/artists/MC-0075-avatar.jpg",
+   "photoMed": "/artists/MC-0075-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0078": {
+   "name": "Joe Gradante",
+   "photo": "/artists/MC-0078-avatar.jpg",
+   "photoMed": "/artists/MC-0078-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0079": {
+   "name": "Lazykay",
+   "photo": "/artists/MC-0079-avatar.jpg",
+   "photoMed": "/artists/MC-0079-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0081": {
+   "name": "Mr.Sour",
+   "photo": "/artists/MC-0081-avatar.jpg",
+   "photoMed": "/artists/MC-0081-avatar.jpg",
+   "source": "Mixcloud · аватар",
+   "match": "handle"
+  },
+  "MC-0084": {
+   "name": "MK.Santo",
+   "photo": "/artists/MC-0084-avatar.jpg",
+   "photoMed": "/artists/MC-0084-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0128": {
+   "name": "Ron Poe",
+   "photo": "/artists/MC-0128-avatar.jpg",
+   "photoMed": "/artists/MC-0128-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0185": {
+   "name": "gizzdear",
+   "photo": "/artists/MC-0185-avatar.jpg",
+   "photoMed": "/artists/MC-0185-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0186": {
+   "name": "Jduck",
+   "photo": "/artists/MC-0186-avatar.jpg",
+   "photoMed": "/artists/MC-0186-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0225": {
+   "name": "Taomild",
+   "photo": "/artists/MC-0225-avatar.jpg",
+   "photoMed": "/artists/MC-0225-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0227": {
+   "name": "Guf",
+   "photo": "/artists/MC-0227-avatar.jpg",
+   "photoMed": "/artists/MC-0227-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0253": {
+   "name": "Umaturman",
+   "photo": "/artists/MC-0253-avatar.jpg",
+   "photoMed": "/artists/MC-0253-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0273": {
+   "name": "Eva Polna",
+   "photo": "/artists/MC-0273-avatar.jpg",
+   "photoMed": "/artists/MC-0273-avatar.jpg",
+   "source": "SoundCloud · аватар профиля",
+   "match": "handle"
+  },
+  "MC-0045": {
+   "name": "Yulianiko",
+   "photo": "/artists/MC-0045-avatar.jpg",
+   "photoMed": "/artists/MC-0045-avatar.jpg",
+   "deezerId": 10534323,
+   "source": "Deezer API, точное совпадение имени (добор)",
+   "match": "exact-auto"
+  },
+  "MC-0096": {
+   "name": "Jamie Jones",
+   "photo": "/artists/MC-0096-avatar.jpg",
+   "photoMed": "/artists/MC-0096-avatar.jpg",
+   "deezerId": 15419,
+   "source": "Deezer API, точное совпадение имени (добор)",
+   "match": "exact-auto"
+  },
+  "MC-0113": {
+   "name": "ALOK",
+   "photo": "/artists/MC-0113-avatar.jpg",
+   "photoMed": "/artists/MC-0113-avatar.jpg",
+   "deezerId": 62524832,
+   "source": "Deezer API, точное совпадение имени (добор)",
+   "match": "exact-auto"
+  },
+  "MC-0127": {
+   "name": "FISHER",
+   "photo": "/artists/MC-0127-avatar.jpg",
+   "photoMed": "/artists/MC-0127-avatar.jpg",
+   "deezerId": 64250922,
+   "source": "Deezer API, точное совпадение имени (добор)",
+   "match": "exact-auto"
+  },
+  "MC-0226": {
+   "name": "Kaspiyskiy Gruz",
+   "photo": "/artists/MC-0226-avatar.jpg",
+   "photoMed": "/artists/MC-0226-avatar.jpg",
+   "deezerId": 5330639,
+   "source": "Deezer API, кириллический алиас",
+   "match": "alias"
+  },
+  "MC-0271": {
+   "name": "Zhenya Lyubich",
+   "photo": "/artists/MC-0271-avatar.jpg",
+   "photoMed": "/artists/MC-0271-avatar.jpg",
+   "deezerId": 4333153,
+   "source": "Deezer API, кириллический алиас",
+   "match": "alias"
+  },
+  "MC-0236": {
+   "name": "Nurlan Saburov",
+   "photo": "/artists/MC-0236-avatar.jpg",
+   "photoMed": "/artists/MC-0236-avatar.jpg",
+   "source": "Wikipedia (Сабуров, Нурлан Алибекович)",
+   "match": "alias"
   }
  }
 }

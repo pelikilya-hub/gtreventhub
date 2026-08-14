@@ -87,6 +87,8 @@ export function DashScreen() {
   if (user.role === "sales" || user.role === "organizer") return <SalesCabinet />;
   // Кабинет артиста: предложения, подтверждённые выступления, Telegram
   if (user.role === "artist") return <ArtistCabinet />;
+  // Посетитель: витрина, музыкальный профиль (фаза B), настройки
+  if (user.role === "visitor") return <VisitorCabinet />;
   // BOSS: дашборд контроля всей операции
   if (user.boss) return <BossCabinet />;
 
@@ -1686,6 +1688,73 @@ function InviteLinkButton() {
           {msg}
         </span>
       ) : null}
+    </div>
+  );
+}
+
+// ---------- кабинет посетителя (фаза A) ----------
+function VisitorCabinet() {
+  const { t } = useTranslation();
+  const { user } = useGtr();
+  const navigate = useNavigate();
+  const go = (s: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: s } });
+  const TILES: [ScreenId, string, string][] = [
+    ["feed", "События Пхукета", "Афиши 97 заведений, обновляются каждые 6 часов"],
+    ["map", "Карта", "Все заведения острова точками — от Патонга до Ката"],
+    ["promo", "Бронь столов", "Заявка за минуту — подтверждение в Telegram"],
+    ["aimatch", "ИИ подбор", "Куда идти под ваш музыкальный вкус — фаза B"],
+  ];
+  return (
+    <div style={{ maxWidth: 980, margin: "0 auto" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+        <h1 className="gtr-oswald gtr-h1">{user.name}</h1>
+        <Chip color="#E5231B">{t(user.roleLabel)}</Chip>
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))",
+          gap: 12,
+          marginBottom: 16,
+        }}
+      >
+        {TILES.map(([s, title, sub]) => (
+          <Card key={s} hover style={{ padding: "18px 20px" }} onClick={() => go(s)}>
+            <div style={{ font: "700 14px/1.3 Oswald,sans-serif", textTransform: "uppercase" }}>
+              {t(title)}
+            </div>
+            <div style={{ marginTop: 6, font: "500 11px/1.55 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+              {t(sub)}
+            </div>
+          </Card>
+        ))}
+      </div>
+      <Card style={{ padding: "16px 20px", marginBottom: 14, display: "grid", gap: 10 }}>
+        <Eyebrow>{t("МУЗЫКАЛЬНЫЙ ПРОФИЛЬ")}</Eyebrow>
+        <div style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+          {t("Подключение Spotify и визуальная статистика вашего вкуса — фаза B. Как только запустим, здесь появится кнопка подключения.")}
+        </div>
+        <span><Chip color="#F5A623">{t("СКОРО")}</Chip></span>
+      </Card>
+      <Card style={{ padding: "16px 20px", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <Eyebrow>{t("НАСТРОЙКИ")}</Eyebrow>
+        <PushPanel />
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 7, marginLeft: "auto" }}>
+          <span className="gtr-mono" style={{ font: "600 9px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".1em" }}>
+            {t("ЯЗЫК ПРИЛОЖЕНИЯ")}
+          </span>
+          <select
+            className="gtr-input"
+            style={{ padding: "7px 10px", width: "auto" }}
+            value={i18n.language as UiLang}
+            onChange={(e) => setUiLang(e.target.value as UiLang)}
+          >
+            {UI_LANGS.map(([code, lbl]) => (
+              <option key={code} value={code}>{lbl}</option>
+            ))}
+          </select>
+        </span>
+      </Card>
     </div>
   );
 }

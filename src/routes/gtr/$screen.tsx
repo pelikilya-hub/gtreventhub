@@ -20,6 +20,13 @@ const SCREENS: ScreenId[] = [
   "access",
   "contacts",
   "afishagen",
+  "map",
+  "feed",
+  "aimatch",
+  "community",
+  "visas",
+  "promo",
+  "myshows",
   "admin",
 ];
 

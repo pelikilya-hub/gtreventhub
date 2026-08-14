@@ -120,7 +120,7 @@ export const AMBER = "#F5A623";
 export const RED = "#E5231B";
 
 // ---------- роли ----------
-export type RoleId = "pr" | "owner" | "sales" | "gtr" | "artist" | "organizer";
+export type RoleId = "pr" | "owner" | "sales" | "gtr" | "artist" | "organizer" | "visitor";
 export const ROLES: [RoleId, string, string, string][] = [
   ["pr", "PR-директор", "VEN-0013", "ПД"],
   ["owner", "Владелец", "VEN-0061", "ВЛ"],
@@ -147,6 +147,13 @@ export type ScreenId =
   | "access"
   | "contacts"
   | "afishagen"
+  | "map"
+  | "feed"
+  | "aimatch"
+  | "community"
+  | "visas"
+  | "promo"
+  | "myshows"
   | "admin";
 
 export const NAV_VENUE: [ScreenId, string, string, string][] = [
@@ -209,6 +216,34 @@ export const NAV_NET: [ScreenId, string, string, string][] = [
   ["access", "Доступы и роли", "M7 11V7a5 5 0 0 1 10 0v4 M5 11h14v10H5z M12 15v3", ""],
   ["admin", "GTR-админ", "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z", ""],
 ];
+
+// ---------- три вариации меню платформы (фаза A) ----------
+export const NAV_ARTIST: [ScreenId, string, string, string][] = [
+  ["dash", "Мой профиль", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", ""],
+  ["feed", "События", "M4 4h16v16H4z M4 9h16 M9 13h6", ""],
+  ["base", "Заведения", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "97"],
+  ["aimatch", "ИИ подбор", "M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6l-6-4.4h7.6z", ""],
+  ["community", "Комьюнити", "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75", ""],
+  ["visas", "Визы", "M4 3h16v18H4z M8 7h8 M8 11h8 M8 15h5", ""],
+  ["myshows", "Мои выступления", "M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z", ""],
+  ["map", "Карта", "M1 6v16l7-4 8 4 7-4V2l-7 4-8-4z M8 2v16 M16 6v16", ""],
+];
+export const NAV_VISITOR: [ScreenId, string, string, string][] = [
+  ["dash", "Мой профиль", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", ""],
+  ["feed", "События", "M4 4h16v16H4z M4 9h16 M9 13h6", ""],
+  ["base", "Заведения", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "97"],
+  ["aimatch", "ИИ подбор", "M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6l-6-4.4h7.6z", ""],
+  ["promo", "Промо и бронь", "M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-7 M22 7H2v5h20z M12 22V7 M12 7a3 3 0 1 1 3-3c0 2-3 3-3 3z M12 7a3 3 0 1 0-3-3c0 2 3 3 3 3z", ""],
+  ["community", "Комьюнити · PRO", "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75", ""],
+  ["map", "Карта", "M1 6v16l7-4 8 4 7-4V2l-7 4-8-4z M8 2v16 M16 6v16", ""],
+];
+export const NAV_PLATFORM_VENUE: [ScreenId, string, string, string][] = [
+  ["artists", "Дашборд артистов", "M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z M21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z", "312"],
+  ["aimatch", "ИИ подбор артистов", "M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6l-6-4.4h7.6z", ""],
+  ["vendors", "Каталог подрядчиков", "M4 13a8 8 0 0 1 16 0 M4 13v5a2 2 0 0 0 2 2h2v-7H4z M20 13v5a2 2 0 0 1-2 2h-2v-7h4z", "12"],
+  ["map", "Карта", "M1 6v16l7-4 8 4 7-4V2l-7 4-8-4z M8 2v16 M16 6v16", ""],
+];
+
 
 // ---------- залы по площадкам ----------
 export const ROOMS: Record<string, [string, string, string][]> = {

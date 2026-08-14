@@ -295,6 +295,7 @@ export function BaseScreen() {
 
 export function VenueCardScreen({ vid }: { vid?: string }) {
   const { t } = useTranslation();
+  const { user } = useGtr();
   const navigate = useNavigate();
   const v = vid ? V(vid) : undefined;
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -331,6 +332,9 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
   const rate = rateOf(v.id);
   const ct = CONTACT(v.id);
   const R = v.readiness;
+  // Публичной аудитории (артисты, посетители) — витрина без коммерции:
+  // прайсы, контакты площадки и внутренние статусы видит только команда
+  const commercial = !["artist", "visitor"].includes(user.role);
   // Подтверждённые площадкой значения важнее наших оценок
   const cRate = confirm?.status === "confirmed" ? (confirm.rate ?? null) : null;
 
@@ -394,26 +398,37 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           <div
             style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 14 }}
           >
-            <button
-              className="gtr-btn gtr-btn-red"
-              onClick={() =>
-                navigate({
-                  to: "/gtr/$screen",
-                  params: { screen: "events" },
-                  search: { vid: v.id },
-                })
-              }
-            >
-              {t("Собрать событие здесь →")}
-            </button>
-            {cRate?.amount ? (
+            {commercial ? (
+              <button
+                className="gtr-btn gtr-btn-red"
+                onClick={() =>
+                  navigate({
+                    to: "/gtr/$screen",
+                    params: { screen: "events" },
+                    search: { vid: v.id },
+                  })
+                }
+              >
+                {t("Собрать событие здесь →")}
+              </button>
+            ) : (
+              <button
+                className="gtr-btn gtr-btn-red"
+                onClick={() =>
+                  navigate({ to: "/gtr/$screen", params: { screen: "promo" } })
+                }
+              >
+                {t("Забронировать стол →")}
+              </button>
+            )}
+            {commercial && cRate?.amount ? (
               <span
                 className="gtr-mono"
                 style={{ font: "700 12px/1 'JetBrains Mono',monospace", color: GREEN }}
               >
                 аренда {fmtThb(cRate.amount)} / {cRate.unit} · подтверждено площадкой
               </span>
-            ) : rate ? (
+            ) : commercial && rate ? (
               <span
                 className="gtr-mono"
                 style={{
@@ -586,7 +601,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
         <div style={{ display: "grid", gap: 14, alignContent: "start" }}>
           <VenueLinkBlock vid={v.id} confirm={confirm} />
           <Card style={{ padding: 18 }}>
-            {cRate || rate ? (
+            {commercial && (cRate || rate) ? (
               <div
                 style={{
                   marginBottom: 14,
@@ -652,6 +667,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 ) : null}
               </div>
             ) : null}
+            {commercial ? (<>
             <Eyebrow style={{ marginBottom: 10 }}>ИСТОЧНИКИ И КОНТАКТ</Eyebrow>
             {[
               [
@@ -708,9 +724,10 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 v={val}
               />
             ))}
+            </>) : null}
           </Card>
 
-          {R ? (
+          {commercial && R ? (
             <Card style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>
                 ГОТОВНОСТЬ К БРОНИРОВАНИЮ · {R.score}/100

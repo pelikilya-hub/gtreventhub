@@ -22,6 +22,7 @@ const ROLE_LABELS: Record<RoleId, string> = {
   gtr: "GTR-админ",
   artist: "Артист / диджей",
   organizer: "Организатор",
+  visitor: "Посетитель",
 };
 
 const initialsOf = (name: string) =>
@@ -1383,3 +1384,122 @@ export const contactTeamFn = createServerFn({ method: "POST" })
     }
     return { ok: true as const, delivered };
   });
+
+// ---------- фаза A: посетители, лента событий, бронь столов ----------
+
+// Публичная регистрация посетителя — без приглашения. Лимит по IP не ведём
+// (Workers за CDN), но email уникален и пароль хэшируется как у всех.
+export const signupVisitorFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { name: string; email: string; password: string }) => d)
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    if (!ns) return { ok: false as const, error: "Хранилище недоступно" };
+    const email = data.email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return { ok: false as const, error: "Некорректный email" };
+    if (data.password.length < 6)
+      return { ok: false as const, error: "Пароль от 6 символов" };
+    if (await ns.get(`user:${email}`))
+      return { ok: false as const, error: "Такой аккаунт уже есть — войдите" };
+    const stored: StoredUser = {
+      email,
+      name: data.name.trim() || email.split("@")[0],
+      role: "visitor",
+      roleLabel: ROLE_LABELS.visitor,
+      venueId: "",
+      initials: initialsOf(data.name || email),
+      passHash: await sha256(data.password),
+      created: Date.now(),
+      invitedBy: "signup",
+    };
+    await ns.put(`user:${email}`, JSON.stringify(stored));
+    const { passHash: _p, created: _c, invitedBy: _i, ...sessionUser } = stored;
+    const { issueSession } = await import("./auth");
+    await issueSession(sessionUser);
+    return { ok: true as const };
+  });
+
+// Лента событий всех площадок — публичная витрина (посетители и артисты)
+export const allAfishaFn = createServerFn({ method: "GET" }).handler(async () => {
+  const ns = await getKvNs();
+  if (!ns) return { items: [] as (VenueAfisha["events"][number] & { vid: string })[] };
+  const keys = await kvListAll(ns, "venueevents:");
+  const today = new Date().toISOString().slice(0, 10);
+  const items: (VenueAfisha["events"][number] & { vid: string })[] = [];
+  for (const k of keys) {
+    const rec = await kvGetJson<VenueAfisha>(ns, k);
+    const vid = k.slice("venueevents:".length);
+    for (const e of rec?.events ?? []) if (e.dateIso >= today) items.push({ ...e, vid });
+  }
+  items.sort((a, b) => a.dateIso.localeCompare(b.dateIso));
+  return { items: items.slice(0, 60) };
+});
+
+// Бронь стола / гостевой список: заявка без оплаты — команде в Telegram.
+export type TableBooking = {
+  id: string;
+  vid: string;
+  dateIso: string;
+  guests: number;
+  name: string;
+  phone: string;
+  note?: string;
+  by: string;
+  ts: number;
+  status: "new" | "confirmed" | "declined";
+};
+
+export const bookTableFn = createServerFn({ method: "POST" })
+  .inputValidator(
+    (d: { vid: string; dateIso: string; guests: number; name: string; phone: string; note?: string }) => d,
+  )
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    if (!data.name.trim() || !data.phone.trim() || !data.dateIso)
+      return { ok: false as const, reason: "имя, телефон и дата обязательны" };
+    if (await ns.get(`bklimit:${u.email}`))
+      return { ok: false as const, reason: "не чаще одной заявки в минуту" };
+    await ns.put(`bklimit:${u.email}`, "1", { expirationTtl: 60 });
+    const booking: TableBooking = {
+      id: `BK-${Date.now().toString(36)}`,
+      vid: data.vid,
+      dateIso: data.dateIso,
+      guests: Math.max(1, Math.min(100, Math.round(data.guests) || 2)),
+      name: data.name.trim().slice(0, 90),
+      phone: data.phone.trim().slice(0, 40),
+      note: data.note?.trim().slice(0, 300),
+      by: u.email,
+      ts: Date.now(),
+      status: "new",
+    };
+    await ns.put(`booking:${booking.id}`, JSON.stringify(booking));
+    const { V } = await import("./data/app-data");
+    await notifyAdminsTg(
+      ns,
+      [
+        "🪑 <b>GTR · заявка на стол</b>",
+        "",
+        `<b>${tgEsc(V(booking.vid)?.name ?? booking.vid)}</b> · ${tgEsc(booking.dateIso)} · ${booking.guests} чел.`,
+        `<b>Гость:</b> ${tgEsc(booking.name)} · ${tgEsc(booking.phone)}`,
+        booking.note ? `<b>Комментарий:</b> ${tgEsc(booking.note)}` : "",
+        `<i>${tgEsc(booking.by)}</i>`,
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    );
+    return { ok: true as const, id: booking.id };
+  });
+
+export const myBookingsFn = createServerFn({ method: "GET" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || !ns) return { bookings: [] as TableBooking[] };
+  const keys = await kvListAll(ns, "booking:");
+  const all = (await Promise.all(keys.map((k) => kvGetJson<TableBooking>(ns, k)))).filter(
+    (b): b is TableBooking => Boolean(b),
+  );
+  const mine = u.role === "gtr" ? all : all.filter((b) => b.by === u.email);
+  return { bookings: mine.sort((a, b) => b.ts - a.ts).slice(0, 30) };
+});

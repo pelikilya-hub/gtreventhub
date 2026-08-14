@@ -5,8 +5,11 @@ import { toast } from "sonner";
 import { logoutFn, type SessionUser } from "./auth";
 import {
   eventAlerts,
+  NAV_ARTIST,
   NAV_NET,
+  NAV_PLATFORM_VENUE,
   NAV_VENUE,
+  NAV_VISITOR,
   STATUS_COLOR,
   STATUS_LABEL,
   V,
@@ -32,12 +35,23 @@ import {
 } from "./screens/Misc";
 import { BaseScreen, VenueCardScreen } from "./screens/Base";
 import { ContactsScreen } from "./screens/Contacts";
+import {
+  AiMatchScreen,
+  CommunityScreen,
+  FeedScreen,
+  MyShowsScreen,
+  PromoScreen,
+  VisasScreen,
+} from "./screens/Platform";
 
 const ArtistsScreen = lazy(() =>
   import("./screens/Artists").then((m) => ({ default: m.ArtistsScreen })),
 );
 const VendorsScreen = lazy(() =>
   import("./screens/Vendors").then((m) => ({ default: m.VendorsScreen })),
+);
+const MapScreen = lazy(() =>
+  import("./screens/MapScreen").then((m) => ({ default: m.MapScreen })),
 );
 const AfishaGenScreen = lazy(() =>
   import("./screens/AfishaGen").then((m) => ({ default: m.AfishaGenScreen })),
@@ -116,24 +130,28 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sig]);
 
-  const navVenue =
-    user.role === "artist"
-      ? NAV_VENUE.filter(([id]) => id === "dash")
+  // Три вариации меню платформы + операционные группы команд
+  const canAfishaGen = Boolean(user.boss) || user.role === "organizer";
+  const isArtist = user.role === "artist";
+  const isVisitor = user.role === "visitor";
+  const navVenue = isArtist
+    ? NAV_ARTIST
+    : isVisitor
+      ? NAV_VISITOR
       : user.role === "organizer"
         ? NAV_VENUE.filter(([id]) => ["dash", "events", "constructor"].includes(id))
         : user.role === "gtr"
-          ? // BOSS и GTR-админ: полный операционный набор — тест и работа
-            // во всех модулях; экраны конкретной площадки живут в паспорте
-            NAV_VENUE.filter(([id]) => !["venue", "spaces"].includes(id))
+          ? NAV_VENUE.filter(([id]) => !["venue", "spaces"].includes(id))
           : NAV_VENUE;
-  // Генератор афиш — только BOSS и организаторы/продюсер
-  const canAfishaGen = Boolean(user.boss) || user.role === "organizer";
   const navNet = (
-    user.role === "gtr"
-      ? NAV_NET
-      : user.role === "artist"
-        ? NAV_NET.filter(([id]) => id === "artists")
-        : NAV_NET.filter(([id]) => id !== "admin")
+    isArtist || isVisitor
+      ? ([] as typeof NAV_NET)
+      : user.role === "gtr"
+        ? [...NAV_NET, ...NAV_PLATFORM_VENUE.filter(([id]) => !["artists", "vendors"].includes(id))]
+        : [
+            ...NAV_PLATFORM_VENUE,
+            ...NAV_NET.filter(([id]) => !["admin", "artists", "vendors"].includes(id)),
+          ]
   ).filter(([id]) => id !== "afishagen" || canAfishaGen);
 
   const NavGroup = ({ label, items }: { label: string; items: typeof NAV_VENUE }) => (
@@ -262,8 +280,8 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
           </span>
         </div>
 
-        <NavGroup label={t("ПЛОЩАДКА")} items={navVenue} />
-        <NavGroup label={t("СЕТЬ GTR")} items={navNet} />
+        <NavGroup label={isArtist || isVisitor ? t("ПЛАТФОРМА") : t("ПЛОЩАДКА")} items={navVenue} />
+        {navNet.length ? <NavGroup label={t("СЕТЬ GTR")} items={navNet} /> : null}
 
         <div style={{ marginTop: "auto" }}>
           {peers.length > 0 ? (
@@ -383,6 +401,20 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
       return <ContactsScreen />;
     case "afishagen":
       return <AfishaGenScreen />;
+    case "map":
+      return <MapScreen />;
+    case "feed":
+      return <FeedScreen />;
+    case "aimatch":
+      return <AiMatchScreen />;
+    case "community":
+      return <CommunityScreen />;
+    case "visas":
+      return <VisasScreen />;
+    case "promo":
+      return <PromoScreen />;
+    case "myshows":
+      return <MyShowsScreen />;
     case "admin":
       return <AdminScreen />;
     default:

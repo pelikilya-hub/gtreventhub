@@ -252,6 +252,13 @@ function LoginPage() {
           >
             Открыть витрину организатора · без входа →
           </button>
+          <button
+            className="gtr-btn"
+            style={{ width: "100%", padding: "11px 13px", marginTop: 8 }}
+            onClick={() => navigate({ to: "/gtr/signup" })}
+          >
+            Я посетитель · создать аккаунт →
+          </button>
         </div>
 
         <div

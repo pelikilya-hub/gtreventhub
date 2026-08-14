@@ -9,8 +9,9 @@ import { GREEN, nightOf, richOf, V, PH } from "../data/app-data";
 import geoRaw from "../data/venue-geo.json";
 import { Card, Chip, Eyebrow, tint } from "../ui";
 import { useGtr } from "../store";
-import { allAfishaFn, bookTableFn, type VenueAfisha } from "../kv-api";
+import { allAfishaFn, bookTableFn, promptpayCfgFn, type PromptpayCfg, type VenueAfisha } from "../kv-api";
 import { openAppLink } from "../applink";
+import { PromptpayModal } from "../promptpay-ui";
 
 const GEO = geoRaw as Record<string, { lat: number; lon: number; src: string }>;
 type FeedItem = VenueAfisha["events"][number] & { vid: string };
@@ -49,8 +50,12 @@ export function TonightScreen() {
   const [bkGuests, setBkGuests] = useState(2);
   const [bkState, setBkState] = useState<string>("");
 
+  const [ppCfg, setPpCfg] = useState<PromptpayCfg | null>(null);
+  const [ppFor, setPpFor] = useState<string>(""); // vid открытого QR-модала
+
   useEffect(() => {
     allAfishaFn().then((r) => setItems(r.items)).catch(() => {});
+    promptpayCfgFn().then((r) => setPpCfg(r.cfg)).catch(() => {});
     setRoute(loadRoute());
   }, []);
 
@@ -211,6 +216,11 @@ export function TonightScreen() {
       <button className="gtr-btn gtr-btn-red" onClick={() => submitBooking(vid)}>
         {t("Забронировать на сегодня")}
       </button>
+      {ppCfg ? (
+        <button className="gtr-btn" onClick={() => setPpFor(vid)}>
+          {t("Оплатить депозит · PromptPay QR")}
+        </button>
+      ) : null}
       {bkState ? (
         <div className="gtr-mono" style={{ font: "500 10px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
           {bkState}
@@ -484,8 +494,17 @@ export function TonightScreen() {
           color: "var(--gtr-t3)",
         }}
       >
-        {t("Часы и вход — по данным гайдов; онлайн-оплата входа появится после подключения эквайринга.")}
+        {ppCfg
+          ? t("Часы и вход — по данным гайдов. Оплата: PromptPay QR прямо из брони.")
+          : t("Часы и вход — по данным гайдов; онлайн-оплата входа появится после подключения эквайринга.")}
       </div>
+      {ppFor && ppCfg ? (
+        <PromptpayModal
+          cfg={ppCfg}
+          title={`${t("Депозит")} · ${V(ppFor).name}`}
+          onClose={() => setPpFor("")}
+        />
+      ) : null}
     </div>
   );
 }

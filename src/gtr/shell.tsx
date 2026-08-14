@@ -142,7 +142,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
     : isVisitor
       ? NAV_VISITOR
       : user.role === "organizer"
-        ? NAV_VENUE.filter(([id]) => ["dash", "events", "constructor"].includes(id))
+        ? NAV_VENUE.filter(([id]) => ["dash", "calendar", "events", "constructor"].includes(id))
         : user.role === "gtr"
           ? NAV_VENUE.filter(([id]) => !["venue", "spaces"].includes(id))
           : NAV_VENUE;

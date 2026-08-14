@@ -1506,6 +1506,33 @@ export const myBookingsFn = createServerFn({ method: "GET" }).handler(async () =
 
 // ---------- фаза B: музыкальный профиль и ИИ-подбор ----------
 
+// ---------- PromptPay: реквизит для QR-оплат (правит только BOSS/GTR) ----------
+export type PromptpayCfg = { id: string; name: string };
+
+export const promptpayCfgFn = createServerFn({ method: "GET" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || !ns) return { cfg: null as PromptpayCfg | null };
+  return { cfg: await kvGetJson<PromptpayCfg>(ns, "setting:promptpay") };
+});
+
+export const setPromptpayCfgFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; name: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    if (u.role !== "gtr" && !u.boss) return { ok: false as const, reason: "только BOSS / GTR-админ" };
+    const digits = data.id.replace(/[^\d]/g, "");
+    if (![10, 13, 15].includes(digits.length))
+      return { ok: false as const, reason: "ID: телефон (10 цифр), Tax ID (13) или e-wallet (15)" };
+    await ns.put(
+      "setting:promptpay",
+      JSON.stringify({ id: digits, name: data.name.trim().slice(0, 60) } satisfies PromptpayCfg),
+    );
+    return { ok: true as const };
+  });
+
 export const musicProfileFn = createServerFn({ method: "GET" }).handler(async () => {
   const u = await currentUser();
   const ns = await getKvNs();

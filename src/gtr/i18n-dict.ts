@@ -169,6 +169,14 @@ export const EN: Record<string, string> = {
     "No events posted for today yet — venues open tonight are below.",
   "Часы и вход — по данным гайдов; онлайн-оплата входа появится после подключения эквайринга.":
     "Hours and entry per public guides; online entry payment arrives with acquiring.",
+  "Оплатить депозит · PromptPay QR": "Pay deposit · PromptPay QR",
+  "Депозит": "Deposit",
+  "Сумма, ฿ (можно пустую)": "Amount, ฿ (optional)",
+  "Получатель": "Payee",
+  "Отсканируйте QR в приложении вашего банка (SCB, Kasikorn, Bangkok Bank…). Платёж уходит напрямую получателю.":
+    "Scan the QR in your banking app (SCB, Kasikorn, Bangkok Bank…). Payment goes directly to the payee.",
+  "Часы и вход — по данным гайдов. Оплата: PromptPay QR прямо из брони.":
+    "Hours and entry per public guides. Payments: PromptPay QR right from the booking form.",
   "НОЧНАЯ ЖИЗНЬ": "NIGHTLIFE",
   "ЧАСЫ": "HOURS",
   "ВХОД": "ENTRY",
@@ -419,6 +427,14 @@ export const TH: Record<string, string> = {
     "ยังไม่มีอีเวนต์วันนี้ — ด้านล่างคือร้านที่เปิดค่ำคืนนี้",
   "Часы и вход — по данным гайдов; онлайн-оплата входа появится после подключения эквайринга.":
     "เวลาและค่าเข้าอ้างอิงจากไกด์ · การจ่ายออนไลน์จะมาพร้อมระบบชำระเงิน",
+  "Оплатить депозит · PromptPay QR": "จ่ายมัดจำ · PromptPay QR",
+  "Депозит": "มัดจำ",
+  "Сумма, ฿ (можно пустую)": "จำนวนเงิน ฿ (ไม่บังคับ)",
+  "Получатель": "ผู้รับเงิน",
+  "Отсканируйте QR в приложении вашего банка (SCB, Kasikorn, Bangkok Bank…). Платёж уходит напрямую получателю.":
+    "สแกน QR ในแอปธนาคารของคุณ (SCB, Kasikorn, Bangkok Bank…) เงินโอนตรงถึงผู้รับ",
+  "Часы и вход — по данным гайдов. Оплата: PromptPay QR прямо из брони.":
+    "เวลาและค่าเข้าตามไกด์ · จ่ายผ่าน PromptPay QR จากฟอร์มจองได้เลย",
   "НОЧНАЯ ЖИЗНЬ": "ไนท์ไลฟ์",
   "ЧАСЫ": "เวลาเปิด",
   "ВХОД": "ค่าเข้า",

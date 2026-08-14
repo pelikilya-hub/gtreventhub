@@ -263,6 +263,62 @@ async function kvListAllLocal(ns: KvNs, prefix: string): Promise<string[]> {
 }
 
 // Полный проход: по адаптеру на площадку. Возвращает счётчики для отчёта.
+// Resident Advisor: открытый GraphQL, событList по id площадки. Даёт
+// подтверждённые международные лайнапы — организаторы видят занятые даты.
+const RA_VENUES: [string, number][] = [
+  ["VEN-0002", 137028], // Café del Mar Phuket
+  ["VEN-0013", 162517], // Illuzion
+  ["VEN-0015", 160713], // Shelter
+  ["VEN-0055", 114662], // Paradise Beach
+];
+
+async function syncResidentAdvisor(raId: number): Promise<VenueAfishaEvent[]> {
+  const res = await fetch("https://ra.co/graphql", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "user-agent": UA,
+      referer: "https://ra.co/",
+    },
+    body: JSON.stringify({
+      query: `query { venue(id: ${raId}) { name events(limit: 12, type: LATEST) { id title date contentUrl artists { name } images { filename } } } }`,
+    }),
+  });
+  if (!res.ok) throw new Error(`ra ${res.status}`);
+  const j = (await res.json()) as {
+    data?: {
+      venue?: {
+        events?: {
+          id: string;
+          title: string;
+          date: string;
+          contentUrl?: string;
+          artists?: { name: string }[];
+          images?: { filename: string }[];
+        }[];
+      };
+    };
+  };
+  const today = new Date().toISOString().slice(0, 10);
+  return (j.data?.venue?.events ?? [])
+    .map((e) => {
+      const dateIso = String(e.date).slice(0, 10);
+      const names = (e.artists ?? []).map((a) => a.name).join(", ");
+      return {
+        id: `ra-${e.id}`,
+        title: e.title + (names && !e.title.includes(names.split(",")[0]) ? ` · ${names}` : ""),
+        dateIso,
+        poster: e.images?.[0]?.filename,
+        posterSrc: e.images?.[0]?.filename,
+        url: e.contentUrl ? `https://ra.co${e.contentUrl}` : "https://ra.co",
+        artistIds: matchArtists(`${e.title} ${names}`),
+        source: "ra.co",
+      } satisfies VenueAfishaEvent;
+    })
+    .filter((e) => e.dateIso >= today)
+    .slice(0, 12);
+}
+
 export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
   const jobs: [string, () => Promise<VenueAfishaEvent[]>][] = [
     ["VEN-0002", syncCafeDelMar],
@@ -271,18 +327,41 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
   ];
   const counts: Record<string, number> = {};
   const posterBudget = { left: POSTERS_PER_RUN };
+  const byVid = new Map<string, VenueAfishaEvent[]>();
   for (const [vid, run] of jobs) {
     try {
-      const events = dedupe(await run());
-      counts[vid] = events.length;
-      await cachePosters(ns, vid, events, posterBudget);
-      await ns.put(
-        `venueevents:${vid}`,
-        JSON.stringify({ events, syncedAt: Date.now(), source: events[0]?.source ?? "" } satisfies VenueAfisha),
-      );
+      byVid.set(vid, dedupe(await run()));
     } catch (e) {
       counts[vid] = -1; // источник недоступен — прошлые данные не трогаем
     }
+  }
+  // Resident Advisor поверх сайтов: одинаковые события (та же дата и
+  // пересечение названий) не дублируем — RA дополняет, а не затирает
+  for (const [vid, raId] of RA_VENUES) {
+    try {
+      const ra = await syncResidentAdvisor(raId);
+      const cur = byVid.get(vid) ?? [];
+      const fresh = ra.filter(
+        (e) =>
+          !cur.some(
+            (c) =>
+              c.dateIso === e.dateIso &&
+              (c.title.toLowerCase().includes(e.title.toLowerCase().slice(0, 8)) ||
+                e.title.toLowerCase().includes(c.title.toLowerCase().slice(0, 8))),
+          ),
+      );
+      byVid.set(vid, dedupe([...cur, ...fresh]));
+    } catch {
+      if (!byVid.has(vid)) counts[vid] = counts[vid] ?? -1;
+    }
+  }
+  for (const [vid, events] of byVid) {
+    counts[vid] = events.length;
+    await cachePosters(ns, vid, events, posterBudget);
+    await ns.put(
+      `venueevents:${vid}`,
+      JSON.stringify({ events, syncedAt: Date.now(), source: events[0]?.source ?? "" } satisfies VenueAfisha),
+    );
   }
   return counts;
 }

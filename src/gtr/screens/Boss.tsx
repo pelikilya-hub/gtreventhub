@@ -22,6 +22,8 @@ import { Card, Chip, Dot, Eyebrow, tint } from "../ui";
 import {
   broadcastFn,
   deleteTaskFn,
+  promptpayCfgFn,
+  setPromptpayCfgFn,
   listUsersFn,
   pullTasksFn,
   pushStatusFn,
@@ -611,8 +613,74 @@ export function BossCabinet() {
           </div>
           <BroadcastBlock />
         </Card>
+
+        <PromptpayCard />
       </div>
     </div>
+  );
+}
+
+// PromptPay: реквизит для QR-оплат (бронь, депозиты, вход). Деньги идут
+// напрямую на счёт — без эквайринга. Виден и правится только здесь.
+function PromptpayCard() {
+  const [id, setId] = useState("");
+  const [name, setName] = useState("GTR Event");
+  const [saved, setSaved] = useState<string>("");
+  const [state, setState] = useState("");
+  useEffect(() => {
+    promptpayCfgFn()
+      .then((r) => {
+        if (r.cfg) {
+          setId(r.cfg.id);
+          setName(r.cfg.name);
+          setSaved(r.cfg.id);
+        }
+      })
+      .catch(() => {});
+  }, []);
+  const save = async () => {
+    setState("…");
+    try {
+      const r = await setPromptpayCfgFn({ data: { id, name } });
+      setState(r.ok ? "✓ Сохранено — QR-оплата включена во всех бронях" : (r.reason ?? "…"));
+      if (r.ok) setSaved(id);
+    } catch {
+      setState("Сервер недоступен");
+    }
+  };
+  return (
+    <Card style={{ padding: 14, gridColumn: "1 / -1" }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+        <Eyebrow>PROMPTPAY · ПРИЁМ ОПЛАТ</Eyebrow>
+        <Chip color={saved ? GREEN : AMBER}>{saved ? "ВКЛЮЧЕНО" : "НЕ НАСТРОЕНО"}</Chip>
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <input
+          className="gtr-input"
+          style={{ flex: "1 1 200px" }}
+          placeholder="Телефон (10 цифр) / Tax ID (13) / e-wallet (15)"
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+        />
+        <input
+          className="gtr-input"
+          style={{ flex: "1 1 160px" }}
+          placeholder="Имя получателя на экране оплаты"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <button className="gtr-btn gtr-btn-red" onClick={save}>
+          Сохранить
+        </button>
+      </div>
+      <div
+        className="gtr-mono"
+        style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+      >
+        {state ||
+          "Гость сканирует QR в своём банке — деньги приходят напрямую на этот реквизит. Кнопка оплаты появляется в брони раздела «Сегодня» сразу после сохранения."}
+      </div>
+    </Card>
   );
 }
 

@@ -16,6 +16,7 @@ import photosRaw from "../data/artist-photos.json";
 import mediaRaw from "../data/artist-media.json";
 import playersRaw from "../data/artist-players.json";
 import { useGtr } from "../store";
+import { useTranslation } from "react-i18next";
 import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint, TrashTitle } from "../ui";
 import { GtrLightbox } from "../lightbox";
 import { openAppLink } from "../applink";
@@ -86,6 +87,7 @@ const LINKS: [keyof Artist, string][] = [
 ];
 
 export function ArtistsScreen({ artistId }: { artistId?: string }) {
+  const { t } = useTranslation();
   const [base, setBase] = useState<ArtistBase | null>(null);
   const [q, setQ] = useState("");
   // Исполнители и контрагенты — разные сущности и разные задачи, поэтому
@@ -164,7 +166,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
           color: "rgba(255,255,255,.4)",
         }}
       >
-        Загрузка базы артистов…
+        {t("Загрузка базы артистов…")}
       </div>
     );
 
@@ -189,7 +191,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
         }}
       >
         <h1 className="gtr-oswald gtr-h1">
-          {scope === "performers" ? "Артисты и диджеи" : "Контрагенты"}
+          {scope === "performers" ? t("Артисты и диджеи") : t("Контрагенты")}
         </h1>
         <span
           className="gtr-mono"
@@ -201,7 +203,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
           {filtered.length} / {base.meta.total}
         </span>
         {shared.lineup.length ? (
-          <Chip color="#7B4DFF">В ЛАЙНАПЕ: {shared.lineup.length}</Chip>
+          <Chip color="#7B4DFF">{t("В ЛАЙНАПЕ")}: {shared.lineup.length}</Chip>
         ) : null}
       </div>
 
@@ -210,8 +212,8 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
       <div style={{ display: "flex", gap: 7, marginBottom: 12 }}>
         {(
           [
-            ["performers", "Исполнители", performerCount, "#7B4DFF"],
-            ["counterparties", "Контрагенты", counterpartyCount, "#F5A623"],
+            ["performers", t("Исполнители"), performerCount, "#7B4DFF"],
+            ["counterparties", t("Контрагенты"), counterpartyCount, "#F5A623"],
           ] as const
         ).map(([key, label, n, color]) => {
           const on = scope === key;
@@ -263,7 +265,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
           style={{ maxWidth: 260 }}
           placeholder={
             scope === "performers"
-              ? "Поиск по имени и стилю…"
+              ? t("Поиск по имени и стилю…")
               : "Поиск по названию и роли…"
           }
           value={q}
@@ -331,7 +333,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                 font: "500 10.5px/1 'Golos Text',sans-serif",
               }}
             >
-              {s === "all" ? "Все стили" : `${s} · ${n}`}
+              {s === "all" ? t("Все стили") : `${s} · ${n}`}
             </button>
           ),
         )}
@@ -522,7 +524,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
             fontSize: 11,
           }}
         >
-          Показаны первые 90 — уточните фильтры
+          {t("Показаны первые 90 — уточните фильтры")}
         </div>
       ) : null}
     </div>
@@ -538,6 +540,7 @@ function ArtistCard({
   live?: { live: boolean; kind: string; url?: string };
   onBack: () => void;
 }) {
+  const { t } = useTranslation();
   const { user, shared, setLineup } = useGtr();
   const inLineup = shared.lineup.includes(a.id);
   const rider = a.rider ? RIDERS[a.rider] : null;
@@ -575,7 +578,7 @@ function ArtistCard({
   return (
     <div style={{ maxWidth: 980, margin: "0 auto" }}>
       <button className="gtr-btn" onClick={onBack} style={{ marginBottom: 14 }}>
-        ← Ко всем артистам
+        {t("← Ко всем артистам")}
       </button>
 
       <Card
@@ -708,7 +711,7 @@ function ArtistCard({
                       : "rgba(255,255,255,.4)"
                 }
               >
-                ПРИОРИТЕТ {a.prio || "—"}
+                {t("ПРИОРИТЕТ")} {a.prio || "—"}
               </Chip>
               {a.tier ? (
                 <Chip color="#7B4DFF">{a.tier.toUpperCase()}</Chip>
@@ -719,7 +722,7 @@ function ArtistCard({
                 style={{ cursor: user.role === "gtr" ? "pointer" : "default", display: "inline-flex" }}
               >
                 <Chip color={flags.verified ? GREEN : "rgba(255,255,255,.35)"}>
-                  {flags.verified ? "ВЕРИФИЦИРОВАН ✓" : "БЕЗ ВЕРИФИКАЦИИ"}
+                  {flags.verified ? t("ВЕРИФИЦИРОВАН ✓") : t("БЕЗ ВЕРИФИКАЦИИ")}
                 </Chip>
               </span>
               <span
@@ -728,7 +731,7 @@ function ArtistCard({
                 style={{ cursor: user.role === "gtr" ? "pointer" : "default", display: "inline-flex" }}
               >
                 <Chip color={flags.workPermit ? GREEN : AMBER}>
-                  {flags.workPermit ? "WORK PERMIT ✓" : "WORK PERMIT — НЕТ ДАННЫХ"}
+                  {flags.workPermit ? t("WORK PERMIT ✓") : t("WORK PERMIT — НЕТ ДАННЫХ")}
                 </Chip>
               </span>
             </div>
@@ -800,7 +803,7 @@ function ArtistCard({
                   )
                 }
               >
-                {inLineup ? "Убрать из лайнапа" : "+ В лайнап события"}
+                {inLineup ? t("Убрать из лайнапа") : t("+ В лайнап события")}
               </button>
               {live?.live ? (
                 <a
@@ -814,7 +817,7 @@ function ArtistCard({
                     openAppLink(live.url || (a.twitch ? `https://www.twitch.tv/${a.twitch}` : String(a.ig)));
                   }}
                 >
-                  <span className="gtr-live-dot" /> В ЭФИРЕ — смотреть
+                  <span className="gtr-live-dot" /> {t("В ЭФИРЕ — смотреть")}
                 </a>
               ) : a.twitch ? (
                 <a
@@ -909,7 +912,7 @@ function ArtistCard({
       {/* Сеты артиста — добавляет сам через кабинет */}
       {P?.sets?.length ? (
         <Card style={{ padding: "16px 20px", margin: "14px 0", display: "grid", gap: 7 }}>
-          <Eyebrow>СЕТЫ · {P.sets.length}</Eyebrow>
+          <Eyebrow>{t("СЕТЫ")} · {P.sets.length}</Eyebrow>
           {P.sets.map((sSet) => (
             <a
               key={sSet.url}
@@ -942,7 +945,7 @@ function ArtistCard({
       {/* Фото от артиста — с лайтбоксом */}
       {extras.photos.length ? (
         <Card style={{ padding: "16px 20px", margin: "14px 0" }}>
-          <Eyebrow style={{ marginBottom: 10 }}>ФОТО · {extras.photos.length}</Eyebrow>
+          <Eyebrow style={{ marginBottom: 10 }}>{t("ФОТО")} · {extras.photos.length}</Eyebrow>
           <div
             className="gtr-gallery"
             style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}
@@ -981,7 +984,7 @@ function ArtistCard({
         style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
       >
         <Card style={{ padding: 18 }}>
-          <Eyebrow style={{ marginBottom: 10 }}>КОНТАКТ И БУКИНГ</Eyebrow>
+          <Eyebrow style={{ marginBottom: 10 }}>{t("КОНТАКТ И БУКИНГ")}</Eyebrow>
           {(
             [
               ["Статус", String(a.statusRu || a.status || "—"), false],
@@ -1009,7 +1012,7 @@ function ArtistCard({
 
         <Card style={{ padding: 18 }}>
           <Eyebrow style={{ marginBottom: 10 }}>
-            РАЙДЕР · {rider ? rider.label.toUpperCase() : "НЕ ПРИМЕНЯЕТСЯ"}
+            {t("РАЙДЕР")} · {rider ? rider.label.toUpperCase() : t("НЕ ПРИМЕНЯЕТСЯ")}
           </Eyebrow>
           {rider ? (
             <>

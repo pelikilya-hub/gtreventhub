@@ -1244,3 +1244,142 @@ export const venuePhotosFn = createServerFn({ method: "GET" })
       ),
     };
   });
+
+// ---------- Артист 2.0: профиль-самообслуживание, сеты, связь с командой ----------
+// Артист редактирует свой слой поверх каталога (aprofile:<id>), статика
+// artists.json остаётся источником по умолчанию. Медиа живут в KV через
+// /api/aphoto и /api/avideo.
+
+export type ArtistSet = { title: string; url: string };
+export type ArtistProfile = {
+  bio?: string;
+  links?: Partial<Record<"ig" | "sp" | "yt" | "sc" | "twitch" | "wa", string>>;
+  sets?: ArtistSet[];
+  updatedAt?: number;
+  by?: string;
+};
+
+const canEditArtist = (u: SessionUser, artistId: string) =>
+  u.role === "gtr" || (u.role === "artist" && u.artistId === artistId);
+
+export const setAprofileFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { artistId: string; patch: ArtistProfile }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns || !canEditArtist(u, data.artistId)) return { ok: false as const };
+    const key = `aprofile:${data.artistId}`;
+    const cur = (await kvGetJson<ArtistProfile>(ns, key)) ?? {};
+    const p = data.patch;
+    const clean = (s: string | undefined, n: number) => s?.trim().slice(0, n) || undefined;
+    const next: ArtistProfile = {
+      bio: p.bio !== undefined ? clean(p.bio, 900) : cur.bio,
+      links:
+        p.links !== undefined
+          ? Object.fromEntries(
+              Object.entries(p.links)
+                .map(([k, v]) => [k, clean(v, 300)])
+                .filter(([, v]) => v),
+            )
+          : cur.links,
+      sets:
+        p.sets !== undefined
+          ? p.sets
+              .map((x) => ({ title: (x.title || "").trim().slice(0, 90), url: (x.url || "").trim().slice(0, 400) }))
+              .filter((x) => x.title && /^https?:\/\//.test(x.url))
+              .slice(0, 12)
+          : cur.sets,
+      updatedAt: Date.now(),
+      by: u.email,
+    };
+    await ns.put(key, JSON.stringify(next));
+    return { ok: true as const, profile: next };
+  });
+
+// Публичные дополнения к карточке артиста: профиль, фото, наличие видео
+export const artistExtrasFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { artistId: string }) => d)
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    const empty = {
+      profile: null as ArtistProfile | null,
+      photos: [] as string[],
+      avatar: null as string | null,
+      heroVideo: null as string | null,
+      heroPoster: null as string | null,
+    };
+    if (!ns || !/^MC-\d{4}$/.test(data.artistId)) return empty;
+    const [profile, keys, hasVideo] = await Promise.all([
+      kvGetJson<ArtistProfile>(ns, `aprofile:${data.artistId}`),
+      kvListAll(ns, `aphoto:${data.artistId}:`),
+      ns.get(`avideo:${data.artistId}`).then((v) => Boolean(v)),
+    ]);
+    const path = (k: string) => `/api/aphoto?k=${encodeURIComponent(k.slice("aphoto:".length))}`;
+    const avatarKey = keys.find((k) => k.endsWith(":avatar"));
+    const posterKey = keys.find((k) => k.endsWith(":heroposter"));
+    return {
+      profile,
+      photos: keys.filter((k) => !k.endsWith(":avatar") && !k.endsWith(":heroposter")).map(path),
+      avatar: avatarKey ? path(avatarKey) : null,
+      heroVideo: hasVideo ? `/api/avideo?a=${data.artistId}` : null,
+      heroPoster: posterKey ? path(posterKey) : null,
+    };
+  });
+
+// Кастомные аватары для списка каталога — одним запросом
+export const customAvatarsFn = createServerFn({ method: "GET" }).handler(async () => {
+  const ns = await getKvNs();
+  if (!ns) return { avatars: {} as Record<string, string> };
+  const keys = await kvListAll(ns, "aphoto:");
+  const avatars: Record<string, string> = {};
+  for (const k of keys)
+    if (k.endsWith(":avatar"))
+      avatars[k.slice("aphoto:".length).split(":")[0]] =
+        `/api/aphoto?k=${encodeURIComponent(k.slice("aphoto:".length))}`;
+  return { avatars };
+});
+
+// Сообщение команде: из кабинета артиста (или любого участника) в TG всем
+// менеджерам + push. Лимит — раз в минуту, чтобы не спамили.
+export const contactTeamFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { text: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    const text = data.text.trim().slice(0, 800);
+    if (!text) return { ok: false as const, reason: "пустое сообщение" };
+    if (await ns.get(`ctlimit:${u.email}`))
+      return { ok: false as const, reason: "не чаще раза в минуту" };
+    await ns.put(`ctlimit:${u.email}`, "1", { expirationTtl: 60 });
+    const msg = [
+      `💬 <b>${tgEsc(u.name)}</b> (${tgEsc(u.roleLabel)}) пишет команде:`,
+      "",
+      tgEsc(text),
+    ].join("\n");
+    const tgKeys = await kvListAll(ns, "tg:");
+    const sent = new Set<string>();
+    let delivered = 0;
+    for (const k of tgKeys) {
+      if (k === "tg:bot" || k === `tg:${u.email}`) continue;
+      const target = k.slice("tg:".length);
+      // только команде: артистам и организаторам чужие сообщения не шлём
+      const rec = await kvGetJson<StoredUser>(ns, `user:${target}`);
+      if (rec && (rec.role === "artist" || rec.role === "organizer")) continue;
+      const chat = await ns.get(k);
+      if (!chat || sent.has(chat)) continue;
+      sent.add(chat);
+      const r = await tgApi("sendMessage", { chat_id: chat, text: msg, parse_mode: "HTML" });
+      if (r.ok) delivered++;
+      const { sendPushTo } = await import("./push");
+      sendPushTo(ns, target, { title: `💬 ${u.name}`, body: text.slice(0, 140), url: "/gtr/contacts" }).catch(
+        () => {},
+      );
+    }
+    const common = (typeof process !== "undefined" && process.env?.TELEGRAM_CHAT_ID) || "";
+    if (common && !sent.has(common)) {
+      const r = await tgApi("sendMessage", { chat_id: common, text: msg, parse_mode: "HTML" });
+      if (r.ok) delivered++;
+    }
+    return { ok: true as const, delivered };
+  });

@@ -20,6 +20,7 @@ import {
 } from "../data/app-data";
 import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
+import { ArtistStudio } from "./ArtistStudio";
 import i18n, { setUiLang, UI_LANGS, type UiLang } from "../i18n";
 import { Card, Chip, Dot, Eyebrow, Icon, Ring } from "../ui";
 import { ImpulseArt } from "../impulse";
@@ -1540,6 +1541,8 @@ function ArtistCabinet() {
       </Card>
 
       {/* предложения */}
+      {user.artistId ? <ArtistStudio artistId={user.artistId} /> : null}
+
       <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 18 }}>
         <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
           <Eyebrow>ПРЕДЛОЖЕНИЯ · {open.length}</Eyebrow>

@@ -16,8 +16,15 @@ import photosRaw from "../data/artist-photos.json";
 import mediaRaw from "../data/artist-media.json";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint, TrashTitle } from "../ui";
+import { GtrLightbox } from "../lightbox";
 import { openAppLink } from "../applink";
-import { artistFlagsFn, liveStatusFn, setArtistFlagFn } from "../kv-api";
+import {
+  artistExtrasFn,
+  artistFlagsFn,
+  liveStatusFn,
+  setArtistFlagFn,
+  type ArtistProfile,
+} from "../kv-api";
 
 // Фото артистов: точное совпадение имени в открытом каталоге, заглушки убраны.
 // Дашь Spotify-ключи — база пересоберётся тем же пайплайном.
@@ -438,6 +445,26 @@ function ArtistCard({
   useEffect(() => {
     artistFlagsFn().then((r) => setFlags(r.flags[a.id] ?? {})).catch(() => {});
   }, [a.id]);
+  // Слой 2.0: то, что артист добавил сам — профиль, сеты, медиа
+  const [extras, setExtras] = useState<{
+    profile: ArtistProfile | null;
+    photos: string[];
+    avatar: string | null;
+    heroVideo: string | null;
+    heroPoster: string | null;
+  }>({ profile: null, photos: [], avatar: null, heroVideo: null, heroPoster: null });
+  const [galleryLb, setGalleryLb] = useState<number | null>(null);
+  useEffect(() => {
+    artistExtrasFn({ data: { artistId: a.id } }).then(setExtras).catch(() => {});
+  }, [a.id]);
+  const P = extras.profile;
+  const heroVideo = extras.heroVideo ?? MEDIA[a.id]?.heroVideo;
+  const heroPoster = extras.heroPoster ?? MEDIA[a.id]?.heroPoster;
+  const heroPhoto = extras.avatar ?? PHOTOS[a.id]?.photo;
+  const bio = P?.bio || a.bio;
+  const linkOf = (k: keyof Artist) =>
+    (P?.links as Record<string, string> | undefined)?.[k as string] || (a[k] as string | undefined);
+
   const toggleFlag = async (key: "verified" | "workPermit") => {
     const next = { ...flags, [key]: !flags[key] };
     setFlags(next);
@@ -459,13 +486,13 @@ function ArtistCard({
         }}
       >
         <div className="gtr-beam" />
-        {MEDIA[a.id]?.heroVideo ? (
+        {heroVideo ? (
           <>
-            {/* фрагмент официального рила — живой фон шапки, как видео площадки */}
+            {/* живой фон шапки: видео артиста (кабинет) или фрагмент рила */}
             <video
               className="gtr-heromedia"
-              src={MEDIA[a.id].heroVideo}
-              poster={MEDIA[a.id].heroPoster}
+              src={heroVideo}
+              poster={heroPoster}
               autoPlay
               muted
               loop
@@ -498,12 +525,12 @@ function ArtistCard({
             />
           </>
         ) : null}
-        {!MEDIA[a.id]?.heroVideo && PHOTOS[a.id] ? (
+        {!heroVideo && heroPhoto ? (
           <>
             {/* фото как атмосферная подложка справа, гаснет к тексту */}
             <img
               className="gtr-heromedia"
-              src={PHOTOS[a.id].photo}
+              src={heroPhoto}
               alt=""
               aria-hidden="true"
               style={{
@@ -613,7 +640,7 @@ function ArtistCard({
             >
               {a.role}
             </div>
-            {a.bio ? (
+            {bio ? (
               <div
                 style={{
                   marginTop: 8,
@@ -624,7 +651,7 @@ function ArtistCard({
                   paddingLeft: 12,
                 }}
               >
-                {a.bio}
+                {bio}
               </div>
             ) : null}
             {a.rel ? (
@@ -703,17 +730,17 @@ function ArtistCard({
                   Twitch ↗
                 </a>
               ) : null}
-              {LINKS.filter(([k]) => a[k]).map(([k, label]) => (
+              {LINKS.filter(([k]) => linkOf(k)).map(([k, label]) => (
                 <a
                   key={String(k)}
                   className="gtr-btn"
                   style={{ textDecoration: "none" }}
-                  href={String(a[k])}
+                  href={String(linkOf(k))}
                   target="_blank"
                   rel="noreferrer"
                   onClick={(e) => {
                     e.preventDefault();
-                    openAppLink(String(a[k]));
+                    openAppLink(String(linkOf(k)));
                   }}
                 >
                   {label} ↗
@@ -748,6 +775,76 @@ function ArtistCard({
             ) : null}
         </div>
       </Card>
+
+      {/* Сеты артиста — добавляет сам через кабинет */}
+      {P?.sets?.length ? (
+        <Card style={{ padding: "16px 20px", margin: "14px 0", display: "grid", gap: 7 }}>
+          <Eyebrow>СЕТЫ · {P.sets.length}</Eyebrow>
+          {P.sets.map((sSet) => (
+            <a
+              key={sSet.url}
+              className="gtr-btn"
+              style={{ textDecoration: "none", justifyContent: "flex-start", textAlign: "left" }}
+              href={sSet.url}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => {
+                e.preventDefault();
+                openAppLink(sSet.url);
+              }}
+            >
+              ▶ {sSet.title}
+              <span
+                className="gtr-mono"
+                style={{
+                  marginLeft: "auto",
+                  font: "500 8.5px/1 'JetBrains Mono',monospace",
+                  color: "var(--gtr-t3)",
+                }}
+              >
+                {sSet.url.includes("soundcloud") ? "SOUNDCLOUD" : sSet.url.includes("mixcloud") ? "MIXCLOUD" : sSet.url.includes("youtu") ? "YOUTUBE" : sSet.url.includes("spotify") ? "SPOTIFY" : "ССЫЛКА"} ↗
+              </span>
+            </a>
+          ))}
+        </Card>
+      ) : null}
+
+      {/* Фото от артиста — с лайтбоксом */}
+      {extras.photos.length ? (
+        <Card style={{ padding: "16px 20px", margin: "14px 0" }}>
+          <Eyebrow style={{ marginBottom: 10 }}>ФОТО · {extras.photos.length}</Eyebrow>
+          <div
+            className="gtr-gallery"
+            style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}
+          >
+            {extras.photos.map((src, gi) => (
+              <img
+                key={src}
+                src={src}
+                alt=""
+                loading="lazy"
+                onClick={() => setGalleryLb(gi)}
+                style={{
+                  width: "100%",
+                  aspectRatio: "3/2",
+                  objectFit: "cover",
+                  borderRadius: 0,
+                  border: "1px solid rgba(255,255,255,.08)",
+                  cursor: "zoom-in",
+                }}
+              />
+            ))}
+          </div>
+          {galleryLb !== null ? (
+            <GtrLightbox
+              images={extras.photos}
+              index={galleryLb}
+              credit={`Фото: ${a.name}`}
+              onClose={() => setGalleryLb(null)}
+            />
+          ) : null}
+        </Card>
+      ) : null}
 
       {/* Spotify-плеер: живое превью треков прямо в профиле (нужна
           настоящая artist-ссылка, поисковые /search не встраиваются) */}

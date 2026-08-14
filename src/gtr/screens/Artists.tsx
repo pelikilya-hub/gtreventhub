@@ -42,23 +42,16 @@ const MEDIA = (mediaRaw as unknown as { media: Record<string, ArtistMedia> }).me
 type ArtistPlayer = { kind: "deezer" | "spotify" | "sc" | "mixcloud"; ref: string };
 const PLAYERS = playersRaw as Record<string, ArtistPlayer>;
 
-// Единый мини-формат: один компактный плеер на профиль, без дублей
-const playerEmbed = (p: ArtistPlayer): { src: string; h: number; label: string } =>
+// Встроенные плееры сняты (виджеты сервисов разнобойные) — вместо них
+// прямая ссылка на подтверждённый музыкальный профиль артиста
+const playerLink = (p: ArtistPlayer): { url: string; label: string } =>
   p.kind === "deezer"
-    ? { src: `https://widget.deezer.com/widget/dark/artist/${p.ref}/top_tracks`, h: 200, label: "Deezer · топ-треки" }
+    ? { url: `https://www.deezer.com/artist/${p.ref}`, label: "Музыка · Deezer" }
     : p.kind === "spotify"
-      ? { src: `https://open.spotify.com/embed/artist/${p.ref}?utm_source=gtr&theme=0`, h: 152, label: "Spotify" }
+      ? { url: `https://open.spotify.com/artist/${p.ref}`, label: "Музыка · Spotify" }
       : p.kind === "sc"
-        ? {
-            src: `https://w.soundcloud.com/player/?url=${encodeURIComponent(p.ref)}&color=%23e5231b&auto_play=false&show_teaser=false&visual=false`,
-            h: 166,
-            label: "SoundCloud",
-          }
-        : {
-            src: `https://player-widget.mixcloud.com/widget/iframe/?feed=${encodeURIComponent(p.ref)}&light=0&mini=1&hide_cover=1`,
-            h: 60,
-            label: "Mixcloud",
-          };
+        ? { url: p.ref, label: "Музыка · SoundCloud" }
+        : { url: `https://www.mixcloud.com${p.ref}`, label: "Музыка · Mixcloud" };
 
 const KIND_LABEL: Record<string, string> = {
   all: "Все записи",
@@ -835,7 +828,35 @@ function ArtistCard({
                   Twitch ↗
                 </a>
               ) : null}
-              {LINKS.filter(([k]) => linkOf(k)).map(([k, label]) => (
+              {PLAYERS[a.id]
+                ? (() => {
+                    const pl = playerLink(PLAYERS[a.id]);
+                    return (
+                      <a
+                        className="gtr-btn"
+                        style={{ textDecoration: "none" }}
+                        href={pl.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openAppLink(pl.url);
+                        }}
+                      >
+                        ♪ {pl.label} ↗
+                      </a>
+                    );
+                  })()
+                : null}
+              {LINKS.filter(([k]) => {
+                if (!linkOf(k)) return false;
+                // резолвнутая прямая ссылка заменяет поисковую того же сервиса
+                const pk = PLAYERS[a.id]?.kind;
+                if (pk === "spotify" && k === "sp") return false;
+                if (pk === "sc" && k === "sc") return false;
+                if (pk === "deezer" && k === "sp" && String(linkOf(k)).includes("/search/")) return false;
+                return true;
+              }).map(([k, label]) => (
                 <a
                   key={String(k)}
                   className="gtr-btn"
@@ -880,48 +901,6 @@ function ArtistCard({
             ) : null}
         </div>
       </Card>
-
-      {/* Плеер: музыка артиста прямо в профиле — Deezer/Spotify/SC/Mixcloud */}
-      {PLAYERS[a.id]
-        ? (() => {
-            const emb = playerEmbed(PLAYERS[a.id]);
-            return (
-              <Card style={{ padding: "16px 20px", margin: "14px 0" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "baseline",
-                    gap: 10,
-                    marginBottom: 12,
-                  }}
-                >
-                  <Eyebrow>СЛУШАТЬ</Eyebrow>
-                  <span
-                    className="gtr-mono"
-                    style={{
-                      font: "500 9px/1 'JetBrains Mono',monospace",
-                      color: "var(--gtr-t3)",
-                      textTransform: "uppercase",
-                      letterSpacing: ".1em",
-                    }}
-                  >
-                    {emb.label}
-                  </span>
-                </div>
-                <iframe
-                  title={`Плеер: ${a.name}`}
-                  src={emb.src}
-                  width="100%"
-                  height={emb.h}
-                  frameBorder="0"
-                  allow="encrypted-media; clipboard-write"
-                  loading="lazy"
-                  style={{ display: "block", border: "1px solid var(--gtr-border2)", background: "#0C0D10" }}
-                />
-              </Card>
-            );
-          })()
-        : null}
 
       {/* Сеты артиста — добавляет сам через кабинет */}
       {P?.sets?.length ? (

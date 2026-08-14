@@ -22,7 +22,10 @@ import { Card, Chip, Dot, Eyebrow, tint } from "../ui";
 import {
   broadcastFn,
   deleteTaskFn,
+  metaCfgFn,
+  metaSyncFn,
   promptpayCfgFn,
+  setMetaCfgFn,
   setPromptpayCfgFn,
   listUsersFn,
   pullTasksFn,
@@ -615,8 +618,87 @@ export function BossCabinet() {
         </Card>
 
         <PromptpayCard />
+        <MetaCard />
       </div>
     </div>
+  );
+}
+
+// Meta: авторизация страницы BOSS (FB/IG Business) через официальный
+// Graph API — посты и медиа страницы затягиваются легально по токену.
+function MetaCard() {
+  const [token, setToken] = useState("");
+  const [pageName, setPageName] = useState("");
+  const [igUser, setIgUser] = useState("");
+  const [connected, setConnected] = useState(false);
+  const [state, setState] = useState("");
+  useEffect(() => {
+    metaCfgFn()
+      .then((r) => {
+        setConnected(r.connected);
+        setPageName(r.pageName);
+        setIgUser(r.igUser);
+      })
+      .catch(() => {});
+  }, []);
+  const save = async () => {
+    setState("Проверяю токен у Meta…");
+    try {
+      const r = await setMetaCfgFn({ data: { token } });
+      if (r.ok) {
+        setConnected(true);
+        setPageName(r.pageName ?? "");
+        setIgUser(r.igUser ?? "");
+        setState(`✓ Страница «${r.pageName}» подключена${r.igUser ? ` · IG @${r.igUser}` : ""}`);
+        setToken("");
+      } else setState(r.reason ?? "…");
+    } catch {
+      setState("Сервер недоступен");
+    }
+  };
+  const sync = async () => {
+    setState("Забираю публикации…");
+    try {
+      const r = await metaSyncFn();
+      setState(r.ok ? `✓ Подтянуто публикаций: ${r.count}` : (r.reason ?? "…"));
+    } catch {
+      setState("Сервер недоступен");
+    }
+  };
+  return (
+    <Card style={{ padding: 14, gridColumn: "1 / -1" }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+        <Eyebrow>META · СТРАНИЦА FACEBOOK / INSTAGRAM</Eyebrow>
+        <Chip color={connected ? GREEN : AMBER}>
+          {connected ? `ПОДКЛЮЧЕНА${pageName ? ` · ${pageName.toUpperCase()}` : ""}` : "НЕ ПОДКЛЮЧЕНА"}
+        </Chip>
+        {igUser ? <Chip color="#7B4DFF">IG @{igUser}</Chip> : null}
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <input
+          className="gtr-input"
+          style={{ flex: "1 1 280px" }}
+          placeholder="Access Token из Graph API Explorer (вставить и сохранить)"
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+        />
+        <button className="gtr-btn gtr-btn-red" onClick={save}>
+          Подключить
+        </button>
+        {connected ? (
+          <button className="gtr-btn" onClick={sync}>
+            Синк публикаций
+          </button>
+        ) : null}
+      </div>
+      <div
+        className="gtr-mono"
+        style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+      >
+        {state ||
+          "Токен проверяется живым запросом к Meta: подхватываем страницу, её IG Business и последние публикации. Инструкция по выдаче токена — в Telegram."}
+      </div>
+    </Card>
   );
 }
 

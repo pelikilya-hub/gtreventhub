@@ -1694,6 +1694,55 @@ export const setPromptpayCfgFn = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+// Ручной музыкальный профиль: без внешних ключей — посетитель выбирает
+// жанры (и, по желанию, любимых артистов), профиль ложится в тот же
+// mprofile и питает тот же движок подбора, что и Spotify-анализ.
+export const saveTasteFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { genres: string[]; artists?: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    const { FAMILY_LABEL } = await import("./match");
+    const picked = data.genres.filter((g) => FAMILY_LABEL[g]).slice(0, 6);
+    if (!picked.length) return { ok: false as const, reason: "выберите хотя бы один жанр" };
+    // любимые артисты: матчим по нашей базе, их стили усиливают профиль
+    const names = (data.artists ?? "")
+      .split(/[,;\n]/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 8);
+    const top: { name: string; genres: string[] }[] = [];
+    const extra = new Map<string, number>();
+    if (names.length) {
+      const { loadArtists } = await import("./data/app-data");
+      const { normalizeGenres } = await import("./match");
+      const base = await loadArtists();
+      const norm = (s: string) => s.toLowerCase().replace(/[^a-zа-яё0-9]/g, "");
+      for (const n of names) {
+        const hit = base.artists.find(
+          (a) => norm(a.name) === norm(n) || norm(a.name).includes(norm(n)),
+        );
+        top.push({ name: hit?.name ?? n, genres: hit?.styles ?? [] });
+        if (hit?.styles?.length)
+          for (const [fam, w] of normalizeGenres(hit.styles)) extra.set(fam, Math.max(extra.get(fam) ?? 0, w * 0.6));
+      }
+    }
+    const genres = new Map<string, number>();
+    picked.forEach((g, i) => genres.set(g, 1 - i * 0.08));
+    for (const [fam, w] of extra) genres.set(fam, Math.max(genres.get(fam) ?? 0, w));
+    const profile = {
+      source: "manual" as const,
+      displayName: u.name,
+      genres: [...genres.entries()].sort((a, b) => b[1] - a[1]),
+      rawGenres: picked.map((g) => [FAMILY_LABEL[g], 1] as [string, number]),
+      topArtists: top,
+      updatedAt: Date.now(),
+    };
+    await ns.put(`mprofile:${u.email}`, JSON.stringify(profile));
+    return { ok: true as const };
+  });
+
 export const musicProfileFn = createServerFn({ method: "GET" }).handler(async () => {
   const u = await currentUser();
   const ns = await getKvNs();

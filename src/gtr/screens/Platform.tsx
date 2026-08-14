@@ -13,6 +13,7 @@ import {
   contactTeamFn,
   artistFlagsFn,
   musicProfileFn,
+  saveTasteFn,
   myBookingsFn,
   type MatchArtist,
   type MatchEvent,
@@ -177,6 +178,25 @@ export function AiMatchScreen() {
   } | null>(null);
   const [profile, setProfile] = useState<MusicProfile | null>(null);
   const [state, setState] = useState("");
+  // ручной онбординг вкуса — без внешних сервисов
+  const [picks, setPicks] = useState<string[]>([]);
+  const [tasteArtists, setTasteArtists] = useState("");
+  const [tasteBusy, setTasteBusy] = useState(false);
+  const saveTaste = async () => {
+    setTasteBusy(true);
+    try {
+      const r = await saveTasteFn({ data: { genres: picks, artists: tasteArtists } });
+      if (r.ok) {
+        const p = await musicProfileFn();
+        setProfile(p.profile);
+        aiMatchFn({ data: {} }).then(setRes).catch(() => {});
+      }
+    } catch {
+      /* остаёмся на форме */
+    } finally {
+      setTasteBusy(false);
+    }
+  };
   const notReady =
     typeof window !== "undefined" && window.location.search.includes("spotify=notready");
   const spotifyOk =
@@ -284,17 +304,52 @@ export function AiMatchScreen() {
             {t("Подбор событий под ваш музыкальный вкус")}
           </div>
           <div style={{ font: "500 12px/1.65 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-            {t("Подключите музыкальный профиль — движок сопоставит ваши жанры и любимых артистов с афишами 104 заведений и предложит, куда идти сегодня.")}
+            {t("Выберите до 6 любимых жанров — движок сопоставит их с афишами 104 заведений и предложит, куда идти сегодня. 30 секунд, без регистраций в сервисах.")}
           </div>
-          {notReady ? (
-            <Chip color={AMBER}>{t("Ключи Spotify подключаются — попробуйте позже или встаньте в список")}</Chip>
-          ) : null}
+          {/* онбординг вкуса: жанровые семейства движка — те же, что в анализе */}
+          <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+            {Object.entries(FAMILY_LABEL).map(([fam, label]) => {
+              const on = picks.includes(fam);
+              return (
+                <button
+                  key={fam}
+                  onClick={() =>
+                    setPicks((p) =>
+                      on ? p.filter((x) => x !== fam) : p.length < 6 ? [...p, fam] : p,
+                    )
+                  }
+                  style={{
+                    border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.14)"}`,
+                    background: on ? "rgba(229,35,27,.16)" : "transparent",
+                    color: on ? "#fff" : "rgba(255,255,255,.65)",
+                    borderRadius: 0,
+                    padding: "8px 13px",
+                    cursor: "pointer",
+                    font: `${on ? 700 : 500} 11.5px/1 'Golos Text',sans-serif`,
+                  }}
+                >
+                  {on ? `${picks.indexOf(fam) + 1} · ` : ""}
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          <input
+            className="gtr-input"
+            placeholder={t("Любимые артисты через запятую (необязательно)")}
+            value={tasteArtists}
+            onChange={(e) => setTasteArtists(e.target.value)}
+          />
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-            <a className="gtr-btn gtr-btn-red" style={{ textDecoration: "none" }} href="/api/spotify-login">
-              {t("Подключить Spotify")} →
-            </a>
+            <button
+              className="gtr-btn gtr-btn-red"
+              disabled={!picks.length || tasteBusy}
+              onClick={() => void saveTaste()}
+            >
+              {tasteBusy ? "…" : t("Собрать мой профиль")} →
+            </button>
             <button className="gtr-btn" onClick={() => void join()} disabled={Boolean(state)}>
-              {t("Хочу первым доступ")}
+              {t("Spotify-анализ · в лист ожидания")}
             </button>
             {state ? (
               <span className="gtr-mono" style={{ font: "500 10px/1.3 'JetBrains Mono',monospace", color: GREEN }}>
@@ -315,16 +370,29 @@ export function AiMatchScreen() {
               <Eyebrow>{t("ВАШ МУЗЫКАЛЬНЫЙ ПРОФИЛЬ")}</Eyebrow>
               {profile.displayName ? (
                 <span className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
-                  Spotify · {profile.displayName}
+                  {profile.source === "manual" ? t("мой выбор") : "Spotify"} · {profile.displayName}
                 </span>
               ) : null}
-              <a
-                className="gtr-btn"
-                style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10, textDecoration: "none" }}
-                href="/api/spotify-login"
-              >
-                {t("Обновить")}
-              </a>
+              {profile.source === "manual" ? (
+                <button
+                  className="gtr-btn"
+                  style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10 }}
+                  onClick={() => {
+                    setPicks(profile.genres.map(([f]) => f).slice(0, 6));
+                    setProfile(null);
+                  }}
+                >
+                  {t("Изменить жанры")}
+                </button>
+              ) : (
+                <a
+                  className="gtr-btn"
+                  style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10, textDecoration: "none" }}
+                  href="/api/spotify-login"
+                >
+                  {t("Обновить")}
+                </a>
+              )}
             </div>
             <div style={{ display: "grid", gap: 6 }}>
               {profile.genres.slice(0, 7).map(([fam, w]) => (

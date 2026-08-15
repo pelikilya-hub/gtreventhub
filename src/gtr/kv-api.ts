@@ -245,7 +245,7 @@ export const pushDraftFn = createServerFn({ method: "POST" })
     // Новое событие организатора — оповещение GTR-админам
     if (!existing && u.role === "organizer") {
       const { V } = await import("./data/app-data");
-      notifyAdminsTg(
+      await notifyAdminsTg(
         ns,
         [
           "<b>GTR EVENT · новое событие организатора</b>",
@@ -650,7 +650,7 @@ export const joinFn = createServerFn({ method: "POST" })
     await ns.put(`user:${email}`, JSON.stringify(stored));
     await ns.put(`invite:${data.code}`, JSON.stringify({ ...inv, uses: inv.uses + 1 }));
 
-    notifyAdminsTg(
+    await notifyAdminsTg(
       ns,
       [
         "<b>GTR EVENT · новый участник</b>",
@@ -1522,8 +1522,8 @@ export const signupVisitorFn = createServerFn({ method: "POST" })
     await issueSession(sessionUser);
     // метрика + пинг в служебный контур (не в публичные чаты)
     const { bumpMetric } = await import("./community");
-    bumpMetric(ns, "reg").catch(() => {});
-    notifyBossTg(
+    await bumpMetric(ns, "reg").catch(() => {});
+    await notifyBossTg(
       ns,
       `🆕 <b>Регистрация в GTR Event</b>\n${tgEsc(stored.name)} · ${tgEsc(email)} · посетитель`,
     ).catch(() => {});

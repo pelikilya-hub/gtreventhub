@@ -408,7 +408,7 @@ export const Route = createFileRoute("/api/tg")({
                   ts: Date.now(),
                 }),
               );
-              notifyBossTg(
+              await notifyBossTg(
                 ns,
                 `🤝 Бот добавлен в «${tgEsc(mm.chat.title || String(mm.chat.id))}» (${mm.new_chat_member.status}). Чат в реестре коллабораций.`,
               ).catch(() => {});
@@ -455,12 +455,12 @@ export const Route = createFileRoute("/api/tg")({
               await bumpMetric(ns, isCh ? "chJoin" : "gJoin").catch(() => {});
               const u = cm.new_chat_member.user;
               const via = link ? ` · по ссылке «${tgEsc(cm.invite_link?.name || "invite")}»` : "";
-              notifyBossTg(ns, `➕ ${isCh ? "Канал" : "Чат"}: <b>${tgEsc(u.first_name || String(u.id))}</b> вступил(а)${via}`).catch(() => {});
+              await notifyBossTg(ns, `➕ ${isCh ? "Канал" : "Чат"}: <b>${tgEsc(u.first_name || String(u.id))}</b> вступил(а)${via}`).catch(() => {});
             }
             if ((isCh || isGr) && left) {
               await bumpMetric(ns, isCh ? "chLeave" : "gLeave").catch(() => {});
               const u = cm.new_chat_member.user;
-              notifyBossTg(ns, `➖ ${isCh ? "Канал" : "Чат"}: <b>${tgEsc(u.first_name || String(u.id))}</b> вышел(ла)`).catch(() => {});
+              await notifyBossTg(ns, `➖ ${isCh ? "Канал" : "Чат"}: <b>${tgEsc(u.first_name || String(u.id))}</b> вышел(ла)`).catch(() => {});
             }
           }
 

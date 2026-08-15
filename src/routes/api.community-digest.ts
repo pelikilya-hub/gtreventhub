@@ -20,13 +20,19 @@ export const Route = createFileRoute("/api/community-digest")({
         const { APP_URL, COMMUNITY_KEY, buildDigestText } = await import("../gtr/community");
         const cfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
         if (!cfg?.channelId) return Response.json({ ok: false, reason: "канал не привязан" });
-        const text = await buildDigestText(ns);
-        const res = await tgApi("sendMessage", {
-          chat_id: cfg.channelId,
-          text,
-          parse_mode: "HTML",
-          link_preview_options: { url: APP_URL, prefer_large_media: true },
-        });
+        // mode=ops — только служебная сводка, без публичного дайджеста
+        // (ручной запуск и проверка контура метрик)
+        const opsOnly = new URL(request.url).searchParams.get("mode") === "ops";
+        let res: { ok: boolean; description?: string } = { ok: true };
+        if (!opsOnly) {
+          const text = await buildDigestText(ns);
+          res = await tgApi("sendMessage", {
+            chat_id: cfg.channelId,
+            text,
+            parse_mode: "HTML",
+            link_preview_options: { url: APP_URL, prefer_large_media: true },
+          });
+        }
         // служебный контур: ежедневная сводка метрик — команде, не в паблик
         const { buildOpsSummary } = await import("../gtr/community");
         const { notifyBossTg } = await import("../gtr/kv-api");

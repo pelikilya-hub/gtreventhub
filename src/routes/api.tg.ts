@@ -95,27 +95,58 @@ async function userOfChat(ns: KvNs, chatId: number): Promise<StoredUser | { emai
 const isStaff = (u: { role?: string }) => u.role !== "artist";
 
 // ---------- конкурс инвайтинга ----------
-// Личная инвайт-ссылка на канал: кто по ней вступил — засчитан пригласившему.
-// refown:<ссылка> → владелец; refscore:<chatId> → {n, name}.
+// Личная инвайт-ссылка на канал ИЛИ на чат: кто по ней вступил — засчитан
+// пригласившему. Раньше выдавалась ссылка только на канал, из-за чего все
+// вступления в чат (а туда идёт основной трафик) в конкурсе не считались —
+// теперь у каждого человека своя ссылка на оба входа, счёт общий.
+// refown:<ссылка> → владелец; refscore:<chatId> → {n, name};
+// reflinkof:<chatId>:<target> → ссылка (кэш, чтобы не плодить дубли в Telegram).
 async function issueRefLink(
   ns: KvNs,
   chatId: number,
   name: string,
+  target: "channel" | "chat",
 ): Promise<{ ok: true; link: string } | { ok: false; reason: string }> {
   const { COMMUNITY_KEY } = await import("../gtr/community");
   const cfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
-  if (!cfg?.channelId) return { ok: false, reason: "Канал ещё не привязан" };
-  const existing = await ns.get(`reflinkof:${chatId}`);
+  const targetChatId = target === "channel" ? cfg?.channelId : cfg?.chatId;
+  if (!targetChatId)
+    return { ok: false, reason: target === "channel" ? "Канал ещё не привязан" : "Чат ещё не привязан" };
+  const cacheKey = `reflinkof:${chatId}:${target}`;
+  const existing = await ns.get(cacheKey);
   if (existing) return { ok: true, link: existing };
+  // миграция: раньше ссылка на канал кэшировалась без суффикса — у людей,
+  // получивших её до этого фикса, не плодим дубль, просто переносим ключ
+  if (target === "channel") {
+    const legacy = await ns.get(`reflinkof:${chatId}`);
+    if (legacy) {
+      await ns.put(cacheKey, legacy);
+      return { ok: true, link: legacy };
+    }
+  }
   const r = await tgApi<{ invite_link: string }>("createChatInviteLink", {
-    chat_id: cfg.channelId,
+    chat_id: targetChatId,
     name: `ref ${name}`.slice(0, 32),
   });
   if (!r.ok || !r.result) return { ok: false, reason: r.description || "Telegram не выдал ссылку" };
   const link = r.result.invite_link;
   await ns.put(`refown:${link}`, JSON.stringify({ chat: chatId, name }));
-  await ns.put(`reflinkof:${chatId}`, link);
+  await ns.put(cacheKey, link);
   return { ok: true, link };
+}
+
+// Обе персональные ссылки разом — раньше выдавалась только на канал, и все
+// вступления в чат (основной поток трафика) конкурсом не засчитывались.
+async function issueRefLinks(
+  ns: KvNs,
+  chatId: number,
+  name: string,
+): Promise<{ channel?: string; chat?: string }> {
+  const [rc, rg] = await Promise.all([
+    issueRefLink(ns, chatId, name, "channel"),
+    issueRefLink(ns, chatId, name, "chat"),
+  ]);
+  return { channel: rc.ok ? rc.link : undefined, chat: rg.ok ? rg.link : undefined };
 }
 
 async function refLeaderboard(ns: KvNs): Promise<string> {
@@ -418,15 +449,25 @@ export const Route = createFileRoute("/api/tg")({
           return Response.json({ ok: true });
         }
 
-        // ---------- конкурс: вступление в канал по личной ссылке ----------
+        // ---------- конкурс: вступление в канал ИЛИ чат по личной ссылке ----------
         if (up.chat_member) {
           const cm = up.chat_member;
           const was = ["left", "kicked"].includes(cm.old_chat_member.status);
           const now = ["member", "administrator"].includes(cm.new_chat_member.status);
           const link = cm.invite_link?.invite_link;
+          const { COMMUNITY_KEY, bumpMetric } = await import("../gtr/community");
+          const ccfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
+          const isCh = ccfg?.channelId === cm.chat.id;
+          const isGr = ccfg?.chatId === cm.chat.id;
           if (was && now && link) {
             const own = await kvGetJson<{ chat: number; name: string }>(ns, `refown:${link}`);
-            if (own) {
+            // честный счёт: каждый реальный человек засчитывается ровно один
+            // раз за всю историю (выход-вход не фармится), самоприглашение
+            // по собственной ссылке не считается
+            const joinedId = cm.new_chat_member.user.id;
+            const creditedKey = `refcredited:${joinedId}`;
+            if (own && own.chat !== joinedId && !(await ns.get(creditedKey))) {
+              await ns.put(creditedKey, String(own.chat));
               const key = `refscore:${own.chat}`;
               const cur = (await kvGetJson<{ n: number; name: string }>(ns, key)) ?? {
                 n: 0,
@@ -436,18 +477,15 @@ export const Route = createFileRoute("/api/tg")({
               cur.name = own.name;
               await ns.put(key, JSON.stringify(cur));
               const joined = cm.new_chat_member.user.first_name || "друг";
+              const where = isCh ? "канал" : isGr ? "чат" : "GTR";
               await reply(
                 own.chat,
-                `🎉 <b>${tgEsc(joined)}</b> вступил(а) в канал по твоей ссылке!\nТвой счёт: <b>${cur.n}</b> · таблица лидеров — /top`,
+                `🎉 <b>${tgEsc(joined)}</b> вступил(а) в ${where} по твоей ссылке!\nТвой счёт: <b>${cur.n}</b> · таблица лидеров — /top`,
               );
             }
           }
           // метрики служебного контура: кто пришёл/ушёл в канале и чате
           {
-            const { COMMUNITY_KEY, bumpMetric } = await import("../gtr/community");
-            const ccfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
-            const isCh = ccfg?.channelId === cm.chat.id;
-            const isGr = ccfg?.chatId === cm.chat.id;
             const left = !["left", "kicked"].includes(cm.old_chat_member.status) &&
               ["left", "kicked"].includes(cm.new_chat_member.status);
             // Поимённые «вступил/вышел» никуда не постим (решение BOSS):
@@ -463,9 +501,8 @@ export const Route = createFileRoute("/api/tg")({
           // приветствие новичка в чате сообщества (не чаще раза в 3 минуты,
           // чтобы наплыв людей не превращался в стену приветствий)
           if (was && now && !cm.new_chat_member.user.id.toString().startsWith("-")) {
-            const { APP_URL, COMMUNITY_KEY } = await import("../gtr/community");
-            const ccfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
-            if (ccfg?.chatId === cm.chat.id && !(await ns.get("greetlock"))) {
+            const { APP_URL } = await import("../gtr/community");
+            if (isGr && !(await ns.get("greetlock"))) {
               await ns.put("greetlock", "1", { expirationTtl: 180 });
               const who = cm.new_chat_member.user.first_name || "друг";
               await tgApi("sendMessage", {
@@ -529,24 +566,20 @@ export const Route = createFileRoute("/api/tg")({
           }
 
           const start = text.match(/^\/start\s+(\S+)/);
-          // deep-link конкурса: t.me/бот?start=ref — сразу выдаём личную ссылку
+          // deep-link конкурса: t.me/бот?start=ref — сразу выдаём личные ссылки
           if (start && start[1] === "ref") {
             const who = up.message.from?.first_name || up.message.from?.username || "участник";
-            const r = await issueRefLink(ns, chatId, who);
-            await reply(
-              chatId,
-              r.ok
-                ? [
-                    `🎁 <b>Ты в конкурсе GTR!</b>`,
-                    "",
-                    `Твоя личная ссылка на канал:`,
-                    r.link,
-                    "",
-                    "Зови друзей — каждый вступивший засчитается тебе. Лидеры: /top",
-                    `А афиша вечера всегда тут: /tonight`,
-                  ].join("\n")
-                : `Не получилось: ${tgEsc(r.reason)}`,
+            const links = await issueRefLinks(ns, chatId, who);
+            const lines = [`🎁 <b>Ты в конкурсе GTR!</b>`, ""];
+            if (links.channel) lines.push(`📣 Ссылка на канал:`, links.channel, "");
+            if (links.chat) lines.push(`💬 Ссылка на чат:`, links.chat, "");
+            lines.push(
+              links.channel || links.chat
+                ? "Зови друзей по любой — каждый вступивший засчитается тебе. Лидеры: /top"
+                : "Ссылки пока не готовы — сообщество ещё настраивается.",
+              `А афиша вечера всегда тут: /tonight`,
             );
+            await reply(chatId, lines.join("\n"));
             return Response.json({ ok: true });
           }
           if (start) {
@@ -630,23 +663,23 @@ export const Route = createFileRoute("/api/tg")({
             return Response.json({ ok: true });
           }
 
-          // конкурс инвайтинга: личная ссылка и таблица лидеров
+          // конкурс инвайтинга: личные ссылки (канал + чат) и таблица лидеров
           if (cmd === "/ref") {
             const { tgLangOf } = await import("../gtr/community");
             const lng = tgLangOf(up.message.from?.language_code);
             const who = up.message.from?.first_name || up.message.from?.username || "участник";
-            const r = await issueRefLink(ns, chatId, who);
+            const links = await issueRefLinks(ns, chatId, who);
             const REF_T = {
-              ru: [`🎁 <b>Твоя личная ссылка на канал GTR Live:</b>`, "{l}", "", "Зови друзей по ней — каждый, кто вступит, засчитается тебе.", "Счёт и лидеры: /top"],
-              en: [`🎁 <b>Your personal GTR Live invite link:</b>`, "{l}", "", "Share it with friends — everyone who joins counts for you.", "Score & leaderboard: /top"],
-              th: [`🎁 <b>ลิงก์ชวนเพื่อนส่วนตัวของคุณ:</b>`, "{l}", "", "แชร์ให้เพื่อน — ทุกคนที่เข้าร่วมนับเป็นคะแนนของคุณ", "คะแนนและอันดับ: /top"],
+              ru: { h: "🎁 <b>Твои личные ссылки GTR Live:</b>", ch: "📣 Канал:", gr: "💬 Чат:", f: "Зови друзей по любой — каждый, кто вступит, засчитается тебе.", top: "Счёт и лидеры: /top", none: "Ссылки пока не готовы — сообщество ещё настраивается." },
+              en: { h: "🎁 <b>Your personal GTR Live links:</b>", ch: "📣 Channel:", gr: "💬 Chat:", f: "Share either with friends — everyone who joins counts for you.", top: "Score & leaderboard: /top", none: "Links aren't ready yet — community setup in progress." },
+              th: { h: "🎁 <b>ลิงก์ส่วนตัวของคุณ:</b>", ch: "📣 ช่อง:", gr: "💬 แชท:", f: "แชร์ให้เพื่อน — ทุกคนที่เข้าร่วมนับเป็นคะแนนของคุณ", top: "คะแนนและอันดับ: /top", none: "ลิงก์ยังไม่พร้อม — กำลังตั้งค่าคอมมูนิตี้" },
             } as const;
-            await reply(
-              chatId,
-              r.ok
-                ? REF_T[lng].join("\n").replace("{l}", r.link)
-                : `${lng === "ru" ? "Не получилось" : lng === "th" ? "ไม่สำเร็จ" : "Failed"}: ${tgEsc(r.reason)}`,
-            );
+            const T = REF_T[lng];
+            const lines = [T.h, ""];
+            if (links.channel) lines.push(T.ch, links.channel, "");
+            if (links.chat) lines.push(T.gr, links.chat, "");
+            lines.push(links.channel || links.chat ? T.f : T.none, T.top);
+            await reply(chatId, lines.join("\n"));
             return Response.json({ ok: true });
           }
           if (cmd === "/top") {

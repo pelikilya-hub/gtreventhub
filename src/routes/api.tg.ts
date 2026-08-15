@@ -474,7 +474,8 @@ export const Route = createFileRoute("/api/tg")({
                 text: [
                   `👋 <b>${tgEsc(who)}</b>, добро пожаловать в GTR! · welcome to GTR!`,
                   `Комнаты · Rooms: 🔥 Афиша · 🎵 Музыка · 🎉 Знакомства · 💡 Идеи`,
-                  `🌴 /tonight — куда пойти сегодня · where to go tonight · <a href="${APP_URL}">GTR Event</a>`,
+                  `🌴 /tonight — куда пойти сегодня · where to go tonight`,
+                  `🏆 <a href="${APP_URL}/gtr/signup">Аккаунт GTR за 30 секунд</a> = +3 балла в конкурсе · sign up = +3 contest points`,
                 ].join("\n"),
                 link_preview_options: { is_disabled: true },
               });
@@ -557,17 +558,31 @@ export const Route = createFileRoute("/api/tg")({
             await ns.put(`tg:${email}`, String(chatId));
             await ns.put(`tgrev:${chatId}`, email);
             await ns.delete(`tglink:${start[1]}`);
+            // конкурс-мостик: первый привязанный аккаунт = +3 балла (один раз
+            // на человека и на email — команда и повторные привязки не фармят)
+            let bonusLine = "";
+            if (!(await ns.get(`regbonus:${chatId}`)) && !(await ns.get(`regbonus:e:${email}`))) {
+              await ns.put(`regbonus:${chatId}`, "1");
+              await ns.put(`regbonus:e:${email}`, "1");
+              const who = up.message.from?.first_name || up.message.from?.username || "участник";
+              const key = `refscore:${chatId}`;
+              const cur = (await kvGetJson<{ n: number; name: string }>(ns, key)) ?? { n: 0, name: who };
+              cur.n += 3;
+              cur.name = cur.name || who;
+              await ns.put(key, JSON.stringify(cur));
+              bonusLine = `\n\n🏆 <b>+3 балла в конкурсе за аккаунт GTR!</b> Твой счёт: ${cur.n} · лидеры: /top`;
+            }
             // персональное приглашение (инструкция с доступами) — один раз
             const linkedUser = await kvGetJson<StoredUser>(ns, `user:${email}`);
             const kb = linkedUser ? kbFor(linkedUser) : undefined;
             const welcome = await ns.get(`invitemsg:${email}`);
             if (welcome) {
               await ns.delete(`invitemsg:${email}`);
-              await reply(chatId, welcome, kb);
+              await reply(chatId, welcome + bonusLine, kb);
             } else {
               await reply(
                 chatId,
-                `✅ Telegram привязан к аккаунту <b>${tgEsc(email)}</b>.\nКнопки внизу — вся работа в один тап.`,
+                `✅ Telegram привязан к аккаунту <b>${tgEsc(email)}</b>.\nКнопки внизу — вся работа в один тап.${bonusLine}`,
                 kb,
               );
             }
@@ -642,17 +657,40 @@ export const Route = createFileRoute("/api/tg")({
           const u = await userOfChat(ns, chatId);
 
           if (cmd === "/start" || cmd === "/menu") {
-            await reply(
-              chatId,
-              u
-                ? `Аккаунт: <b>${tgEsc(u.email)}</b>. Кнопки внизу — вся работа в один тап.`
-                : "Это бот GTR Event. Привяжите аккаунт: кнопка «Привязать Telegram» в кабинете → ссылка со стартовым кодом.",
-              u ? kbFor(u as StoredUser) : undefined,
-            );
+            if (u) {
+              await reply(
+                chatId,
+                `Аккаунт: <b>${tgEsc(u.email)}</b>. Кнопки внизу — вся работа в один тап.`,
+                kbFor(u as StoredUser),
+              );
+            } else {
+              const { APP_URL } = await import("../gtr/community");
+              await tgApi("sendMessage", {
+                chat_id: chatId,
+                parse_mode: "HTML",
+                text: [
+                  "⚡ <b>GTR Event — вся ночная жизнь Пхукета</b>",
+                  "",
+                  "🎟 Афиша 104 клубов на сегодня · 🎧 312 артистов · 🍾 бронь столов",
+                  "",
+                  "🏆 Создай аккаунт за 30 секунд и привяжи Telegram — <b>+3 балла в конкурсе</b> (призы 1 сентября!)",
+                ].join("\n"),
+                reply_markup: {
+                  inline_keyboard: [
+                    [{ text: "🚀 Создать аккаунт", url: `${APP_URL}/gtr/signup` }],
+                    [{ text: "🌴 Куда пойти сегодня", url: `${APP_URL}/gtr/tonight` }],
+                  ],
+                },
+              });
+            }
             return Response.json({ ok: true });
           }
           if (!u) {
-            await reply(chatId, "Сначала привяжите аккаунт: «Привязать Telegram» в кабинете GTR Event.");
+            const { APP_URL } = await import("../gtr/community");
+            await reply(
+              chatId,
+              `Сначала привяжите аккаунт: «Привязать Telegram» в кабинете GTR Event.\nНет аккаунта? Регистрация за 30 секунд (+3 балла в конкурсе): ${APP_URL}/gtr/signup`,
+            );
             return Response.json({ ok: true });
           }
           const su = u as StoredUser;

@@ -30,6 +30,9 @@ export const Route = createFileRoute("/api/community-digest")({
             chat_id: cfg.channelId,
             text,
             parse_mode: "HTML",
+            reply_markup: {
+              inline_keyboard: [[{ text: "🎟 Открыть GTR Event", url: `${APP_URL}/gtr/tonight` }]],
+            },
             link_preview_options: { url: APP_URL, prefer_large_media: true },
           });
         }

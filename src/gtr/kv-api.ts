@@ -1780,29 +1780,33 @@ export const communityPostFn = createServerFn({ method: "POST" })
       return { ok: false as const, reason: data.target === "channel" ? "Канал не привязан" : "Группа не привязана" };
     }
     const bot = (await ns.get("tg:bot")) || "Gtrcom1_bot";
+    const { APP_URL } = await import("./community");
     const text =
       data.kind === "digest"
         ? await buildDigestText(ns)
         : data.kind === "contest"
           ? buildContestText()
-          : buildInviteText(cfg ?? {});
+          : buildInviteText(cfg ?? {}, false); // false: ссылки только в кнопках, не в тексте
+    // ссылки — всегда кнопками, никогда голым текстом в теле поста
+    const buttons: { text: string; url: string }[][] =
+      data.kind === "contest"
+        ? [[{ text: "🎁 Получить мою ссылку", url: `https://t.me/${bot}?start=ref` }]]
+        : [
+            [{ text: "🎟 Открыть GTR Event", url: `${APP_URL}/gtr/tonight` }],
+            [
+              ...(cfg?.channelUrl ? [{ text: "📣 Канал", url: cfg.channelUrl }] : []),
+              ...(cfg?.chatUrl ? [{ text: "💬 Чат", url: cfg.chatUrl }] : []),
+            ],
+          ].filter((row) => row.length);
     const res = await tgApi("sendMessage", {
       chat_id: chatId,
       text,
       parse_mode: "HTML",
+      reply_markup: { inline_keyboard: buttons },
       ...(data.kind === "contest"
-        ? {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: "🎁 Получить мою ссылку", url: `https://t.me/${bot}?start=ref` }],
-              ],
-            },
-          }
+        ? {}
         : {
-            link_preview_options: {
-              url: (await import("./community")).APP_URL,
-              prefer_large_media: true,
-            },
+            link_preview_options: { url: APP_URL, prefer_large_media: true },
           }),
     });
     return res.ok

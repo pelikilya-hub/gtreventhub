@@ -568,16 +568,19 @@ export const Route = createFileRoute("/api/tg")({
           if (start && start[1] === "ref") {
             const who = up.message.from?.first_name || up.message.from?.username || "участник";
             const links = await issueRefLinks(ns, chatId, who);
-            const lines = [`🎁 <b>Ты в конкурсе GTR!</b>`, ""];
-            if (links.channel) lines.push(`📣 Ссылка на канал:`, links.channel, "");
-            if (links.chat) lines.push(`💬 Ссылка на чат:`, links.chat, "");
-            lines.push(
+            const lines = [
+              `🎁 <b>Ты в конкурсе GTR!</b>`,
+              "",
               links.channel || links.chat
-                ? "Зови друзей по любой — каждый вступивший засчитается тебе. Лидеры: /top"
+                ? "Зови друзей по кнопкам ниже — каждый вступивший засчитается тебе. Лидеры: /top"
                 : "Ссылки пока не готовы — сообщество ещё настраивается.",
               `А афиша вечера всегда тут: /tonight`,
-            );
-            await reply(chatId, lines.join("\n"));
+            ];
+            const refButtons = [
+              ...(links.channel ? [{ text: "📣 Моя ссылка на канал", url: links.channel }] : []),
+              ...(links.chat ? [{ text: "💬 Моя ссылка на чат", url: links.chat }] : []),
+            ].map((b) => [b]);
+            await reply(chatId, lines.join("\n"), refButtons.length ? { inline_keyboard: refButtons } : undefined);
             return Response.json({ ok: true });
           }
           if (start) {
@@ -656,8 +659,10 @@ export const Route = createFileRoute("/api/tg")({
           // /tonight работает везде — и в личке, и в группе комьюнити,
           // без привязки аккаунта: это витрина, а не кабинет
           if (cmd === "/tonight" || cmd === "/afisha") {
-            const { buildDigestText, tgLangOf } = await import("../gtr/community");
-            await reply(chatId, await buildDigestText(ns, tgLangOf(up.message.from?.language_code)));
+            const { APP_URL, buildDigestText, tgLangOf } = await import("../gtr/community");
+            await reply(chatId, await buildDigestText(ns, tgLangOf(up.message.from?.language_code)), {
+              inline_keyboard: [[{ text: "🎟 Открыть в приложении", url: `${APP_URL}/gtr/tonight` }]],
+            });
             return Response.json({ ok: true });
           }
 
@@ -668,16 +673,17 @@ export const Route = createFileRoute("/api/tg")({
             const who = up.message.from?.first_name || up.message.from?.username || "участник";
             const links = await issueRefLinks(ns, chatId, who);
             const REF_T = {
-              ru: { h: "🎁 <b>Твои личные ссылки GTR Live:</b>", ch: "📣 Канал:", gr: "💬 Чат:", f: "Зови друзей по любой — каждый, кто вступит, засчитается тебе.", top: "Счёт и лидеры: /top", none: "Ссылки пока не готовы — сообщество ещё настраивается." },
-              en: { h: "🎁 <b>Your personal GTR Live links:</b>", ch: "📣 Channel:", gr: "💬 Chat:", f: "Share either with friends — everyone who joins counts for you.", top: "Score & leaderboard: /top", none: "Links aren't ready yet — community setup in progress." },
-              th: { h: "🎁 <b>ลิงก์ส่วนตัวของคุณ:</b>", ch: "📣 ช่อง:", gr: "💬 แชท:", f: "แชร์ให้เพื่อน — ทุกคนที่เข้าร่วมนับเป็นคะแนนของคุณ", top: "คะแนนและอันดับ: /top", none: "ลิงก์ยังไม่พร้อม — กำลังตั้งค่าคอมมูนิตี้" },
+              ru: { h: "🎁 <b>Твои личные ссылки GTR Live:</b>", ch: "📣 Моя ссылка на канал", gr: "💬 Моя ссылка на чат", f: "Зови друзей по кнопкам ниже — каждый, кто вступит, засчитается тебе.", top: "Счёт и лидеры: /top", none: "Ссылки пока не готовы — сообщество ещё настраивается." },
+              en: { h: "🎁 <b>Your personal GTR Live links:</b>", ch: "📣 My channel link", gr: "💬 My chat link", f: "Share the buttons below — everyone who joins counts for you.", top: "Score & leaderboard: /top", none: "Links aren't ready yet — community setup in progress." },
+              th: { h: "🎁 <b>ลิงก์ส่วนตัวของคุณ:</b>", ch: "📣 ลิงก์ช่องของฉัน", gr: "💬 ลิงก์แชทของฉัน", f: "แชร์ปุ่มด้านล่างให้เพื่อน — ทุกคนที่เข้าร่วมนับเป็นคะแนนของคุณ", top: "คะแนนและอันดับ: /top", none: "ลิงก์ยังไม่พร้อม — กำลังตั้งค่าคอมมูนิตี้" },
             } as const;
             const T = REF_T[lng];
-            const lines = [T.h, ""];
-            if (links.channel) lines.push(T.ch, links.channel, "");
-            if (links.chat) lines.push(T.gr, links.chat, "");
-            lines.push(links.channel || links.chat ? T.f : T.none, T.top);
-            await reply(chatId, lines.join("\n"));
+            const lines = [T.h, "", links.channel || links.chat ? T.f : T.none, T.top];
+            const refButtons = [
+              ...(links.channel ? [{ text: T.ch, url: links.channel }] : []),
+              ...(links.chat ? [{ text: T.gr, url: links.chat }] : []),
+            ].map((b) => [b]);
+            await reply(chatId, lines.join("\n"), refButtons.length ? { inline_keyboard: refButtons } : undefined);
             return Response.json({ ok: true });
           }
           if (cmd === "/top") {
@@ -720,7 +726,8 @@ export const Route = createFileRoute("/api/tg")({
             const { APP_URL } = await import("../gtr/community");
             await reply(
               chatId,
-              `Сначала привяжите аккаунт: «Привязать Telegram» в кабинете GTR Event.\nНет аккаунта? Регистрация за 30 секунд (+3 балла в конкурсе): ${APP_URL}/gtr/signup`,
+              `Сначала привяжите аккаунт: «Привязать Telegram» в кабинете GTR Event.\nНет аккаунта? Регистрация за 30 секунд — +3 балла в конкурсе.`,
+              { inline_keyboard: [[{ text: "🚀 Создать аккаунт", url: `${APP_URL}/gtr/signup` }]] },
             );
             return Response.json({ ok: true });
           }

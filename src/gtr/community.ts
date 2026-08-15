@@ -153,8 +153,8 @@ export async function buildDigestText(ns: KvNs, lang: TgLang = "dual"): Promise<
   if (!tonight.length && !upcoming.length) {
     lines.push("", pick("empty"));
   }
-  // ссылка спрятана под именем продукта — без голого URL в тексте
-  lines.push("", `🎟 <a href="${APP_URL}">GTR Event</a> — ${pick("cta")}`);
+  // ссылка — только под кнопкой у отправителя, в тексте её нет вообще
+  lines.push("", `🎟 ${pick("cta")}`);
   return lines.join("\n");
 }
 
@@ -239,17 +239,20 @@ export function buildContestText(): string {
   ].join("\n");
 }
 
-// Пост-приглашение тестовой группы: зовём людей в продукт и в комьюнити
-export function buildInviteText(cfg: CommunityCfg): string {
+// Пост-приглашение тестовой группы: зовём людей в продукт и в комьюнити.
+// linksAsText=true — для ручного копипаста (WhatsApp и т.п., где кнопок
+// не бывает); false — когда пост шлёт сам бот, там ссылки только в кнопках.
+export function buildInviteText(cfg: CommunityCfg, linksAsText = true): string {
   const lines = [
     `🎉 <b>GTR Event — твой гид по ночному Пхукету</b>`,
     "",
     `104 клуба и бара, 312 артистов, живая афиша на каждый вечер, бронь столов в пару касаний и ИИ-подбор вечеринок под твой вкус.`,
-    "",
-    `▶ Открыть приложение: <a href="${APP_URL}">GTR Event</a>`,
   ];
-  if (cfg.channelUrl) lines.push(`📣 Новости: ${tgEsc(cfg.channelUrl)}`);
-  if (cfg.chatUrl) lines.push(`💬 Чат сообщества: ${tgEsc(cfg.chatUrl)}`);
+  if (linksAsText) {
+    lines.push("", `▶ Открыть приложение: ${APP_URL}`);
+    if (cfg.channelUrl) lines.push(`📣 Новости: ${tgEsc(cfg.channelUrl)}`);
+    if (cfg.chatUrl) lines.push(`💬 Чат сообщества: ${tgEsc(cfg.chatUrl)}`);
+  }
   lines.push(`📩 Связь и сотрудничество: @bangtaostyle`);
   lines.push("", `Мы запускаем тестовую группу — заходи первым и расскажи, чего не хватает. Твои идеи попадут в продукт.`);
   return lines.join("\n");

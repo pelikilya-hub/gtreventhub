@@ -457,6 +457,35 @@ export const Route = createFileRoute("/api/tg")({
           // в личке, чтобы техника не протекала к пользователям.
           if (chatId < 0) {
             const pub = text.split(/[\s@]/)[0].toLowerCase();
+            // /ops — привязка закрытой группы как служебного контура:
+            // публичные чаты комьюнити отклоняются, бот обязан быть админом
+            if (pub === "/ops") {
+              const { COMMUNITY_KEY, OPS_KEY } = await import("../gtr/community");
+              const ccfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
+              if (
+                String(chatId) === String(ccfg?.channelId ?? "∅") ||
+                String(chatId) === String(ccfg?.chatId ?? "∅")
+              ) {
+                return Response.json({ ok: true, ops: "rejected-public" });
+              }
+              const me = await tgApi<{ id: number }>("getMe", {});
+              const member = me.ok && me.result
+                ? await tgApi<{ status: string }>("getChatMember", { chat_id: chatId, user_id: me.result.id })
+                : { ok: false as const, result: undefined };
+              const admin = Boolean(
+                member.ok && member.result && ["administrator", "creator"].includes(member.result.status),
+              );
+              if (!admin) {
+                await reply(chatId, "Чтобы привязать служебный контур, сделайте бота админом этого чата и повторите /ops.");
+                return Response.json({ ok: true, ops: "not-admin" });
+              }
+              await ns.put(OPS_KEY, JSON.stringify({ chatId, title: "", bound: Date.now() }));
+              await reply(
+                chatId,
+                "✅ <b>Служебный контур GTR OPS привязан.</b>\nСюда будут приходить метрики и технические уведомления. Публичный контент сюда не попадает, служебный — не попадает в комьюнити.",
+              );
+              return Response.json({ ok: true, ops: "bound" });
+            }
             if (!["/tonight", "/afisha", "/top"].includes(pub)) {
               return Response.json({ ok: true, scope: "public-only" });
             }

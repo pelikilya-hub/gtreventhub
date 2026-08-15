@@ -9,6 +9,7 @@ import {
   isPerformer,
   loadArtists,
   RIDERS,
+  V,
   type Artist,
   type ArtistBase,
 } from "../data/app-data";
@@ -21,6 +22,7 @@ import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint, TrashTitle }
 import { GtrLightbox } from "../lightbox";
 import { openAppLink } from "../applink";
 import {
+  allAfishaFn,
   artistExtrasFn,
   artistFlagsFn,
   liveStatusFn,
@@ -56,6 +58,17 @@ const playerLink = (p: ArtistPlayer, spFallback?: string): { url: string; label:
         : p.kind === "mixcloud"
           ? { url: `https://www.mixcloud.com${p.ref}`, label: "Музыка · Mixcloud" }
           : { url: `https://www.deezer.com/artist/${p.ref}`, label: "Музыка" };
+
+// Группы базы — служебные английские метки; посетителю показываем
+// человеческое название сцены (ключи RU — под естественную i18n-схему)
+const GROUP_FAN: Record<string, string> = {
+  "Phuket Priority": "Приоритет сцены Пхукета",
+  "Phuket Community": "Комьюнити Пхукета",
+  "Phuket Venue Acts": "Резидент площадок Пхукета",
+  "Thailand Artists": "Сцена Таиланда",
+  "CIS Bookable": "Международный ростер",
+  "Producers & Managers": "Продюсер / менеджмент",
+};
 
 const KIND_LABEL: Record<string, string> = {
   all: "Все записи",
@@ -542,6 +555,11 @@ function ArtistCard({
 }) {
   const { t } = useTranslation();
   const { user, shared, setLineup } = useGtr();
+  const navigate = useNavigate();
+  // Режим посетителя: страница артиста как для фаната — без букинга,
+  // райдера и служебных статусов; вместо них стили, статус сцены,
+  // площадки и ИИ-подбор похожих исполнителей
+  const fanView = user.role === "visitor";
   const inLineup = shared.lineup.includes(a.id);
   const rider = a.rider ? RIDERS[a.rider] : null;
   // Статусы допуска: верификация GTR и разрешение на работу (KV, правит GTR)
@@ -561,6 +579,44 @@ function ArtistCard({
   useEffect(() => {
     artistExtrasFn({ data: { artistId: a.id } }).then(setExtras).catch(() => {});
   }, [a.id]);
+  // Фан-режим: площадки из живой афиши + похожие исполнители по стилям
+  const [fanAfisha, setFanAfisha] = useState<{ vid: string; artistIds: string[]; title: string; dateIso: string }[]>([]);
+  const [allArtists, setAllArtists] = useState<Artist[]>([]);
+  useEffect(() => {
+    if (!fanView) return;
+    allAfishaFn().then((r) => setFanAfisha(r.items)).catch(() => {});
+    loadArtists().then((b) => setAllArtists(b.artists)).catch(() => {});
+  }, [fanView, a.id]);
+  // Площадки, где играл / играет: домашняя площадка из базы + события афиши
+  const playedVenues = useMemo(() => {
+    const vids: string[] = [];
+    if (a.venue && V(a.venue)?.name) vids.push(a.venue);
+    for (const e of fanAfisha)
+      if (e.artistIds?.includes(a.id) && !vids.includes(e.vid) && V(e.vid)?.name) vids.push(e.vid);
+    return vids.slice(0, 8);
+  }, [a.id, a.venue, fanAfisha]);
+  // ИИ-подбор: Ружичка по стилям (пересечение/объединение) + бонус своей
+  // сцены и фото — тот же принцип, что в движке вкуса
+  const similar = useMemo(() => {
+    if (!fanView || !allArtists.length || !(a.styles || []).length) return [];
+    const mine = new Set((a.styles || []).map((s) => s.toLowerCase()));
+    return allArtists
+      .filter((x) => x.id !== a.id && isPerformer(x) && (x.styles || []).length)
+      .map((x) => {
+        const theirs = new Set((x.styles || []).map((s) => s.toLowerCase()));
+        let inter = 0;
+        for (const s of mine) if (theirs.has(s)) inter++;
+        const union = mine.size + theirs.size - inter;
+        let score = union ? inter / union : 0;
+        if (x.group === a.group) score += 0.12;
+        if (PHOTOS[x.id]) score += 0.08;
+        return { x, score };
+      })
+      .filter((r) => r.score > 0.14)
+      .sort((p, q) => q.score - p.score)
+      .slice(0, 6)
+      .map((r) => r.x);
+  }, [fanView, allArtists, a.id, a.styles, a.group]);
   const P = extras.profile;
   const heroVideo = extras.heroVideo ?? MEDIA[a.id]?.heroVideo;
   const heroPoster = extras.heroPoster ?? MEDIA[a.id]?.heroPoster;
@@ -702,38 +758,46 @@ function ArtistCard({
               }}
             >
               <TrashTitle text={a.name} size={30} />
-              <Chip
-                color={
-                  a.prio === "A"
-                    ? GREEN
-                    : a.prio === "B"
-                      ? AMBER
-                      : "rgba(255,255,255,.4)"
-                }
-              >
-                {t("ПРИОРИТЕТ")} {a.prio || "—"}
-              </Chip>
-              {a.tier ? (
-                <Chip color="#7B4DFF">{a.tier.toUpperCase()}</Chip>
+              {/* посетителю — только фанатские метки; служебные статусы
+                  (приоритет, work permit) остаются командам */}
+              {!fanView ? (
+                <Chip
+                  color={
+                    a.prio === "A"
+                      ? GREEN
+                      : a.prio === "B"
+                        ? AMBER
+                        : "rgba(255,255,255,.4)"
+                  }
+                >
+                  {t("ПРИОРИТЕТ")} {a.prio || "—"}
+                </Chip>
               ) : null}
-              <span
-                title={user.role === "gtr" ? "Нажмите, чтобы переключить" : undefined}
-                onClick={user.role === "gtr" ? () => toggleFlag("verified") : undefined}
-                style={{ cursor: user.role === "gtr" ? "pointer" : "default", display: "inline-flex" }}
-              >
-                <Chip color={flags.verified ? GREEN : "rgba(255,255,255,.35)"}>
-                  {flags.verified ? t("ВЕРИФИЦИРОВАН ✓") : t("БЕЗ ВЕРИФИКАЦИИ")}
-                </Chip>
-              </span>
-              <span
-                title={user.role === "gtr" ? "Нажмите, чтобы переключить" : undefined}
-                onClick={user.role === "gtr" ? () => toggleFlag("workPermit") : undefined}
-                style={{ cursor: user.role === "gtr" ? "pointer" : "default", display: "inline-flex" }}
-              >
-                <Chip color={flags.workPermit ? GREEN : AMBER}>
-                  {flags.workPermit ? t("WORK PERMIT ✓") : t("WORK PERMIT — НЕТ ДАННЫХ")}
-                </Chip>
-              </span>
+              {a.tier && a.tier !== "—" ? (
+                <Chip color="#7B4DFF">{t(a.tier).toUpperCase()}</Chip>
+              ) : null}
+              {!fanView || flags.verified ? (
+                <span
+                  title={user.role === "gtr" ? "Нажмите, чтобы переключить" : undefined}
+                  onClick={user.role === "gtr" ? () => toggleFlag("verified") : undefined}
+                  style={{ cursor: user.role === "gtr" ? "pointer" : "default", display: "inline-flex" }}
+                >
+                  <Chip color={flags.verified ? GREEN : "rgba(255,255,255,.35)"}>
+                    {flags.verified ? t("ВЕРИФИЦИРОВАН ✓") : t("БЕЗ ВЕРИФИКАЦИИ")}
+                  </Chip>
+                </span>
+              ) : null}
+              {!fanView ? (
+                <span
+                  title={user.role === "gtr" ? "Нажмите, чтобы переключить" : undefined}
+                  onClick={user.role === "gtr" ? () => toggleFlag("workPermit") : undefined}
+                  style={{ cursor: user.role === "gtr" ? "pointer" : "default", display: "inline-flex" }}
+                >
+                  <Chip color={flags.workPermit ? GREEN : AMBER}>
+                    {flags.workPermit ? t("WORK PERMIT ✓") : t("WORK PERMIT — НЕТ ДАННЫХ")}
+                  </Chip>
+                </span>
+              ) : null}
             </div>
             <div
               style={{
@@ -758,7 +822,7 @@ function ArtistCard({
                 {bio}
               </div>
             ) : null}
-            {a.rel ? (
+            {a.rel && !fanView ? (
               <div
                 className="gtr-mono"
                 style={{
@@ -795,16 +859,18 @@ function ArtistCard({
                 flexWrap: "wrap",
               }}
             >
-              <button
-                className={`gtr-btn ${inLineup ? "" : "gtr-btn-red"}`}
-                onClick={() =>
-                  setLineup((ids) =>
-                    inLineup ? ids.filter((x) => x !== a.id) : [...ids, a.id],
-                  )
-                }
-              >
-                {inLineup ? t("Убрать из лайнапа") : t("+ В лайнап события")}
-              </button>
+              {!fanView ? (
+                <button
+                  className={`gtr-btn ${inLineup ? "" : "gtr-btn-red"}`}
+                  onClick={() =>
+                    setLineup((ids) =>
+                      inLineup ? ids.filter((x) => x !== a.id) : [...ids, a.id],
+                    )
+                  }
+                >
+                  {inLineup ? t("Убрать из лайнапа") : t("+ В лайнап события")}
+                </button>
+              ) : null}
               {live?.live ? (
                 <a
                   className="gtr-btn gtr-live-btn"
@@ -880,7 +946,7 @@ function ArtistCard({
                 </a>
               ))}
             </div>
-            {MEDIA[a.id]?.heroVideo || PHOTOS[a.id] ? (
+            {!fanView && (MEDIA[a.id]?.heroVideo || PHOTOS[a.id]) ? (
               <div
                 className="gtr-mono"
                 style={{
@@ -979,6 +1045,7 @@ function ArtistCard({
         </Card>
       ) : null}
 
+      {!fanView ? (
       <div
         className="gtr-md-stack"
         style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
@@ -1045,6 +1112,120 @@ function ArtistCard({
           )}
         </Card>
       </div>
+      ) : (
+        <>
+          {/* ---- фан-режим: площадки, стили, статус, похожие ---- */}
+          {playedVenues.length ? (
+            <Card style={{ padding: "16px 20px", marginBottom: 14 }}>
+              <Eyebrow style={{ marginBottom: 10 }}>{t("ИГРАЛ НА ПЛОЩАДКАХ")}</Eyebrow>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {playedVenues.map((vid) => (
+                  <button
+                    key={vid}
+                    className="gtr-btn"
+                    onClick={() =>
+                      navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid } })
+                    }
+                  >
+                    {V(vid).name}
+                    {V(vid).area ? (
+                      <span
+                        className="gtr-mono"
+                        style={{ marginLeft: 8, font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                      >
+                        {t(String(V(vid).area))}
+                      </span>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+            </Card>
+          ) : null}
+
+          <div
+            className="gtr-md-stack"
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}
+          >
+            <Card style={{ padding: 18 }}>
+              <Eyebrow style={{ marginBottom: 12 }}>{t("МУЗЫКАЛЬНЫЕ СТИЛИ")}</Eyebrow>
+              {(a.styles || []).length ? (
+                (a.styles || []).map((s, i, arr) => (
+                  <div key={s} style={{ marginBottom: 10 }}>
+                    <div style={{ font: "600 12px/1.2 'Golos Text',sans-serif", marginBottom: 5 }}>{t(s)}</div>
+                    <div style={{ height: 5, background: "rgba(255,255,255,.07)" }}>
+                      <span
+                        className="gtr-genrebar"
+                        style={{
+                          display: "block",
+                          width: `${arr.length > 1 ? 100 - i * (55 / (arr.length - 1)) : 100}%`,
+                          height: "100%",
+                          background: "linear-gradient(90deg,#E5231B,#F5A623)",
+                          ["--gtr-d" as string]: `${i * 0.09}s`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+                  {t("Стили уточняются")}
+                </div>
+              )}
+            </Card>
+            <Card style={{ padding: 18 }}>
+              <Eyebrow style={{ marginBottom: 10 }}>{t("СТАТУС И ДОСТИЖЕНИЯ")}</Eyebrow>
+              {a.tier && a.tier !== "—" ? <Field k={t("Статус сцены")} v={t(a.tier)} /> : null}
+              {a.group ? <Field k={t("Сцена")} v={t(GROUP_FAN[a.group] ?? a.group)} /> : null}
+              {String(a.baseRu || a.base || "") ? <Field k={t("База")} v={String(a.baseRu || a.base)} /> : null}
+              {flags.verified ? <Field k={t("Верификация")} v={t("Подтверждён командой GTR ✓")} /> : null}
+              {P?.sets?.length ? <Field k={t("Сеты в профиле")} v={String(P.sets.length)} mono /> : null}
+              {playedVenues.length ? <Field k={t("Площадки")} v={String(playedVenues.length)} mono /> : null}
+            </Card>
+          </div>
+
+          {similar.length ? (
+            <Card style={{ padding: "16px 20px", marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
+                <span className="gtr-eq" aria-hidden><span /><span /><span /><span /></span>
+                <Eyebrow>{t("ИИ-ПОДБОР: ПОХОЖИЕ ИСПОЛНИТЕЛИ")}</Eyebrow>
+              </div>
+              <div className="gtr-hscroll">
+                {similar.map((x) => (
+                  <Card
+                    key={x.id}
+                    hover
+                    style={{ padding: 0, overflow: "hidden", width: 132, flex: "none" }}
+                    onClick={() =>
+                      navigate({ to: "/gtr/$screen", params: { screen: "artists" }, search: { artist: x.id } })
+                    }
+                  >
+                    <div style={{ position: "relative", aspectRatio: "1/1", background: "#101116" }}>
+                      {PHOTOS[x.id] ? (
+                        <img
+                          src={PHOTOS[x.id].photo}
+                          alt=""
+                          loading="lazy"
+                          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                          onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }}
+                        />
+                      ) : null}
+                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 55%, rgba(10,11,13,.94))" }} />
+                      <div style={{ position: "absolute", left: 8, right: 8, bottom: 7 }}>
+                        <div style={{ font: "700 11px/1.2 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".03em" }}>
+                          {x.name}
+                        </div>
+                        <div className="gtr-mono" style={{ marginTop: 2, font: "500 7.5px/1.3 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {(x.styles || []).slice(0, 2).join(" · ")}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </Card>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }

@@ -1715,7 +1715,25 @@ function VisitorCabinet() {
   const [heads, setHeads] = useState<{ id: string; name: string; styles: string[]; photo?: string; music?: string }[]>([]);
   useEffect(() => {
     musicProfileFn().then((r) => setMp(r.profile)).catch(() => {});
-    allAfishaFn().then((r) => setFeed(r.items.slice(0, 10))).catch(() => {});
+    allAfishaFn()
+      .then((r) => {
+        // лента без повторов: один постер один раз, максимум 2 события
+        // с одной площадки — иначе весь ряд забивает одна афиша
+        const seenPoster = new Set<string>();
+        const perVenue = new Map<string, number>();
+        const picked: typeof r.items = [];
+        for (const e of r.items) {
+          const pk = e.poster || "";
+          if (pk && seenPoster.has(pk)) continue;
+          if ((perVenue.get(e.vid) ?? 0) >= 2) continue;
+          if (pk) seenPoster.add(pk);
+          perVenue.set(e.vid, (perVenue.get(e.vid) ?? 0) + 1);
+          picked.push(e);
+          if (picked.length >= 10) break;
+        }
+        setFeed(picked);
+      })
+      .catch(() => {});
     // хедлайнеры: приоритетные артисты с фото — витрина, не список
     Promise.all([loadArtists(), import("../data/artist-photos.json"), import("../data/artist-players.json")]).then(
       ([base, ph, pl]) => {
@@ -1810,7 +1828,7 @@ function VisitorCabinet() {
                     </span>
                   ) : null}
                   <div style={{ position: "absolute", left: 9, right: 9, bottom: 8 }}>
-                    <div style={{ font: "600 11.5px/1.3 'Golos Text',sans-serif" }}>{e.title.slice(0, 44)}</div>
+                    <div style={{ font: "600 12.5px/1.25 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".04em" }}>{e.title.slice(0, 44)}</div>
                     <div className="gtr-mono" style={{ marginTop: 3, font: "500 8.5px/1.3 'JetBrains Mono',monospace", color: "rgba(255,255,255,.65)" }}>
                       {e.dateIso.slice(8, 10)}.{e.dateIso.slice(5, 7)} · {V(e.vid)?.name?.slice(0, 20)}
                     </div>
@@ -1840,10 +1858,14 @@ function VisitorCabinet() {
                     <button
                       aria-label={t("Слушать превью")}
                       onClick={(ev) => { ev.stopPropagation(); window.open(a.music, "_blank"); }}
-                      style={{ position: "absolute", top: 8, right: 8, width: 32, height: 32, border: "none", cursor: "pointer",
-                        background: "rgba(229,35,27,.92)", color: "#fff", font: "700 12px/1 Oswald", display: "grid", placeItems: "center",
+                      style={{ position: "absolute", top: 8, right: 8, width: 30, height: 30, cursor: "pointer",
+                        border: "1px solid rgba(255,255,255,.4)", background: "rgba(10,11,13,.55)", color: "#fff",
+                        display: "grid", placeItems: "center", padding: 0,
                         clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)" }}>
-                      ▶
+                      <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden>
+                        <polyline points="9 5 16 12 9 19" fill="none" stroke="currentColor"
+                          strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
                     </button>
                   ) : null}
                   <div style={{ position: "absolute", left: 9, right: 9, bottom: 8 }}>

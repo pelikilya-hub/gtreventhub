@@ -1015,7 +1015,18 @@ export const listAfishaFn = createServerFn({ method: "GET" })
     const ns = await getKvNs();
     if (!ns) return { events: [], syncedAt: 0, source: "" } as VenueAfisha;
     const rec = await kvGetJson<VenueAfisha>(ns, `venueevents:${data.vid}`);
-    return rec ?? ({ events: [], syncedAt: 0, source: "" } as VenueAfisha);
+    if (!rec) return { events: [], syncedAt: 0, source: "" } as VenueAfisha;
+    // паспорт площадки показывает ту же чистую программу, что и лента
+    const { cleanEventTitle, isJunkEventTitle } = await import("./afisha-clean");
+    const { V } = await import("./data/app-data");
+    const vname = V(data.vid)?.name;
+    return {
+      ...rec,
+      events: rec.events
+        .filter((e) => !isJunkEventTitle(e.title))
+        .map((e) => ({ ...e, title: cleanEventTitle(e.title, vname) }))
+        .filter((e) => !isJunkEventTitle(e.title)),
+    } as VenueAfisha;
   });
 
 export const syncAfishaNowFn = createServerFn({ method: "POST" }).handler(async () => {
@@ -1423,13 +1434,27 @@ export const signupVisitorFn = createServerFn({ method: "POST" })
 export const allAfishaFn = createServerFn({ method: "GET" }).handler(async () => {
   const ns = await getKvNs();
   if (!ns) return { items: [] as (VenueAfisha["events"][number] & { vid: string })[] };
+  const { cleanEventTitle, isJunkEventTitle } = await import("./afisha-clean");
+  const { V } = await import("./data/app-data");
   const keys = await kvListAll(ns, "venueevents:");
   const today = new Date().toISOString().slice(0, 10);
   const items: (VenueAfisha["events"][number] & { vid: string })[] = [];
+  const seen = new Set<string>();
   for (const k of keys) {
     const rec = await kvGetJson<VenueAfisha>(ns, k);
     const vid = k.slice("venueevents:".length);
-    for (const e of rec?.events ?? []) if (e.dateIso >= today) items.push({ ...e, vid });
+    for (const e of rec?.events ?? []) {
+      if (e.dateIso < today) continue;
+      // мусорные страницы сайтов («Restaurant», «feed») — не программа
+      if (isJunkEventTitle(e.title)) continue;
+      const title = cleanEventTitle(e.title, V(vid)?.name);
+      if (isJunkEventTitle(title)) continue;
+      // дедуп: одна и та же программа из двух источников (RA + сайт)
+      const key = `${title.toLowerCase()}|${e.dateIso}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      items.push({ ...e, title, vid });
+    }
   }
   items.sort((a, b) => a.dateIso.localeCompare(b.dateIso));
   return { items: items.slice(0, 60) };

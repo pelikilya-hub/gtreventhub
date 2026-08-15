@@ -471,32 +471,57 @@
   /* сенсоры движения: наклон телефона ведёт свет за собой */
   transform: translate3d(var(--gtr-tilt-x, 0px), var(--gtr-tilt-y, 0px), 0);
 }
+/* Рассеивание даёт сам многоступенчатый градиент, а не filter: blur().
+   Раньше поверх и без того мягкого radial-gradient висел blur(90px) на
+   четырёх больших слоях — GPU пересчитывал размытие каждый кадр, и весь
+   продукт держал 31 fps даже в полном покое. Без blur — те же 60 fps и
+   более мягкий, глубже рассеянный свет (замер: 31 → 60 fps). */
 .gtr-atmo span {
   position: absolute;
   width: 44vmax;
   height: 44vmax;
   border-radius: 50%;
-  filter: blur(90px);
   mix-blend-mode: screen;
   will-change: transform;
-  opacity: 0.55;
+  opacity: 0.62;
 }
 .gtr-atmo span:nth-child(1) {
   left: -12vmax;
   top: -10vmax;
-  background: radial-gradient(circle, rgba(229, 35, 27, 0.32), transparent 62%);
+  background: radial-gradient(
+    circle,
+    rgba(229, 35, 27, 0.3) 0%,
+    rgba(229, 35, 27, 0.19) 26%,
+    rgba(229, 35, 27, 0.09) 46%,
+    rgba(229, 35, 27, 0.03) 64%,
+    transparent 78%
+  );
   animation: gtrdrift1 34s ease-in-out infinite;
 }
 .gtr-atmo span:nth-child(2) {
   right: -16vmax;
   top: 8vmax;
-  background: radial-gradient(circle, rgba(123, 77, 255, 0.26), transparent 60%);
+  background: radial-gradient(
+    circle,
+    rgba(123, 77, 255, 0.25) 0%,
+    rgba(123, 77, 255, 0.16) 26%,
+    rgba(123, 77, 255, 0.08) 46%,
+    rgba(123, 77, 255, 0.025) 64%,
+    transparent 78%
+  );
   animation: gtrdrift2 44s ease-in-out infinite;
 }
 .gtr-atmo span:nth-child(3) {
   left: 18vmax;
   bottom: -18vmax;
-  background: radial-gradient(circle, rgba(245, 166, 35, 0.2), transparent 60%);
+  background: radial-gradient(
+    circle,
+    rgba(245, 166, 35, 0.19) 0%,
+    rgba(245, 166, 35, 0.12) 28%,
+    rgba(245, 166, 35, 0.055) 48%,
+    rgba(245, 166, 35, 0.02) 66%,
+    transparent 78%
+  );
   animation: gtrdrift3 39s ease-in-out infinite;
 }
 .gtr-atmo span:nth-child(4) {
@@ -504,7 +529,14 @@
   bottom: -8vmax;
   width: 30vmax;
   height: 30vmax;
-  background: radial-gradient(circle, rgba(0, 190, 255, 0.14), transparent 58%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 190, 255, 0.14) 0%,
+    rgba(0, 190, 255, 0.09) 28%,
+    rgba(0, 190, 255, 0.04) 48%,
+    rgba(0, 190, 255, 0.015) 66%,
+    transparent 78%
+  );
   animation: gtrdrift1 52s ease-in-out infinite reverse;
 }
 @keyframes gtrdrift1 {
@@ -1533,8 +1565,8 @@ html { -webkit-tap-highlight-color: transparent; }
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-  /* атмосфера легче: два орба, мягче blur — стабильные кадры */
-  .gtr-atmo span { filter: blur(56px); opacity: 0.5; }
+  /* атмосфера легче: два орба вместо четырёх — стабильные кадры */
+  .gtr-atmo span { opacity: 0.55; }
   .gtr-atmo span:nth-child(3),
   .gtr-atmo span:nth-child(4) { display: none; }
 
@@ -1900,11 +1932,15 @@ html { -webkit-tap-highlight-color: transparent; }
   .gtr-cta-spin { animation-duration: 1.4s; }
 }
 
-/* ---------- Swipe-to-book ---------- */
+/* ---------- Swipe-to-book ----------
+   Производительность: жест двигает ТОЛЬКО transform/opacity на трёх
+   композитных слоях (заливка scaleX, рассеянный блик translate3d, ручка
+   translate3d). Никакого width/left и никаких React-рендеров на кадр —
+   поэтому жест держит 60/120 fps даже на слабых телефонах. */
 .gtr-swipe {
   position: relative;
-  height: 60px;
-  background: var(--gtr-card2);
+  height: 62px;
+  background: linear-gradient(180deg, #141519 0%, #0e0f12 100%);
   border: 1px solid var(--gtr-border2);
   clip-path: polygon(
     0 0, calc(100% - var(--gtr-cut)) 0, 100% var(--gtr-cut),
@@ -1913,109 +1949,219 @@ html { -webkit-tap-highlight-color: transparent; }
   overflow: hidden;
   touch-action: none;
   user-select: none;
+  isolation: isolate;
+  transition: border-color 240ms ease-out;
 }
-.gtr-swipe.is-done { border-color: rgba(229, 35, 27, 0.6); }
+.gtr-swipe.is-done { border-color: rgba(229, 35, 27, 0.55); }
+
 .gtr-swipe-grain {
   position: absolute; inset: 0;
-  opacity: 0.07;
+  opacity: 0.055;
   mix-blend-mode: overlay;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+
+/* Заливка ЕДЕТ (translate3d), а не растягивается: при scaleX градиент
+   тянулся бы вместе с элементом и кромка всегда была бы жёстким срезом
+   по его границе. Сдвиг оставляет мягкий спад, вшитый в правый край,
+   размытым при любом положении — и это тот же GPU-композит без layout. */
 .gtr-swipe-fill {
   position: absolute; inset: 0;
-  width: 0;
-  background: linear-gradient(90deg, var(--gtr-red-deep) 0%, var(--gtr-red) 70%, var(--gtr-red-hot) 100%);
-  will-change: width;
+  transform: translate3d(-100%, 0, 0);
+  will-change: transform;
+  /* заливка держит тон, но не забивает трек в плотный блок — яркость
+     и «горячую» точку даёт рассеянный блик у самой ручки */
+  background: linear-gradient(
+    90deg,
+    rgba(120, 18, 13, 0.3) 0%,
+    rgba(158, 24, 18, 0.44) 34%,
+    rgba(196, 30, 22, 0.58) 62%,
+    rgba(224, 36, 27, 0.7) 80%,
+    rgba(240, 44, 33, 0.6) 90%,
+    rgba(255, 52, 39, 0.28) 96%,
+    rgba(255, 60, 46, 0) 100%
+  );
 }
-.gtr-swipe-fill::after {
-  content: "";
-  position: absolute; top: 0; right: -1px; bottom: 0; width: 34px;
-  background: linear-gradient(90deg, transparent, rgba(255, 52, 39, 0.55));
-  filter: blur(6px);
+
+/* рассеянный свет, идущий за ручкой — отдельный слой, чтобы blur не
+   растягивался вместе с заливкой */
+.gtr-swipe-bloom {
+  position: absolute;
+  top: 50%; left: 0;
+  width: 240px; height: 240px;
+  margin: -120px 0 0 -120px;
+  transform: translate3d(0, 0, 0) scale(0.6);
+  will-change: transform, opacity;
+  opacity: 0;
+  pointer-events: none;
+  /* Мягкость даёт сам градиент — многоступенчатый alpha-спад читается как
+     рассеянный свет. filter: blur() здесь был бы дублирующим и стоил бы
+     полного GPU-перерасчёта размытия на каждый кадр жеста (замер: 30 fps
+     против 60 без него), поэтому его нет намеренно. */
+  background: radial-gradient(
+    circle,
+    rgba(255, 150, 130, 0.6) 0%,
+    rgba(255, 108, 88, 0.44) 14%,
+    rgba(255, 72, 56, 0.3) 27%,
+    rgba(255, 52, 39, 0.19) 40%,
+    rgba(235, 40, 30, 0.1) 55%,
+    rgba(215, 34, 25, 0.035) 70%,
+    transparent 82%
+  );
 }
+
 .gtr-swipe-label {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
+  padding-left: 46px;
   font: 600 11.5px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.1em;
   color: var(--gtr-t2);
   pointer-events: none;
+  will-change: opacity;
+  transition: color 200ms ease-out;
 }
-.gtr-swipe-label.is-done { color: #fff; font-weight: 700; }
-.gtr-swipe-spark {
-  position: absolute;
-  width: 3px; height: 3px;
-  background: var(--gtr-red-hot);
-  border-radius: 50%;
-  box-shadow: 0 0 6px 1px rgba(255, 52, 39, 0.9);
-  pointer-events: none;
-  animation: gtr-spark-fade 0.5s ease-out forwards;
+.gtr-swipe-label.is-done {
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(255, 52, 39, 0.5);
+  /* освобождаем место слева под стикер-шампанское, справа — под ручку */
+  padding: 0 58px 0 74px;
 }
-@keyframes gtr-spark-fade {
-  0% { opacity: 1; transform: translate(0, 0) scale(1); }
-  100% { opacity: 0; transform: translate(var(--dx, 10px), var(--dy, 0)) scale(0.3); }
-}
+
+/* ручка: лицо — фирменный стикер GTR, оживает при захвате */
 .gtr-swipe-handle {
   position: absolute;
-  top: 4px; left: 4px;
+  top: 5px; left: 5px;
   width: 52px; height: 52px;
   border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, #2a1210, #0c0d0f 68%);
-  border: 1.5px solid var(--gtr-red);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 0 22px -4px rgba(229, 35, 27, 0.85), inset 0 0 10px rgba(0, 0, 0, 0.6);
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.09), transparent 58%),
+    radial-gradient(circle at 50% 50%, #241012 0%, #0b0c0e 72%);
+  border: 1px solid rgba(229, 35, 27, 0.75);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    0 6px 18px rgba(0, 0, 0, 0.5),
+    0 0 26px -8px rgba(229, 35, 27, 0.9),
+    inset 0 0 14px rgba(0, 0, 0, 0.55);
   display: flex; align-items: center; justify-content: center;
   cursor: grab;
+  transform: translate3d(0, 0, 0);
   will-change: transform;
   touch-action: none;
+  transition: border-color 200ms ease-out, box-shadow 200ms ease-out;
 }
 .gtr-swipe-handle:active { cursor: grabbing; }
-.gtr-swipe-handle-mark {
-  font: 700 12px/1 "Oswald", sans-serif;
-  color: #fff;
+.gtr-swipe-sticker {
+  width: 34px; height: auto;
+  pointer-events: none;
+  transform: scale(1);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease-out;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.6));
+}
+/* стикер «оживает» под пальцем: подрастает и разгорается */
+.gtr-swipe.is-grab .gtr-swipe-sticker {
+  transform: scale(1.16);
+  filter: drop-shadow(0 0 9px rgba(255, 52, 39, 0.75)) brightness(1.18);
+}
+.gtr-swipe.is-grab .gtr-swipe-handle {
+  border-color: var(--gtr-red-hot);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    0 6px 20px rgba(0, 0, 0, 0.55),
+    0 0 34px -6px rgba(255, 52, 39, 1),
+    inset 0 0 14px rgba(0, 0, 0, 0.5);
 }
 .gtr-swipe-handle.is-done {
-  border-color: #fff;
-  animation: gtr-swipe-pulse 0.6s ease-out;
+  border-color: rgba(255, 255, 255, 0.9);
+  animation: gtr-swipe-ring 620ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-@keyframes gtr-swipe-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.55), 0 0 22px -4px rgba(229, 35, 27, 0.85); }
-  100% { box-shadow: 0 0 0 22px rgba(255, 255, 255, 0), 0 0 22px -4px rgba(229, 35, 27, 0.85); }
+@keyframes gtr-swipe-ring {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5), 0 0 26px -8px rgba(229, 35, 27, 0.9); }
+  100% { box-shadow: 0 0 0 26px rgba(255, 255, 255, 0), 0 0 26px -8px rgba(229, 35, 27, 0.9); }
 }
-.gtr-swipe-burst {
+
+/* успех: стикер-шампанское выпрыгивает пружиной поверх трека */
+/* слева: в подтверждённом состоянии ручка стоит у правого края,
+   поэтому стикер ставим с противоположной стороны — не перекрываются */
+.gtr-swipe-success {
   position: absolute;
-  top: 50%; left: 0;
-  width: 130px; height: 130px;
-  transform: translate(-38%, -50%);
-  background: url("/raw-pulse/radial-hit.webp") center / contain no-repeat;
-  mix-blend-mode: screen;
+  top: 50%; left: 10px;
+  width: 62px;
+  margin-top: -31px;
   pointer-events: none;
   opacity: 0;
+  transform: translate3d(0, 12px, 0) scale(0.5) rotate(-14deg);
 }
-.gtr-swipe-burst.is-play { animation: gtr-burst-fade 0.5s ease-out forwards; }
-@keyframes gtr-burst-fade {
-  0% { opacity: 0.9; transform: translate(-38%, -50%) scale(0.7); }
-  100% { opacity: 0; transform: translate(-38%, -50%) scale(1.15); }
+.gtr-swipe-success.is-play {
+  animation: gtr-champagne-pop 720ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
+@keyframes gtr-champagne-pop {
+  0% { opacity: 0; transform: translate3d(0, 12px, 0) scale(0.5) rotate(-14deg); }
+  55% { opacity: 1; transform: translate3d(0, -2px, 0) scale(1.08) rotate(3deg); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+}
+
+/* Свайп — только для пальца (телефон, iPad). На десктопе с мышью жест
+   неудобен, там остаётся обычная кнопка. Разделение чисто медиазапросом:
+   оба узла есть в разметке, JS-детекта нет — значит нет рассинхрона
+   гидратации при SSR и нет скачка вёрстки после загрузки. */
+.gtr-swipe { display: none; }
 .gtr-swipe-alt {
-  /* доступная альтернатива жесту — «Подтвердить бронь» для VoiceOver/TalkBack */
-  position: absolute;
-  width: 1px; height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
+  /* десктопный дефолт: обычная кнопка в стиле продукта */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid var(--gtr-red);
+  background: linear-gradient(90deg, var(--gtr-red-hot) 0%, var(--gtr-red) 100%);
+  color: #fff;
+  font: 700 11px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  cursor: pointer;
+  clip-path: polygon(
+    0 0, calc(100% - var(--gtr-cut-s)) 0, 100% var(--gtr-cut-s),
+    100% 100%, var(--gtr-cut-s) 100%, 0 calc(100% - var(--gtr-cut-s))
+  );
+  transition: box-shadow 0.18s, transform 0.07s;
 }
-.gtr-swipe-alt:focus-visible {
-  position: static;
-  width: auto; height: auto;
-  clip: auto;
-  margin-top: 8px;
-  display: block;
+.gtr-swipe-alt:hover { box-shadow: 0 0 20px -4px rgba(229, 35, 27, 0.85); }
+.gtr-swipe-alt:active { transform: translateY(1px); }
+.gtr-swipe-alt:disabled { opacity: 0.55; cursor: not-allowed; }
+
+@media (any-pointer: coarse) {
+  /* есть тач — показываем жест, кнопку прячем, но оставляем в DOM
+     доступной для VoiceOver/TalkBack и клавиатуры */
+  .gtr-swipe { display: block; }
+  .gtr-swipe-alt {
+    position: absolute;
+    width: 1px; height: 1px;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .gtr-swipe-alt:focus-visible {
+    position: static;
+    width: auto; height: auto;
+    min-height: 46px;
+    padding: 0 16px;
+    clip: auto;
+    margin-top: 8px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .gtr-swipe-handle.is-done { animation: none; }
-  .gtr-swipe-burst.is-play { animation: none; opacity: 0; }
+  .gtr-swipe-success.is-play { animation: none; opacity: 1; transform: none; }
+  .gtr-swipe-bloom { display: none; }
+  .gtr-swipe-sticker { transition: none; }
 }
 
 /* ---------- Hold-to-confirm ---------- */

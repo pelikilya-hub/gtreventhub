@@ -16,35 +16,6 @@ const vibrate = (pattern: number | number[]) => {
 const reducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-// критически демпфированная пружина через интеграцию скорости на каждый
-// кадр — настоящая физика, не canned CSS-переход
-function springTo(
-  from: number,
-  to: number,
-  onUpdate: (v: number) => void,
-  onDone?: () => void,
-): () => void {
-  let pos = from;
-  let velocity = 0;
-  let raf = 0;
-  const reduced = reducedMotion();
-  const stiffness = reduced ? 0.4 : 0.22;
-  const damping = reduced ? 0.9 : 0.74;
-  function step() {
-    const force = (to - pos) * stiffness;
-    velocity = (velocity + force) * damping;
-    pos += velocity;
-    onUpdate(pos);
-    if (Math.abs(to - pos) > 0.4 || Math.abs(velocity) > 0.4) {
-      raf = requestAnimationFrame(step);
-    } else {
-      onUpdate(to);
-      onDone?.();
-    }
-  }
-  raf = requestAnimationFrame(step);
-  return () => cancelAnimationFrame(raf);
-}
 
 // ---------- CTA: крупные транзакционные кнопки ----------
 
@@ -99,17 +70,27 @@ export function CtaButton({
 }
 
 // ---------- Swipe-to-book ----------
+// Производительность: во время жеста НЕ дёргаем React вообще — состояние
+// живёт в ref, а в DOM пишутся только transform/opacity трёх композитных
+// слоёв за один rAF-кадр. Раньше setState на каждый pointermove давал
+// перерисовку React 60 раз в секунду и анимацию через width (пересчёт
+// лейаута) — теперь ни того, ни другого.
 
 type SwipeStatus = "idle" | "sending" | "done";
 
+const HANDLE = 52;
+const THRESHOLD = 0.72; // порог подтверждения по спеке RAW PULSE 9.1
+
 export function SwipeToBook({
   label = "ПРОВЕДИ ДЛЯ БРОНИ →",
+  desktopLabel = "ЗАБРОНИРОВАТЬ СТОЛ",
   sendingLabel = "ОТПРАВЛЯЕМ…",
   doneLabel = "✓ СТОЛ ЗАБРОНИРОВАН",
   onConfirm,
   disabled,
 }: {
   label?: string;
+  desktopLabel?: string;
   sendingLabel?: string;
   doneLabel?: string;
   onConfirm: () => Promise<{ ok: boolean; reason?: string }>;
@@ -118,80 +99,118 @@ export function SwipeToBook({
   const trackRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<HTMLDivElement>(null);
-  const stopSpringRef = useRef<() => void>(() => {});
+  const bloomRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLDivElement>(null);
+
   const posRef = useRef(0);
-  const maxXRef = useRef(0);
+  const maxXRef = useRef(1);
   const draggingRef = useRef(false);
-  const lastSparkT = useRef(0);
-  const HANDLE = 52;
+  const startXRef = useRef(0);
+  const startPosRef = useRef(0);
+  const hapticStage = useRef(0);
+  const rafRef = useRef(0);
+  const pendingRef = useRef<number | null>(null);
+  const springRef = useRef(0);
 
   const [status, setStatus] = useState<SwipeStatus>("idle");
   const [error, setError] = useState("");
-  const [burstKey, setBurstKey] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const [popKey, setPopKey] = useState(0);
 
   useEffect(() => {
     const measure = () => {
-      if (trackRef.current) maxXRef.current = trackRef.current.clientWidth - HANDLE - 8;
+      const el = trackRef.current;
+      if (el) maxXRef.current = Math.max(1, el.clientWidth - HANDLE - 10);
     };
     measure();
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+    return () => {
+      window.removeEventListener("resize", measure);
+      cancelAnimationFrame(rafRef.current);
+      cancelAnimationFrame(springRef.current);
+    };
   }, []);
 
-  const paint = (p: number) => {
-    posRef.current = p;
-    if (handleRef.current) handleRef.current.style.transform = `translateX(${p}px)`;
-    if (fillRef.current) fillRef.current.style.width = `${p + HANDLE / 2}px`;
-    const max = maxXRef.current || 1;
-    setProgress(Math.max(0, Math.min(1, p / max)));
+  // единственная точка записи в DOM — только композитные свойства
+  const commit = (p: number) => {
+    const max = maxXRef.current;
+    const k = Math.max(0, Math.min(1, p / max));
+    if (handleRef.current) handleRef.current.style.transform = `translate3d(${p}px,0,0)`;
+    // заливка едет, а не тянется — мягкая кромка не деформируется
+    if (fillRef.current) {
+      const shown = (p + HANDLE / 2) / (max + HANDLE);
+      fillRef.current.style.transform = `translate3d(${(shown - 1) * 100}%,0,0)`;
+    }
+    if (bloomRef.current) {
+      bloomRef.current.style.transform = `translate3d(${p + HANDLE / 2}px,0,0) scale(${0.6 + k * 0.75})`;
+      bloomRef.current.style.opacity = `${Math.min(1, k * 1.6)}`;
+    }
+    if (labelRef.current) labelRef.current.style.opacity = `${Math.max(0, 1 - k * 1.7)}`;
   };
 
-  const spawnSpark = (x: number, y: number) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const s = document.createElement("div");
-    s.className = "gtr-swipe-spark";
-    const dy = (Math.random() - 0.5) * 16;
-    s.style.setProperty("--dx", `${8 + Math.random() * 10}px`);
-    s.style.setProperty("--dy", `${dy}px`);
-    s.style.left = `${x}px`;
-    s.style.top = `${y}px`;
-    track.appendChild(s);
-    s.addEventListener("animationend", () => s.remove());
+  // все записи собираются в один кадр — несколько pointermove подряд
+  // не приводят к нескольким layout/paint
+  const schedule = (p: number) => {
+    posRef.current = p;
+    pendingRef.current = p;
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = 0;
+      if (pendingRef.current !== null) commit(pendingRef.current);
+      pendingRef.current = null;
+    });
+  };
+
+  const springTo = (to: number, onDone?: () => void) => {
+    cancelAnimationFrame(springRef.current);
+    let velocity = 0;
+    const reduced = reducedMotion();
+    const stiffness = reduced ? 0.42 : 0.26;
+    const damping = reduced ? 0.9 : 0.72;
+    const step = () => {
+      const force = (to - posRef.current) * stiffness;
+      velocity = (velocity + force) * damping;
+      posRef.current += velocity;
+      commit(posRef.current);
+      if (Math.abs(to - posRef.current) > 0.4 || Math.abs(velocity) > 0.4) {
+        springRef.current = requestAnimationFrame(step);
+      } else {
+        posRef.current = to;
+        commit(to);
+        onDone?.();
+      }
+    };
+    springRef.current = requestAnimationFrame(step);
+  };
+
+  const setGrab = (on: boolean) => {
+    trackRef.current?.classList.toggle("is-grab", on);
   };
 
   const onDown = (e: React.PointerEvent) => {
     if (disabled || status !== "idle") return;
     draggingRef.current = true;
+    hapticStage.current = 0;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     startXRef.current = e.clientX;
     startPosRef.current = posRef.current;
-    stopSpringRef.current();
+    cancelAnimationFrame(springRef.current);
+    setGrab(true);
+    vibrate(5);
   };
-  const startXRef = useRef(0);
-  const startPosRef = useRef(0);
-  const hapticStage = useRef(0);
 
   const onMove = (e: React.PointerEvent) => {
     if (!draggingRef.current) return;
     const max = maxXRef.current;
-    const dx = e.clientX - startXRef.current;
-    const p = Math.min(max, Math.max(0, startPosRef.current + dx));
-    paint(p);
-    const prog = max > 0 ? p / max : 0;
-    if (prog >= 0.5 && hapticStage.current < 1) {
+    const p = Math.min(max, Math.max(0, startPosRef.current + (e.clientX - startXRef.current)));
+    schedule(p);
+    const k = p / max;
+    if (k >= 0.5 && hapticStage.current < 1) {
       hapticStage.current = 1;
       vibrate(8);
     }
-    if (prog >= 0.72 && hapticStage.current < 2) {
+    if (k >= THRESHOLD && hapticStage.current < 2) {
       hapticStage.current = 2;
       vibrate(16);
-    }
-    const now = performance.now();
-    if (!reducedMotion() && prog > 0.12 && now - lastSparkT.current > 45) {
-      lastSparkT.current = now;
-      spawnSpark(p + HANDLE - 6, HANDLE / 2 - 1.5);
     }
   };
 
@@ -199,47 +218,60 @@ export function SwipeToBook({
     if (!draggingRef.current) return;
     draggingRef.current = false;
     hapticStage.current = 0;
-    const max = maxXRef.current;
-    const prog = max > 0 ? posRef.current / max : 0;
-    if (prog < 0.72) {
-      stopSpringRef.current = springTo(posRef.current, 0, paint);
+    setGrab(false);
+    const k = posRef.current / maxXRef.current;
+    if (k < THRESHOLD) {
+      springTo(0);
       return;
     }
-    // порог пройден — держим puck в конце и ждём ответ сервера, повторный
-    // жест заблокирован до ответа (спека раздел 9.1)
-    stopSpringRef.current = springTo(posRef.current, max, paint);
+    springTo(maxXRef.current);
+    await send();
+  };
+
+  const send = async () => {
     setStatus("sending");
     setError("");
     try {
       const r = await onConfirm();
       if (r.ok) {
         vibrate([12, 40, 18]);
-        setBurstKey((k) => k + 1);
+        // подпись гасилась инлайново во время жеста — возвращаем её,
+        // иначе «СТОЛ ЗАБРОНИРОВАН» останется невидимым
+        if (labelRef.current) labelRef.current.style.opacity = "1";
+        setPopKey((n) => n + 1);
         setStatus("done");
       } else {
         setError(r.reason || "Не удалось забронировать — попробуйте ещё раз");
         setStatus("idle");
-        stopSpringRef.current = springTo(posRef.current, 0, paint);
+        springTo(0);
       }
     } catch {
       setError("Сервер недоступен — попробуйте ещё раз");
       setStatus("idle");
-      stopSpringRef.current = springTo(posRef.current, 0, paint);
+      springTo(0);
     }
   };
 
-  const currentLabel = status === "done" ? doneLabel : status === "sending" ? sendingLabel : label;
+  const shownLabel = status === "done" ? doneLabel : status === "sending" ? sendingLabel : label;
 
   return (
     <div>
-      <div
-        ref={trackRef}
-        className={`gtr-swipe${status === "done" ? " is-done" : ""}`}
-        role="presentation"
-      >
-        <div className="gtr-swipe-grain" />
+      <div ref={trackRef} className={`gtr-swipe${status === "done" ? " is-done" : ""}`}>
         <div ref={fillRef} className="gtr-swipe-fill" />
-        <div className={`gtr-swipe-label${status === "done" ? " is-done" : ""}`}>{currentLabel}</div>
+        <div ref={bloomRef} className="gtr-swipe-bloom" aria-hidden />
+        <div className="gtr-swipe-grain" />
+        <div ref={labelRef} className={`gtr-swipe-label${status === "done" ? " is-done" : ""}`}>
+          {shownLabel}
+        </div>
+        {status === "done" ? (
+          <img
+            key={popKey}
+            className="gtr-swipe-success is-play"
+            src="/raw-pulse/success-champagne.webp"
+            alt=""
+            aria-hidden
+          />
+        ) : null}
         <div
           ref={handleRef}
           className={`gtr-swipe-handle${status === "done" ? " is-done" : ""}`}
@@ -247,33 +279,20 @@ export function SwipeToBook({
           onPointerMove={onMove}
           onPointerUp={onUp}
           onPointerCancel={onUp}
-          role="button"
-          tabIndex={-1}
           aria-hidden
         >
-          <span className="gtr-swipe-handle-mark">GTR</span>
+          <img className="gtr-swipe-sticker" src="/raw-pulse/handle-logo.webp" alt="" />
         </div>
-        <div key={burstKey} className={`gtr-swipe-burst${burstKey ? " is-play" : ""}`} aria-hidden />
       </div>
-      {/* доступная альтернатива для VoiceOver/TalkBack и клавиатуры */}
+      {/* На десктопе это обычная кнопка (жест мышью неудобен), на тач-
+          устройствах — скрытая доступная альтернатива для VoiceOver/
+          TalkBack и клавиатуры. Переключает медиазапрос, см. gtr.css */}
       <button
         className="gtr-swipe-alt"
         disabled={disabled || status !== "idle"}
-        aria-label="Подтвердить бронь стола"
-        onClick={async () => {
-          setStatus("sending");
-          setError("");
-          const r = await onConfirm();
-          if (r.ok) {
-            vibrate([12, 40, 18]);
-            setStatus("done");
-          } else {
-            setError(r.reason || "Не удалось забронировать — попробуйте ещё раз");
-            setStatus("idle");
-          }
-        }}
+        onClick={send}
       >
-        Подтвердить бронь
+        {status === "done" ? doneLabel : status === "sending" ? sendingLabel : desktopLabel}
       </button>
       {error ? (
         <div
@@ -283,9 +302,6 @@ export function SwipeToBook({
           {error}
         </div>
       ) : null}
-      <span aria-live="polite" className="gtr-swipe-alt">
-        {status === "sending" ? `${Math.round(progress * 100)}%` : ""}
-      </span>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 {
  "meta": {
   "updated": "2026-08-15",
-  "total": 105,
+  "total": 106,
   "spaces": 88,
   "contacts": 22
  },
@@ -3188,6 +3188,33 @@
    "music": "Restobar-сеты; DJ/live по вечерам",
    "address": "277, 1 Srisoonthorn Rd, Choeng Thale, Phuket 83110",
    "source": "https://fireandsmokephuket.com/"
+  },
+  {
+   "catering": "Yes",
+   "phone": "",
+   "email": "",
+   "website": "https://andaman-riviera.com/eng",
+   "social": "https://www.facebook.com/phuket.andaman.riviera/",
+   "sourceType": "nightlife-sweep-2026",
+   "confidence": "medium",
+   "status": "active",
+   "verified": false,
+   "notes": "Кондо-отель под управлением Radisson Individuals. Два конкурирующих официальных домена (andaman.city и andaman-riviera.com) — выяснить канонический. Прямой телефон/email не найдены, выделенный Instagram-аккаунт не подтверждён (только гео-метка). Уточнить у ресепшн/букинга условия аренды ресторанов и рутфопа под частные события.",
+   "readiness": "",
+   "id": "VEN-0106",
+   "name": "Andaman Riviera",
+   "type": "Condo-hotel / рутфоп и рестораны",
+   "tag": "Rooftop",
+   "area": "Choeng Thale / Bang Tao",
+   "cluster": "Bang Tao / Laguna",
+   "district": "Thalang",
+   "concept": "Кондо-отель Andaman Riviera (a member of Radisson Individuals) в Чёнг Тале рядом с Банг Тао: рутфоп с инфинити-бассейном и лаунж-баром на закат, 2 ресторана/бара для гостей и внешних посетителей.",
+   "events": "Санкат-лаунж на рутфопе; ужины; частные мероприятия в ресторанах",
+   "facilities": "Рутфоп-инфинити-бассейн (~32 м); лаунж-бар; 2 ресторана/бара; фитнес; спа",
+   "capacity": "",
+   "music": "Lounge / атмосферная — событийную политику уточнить",
+   "address": "Soi Choeng Thale 14, Choeng Thale, Phuket 83110",
+   "source": "https://www.hospitalitynet.org/news/4124875.html"
   }
  ],
  "spaces": [

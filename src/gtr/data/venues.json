@@ -1,7 +1,7 @@
 {
  "meta": {
-  "updated": "2026-08-06",
-  "total": 104,
+  "updated": "2026-08-15",
+  "total": 105,
   "spaces": 88,
   "contacts": 22
  },
@@ -3161,6 +3161,33 @@
    "music": "Jazz; live",
    "address": "Phuket Old Town, Phuket",
    "source": "https://www.phuket.com/phuket-magazine/phuket-live-music-bars.htm"
+  },
+  {
+   "catering": "Yes",
+   "phone": "+66 98 062 4000",
+   "email": "",
+   "website": "https://fireandsmokephuket.com/",
+   "social": "https://www.instagram.com/lava_restobar/",
+   "sourceType": "nightlife-sweep-2026",
+   "confidence": "medium",
+   "status": "active",
+   "verified": false,
+   "notes": "2026 ребрендинг \"Fire & Smoke Phuket\" (стейкхаус/смокхаус) — тот же адрес и оператор, теперь продвигается как LAVA restobar & more с тематическими DJ/музыкальными неделями. Сверить вывеску на месте перед контактом. На Яндекс.Картах не найдено под этим названием — проверить.",
+   "readiness": "",
+   "id": "VEN-0105",
+   "name": "Lava Restobar",
+   "type": "Restobar / smokehouse",
+   "tag": "Bar / Lounge",
+   "area": "Bang Tao / Cherngtalay",
+   "cluster": "Bang Tao / Laguna",
+   "district": "Thalang",
+   "concept": "Рестобар и смокхаус в Банг Тао с полным баром и вечерними DJ/live-сетами; ребренд многолетнего Fire & Smoke Phuket.",
+   "events": "DJ-вечера; тематические недели; live-музыка",
+   "facilities": "Опен-китчен офсет-смокер (8–20ч томления мяса); полный бар; зал и летняя терраса; парковка",
+   "capacity": "",
+   "music": "Restobar-сеты; DJ/live по вечерам",
+   "address": "277, 1 Srisoonthorn Rd, Choeng Thale, Phuket 83110",
+   "source": "https://fireandsmokephuket.com/"
   }
  ],
  "spaces": [

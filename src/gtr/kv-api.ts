@@ -547,8 +547,10 @@ export const tgActivateFn = createServerFn({ method: "POST" }).handler(async () 
   const hook = await tgApi("setWebhook", {
     url: `${origin}/api/tg`,
     secret_token: await tgWebhookSecret(),
-    // chat_member — вступления в канал по инвайт-ссылкам (конкурс инвайтинга)
-    allowed_updates: ["message", "callback_query", "chat_member"],
+    // chat_member — вступления в канал по инвайт-ссылкам (конкурс);
+    // channel_post — привязка служебного канала /ops;
+    // my_chat_member — учёт групп, куда добавили бота (реестр для коллабораций)
+    allowed_updates: ["message", "callback_query", "chat_member", "channel_post", "my_chat_member"],
   });
   if (!hook.ok) return { ok: false as const, error: `setWebhook: ${hook.description}` };
   await ns.put("tg:bot", meBot.result.username);

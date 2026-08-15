@@ -67,6 +67,14 @@ type TgUpdate = {
     new_chat_member: { status: string; user: { id: number; first_name?: string } };
     invite_link?: { invite_link: string; name?: string };
   };
+  // статус самого бота: добавили/убрали из группы — ведём реестр чатов,
+  // куда BOSS добавил бота (источник админов для коллабораций)
+  my_chat_member?: {
+    chat: { id: number; title?: string; type: string; username?: string };
+    from?: { id: number; first_name?: string; username?: string };
+    old_chat_member: { status: string };
+    new_chat_member: { status: string };
+  };
 };
 
 const reply = (chatId: number, text: string, markup?: unknown) =>
@@ -374,6 +382,38 @@ export const Route = createFileRoute("/api/tg")({
               text: "✅ <b>Служебный канал GTR OPS привязан.</b>\nСюда будут приходить метрики и технические уведомления. Публичный контент сюда не попадает, служебный — не попадает в комьюнити.",
             });
             return Response.json({ ok: true, ops: "bound" });
+          }
+          return Response.json({ ok: true });
+        }
+
+        // ---------- реестр групп бота: добавили/убрали из чата ----------
+        // BOSS добавляет бота в свои группы — мы запоминаем чат и можем
+        // вытащить его админов для коллабораций. Служебное — только BOSS-контур.
+        if (up.my_chat_member) {
+          const mm = up.my_chat_member;
+          const nowIn = ["member", "administrator"].includes(mm.new_chat_member.status);
+          const out = ["left", "kicked"].includes(mm.new_chat_member.status);
+          if (["group", "supergroup", "channel"].includes(mm.chat.type)) {
+            const { notifyBossTg } = await import("../gtr/kv-api");
+            if (nowIn) {
+              await ns.put(
+                `knownchat:${mm.chat.id}`,
+                JSON.stringify({
+                  id: mm.chat.id,
+                  title: mm.chat.title || "",
+                  type: mm.chat.type,
+                  username: mm.chat.username || "",
+                  status: mm.new_chat_member.status,
+                  by: mm.from?.username || mm.from?.first_name || "",
+                  ts: Date.now(),
+                }),
+              );
+              notifyBossTg(
+                ns,
+                `🤝 Бот добавлен в «${tgEsc(mm.chat.title || String(mm.chat.id))}» (${mm.new_chat_member.status}). Чат в реестре коллабораций.`,
+              ).catch(() => {});
+            }
+            if (out) await ns.delete(`knownchat:${mm.chat.id}`);
           }
           return Response.json({ ok: true });
         }

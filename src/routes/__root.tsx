@@ -13,7 +13,14 @@ export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // viewport-fit=cover обязателен: без него iOS отдаёт env(safe-area-inset-*)
+      // равным нулю, и весь учёт чёлки, Dynamic Island и полоски home в CSS
+      // не работает — в установленном PWA (status-bar-style black-translucent)
+      // контент уезжает под статус-бар.
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, viewport-fit=cover",
+      },
       { title: "GTR Event — операционная платформа площадок Пхукета" },
       {
         name: "description",

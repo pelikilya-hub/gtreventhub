@@ -8,6 +8,7 @@ import {
   NAV_ARTIST,
   NAV_NET,
   NAV_PLATFORM_VENUE,
+  NAV_TABS,
   NAV_VENUE,
   NAV_VISITOR,
   STATUS_COLOR,
@@ -414,6 +415,31 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
 
       {/* ---------- GTR SOUND: плеер в футере мобильной версии ---------- */}
       <GtrPlayerBar />
+
+      {/* ---------- нижняя навигация (телефон и iPad) ---------- */}
+      <nav className="gtr-tabbar" aria-label={t("Основные разделы")}>
+        {NAV_TABS.map(([id, label, d]) => {
+          const on = screen === id;
+          const center = !d;
+          return (
+            <button
+              key={id}
+              className={`gtr-tab${center ? " gtr-tab-center" : ""}${on ? " on" : ""}`}
+              aria-current={on ? "page" : undefined}
+              onClick={() => go(id)}
+            >
+              {center ? (
+                <span className="gtr-tab-core">
+                  <img src="/raw-pulse/handle-logo.webp" alt="" aria-hidden />
+                </span>
+              ) : (
+                <Icon d={d} size={21} />
+              )}
+              <span className="gtr-tab-label">{t(label)}</span>
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }

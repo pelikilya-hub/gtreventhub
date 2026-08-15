@@ -2,7 +2,7 @@
 // в KV (venueevents:<venueId>). Запуск — cron воркера каждые 6 часов или
 // кнопкой в паспорте площадки. Постеры — og:image событийных страниц.
 import artistsRaw from "./data/artists.json";
-import type { KvNs } from "./kv-ns";
+import { kvGetJson, type KvNs } from "./kv-ns";
 
 export type VenueAfishaEvent = {
   id: string;
@@ -391,11 +391,19 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
     }
   }
   for (const [vid, events] of byVid) {
-    counts[vid] = events.length;
-    await cachePosters(ns, vid, events, posterBudget);
+    // события, добавленные командой вручную, переживают пересборку
+    const prev = await kvGetJson<VenueAfisha>(ns, `venueevents:${vid}`);
+    const manual = (prev?.events ?? []).filter(
+      (e) =>
+        e.source === "manual" &&
+        !events.some((n) => n.dateIso === e.dateIso && n.title.toLowerCase() === e.title.toLowerCase()),
+    );
+    const all = dedupe([...events, ...manual]).sort((a, b) => a.dateIso.localeCompare(b.dateIso));
+    counts[vid] = all.length;
+    await cachePosters(ns, vid, all, posterBudget);
     await ns.put(
       `venueevents:${vid}`,
-      JSON.stringify({ events, syncedAt: Date.now(), source: events[0]?.source ?? "" } satisfies VenueAfisha),
+      JSON.stringify({ events: all, syncedAt: Date.now(), source: all[0]?.source ?? "" } satisfies VenueAfisha),
     );
   }
   return counts;

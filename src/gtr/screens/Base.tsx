@@ -21,6 +21,7 @@ import { Card, Chip, Eyebrow, Field, tint, TrashTitle } from "../ui";
 import { GtrLightbox } from "../lightbox";
 import {
   createVenueLinkFn,
+  afishaAddFn,
   listAfishaFn,
   styleProfileFn,
   syncAfishaNowFn,
@@ -893,6 +894,10 @@ function AfishaBlock({ vid }: { vid: string }) {
   const [data, setData] = useState<{ events: AfishaEvent[]; syncedAt: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [style, setStyle] = useState<StyleProfile | null>(null);
+  // ручное добавление события командой (площадки без RA/FB/сайта)
+  const [mTitle, setMTitle] = useState("");
+  const [mDate, setMDate] = useState("");
+  const [mNote, setMNote] = useState("");
   useEffect(() => {
     styleProfileFn({ data: { vid } })
       .then((r) => setStyle(r.profile))
@@ -952,6 +957,43 @@ function AfishaBlock({ vid }: { vid: string }) {
           </button>
         ) : null}
       </div>
+      {user.role === "gtr" ? (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 12 }}>
+          <input
+            className="gtr-input"
+            style={{ flex: "1 1 180px" }}
+            placeholder="Название события"
+            value={mTitle}
+            onChange={(e) => setMTitle(e.target.value)}
+          />
+          <input
+            className="gtr-input"
+            type="date"
+            style={{ width: 150 }}
+            value={mDate}
+            onChange={(e) => setMDate(e.target.value)}
+          />
+          <button
+            className="gtr-btn gtr-btn-sm"
+            onClick={async () => {
+              const r = await afishaAddFn({ data: { vid, title: mTitle, dateIso: mDate } }).catch(() => null);
+              if (r?.ok) {
+                setMTitle("");
+                setMNote("✓ добавлено");
+                await load();
+              } else setMNote(r && "reason" in r ? String(r.reason) : "ошибка");
+              setTimeout(() => setMNote(""), 3000);
+            }}
+          >
+            + Добавить
+          </button>
+          {mNote ? (
+            <span className="gtr-mono" style={{ font: "500 9px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+              {mNote}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       {upcoming.length ? (
         <div
           style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(150px,1fr))", gap: 10 }}

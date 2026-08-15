@@ -1061,6 +1061,60 @@ export const listAfishaFn = createServerFn({ method: "GET" })
     } as VenueAfisha;
   });
 
+// Ручное событие афиши: команда добивает программу площадок, у которых
+// нет RA/FB/сайта. Живёт в venueevents с source:"manual", переживает синк.
+export const afishaAddFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { vid: string; title: string; dateIso: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    if (u.role !== "gtr") return { ok: false as const, reason: "только команда GTR" };
+    const title = data.title.trim().slice(0, 80);
+    if (title.length < 3) return { ok: false as const, reason: "название от 3 символов" };
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(data.dateIso))
+      return { ok: false as const, reason: "дата в формате ГГГГ-ММ-ДД" };
+    const key = `venueevents:${data.vid}`;
+    const rec =
+      (await kvGetJson<VenueAfisha>(ns, key)) ??
+      ({ events: [], syncedAt: Date.now(), source: "manual" } as VenueAfisha);
+    if (
+      rec.events.some(
+        (e) => e.dateIso === data.dateIso && e.title.toLowerCase() === title.toLowerCase(),
+      )
+    )
+      return { ok: false as const, reason: "такое событие уже есть" };
+    rec.events.push({
+      id: `man-${Date.now().toString(36)}`,
+      title,
+      dateIso: data.dateIso,
+      url: "",
+      artistIds: [],
+      source: "manual",
+    });
+    rec.events.sort((a, b) => a.dateIso.localeCompare(b.dateIso));
+    rec.syncedAt = Date.now();
+    await ns.put(key, JSON.stringify(rec));
+    return { ok: true as const };
+  });
+
+export const afishaDelFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { vid: string; id: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    if (u.role !== "gtr") return { ok: false as const, reason: "только команда GTR" };
+    // удалять можно только ручные записи — синкованные вернёт источник
+    if (!data.id.startsWith("man-")) return { ok: false as const, reason: "только ручные события" };
+    const key = `venueevents:${data.vid}`;
+    const rec = await kvGetJson<VenueAfisha>(ns, key);
+    if (!rec) return { ok: false as const, reason: "нет записи" };
+    rec.events = rec.events.filter((e) => e.id !== data.id);
+    await ns.put(key, JSON.stringify(rec));
+    return { ok: true as const };
+  });
+
 export const syncAfishaNowFn = createServerFn({ method: "POST" }).handler(async () => {
   const u = await currentUser();
   const ns = await getKvNs();

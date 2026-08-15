@@ -1434,30 +1434,124 @@ export const signupVisitorFn = createServerFn({ method: "POST" })
 export const allAfishaFn = createServerFn({ method: "GET" }).handler(async () => {
   const ns = await getKvNs();
   if (!ns) return { items: [] as (VenueAfisha["events"][number] & { vid: string })[] };
-  const { cleanEventTitle, isJunkEventTitle } = await import("./afisha-clean");
-  const { V } = await import("./data/app-data");
-  const keys = await kvListAll(ns, "venueevents:");
-  const today = new Date().toISOString().slice(0, 10);
-  const items: (VenueAfisha["events"][number] & { vid: string })[] = [];
-  const seen = new Set<string>();
-  for (const k of keys) {
-    const rec = await kvGetJson<VenueAfisha>(ns, k);
-    const vid = k.slice("venueevents:".length);
-    for (const e of rec?.events ?? []) {
-      if (e.dateIso < today) continue;
-      // мусорные страницы сайтов («Restaurant», «feed») — не программа
-      if (isJunkEventTitle(e.title)) continue;
-      const title = cleanEventTitle(e.title, V(vid)?.name);
-      if (isJunkEventTitle(title)) continue;
-      // дедуп: одна и та же программа из двух источников (RA + сайт)
-      const key = `${title.toLowerCase()}|${e.dateIso}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      items.push({ ...e, title, vid });
-    }
-  }
-  items.sort((a, b) => a.dateIso.localeCompare(b.dateIso));
+  // чистка названий, фильтр мусора и дедуп — в общем сборщике комьюнити
+  const { collectCleanAfisha } = await import("./community");
+  const items = await collectCleanAfisha(ns);
   return { items: items.slice(0, 60) };
+});
+
+// ---------- комьюнити Telegram: канал новостей + группа общения ----------
+
+export const communityCfgFn = createServerFn({ method: "GET" }).handler(async () => {
+  const ns = await getKvNs();
+  const empty = { channelUrl: "", chatUrl: "", channelTitle: "", chatTitle: "" };
+  if (!ns) return empty;
+  const { COMMUNITY_KEY } = await import("./community");
+  const cfg = await kvGetJson<import("./community").CommunityCfg>(ns, COMMUNITY_KEY);
+  if (!cfg) return empty;
+  // публичная часть: ссылки и названия — их видит любой залогиненный
+  return {
+    channelUrl: cfg.channelUrl || "",
+    chatUrl: cfg.chatUrl || "",
+    channelTitle: cfg.channelTitle || "",
+    chatTitle: cfg.chatTitle || "",
+  };
+});
+
+export const setCommunityCfgFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { channelUrl?: string; chatUrl?: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    if (u.role !== "gtr" && !u.boss) return { ok: false as const, reason: "только BOSS / GTR-админ" };
+    const { COMMUNITY_KEY, resolveTgChat } = await import("./community");
+    const prev =
+      (await kvGetJson<import("./community").CommunityCfg>(ns, COMMUNITY_KEY)) ?? {};
+    const cfg: import("./community").CommunityCfg = { ...prev, updated: Date.now() };
+    const notes: string[] = [];
+    if (data.channelUrl !== undefined) {
+      cfg.channelUrl = data.channelUrl.trim();
+      cfg.channelId = undefined;
+      cfg.channelTitle = undefined;
+      cfg.channelAdmin = undefined;
+      if (cfg.channelUrl) {
+        const r = await resolveTgChat(cfg.channelUrl);
+        if (r.ok) {
+          cfg.channelId = r.id;
+          cfg.channelTitle = r.title;
+          cfg.channelAdmin = r.admin;
+          if (!r.admin) notes.push(`Канал «${r.title}» найден, но бот НЕ админ — посты не пройдут`);
+        } else notes.push(`Канал: ${r.reason}`);
+      }
+    }
+    if (data.chatUrl !== undefined) {
+      cfg.chatUrl = data.chatUrl.trim();
+      cfg.chatId = undefined;
+      cfg.chatTitle = undefined;
+      cfg.chatAdmin = undefined;
+      if (cfg.chatUrl) {
+        const r = await resolveTgChat(cfg.chatUrl);
+        if (r.ok) {
+          cfg.chatId = r.id;
+          cfg.chatTitle = r.title;
+          cfg.chatAdmin = r.admin;
+          if (!r.admin) notes.push(`Группа «${r.title}» найдена, бот пока не админ (для /tonight хватит и участника)`);
+        } else notes.push(`Группа: ${r.reason}`);
+      }
+    }
+    await ns.put(COMMUNITY_KEY, JSON.stringify(cfg));
+    return {
+      ok: true as const,
+      cfg: {
+        channelUrl: cfg.channelUrl || "",
+        chatUrl: cfg.chatUrl || "",
+        channelTitle: cfg.channelTitle || "",
+        chatTitle: cfg.chatTitle || "",
+        channelAdmin: Boolean(cfg.channelAdmin),
+        chatAdmin: Boolean(cfg.chatAdmin),
+        channelId: cfg.channelId ?? null,
+        chatId: cfg.chatId ?? null,
+      },
+      notes,
+    };
+  });
+
+export const communityPostFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { kind: "digest" | "invite"; target: "channel" | "chat" }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    if (u.role !== "gtr" && !u.boss) return { ok: false as const, reason: "только BOSS / GTR-админ" };
+    const { COMMUNITY_KEY, buildDigestText, buildInviteText } = await import("./community");
+    const cfg = await kvGetJson<import("./community").CommunityCfg>(ns, COMMUNITY_KEY);
+    const chatId = data.target === "channel" ? cfg?.channelId : cfg?.chatId;
+    if (!chatId) {
+      return { ok: false as const, reason: data.target === "channel" ? "Канал не привязан" : "Группа не привязана" };
+    }
+    const text =
+      data.kind === "digest" ? await buildDigestText(ns) : buildInviteText(cfg ?? {});
+    const res = await tgApi("sendMessage", {
+      chat_id: chatId,
+      text,
+      parse_mode: "HTML",
+      link_preview_options: { url: (await import("./community")).APP_URL, prefer_large_media: true },
+    });
+    return res.ok
+      ? { ok: true as const, reason: "" }
+      : { ok: false as const, reason: res.description || "Telegram отклонил пост" };
+  });
+
+// Текст приглашения для ручной рассылки (BOSS копирует и шлёт кому угодно)
+export const communityInviteTextFn = createServerFn({ method: "GET" }).handler(async () => {
+  const ns = await getKvNs();
+  const { COMMUNITY_KEY, buildInviteText } = await import("./community");
+  const cfg = ns
+    ? await kvGetJson<import("./community").CommunityCfg>(ns, COMMUNITY_KEY)
+    : null;
+  // без HTML-тегов — это текст для копирования
+  return { text: buildInviteText(cfg ?? {}).replace(/<\/?b>/g, "") };
 });
 
 // Бронь стола / гостевой список: заявка без оплаты — команде в Telegram.

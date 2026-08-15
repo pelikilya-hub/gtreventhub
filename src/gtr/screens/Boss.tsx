@@ -21,12 +21,16 @@ import { useTranslation } from "react-i18next";
 import { Card, Chip, Dot, Eyebrow, tint } from "../ui";
 import {
   broadcastFn,
+  communityInviteTextFn,
+  communityPostFn,
   deleteTaskFn,
   metaCfgFn,
   metaExchangeFn,
   metaFeedFn,
   metaSyncFn,
+  communityCfgFn,
   promptpayCfgFn,
+  setCommunityCfgFn,
   setMetaCfgFn,
   setPromptpayCfgFn,
   listUsersFn,
@@ -620,6 +624,7 @@ export function BossCabinet() {
         </Card>
 
         <PromptpayCard />
+        <CommunityCard />
         <MetaCard />
       </div>
     </div>
@@ -628,6 +633,127 @@ export function BossCabinet() {
 
 // Meta: авторизация страницы BOSS (FB/IG Business) через официальный
 // Graph API — посты и медиа страницы затягиваются легально по токену.
+// Комьюнити Telegram: канал новостей + группа общения. Бот проверяет,
+// что добавлен админом, и дальше умеет постить дайджест вечера и
+// приглашение тестовой группы.
+function CommunityCard() {
+  const [channelUrl, setChannelUrl] = useState("");
+  const [chatUrl, setChatUrl] = useState("");
+  const [channelTitle, setChannelTitle] = useState("");
+  const [chatTitle, setChatTitle] = useState("");
+  const [state, setState] = useState("");
+  const [inviteText, setInviteText] = useState("");
+  useEffect(() => {
+    communityCfgFn()
+      .then((r) => {
+        setChannelUrl(r.channelUrl);
+        setChatUrl(r.chatUrl);
+        setChannelTitle(r.channelTitle);
+        setChatTitle(r.chatTitle);
+      })
+      .catch(() => {});
+  }, []);
+  const save = async () => {
+    setState("Проверяю канал и группу у Telegram…");
+    try {
+      const r = await setCommunityCfgFn({ data: { channelUrl, chatUrl } });
+      if (r.ok) {
+        setChannelTitle(r.cfg.channelTitle);
+        setChatTitle(r.cfg.chatTitle);
+        setState(
+          r.notes.length
+            ? r.notes.join(" · ")
+            : `✓ Привязано: ${[r.cfg.channelTitle, r.cfg.chatTitle].filter(Boolean).join(" + ") || "пока пусто"}`,
+        );
+      } else setState(r.reason ?? "…");
+    } catch {
+      setState("Сервер недоступен");
+    }
+  };
+  const post = async (kind: "digest" | "invite", target: "channel" | "chat") => {
+    setState(kind === "digest" ? "Собираю дайджест вечера…" : "Отправляю приглашение…");
+    try {
+      const r = await communityPostFn({ data: { kind, target } });
+      setState(r.ok ? "✓ Опубликовано" : r.reason);
+    } catch {
+      setState("Сервер недоступен");
+    }
+  };
+  const copyInvite = async () => {
+    try {
+      const r = await communityInviteTextFn();
+      setInviteText(r.text);
+      try {
+        await navigator.clipboard.writeText(r.text);
+        setState("✓ Текст приглашения скопирован — шли кому угодно");
+      } catch {
+        setState("Текст ниже — скопируй вручную");
+      }
+    } catch {
+      setState("Сервер недоступен");
+    }
+  };
+  return (
+    <Card style={{ padding: 14, gridColumn: "1 / -1" }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+        <Eyebrow>КОМЬЮНИТИ TELEGRAM · НОВОСТИ И ОБЩЕНИЕ</Eyebrow>
+        <Chip color={channelTitle ? GREEN : AMBER}>
+          {channelTitle ? `КАНАЛ · ${channelTitle.toUpperCase()}` : "КАНАЛ НЕ ПРИВЯЗАН"}
+        </Chip>
+        <Chip color={chatTitle ? GREEN : AMBER}>
+          {chatTitle ? `ЧАТ · ${chatTitle.toUpperCase()}` : "ЧАТ НЕ ПРИВЯЗАН"}
+        </Chip>
+      </div>
+      <div
+        className="gtr-mono"
+        style={{ font: "500 9.5px/1.6 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 10 }}
+      >
+        1) создай публичный канал (новости) и группу (чат) · 2) добавь бота @Gtrcom1_bot админом в оба ·
+        3) вставь ссылки t.me и привяжи. Дайджест вечера уходит в канал сам — каждый день в 17:00.
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+        <input
+          className="gtr-input"
+          style={{ flex: "1 1 220px" }}
+          placeholder="Канал: t.me/имя_канала"
+          value={channelUrl}
+          onChange={(e) => setChannelUrl(e.target.value)}
+        />
+        <input
+          className="gtr-input"
+          style={{ flex: "1 1 220px" }}
+          placeholder="Группа: t.me/имя_группы"
+          value={chatUrl}
+          onChange={(e) => setChatUrl(e.target.value)}
+        />
+        <button className="gtr-btn gtr-btn-red" onClick={save}>Привязать и проверить</button>
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <button className="gtr-btn" onClick={() => post("digest", "channel")}>📣 Дайджест в канал сейчас</button>
+        <button className="gtr-btn" onClick={() => post("invite", "channel")}>🎉 Приглашение в канал</button>
+        <button className="gtr-btn" onClick={() => post("invite", "chat")}>💬 Приглашение в группу</button>
+        <button className="gtr-btn" onClick={copyInvite}>📋 Текст приглашения (разослать)</button>
+      </div>
+      {state ? (
+        <div
+          className="gtr-mono"
+          style={{ marginTop: 8, font: "500 10px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+        >
+          {state}
+        </div>
+      ) : null}
+      {inviteText ? (
+        <textarea
+          className="gtr-input"
+          readOnly
+          value={inviteText}
+          style={{ marginTop: 8, width: "100%", minHeight: 120, font: "500 11px/1.5 'Golos Text',sans-serif" }}
+        />
+      ) : null}
+    </Card>
+  );
+}
+
 function MetaCard() {
   const [token, setToken] = useState("");
   const [pageName, setPageName] = useState("");

@@ -27,6 +27,14 @@ export default {
       );
       return;
     }
+    // 10:00 UTC = 17:00 Пхукета — дайджест вечера в канал комьюнити
+    if (event.cron === "0 10 * * *") {
+      const key = await derive(env, "afisha");
+      ctx.waitUntil(
+        fetch("https://gtr-event-hub.gtr-event.workers.dev/api/community-digest?key=" + key),
+      );
+      return;
+    }
     const key = await derive(env, "afisha");
     ctx.waitUntil(
       fetch("https://gtr-event-hub.gtr-event.workers.dev/api/afisha", {
@@ -38,6 +46,6 @@ export default {
 `,
 );
 cfg.main = "cron.mjs";
-cfg.triggers = { crons: ["0 */6 * * *", "0 13 * * *"] };
+cfg.triggers = { crons: ["0 */6 * * *", "0 13 * * *", "0 10 * * *"] };
 writeFileSync(p, JSON.stringify(cfg, null, 2));
-console.log("wrangler.json: GTR_KV + кроны (афиши 6ч, отчёт спринта 20:00 Пхукета)");
+console.log("wrangler.json: GTR_KV + кроны (афиши 6ч, отчёт 20:00, дайджест 17:00 Пхукета)");

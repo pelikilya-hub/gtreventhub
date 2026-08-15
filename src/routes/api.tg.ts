@@ -352,6 +352,15 @@ export const Route = createFileRoute("/api/tg")({
             const hit = BUTTON_CMDS.find(([re]) => re.test(text.trim()));
             if (hit) cmd = hit[1];
           }
+
+          // /tonight работает везде — и в личке, и в группе комьюнити,
+          // без привязки аккаунта: это витрина, а не кабинет
+          if (cmd === "/tonight" || cmd === "/afisha") {
+            const { buildDigestText } = await import("../gtr/community");
+            await reply(chatId, await buildDigestText(ns));
+            return Response.json({ ok: true });
+          }
+
           const u = await userOfChat(ns, chatId);
 
           if (cmd === "/start" || cmd === "/menu") {

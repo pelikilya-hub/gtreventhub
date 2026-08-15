@@ -15,6 +15,7 @@ import { Route as ApiAfishaRouteImport } from './routes/api.afisha'
 import { Route as ApiAfishaSendRouteImport } from './routes/api.afisha-send'
 import { Route as ApiAphotoRouteImport } from './routes/api.aphoto'
 import { Route as ApiAvideoRouteImport } from './routes/api.avideo'
+import { Route as ApiCommunityDigestRouteImport } from './routes/api.community-digest'
 import { Route as ApiPosterRouteImport } from './routes/api.poster'
 import { Route as ApiPushRouteImport } from './routes/api.push'
 import { Route as ApiSpotifyCallbackRouteImport } from './routes/api.spotify-callback'
@@ -58,6 +59,11 @@ const ApiAphotoRoute = ApiAphotoRouteImport.update({
 const ApiAvideoRoute = ApiAvideoRouteImport.update({
   id: '/api/avideo',
   path: '/api/avideo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCommunityDigestRoute = ApiCommunityDigestRouteImport.update({
+  id: '/api/community-digest',
+  path: '/api/community-digest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPosterRoute = ApiPosterRouteImport.update({
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
+  '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
+  '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
@@ -182,6 +190,7 @@ export interface FileRoutesById {
   '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
+  '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/api/afisha-send'
     | '/api/aphoto'
     | '/api/avideo'
+    | '/api/community-digest'
     | '/api/poster'
     | '/api/push'
     | '/api/spotify-callback'
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/api/afisha-send'
     | '/api/aphoto'
     | '/api/avideo'
+    | '/api/community-digest'
     | '/api/poster'
     | '/api/push'
     | '/api/spotify-callback'
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/api/afisha-send'
     | '/api/aphoto'
     | '/api/avideo'
+    | '/api/community-digest'
     | '/api/poster'
     | '/api/push'
     | '/api/spotify-callback'
@@ -272,6 +284,7 @@ export interface RootRouteChildren {
   ApiAfishaSendRoute: typeof ApiAfishaSendRoute
   ApiAphotoRoute: typeof ApiAphotoRoute
   ApiAvideoRoute: typeof ApiAvideoRoute
+  ApiCommunityDigestRoute: typeof ApiCommunityDigestRoute
   ApiPosterRoute: typeof ApiPosterRoute
   ApiPushRoute: typeof ApiPushRoute
   ApiSpotifyCallbackRoute: typeof ApiSpotifyCallbackRoute
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       path: '/api/avideo'
       fullPath: '/api/avideo'
       preLoaderRoute: typeof ApiAvideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/community-digest': {
+      id: '/api/community-digest'
+      path: '/api/community-digest'
+      fullPath: '/api/community-digest'
+      preLoaderRoute: typeof ApiCommunityDigestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/poster': {
@@ -457,6 +477,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAfishaSendRoute: ApiAfishaSendRoute,
   ApiAphotoRoute: ApiAphotoRoute,
   ApiAvideoRoute: ApiAvideoRoute,
+  ApiCommunityDigestRoute: ApiCommunityDigestRoute,
   ApiPosterRoute: ApiPosterRoute,
   ApiPushRoute: ApiPushRoute,
   ApiSpotifyCallbackRoute: ApiSpotifyCallbackRoute,

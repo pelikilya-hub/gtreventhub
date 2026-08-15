@@ -28,6 +28,7 @@ import { Card, Chip, Dot, Eyebrow, Icon, Ring, TrashTitle } from "../ui";
 import { ImpulseArt } from "../impulse";
 import {
   allAfishaFn,
+  communityCfgFn,
   createInviteFn,
   decideOfferFn,
   getPrefsFn,
@@ -1713,8 +1714,10 @@ function VisitorCabinet() {
   const [mp, setMp] = useState<import("../spotify").MusicProfile | null>(null);
   const [feed, setFeed] = useState<{ id: string; vid: string; title: string; dateIso: string; poster?: string; artistIds: string[] }[]>([]);
   const [heads, setHeads] = useState<{ id: string; name: string; styles: string[]; photo?: string; music?: string }[]>([]);
+  const [community, setCommunity] = useState<{ channelUrl: string; chatUrl: string }>({ channelUrl: "", chatUrl: "" });
   useEffect(() => {
     musicProfileFn().then((r) => setMp(r.profile)).catch(() => {});
+    communityCfgFn().then((r) => setCommunity({ channelUrl: r.channelUrl, chatUrl: r.chatUrl })).catch(() => {});
     allAfishaFn()
       .then((r) => {
         // лента без повторов: один постер один раз, максимум 2 события
@@ -1794,7 +1797,7 @@ function VisitorCabinet() {
             <TrashTitle text={t("Сегодня вечером")} size={40} />
             <div style={{ margin: "10px 0 16px", font: "500 13px/1.5 'Golos Text',sans-serif", color: "rgba(255,255,255,.82)", maxWidth: 420 }}>
               {tonightCount
-                ? `${tonightCount} ${t("событий и весь остров открыт — собери свой вечер")}`
+                ? `${t("В афише")}: ${tonightCount} · ${t("весь остров открыт — собери свой вечер")}`
                 : t("Остров открыт — собери свой вечер: клубы, пляжные вечеринки, живая музыка")}
             </div>
             <div>
@@ -1904,6 +1907,28 @@ function VisitorCabinet() {
           <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{t("Бронь в пару касаний")}</div>
         </Card>
       </div>
+
+      {community.channelUrl || community.chatUrl ? (
+        <Card style={{ padding: "16px 18px", marginBottom: 16, position: "relative", overflow: "hidden" }}>
+          <div className="gtr-laser" aria-hidden />
+          <Eyebrow style={{ marginBottom: 8 }}>{t("КОМЬЮНИТИ GTR")}</Eyebrow>
+          <div style={{ font: "500 11.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", marginBottom: 10 }}>
+            {t("Новости острова и живой чат — вся тусовка в одном месте")}
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {community.channelUrl ? (
+              <button className="gtr-btn gtr-btn-red" onClick={() => openAppLink(community.channelUrl)}>
+                📣 {t("Канал новостей")}
+              </button>
+            ) : null}
+            {community.chatUrl ? (
+              <button className="gtr-btn" onClick={() => openAppLink(community.chatUrl)}>
+                💬 {t("Чат сообщества")}
+              </button>
+            ) : null}
+          </div>
+        </Card>
+      ) : null}
 
       <Card style={{ padding: "12px 16px", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         <PushPanel />

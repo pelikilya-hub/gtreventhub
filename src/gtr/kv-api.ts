@@ -2,18 +2,11 @@
 // база событий/заявок. Пока биндинга нет (vite-dev), функции возвращают
 // null/недоступно — клиент продолжает работать на localStorage.
 import { createServerFn } from "@tanstack/react-start";
-import { currentUser, type SessionUser, type StoredUser } from "./auth";
+import { currentUser, hashPassword, type SessionUser, type StoredUser } from "./auth";
 import type { EventDraft, Offer, OrgRequest, RoleId } from "./data/app-data";
 import { getKvNs, kvGetJson, kvListAll, type KvNs } from "./kv-ns";
 import { tgApi, tgConfigured, tgEsc, tgWebhookSecret } from "./tg";
 import type { VenueAfisha } from "./afisha";
-
-const sha256 = async (s: string) => {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-};
 
 export const ROLE_LABELS: Record<RoleId, string> = {
   pr: "PR-директор",
@@ -129,7 +122,7 @@ export const inviteUserFn = createServerFn({ method: "POST" })
       venueId: data.venueId || "",
       artistId: data.artistId || "",
       initials: initialsOf(data.name),
-      passHash: await sha256(data.password),
+      passHash: await hashPassword(data.password),
       created: Date.now(),
       invitedBy: me.email,
     };
@@ -643,7 +636,7 @@ export const joinFn = createServerFn({ method: "POST" })
       artistId: "",
       teamOf: inv.teamOf || undefined,
       initials: initialsOf(data.name),
-      passHash: await sha256(data.password),
+      passHash: await hashPassword(data.password),
       created: Date.now(),
       invitedBy: inv.invitedBy,
     };
@@ -1512,7 +1505,7 @@ export const signupVisitorFn = createServerFn({ method: "POST" })
       roleLabel: ROLE_LABELS.visitor,
       venueId: "",
       initials: initialsOf(data.name || email),
-      passHash: await sha256(data.password),
+      passHash: await hashPassword(data.password),
       created: Date.now(),
       invitedBy: "signup",
     };
@@ -1579,7 +1572,7 @@ export const signupApplyFn = createServerFn({ method: "POST" })
     const app: PendingApp = {
       name: data.name.trim() || email.split("@")[0],
       email,
-      passHash: await sha256(data.password),
+      passHash: await hashPassword(data.password),
       role,
       about: data.about.trim().slice(0, 400),
       code,

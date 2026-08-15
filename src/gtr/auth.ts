@@ -33,6 +33,55 @@ const sha256 = async (s: string) => {
     .join("");
 };
 
+// Пароли реальных аккаунтов: PBKDF2 с индивидуальной солью, а не голый
+// sha256 (тот легко перебирается по радужным таблицам, если KV когда-либо
+// утечёт). Формат: pbkdf2$итерации$соль$хэш. Старые записи, созданные до
+// этого перехода, всё ещё голый sha256-хэш — verifyPassword понимает оба
+// формата и молча перехэшируется в новый при следующем успешном входе.
+const PBKDF2_ITER = 100_000;
+
+const toHex = (buf: ArrayBuffer | Uint8Array) =>
+  Array.from(buf instanceof Uint8Array ? buf : new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+const fromHex = (hex: string) =>
+  new Uint8Array((hex.match(/.{2}/g) ?? []).map((b) => parseInt(b, 16)));
+
+const pbkdf2 = async (password: string, salt: Uint8Array, iterations: number) => {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits"],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: salt as BufferSource, iterations, hash: "SHA-256" },
+    key,
+    256,
+  );
+  return toHex(bits);
+};
+
+export const hashPassword = async (password: string) => {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const hash = await pbkdf2(password, salt, PBKDF2_ITER);
+  return `pbkdf2$${PBKDF2_ITER}$${toHex(salt)}$${hash}`;
+};
+
+export const verifyPassword = async (
+  password: string,
+  stored: string,
+): Promise<boolean> => {
+  if (stored.startsWith("pbkdf2$")) {
+    const [, iterStr, saltHex, hashHex] = stored.split("$");
+    const iterations = Number(iterStr) || PBKDF2_ITER;
+    return (await pbkdf2(password, fromHex(saltHex), iterations)) === hashHex;
+  }
+  return stored === (await sha256(password)); // легаси-формат
+};
+
 // Пароль демо-доступа: gtr2026 (подсказан на экране входа).
 // На публичном стенде демо-пароль означает открытый доступ: он написан
 // в самом интерфейсе. Поэтому если задан GTR_ACCESS_PASSWORD, вход идёт
@@ -178,8 +227,13 @@ export const loginFn = createServerFn({ method: "POST" })
     if (ns) {
       const stored = await kvGetJson<StoredUser>(ns, `user:${email}`);
       if (stored) {
-        if (stored.passHash !== (await sha256(data.password))) {
+        if (!(await verifyPassword(data.password, stored.passHash))) {
           return { ok: false as const, error: "Неверный email или пароль" };
+        }
+        // легаси-хэш без соли — тихо перехэшируем на PBKDF2, раз пароль уже подтверждён
+        if (!stored.passHash.startsWith("pbkdf2$")) {
+          stored.passHash = await hashPassword(data.password);
+          await ns.put(`user:${email}`, JSON.stringify(stored));
         }
         const { passHash: _p, created: _c, invitedBy: _i, ...sessionUser } = stored;
         await issueSession(sessionUser);

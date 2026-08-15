@@ -501,7 +501,6 @@ export const Route = createFileRoute("/api/tg")({
           // приветствие новичка в чате сообщества (не чаще раза в 3 минуты,
           // чтобы наплыв людей не превращался в стену приветствий)
           if (was && now && !cm.new_chat_member.user.id.toString().startsWith("-")) {
-            const { APP_URL } = await import("../gtr/community");
             if (isGr && !(await ns.get("greetlock"))) {
               await ns.put("greetlock", "1", { expirationTtl: 180 });
               const who = cm.new_chat_member.user.first_name || "друг";
@@ -512,7 +511,6 @@ export const Route = createFileRoute("/api/tg")({
                   `👋 <b>${tgEsc(who)}</b>, добро пожаловать в GTR! · welcome to GTR!`,
                   `Комнаты · Rooms: 🔥 Афиша · 🎵 Музыка · 🎉 Знакомства · 💡 Идеи`,
                   `🌴 /tonight — куда пойти сегодня · where to go tonight`,
-                  `🏆 <a href="${APP_URL}/gtr/signup">Аккаунт GTR за 30 секунд</a> = +3 балла в конкурсе · sign up = +3 contest points`,
                 ].join("\n"),
                 link_preview_options: { is_disabled: true },
               });

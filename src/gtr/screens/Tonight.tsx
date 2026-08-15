@@ -12,6 +12,7 @@ import { useGtr } from "../store";
 import { allAfishaFn, bookTableFn, promptpayCfgFn, type PromptpayCfg, type VenueAfisha } from "../kv-api";
 import { openAppLink } from "../applink";
 import { PromptpayModal } from "../promptpay-ui";
+import { SwipeToBook } from "../raw-pulse";
 
 const GEO = geoRaw as Record<string, { lat: number; lon: number; src: string }>;
 type FeedItem = VenueAfisha["events"][number] & { vid: string };
@@ -84,8 +85,10 @@ export function TonightScreen() {
     return pts.length >= 1 ? `https://www.google.com/maps/dir/${pts.join("/")}` : "";
   };
 
-  const submitBooking = async (vid: string) => {
-    setBkState("…");
+  const submitBooking = async (vid: string): Promise<{ ok: boolean; reason?: string }> => {
+    if (!bkName.trim() || !bkPhone.trim()) {
+      return { ok: false, reason: t("Укажите имя и телефон") };
+    }
     try {
       const r = await bookTableFn({
         data: {
@@ -97,10 +100,14 @@ export function TonightScreen() {
           note: "Заявка из раздела «Сегодня»",
         },
       });
-      setBkState(r.ok ? t("Заявка ушла — площадка свяжется с вами") : (r.reason ?? "…"));
-      if (r.ok) setTimeout(() => setBookVid(""), 1600);
+      if (r.ok) {
+        setBkState(t("Заявка ушла — площадка свяжется с вами"));
+        setTimeout(() => setBookVid(""), 1600);
+        return { ok: true };
+      }
+      return { ok: false, reason: r.reason };
     } catch {
-      setBkState(t("Сервер недоступен"));
+      return { ok: false, reason: t("Сервер недоступен") };
     }
   };
 
@@ -213,9 +220,7 @@ export function TonightScreen() {
         value={bkPhone}
         onChange={(e) => setBkPhone(e.target.value)}
       />
-      <button className="gtr-btn gtr-btn-red" onClick={() => submitBooking(vid)}>
-        {t("Забронировать на сегодня")}
-      </button>
+      <SwipeToBook onConfirm={() => submitBooking(vid)} />
       {ppCfg ? (
         <button className="gtr-btn" onClick={() => setPpFor(vid)}>
           {t("Оплатить депозит · PromptPay QR")}

@@ -1773,3 +1773,287 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .gtr-play-btn { box-shadow: 0 0 10px rgba(229, 35, 27, 0.35); }
 }
+
+/* =====================================================================
+   GTR RAW PULSE — Фаза 1 (транзакционные CTA, swipe-to-book, hold-to-confirm)
+   Токены см. GTR_RAW_PULSE_INTEGRATION_SPEC_RU. Геометрия — острые срезанные
+   углы (--gtr-cut), НЕ капсулы: решение принято 2026-08-15, radius.capsule
+   из кита сознательно не используется нигде в продукте.
+   ===================================================================== */
+.gtr-app {
+  --pulse-steel: #8a8d93;
+  --pulse-shadow-ambient: 0 10px 26px rgba(0, 0, 0, 0.46);
+  --pulse-shadow-pressed: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- CTA: крупные транзакционные кнопки (56px, touch.primary) ---------- */
+.gtr-cta {
+  --cta-bg: linear-gradient(180deg, var(--gtr-graphite) 0%, #131316 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 20px;
+  border: none;
+  cursor: pointer;
+  background: var(--cta-bg);
+  clip-path: polygon(
+    0 0, calc(100% - var(--gtr-cut)) 0, 100% var(--gtr-cut),
+    100% 100%, var(--gtr-cut) 100%, 0 calc(100% - var(--gtr-cut))
+  );
+  box-shadow: var(--pulse-shadow-ambient), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: transform 110ms ease-out, box-shadow 110ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+.gtr-cta::before {
+  /* hairline-бордер + оптический red seam поверх фона, не мешает transform */
+  content: "";
+  position: absolute; inset: 0;
+  clip-path: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  transition: border-color 110ms;
+}
+.gtr-cta::after {
+  /* red seam:核 1px + два слоя свечения, проходит через центр */
+  content: "";
+  position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+  transform: translateY(-50%);
+  background: var(--gtr-red);
+  box-shadow: 0 0 6px 1px rgba(229, 35, 27, 0.55), 0 0 14px 4px rgba(229, 35, 27, 0.22);
+  opacity: 0.9;
+  pointer-events: none;
+}
+.gtr-cta-label {
+  font: 700 14px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: #fff;
+  z-index: 1;
+}
+.gtr-cta-icon { position: relative; z-index: 1; flex: none; }
+
+.gtr-cta:active:not(:disabled) {
+  transform: scale(0.975) translateY(2px);
+  box-shadow: var(--pulse-shadow-pressed);
+}
+.gtr-cta:active:not(:disabled)::before { border-color: var(--gtr-red); }
+.gtr-cta:active:not(:disabled)::after { opacity: 1.2; }
+
+.gtr-cta:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+.gtr-cta:disabled .gtr-cta-label { color: var(--pulse-steel); }
+.gtr-cta:disabled::after { display: none; }
+
+.gtr-cta-loading .gtr-cta-label { opacity: 0.65; }
+.gtr-cta-spin {
+  width: 15px; height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: gtr-cta-spin 900ms linear infinite;
+  flex: none;
+  z-index: 1;
+}
+@keyframes gtr-cta-spin { to { transform: rotate(360deg); } }
+
+/* вариант: живой эфир — pulse вместо статичного seam */
+.gtr-cta-live::after { animation: gtr-cta-pulse 1.6s ease-in-out infinite; }
+@keyframes gtr-cta-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* вариант: отмена — приглушённая, без seam в простое */
+.gtr-cta-cancel { --cta-bg: transparent; box-shadow: none; }
+.gtr-cta-cancel::before { border-color: rgba(255, 255, 255, 0.35); }
+.gtr-cta-cancel::after { opacity: 0; }
+.gtr-cta-cancel .gtr-cta-label { color: var(--gtr-t2); }
+.gtr-cta-cancel:active:not(:disabled) { box-shadow: none; }
+
+/* вариант: split purchase — цена слева, заливка справа */
+.gtr-cta-split {
+  justify-content: space-between;
+  padding: 0 6px 0 18px;
+}
+.gtr-cta-split .gtr-cta-price {
+  font: 700 15px/1 "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  z-index: 1;
+}
+.gtr-cta-split .gtr-cta-action {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; padding: 0 18px;
+  background: linear-gradient(90deg, var(--gtr-red-hot) 0%, var(--gtr-red) 100%);
+  z-index: 1;
+}
+.gtr-cta-split::after { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-cta-live::after { animation: none; opacity: 0.85; }
+  .gtr-cta-spin { animation-duration: 1.4s; }
+}
+
+/* ---------- Swipe-to-book ---------- */
+.gtr-swipe {
+  position: relative;
+  height: 60px;
+  background: var(--gtr-card2);
+  border: 1px solid var(--gtr-border2);
+  clip-path: polygon(
+    0 0, calc(100% - var(--gtr-cut)) 0, 100% var(--gtr-cut),
+    100% 100%, var(--gtr-cut) 100%, 0 calc(100% - var(--gtr-cut))
+  );
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+.gtr-swipe.is-done { border-color: rgba(229, 35, 27, 0.6); }
+.gtr-swipe-grain {
+  position: absolute; inset: 0;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.gtr-swipe-fill {
+  position: absolute; inset: 0;
+  width: 0;
+  background: linear-gradient(90deg, var(--gtr-red-deep) 0%, var(--gtr-red) 70%, var(--gtr-red-hot) 100%);
+  will-change: width;
+}
+.gtr-swipe-fill::after {
+  content: "";
+  position: absolute; top: 0; right: -1px; bottom: 0; width: 34px;
+  background: linear-gradient(90deg, transparent, rgba(255, 52, 39, 0.55));
+  filter: blur(6px);
+}
+.gtr-swipe-label {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font: 600 11.5px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.1em;
+  color: var(--gtr-t2);
+  pointer-events: none;
+}
+.gtr-swipe-label.is-done { color: #fff; font-weight: 700; }
+.gtr-swipe-spark {
+  position: absolute;
+  width: 3px; height: 3px;
+  background: var(--gtr-red-hot);
+  border-radius: 50%;
+  box-shadow: 0 0 6px 1px rgba(255, 52, 39, 0.9);
+  pointer-events: none;
+  animation: gtr-spark-fade 0.5s ease-out forwards;
+}
+@keyframes gtr-spark-fade {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx, 10px), var(--dy, 0)) scale(0.3); }
+}
+.gtr-swipe-handle {
+  position: absolute;
+  top: 4px; left: 4px;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #2a1210, #0c0d0f 68%);
+  border: 1.5px solid var(--gtr-red);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 0 22px -4px rgba(229, 35, 27, 0.85), inset 0 0 10px rgba(0, 0, 0, 0.6);
+  display: flex; align-items: center; justify-content: center;
+  cursor: grab;
+  will-change: transform;
+  touch-action: none;
+}
+.gtr-swipe-handle:active { cursor: grabbing; }
+.gtr-swipe-handle-mark {
+  font: 700 12px/1 "Oswald", sans-serif;
+  color: #fff;
+}
+.gtr-swipe-handle.is-done {
+  border-color: #fff;
+  animation: gtr-swipe-pulse 0.6s ease-out;
+}
+@keyframes gtr-swipe-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.55), 0 0 22px -4px rgba(229, 35, 27, 0.85); }
+  100% { box-shadow: 0 0 0 22px rgba(255, 255, 255, 0), 0 0 22px -4px rgba(229, 35, 27, 0.85); }
+}
+.gtr-swipe-burst {
+  position: absolute;
+  top: 50%; left: 0;
+  width: 130px; height: 130px;
+  transform: translate(-38%, -50%);
+  background: url("/raw-pulse/radial-hit.webp") center / contain no-repeat;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0;
+}
+.gtr-swipe-burst.is-play { animation: gtr-burst-fade 0.5s ease-out forwards; }
+@keyframes gtr-burst-fade {
+  0% { opacity: 0.9; transform: translate(-38%, -50%) scale(0.7); }
+  100% { opacity: 0; transform: translate(-38%, -50%) scale(1.15); }
+}
+.gtr-swipe-alt {
+  /* доступная альтернатива жесту — «Подтвердить бронь» для VoiceOver/TalkBack */
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.gtr-swipe-alt:focus-visible {
+  position: static;
+  width: auto; height: auto;
+  clip: auto;
+  margin-top: 8px;
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-swipe-handle.is-done { animation: none; }
+  .gtr-swipe-burst.is-play { animation: none; opacity: 0; }
+}
+
+/* ---------- Hold-to-confirm ---------- */
+.gtr-hold {
+  position: relative;
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #201113, #0c0d0f 68%);
+  border: 1.5px solid var(--gtr-border2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 150ms;
+}
+.gtr-hold-ring {
+  position: absolute; inset: -1.5px;
+  transform: rotate(-90deg);
+}
+.gtr-hold-ring circle {
+  fill: none;
+  stroke-width: 3;
+}
+.gtr-hold-ring .track { stroke: rgba(255, 255, 255, 0.12); }
+.gtr-hold-ring .fill {
+  stroke: var(--gtr-red-hot);
+  stroke-linecap: butt;
+  filter: drop-shadow(0 0 4px rgba(255, 52, 39, 0.7));
+  transition: stroke-dashoffset 30ms linear;
+}
+.gtr-hold-label {
+  font: 700 11px/1 "Oswald", sans-serif;
+  color: #fff;
+  z-index: 1;
+  text-align: center;
+}
+.gtr-hold.is-done { border-color: #fff; }
+.gtr-hold.is-locked {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

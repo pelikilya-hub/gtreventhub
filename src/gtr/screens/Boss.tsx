@@ -34,6 +34,8 @@ import {
   setMetaCfgFn,
   setPromptpayCfgFn,
   listUsersFn,
+  pendingDecideFn,
+  pendingListFn,
   pullTasksFn,
   pushStatusFn,
   pushSubscribeFn,
@@ -44,6 +46,7 @@ import {
   tgStatusFn,
   venueConfirmsFn,
   type GtrTask,
+  type PendingApp,
   type PublicUser,
   type VenueConfirm,
 } from "../kv-api";
@@ -624,11 +627,107 @@ export function BossCabinet() {
           <BroadcastBlock />
         </Card>
 
+        <PendingCard />
         <PromptpayCard />
         <CommunityCard />
         <MetaCard />
       </div>
     </div>
+  );
+}
+
+// Заявки на роли: артисты, организаторы, площадки, команда. Дублирует
+// Telegram-кнопки BOSS — решение можно принять прямо из дашборда.
+// Метки ролей — из клиентского app-data: kv-api в браузере отдаёт только
+// RPC-стабы серверных функций, обычные константы оттуда не доезжают.
+const PENDING_ROLE_LABEL: Record<string, string> = {
+  pr: "PR-директор", owner: "Площадка", sales: "Event-продажи",
+  gtr: "Команда GTR", artist: "Артист", organizer: "Организатор", visitor: "Посетитель",
+};
+function PendingCard() {
+  const [items, setItems] = useState<PendingApp[]>([]);
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState("");
+  const load = useCallback(() => {
+    pendingListFn()
+      .then((r) => setItems(r.items))
+      .catch(() => {});
+  }, []);
+  useEffect(load, [load]);
+  const decide = async (email: string, approve: boolean) => {
+    setBusy(email);
+    try {
+      const r = await pendingDecideFn({ data: { email, approve } });
+      setNote(r.note);
+      load();
+    } catch {
+      setNote("Сервер недоступен");
+    } finally {
+      setBusy("");
+    }
+  };
+  return (
+    <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10, gridColumn: "1 / -1" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+        <Eyebrow>ЗАЯВКИ НА РОЛИ · ПОДТВЕРЖДЕНИЕ BOSS</Eyebrow>
+        <span style={{ font: mono(9.5, 700), color: items.length ? RED : "rgba(255,255,255,.35)" }}>
+          {items.length}
+        </span>
+      </div>
+      {items.length ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {items.map((a) => (
+            <div
+              key={a.email}
+              style={{
+                display: "flex",
+                gap: 10,
+                alignItems: "center",
+                flexWrap: "wrap",
+                border: "1px solid rgba(255,255,255,.1)",
+                padding: "9px 11px",
+              }}
+            >
+              <div style={{ flex: "1 1 220px", minWidth: 0 }}>
+                <div style={{ font: golos(11.5, 700) }}>
+                  {a.name}
+                  <span style={{ color: RED, marginLeft: 8, font: mono(9, 700) }}>
+                    {PENDING_ROLE_LABEL[a.role]?.toUpperCase()}
+                  </span>
+                </div>
+                <div style={{ font: mono(9), color: "rgba(255,255,255,.45)", marginTop: 2 }}>
+                  {a.email} · {new Date(a.created).toLocaleDateString("ru-RU")}
+                </div>
+                {a.about ? (
+                  <div style={{ font: golos(10.5), color: "rgba(255,255,255,.6)", marginTop: 3 }}>«{a.about}»</div>
+                ) : null}
+              </div>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button
+                  className="gtr-btn gtr-btn-sm gtr-btn-red"
+                  disabled={busy === a.email}
+                  onClick={() => void decide(a.email, true)}
+                >
+                  ✅ Принять
+                </button>
+                <button
+                  className="gtr-btn gtr-btn-sm"
+                  disabled={busy === a.email}
+                  onClick={() => void decide(a.email, false)}
+                >
+                  ❌ Отклонить
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <span style={{ font: golos(11), color: "var(--gtr-t3)" }}>
+          Новых заявок нет. Артисты, организаторы, площадки и кандидаты в команду появятся здесь и в Telegram.
+        </span>
+      )}
+      {note ? <span style={{ font: golos(10.5), color: "rgba(255,255,255,.6)" }}>{note}</span> : null}
+    </Card>
   );
 }
 

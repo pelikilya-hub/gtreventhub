@@ -15,7 +15,7 @@ const sha256 = async (s: string) => {
     .join("");
 };
 
-const ROLE_LABELS: Record<RoleId, string> = {
+export const ROLE_LABELS: Record<RoleId, string> = {
   pr: "PR-директор",
   owner: "Владелец",
   sales: "Event-продажи",
@@ -1526,6 +1526,155 @@ export const signupVisitorFn = createServerFn({ method: "POST" })
       `🆕 <b>Регистрация в GTR Event</b>\n${tgEsc(stored.name)} · ${tgEsc(email)} · посетитель`,
     ).catch(() => {});
     return { ok: true as const };
+  });
+
+// ---------- заявки на роли: артист / организатор / площадка / команда ----------
+// Посетитель регистрируется мгновенно; остальные роли — заявка, которую
+// подтверждает BOSS (в Telegram кнопками или в дашборде). До одобрения
+// входа нет; после — человек входит со своим паролем.
+
+export type PendingApp = {
+  name: string;
+  email: string;
+  passHash: string;
+  role: RoleId;
+  about: string;
+  code: string;
+  created: number;
+};
+
+const APPLY_ROLES: Record<string, RoleId> = {
+  artist: "artist",
+  organizer: "organizer",
+  venue: "owner",
+  team: "gtr",
+};
+const APPLY_LABEL: Record<string, string> = {
+  artist: "Артист",
+  organizer: "Организатор",
+  venue: "Площадка",
+  team: "Команда GTR",
+};
+
+export const signupApplyFn = createServerFn({ method: "POST" })
+  .inputValidator(
+    (d: { name: string; email: string; password: string; kind: string; about: string }) => d,
+  )
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    if (!ns) return { ok: false as const, error: "Хранилище недоступно" };
+    const role = APPLY_ROLES[data.kind];
+    if (!role) return { ok: false as const, error: "Неизвестная роль" };
+    const email = data.email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return { ok: false as const, error: "Некорректный email" };
+    if (data.password.length < 6) return { ok: false as const, error: "Пароль от 6 символов" };
+    if (await ns.get(`user:${email}`))
+      return { ok: false as const, error: "Такой аккаунт уже есть — войдите" };
+    if (await ns.get(`pending:${email}`))
+      return { ok: false as const, error: "Заявка уже на рассмотрении — мы напишем" };
+    const code = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    const app: PendingApp = {
+      name: data.name.trim() || email.split("@")[0],
+      email,
+      passHash: await sha256(data.password),
+      role,
+      about: data.about.trim().slice(0, 400),
+      code,
+      created: Date.now(),
+    };
+    await ns.put(`pending:${email}`, JSON.stringify(app));
+    await ns.put(`pcode:${code}`, email, { expirationTtl: 60 * 60 * 24 * 30 });
+    // заявка — владельческое решение: только BOSS-контур, с кнопками
+    const { guardInternalChatId, OPS_KEY } = await import("./community");
+    const keys = await kvListAll(ns, "user:");
+    const users = (
+      await Promise.all(keys.map((k) => kvGetJson<StoredUser>(ns, k)))
+    ).filter((u): u is StoredUser => Boolean(u));
+    const text = [
+      `📥 <b>Заявка на роль: ${APPLY_LABEL[data.kind]}</b>`,
+      "",
+      `<b>${tgEsc(app.name)}</b> · ${tgEsc(email)}`,
+      app.about ? `«${tgEsc(app.about)}»` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+    const markup = {
+      inline_keyboard: [
+        [
+          { text: "✅ Принять", callback_data: `apr:${code}` },
+          { text: "❌ Отклонить", callback_data: `rej:${code}` },
+        ],
+      ],
+    };
+    const sent = new Set<string>();
+    const push = async (raw: string | number | null | undefined) => {
+      const chat = await guardInternalChatId(ns, raw);
+      if (!chat || sent.has(chat)) return;
+      sent.add(chat);
+      await tgApi("sendMessage", { chat_id: chat, text, parse_mode: "HTML", reply_markup: markup });
+    };
+    for (const a of users.filter((u) => u.role === "gtr" && u.boss)) {
+      await push(await ns.get(`tg:${a.email}`));
+    }
+    const ops = await kvGetJson<import("./community").OpsCfg>(ns, OPS_KEY);
+    await push(ops?.chatId);
+    return { ok: true as const };
+  });
+
+// Общее ядро решения по заявке — им пользуются TG-кнопки и дашборд
+export async function decidePendingCore(
+  ns: KvNs,
+  email: string,
+  approve: boolean,
+): Promise<{ ok: boolean; note: string; app?: PendingApp }> {
+  const app = await kvGetJson<PendingApp>(ns, `pending:${email}`);
+  if (!app) return { ok: false, note: "Заявка не найдена (уже решена?)" };
+  if (approve) {
+    const stored: StoredUser = {
+      email: app.email,
+      name: app.name,
+      role: app.role,
+      roleLabel: ROLE_LABELS[app.role],
+      venueId: "",
+      initials: initialsOf(app.name),
+      passHash: app.passHash,
+      created: Date.now(),
+      invitedBy: "apply",
+    };
+    await ns.put(`user:${app.email}`, JSON.stringify(stored));
+  }
+  await ns.delete(`pending:${email}`);
+  await ns.delete(`pcode:${app.code}`);
+  return {
+    ok: true,
+    note: approve
+      ? `✅ ${app.name} (${app.email}) — роль «${ROLE_LABELS[app.role]}» одобрена`
+      : `❌ Заявка ${app.name} (${app.email}) отклонена`,
+    app,
+  };
+}
+
+export const pendingListFn = createServerFn({ method: "GET" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || !ns || u.role !== "gtr") return { items: [] as PendingApp[] };
+  const keys = await kvListAll(ns, "pending:");
+  const items = (
+    await Promise.all(keys.map((k) => kvGetJson<PendingApp>(ns, k)))
+  ).filter((x): x is PendingApp => Boolean(x));
+  return { items: items.sort((a, b) => b.created - a.created).map(({ passHash: _p, ...r }) => r as PendingApp) };
+});
+
+export const pendingDecideFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { email: string; approve: boolean }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, note: "нужен вход" };
+    if (u.role !== "gtr" || !u.boss) return { ok: false as const, note: "только BOSS" };
+    const r = await decidePendingCore(ns, data.email.toLowerCase(), data.approve);
+    return { ok: r.ok as true, note: r.note };
   });
 
 // Лента событий всех площадок — публичная витрина (посетители и артисты)

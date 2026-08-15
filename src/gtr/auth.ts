@@ -185,6 +185,13 @@ export const loginFn = createServerFn({ method: "POST" })
         await issueSession(sessionUser);
         return { ok: true as const, user: sessionUser };
       }
+      // заявка на роль ещё не одобрена — честно говорим статус
+      if (await ns.get(`pending:${email}`)) {
+        return {
+          ok: false as const,
+          error: "Заявка на рассмотрении у основателя GTR. После одобрения вход откроется с вашим паролем.",
+        };
+      }
     }
 
     // 2) Демо-состав: общий пароль стенда (или демо-пароль без гейта)

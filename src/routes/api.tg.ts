@@ -855,6 +855,31 @@ export const Route = createFileRoute("/api/tg")({
             await tgApi("answerCallbackQuery", { callback_query_id: cqr.id, text: "Только в личке бота" });
             return Response.json({ ok: true, scope: "public-only" });
           }
+
+          // решение по заявке на роль: только BOSS
+          const ma = (cqr.data || "").match(/^(apr|rej):(\S+)$/);
+          if (ma && cqr.message) {
+            const u = await userOfChat(ns, cqr.message.chat.id);
+            const su = u as StoredUser | null;
+            if (!su || su.role !== "gtr" || !su.boss) {
+              await tgApi("answerCallbackQuery", { callback_query_id: cqr.id, text: "Только BOSS" });
+              return Response.json({ ok: true });
+            }
+            const email = await ns.get(`pcode:${ma[2]}`);
+            const { decidePendingCore } = await import("../gtr/kv-api");
+            const r = email
+              ? await decidePendingCore(ns, email, ma[1] === "apr")
+              : { ok: false, note: "Заявка не найдена (уже решена?)" };
+            await tgApi("answerCallbackQuery", { callback_query_id: cqr.id, text: r.ok ? "Готово" : r.note });
+            await tgApi("editMessageText", {
+              chat_id: cqr.message.chat.id,
+              message_id: cqr.message.message_id,
+              parse_mode: "HTML",
+              text: `${cqr.message.text ? tgEsc(cqr.message.text) + "\n\n" : ""}<b>${tgEsc(r.note)}</b>`,
+            });
+            return Response.json({ ok: true });
+          }
+
           const mr = (cqr.data || "").match(/^req:(\S+):(take|acc|dec)$/);
           if (mr && cqr.message) {
             const chatId = cqr.message.chat.id;

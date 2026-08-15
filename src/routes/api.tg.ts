@@ -369,6 +369,26 @@ export const Route = createFileRoute("/api/tg")({
               );
             }
           }
+          // приветствие новичка в чате сообщества (не чаще раза в 3 минуты,
+          // чтобы наплыв людей не превращался в стену приветствий)
+          if (was && now && !cm.new_chat_member.user.id.toString().startsWith("-")) {
+            const { APP_URL, COMMUNITY_KEY } = await import("../gtr/community");
+            const ccfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
+            if (ccfg?.chatId === cm.chat.id && !(await ns.get("greetlock"))) {
+              await ns.put("greetlock", "1", { expirationTtl: 180 });
+              const who = cm.new_chat_member.user.first_name || "друг";
+              await tgApi("sendMessage", {
+                chat_id: cm.chat.id,
+                parse_mode: "HTML",
+                text: [
+                  `👋 <b>${tgEsc(who)}</b>, добро пожаловать в GTR!`,
+                  `Комнаты: 🔥 Афиша · 🎵 Музыка · 🎉 Знакомства · 💡 Идеи`,
+                  `🌴 /tonight — куда пойти сегодня · <a href="${APP_URL}">GTR Event</a>`,
+                ].join("\n"),
+                link_preview_options: { is_disabled: true },
+              });
+            }
+          }
           return Response.json({ ok: true });
         }
 

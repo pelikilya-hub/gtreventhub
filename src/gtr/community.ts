@@ -114,7 +114,8 @@ export async function buildDigestText(ns: KvNs): Promise<string> {
   if (!tonight.length && !upcoming.length) {
     lines.push("", "Программа обновляется — загляни в приложение, там вся карта острова.");
   }
-  lines.push("", `🎟 Афиша, бронь столов и подбор вечеринок под твой вкус:`, APP_URL);
+  // ссылка спрятана под именем продукта — без голого URL в тексте
+  lines.push("", `🎟 <a href="${APP_URL}">GTR Event</a> — афиша, бронь столов и подбор вечеринок под твой вкус`);
   return lines.join("\n");
 }
 
@@ -141,7 +142,7 @@ export function buildInviteText(cfg: CommunityCfg): string {
     "",
     `104 клуба и бара, 312 артистов, живая афиша на каждый вечер, бронь столов в пару касаний и ИИ-подбор вечеринок под твой вкус.`,
     "",
-    `▶ Открыть приложение: ${APP_URL}`,
+    `▶ Открыть приложение: <a href="${APP_URL}">GTR Event</a>`,
   ];
   if (cfg.channelUrl) lines.push(`📣 Новости: ${tgEsc(cfg.channelUrl)}`);
   if (cfg.chatUrl) lines.push(`💬 Чат сообщества: ${tgEsc(cfg.chatUrl)}`);

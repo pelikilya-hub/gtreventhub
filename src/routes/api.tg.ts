@@ -47,7 +47,7 @@ type TgUpdate = {
   message?: {
     text?: string;
     chat: { id: number };
-    from?: { first_name?: string; username?: string };
+    from?: { first_name?: string; username?: string; language_code?: string };
   };
   callback_query?: {
     id: string;
@@ -381,9 +381,9 @@ export const Route = createFileRoute("/api/tg")({
                 chat_id: cm.chat.id,
                 parse_mode: "HTML",
                 text: [
-                  `👋 <b>${tgEsc(who)}</b>, добро пожаловать в GTR!`,
-                  `Комнаты: 🔥 Афиша · 🎵 Музыка · 🎉 Знакомства · 💡 Идеи`,
-                  `🌴 /tonight — куда пойти сегодня · <a href="${APP_URL}">GTR Event</a>`,
+                  `👋 <b>${tgEsc(who)}</b>, добро пожаловать в GTR! · welcome to GTR!`,
+                  `Комнаты · Rooms: 🔥 Афиша · 🎵 Музыка · 🎉 Знакомства · 💡 Идеи`,
+                  `🌴 /tonight — куда пойти сегодня · where to go tonight · <a href="${APP_URL}">GTR Event</a>`,
                 ].join("\n"),
                 link_preview_options: { is_disabled: true },
               });
@@ -480,26 +480,27 @@ export const Route = createFileRoute("/api/tg")({
           // /tonight работает везде — и в личке, и в группе комьюнити,
           // без привязки аккаунта: это витрина, а не кабинет
           if (cmd === "/tonight" || cmd === "/afisha") {
-            const { buildDigestText } = await import("../gtr/community");
-            await reply(chatId, await buildDigestText(ns));
+            const { buildDigestText, tgLangOf } = await import("../gtr/community");
+            await reply(chatId, await buildDigestText(ns, tgLangOf(up.message.from?.language_code)));
             return Response.json({ ok: true });
           }
 
           // конкурс инвайтинга: личная ссылка и таблица лидеров
           if (cmd === "/ref") {
+            const { tgLangOf } = await import("../gtr/community");
+            const lng = tgLangOf(up.message.from?.language_code);
             const who = up.message.from?.first_name || up.message.from?.username || "участник";
             const r = await issueRefLink(ns, chatId, who);
+            const REF_T = {
+              ru: [`🎁 <b>Твоя личная ссылка на канал GTR Live:</b>`, "{l}", "", "Зови друзей по ней — каждый, кто вступит, засчитается тебе.", "Счёт и лидеры: /top"],
+              en: [`🎁 <b>Your personal GTR Live invite link:</b>`, "{l}", "", "Share it with friends — everyone who joins counts for you.", "Score & leaderboard: /top"],
+              th: [`🎁 <b>ลิงก์ชวนเพื่อนส่วนตัวของคุณ:</b>`, "{l}", "", "แชร์ให้เพื่อน — ทุกคนที่เข้าร่วมนับเป็นคะแนนของคุณ", "คะแนนและอันดับ: /top"],
+            } as const;
             await reply(
               chatId,
               r.ok
-                ? [
-                    `🎁 <b>Твоя личная ссылка на канал GTR Live:</b>`,
-                    r.link,
-                    "",
-                    "Зови друзей по ней — каждый, кто вступит, засчитается тебе.",
-                    "Счёт и лидеры: /top",
-                  ].join("\n")
-                : `Не получилось: ${tgEsc(r.reason)}`,
+                ? REF_T[lng].join("\n").replace("{l}", r.link)
+                : `${lng === "ru" ? "Не получилось" : lng === "th" ? "ไม่สำเร็จ" : "Failed"}: ${tgEsc(r.reason)}`,
             );
             return Response.json({ ok: true });
           }

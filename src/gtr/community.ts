@@ -85,7 +85,43 @@ export async function collectCleanAfisha(ns: KvNs) {
 const RU_DATE = (iso: string) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}`;
 
 // Дайджест вечера: сегодняшняя программа, при тишине — ближайшие дни
-export async function buildDigestText(ns: KvNs): Promise<string> {
+// Языки бота: Telegram присылает language_code пользователя — бот отвечает
+// на его языке. Канал один на всех, поэтому дайджест туда идёт "dual"
+// (RU·EN-метки, контент — названия и площадки — языконезависим).
+export type TgLang = "ru" | "en" | "th" | "dual";
+
+export const tgLangOf = (code?: string): TgLang => {
+  const c = (code || "").toLowerCase();
+  if (c.startsWith("ru") || c.startsWith("uk") || c.startsWith("be") || c.startsWith("kk")) return "ru";
+  if (c.startsWith("th")) return "th";
+  return "en";
+};
+
+const DIGEST_L: Record<Exclude<TgLang, "dual">, { head: string; tonight: string; upcoming: string; empty: string; cta: string }> = {
+  ru: {
+    head: "GTR · Куда пойти на Пхукете",
+    tonight: "Сегодня",
+    upcoming: "Ближайшие вечера",
+    empty: "Программа обновляется — загляни в приложение, там вся карта острова.",
+    cta: "афиша, бронь столов и подбор вечеринок под твой вкус",
+  },
+  en: {
+    head: "GTR · Where to go in Phuket",
+    tonight: "Tonight",
+    upcoming: "Upcoming nights",
+    empty: "The lineup is updating — check the app for the full island map.",
+    cta: "events, table booking and AI party match",
+  },
+  th: {
+    head: "GTR · เที่ยวไหนดีที่ภูเก็ต",
+    tonight: "คืนนี้",
+    upcoming: "คืนถัดไป",
+    empty: "โปรแกรมกำลังอัปเดต — เปิดแอปดูแผนที่ทั้งเกาะได้เลย",
+    cta: "อีเวนต์ จองโต๊ะ และ AI จับคู่ปาร์ตี้",
+  },
+};
+
+export async function buildDigestText(ns: KvNs, lang: TgLang = "dual"): Promise<string> {
   const items = await collectCleanAfisha(ns);
   const today = new Date().toISOString().slice(0, 10);
   const tonight = items.filter((e) => e.dateIso === today).slice(0, 8);
@@ -99,23 +135,26 @@ export async function buildDigestText(ns: KvNs): Promise<string> {
     upcoming.push(e);
     if (upcoming.length >= 8 - Math.min(tonight.length, 8)) break;
   }
+  // dual: русская метка · английская — контент один и тот же
+  const pick = (k: keyof (typeof DIGEST_L)["ru"]) =>
+    lang === "dual" ? `${DIGEST_L.ru[k]} · ${DIGEST_L.en[k]}` : DIGEST_L[lang][k];
   const lines: string[] = [];
-  lines.push(`🌴 <b>GTR · Куда пойти на Пхукете</b>`);
+  lines.push(`🌴 <b>${lang === "dual" ? `${DIGEST_L.ru.head} · Phuket night guide` : DIGEST_L[lang].head}</b>`);
   if (tonight.length) {
-    lines.push("", `🔥 <b>Сегодня</b>`);
+    lines.push("", `🔥 <b>${pick("tonight")}</b>`);
     for (const e of tonight)
       lines.push(`• <b>${tgEsc(e.title.toUpperCase())}</b> — ${tgEsc(e.venueName)}`);
   }
   if (upcoming.length) {
-    lines.push("", `📅 <b>Ближайшие вечера</b>`);
+    lines.push("", `📅 <b>${pick("upcoming")}</b>`);
     for (const e of upcoming)
       lines.push(`• ${RU_DATE(e.dateIso)} · <b>${tgEsc(e.title.toUpperCase())}</b> — ${tgEsc(e.venueName)}`);
   }
   if (!tonight.length && !upcoming.length) {
-    lines.push("", "Программа обновляется — загляни в приложение, там вся карта острова.");
+    lines.push("", pick("empty"));
   }
   // ссылка спрятана под именем продукта — без голого URL в тексте
-  lines.push("", `🎟 <a href="${APP_URL}">GTR Event</a> — афиша, бронь столов и подбор вечеринок под твой вкус`);
+  lines.push("", `🎟 <a href="${APP_URL}">GTR Event</a> — ${pick("cta")}`);
   return lines.join("\n");
 }
 

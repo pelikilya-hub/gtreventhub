@@ -1926,6 +1926,9 @@ function VisitorCabinet() {
                 💬 {t("Чат сообщества")}
               </button>
             ) : null}
+            <button className="gtr-btn" onClick={() => openAppLink("https://t.me/bangtaostyle")}>
+              📩 {t("Связь")}
+            </button>
           </div>
         </Card>
       ) : null}

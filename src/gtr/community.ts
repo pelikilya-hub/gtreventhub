@@ -8,6 +8,8 @@ import { kvGetJson, kvListAll, type KvNs } from "./kv-ns";
 import { tgApi, tgEsc } from "./tg";
 
 export const APP_URL = "https://gtr-event-hub.gtr-event.workers.dev";
+// Контакт основателя для связи и сотрудничества — показывается в постах
+export const OWNER_TG = "https://t.me/bangtaostyle";
 
 export type CommunityCfg = {
   channelUrl?: string;
@@ -143,6 +145,7 @@ export function buildInviteText(cfg: CommunityCfg): string {
   ];
   if (cfg.channelUrl) lines.push(`📣 Новости: ${tgEsc(cfg.channelUrl)}`);
   if (cfg.chatUrl) lines.push(`💬 Чат сообщества: ${tgEsc(cfg.chatUrl)}`);
+  lines.push(`📩 Связь и сотрудничество: @bangtaostyle`);
   lines.push("", `Мы запускаем тестовую группу — заходи первым и расскажи, чего не хватает. Твои идеи попадут в продукт.`);
   return lines.join("\n");
 }

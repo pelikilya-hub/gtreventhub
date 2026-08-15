@@ -18,7 +18,7 @@ import {
 import { useContent } from "./content";
 import { GtrProvider, useGtr } from "./store";
 import { Eyebrow, Icon } from "./ui";
-import "./i18n";
+import { setUiLang, UI_LANGS, type UiLang } from "./i18n";
 import { useTranslation } from "react-i18next";
 
 import { DashScreen } from "./screens/Dash";
@@ -63,6 +63,35 @@ const AfishaGenScreen = lazy(() =>
 );
 
 export type GtrSearch = { vid?: string; artist?: string; draft?: string };
+
+// Переключатель языка в шапке: RU / EN / TH одним тапом, мгновенно —
+// в мобильной шапке справа и в сайдбаре десктопа под логотипом
+function LangSwitch({ style }: { style?: import("react").CSSProperties }) {
+  const { i18n: i } = useTranslation();
+  const cur = (i.language as UiLang) || "ru";
+  return (
+    <div style={{ display: "inline-flex", border: "1px solid rgba(255,255,255,.16)", ...style }}>
+      {UI_LANGS.map(([code]) => (
+        <button
+          key={code}
+          onClick={() => setUiLang(code)}
+          aria-pressed={cur === code}
+          style={{
+            padding: "6px 9px",
+            cursor: "pointer",
+            font: "700 9.5px/1 'JetBrains Mono',monospace",
+            letterSpacing: ".08em",
+            border: "none",
+            background: cur === code ? "#E5231B" : "transparent",
+            color: cur === code ? "#fff" : "rgba(255,255,255,.55)",
+          }}
+        >
+          {code.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export function GtrShell({
   user,
@@ -229,18 +258,22 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
           alt="GTR — Global Transformation Reality"
           style={{ height: 30, width: "auto" }}
         />
+        <LangSwitch style={{ marginLeft: "auto" }} />
       </header>
       {/* скрим всегда в DOM: видимость через CSS-фейд, чтобы меню не моргало */}
       <div className="gtr-scrim" aria-hidden={!navOpen} onClick={() => setNavOpen(false)} />
 
       {/* ---------- сайдбар ---------- */}
       <aside className="gtr-sidebar">
-        <div className="gtr-neon" style={{ padding: "0 11px", marginBottom: 22 }}>
+        <div className="gtr-neon" style={{ padding: "0 11px", marginBottom: 14 }}>
           <img
             src="/brand/GTR_primary_dark_clean.svg"
             alt="GTR — Global Transformation Reality"
             style={{ height: 44, width: "auto", display: "block" }}
           />
+        </div>
+        <div style={{ padding: "0 11px", marginBottom: 16 }}>
+          <LangSwitch />
         </div>
 
         {/* пользователь */}

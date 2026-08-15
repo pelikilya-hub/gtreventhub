@@ -23,7 +23,7 @@ import { useGtr } from "../store";
 import { FAMILY_LABEL } from "../match";
 import { useTranslation } from "react-i18next";
 import { ArtistStudio } from "./ArtistStudio";
-import i18n, { setUiLang, UI_LANGS, type UiLang } from "../i18n";
+import "../i18n";
 import { Card, Chip, Dot, Eyebrow, Icon, Ring, TrashTitle } from "../ui";
 import { ImpulseArt } from "../impulse";
 import {
@@ -937,21 +937,7 @@ function SalesCabinet() {
             <option value="th">ไทย</option>
           </select>
         </span>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
-          <span className="gtr-mono" style={{ font: "600 9px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".1em" }}>
-            {t("ЯЗЫК ПРИЛОЖЕНИЯ")}
-          </span>
-          <select
-            className="gtr-input"
-            style={{ padding: "7px 10px", width: "auto" }}
-            value={i18n.language as UiLang}
-            onChange={(e) => setUiLang(e.target.value as UiLang)}
-          >
-            {UI_LANGS.map(([code, label]) => (
-              <option key={code} value={code}>{label}</option>
-            ))}
-          </select>
-        </span>
+        {/* язык приложения переехал в шапку (LangSwitch в shell) */}
       </Card>
 
       {/* ---------- KPI кабинета ---------- */}
@@ -1936,20 +1922,9 @@ function VisitorCabinet() {
         </Card>
       ) : null}
 
+      {/* язык приложения переехал в шапку (LangSwitch в shell) */}
       <Card style={{ padding: "12px 16px", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         <PushPanel />
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 7, marginLeft: "auto" }}>
-          <select
-            className="gtr-input"
-            style={{ padding: "7px 10px", width: "auto" }}
-            value={i18n.language as UiLang}
-            onChange={(e) => setUiLang(e.target.value as UiLang)}
-          >
-            {UI_LANGS.map(([code, lbl]) => (
-              <option key={code} value={code}>{lbl}</option>
-            ))}
-          </select>
-        </span>
       </Card>
     </div>
   );

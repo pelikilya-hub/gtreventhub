@@ -29,8 +29,8 @@ export const Route = createFileRoute("/api/community-digest")({
         });
         // служебный контур: ежедневная сводка метрик — команде, не в паблик
         const { buildOpsSummary } = await import("../gtr/community");
-        const { notifyAdminsTg } = await import("../gtr/kv-api");
-        await notifyAdminsTg(ns, await buildOpsSummary(ns)).catch(() => {});
+        const { notifyBossTg } = await import("../gtr/kv-api");
+        await notifyBossTg(ns, await buildOpsSummary(ns)).catch(() => {});
         return Response.json({ ok: res.ok, reason: res.description ?? "" });
       },
     },

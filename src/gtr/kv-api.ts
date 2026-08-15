@@ -49,6 +49,28 @@ const canSeeRequest = (u: SessionUser, r: OrgRequest) =>
 // Служебный контур: личные чаты GTR-админов + закрытый ops-канал.
 // Любой адрес проходит через guardInternalChatId — в публичные чаты
 // комьюнити техническое не уходит никогда.
+// Метрики и владельческое: ТОЛЬКО BOSS + закрытый ops-канал. Команда
+// (Фёдор, Владимир) это не получает — им идёт только их операционка.
+export async function notifyBossTg(ns: KvNs, text: string) {
+  const { guardInternalChatId, OPS_KEY } = await import("./community");
+  const keys = await kvListAll(ns, "user:");
+  const users = (
+    await Promise.all(keys.map((k) => kvGetJson<StoredUser>(ns, k)))
+  ).filter((u): u is StoredUser => Boolean(u));
+  const sent = new Set<string>();
+  const push = async (raw: string | number | null | undefined) => {
+    const chat = await guardInternalChatId(ns, raw);
+    if (!chat || sent.has(chat)) return;
+    sent.add(chat);
+    await tgApi("sendMessage", { chat_id: chat, text, parse_mode: "HTML" });
+  };
+  for (const a of users.filter((u) => u.role === "gtr" && u.boss)) {
+    await push(await ns.get(`tg:${a.email}`));
+  }
+  const ops = await kvGetJson<import("./community").OpsCfg>(ns, OPS_KEY);
+  await push(ops?.chatId);
+}
+
 export async function notifyAdminsTg(ns: KvNs, text: string) {
   const { guardInternalChatId, OPS_KEY } = await import("./community");
   const keys = await kvListAll(ns, "user:");
@@ -1445,7 +1467,7 @@ export const signupVisitorFn = createServerFn({ method: "POST" })
     // метрика + пинг в служебный контур (не в публичные чаты)
     const { bumpMetric } = await import("./community");
     bumpMetric(ns, "reg").catch(() => {});
-    notifyAdminsTg(
+    notifyBossTg(
       ns,
       `🆕 <b>Регистрация в GTR Event</b>\n${tgEsc(stored.name)} · ${tgEsc(email)} · посетитель`,
     ).catch(() => {});

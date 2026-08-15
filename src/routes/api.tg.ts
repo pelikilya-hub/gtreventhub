@@ -405,7 +405,7 @@ export const Route = createFileRoute("/api/tg")({
           // метрики служебного контура: кто пришёл/ушёл в канале и чате
           {
             const { COMMUNITY_KEY, bumpMetric } = await import("../gtr/community");
-            const { notifyAdminsTg } = await import("../gtr/kv-api");
+            const { notifyBossTg } = await import("../gtr/kv-api");
             const ccfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
             const isCh = ccfg?.channelId === cm.chat.id;
             const isGr = ccfg?.chatId === cm.chat.id;
@@ -415,12 +415,12 @@ export const Route = createFileRoute("/api/tg")({
               await bumpMetric(ns, isCh ? "chJoin" : "gJoin").catch(() => {});
               const u = cm.new_chat_member.user;
               const via = link ? ` · по ссылке «${tgEsc(cm.invite_link?.name || "invite")}»` : "";
-              notifyAdminsTg(ns, `➕ ${isCh ? "Канал" : "Чат"}: <b>${tgEsc(u.first_name || String(u.id))}</b> вступил(а)${via}`).catch(() => {});
+              notifyBossTg(ns, `➕ ${isCh ? "Канал" : "Чат"}: <b>${tgEsc(u.first_name || String(u.id))}</b> вступил(а)${via}`).catch(() => {});
             }
             if ((isCh || isGr) && left) {
               await bumpMetric(ns, isCh ? "chLeave" : "gLeave").catch(() => {});
               const u = cm.new_chat_member.user;
-              notifyAdminsTg(ns, `➖ ${isCh ? "Канал" : "Чат"}: <b>${tgEsc(u.first_name || String(u.id))}</b> вышел(ла)`).catch(() => {});
+              notifyBossTg(ns, `➖ ${isCh ? "Канал" : "Чат"}: <b>${tgEsc(u.first_name || String(u.id))}</b> вышел(ла)`).catch(() => {});
             }
           }
 

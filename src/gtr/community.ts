@@ -87,7 +87,16 @@ export async function buildDigestText(ns: KvNs): Promise<string> {
   const items = await collectCleanAfisha(ns);
   const today = new Date().toISOString().slice(0, 10);
   const tonight = items.filter((e) => e.dateIso === today).slice(0, 8);
-  const upcoming = items.filter((e) => e.dateIso > today).slice(0, 8 - Math.min(tonight.length, 8));
+  // не даём одной площадке забить весь дайджест — максимум 2 строки на неё
+  const perVenue = new Map<string, number>();
+  const upcoming: typeof items = [];
+  for (const e of items) {
+    if (e.dateIso <= today) continue;
+    if ((perVenue.get(e.vid) ?? 0) >= 2) continue;
+    perVenue.set(e.vid, (perVenue.get(e.vid) ?? 0) + 1);
+    upcoming.push(e);
+    if (upcoming.length >= 8 - Math.min(tonight.length, 8)) break;
+  }
   const lines: string[] = [];
   lines.push(`🌴 <b>GTR · Куда пойти на Пхукете</b>`);
   if (tonight.length) {

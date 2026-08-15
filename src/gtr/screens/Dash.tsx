@@ -1884,27 +1884,30 @@ function VisitorCabinet() {
         </>
       ) : null}
 
-      {/* ---- мой вкус + быстрые ходы ---- */}
+      {/* ---- мой вкус + быстрые ходы: фирменные значки-стикеры ---- */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 12, marginBottom: 16 }}>
-        <Card hover style={{ padding: "16px 18px" }} onClick={() => go("aimatch")}>
+        <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("aimatch")}>
+          <img src="/brand/stickers/headphones.png" alt="" aria-hidden style={{ position: "absolute", right: -8, bottom: -10, width: 74, opacity: 0.85, transform: "rotate(-8deg)" }} />
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span className="gtr-eq" aria-hidden><span /><span /><span /><span /></span>
             <span style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Мой вкус")}</span>
             {mp ? <Chip color="#2ECC71">{t("СОБРАН")}</Chip> : null}
           </div>
-          <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+          <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>
             {mp
               ? mp.genres.slice(0, 3).map(([f]) => FAMILY_LABEL[f] ?? f).join(" · ")
               : t("Выбери жанры — получи свои места")}
           </div>
         </Card>
-        <Card hover style={{ padding: "16px 18px" }} onClick={() => go("map")}>
+        <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("map")}>
+          <img src="/brand/stickers/map.png" alt="" aria-hidden style={{ position: "absolute", right: -8, bottom: -10, width: 74, opacity: 0.85, transform: "rotate(6deg)" }} />
           <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Карта")}</div>
-          <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{t("Весь остров точками")}</div>
+          <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>{t("Весь остров точками")}</div>
         </Card>
-        <Card hover style={{ padding: "16px 18px" }} onClick={() => go("promo")}>
+        <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("promo")}>
+          <img src="/brand/stickers/champagne.png" alt="" aria-hidden style={{ position: "absolute", right: -8, bottom: -10, width: 74, opacity: 0.85, transform: "rotate(-6deg)" }} />
           <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Стол на вечер")}</div>
-          <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{t("Бронь в пару касаний")}</div>
+          <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>{t("Бронь в пару касаний")}</div>
         </Card>
       </div>
 

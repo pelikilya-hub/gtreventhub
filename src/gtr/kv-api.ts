@@ -518,7 +518,8 @@ export const tgActivateFn = createServerFn({ method: "POST" }).handler(async () 
   const hook = await tgApi("setWebhook", {
     url: `${origin}/api/tg`,
     secret_token: await tgWebhookSecret(),
-    allowed_updates: ["message", "callback_query"],
+    // chat_member — вступления в канал по инвайт-ссылкам (конкурс инвайтинга)
+    allowed_updates: ["message", "callback_query", "chat_member"],
   });
   if (!hook.ok) return { ok: false as const, error: `setWebhook: ${hook.description}` };
   await ns.put("tg:bot", meBot.result.username);
@@ -1518,25 +1519,43 @@ export const setCommunityCfgFn = createServerFn({ method: "POST" })
   });
 
 export const communityPostFn = createServerFn({ method: "POST" })
-  .inputValidator((d: { kind: "digest" | "invite"; target: "channel" | "chat" }) => d)
+  .inputValidator((d: { kind: "digest" | "invite" | "contest"; target: "channel" | "chat" }) => d)
   .handler(async ({ data }) => {
     const u = await currentUser();
     const ns = await getKvNs();
     if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
     if (u.role !== "gtr" && !u.boss) return { ok: false as const, reason: "только BOSS / GTR-админ" };
-    const { COMMUNITY_KEY, buildDigestText, buildInviteText } = await import("./community");
+    const { COMMUNITY_KEY, buildContestText, buildDigestText, buildInviteText } = await import("./community");
     const cfg = await kvGetJson<import("./community").CommunityCfg>(ns, COMMUNITY_KEY);
     const chatId = data.target === "channel" ? cfg?.channelId : cfg?.chatId;
     if (!chatId) {
       return { ok: false as const, reason: data.target === "channel" ? "Канал не привязан" : "Группа не привязана" };
     }
+    const bot = (await ns.get("tg:bot")) || "Gtrcom1_bot";
     const text =
-      data.kind === "digest" ? await buildDigestText(ns) : buildInviteText(cfg ?? {});
+      data.kind === "digest"
+        ? await buildDigestText(ns)
+        : data.kind === "contest"
+          ? buildContestText()
+          : buildInviteText(cfg ?? {});
     const res = await tgApi("sendMessage", {
       chat_id: chatId,
       text,
       parse_mode: "HTML",
-      link_preview_options: { url: (await import("./community")).APP_URL, prefer_large_media: true },
+      ...(data.kind === "contest"
+        ? {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: "🎁 Получить мою ссылку", url: `https://t.me/${bot}?start=ref` }],
+              ],
+            },
+          }
+        : {
+            link_preview_options: {
+              url: (await import("./community")).APP_URL,
+              prefer_large_media: true,
+            },
+          }),
     });
     return res.ok
       ? { ok: true as const, reason: "" }

@@ -39,6 +39,7 @@ import {
   pushSubscribeFn,
   pushTaskFn,
   pushTestFn,
+  tgActivateFn,
   tgLinkFn,
   tgStatusFn,
   venueConfirmsFn,
@@ -670,8 +671,17 @@ function CommunityCard() {
       setState("Сервер недоступен");
     }
   };
-  const post = async (kind: "digest" | "invite", target: "channel" | "chat") => {
-    setState(kind === "digest" ? "Собираю дайджест вечера…" : "Отправляю приглашение…");
+  const activate = async () => {
+    setState("Обновляю вебхук бота (конкурс)…");
+    try {
+      const r = await tgActivateFn();
+      setState(r.ok ? `✓ Вебхук обновлён · @${r.bot}` : r.error);
+    } catch {
+      setState("Сервер недоступен");
+    }
+  };
+  const post = async (kind: "digest" | "invite" | "contest", target: "channel" | "chat") => {
+    setState(kind === "digest" ? "Собираю дайджест вечера…" : kind === "contest" ? "Публикую конкурс…" : "Отправляю приглашение…");
     try {
       const r = await communityPostFn({ data: { kind, target } });
       setState(r.ok ? "✓ Опубликовано" : r.reason);
@@ -731,8 +741,9 @@ function CommunityCard() {
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button className="gtr-btn" onClick={() => post("digest", "channel")}>📣 Дайджест в канал сейчас</button>
         <button className="gtr-btn" onClick={() => post("invite", "channel")}>🎉 Приглашение в канал</button>
-        <button className="gtr-btn" onClick={() => post("invite", "chat")}>💬 Приглашение в группу</button>
+        <button className="gtr-btn" onClick={() => post("contest", "channel")}>🏆 Конкурс инвайтинга в канал</button>
         <button className="gtr-btn" onClick={copyInvite}>📋 Текст приглашения (разослать)</button>
+        <button className="gtr-btn" onClick={activate}>⚙️ Обновить вебхук (для конкурса)</button>
       </div>
       {state ? (
         <div

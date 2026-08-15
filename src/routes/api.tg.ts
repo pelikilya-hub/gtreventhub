@@ -54,6 +54,14 @@ type TgUpdate = {
     data?: string;
     message?: { chat: { id: number }; message_id: number; text?: string };
   };
+  // конкурс инвайтинга: Telegram шлёт вступления в канал с инвайт-ссылкой
+  chat_member?: {
+    chat: { id: number };
+    from?: { id: number; first_name?: string };
+    old_chat_member: { status: string; user: { id: number; first_name?: string } };
+    new_chat_member: { status: string; user: { id: number; first_name?: string } };
+    invite_link?: { invite_link: string; name?: string };
+  };
 };
 
 const reply = (chatId: number, text: string, markup?: unknown) =>
@@ -72,6 +80,50 @@ async function userOfChat(ns: KvNs, chatId: number): Promise<StoredUser | { emai
 }
 
 const isStaff = (u: { role?: string }) => u.role !== "artist";
+
+// ---------- конкурс инвайтинга ----------
+// Личная инвайт-ссылка на канал: кто по ней вступил — засчитан пригласившему.
+// refown:<ссылка> → владелец; refscore:<chatId> → {n, name}.
+async function issueRefLink(
+  ns: KvNs,
+  chatId: number,
+  name: string,
+): Promise<{ ok: true; link: string } | { ok: false; reason: string }> {
+  const { COMMUNITY_KEY } = await import("../gtr/community");
+  const cfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
+  if (!cfg?.channelId) return { ok: false, reason: "Канал ещё не привязан" };
+  const existing = await ns.get(`reflinkof:${chatId}`);
+  if (existing) return { ok: true, link: existing };
+  const r = await tgApi<{ invite_link: string }>("createChatInviteLink", {
+    chat_id: cfg.channelId,
+    name: `ref ${name}`.slice(0, 32),
+  });
+  if (!r.ok || !r.result) return { ok: false, reason: r.description || "Telegram не выдал ссылку" };
+  const link = r.result.invite_link;
+  await ns.put(`refown:${link}`, JSON.stringify({ chat: chatId, name }));
+  await ns.put(`reflinkof:${chatId}`, link);
+  return { ok: true, link };
+}
+
+async function refLeaderboard(ns: KvNs): Promise<string> {
+  const keys = await kvListAll(ns, "refscore:");
+  const rows: { n: number; name: string }[] = [];
+  for (const k of keys) {
+    const v = await kvGetJson<{ n: number; name: string }>(ns, k);
+    if (v?.n) rows.push(v);
+  }
+  rows.sort((a, b) => b.n - a.n);
+  if (!rows.length)
+    return "Пока никто не приглашал. Возьми личную ссылку — /ref — и открой счёт!";
+  const medal = ["🥇", "🥈", "🥉"];
+  return [
+    "🏆 <b>Топ инвайтеров GTR</b>",
+    "",
+    ...rows.slice(0, 10).map((r, i) => `${medal[i] ?? `${i + 1}.`} <b>${tgEsc(r.name)}</b> — ${r.n}`),
+    "",
+    "Личная ссылка: /ref",
+  ].join("\n");
+}
 
 // Мои события (та же логика скоупа, что в приложении)
 async function draftsFor(ns: KvNs, u: StoredUser | { email: string }) {
@@ -282,11 +334,43 @@ export const Route = createFileRoute("/api/tg")({
     handlers: {
       POST: async ({ request }: { request: Request }) => {
         const secret = request.headers.get("x-telegram-bot-api-secret-token");
-        if (secret !== (await tgWebhookSecret())) return new Response("nope", { status: 401 });
         const ns = await getKvNs();
+        // два валидных секрета: производная от секрета сессий (ставит
+        // tgActivateFn) и операционный из KV (tg:hooksecret) — чтобы вебхук
+        // можно было переустановить без входа в приложение
+        const altSecret = ns ? await ns.get("tg:hooksecret") : null;
+        if (secret !== (await tgWebhookSecret()) && (!altSecret || secret !== altSecret))
+          return new Response("nope", { status: 401 });
         if (!ns) return Response.json({ ok: true });
         const up = (await request.json().catch(() => null)) as TgUpdate | null;
         if (!up) return Response.json({ ok: true });
+
+        // ---------- конкурс: вступление в канал по личной ссылке ----------
+        if (up.chat_member) {
+          const cm = up.chat_member;
+          const was = ["left", "kicked"].includes(cm.old_chat_member.status);
+          const now = ["member", "administrator"].includes(cm.new_chat_member.status);
+          const link = cm.invite_link?.invite_link;
+          if (was && now && link) {
+            const own = await kvGetJson<{ chat: number; name: string }>(ns, `refown:${link}`);
+            if (own) {
+              const key = `refscore:${own.chat}`;
+              const cur = (await kvGetJson<{ n: number; name: string }>(ns, key)) ?? {
+                n: 0,
+                name: own.name,
+              };
+              cur.n += 1;
+              cur.name = own.name;
+              await ns.put(key, JSON.stringify(cur));
+              const joined = cm.new_chat_member.user.first_name || "друг";
+              await reply(
+                own.chat,
+                `🎉 <b>${tgEsc(joined)}</b> вступил(а) в канал по твоей ссылке!\nТвой счёт: <b>${cur.n}</b> · таблица лидеров — /top`,
+              );
+            }
+          }
+          return Response.json({ ok: true });
+        }
 
         // ---------- сообщения ----------
         if (up.message?.text) {
@@ -294,6 +378,26 @@ export const Route = createFileRoute("/api/tg")({
           const text = up.message.text.trim();
 
           const start = text.match(/^\/start\s+(\S+)/);
+          // deep-link конкурса: t.me/бот?start=ref — сразу выдаём личную ссылку
+          if (start && start[1] === "ref") {
+            const who = up.message.from?.first_name || up.message.from?.username || "участник";
+            const r = await issueRefLink(ns, chatId, who);
+            await reply(
+              chatId,
+              r.ok
+                ? [
+                    `🎁 <b>Ты в конкурсе GTR!</b>`,
+                    "",
+                    `Твоя личная ссылка на канал:`,
+                    r.link,
+                    "",
+                    "Зови друзей — каждый вступивший засчитается тебе. Лидеры: /top",
+                    `А афиша вечера всегда тут: /tonight`,
+                  ].join("\n")
+                : `Не получилось: ${tgEsc(r.reason)}`,
+            );
+            return Response.json({ ok: true });
+          }
           if (start) {
             const email = await ns.get(`tglink:${start[1]}`);
             if (!email) {
@@ -358,6 +462,29 @@ export const Route = createFileRoute("/api/tg")({
           if (cmd === "/tonight" || cmd === "/afisha") {
             const { buildDigestText } = await import("../gtr/community");
             await reply(chatId, await buildDigestText(ns));
+            return Response.json({ ok: true });
+          }
+
+          // конкурс инвайтинга: личная ссылка и таблица лидеров
+          if (cmd === "/ref") {
+            const who = up.message.from?.first_name || up.message.from?.username || "участник";
+            const r = await issueRefLink(ns, chatId, who);
+            await reply(
+              chatId,
+              r.ok
+                ? [
+                    `🎁 <b>Твоя личная ссылка на канал GTR Live:</b>`,
+                    r.link,
+                    "",
+                    "Зови друзей по ней — каждый, кто вступит, засчитается тебе.",
+                    "Счёт и лидеры: /top",
+                  ].join("\n")
+                : `Не получилось: ${tgEsc(r.reason)}`,
+            );
+            return Response.json({ ok: true });
+          }
+          if (cmd === "/top") {
+            await reply(chatId, await refLeaderboard(ns));
             return Response.json({ ok: true });
           }
 

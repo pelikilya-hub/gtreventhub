@@ -722,6 +722,9 @@
 /* ---------- кнопка: красное заливает слева ---------- */
 .gtr-btn {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   border: var(--gtr-hair) solid var(--gtr-border2);
   color: var(--gtr-t1);
   border-radius: 0;
@@ -770,6 +773,20 @@
 .gtr-btn-red:hover {
   border-color: var(--gtr-red-hot);
   box-shadow: 0 0 20px -4px rgba(229, 35, 27, 0.85);
+}
+
+/* вспомогательное действие рядом с основными — без красной заливки на ховере,
+   чтобы не спорить по весу с кнопками публикации/отправки */
+.gtr-btn-ghost {
+  background-image: none;
+  background-color: transparent;
+  color: var(--gtr-t2);
+}
+.gtr-btn-ghost:hover {
+  background-position: 100% 0;
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: var(--gtr-border2);
+  color: var(--gtr-t1);
 }
 
 /* фокус с клавиатуры — обязателен */

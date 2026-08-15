@@ -18,7 +18,7 @@ import {
 } from "../data/app-data";
 import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
-import { Card, Chip, Dot, Eyebrow, tint } from "../ui";
+import { Card, Chip, Dot, Eyebrow, Icon, tint } from "../ui";
 import {
   broadcastFn,
   communityInviteTextFn,
@@ -837,17 +837,46 @@ function CommunityCard() {
         />
         <button className="gtr-btn gtr-btn-red" onClick={save}>Привязать и проверить</button>
       </div>
+      <div
+        className="gtr-mono"
+        style={{ font: "600 9px/1 'JetBrains Mono',monospace", letterSpacing: "0.09em", color: "var(--gtr-t3)", marginBottom: 6 }}
+      >
+        ПУБЛИКАЦИЯ
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+        <button className="gtr-btn" onClick={() => post("digest", "channel")}>
+          <Icon d="M3 9v6h4l6 4V5L7 9H3z M15.5 8.5a4 4 0 0 1 0 7" size={13} />
+          Дайджест в канал сейчас
+        </button>
+        <button className="gtr-btn" onClick={() => post("invite", "channel")}>
+          <Icon d="M11 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6 M15 8l4 4-4 4 M19 12H9" size={13} />
+          Приглашение в канал
+        </button>
+        <button className="gtr-btn" onClick={() => post("contest", "channel")}>
+          <Icon d="M7 4h10v4a5 5 0 0 1-10 0V4z M5 5H3v2a4 4 0 0 0 4 4 M21 5h-2v2a4 4 0 0 0-4 4 M9 21h6 M12 17v4" size={13} />
+          Конкурс инвайтинга в канал
+        </button>
+      </div>
+      <div
+        className="gtr-mono"
+        style={{ font: "600 9px/1 'JetBrains Mono',monospace", letterSpacing: "0.09em", color: "var(--gtr-t3)", marginBottom: 6 }}
+      >
+        ИНСТРУМЕНТЫ
+      </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <button className="gtr-btn" onClick={() => post("digest", "channel")}>📣 Дайджест в канал сейчас</button>
-        <button className="gtr-btn" onClick={() => post("invite", "channel")}>🎉 Приглашение в канал</button>
-        <button className="gtr-btn" onClick={() => post("contest", "channel")}>🏆 Конкурс инвайтинга в канал</button>
-        <button className="gtr-btn" onClick={copyInvite}>📋 Текст приглашения (разослать)</button>
-        <button className="gtr-btn" onClick={activate}>⚙️ Обновить вебхук (для конкурса)</button>
+        <button className="gtr-btn gtr-btn-ghost" onClick={copyInvite}>
+          <Icon d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1z M6 5h12v15H6z M9 10h6 M9 14h6" size={13} />
+          Текст приглашения (разослать)
+        </button>
+        <button className="gtr-btn gtr-btn-ghost" onClick={activate}>
+          <Icon d="M20 11a8 8 0 1 0-2.2 6.6 M20 6v5h-5" size={13} />
+          Обновить вебхук (для конкурса)
+        </button>
       </div>
       {state ? (
         <div
           className="gtr-mono"
-          style={{ marginTop: 8, font: "500 10px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+          style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
         >
           {state}
         </div>

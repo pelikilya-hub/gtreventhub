@@ -46,23 +46,28 @@ const canSeeRequest = (u: SessionUser, r: OrgRequest) =>
   r.assignee === u.email ||
   r.organizerEmail === u.email;
 
-// Уведомление GTR-админам: личные чаты всех admin-аккаунтов + общий канал
-async function notifyAdminsTg(ns: KvNs, text: string) {
+// Служебный контур: личные чаты GTR-админов + закрытый ops-канал.
+// Любой адрес проходит через guardInternalChatId — в публичные чаты
+// комьюнити техническое не уходит никогда.
+export async function notifyAdminsTg(ns: KvNs, text: string) {
+  const { guardInternalChatId, OPS_KEY } = await import("./community");
   const keys = await kvListAll(ns, "user:");
   const users = (
     await Promise.all(keys.map((k) => kvGetJson<StoredUser>(ns, k)))
   ).filter((u): u is StoredUser => Boolean(u));
   const sent = new Set<string>();
+  const push = async (raw: string | number | null | undefined) => {
+    const chat = await guardInternalChatId(ns, raw);
+    if (!chat || sent.has(chat)) return;
+    sent.add(chat);
+    await tgApi("sendMessage", { chat_id: chat, text, parse_mode: "HTML" });
+  };
   for (const a of users.filter((u) => u.role === "gtr")) {
-    const chat = await ns.get(`tg:${a.email}`);
-    if (chat && !sent.has(chat)) {
-      sent.add(chat);
-      await tgApi("sendMessage", { chat_id: chat, text, parse_mode: "HTML" });
-    }
+    await push(await ns.get(`tg:${a.email}`));
   }
-  const channel = process.env.TELEGRAM_CHAT_ID;
-  if (channel && !sent.has(channel))
-    await tgApi("sendMessage", { chat_id: channel, text, parse_mode: "HTML" });
+  const ops = await kvGetJson<import("./community").OpsCfg>(ns, OPS_KEY);
+  await push(ops?.chatId);
+  await push(process.env.TELEGRAM_CHAT_ID);
 }
 
 // ---------- пользователи ----------
@@ -292,7 +297,8 @@ export const pushRequestFn = createServerFn({ method: "POST" })
           await tgApi("sendMessage", { chat_id: chat, text, parse_mode: "HTML", reply_markup: markup });
         }
       }
-      const channel = process.env.TELEGRAM_CHAT_ID;
+      const { guardInternalChatId } = await import("./community");
+      const channel = await guardInternalChatId(ns, process.env.TELEGRAM_CHAT_ID);
       if (channel && !sent.has(channel))
         await tgApi("sendMessage", { chat_id: channel, text, parse_mode: "HTML" });
     }
@@ -348,7 +354,8 @@ export async function decideOfferCore(
   ]
     .filter(Boolean)
     .join("\n");
-  const target = chatId || process.env.TELEGRAM_CHAT_ID;
+  const { guardInternalChatId } = await import("./community");
+  const target = await guardInternalChatId(ns, chatId || process.env.TELEGRAM_CHAT_ID);
   if (target) await tgApi("sendMessage", { chat_id: target, text, parse_mode: "HTML" });
   return next;
 }
@@ -441,7 +448,7 @@ export const sendOfferFn = createServerFn({ method: "POST" })
           ],
         },
       });
-    } else if (process.env.TELEGRAM_CHAT_ID) {
+    } else if (await (await import("./community")).guardInternalChatId(ns, process.env.TELEGRAM_CHAT_ID)) {
       await tgApi("sendMessage", {
         chat_id: process.env.TELEGRAM_CHAT_ID,
         text: text + "\n\n<i>Личный Telegram артиста не привязан — передайте вручную.</i>",
@@ -711,8 +718,10 @@ export const pushTaskFn = createServerFn({ method: "POST" })
           "У исполнителя не привязан Telegram (@Gtrcom1_bot → /start) и не включён push в настройках кабинета. Передайте задачу лично.",
         ].join("\n");
         const byChat = await ns.get(`tg:${task.by}`);
-        const common =
-          (typeof process !== "undefined" && process.env?.TELEGRAM_CHAT_ID) || "";
+        const common = await (await import("./community")).guardInternalChatId(
+          ns,
+          (typeof process !== "undefined" && process.env?.TELEGRAM_CHAT_ID) || "",
+        );
         for (const c of new Set([byChat, common].filter(Boolean) as string[]))
           tgApi("sendMessage", { chat_id: c, text: warn, parse_mode: "HTML" }).catch(() => {});
       }
@@ -1194,8 +1203,10 @@ export const venueConfirmSubmitFn = createServerFn({ method: "POST" })
         .filter((l) => l !== "")
         .join("\n");
       const personal = await ns.get(`tg:${next.sentBy}`);
-      const common =
-        (typeof process !== "undefined" && process.env?.TELEGRAM_CHAT_ID) || "";
+      const common = await (await import("./community")).guardInternalChatId(
+        ns,
+        (typeof process !== "undefined" && process.env?.TELEGRAM_CHAT_ID) || "",
+      );
       const chats = [...new Set([personal, common].filter(Boolean))] as string[];
       for (const chat of chats)
         await tgApi("sendMessage", {
@@ -1389,7 +1400,10 @@ export const contactTeamFn = createServerFn({ method: "POST" })
         () => {},
       );
     }
-    const common = (typeof process !== "undefined" && process.env?.TELEGRAM_CHAT_ID) || "";
+    const common = await (await import("./community")).guardInternalChatId(
+      ns,
+      (typeof process !== "undefined" && process.env?.TELEGRAM_CHAT_ID) || "",
+    );
     if (common && !sent.has(common)) {
       const r = await tgApi("sendMessage", { chat_id: common, text: msg, parse_mode: "HTML" });
       if (r.ok) delivered++;
@@ -1428,6 +1442,13 @@ export const signupVisitorFn = createServerFn({ method: "POST" })
     const { passHash: _p, created: _c, invitedBy: _i, ...sessionUser } = stored;
     const { issueSession } = await import("./auth");
     await issueSession(sessionUser);
+    // метрика + пинг в служебный контур (не в публичные чаты)
+    const { bumpMetric } = await import("./community");
+    bumpMetric(ns, "reg").catch(() => {});
+    notifyAdminsTg(
+      ns,
+      `🆕 <b>Регистрация в GTR Event</b>\n${tgEsc(stored.name)} · ${tgEsc(email)} · посетитель`,
+    ).catch(() => {});
     return { ok: true as const };
   });
 

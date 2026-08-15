@@ -27,6 +27,10 @@ export const Route = createFileRoute("/api/community-digest")({
           parse_mode: "HTML",
           link_preview_options: { url: APP_URL, prefer_large_media: true },
         });
+        // служебный контур: ежедневная сводка метрик — команде, не в паблик
+        const { buildOpsSummary } = await import("../gtr/community");
+        const { notifyAdminsTg } = await import("../gtr/kv-api");
+        await notifyAdminsTg(ns, await buildOpsSummary(ns)).catch(() => {});
         return Response.json({ ok: res.ok, reason: res.description ?? "" });
       },
     },

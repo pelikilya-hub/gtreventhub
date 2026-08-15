@@ -54,6 +54,11 @@ type TgUpdate = {
     data?: string;
     message?: { chat: { id: number }; message_id: number; text?: string };
   };
+  // пост в канале (нужен для /ops — привязки служебного канала)
+  channel_post?: {
+    text?: string;
+    chat: { id: number; title?: string };
+  };
   // конкурс инвайтинга: Telegram шлёт вступления в канал с инвайт-ссылкой
   chat_member?: {
     chat: { id: number };
@@ -345,6 +350,34 @@ export const Route = createFileRoute("/api/tg")({
         const up = (await request.json().catch(() => null)) as TgUpdate | null;
         if (!up) return Response.json({ ok: true });
 
+        // ---------- /ops в закрытом канале: привязка служебного контура ----------
+        if (up.channel_post?.text) {
+          const cp = up.channel_post;
+          const cmd0 = cp.text.trim().split(/[\s@]/)[0].toLowerCase();
+          if (cmd0 === "/ops") {
+            const { COMMUNITY_KEY, OPS_KEY } = await import("../gtr/community");
+            const ccfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
+            // публичные чаты комьюнити служебным контуром быть не могут
+            if (String(cp.chat.id) === String(ccfg?.channelId ?? "∅") || String(cp.chat.id) === String(ccfg?.chatId ?? "∅")) {
+              return Response.json({ ok: true, ops: "rejected-public" });
+            }
+            const me = await tgApi<{ id: number }>("getMe", {});
+            const member = me.ok && me.result
+              ? await tgApi<{ status: string }>("getChatMember", { chat_id: cp.chat.id, user_id: me.result.id })
+              : { ok: false as const, result: undefined };
+            const admin = Boolean(member.ok && member.result && ["administrator", "creator"].includes(member.result.status));
+            if (!admin) return Response.json({ ok: true, ops: "not-admin" });
+            await ns.put(OPS_KEY, JSON.stringify({ chatId: cp.chat.id, title: cp.chat.title || "", bound: Date.now() }));
+            await tgApi("sendMessage", {
+              chat_id: cp.chat.id,
+              parse_mode: "HTML",
+              text: "✅ <b>Служебный канал GTR OPS привязан.</b>\nСюда будут приходить метрики и технические уведомления. Публичный контент сюда не попадает, служебный — не попадает в комьюнити.",
+            });
+            return Response.json({ ok: true, ops: "bound" });
+          }
+          return Response.json({ ok: true });
+        }
+
         // ---------- конкурс: вступление в канал по личной ссылке ----------
         if (up.chat_member) {
           const cm = up.chat_member;
@@ -369,6 +402,28 @@ export const Route = createFileRoute("/api/tg")({
               );
             }
           }
+          // метрики служебного контура: кто пришёл/ушёл в канале и чате
+          {
+            const { COMMUNITY_KEY, bumpMetric } = await import("../gtr/community");
+            const { notifyAdminsTg } = await import("../gtr/kv-api");
+            const ccfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
+            const isCh = ccfg?.channelId === cm.chat.id;
+            const isGr = ccfg?.chatId === cm.chat.id;
+            const left = !["left", "kicked"].includes(cm.old_chat_member.status) &&
+              ["left", "kicked"].includes(cm.new_chat_member.status);
+            if ((isCh || isGr) && (was && now)) {
+              await bumpMetric(ns, isCh ? "chJoin" : "gJoin").catch(() => {});
+              const u = cm.new_chat_member.user;
+              const via = link ? ` · по ссылке «${tgEsc(cm.invite_link?.name || "invite")}»` : "";
+              notifyAdminsTg(ns, `➕ ${isCh ? "Канал" : "Чат"}: <b>${tgEsc(u.first_name || String(u.id))}</b> вступил(а)${via}`).catch(() => {});
+            }
+            if ((isCh || isGr) && left) {
+              await bumpMetric(ns, isCh ? "chLeave" : "gLeave").catch(() => {});
+              const u = cm.new_chat_member.user;
+              notifyAdminsTg(ns, `➖ ${isCh ? "Канал" : "Чат"}: <b>${tgEsc(u.first_name || String(u.id))}</b> вышел(ла)`).catch(() => {});
+            }
+          }
+
           // приветствие новичка в чате сообщества (не чаще раза в 3 минуты,
           // чтобы наплыв людей не превращался в стену приветствий)
           if (was && now && !cm.new_chat_member.user.id.toString().startsWith("-")) {
@@ -396,6 +451,16 @@ export const Route = createFileRoute("/api/tg")({
         if (up.message?.text) {
           const chatId = up.message.chat.id;
           const text = up.message.text.trim();
+
+          // Контур: в группах и каналах бот отвечает ТОЛЬКО на публичные
+          // команды. Всё служебное (события, заявки, сметы, формы) — строго
+          // в личке, чтобы техника не протекала к пользователям.
+          if (chatId < 0) {
+            const pub = text.split(/[\s@]/)[0].toLowerCase();
+            if (!["/tonight", "/afisha", "/top"].includes(pub)) {
+              return Response.json({ ok: true, scope: "public-only" });
+            }
+          }
 
           const start = text.match(/^\/start\s+(\S+)/);
           // deep-link конкурса: t.me/бот?start=ref — сразу выдаём личную ссылку
@@ -757,6 +822,10 @@ export const Route = createFileRoute("/api/tg")({
         // ---------- кнопки: заявки организаторов ----------
         if (up.callback_query) {
           const cqr = up.callback_query;
+          if (cqr.message && cqr.message.chat.id < 0) {
+            await tgApi("answerCallbackQuery", { callback_query_id: cqr.id, text: "Только в личке бота" });
+            return Response.json({ ok: true, scope: "public-only" });
+          }
           const mr = (cqr.data || "").match(/^req:(\S+):(take|acc|dec)$/);
           if (mr && cqr.message) {
             const chatId = cqr.message.chat.id;

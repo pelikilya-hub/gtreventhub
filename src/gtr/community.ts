@@ -158,6 +158,70 @@ export async function buildDigestText(ns: KvNs, lang: TgLang = "dual"): Promise<
   return lines.join("\n");
 }
 
+// ---------- служебный контур: изоляция от публичного ----------
+// Всё техническое (уведомления команде, метрики) не имеет права попадать
+// в публичный канал/чат комьюнити — даже если id перепутан в переменных.
+
+export const OPS_KEY = "setting:ops";
+export type OpsCfg = { chatId: number; title?: string; bound?: number };
+
+// Пропускает id только если это НЕ публичный чат комьюнити; иначе ""
+export async function guardInternalChatId(
+  ns: KvNs,
+  chatId: string | number | undefined | null,
+): Promise<string> {
+  if (!chatId) return "";
+  const cfg = await kvGetJson<CommunityCfg>(ns, COMMUNITY_KEY);
+  const s = String(chatId);
+  if (cfg && (s === String(cfg.channelId ?? "∅") || s === String(cfg.chatId ?? "∅"))) return "";
+  return s;
+}
+
+// Счётчики дня: вступления/выходы канала и чата, регистрации
+export type DayMetrics = { chJoin: number; chLeave: number; gJoin: number; gLeave: number; reg: number };
+const EMPTY_DAY: DayMetrics = { chJoin: 0, chLeave: 0, gJoin: 0, gLeave: 0, reg: 0 };
+
+export async function bumpMetric(ns: KvNs, field: keyof DayMetrics): Promise<void> {
+  const key = `mstat:${new Date().toISOString().slice(0, 10)}`;
+  const cur = (await kvGetJson<DayMetrics>(ns, key)) ?? { ...EMPTY_DAY };
+  cur[field] = (cur[field] ?? 0) + 1;
+  await ns.put(key, JSON.stringify(cur), { expirationTtl: 60 * 60 * 24 * 45 });
+}
+
+// Ежедневная сводка метрик для служебного контура
+export async function buildOpsSummary(ns: KvNs): Promise<string> {
+  const today = new Date().toISOString().slice(0, 10);
+  const m = (await kvGetJson<DayMetrics>(ns, `mstat:${today}`)) ?? { ...EMPTY_DAY };
+  const cfg = await kvGetJson<CommunityCfg>(ns, COMMUNITY_KEY);
+  const count = async (id?: number) => {
+    if (!id) return "—";
+    const r = await tgApi<number>("getChatMemberCount", { chat_id: id });
+    return r.ok ? String(r.result) : "—";
+  };
+  const chN = await count(cfg?.channelId);
+  const gN = await count(cfg?.chatId);
+  // топ инвайтеров
+  const { kvListAll } = await import("./kv-ns");
+  const keys = await kvListAll(ns, "refscore:");
+  const rows: { n: number; name: string }[] = [];
+  for (const k of keys) {
+    const v = await kvGetJson<{ n: number; name: string }>(ns, k);
+    if (v?.n) rows.push(v);
+  }
+  rows.sort((a, b) => b.n - a.n);
+  const lines = [
+    `📊 <b>GTR OPS · сводка за ${today}</b>`,
+    "",
+    `📣 Канал: <b>${chN}</b> подписчиков · за день +${m.chJoin} / −${m.chLeave}`,
+    `💬 Чат: <b>${gN}</b> участников · за день +${m.gJoin} / −${m.gLeave}`,
+    `🆕 Регистраций в приложении: <b>${m.reg}</b>`,
+  ];
+  if (rows.length) {
+    lines.push("", `🏆 Топ инвайтеров: ${rows.slice(0, 3).map((r) => `${tgEsc(r.name)} (${r.n})`).join(" · ")}`);
+  }
+  return lines.join("\n");
+}
+
 // Конкурсный пост: правила + deep-link на бота, который выдаёт личную ссылку
 export function buildContestText(): string {
   return [

@@ -61,7 +61,13 @@ export const notifyRequestFn = createServerFn({ method: "POST" })
   .inputValidator((d: RequestNotice) => d)
   .handler(async ({ data }): Promise<NotifyResult> => {
     const token = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
+    // служебный контур: заявка не имеет права уйти в публичный чат комьюнити
+    let chatId = process.env.TELEGRAM_CHAT_ID;
+    const nsGuard = await getKvNs();
+    if (nsGuard && chatId) {
+      const { guardInternalChatId } = await import("./community");
+      chatId = await guardInternalChatId(nsGuard, chatId);
+    }
 
     if (!token || !chatId) {
       return {

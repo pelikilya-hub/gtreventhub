@@ -7,7 +7,9 @@ import {
   eventAlerts,
   NAV_ARTIST,
   NAV_NET,
+  canPrivate,
   NAV_PLATFORM_VENUE,
+  NAV_PRIVATE,
   NAV_TABS,
   NAV_VENUE,
   NAV_VISITOR,
@@ -23,6 +25,7 @@ import { setUiLang, UI_LANGS, type UiLang } from "./i18n";
 import { useTranslation } from "react-i18next";
 
 import { DashScreen } from "./screens/Dash";
+import { PrivateScreen } from "./screens/Private";
 import { CalendarScreen } from "./screens/Calendar";
 import { ConstructorScreen } from "./screens/Constructor";
 import { EventsScreen } from "./screens/Events";
@@ -190,6 +193,10 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
           ]
   ).filter(([id]) => id !== "afishagen" || canAfishaGen);
 
+  // Private (виллы) — организаторам, PRO и команде. Посетителю-PRO меню
+  // сети пустое, поэтому пункт добавляем отдельно, а не фильтром.
+  const navNetFull = canPrivate(user) ? [...navNet, NAV_PRIVATE] : navNet;
+
   const NavGroup = ({ label, items }: { label: string; items: typeof NAV_VENUE }) => (
     <div style={{ marginBottom: 18 }}>
       <Eyebrow style={{ padding: "0 11px", marginBottom: 8 }}>{label}</Eyebrow>
@@ -326,7 +333,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
         </div>
 
         <NavGroup label={isArtist || isVisitor ? t("ПЛАТФОРМА") : t("ПЛОЩАДКА")} items={navVenue} />
-        {navNet.length ? <NavGroup label={t("СЕТЬ GTR")} items={navNet} /> : null}
+        {navNetFull.length ? <NavGroup label={t("СЕТЬ GTR")} items={navNetFull} /> : null}
 
         <div style={{ marginTop: "auto" }}>
           {peers.length > 0 ? (
@@ -444,6 +451,29 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
   );
 }
 
+// Private закрыт: прямой переход по адресу без прав показывает отказ, а не
+// содержимое. Данные вилл публичные (trip.com), поэтому это разграничение
+// продукта, а не защита секретов — наценку GTR при необходимости надо
+// уносить на сервер отдельно.
+function PrivateGate() {
+  const { user } = useGtr();
+  const { t } = useTranslation();
+  if (!canPrivate(user)) {
+    return (
+      <div style={{ padding: "48px 8px", maxWidth: "52ch" }}>
+        <Eyebrow>PRIVATE</Eyebrow>
+        <div style={{ font: "600 15px/1.5 'Golos Text',sans-serif", margin: "10px 0 8px" }}>
+          {t("Раздел доступен организаторам и участникам Комьюнити PRO")}
+        </div>
+        <div style={{ font: "500 12.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+          {t("Виллы под приватные события открываются вместе с подпиской PRO. Напишите команде GTR — подключим.")}
+        </div>
+      </div>
+    );
+  }
+  return <PrivateScreen />;
+}
+
 function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch }) {
   switch (screen) {
     case "dash":
@@ -484,6 +514,8 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
       return <TonightScreen />;
     case "aimatch":
       return <AiMatchScreen />;
+    case "private":
+      return <PrivateGate />;
     case "community":
       return <CommunityScreen />;
     case "visas":

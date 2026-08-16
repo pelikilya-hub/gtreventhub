@@ -27,6 +27,7 @@ const SCREENS: ScreenId[] = [
   "community",
   "visas",
   "promo",
+  "private",
   "myshows",
   "admin",
 ];

@@ -18,6 +18,7 @@ export type SessionUser = {
   artistId?: string; // роль artist: карточка каталога (MC-…)
   teamOf?: string; // email тимлида-организатора, чью команду пополнил
   boss?: boolean; // BOSS: дашборд контроля поверх прав GTR-админа
+  pro?: boolean; // участник Комьюнити PRO: открывает раздел Private (виллы)
   initials: string;
 };
 

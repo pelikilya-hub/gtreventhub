@@ -759,5 +759,41 @@
   "src": "PHUKET-INSIDER.COM",
   "credit": "phuket-insider.com",
   "hero": "/venues/VEN-0100-hero.jpg"
+ },
+ "VEN-0107": {
+  "src": "TRIP.COM",
+  "credit": "Himmapana Villas - Grand Valley · trip.com",
+  "hero": "https://ak-d.tripcdn.com/images/1z67112000hff7umf7212_R_960_660_R5_D.jpg",
+  "video": "https://ak-v.tripcdn.com/videos/u00qhk14x90xkhawo45D6.mp4",
+  "gallery": [
+   "https://ak-d.tripcdn.com/images/1z63k12000hff40pj0C0C_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/1z67112000hff7umf7212_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/1z61u12000hffh4inF9C4_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/1z65z12000hffgalk46B7_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/0222l12000kvxy66mE203_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/1z66912000hff4fqbBB2B_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/1z62812000hff4b0fCA40_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/0221m12000l6yng6u4F5D_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/0586512000jqs6ogp411C_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/1mc2k12000hoxotag7370_R_960_660_R5_D.jpg"
+  ]
+ },
+ "VEN-0108": {
+  "src": "TRIP.COM",
+  "credit": "Luxury 3BR Villa Wallaya with Private Pool · trip.com",
+  "hero": "https://ak-d.tripcdn.com/images/0220l12000sf1yzti1AB0_R_960_660_R5_D.jpg",
+  "video": "",
+  "gallery": [
+   "https://ak-d.tripcdn.com/images/0224312000sf1ystv8E47_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/0220l12000sf1yzti1AB0_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/0224w12000sf1z5wpD8F7_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/0223b12000sf1woxq92F2_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/0226m12000sf1yjbu7048_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/0220w12000sf1yrdr7401_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/0220h12000sf1z5wsA912_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/0225112000sf1yty25E89_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/0222b12000sf1yq2d66C7_R_960_660_R5_D.jpg",
+   "https://ak-d.tripcdn.com/images/0223712000sf1z85o9277_R_960_660_R5_D.jpg"
+  ]
  }
 }

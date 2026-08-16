@@ -165,6 +165,7 @@ export type ScreenId =
   | "community"
   | "visas"
   | "promo"
+  | "private"
   | "myshows"
   | "admin";
 
@@ -254,6 +255,20 @@ export const NAV_VISITOR: [ScreenId, string, string, string][] = [
 // Нижняя навигация (мобильная/iPad), спека RAW PULSE §13: пять зон,
 // центральный GTR приподнят. Полное ролевое меню остаётся в бургере —
 // это быстрый доступ к пяти универсальным точкам, а не замена меню.
+// Раздел Private (виллы) — только организаторам и участникам Комьюнити PRO.
+// Пункт меню виден по тому же правилу, что и сам экран (см. canPrivate).
+export const NAV_PRIVATE: [ScreenId, string, string, string] = [
+  "private",
+  "Private · виллы",
+  "M3 21h18 M5 21V8l7-5 7 5v13 M10 21v-6h4v6 M9 11h.01 M15 11h.01",
+  "",
+];
+
+// Доступ к Private: организатор, участник PRO и команда GTR (админам видно
+// всё). Обычный посетитель и артист раздел не видят.
+export const canPrivate = (u: { role: RoleId; pro?: boolean }) =>
+  u.role === "organizer" || u.role === "gtr" || Boolean(u.pro);
+
 export const NAV_TABS: [ScreenId, string, string][] = [
   ["feed", "Афиша", "M4 4h16v16H4z M4 9h16 M9 13h6 M9 17h3"],
   ["map", "Карта", "M1 6v16l7-4 8 4 7-4V2l-7 4-8-4z M8 2v16 M16 6v16"],

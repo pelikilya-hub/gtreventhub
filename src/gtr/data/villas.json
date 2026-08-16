@@ -1,0 +1,79 @@
+{
+ "meta": {
+  "updated": "2026-08-15",
+  "markup": 1.15,
+  "note": "Прайс GTR = цена trip.com +15%. gtrPrice заполняется только после подтверждения базовой ставки.",
+  "priceSource": "Цена сверяется вручную. Автопроверка требует партнёрского API trip.com: в публичных страницах цен нет (проверено — приходят подписанным XHR), а SEO-поле «средняя от» не зависит от дат и для отслеживания непригодно."
+ },
+ "villas": [
+  {
+   "id": "VEN-0107",
+   "tripId": 125185668,
+   "tripUrl": "https://www.trip.com/hotels/detail/?hotelId=125185668",
+   "stars": 5,
+   "rating": 8.5,
+   "ratingOf": 10,
+   "reviews": 7,
+   "host": "Himmapana Villas",
+   "hostLangs": "Какими языками владеет: Английский,Тайский",
+   "currency": "THB",
+   "basePriceRaw": 20704,
+   "markup": 1.15,
+   "gtrPrice": 7936,
+   "needsPriceCheck": false,
+   "openedYear": "20241225",
+   "photos": [
+    "https://ak-d.tripcdn.com/images/1z63k12000hff40pj0C0C_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/1z67112000hff7umf7212_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/1z61u12000hffh4inF9C4_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/1z65z12000hffgalk46B7_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/0222l12000kvxy66mE203_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/1z66912000hff4fqbBB2B_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/1z62812000hff4b0fCA40_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/0221m12000l6yng6u4F5D_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/0586512000jqs6ogp411C_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/1mc2k12000hoxotag7370_R_960_660_R5_D.jpg"
+   ],
+   "video": "https://ak-v.tripcdn.com/videos/u00qhk14x90xkhawo45D6.mp4",
+   "name": "Himmapana Villas - Grand Valley",
+   "basePriceNights": 3,
+   "basePerNight": 6901,
+   "gtrPerNight": 7936,
+   "priceNote": "trip.com: 20704 THB за 3 ночи (18–21.08.2026) → 6901/ночь. Прайс GTR = +15%.",
+   "priceCheckedAt": "2026-08-15"
+  },
+  {
+   "id": "VEN-0108",
+   "tripId": 134685783,
+   "tripUrl": "https://www.trip.com/hotels/detail/?hotelId=134685783",
+   "stars": 3,
+   "rating": 10,
+   "ratingOf": 10,
+   "reviews": 0,
+   "host": "",
+   "hostLangs": "",
+   "currency": "THB",
+   "basePriceRaw": 11429,
+   "markup": 1.15,
+   "gtrPrice": null,
+   "needsPriceCheck": true,
+   "openedYear": "",
+   "photos": [
+    "https://ak-d.tripcdn.com/images/0224312000sf1ystv8E47_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/0220l12000sf1yzti1AB0_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/0224w12000sf1z5wpD8F7_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/0223b12000sf1woxq92F2_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/0226m12000sf1yjbu7048_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/0220w12000sf1yrdr7401_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/0220h12000sf1z5wsA912_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/0225112000sf1yty25E89_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/0222b12000sf1yq2d66C7_R_960_660_R5_D.jpg",
+    "https://ak-d.tripcdn.com/images/0223712000sf1z85o9277_R_960_660_R5_D.jpg"
+   ],
+   "video": "",
+   "name": "Luxury 3BR Villa Wallaya with Private Pool",
+   "priceNote": "SEO-поле trip.com не зависит от дат — база за ночь НЕ подтверждена, жду цифру от BOSS.",
+   "priceCheckedAt": null
+  }
+ ]
+}

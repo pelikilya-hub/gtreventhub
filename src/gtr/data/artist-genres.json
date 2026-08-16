@@ -690,5 +690,125 @@
    "releases": 0,
    "sets": 0
   }
+ },
+ "MC-0066": {
+  "name": "MNML Beats",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0067": {
+  "name": "Andrew Bond",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 4,
+   "sets": 2
+  }
+ },
+ "MC-0068": {
+  "name": "He's Outta Nowhere",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0069": {
+  "name": "Gati Love",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0070": {
+  "name": "That Boy Reu",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0071": {
+  "name": "Javi Sampol",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0072": {
+  "name": "Reme",
+  "ids": [
+   "tech-house",
+   "minimal-techno",
+   "ambient"
+  ],
+  "weights": {
+   "tech-house": 0.357,
+   "minimal-techno": 0.214,
+   "ambient": 0.214
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "ambient",
+    "minimal-techno",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 14,
+   "sets": 0
+  }
+ },
+ "MC-0073": {
+  "name": "Balinsky",
+  "ids": [
+   "minimal-techno",
+   "tech-house",
+   "deep-house"
+  ],
+  "weights": {
+   "minimal-techno": 0.818,
+   "tech-house": 0.818,
+   "deep-house": 0.182
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "minimal-techno",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 11,
+   "sets": 0
+  }
+ },
+ "MC-0074": {
+  "name": "Holu Sound",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0075": {
+  "name": "Sasha Belov",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
  }
 }

@@ -1,7 +1,9 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import gtrCss from "@/gtr/gtr.css?url";
 import { ContentProvider } from "@/gtr/content";
+import { installZoom } from "@/gtr/zoom";
 
 export const Route = createFileRoute("/gtr")({
   head: () => ({
@@ -20,6 +22,9 @@ export const Route = createFileRoute("/gtr")({
 });
 
 function GtrLayout() {
+  // Масштаб на трёх пальцах: щипок двумя больше не растягивает вёрстку.
+  useEffect(() => installZoom(), []);
+
   return (
     <div className="gtr-app" style={{ minHeight: "100vh" }}>
       <ContentProvider>

@@ -19,7 +19,11 @@ export const Route = createRootRoute({
       // контент уезжает под статус-бар.
       {
         name: "viewport",
-        content: "width=device-width, initial-scale=1, viewport-fit=cover",
+        // maximum-scale/user-scalable убирают системный щипок там, где браузер
+        // их слушает (Android). iOS их игнорирует — там то же самое делает
+        // gtr/zoom.ts, он же отдаёт увеличение трём пальцам.
+        content:
+          "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
       },
       { title: "GTR Event — операционная платформа площадок Пхукета" },
       {

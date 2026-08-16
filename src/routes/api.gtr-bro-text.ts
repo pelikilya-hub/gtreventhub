@@ -18,6 +18,23 @@ import { handlers, TOOL_DEFS, type ToolName } from "../gtr/bro/tools";
 
 type Flags = { broEnabled?: boolean; broKill?: boolean };
 type Brain = { url?: string; token?: string; model?: string };
+
+// Схемы инструментов для Gemini REST: без additionalProperties.
+const stripExtra = (o: unknown): unknown => {
+  if (Array.isArray(o)) return o.map(stripExtra);
+  if (o && typeof o === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(o as Record<string, unknown>))
+      if (k !== "additionalProperties") out[k] = stripExtra(v);
+    return out;
+  }
+  return o;
+};
+const GEM_TOOLS = TOOL_DEFS.map((d) => ({
+  name: d.name,
+  description: d.description,
+  parameters: stripExtra(d.parameters),
+}));
 type Msg = {
   role: "system" | "user" | "assistant" | "tool";
   content: string | null;
@@ -87,6 +104,160 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         const trace: { tool: string; args: unknown }[] = [];
         const provider = kvProvider(ns);
 
+        const runTool = async (name: ToolName, args: Record<string, unknown>): Promise<unknown> => {
+          const fn = handlers[name];
+          if (!fn) return { ok: false, error: "unknown-tool", retryable: false };
+          trace.push({ tool: name, args });
+          try {
+            return await Promise.race([
+              fn(args, { provider }),
+              new Promise<{ ok: false; error: string; retryable: boolean }>((r) =>
+                setTimeout(() => r({ ok: false, error: "timeout", retryable: true }), 8000),
+              ),
+            ]);
+          } catch {
+            return { ok: false, error: "internal", retryable: false };
+          }
+        };
+        const collectCards = (name: ToolName, result: unknown) => {
+          const rr = result as { ok?: boolean; data?: Record<string, unknown> };
+          if (!rr.ok || !rr.data) return;
+          if (name === "search_events" && Array.isArray(rr.data.events))
+            for (const ev of (rr.data.events as Record<string, unknown>[]).slice(0, 3))
+              cards.push({ kind: "event", data: ev });
+          else if (name === "get_event_details") cards.push({ kind: "venue", data: rr.data });
+          else if (name === "build_night_route") cards.push({ kind: "route", data: rr.data });
+        };
+        const saveDialog = async (reply: string, engine: string) => {
+          try {
+            const day = new Date().toISOString().slice(0, 10);
+            const dkey = `brods:${day}`;
+            const cur = (await kvGetJson<unknown[]>(ns, dkey)) ?? [];
+            if (cur.length < 300) {
+              cur.push({ t: Date.now(), u: user.email, q: text, a: reply.slice(0, 1200), trace, e: engine });
+              await ns.put(dkey, JSON.stringify(cur), { expirationTtl: 60 * 60 * 24 * 365 });
+            }
+          } catch {
+            /* датасет — не повод уронить ответ */
+          }
+        };
+
+        // ---------------- Быстрый мозг: Gemini Flash по REST -------------
+        // На CPU-сервере честные 20-45 секунд — для разговора это вечность.
+        // Gemini отвечает за секунды и бесплатен в рамках дневного лимита;
+        // Qwen на нашем железе остаётся запасным и полем для обучения.
+        const gemKey =
+          (typeof process !== "undefined" ? process.env?.GEMINI_API_KEY : undefined) ?? "";
+        if (gemKey) {
+          const gcfg = (await kvGetJson<{ textModel?: string }>(ns, "setting:gemini")) ?? {};
+          const gmodel = gcfg.textModel ?? "gemini-flash-latest";
+          type GPart = Record<string, unknown>;
+          const contents: { role: "user" | "model"; parts: GPart[] }[] = [];
+          for (const h of (body.history ?? []).slice(-6))
+            contents.push({
+              role: h.who === "bro" ? "model" : "user",
+              parts: [{ text: String(h.text ?? "").slice(0, 300) }],
+            });
+          contents.push({ role: "user", parts: [{ text }] });
+
+          let gemFail = "";
+          for (let round = 0; round < 3 && !gemFail; round++) {
+            let res: Response;
+            try {
+              res = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${gmodel}:generateContent?key=${gemKey}`,
+                {
+                  method: "POST",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({
+                    systemInstruction: { parts: [{ text: buildTextPrompt(ctx) }] },
+                    contents,
+                    tools: [{ functionDeclarations: GEM_TOOLS }],
+                    generationConfig: { temperature: 0.7, maxOutputTokens: 600 },
+                  }),
+                  signal: AbortSignal.timeout(25_000),
+                },
+              );
+            } catch {
+              gemFail = "network";
+              break;
+            }
+            if (res.status === 429) {
+              // Лимит Gemini исчерпан — считаем и честно откатываемся на Qwen.
+              gemFail = "429";
+              break;
+            }
+            if (res.status === 503 || res.status === 500) {
+              // Перегруз на стороне Google — мимолётный. Один повтор
+              // дешевле, чем 30 секунд запасного мозга.
+              await new Promise((r) => setTimeout(r, 1500));
+              const retry = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${gmodel}:generateContent?key=${gemKey}`,
+                {
+                  method: "POST",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({
+                    systemInstruction: { parts: [{ text: buildTextPrompt(ctx) }] },
+                    contents,
+                    tools: [{ functionDeclarations: GEM_TOOLS }],
+                    generationConfig: { temperature: 0.7, maxOutputTokens: 600 },
+                  }),
+                  signal: AbortSignal.timeout(25_000),
+                },
+              ).catch(() => null);
+              if (!retry || !retry.ok) {
+                gemFail = `http-${res.status}`;
+                break;
+              }
+              res = retry;
+            } else if (!res.ok) {
+              gemFail = `http-${res.status}`;
+              break;
+            }
+            const data = (await res.json()) as {
+              candidates?: { content?: { parts?: GPart[] } }[];
+            };
+            const parts = data.candidates?.[0]?.content?.parts ?? [];
+            const calls = parts.filter((p) => p.functionCall) as {
+              functionCall: { name: string; args?: Record<string, unknown> };
+            }[];
+            if (!calls.length) {
+              const reply = parts
+                .map((p) => String((p as { text?: string }).text ?? ""))
+                .join("")
+                .trim();
+              if (reply) {
+                await saveDialog(reply, gmodel);
+                return json({ ok: true, reply, cards, trace, engine: gmodel });
+              }
+              gemFail = "empty";
+              break;
+            }
+            contents.push({ role: "model", parts });
+            const fr: GPart[] = [];
+            for (const c of calls.slice(0, 4)) {
+              const name = c.functionCall.name as ToolName;
+              const result = await runTool(name, c.functionCall.args ?? {});
+              collectCards(name, result);
+              fr.push({ functionResponse: { name, response: { result } } });
+            }
+            contents.push({ role: "user", parts: fr });
+          }
+          // gemFail — падаем дальше, в Qwen. Причина уходит в метрики.
+          try {
+            const day = new Date().toISOString().slice(0, 10);
+            const mkey = `brostat:${day}`;
+            const cur = (await kvGetJson<Record<string, number>>(ns, mkey)) ?? {};
+            const mname = `bro.text.gemfail.${gemFail.replace(/[^a-z0-9-]/gi, "")}`;
+            cur[mname] = (cur[mname] ?? 0) + 1;
+            await ns.put(mkey, JSON.stringify(cur), { expirationTtl: 60 * 60 * 24 * 120 });
+          } catch {
+            /* счётчик не важнее ответа */
+          }
+        }
+
+        // ---------------- Запасной мозг: Qwen на сервере GTR -------------
+
         // Агентная петля: модель зовёт инструмент → воркер исполняет →
         // результат обратно. Три круга хватает на «найди и собери маршрут»;
         // больше — уже зацикливание, режем.
@@ -129,21 +300,8 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
             const reply = String(msg.content ?? "")
               .replace(/<think>[\s\S]*?<\/think>/g, "")
               .trim();
-            // Копилка датасета: вопрос, ответ и реальные вызовы
-            // инструментов. Из этого потом растёт дообучение — без
-            // накопленных живых диалогов оно невозможно в принципе.
-            try {
-              const day = new Date().toISOString().slice(0, 10);
-              const dkey = `brods:${day}`;
-              const cur = (await kvGetJson<unknown[]>(ns, dkey)) ?? [];
-              if (cur.length < 300) {
-                cur.push({ t: Date.now(), u: user.email, q: text, a: reply.slice(0, 1200), trace });
-                await ns.put(dkey, JSON.stringify(cur), { expirationTtl: 60 * 60 * 24 * 365 });
-              }
-            } catch {
-              /* датасет — не повод уронить ответ */
-            }
-            return json({ ok: true, reply: reply || "…", cards, trace });
+            await saveDialog(reply, "qwen3-8b");
+            return json({ ok: true, reply: reply || "…", cards, trace, engine: "qwen3-8b" });
           }
 
           messages.push(msg);

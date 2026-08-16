@@ -2194,12 +2194,20 @@ export type MatchArtist = {
   reasons: string[];
   verified: boolean;
   hasMedia: boolean;
+  /** роль слота, под который артист подошёл: разогрев, прайм, закат */
+  slot?: string | null;
+  /** коридор темпа этого слота — менеджеру видно, о чём договариваться */
+  bpm?: [number, number] | null;
+  /** жанры артиста, которые и дали совпадение с палитрой слота */
+  fitStyles?: string[];
 };
 
 // Подбор: слушателю — площадки и события под вкус; команде — артисты под
 // площадку. Вектора собираются из music площадок, стилей артистов и афиш.
 export const aiMatchFn = createServerFn({ method: "GET" })
-  .inputValidator((d: { vid?: string }) => d)
+  // hour — час вечера, под который подбираем. Без него берём главный
+  // слот площадки: тот, ради которого туда и приходят.
+  .inputValidator((d: { vid?: string; hour?: number }) => d)
   .handler(async ({ data }) => {
     const u = await currentUser();
     const ns = await getKvNs();
@@ -2241,16 +2249,34 @@ export const aiMatchFn = createServerFn({ method: "GET" })
       return parts.filter(Boolean);
     };
 
-    // Счёт артиста: где дерево узнало обе стороны — ведёт оно, где
-    // промолчало — работают семейства, как и раньше.
+    // Счёт артиста складывается из трёх слоёв, и порядок между ними
+    // важен. Сверху — звуковой паспорт площадки: он знает, что играет в
+    // этот час и чего здесь не играют никогда, и его вето отменяет всё
+    // остальное. Ниже — дерево жанров: оно различает дип-хаус и биг-рум.
+    // В основании — старые семейства: они выручают, когда про артиста
+    // известно только «электроника».
+    const { fitArtist, soundOf } = await import("./venue-sound");
     const scoreArtist = (
-      a: { styles?: string[] },
+      a: { id: string; styles?: string[]; styleIds?: string[] },
       famTarget: ReturnType<typeof normalizeGenres>,
       styles: string[],
+      vid: string,
+      hour?: number,
     ) => {
       const raw = a.styles ?? [];
-      if (!styles.length) return scoreVectors(normalizeGenres(raw), famTarget);
-      return scoreStyles(raw, styles);
+      const ids = a.styleIds ?? [];
+      const base = styles.length
+        ? scoreStyles(raw, styles)
+        : scoreVectors(normalizeGenres(raw), famTarget);
+
+      const sound = soundOf(vid);
+      if (!sound || !ids.length) return { ...base, fit: null as ReturnType<typeof fitArtist> | null };
+
+      const fit = fitArtist(vid, ids, hour);
+      // Запрещённый стиль — это отказ, а не минус к оценке: испорченный
+      // вечер не окупается совпадением по остальным жанрам.
+      if (fit.vetoed.length) return { score: 0, reasons: base.reasons, fit };
+      return { score: 0.6 * fit.score + 0.4 * base.score, reasons: base.reasons, fit };
     };
 
     const teamSide = ["gtr", "pr", "owner", "sales", "organizer"].includes(u.role);
@@ -2270,7 +2296,7 @@ export const aiMatchFn = createServerFn({ method: "GET" })
           // Дерево жанров поверх семейств: у половины каталога есть
           // размеченные styleIds, и для них счёт считается по родству
           // жанров, а не по попаданию в одну из пятнадцати корзин.
-          const { score, reasons } = scoreArtist(a, target, targetStyles);
+          const { score, reasons, fit } = scoreArtist(a, target, targetStyles, vid, data.hour);
           const hasMedia = Boolean(a.ig || a.sp);
           // бонусы малые: шкала Ружички 0..1, верификация не должна ломать её
           const bonus = (verified.has(a.id) ? 0.08 : 0) + (hasMedia ? 0.04 : 0);
@@ -2281,6 +2307,9 @@ export const aiMatchFn = createServerFn({ method: "GET" })
             reasons,
             verified: verified.has(a.id),
             hasMedia,
+            slot: fit?.slot?.role ?? null,
+            bpm: fit?.slot?.bpm ?? null,
+            fitStyles: fit?.matched?.map((m) => m.id) ?? [],
           };
         })
         .filter((x) => x.score > 0.15)

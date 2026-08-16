@@ -1,0 +1,694 @@
+{
+ "MC-0001": {
+  "name": "Enthusiast Place",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0002": {
+  "name": "DJ Meet",
+  "ids": [
+   "hard-trance"
+  ],
+  "weights": {
+   "hard-trance": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "hard-trance"
+   ],
+   "musicbrainz": [],
+   "releases": 8,
+   "sets": 2
+  }
+ },
+ "MC-0003": {
+  "name": "DJ Mike Edwards",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0004": {
+  "name": "Alex Vee",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0005": {
+  "name": "MK.Santo",
+  "ids": [
+   "deep-house",
+   "progressive-house",
+   "tech-house",
+   "funky-house",
+   "afro-house",
+   "soulful-house"
+  ],
+  "weights": {
+   "afro-house": 0.125,
+   "progressive-house": 0.375,
+   "tech-house": 0.35,
+   "deep-house": 0.4,
+   "soulful-house": 0.125,
+   "funky-house": 0.175
+  },
+  "src": {
+   "mixcloud": [
+    "afro-house",
+    "deep-house",
+    "funky-house",
+    "progressive-house",
+    "soulful-house",
+    "tech-house"
+   ],
+   "discogs": [],
+   "musicbrainz": [],
+   "releases": 1,
+   "sets": 40
+  }
+ },
+ "MC-0006": {
+  "name": "LION",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 48,
+   "sets": 0
+  }
+ },
+ "MC-0007": {
+  "name": "JZEN",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 8
+  }
+ },
+ "MC-0008": {
+  "name": "Rudi",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 46,
+   "sets": 0
+  }
+ },
+ "MC-0009": {
+  "name": "Vadim Almazov",
+  "ids": [
+   "deep-house",
+   "organic-house",
+   "electronica",
+   "downtempo"
+  ],
+  "weights": {
+   "organic-house": 0.333,
+   "electronica": 0.222,
+   "deep-house": 0.444,
+   "downtempo": 0.222
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house",
+    "downtempo",
+    "electronica",
+    "organic-house"
+   ],
+   "discogs": [],
+   "musicbrainz": [],
+   "releases": 0,
+   "sets": 9
+  }
+ },
+ "MC-0010": {
+  "name": "LUTANG",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0011": {
+  "name": "LONNER",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0012": {
+  "name": "TISSANAI",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 1,
+   "sets": 0
+  }
+ },
+ "MC-0013": {
+  "name": "Rory Spencer",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0014": {
+  "name": "Sami Galetto",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0015": {
+  "name": "Taz Mutcha",
+  "ids": [
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 1.0
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house"
+   ],
+   "musicbrainz": [],
+   "releases": 3,
+   "sets": 0
+  }
+ },
+ "MC-0016": {
+  "name": "Hebdonis",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 1,
+   "sets": 0
+  }
+ },
+ "MC-0017": {
+  "name": "DJ Limmie (Yaroslav Pashkov)",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0018": {
+  "name": "Tuslay",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0019": {
+  "name": "Chris J",
+  "ids": [
+   "deep-house",
+   "tech-house"
+  ],
+  "weights": {
+   "deep-house": 0.275,
+   "tech-house": 0.125
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 40,
+   "sets": 0
+  }
+ },
+ "MC-0020": {
+  "name": "Siberian Soul",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0021": {
+  "name": "Inna Ra",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0022": {
+  "name": "IFIR",
+  "ids": [
+   "tech-house",
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 0.5,
+   "tech-house": 0.833
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 6,
+   "sets": 0
+  }
+ },
+ "MC-0023": {
+  "name": "DJ Adamantine / Dawn Razor",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0024": {
+  "name": "Thrive Live Music",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0025": {
+  "name": "Rai Maia",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0026": {
+  "name": "KPK Live Music",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0027": {
+  "name": "Phuket Live Band",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0028": {
+  "name": "Phuket DJs",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0029": {
+  "name": "Phuket Event Company",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0035": {
+  "name": "Art of Events Phuket",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0036": {
+  "name": "Aleksey Justie",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0037": {
+  "name": "Serg Lebowski",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0038": {
+  "name": "KAGODO",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0039": {
+  "name": "ZOM",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 45,
+   "sets": 0
+  }
+ },
+ "MC-0040": {
+  "name": "Ivan Shumkov",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0041": {
+  "name": "Denis VHQ",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0042": {
+  "name": "Konvex",
+  "ids": [
+   "dubstep",
+   "melodic-techno",
+   "tech-house",
+   "progressive-house",
+   "tribal-house"
+  ],
+  "weights": {
+   "melodic-techno": 0.667,
+   "dubstep": 1.0,
+   "tech-house": 0.333,
+   "progressive-house": 0.133,
+   "tribal-house": 0.133
+  },
+  "src": {
+   "mixcloud": [
+    "dubstep",
+    "melodic-techno"
+   ],
+   "discogs": [
+    "dubstep",
+    "melodic-techno",
+    "progressive-house",
+    "tech-house",
+    "tribal-house"
+   ],
+   "musicbrainz": [],
+   "releases": 15,
+   "sets": 5
+  }
+ },
+ "MC-0043": {
+  "name": "Thmitrii",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0044": {
+  "name": "Jennifer Loveless",
+  "ids": [
+   "deep-house",
+   "ambient",
+   "melodic-techno",
+   "electronica",
+   "electro"
+  ],
+  "weights": {
+   "ambient": 0.536,
+   "melodic-techno": 0.5,
+   "deep-house": 0.571,
+   "electro": 0.214,
+   "electronica": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "ambient",
+    "deep-house",
+    "electro",
+    "melodic-techno"
+   ],
+   "musicbrainz": [
+    "ambient",
+    "electronica"
+   ],
+   "releases": 14,
+   "sets": 0
+  }
+ },
+ "MC-0045": {
+  "name": "Yulianiko",
+  "ids": [
+   "deep-house",
+   "tech-house",
+   "melodic-techno",
+   "vocal-house",
+   "funky-house"
+  ],
+  "weights": {
+   "tech-house": 0.364,
+   "deep-house": 0.455,
+   "melodic-techno": 0.182,
+   "vocal-house": 0.182,
+   "funky-house": 0.182
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house",
+    "funky-house",
+    "melodic-techno",
+    "tech-house",
+    "vocal-house"
+   ],
+   "discogs": [],
+   "musicbrainz": [],
+   "releases": 0,
+   "sets": 11
+  }
+ },
+ "MC-0046": {
+  "name": "Anton Shaikhov",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0047": {
+  "name": "Vallluta",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0048": {
+  "name": "Marcus Cato",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 1,
+   "sets": 0
+  }
+ },
+ "MC-0049": {
+  "name": "The Lenny",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 13,
+   "sets": 0
+  }
+ },
+ "MC-0050": {
+  "name": "Lewis Aung",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0051": {
+  "name": "Katya Colt",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0052": {
+  "name": "K65",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0053": {
+  "name": "Sexy Tamir",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0054": {
+  "name": "MVXOOD",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0055": {
+  "name": "Stanish B",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0056": {
+  "name": "Nia Obsedo",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0057": {
+  "name": "LHZVR",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0058": {
+  "name": "Soma Bluu",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0059": {
+  "name": "Valeri Emberche",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0060": {
+  "name": "Allen Des",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 2,
+   "sets": 0
+  }
+ },
+ "MC-0061": {
+  "name": "Detka Planetka",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0062": {
+  "name": "Artemidus",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0063": {
+  "name": "Julia Black Spirit",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0064": {
+  "name": "Lera Shokol",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0065": {
+  "name": "DCORE",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ }
+}

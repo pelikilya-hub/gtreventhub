@@ -1870,6 +1870,9 @@ export type Artist = {
   verified: string;
   group: string;
   styles: string[];
+  /** Жанры дерева (genres.json). Живая подпись остаётся в styles —
+      её видит менеджер, — а машина работает с этими идентификаторами. */
+  styleIds?: string[];
   bio?: string; // короткое описание для профиля (RU)
   twitch?: string; // логин канала Twitch — для индикатора «в эфире»
   tier: string;

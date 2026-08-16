@@ -1,0 +1,8667 @@
+{
+ "VEN-0077": {
+  "arch": "rooftop",
+  "label": "Крыша / скай-бар",
+  "audience": "Пары и компании 28–50, дороже средней публики, вечер до полуночи",
+  "note": "Крыша живёт разговором: громкость и плотность ниже клубной, жёсткий бас гости считывают как агрессию.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     110,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0003": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0051": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0049": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0001": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0046": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0040": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0048": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0039": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0004": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0059": {
+  "arch": "live",
+  "label": "Живая музыка",
+  "audience": "Публика пришла на сцену, а не на диджея",
+  "note": "Диджей здесь — оправа для группы: до, между и после, не перетягивая внимание.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 19,
+    "to": 23,
+    "role": "live",
+    "bpm": [
+     80,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "nu-jazz": 0.8,
+     "electro-swing": 0.6,
+     "lounge": 0.6,
+     "downtempo": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0068": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0076": {
+  "arch": "rooftop",
+  "label": "Крыша / скай-бар",
+  "audience": "Пары и компании 28–50, дороже средней публики, вечер до полуночи",
+  "note": "Крыша живёт разговором: громкость и плотность ниже клубной, жёсткий бас гости считывают как агрессию.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     110,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0074": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0063": {
+  "arch": "marina",
+  "label": "Марина / яхт-клуб",
+  "audience": "Владельцы лодок и их гости, взрослая обеспеченная публика",
+  "note": "Причал слышно далеко: после одиннадцати громкость режут почти всегда, и сет должен это учитывать.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 16,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     105,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 23,
+    "role": "night",
+    "bpm": [
+     115,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0061": {
+  "arch": "space",
+  "label": "Событийная площадка",
+  "audience": "Зависит от арендатора: формат задаёт организатор события",
+  "note": "Пустая коробка: ограничения приносит арендатор, а не сама площадка.",
+  "veto": [],
+  "slots": [
+   {
+    "from": 18,
+    "to": 23,
+    "role": "event",
+    "bpm": [
+     100,
+     128
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0080": {
+  "arch": "rooftop",
+  "label": "Крыша / скай-бар",
+  "audience": "Пары и компании 28–50, дороже средней публики, вечер до полуночи",
+  "note": "Крыша живёт разговором: громкость и плотность ниже клубной, жёсткий бас гости считывают как агрессию.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     110,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0002": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0026": {
+  "arch": "show",
+  "label": "Шоу / парк",
+  "audience": "Организованные группы и семьи, программа расписана по минутам",
+  "note": "Музыка подчинена сценарию шоу: свободного сета здесь нет.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "phonk",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "show",
+    "bpm": [
+     90,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0078": {
+  "arch": "rooftop",
+  "label": "Крыша / скай-бар",
+  "audience": "Пары и компании 28–50, дороже средней публики, вечер до полуночи",
+  "note": "Крыша живёт разговором: громкость и плотность ниже клубной, жёсткий бас гости считывают как агрессию.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     110,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0034": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0033": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0025": {
+  "arch": "show",
+  "label": "Шоу / парк",
+  "audience": "Организованные группы и семьи, программа расписана по минутам",
+  "note": "Музыка подчинена сценарию шоу: свободного сета здесь нет.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "phonk",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "show",
+    "bpm": [
+     90,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0008": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0079": {
+  "arch": "rooftop",
+  "label": "Крыша / скай-бар",
+  "audience": "Пары и компании 28–50, дороже средней публики, вечер до полуночи",
+  "note": "Крыша живёт разговором: громкость и плотность ниже клубной, жёсткий бас гости считывают как агрессию.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     110,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0073": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0012": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0035": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0009": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0036": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0075": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0054": {
+  "arch": "live",
+  "label": "Живая музыка",
+  "audience": "Публика пришла на сцену, а не на диджея",
+  "note": "Диджей здесь — оправа для группы: до, между и после, не перетягивая внимание.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 19,
+    "to": 23,
+    "role": "live",
+    "bpm": [
+     80,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "nu-jazz": 0.8,
+     "electro-swing": 0.6,
+     "lounge": 0.6,
+     "downtempo": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0050": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0070": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0031": {
+  "arch": "space",
+  "label": "Событийная площадка",
+  "audience": "Зависит от арендатора: формат задаёт организатор события",
+  "note": "Пустая коробка: ограничения приносит арендатор, а не сама площадка.",
+  "veto": [],
+  "slots": [
+   {
+    "from": 18,
+    "to": 23,
+    "role": "event",
+    "bpm": [
+     100,
+     128
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0067": {
+  "arch": "marina",
+  "label": "Марина / яхт-клуб",
+  "audience": "Владельцы лодок и их гости, взрослая обеспеченная публика",
+  "note": "Причал слышно далеко: после одиннадцати громкость режут почти всегда, и сет должен это учитывать.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 16,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     105,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 23,
+    "role": "night",
+    "bpm": [
+     115,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0066": {
+  "arch": "marina",
+  "label": "Марина / яхт-клуб",
+  "audience": "Владельцы лодок и их гости, взрослая обеспеченная публика",
+  "note": "Причал слышно далеко: после одиннадцати громкость режут почти всегда, и сет должен это учитывать.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 16,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     105,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 23,
+    "role": "night",
+    "bpm": [
+     115,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0053": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0057": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0042": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0032": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0056": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0041": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0065": {
+  "arch": "marina",
+  "label": "Марина / яхт-клуб",
+  "audience": "Владельцы лодок и их гости, взрослая обеспеченная публика",
+  "note": "Причал слышно далеко: после одиннадцати громкость режут почти всегда, и сет должен это учитывать.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 16,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     105,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 23,
+    "role": "night",
+    "bpm": [
+     115,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0071": {
+  "arch": "rooftop",
+  "label": "Крыша / скай-бар",
+  "audience": "Пары и компании 28–50, дороже средней публики, вечер до полуночи",
+  "note": "Крыша живёт разговором: громкость и плотность ниже клубной, жёсткий бас гости считывают как агрессию.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     110,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0045": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0064": {
+  "arch": "marina",
+  "label": "Марина / яхт-клуб",
+  "audience": "Владельцы лодок и их гости, взрослая обеспеченная публика",
+  "note": "Причал слышно далеко: после одиннадцати громкость режут почти всегда, и сет должен это учитывать.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 16,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     105,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 23,
+    "role": "night",
+    "bpm": [
+     115,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0044": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0055": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0047": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0011": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0010": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0037": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0019": {
+  "arch": "live",
+  "label": "Живая музыка",
+  "audience": "Публика пришла на сцену, а не на диджея",
+  "note": "Диджей здесь — оправа для группы: до, между и после, не перетягивая внимание.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 19,
+    "to": 23,
+    "role": "live",
+    "bpm": [
+     80,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "nu-jazz": 0.8,
+     "electro-swing": 0.6,
+     "lounge": 0.6,
+     "downtempo": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0007": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0082": {
+  "arch": "rooftop",
+  "label": "Крыша / скай-бар",
+  "audience": "Пары и компании 28–50, дороже средней публики, вечер до полуночи",
+  "note": "Крыша живёт разговором: громкость и плотность ниже клубной, жёсткий бас гости считывают как агрессию.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     110,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0038": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0028": {
+  "arch": "show",
+  "label": "Шоу / парк",
+  "audience": "Организованные группы и семьи, программа расписана по минутам",
+  "note": "Музыка подчинена сценарию шоу: свободного сета здесь нет.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "phonk",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "show",
+    "bpm": [
+     90,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0015": {
+  "arch": "nightclub",
+  "label": "Ночной клуб",
+  "audience": "Туристы 21–35 и местная сцена, к ночи — плотный танцпол",
+  "note": "Разогрев не играет прайм: пик, поставленный в 21:30, сжигает вечер и оставляет хедлайнеру пустой зал.",
+  "veto": [
+   "digital-hardcore",
+   "gabber",
+   "hardcore",
+   "power-electronics",
+   "psycore",
+   "speedcore",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 21,
+    "to": 23,
+    "role": "warmup",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   },
+   {
+    "from": 23,
+    "to": 2,
+    "role": "prime",
+    "bpm": [
+     124,
+     128
+    ],
+    "energy": 5,
+    "genres": {
+     "tech-house": 1.0,
+     "bass-house": 0.8,
+     "big-room-house": 0.7,
+     "edm-pop": 0.7,
+     "future-house": 0.6,
+     "melodic-techno": 0.6,
+     "dance-pop": 0.5,
+     "slap-house": 0.5
+    }
+   },
+   {
+    "from": 2,
+    "to": 5,
+    "role": "after",
+    "bpm": [
+     126,
+     138
+    ],
+    "energy": 5,
+    "genres": {
+     "melodic-techno": 1.0,
+     "peak-time-techno": 0.9,
+     "tech-house": 0.8,
+     "driving-techno": 0.7,
+     "minimal-techno": 0.6,
+     "hard-techno": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0058": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0016": {
+  "arch": "nightclub",
+  "label": "Ночной клуб",
+  "audience": "Туристы 21–35 и местная сцена, к ночи — плотный танцпол",
+  "note": "Разогрев не играет прайм: пик, поставленный в 21:30, сжигает вечер и оставляет хедлайнеру пустой зал.",
+  "veto": [
+   "digital-hardcore",
+   "gabber",
+   "hardcore",
+   "power-electronics",
+   "psycore",
+   "speedcore",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 21,
+    "to": 23,
+    "role": "warmup",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   },
+   {
+    "from": 23,
+    "to": 2,
+    "role": "prime",
+    "bpm": [
+     124,
+     128
+    ],
+    "energy": 5,
+    "genres": {
+     "tech-house": 1.0,
+     "bass-house": 0.8,
+     "big-room-house": 0.7,
+     "edm-pop": 0.7,
+     "future-house": 0.6,
+     "melodic-techno": 0.6,
+     "dance-pop": 0.5,
+     "slap-house": 0.5
+    }
+   },
+   {
+    "from": 2,
+    "to": 5,
+    "role": "after",
+    "bpm": [
+     126,
+     138
+    ],
+    "energy": 5,
+    "genres": {
+     "melodic-techno": 1.0,
+     "peak-time-techno": 0.9,
+     "tech-house": 0.8,
+     "driving-techno": 0.7,
+     "minimal-techno": 0.6,
+     "hard-techno": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0013": {
+  "arch": "nightclub",
+  "label": "Ночной клуб",
+  "audience": "Туристы 21–35 и местная сцена, к ночи — плотный танцпол",
+  "note": "Разогрев не играет прайм: пик, поставленный в 21:30, сжигает вечер и оставляет хедлайнеру пустой зал.",
+  "veto": [
+   "digital-hardcore",
+   "gabber",
+   "hardcore",
+   "power-electronics",
+   "psycore",
+   "speedcore",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 21,
+    "to": 23,
+    "role": "warmup",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   },
+   {
+    "from": 23,
+    "to": 2,
+    "role": "prime",
+    "bpm": [
+     124,
+     128
+    ],
+    "energy": 5,
+    "genres": {
+     "tech-house": 1.0,
+     "bass-house": 0.8,
+     "big-room-house": 0.7,
+     "edm-pop": 0.7,
+     "future-house": 0.6,
+     "melodic-techno": 0.6,
+     "dance-pop": 0.5,
+     "slap-house": 0.5
+    }
+   },
+   {
+    "from": 2,
+    "to": 5,
+    "role": "after",
+    "bpm": [
+     126,
+     138
+    ],
+    "energy": 5,
+    "genres": {
+     "melodic-techno": 1.0,
+     "peak-time-techno": 0.9,
+     "tech-house": 0.8,
+     "driving-techno": 0.7,
+     "minimal-techno": 0.6,
+     "hard-techno": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0018": {
+  "arch": "live",
+  "label": "Живая музыка",
+  "audience": "Публика пришла на сцену, а не на диджея",
+  "note": "Диджей здесь — оправа для группы: до, между и после, не перетягивая внимание.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 19,
+    "to": 23,
+    "role": "live",
+    "bpm": [
+     80,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "nu-jazz": 0.8,
+     "electro-swing": 0.6,
+     "lounge": 0.6,
+     "downtempo": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0060": {
+  "arch": "live",
+  "label": "Живая музыка",
+  "audience": "Публика пришла на сцену, а не на диджея",
+  "note": "Диджей здесь — оправа для группы: до, между и после, не перетягивая внимание.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 19,
+    "to": 23,
+    "role": "live",
+    "bpm": [
+     80,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "nu-jazz": 0.8,
+     "electro-swing": 0.6,
+     "lounge": 0.6,
+     "downtempo": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0014": {
+  "arch": "nightclub",
+  "label": "Ночной клуб",
+  "audience": "Туристы 21–35 и местная сцена, к ночи — плотный танцпол",
+  "note": "Разогрев не играет прайм: пик, поставленный в 21:30, сжигает вечер и оставляет хедлайнеру пустой зал.",
+  "veto": [
+   "digital-hardcore",
+   "gabber",
+   "hardcore",
+   "power-electronics",
+   "psycore",
+   "speedcore",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 21,
+    "to": 23,
+    "role": "warmup",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   },
+   {
+    "from": 23,
+    "to": 2,
+    "role": "prime",
+    "bpm": [
+     124,
+     128
+    ],
+    "energy": 5,
+    "genres": {
+     "tech-house": 1.0,
+     "bass-house": 0.8,
+     "big-room-house": 0.7,
+     "edm-pop": 0.7,
+     "future-house": 0.6,
+     "melodic-techno": 0.6,
+     "dance-pop": 0.5,
+     "slap-house": 0.5
+    }
+   },
+   {
+    "from": 2,
+    "to": 5,
+    "role": "after",
+    "bpm": [
+     126,
+     138
+    ],
+    "energy": 5,
+    "genres": {
+     "melodic-techno": 1.0,
+     "peak-time-techno": 0.9,
+     "tech-house": 0.8,
+     "driving-techno": 0.7,
+     "minimal-techno": 0.6,
+     "hard-techno": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0081": {
+  "arch": "rooftop",
+  "label": "Крыша / скай-бар",
+  "audience": "Пары и компании 28–50, дороже средней публики, вечер до полуночи",
+  "note": "Крыша живёт разговором: громкость и плотность ниже клубной, жёсткий бас гости считывают как агрессию.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     110,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0006": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0024": {
+  "arch": "show",
+  "label": "Шоу / парк",
+  "audience": "Организованные группы и семьи, программа расписана по минутам",
+  "note": "Музыка подчинена сценарию шоу: свободного сета здесь нет.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "phonk",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "show",
+    "bpm": [
+     90,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0085": {
+  "arch": "space",
+  "label": "Событийная площадка",
+  "audience": "Зависит от арендатора: формат задаёт организатор события",
+  "note": "Пустая коробка: ограничения приносит арендатор, а не сама площадка.",
+  "veto": [],
+  "slots": [
+   {
+    "from": 18,
+    "to": 23,
+    "role": "event",
+    "bpm": [
+     100,
+     128
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0021": {
+  "arch": "live",
+  "label": "Живая музыка",
+  "audience": "Публика пришла на сцену, а не на диджея",
+  "note": "Диджей здесь — оправа для группы: до, между и после, не перетягивая внимание.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 19,
+    "to": 23,
+    "role": "live",
+    "bpm": [
+     80,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "nu-jazz": 0.8,
+     "electro-swing": 0.6,
+     "lounge": 0.6,
+     "downtempo": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0086": {
+  "arch": "space",
+  "label": "Событийная площадка",
+  "audience": "Зависит от арендатора: формат задаёт организатор события",
+  "note": "Пустая коробка: ограничения приносит арендатор, а не сама площадка.",
+  "veto": [],
+  "slots": [
+   {
+    "from": 18,
+    "to": 23,
+    "role": "event",
+    "bpm": [
+     100,
+     128
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0022": {
+  "arch": "live",
+  "label": "Живая музыка",
+  "audience": "Публика пришла на сцену, а не на диджея",
+  "note": "Диджей здесь — оправа для группы: до, между и после, не перетягивая внимание.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 19,
+    "to": 23,
+    "role": "live",
+    "bpm": [
+     80,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "nu-jazz": 0.8,
+     "electro-swing": 0.6,
+     "lounge": 0.6,
+     "downtempo": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0083": {
+  "arch": "rooftop",
+  "label": "Крыша / скай-бар",
+  "audience": "Пары и компании 28–50, дороже средней публики, вечер до полуночи",
+  "note": "Крыша живёт разговором: громкость и плотность ниже клубной, жёсткий бас гости считывают как агрессию.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     110,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0087": {
+  "arch": "space",
+  "label": "Событийная площадка",
+  "audience": "Зависит от арендатора: формат задаёт организатор события",
+  "note": "Пустая коробка: ограничения приносит арендатор, а не сама площадка.",
+  "veto": [],
+  "slots": [
+   {
+    "from": 18,
+    "to": 23,
+    "role": "event",
+    "bpm": [
+     100,
+     128
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0020": {
+  "arch": "show",
+  "label": "Шоу / парк",
+  "audience": "Организованные группы и семьи, программа расписана по минутам",
+  "note": "Музыка подчинена сценарию шоу: свободного сета здесь нет.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "phonk",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "show",
+    "bpm": [
+     90,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0084": {
+  "arch": "space",
+  "label": "Событийная площадка",
+  "audience": "Зависит от арендатора: формат задаёт организатор события",
+  "note": "Пустая коробка: ограничения приносит арендатор, а не сама площадка.",
+  "veto": [],
+  "slots": [
+   {
+    "from": 18,
+    "to": 23,
+    "role": "event",
+    "bpm": [
+     100,
+     128
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0072": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0043": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0069": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0052": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0017": {
+  "arch": "nightclub",
+  "label": "Ночной клуб",
+  "audience": "Туристы 21–35 и местная сцена, к ночи — плотный танцпол",
+  "note": "Разогрев не играет прайм: пик, поставленный в 21:30, сжигает вечер и оставляет хедлайнеру пустой зал.",
+  "veto": [
+   "digital-hardcore",
+   "gabber",
+   "hardcore",
+   "power-electronics",
+   "psycore",
+   "speedcore",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 21,
+    "to": 23,
+    "role": "warmup",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   },
+   {
+    "from": 23,
+    "to": 2,
+    "role": "prime",
+    "bpm": [
+     124,
+     128
+    ],
+    "energy": 5,
+    "genres": {
+     "tech-house": 1.0,
+     "bass-house": 0.8,
+     "big-room-house": 0.7,
+     "edm-pop": 0.7,
+     "future-house": 0.6,
+     "melodic-techno": 0.6,
+     "dance-pop": 0.5,
+     "slap-house": 0.5
+    }
+   },
+   {
+    "from": 2,
+    "to": 5,
+    "role": "after",
+    "bpm": [
+     126,
+     138
+    ],
+    "energy": 5,
+    "genres": {
+     "melodic-techno": 1.0,
+     "peak-time-techno": 0.9,
+     "tech-house": 0.8,
+     "driving-techno": 0.7,
+     "minimal-techno": 0.6,
+     "hard-techno": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0062": {
+  "arch": "space",
+  "label": "Событийная площадка",
+  "audience": "Зависит от арендатора: формат задаёт организатор события",
+  "note": "Пустая коробка: ограничения приносит арендатор, а не сама площадка.",
+  "veto": [],
+  "slots": [
+   {
+    "from": 18,
+    "to": 23,
+    "role": "event",
+    "bpm": [
+     100,
+     128
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0027": {
+  "arch": "show",
+  "label": "Шоу / парк",
+  "audience": "Организованные группы и семьи, программа расписана по минутам",
+  "note": "Музыка подчинена сценарию шоу: свободного сета здесь нет.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "phonk",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "show",
+    "bpm": [
+     90,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0030": {
+  "arch": "lounge",
+  "label": "Лаунж / бар",
+  "audience": "Смешанная публика на ужине, музыка — фон, а не событие",
+  "note": "Здесь выигрывает сет, который не мешает разговору. Танцпола нет — значит, нет и пика.",
+  "veto": [
+   "algorithmic-music",
+   "big-room-house",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hardwave",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 21,
+    "role": "dinner",
+    "bpm": [
+     95,
+     115
+    ],
+    "energy": 1,
+    "genres": {
+     "lounge": 1.0,
+     "downtempo": 0.9,
+     "chillout": 0.8,
+     "organic-house": 0.7,
+     "deep-house": 0.6,
+     "nu-jazz": 0.5,
+     "trip-hop": 0.4
+    }
+   },
+   {
+    "from": 21,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     112,
+     122
+    ],
+    "energy": 2,
+    "genres": {
+     "lounge": 1.0,
+     "downtempo": 0.9,
+     "chillout": 0.8,
+     "organic-house": 0.7,
+     "deep-house": 0.6,
+     "nu-jazz": 0.5,
+     "trip-hop": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0029": {
+  "arch": "lounge",
+  "label": "Лаунж / бар",
+  "audience": "Смешанная публика на ужине, музыка — фон, а не событие",
+  "note": "Здесь выигрывает сет, который не мешает разговору. Танцпола нет — значит, нет и пика.",
+  "veto": [
+   "algorithmic-music",
+   "big-room-house",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hardwave",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 21,
+    "role": "dinner",
+    "bpm": [
+     95,
+     115
+    ],
+    "energy": 1,
+    "genres": {
+     "lounge": 1.0,
+     "downtempo": 0.9,
+     "chillout": 0.8,
+     "organic-house": 0.7,
+     "deep-house": 0.6,
+     "nu-jazz": 0.5,
+     "trip-hop": 0.4
+    }
+   },
+   {
+    "from": 21,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     112,
+     122
+    ],
+    "energy": 2,
+    "genres": {
+     "lounge": 1.0,
+     "downtempo": 0.9,
+     "chillout": 0.8,
+     "organic-house": 0.7,
+     "deep-house": 0.6,
+     "nu-jazz": 0.5,
+     "trip-hop": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0023": {
+  "arch": "live",
+  "label": "Живая музыка",
+  "audience": "Публика пришла на сцену, а не на диджея",
+  "note": "Диджей здесь — оправа для группы: до, между и после, не перетягивая внимание.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 19,
+    "to": 23,
+    "role": "live",
+    "bpm": [
+     80,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "nu-jazz": 0.8,
+     "electro-swing": 0.6,
+     "lounge": 0.6,
+     "downtempo": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0005": {
+  "arch": "beach",
+  "label": "Пляжный клуб",
+  "audience": "Туристы 25–45, смешанная европейско-российская публика, пары и компании",
+  "note": "Закат — главный слот: по нему площадку и запоминают. Ставить на закат жёсткий сет — терять вечер.",
+  "veto": [
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "digital-hardcore",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "jungle",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 11,
+    "to": 17,
+    "role": "day",
+    "bpm": [
+     100,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "organic-house": 1.0,
+     "downtempo": 0.8,
+     "lounge": 0.7,
+     "balearic-beat": 0.7,
+     "chillout": 0.6,
+     "deep-house": 0.5,
+     "afro-house": 0.4
+    }
+   },
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     116,
+     122
+    ],
+    "energy": 3,
+    "genres": {
+     "organic-house": 1.0,
+     "melodic-house": 0.9,
+     "afro-house": 0.8,
+     "balearic-beat": 0.7,
+     "downtempo": 0.6,
+     "nu-disco": 0.5,
+     "indie-dance": 0.5,
+     "deep-house": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     120,
+     126
+    ],
+    "energy": 4,
+    "genres": {
+     "tech-house": 1.0,
+     "afro-house": 0.9,
+     "melodic-house": 0.8,
+     "melodic-techno": 0.7,
+     "progressive-house": 0.6,
+     "deep-house": 0.6,
+     "latin-house": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0088": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0089": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0090": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0091": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0092": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0093": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0094": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0095": {
+  "arch": "mice",
+  "label": "Отель / банкет / MICE",
+  "audience": "Корпоративные и свадебные гости всех возрастов, включая семьи",
+  "note": "Заказчик — отель, а не танцпол. Узнаваемость важнее новизны: гость должен подпевать, а не разгадывать трек.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-ambient",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "goa-trance",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "reception",
+    "bpm": [
+     95,
+     118
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   },
+   {
+    "from": 22,
+    "to": 1,
+    "role": "party",
+    "bpm": [
+     118,
+     126
+    ],
+    "energy": 3,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0096": {
+  "arch": "space",
+  "label": "Событийная площадка",
+  "audience": "Зависит от арендатора: формат задаёт организатор события",
+  "note": "Пустая коробка: ограничения приносит арендатор, а не сама площадка.",
+  "veto": [],
+  "slots": [
+   {
+    "from": 18,
+    "to": 23,
+    "role": "event",
+    "bpm": [
+     100,
+     128
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0097": {
+  "arch": "space",
+  "label": "Событийная площадка",
+  "audience": "Зависит от арендатора: формат задаёт организатор события",
+  "note": "Пустая коробка: ограничения приносит арендатор, а не сама площадка.",
+  "veto": [],
+  "slots": [
+   {
+    "from": 18,
+    "to": 23,
+    "role": "event",
+    "bpm": [
+     100,
+     128
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0098": {
+  "arch": "nightclub",
+  "label": "Ночной клуб",
+  "audience": "Туристы 21–35 и местная сцена, к ночи — плотный танцпол",
+  "note": "Разогрев не играет прайм: пик, поставленный в 21:30, сжигает вечер и оставляет хедлайнеру пустой зал.",
+  "veto": [
+   "digital-hardcore",
+   "gabber",
+   "hardcore",
+   "power-electronics",
+   "psycore",
+   "speedcore",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 21,
+    "to": 23,
+    "role": "warmup",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   },
+   {
+    "from": 23,
+    "to": 2,
+    "role": "prime",
+    "bpm": [
+     124,
+     128
+    ],
+    "energy": 5,
+    "genres": {
+     "tech-house": 1.0,
+     "bass-house": 0.8,
+     "big-room-house": 0.7,
+     "edm-pop": 0.7,
+     "future-house": 0.6,
+     "melodic-techno": 0.6,
+     "dance-pop": 0.5,
+     "slap-house": 0.5
+    }
+   },
+   {
+    "from": 2,
+    "to": 5,
+    "role": "after",
+    "bpm": [
+     126,
+     138
+    ],
+    "energy": 5,
+    "genres": {
+     "melodic-techno": 1.0,
+     "peak-time-techno": 0.9,
+     "tech-house": 0.8,
+     "driving-techno": 0.7,
+     "minimal-techno": 0.6,
+     "hard-techno": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0099": {
+  "arch": "nightclub",
+  "label": "Ночной клуб",
+  "audience": "Туристы 21–35 и местная сцена, к ночи — плотный танцпол",
+  "note": "Разогрев не играет прайм: пик, поставленный в 21:30, сжигает вечер и оставляет хедлайнеру пустой зал.",
+  "veto": [
+   "digital-hardcore",
+   "gabber",
+   "hardcore",
+   "power-electronics",
+   "psycore",
+   "speedcore",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 21,
+    "to": 23,
+    "role": "warmup",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   },
+   {
+    "from": 23,
+    "to": 2,
+    "role": "prime",
+    "bpm": [
+     124,
+     128
+    ],
+    "energy": 5,
+    "genres": {
+     "tech-house": 1.0,
+     "bass-house": 0.8,
+     "big-room-house": 0.7,
+     "edm-pop": 0.7,
+     "future-house": 0.6,
+     "melodic-techno": 0.6,
+     "dance-pop": 0.5,
+     "slap-house": 0.5
+    }
+   },
+   {
+    "from": 2,
+    "to": 5,
+    "role": "after",
+    "bpm": [
+     126,
+     138
+    ],
+    "energy": 5,
+    "genres": {
+     "melodic-techno": 1.0,
+     "peak-time-techno": 0.9,
+     "tech-house": 0.8,
+     "driving-techno": 0.7,
+     "minimal-techno": 0.6,
+     "hard-techno": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0100": {
+  "arch": "nightclub",
+  "label": "Ночной клуб",
+  "audience": "Туристы 21–35 и местная сцена, к ночи — плотный танцпол",
+  "note": "Разогрев не играет прайм: пик, поставленный в 21:30, сжигает вечер и оставляет хедлайнеру пустой зал.",
+  "veto": [
+   "digital-hardcore",
+   "gabber",
+   "hardcore",
+   "power-electronics",
+   "psycore",
+   "speedcore",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 21,
+    "to": 23,
+    "role": "warmup",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   },
+   {
+    "from": 23,
+    "to": 2,
+    "role": "prime",
+    "bpm": [
+     124,
+     128
+    ],
+    "energy": 5,
+    "genres": {
+     "tech-house": 1.0,
+     "bass-house": 0.8,
+     "big-room-house": 0.7,
+     "edm-pop": 0.7,
+     "future-house": 0.6,
+     "melodic-techno": 0.6,
+     "dance-pop": 0.5,
+     "slap-house": 0.5
+    }
+   },
+   {
+    "from": 2,
+    "to": 5,
+    "role": "after",
+    "bpm": [
+     126,
+     138
+    ],
+    "energy": 5,
+    "genres": {
+     "melodic-techno": 1.0,
+     "peak-time-techno": 0.9,
+     "tech-house": 0.8,
+     "driving-techno": 0.7,
+     "minimal-techno": 0.6,
+     "hard-techno": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0101": {
+  "arch": "nightclub",
+  "label": "Ночной клуб",
+  "audience": "Туристы 21–35 и местная сцена, к ночи — плотный танцпол",
+  "note": "Разогрев не играет прайм: пик, поставленный в 21:30, сжигает вечер и оставляет хедлайнеру пустой зал.",
+  "veto": [
+   "digital-hardcore",
+   "gabber",
+   "hardcore",
+   "power-electronics",
+   "psycore",
+   "speedcore",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 21,
+    "to": 23,
+    "role": "warmup",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   },
+   {
+    "from": 23,
+    "to": 2,
+    "role": "prime",
+    "bpm": [
+     124,
+     128
+    ],
+    "energy": 5,
+    "genres": {
+     "tech-house": 1.0,
+     "bass-house": 0.8,
+     "big-room-house": 0.7,
+     "edm-pop": 0.7,
+     "future-house": 0.6,
+     "melodic-techno": 0.6,
+     "dance-pop": 0.5,
+     "slap-house": 0.5
+    }
+   },
+   {
+    "from": 2,
+    "to": 5,
+    "role": "after",
+    "bpm": [
+     126,
+     138
+    ],
+    "energy": 5,
+    "genres": {
+     "melodic-techno": 1.0,
+     "peak-time-techno": 0.9,
+     "tech-house": 0.8,
+     "driving-techno": 0.7,
+     "minimal-techno": 0.6,
+     "hard-techno": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0102": {
+  "arch": "nightclub",
+  "label": "Ночной клуб",
+  "audience": "Туристы 21–35 и местная сцена, к ночи — плотный танцпол",
+  "note": "Разогрев не играет прайм: пик, поставленный в 21:30, сжигает вечер и оставляет хедлайнеру пустой зал.",
+  "veto": [
+   "digital-hardcore",
+   "gabber",
+   "hardcore",
+   "power-electronics",
+   "psycore",
+   "speedcore",
+   "terrorcore",
+   "uptempo-hardcore"
+  ],
+  "slots": [
+   {
+    "from": 21,
+    "to": 23,
+    "role": "warmup",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   },
+   {
+    "from": 23,
+    "to": 2,
+    "role": "prime",
+    "bpm": [
+     124,
+     128
+    ],
+    "energy": 5,
+    "genres": {
+     "tech-house": 1.0,
+     "bass-house": 0.8,
+     "big-room-house": 0.7,
+     "edm-pop": 0.7,
+     "future-house": 0.6,
+     "melodic-techno": 0.6,
+     "dance-pop": 0.5,
+     "slap-house": 0.5
+    }
+   },
+   {
+    "from": 2,
+    "to": 5,
+    "role": "after",
+    "bpm": [
+     126,
+     138
+    ],
+    "energy": 5,
+    "genres": {
+     "melodic-techno": 1.0,
+     "peak-time-techno": 0.9,
+     "tech-house": 0.8,
+     "driving-techno": 0.7,
+     "minimal-techno": 0.6,
+     "hard-techno": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0103": {
+  "arch": "live",
+  "label": "Живая музыка",
+  "audience": "Публика пришла на сцену, а не на диджея",
+  "note": "Диджей здесь — оправа для группы: до, между и после, не перетягивая внимание.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 19,
+    "to": 23,
+    "role": "live",
+    "bpm": [
+     80,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "nu-jazz": 0.8,
+     "electro-swing": 0.6,
+     "lounge": 0.6,
+     "downtempo": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0104": {
+  "arch": "live",
+  "label": "Живая музыка",
+  "audience": "Публика пришла на сцену, а не на диджея",
+  "note": "Диджей здесь — оправа для группы: до, между и после, не перетягивая внимание.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 19,
+    "to": 23,
+    "role": "live",
+    "bpm": [
+     80,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "nu-jazz": 0.8,
+     "electro-swing": 0.6,
+     "lounge": 0.6,
+     "downtempo": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0105": {
+  "arch": "lounge",
+  "label": "Лаунж / бар",
+  "audience": "Смешанная публика на ужине, музыка — фон, а не событие",
+  "note": "Здесь выигрывает сет, который не мешает разговору. Танцпола нет — значит, нет и пика.",
+  "veto": [
+   "algorithmic-music",
+   "big-room-house",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hardwave",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 21,
+    "role": "dinner",
+    "bpm": [
+     95,
+     115
+    ],
+    "energy": 1,
+    "genres": {
+     "lounge": 1.0,
+     "downtempo": 0.9,
+     "chillout": 0.8,
+     "organic-house": 0.7,
+     "deep-house": 0.6,
+     "nu-jazz": 0.5,
+     "trip-hop": 0.4
+    }
+   },
+   {
+    "from": 21,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     112,
+     122
+    ],
+    "energy": 2,
+    "genres": {
+     "lounge": 1.0,
+     "downtempo": 0.9,
+     "chillout": 0.8,
+     "organic-house": 0.7,
+     "deep-house": 0.6,
+     "nu-jazz": 0.5,
+     "trip-hop": 0.4
+    }
+   }
+  ]
+ },
+ "VEN-0106": {
+  "arch": "rooftop",
+  "label": "Крыша / скай-бар",
+  "audience": "Пары и компании 28–50, дороже средней публики, вечер до полуночи",
+  "note": "Крыша живёт разговором: громкость и плотность ниже клубной, жёсткий бас гости считывают как агрессию.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "neurofunk",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 20,
+    "role": "sunset",
+    "bpm": [
+     110,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   },
+   {
+    "from": 20,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     118,
+     124
+    ],
+    "energy": 3,
+    "genres": {
+     "melodic-house": 1.0,
+     "organic-house": 0.9,
+     "deep-house": 0.8,
+     "nu-disco": 0.6,
+     "downtempo": 0.6,
+     "indie-dance": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0107": {
+  "arch": "space",
+  "label": "Событийная площадка",
+  "audience": "Зависит от арендатора: формат задаёт организатор события",
+  "note": "Пустая коробка: ограничения приносит арендатор, а не сама площадка.",
+  "veto": [],
+  "slots": [
+   {
+    "from": 18,
+    "to": 23,
+    "role": "event",
+    "bpm": [
+     100,
+     128
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0108": {
+  "arch": "space",
+  "label": "Событийная площадка",
+  "audience": "Зависит от арендатора: формат задаёт организатор события",
+  "note": "Пустая коробка: ограничения приносит арендатор, а не сама площадка.",
+  "veto": [],
+  "slots": [
+   {
+    "from": 18,
+    "to": 23,
+    "role": "event",
+    "bpm": [
+     100,
+     128
+    ],
+    "energy": 3,
+    "genres": {
+     "deep-house": 1.0,
+     "tech-house": 0.9,
+     "disco-house": 0.7,
+     "melodic-house": 0.7,
+     "nu-disco": 0.5,
+     "funky-house": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0109": {
+  "arch": "show",
+  "label": "Шоу / парк",
+  "audience": "Организованные группы и семьи, программа расписана по минутам",
+  "note": "Музыка подчинена сценарию шоу: свободного сета здесь нет.",
+  "veto": [
+   "algorithmic-music",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "grime",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "jungle",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "phonk",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 18,
+    "to": 22,
+    "role": "show",
+    "bpm": [
+     90,
+     120
+    ],
+    "energy": 2,
+    "genres": {
+     "dance-pop": 1.0,
+     "disco-house": 0.8,
+     "edm-pop": 0.7,
+     "eurodance": 0.6,
+     "nu-disco": 0.6,
+     "deep-house": 0.5,
+     "lounge": 0.5
+    }
+   }
+  ]
+ },
+ "VEN-0110": {
+  "arch": "lounge",
+  "label": "Лаунж / бар",
+  "audience": "Смешанная публика на ужине, музыка — фон, а не событие",
+  "note": "Здесь выигрывает сет, который не мешает разговору. Танцпола нет — значит, нет и пика.",
+  "veto": [
+   "algorithmic-music",
+   "big-room-house",
+   "brostep",
+   "crossbreed",
+   "dark-psy",
+   "darkstep",
+   "deconstructed-club",
+   "digital-hardcore",
+   "drone",
+   "drumfunk",
+   "forest-psy",
+   "frenchcore",
+   "gabber",
+   "ghetto-house",
+   "ghetto-tech",
+   "hard-techno",
+   "hardcore",
+   "hardstyle",
+   "hardwave",
+   "hi-tech-psy",
+   "industrial-techno",
+   "isolationism",
+   "lo-fi-house",
+   "microsound",
+   "musique-concrete",
+   "outsider-house",
+   "power-electronics",
+   "psycore",
+   "psytrance",
+   "rawstyle",
+   "rhythmic-noise",
+   "riddim",
+   "rominimal",
+   "schranz",
+   "speedcore",
+   "tearout",
+   "terrorcore",
+   "uptempo-hardcore",
+   "witch-house"
+  ],
+  "slots": [
+   {
+    "from": 17,
+    "to": 21,
+    "role": "dinner",
+    "bpm": [
+     95,
+     115
+    ],
+    "energy": 1,
+    "genres": {
+     "lounge": 1.0,
+     "downtempo": 0.9,
+     "chillout": 0.8,
+     "organic-house": 0.7,
+     "deep-house": 0.6,
+     "nu-jazz": 0.5,
+     "trip-hop": 0.4
+    }
+   },
+   {
+    "from": 21,
+    "to": 24,
+    "role": "night",
+    "bpm": [
+     112,
+     122
+    ],
+    "energy": 2,
+    "genres": {
+     "lounge": 1.0,
+     "downtempo": 0.9,
+     "chillout": 0.8,
+     "organic-house": 0.7,
+     "deep-house": 0.6,
+     "nu-jazz": 0.5,
+     "trip-hop": 0.4
+    }
+   }
+  ]
+ }
+}

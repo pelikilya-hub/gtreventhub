@@ -129,6 +129,20 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
             const reply = String(msg.content ?? "")
               .replace(/<think>[\s\S]*?<\/think>/g, "")
               .trim();
+            // Копилка датасета: вопрос, ответ и реальные вызовы
+            // инструментов. Из этого потом растёт дообучение — без
+            // накопленных живых диалогов оно невозможно в принципе.
+            try {
+              const day = new Date().toISOString().slice(0, 10);
+              const dkey = `brods:${day}`;
+              const cur = (await kvGetJson<unknown[]>(ns, dkey)) ?? [];
+              if (cur.length < 300) {
+                cur.push({ t: Date.now(), u: user.email, q: text, a: reply.slice(0, 1200), trace });
+                await ns.put(dkey, JSON.stringify(cur), { expirationTtl: 60 * 60 * 24 * 365 });
+              }
+            } catch {
+              /* датасет — не повод уронить ответ */
+            }
             return json({ ok: true, reply: reply || "…", cards, trace });
           }
 

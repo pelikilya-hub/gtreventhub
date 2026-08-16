@@ -599,8 +599,13 @@ async function syncDiscovered(
     }
   }
 
+  // Непроверенные идут первыми, и внутри них — свежедобавленные площадки
+  // (id по убыванию). Иначе новая площадка ждёт полного круга разведки:
+  // 110 сайтов по 12 за прогон — это почти сутки. Так добавленная сегодня
+  // площадка попадает в очередь на ближайшем же кроне, а старый хвост
+  // всё равно дочерпывается — множество непроверенных только сокращается.
   const queue = [
-    ...rows.filter((x) => !x.rec),
+    ...rows.filter((x) => !x.rec).sort((a, b) => b.vid.localeCompare(a.vid)),
     ...rows
       .filter((x) => x.rec?.kind === "none" && daysBetween(x.rec.checkedAt) >= RECHECK_DAYS)
       .sort((a, b) => a.rec!.checkedAt.localeCompare(b.rec!.checkedAt)),

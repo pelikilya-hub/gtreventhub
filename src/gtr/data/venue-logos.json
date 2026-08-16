@@ -8,7 +8,7 @@
   "bytes": 42895,
   "file": "/venues/logos/VEN-0001-logo.png",
   "name": "Catch Beach Club",
-  "src": "https://www.catchbeachclub.com/wp-content/uploads/2023/11/cropped-LOGO-1000x1000-1.webp",
+  "src": null,
   "own": true
  },
  "VEN-0002": {
@@ -20,7 +20,7 @@
   "bytes": 120971,
   "file": "/venues/logos/VEN-0002-logo.png",
   "name": "Café del Mar Phuket",
-  "src": "https://cdn.prod.website-files.com/675969a2220618a361236fac/67d82fd170484389c32c5f1f_256x256.jpg",
+  "src": null,
   "own": true
  },
  "VEN-0003": {
@@ -32,7 +32,43 @@
   "bytes": 17462,
   "file": "/venues/logos/VEN-0003-logo.png",
   "name": "Carpe Diem Beach Club",
-  "src": "https://carpediemphuket.com/wp-content/uploads/2024/07/CARPEDIEM-Logo-White.png",
+  "src": null,
+  "own": true
+ },
+ "VEN-0007": {
+  "w": 512,
+  "h": 512,
+  "plate": null,
+  "tone": "light",
+  "onDark": true,
+  "bytes": 9912,
+  "file": "/venues/logos/VEN-0007-logo.png",
+  "name": "KUDO Beach Club",
+  "src": "https://kudohotel.com/wp-content/uploads/2024/09/cropped-kudo-favicon.png",
+  "own": true
+ },
+ "VEN-0009": {
+  "w": 194,
+  "h": 128,
+  "plate": null,
+  "tone": "dark",
+  "onDark": false,
+  "bytes": 5810,
+  "file": "/venues/logos/VEN-0009-logo.png",
+  "name": "Tann Terrace Phuket",
+  "src": null,
+  "own": true
+ },
+ "VEN-0010": {
+  "w": 512,
+  "h": 162,
+  "plate": null,
+  "tone": "dark",
+  "onDark": false,
+  "bytes": 17626,
+  "file": "/venues/logos/VEN-0010-logo.png",
+  "name": "FUGA Beach Club",
+  "src": null,
   "own": true
  },
  "VEN-0013": {
@@ -44,7 +80,7 @@
   "bytes": 14699,
   "file": "/venues/logos/VEN-0013-logo.png",
   "name": "Illuzion Phuket",
-  "src": "https://www.illuzionphuket.com/wp-content/uploads/2023/06/illuzion-phuket-logo-w-2023-head-2@.png",
+  "src": null,
   "own": true
  },
  "VEN-0014": {
@@ -56,8 +92,68 @@
   "bytes": 52628,
   "file": "/venues/logos/VEN-0014-logo.png",
   "name": "Sugar Club Phuket",
-  "src": "https://www.sugarclub-phuket.com/wp-content/uploads/2018/12/logo.png",
+  "src": null,
   "own": true
+ },
+ "VEN-0027": {
+  "w": 512,
+  "h": 462,
+  "plate": null,
+  "tone": "dark",
+  "onDark": false,
+  "bytes": 83258,
+  "file": "/venues/logos/VEN-0027-logo.png",
+  "name": "Siam Niramit Phuket",
+  "src": null,
+  "own": true
+ },
+ "VEN-0028": {
+  "w": 491,
+  "h": 512,
+  "plate": null,
+  "tone": "light",
+  "onDark": true,
+  "bytes": 116557,
+  "file": "/venues/logos/VEN-0028-logo.png",
+  "name": "Phuket Simon Cabaret",
+  "src": null,
+  "own": true
+ },
+ "VEN-0031": {
+  "w": 512,
+  "h": 147,
+  "plate": null,
+  "tone": "light",
+  "onDark": true,
+  "bytes": 79616,
+  "file": "/venues/logos/VEN-0031-logo.png",
+  "name": "Andamanda Phuket",
+  "src": null,
+  "own": true
+ },
+ "VEN-0037": {
+  "w": 180,
+  "h": 180,
+  "plate": "#ffffff",
+  "tone": "dark",
+  "onDark": false,
+  "bytes": 5779,
+  "file": "/venues/logos/VEN-0037-logo.png",
+  "name": "Grand Mercure Phuket Patong",
+  "src": null,
+  "own": false
+ },
+ "VEN-0039": {
+  "w": 512,
+  "h": 89,
+  "plate": null,
+  "tone": "light",
+  "onDark": true,
+  "bytes": 15519,
+  "file": "/venues/logos/VEN-0039-logo.png",
+  "name": "SAii Laguna Phuket",
+  "src": null,
+  "own": false
  },
  "VEN-0047": {
   "w": 512,
@@ -68,7 +164,31 @@
   "bytes": 19266,
   "file": "/venues/logos/VEN-0047-logo.png",
   "name": "Barra Cuda Beach Club",
-  "src": "https://barracuda-r2.tumwebsme.com/cms/barracuda_logo.webp",
+  "src": null,
+  "own": true
+ },
+ "VEN-0051": {
+  "w": 472,
+  "h": 512,
+  "plate": null,
+  "tone": "mixed",
+  "onDark": false,
+  "bytes": 49426,
+  "file": "/venues/logos/VEN-0051-logo.png",
+  "name": "NORA Beach Club",
+  "src": null,
+  "own": true
+ },
+ "VEN-0053": {
+  "w": 264,
+  "h": 80,
+  "plate": null,
+  "tone": "dark",
+  "onDark": false,
+  "bytes": 3994,
+  "file": "/venues/logos/VEN-0053-logo.png",
+  "name": "Laku Beach Club",
+  "src": null,
   "own": true
  },
  "VEN-0055": {
@@ -80,7 +200,7 @@
   "bytes": 86749,
   "file": "/venues/logos/VEN-0055-logo.png",
   "name": "Paradise Beach Phuket",
-  "src": "https://theparadisebeachphuket.com/wp-content/uploads/2025/11/cropped-514091360_122109894788912301_6362868733687961649_n.jpg",
+  "src": null,
   "own": true
  },
  "VEN-0059": {
@@ -92,7 +212,19 @@
   "bytes": 310825,
   "file": "/venues/logos/VEN-0059-logo.png",
   "name": "Moonshine Phuket",
-  "src": "https://www.moonshinephuket.net/web-app-manifest-512x512.png",
+  "src": null,
+  "own": true
+ },
+ "VEN-0061": {
+  "w": 358,
+  "h": 274,
+  "plate": null,
+  "tone": "light",
+  "onDark": true,
+  "bytes": 6926,
+  "file": "/venues/logos/VEN-0061-logo.png",
+  "name": "Place Coworking",
+  "src": null,
   "own": true
  },
  "VEN-0066": {
@@ -104,7 +236,19 @@
   "bytes": 5041,
   "file": "/venues/logos/VEN-0066-logo.png",
   "name": "Royal Phuket Marina",
-  "src": "https://royalphuketmarina.com/wp-content/uploads/2022/05/RPM_Logo.png",
+  "src": null,
+  "own": true
+ },
+ "VEN-0067": {
+  "w": 349,
+  "h": 417,
+  "plate": null,
+  "tone": "mixed",
+  "onDark": false,
+  "bytes": 132000,
+  "file": "/venues/logos/VEN-0067-logo.png",
+  "name": "Phuket Boat Lagoon",
+  "src": null,
   "own": true
  },
  "VEN-0069": {
@@ -116,7 +260,7 @@
   "bytes": 6404,
   "file": "/venues/logos/VEN-0069-logo.png",
   "name": "Phuket Marriott Resort & Spa, Merlin Beach",
-  "src": "https://cache.marriott.com/content/dam/marriott-digital/mc/global-property-shared/en_us/logo/assets/mc_logo_L.png",
+  "src": null,
   "own": false
  },
  "VEN-0076": {
@@ -128,8 +272,68 @@
   "bytes": 5891,
   "file": "/venues/logos/VEN-0076-logo.png",
   "name": "Sri Panwa Phuket / Baba Nest",
-  "src": "https://www.babaphuket.com/images/logo-main.png",
+  "src": null,
   "own": true
+ },
+ "VEN-0078": {
+  "w": 261,
+  "h": 411,
+  "plate": null,
+  "tone": "light",
+  "onDark": true,
+  "bytes": 16417,
+  "file": "/venues/logos/VEN-0078-logo.png",
+  "name": "Casa Boho Phuket",
+  "src": null,
+  "own": true
+ },
+ "VEN-0079": {
+  "w": 168,
+  "h": 68,
+  "plate": null,
+  "tone": "light",
+  "onDark": true,
+  "bytes": 3042,
+  "file": "/venues/logos/VEN-0079-logo.png",
+  "name": "Vanilla Sky Bar & Lounge",
+  "src": "https://www.capesienna.com/uploads/logoshotel/capesienna_logo.png",
+  "own": false
+ },
+ "VEN-0080": {
+  "w": 460,
+  "h": 215,
+  "plate": null,
+  "tone": "dark",
+  "onDark": false,
+  "bytes": 10663,
+  "file": "/venues/logos/VEN-0080-logo.png",
+  "name": "Malika Sky Bar",
+  "src": "https://www.kalimaresort.com/asset_theme/images/icon/logo_khaolak.png",
+  "own": false
+ },
+ "VEN-0081": {
+  "w": 485,
+  "h": 249,
+  "plate": null,
+  "tone": "light",
+  "onDark": true,
+  "bytes": 30168,
+  "file": "/venues/logos/VEN-0081-logo.png",
+  "name": "Sizzle Rooftop Restaurant",
+  "src": null,
+  "own": true
+ },
+ "VEN-0082": {
+  "w": 114,
+  "h": 141,
+  "plate": null,
+  "tone": "light",
+  "onDark": true,
+  "bytes": 6809,
+  "file": "/venues/logos/VEN-0082-logo.png",
+  "name": "Kee Sky Lounge",
+  "src": "https://www.thekeeresort.com/images/logo-skylounge.png",
+  "own": false
  },
  "VEN-0101": {
   "w": 512,
@@ -140,7 +344,7 @@
   "bytes": 73709,
   "file": "/venues/logos/VEN-0101-logo.png",
   "name": "BOA Club Phuket",
-  "src": "https://www.boaclubphuket.com/web/image/29534-7e493b59/Logo-1000.webp",
+  "src": null,
   "own": true
  },
  "VEN-0105": {
@@ -152,7 +356,7 @@
   "bytes": 51318,
   "file": "/venues/logos/VEN-0105-logo.png",
   "name": "Lava Restobar",
-  "src": "https://fireandsmokephuket.com/wp-content/uploads/Logo-Fire-Smoke-SD.png",
+  "src": null,
   "own": true
  }
 }

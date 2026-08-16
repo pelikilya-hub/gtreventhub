@@ -37,7 +37,8 @@ from PIL import Image
 ALIEN = re.compile(
     r"travelife|tripadvisor|certified|certificate|award|badge|partner|sponsor|"
     r"payment|visa|mastercard|promptpay|booking|agoda|expedia|trustpilot|"
-    r"facebook|instagram|tiktok|whatsapp|line-|youtube|google",
+    r"facebook|instagram|tiktok|whatsapp|line-|youtube|google|"
+    r"gdpr|cookie|consent|privacy",
     re.I,
 )
 

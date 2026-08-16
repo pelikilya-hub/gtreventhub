@@ -1,0 +1,380 @@
+{
+ "found": {
+  "VEN-0051": {
+   "name": "NORA Beach Club",
+   "site": "https://norabeachclub.com",
+   "score": 85,
+   "title": "NORA Beach Club | Phuket&#039;s Premier Beachfront Destination"
+  },
+  "VEN-0039": {
+   "name": "SAii Laguna Phuket",
+   "site": "https://saiilagunaphuket.com",
+   "score": 140,
+   "title": "Resort in Phuket | SAii Laguna Phuket Official Site"
+  },
+  "VEN-0063": {
+   "name": "Phuket Yacht Club",
+   "site": "https://phuketyachtclub.com",
+   "score": 85,
+   "title": "Welcome to Phuket Yacht Club - Phuket Yacht Club"
+  },
+  "VEN-0061": {
+   "name": "Place Coworking",
+   "site": "https://placecoworking.com",
+   "score": 140,
+   "title": "Coworking Space in Phuket – Place Coworking"
+  },
+  "VEN-0078": {
+   "name": "Casa Boho Phuket",
+   "site": "https://casabohophuket.com",
+   "score": 140,
+   "title": "Casa Boho: Oceanview Latin American Restaurant in Phuket"
+  },
+  "VEN-0025": {
+   "name": "Phuket FantaSea",
+   "site": "https://fantaseaphuket.com",
+   "score": 85,
+   "title": "Купить апартаменты в Fantasea Condo Rawai — Цены в Августе 2026"
+  },
+  "VEN-0009": {
+   "name": "Tann Terrace Phuket",
+   "site": "https://tannterracephuket.com",
+   "score": 70,
+   "title": "Tann Beach Club - The Ultimate Beach Club Experience in Phuket"
+  },
+  "VEN-0075": {
+   "name": "Kata Rocks",
+   "site": "https://katarocks.com",
+   "score": 140,
+   "title": "Phuket Luxury Pool Villas | Kata Rocks Official Site"
+  },
+  "VEN-0031": {
+   "name": "Andamanda Phuket",
+   "site": "https://andamandaphuket.com",
+   "score": 85,
+   "title": "Waterpark | Andamanda Phuket"
+  },
+  "VEN-0067": {
+   "name": "Phuket Boat Lagoon",
+   "site": "https://phuketboatlagoon.com",
+   "score": 140,
+   "title": "Home | Phuket Boat Lagoon"
+  },
+  "VEN-0053": {
+   "name": "Laku Beach Club",
+   "site": "https://lakubeachclub.com",
+   "score": 85,
+   "title": "LAKU UPDATED HOMEPAGE | LAKU Beach Club"
+  },
+  "VEN-0064": {
+   "name": "Ao Po Grand Marina",
+   "site": "https://aopograndmarina.com",
+   "score": 140,
+   "title": "Ao Po Grand Marina, Phuket Thailand"
+  },
+  "VEN-0010": {
+   "name": "FUGA Beach Club",
+   "site": "https://fugabeachclub.com",
+   "score": 85,
+   "title": "FUGA Beach Club | Patong Phuket &#8211; Unwind in paradise at FUGA Beach Club, a breathtak"
+  },
+  "VEN-0037": {
+   "name": "Grand Mercure Phuket Patong",
+   "site": "https://grandmercurephuketpatong.com",
+   "score": 195,
+   "title": "Grand Mercure Phuket Patong Resort and Villas | Discover Phuket in Style"
+  },
+  "VEN-0038": {
+   "name": "M Social Hotel Phuket",
+   "site": "https://msocial.com",
+   "score": 85,
+   "title": "M Social Hotels | Lifestyle Hotel Book Direct for Best Deals"
+  },
+  "VEN-0028": {
+   "name": "Phuket Simon Cabaret",
+   "site": "https://simoncabaretphuket.com",
+   "score": 140,
+   "title": "Simon Cabaret Phuket | The Best Cabaret Show in Phuket"
+  },
+  "VEN-0058": {
+   "name": "The Deck Beach Club Patong",
+   "site": "https://thedeckbeachclubpatong.com",
+   "score": 140,
+   "title": "Discover Phuket's New Beach Club | The Deck Beach Club Patong"
+  },
+  "VEN-0081": {
+   "name": "Sizzle Rooftop Restaurant",
+   "site": "https://sizzlerooftopphuket.com",
+   "score": 85,
+   "title": "Best Steakhouse in Phuket | Sizzle Rooftop Bar. Steak. Seafood"
+  },
+  "VEN-0043": {
+   "name": "Rosewood Phuket",
+   "site": "https://rosewoodphuket.com",
+   "score": 85,
+   "title": "Luxury Phuket Resort | 5-Star Hotel Phuket | Rosewood Phuket"
+  },
+  "VEN-0027": {
+   "name": "Siam Niramit Phuket",
+   "site": "https://siamniramitphuket.com",
+   "score": 140,
+   "title": "World Class Show in Phuket | Siam Niramit Phuket"
+  },
+  "VEN-0005": {
+   "name": "MAYA Beach Club Phuket",
+   "site": "https://mayaphuket.com",
+   "score": 85,
+   "title": "Maya Phuket Airport Hotel, Thalang - Official Site"
+  }
+ },
+ "miss": [
+  {
+   "id": "VEN-0077",
+   "name": "Akoya Star Lounge at V Villas Phuket"
+  },
+  {
+   "id": "VEN-0049",
+   "name": "The Beach Phuket"
+  },
+  {
+   "id": "VEN-0040",
+   "name": "Angsana Laguna Phuket"
+  },
+  {
+   "id": "VEN-0048",
+   "name": "Casuarina Beach Club"
+  },
+  {
+   "id": "VEN-0004",
+   "name": "XANA Beach Club"
+  },
+  {
+   "id": "VEN-0074",
+   "name": "COMO Point Yamu"
+  },
+  {
+   "id": "VEN-0080",
+   "name": "Malika Sky Bar"
+  },
+  {
+   "id": "VEN-0026",
+   "name": "Carnival Magic"
+  },
+  {
+   "id": "VEN-0034",
+   "name": "Hyatt Regency Phuket Resort"
+  },
+  {
+   "id": "VEN-0008",
+   "name": "Pine Beach Bar"
+  },
+  {
+   "id": "VEN-0079",
+   "name": "Vanilla Sky Bar & Lounge"
+  },
+  {
+   "id": "VEN-0073",
+   "name": "Paresa Resort Phuket"
+  },
+  {
+   "id": "VEN-0012",
+   "name": "COAST Beach Club & Bistro Phuket"
+  },
+  {
+   "id": "VEN-0035",
+   "name": "Paradox Resort Phuket"
+  },
+  {
+   "id": "VEN-0036",
+   "name": "Le Méridien Phuket Beach Resort"
+  },
+  {
+   "id": "VEN-0054",
+   "name": "Ska Bar"
+  },
+  {
+   "id": "VEN-0070",
+   "name": "The Shore at Katathani"
+  },
+  {
+   "id": "VEN-0057",
+   "name": "The Beach House at Anantara Layan"
+  },
+  {
+   "id": "VEN-0042",
+   "name": "Anantara Mai Khao Phuket Villas"
+  },
+  {
+   "id": "VEN-0032",
+   "name": "JW Marriott Phuket Resort & Spa"
+  },
+  {
+   "id": "VEN-0056",
+   "name": "M Beach Club Phuket"
+  },
+  {
+   "id": "VEN-0041",
+   "name": "Renaissance Phuket Resort & Spa"
+  },
+  {
+   "id": "VEN-0065",
+   "name": "Phuket Yacht Haven Marina"
+  },
+  {
+   "id": "VEN-0071",
+   "name": "The Nai Harn Phuket"
+  },
+  {
+   "id": "VEN-0045",
+   "name": "The Naka Island, a Luxury Collection Resort & Spa"
+  },
+  {
+   "id": "VEN-0044",
+   "name": "Amanpuri"
+  },
+  {
+   "id": "VEN-0011",
+   "name": "Endless Summer Beach Club"
+  },
+  {
+   "id": "VEN-0019",
+   "name": "Hard Rock Cafe Phuket"
+  },
+  {
+   "id": "VEN-0007",
+   "name": "KUDO Beach Club"
+  },
+  {
+   "id": "VEN-0082",
+   "name": "Kee Sky Lounge"
+  },
+  {
+   "id": "VEN-0015",
+   "name": "Shelter Phuket"
+  },
+  {
+   "id": "VEN-0016",
+   "name": "Armania Phuket"
+  },
+  {
+   "id": "VEN-0060",
+   "name": "Red Hot Club Phuket"
+  },
+  {
+   "id": "VEN-0024",
+   "name": "Lotus Arena Phuket"
+  },
+  {
+   "id": "VEN-0085",
+   "name": "Phuket Co Working Space / Summit Tower"
+  },
+  {
+   "id": "VEN-0021",
+   "name": "Bebop Live Music Bar"
+  },
+  {
+   "id": "VEN-0086",
+   "name": "Blue Elephant Governor's Mansion Phuket"
+  },
+  {
+   "id": "VEN-0022",
+   "name": "Cue Bar Phuket"
+  },
+  {
+   "id": "VEN-0083",
+   "name": "Quip Sky Bar"
+  },
+  {
+   "id": "VEN-0087",
+   "name": "VELA Phuket Old Town"
+  },
+  {
+   "id": "VEN-0020",
+   "name": "Flame Phuket Town"
+  },
+  {
+   "id": "VEN-0084",
+   "name": "HOMA Phuket Town"
+  },
+  {
+   "id": "VEN-0072",
+   "name": "Twinpalms Phuket"
+  },
+  {
+   "id": "VEN-0052",
+   "name": "The G Beach Club"
+  },
+  {
+   "id": "VEN-0062",
+   "name": "BTC Space Phuket"
+  },
+  {
+   "id": "VEN-0030",
+   "name": "Rhythm Park Phuket"
+  },
+  {
+   "id": "VEN-0029",
+   "name": "Blue Tree Phuket"
+  },
+  {
+   "id": "VEN-0023",
+   "name": "The Garage OG Phuket"
+  },
+  {
+   "id": "VEN-0088",
+   "name": "Pullman Phuket Karon Beach Resort"
+  },
+  {
+   "id": "VEN-0089",
+   "name": "Four Points by Sheraton Phuket Patong Beach Resort"
+  },
+  {
+   "id": "VEN-0090",
+   "name": "Courtyard by Marriott Phuket Town"
+  },
+  {
+   "id": "VEN-0091",
+   "name": "Courtyard by Marriott Phuket, Patong Beach Resort"
+  },
+  {
+   "id": "VEN-0092",
+   "name": "Pullman Phuket Arcadia Naithon Beach"
+  },
+  {
+   "id": "VEN-0093",
+   "name": "Novotel Phuket Vintage Park Resort"
+  },
+  {
+   "id": "VEN-0094",
+   "name": "Holiday Inn Resort Phuket"
+  },
+  {
+   "id": "VEN-0095",
+   "name": "Hotel Indigo Phuket Patong"
+  },
+  {
+   "id": "VEN-0096",
+   "name": "ibis Phuket Patong"
+  },
+  {
+   "id": "VEN-0097",
+   "name": "ibis Phuket Kata"
+  },
+  {
+   "id": "VEN-0099",
+   "name": "Tiger Night Club"
+  },
+  {
+   "id": "VEN-0100",
+   "name": "Hollywood Phuket"
+  },
+  {
+   "id": "VEN-0103",
+   "name": "Rock City Phuket"
+  },
+  {
+   "id": "VEN-0104",
+   "name": "Music Matter Jazz Bar"
+  }
+ ]
+}

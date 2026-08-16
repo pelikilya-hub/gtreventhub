@@ -1942,6 +1942,42 @@ export const venueFbConnectFn = createServerFn({ method: "POST" })
       if (ex?.access_token) page.token = ex.access_token;
     }
     await ns.put(`vmeta:${link.vid}`, JSON.stringify(page));
+
+    // Заодно забираем аватар страницы: у заведения там почти всегда
+    // стоит собственный знак. Это единственный законный путь к логотипу
+    // через Meta — публичные страницы чужих заведений Graph закрыл, для
+    // них нужен разбор приложения. А со своим токеном площадка отдаёт
+    // аватар сама, и это уже её осознанное согласие.
+    try {
+      const pic = await fetch(
+        `${G}/${page.pageId}/picture?type=large&redirect=false&access_token=${encodeURIComponent(page.token)}`,
+      )
+        .then(
+          (r) =>
+            r.json() as Promise<{
+              data?: { url?: string; width?: number; height?: number; is_silhouette?: boolean };
+            }>,
+        )
+        .catch(() => null);
+      const d = pic?.data;
+      // Силуэт — заглушка Facebook «аватара нет»: сохранять нечего.
+      if (d?.url && !d.is_silhouette) {
+        await ns.put(
+          `vlogo:${link.vid}`,
+          JSON.stringify({
+            url: d.url,
+            w: d.width ?? 0,
+            h: d.height ?? 0,
+            from: "facebook",
+            pageName: page.pageName,
+            at: Date.now(),
+          }),
+        );
+      }
+    } catch {
+      // аватар — приятное дополнение, из-за него подключение не валим
+    }
+
     const { V } = await import("./data/app-data");
     await notifyAdminsTg(
       ns,
@@ -2315,6 +2351,57 @@ export const setVillaPriceFn = createServerFn({ method: "POST" })
 // ---------- занятость площадок: даты, где уже стоит своя программа ----------
 // Календарь и конструктор спрашивают «свободна ли дата», а не «покажи
 // афишу» — держим отдельный лёгкий индекс, чтобы не тянуть события целиком.
+
+// ---------- знаки площадок ----------
+// Два источника, и порядок между ними важен. Снизу лежит то, что мы
+// сами сняли с официальных сайтов (venue-logos.json, файлы в сборке).
+// Сверху — то, что площадка отдала нам сама, подключив свою страницу:
+// её знак свежее нашего и получен с прямого согласия, поэтому он
+// перекрывает собранный.
+export type VenueLogo = {
+  file: string;
+  w: number;
+  h: number;
+  plate: string | null;
+  tone: "light" | "dark";
+  onDark: boolean;
+  from: "site" | "facebook";
+};
+
+export const venueLogosFn = createServerFn({ method: "GET" }).handler(async () => {
+  const { default: statics } = await import("./data/venue-logos.json");
+  const out: Record<string, VenueLogo> = {};
+  for (const [vid, d] of Object.entries(statics as Record<string, Record<string, unknown>>)) {
+    out[vid] = {
+      file: String(d.file),
+      w: Number(d.w),
+      h: Number(d.h),
+      plate: (d.plate as string | null) ?? null,
+      tone: d.tone === "light" ? "light" : "dark",
+      onDark: Boolean(d.onDark),
+      from: "site",
+    };
+  }
+  const ns = await getKvNs();
+  if (ns) {
+    for (const key of await kvListAll(ns, "vlogo:")) {
+      const v = await kvGetJson<{ url: string; w?: number; h?: number }>(ns, key);
+      if (!v?.url) continue;
+      // Аватар страницы — всегда квадрат на сплошной подложке: подложку
+      // не угадываем, а честно помечаем «плашка нужна».
+      out[key.slice("vlogo:".length)] = {
+        file: v.url,
+        w: v.w ?? 0,
+        h: v.h ?? 0,
+        plate: null,
+        tone: "dark",
+        onDark: false,
+        from: "facebook",
+      };
+    }
+  }
+  return { logos: out };
+});
 
 export const venueBusyFn = createServerFn({ method: "GET" })
   .inputValidator((d: { vids: string[] }) => d)

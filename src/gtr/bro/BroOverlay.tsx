@@ -128,7 +128,11 @@ export function GtrBroOverlay({
   const [ask, setAsk] = useState<{ tool: string; summary: string; resolve: (v: boolean) => void } | null>(
     null,
   );
+  // Мини-режим: разговор жив, оверлей сложен в таблетку поверх приложения.
+  // Микрофон при этом ВИДЕН — скрытой записи в продукте нет.
+  const [mini, setMini] = useState(false);
   const ses = useRef<VoiceSession | null>(null);
+  const starting = useRef(false);
   const metric = useMetrics();
 
   const reset = () => {
@@ -145,6 +149,10 @@ export function GtrBroOverlay({
 
   const begin = useCallback(
     async (v: string, m: PersonaMode) => {
+      // Два быстрых нажатия рождали две параллельные сессии — двойной
+      // звук и двойной счёт. Вторая попытка ждёт, пока первая не решится.
+      if (starting.current) return;
+      starting.current = true;
       ses.current?.stop("restart");
       reset();
       const S = provider === "gemini" ? GemSession : BroSession;
@@ -168,13 +176,24 @@ export function GtrBroOverlay({
           }),
         onLine: (l) =>
           setRows((p) => {
-            const last = p[p.length - 1];
-            const base = last && last.who === l.who && !last.done ? p.slice(0, -1) : p;
-            return [...base.slice(-120), { who: l.who, text: l.text, done: true }];
+            // Финал заменяет НЕДОПЕЧАТАННУЮ строку того же автора, где бы
+            // она ни стояла: реплики двух сторон перемежаются, и «последняя
+            // строка» — не всегда та.
+            for (let i = p.length - 1; i >= 0; i--) {
+              if (p[i].who === l.who && !p[i].done) {
+                const next = [...p];
+                next[i] = { who: l.who, text: l.text, done: true };
+                return next.slice(-120);
+              }
+            }
+            return [...p.slice(-120), { who: l.who, text: l.text, done: true }];
           }),
         onCard: (c) => {
           if (c.kind === "navigate") {
+            // Навигация больше не убивает разговор: приложение открывает
+            // экран, а BRO складывается в таблетку и продолжает слушать.
             onNavigate(String(c.data.route), c.data.entityId);
+            setMini(true);
             return;
           }
           setCards((p) => [c, ...p].slice(0, 6));
@@ -183,7 +202,11 @@ export function GtrBroOverlay({
         onConfirm: (a) => new Promise<boolean>((resolve) => setAsk({ ...a, resolve })),
       });
       ses.current = s;
-      await s.start({ voice: v, personaMode: m, screen, district, ptt: !handsRef.current });
+      try {
+        await s.start({ voice: v, personaMode: m, screen, district, ptt: !handsRef.current });
+      } finally {
+        starting.current = false;
+      }
     },
     [district, metric, onNavigate, provider, screen],
   );
@@ -214,6 +237,32 @@ export function GtrBroOverlay({
   }, [open, onClose]);
 
   if (!open) return null;
+
+  if (mini) {
+    const liveMini = ses.current !== null && !["closed", "idle", "error"].includes(state);
+    return (
+      <div className="gtr-bro-pill-wrap">
+        <button className="gtr-bro-pill" onClick={() => setMini(false)} aria-label="Развернуть BRO">
+          <span
+            className={`gtr-bro-pill-dot${liveMini ? " on" : ""}`}
+            style={{ transform: `scale(${0.8 + level * 1.2})` }}
+          />
+          <span className="gtr-bro-pill-t">BRO · {STATE_RU[state]}</span>
+        </button>
+        <button
+          className="gtr-bro-pill-x"
+          aria-label="Завершить разговор"
+          onClick={() => {
+            stop();
+            setMini(false);
+            onClose();
+          }}
+        >
+          ✕
+        </button>
+      </div>
+    );
+  }
 
   const live = ses.current !== null && state !== "closed" && state !== "idle" && state !== "error";
   const busy = state === "connecting" || state === "requesting_permission";

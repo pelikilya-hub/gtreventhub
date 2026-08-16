@@ -3619,3 +3619,45 @@ html { -webkit-tap-highlight-color: transparent; }
   padding: 2px 0;
 }
 .gtr-bro-cmd::placeholder { color: #1f9c3d; opacity: 0.6; }
+
+/* BRO-таблетка: разговор продолжается поверх приложения. Точка пульсирует
+   от реального уровня микрофона — открытый эфир всегда виден. */
+.gtr-bro-pill-wrap {
+  position: fixed;
+  left: 50%;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 259;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.gtr-bro-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  padding: 9px 14px;
+  background: linear-gradient(180deg, rgba(24, 26, 50, 0.95), rgba(10, 11, 24, 0.97));
+  box-shadow: 0 0 0 1px rgba(123, 77, 255, 0.4), 0 8px 30px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font: 600 11px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.gtr-bro-pill-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #555;
+  transition: transform 0.08s linear;
+}
+.gtr-bro-pill-dot.on { background: #35ff5c; box-shadow: 0 0 10px rgba(53, 255, 92, 0.8); }
+.gtr-bro-pill-x {
+  border: 0;
+  padding: 9px 11px;
+  background: rgba(229, 35, 27, 0.3);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}

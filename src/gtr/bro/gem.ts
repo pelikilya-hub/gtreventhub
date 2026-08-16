@@ -206,6 +206,9 @@ export class GemSession {
               model: `models/${model}`,
               generationConfig: {
                 responseModalities: ["AUDIO"],
+                // Ниже температура — меньше соблазна украсить ответ
+                // выдуманным баром.
+                temperature: 0.6,
                 speechConfig: {
                   languageCode: "ru-RU",
                   voiceConfig: { prebuiltVoiceConfig: { voiceName: opts.voice } },

@@ -1761,10 +1761,12 @@ function VisitorCabinet() {
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto" }}>
-      {/* ---- HERO: вайб вечера — живое видео площадки ---- */}
-      <Card style={{ position: "relative", overflow: "hidden", padding: 0, marginBottom: 16 }}>
-        <div style={{ position: "relative", minHeight: "min(46vh, 380px)" }}>
-          <video
+      {/* ---- HERO: вайб вечера — живое видео площадки.
+           Без карточки и рамки: кадр выходит за отступы колонки до граней
+           экрана, а по краям свет заваливается, как на изогнутом стекле —
+           видео читается уходящим за грань, а не вырезанным в окошке. ---- */}
+      <div className="gtr-hero-edge">
+        <video
             src="https://cwsdn.b-cdn.net/Illuzion/illuzion-intro-2025.mp4"
             poster="/venues/VEN-0013-hero.jpg"
             autoPlay
@@ -1774,9 +1776,9 @@ function VisitorCabinet() {
             aria-hidden
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "saturate(1.08) contrast(1.05)" }}
           />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,11,13,.18) 30%, rgba(10,11,13,.92) 100%)" }} />
-          <div className="gtr-laser" style={{ ["--gtr-run" as string]: "340px" }} />
-          <div style={{ position: "relative", padding: "26px 22px", display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: "min(46vh, 380px)" }}>
+        <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(180deg, rgba(10,11,13,.16) 26%, rgba(10,11,13,.7) 70%, rgba(10,11,13,.96) 90%, #0a0b0d 100%)" }} />
+        <div className="gtr-laser" style={{ ["--gtr-run" as string]: "340px", zIndex: 1 }} />
+        <div className="gtr-hero-edge-in" style={{ padding: "26px 22px", display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: "min(46vh, 380px)" }}>
             <div className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "rgba(255,255,255,.75)", letterSpacing: ".16em", marginBottom: 10 }}>
               {user.name.toUpperCase()} · PHUKET
             </div>
@@ -1791,9 +1793,8 @@ function VisitorCabinet() {
                 {t("Выбрать вечер")} →
               </button>
             </div>
-          </div>
         </div>
-      </Card>
+      </div>
 
       {/* ---- афиша: ближайшие события, клик — в артиста ---- */}
       {feed.length ? (

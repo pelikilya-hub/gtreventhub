@@ -949,7 +949,7 @@
   height: 100dvh;
   overflow-y: auto;
 }
-.gtr-main { flex: 1; min-width: 0; padding: 22px 30px 40px; }
+.gtr-main { flex: 1; min-width: 0; --gtr-pad: 30px; padding: 22px var(--gtr-pad) 40px; }
 .gtr-topbar { display: none; }
 .gtr-scrim { display: none; }
 
@@ -1025,7 +1025,8 @@
   }
 
   .gtr-main {
-    padding: 14px 14px calc(30px + env(safe-area-inset-bottom));
+    --gtr-pad: 14px;
+    padding: 14px var(--gtr-pad) calc(30px + env(safe-area-inset-bottom));
   }
 
   /* заголовки чуть плотнее на узком экране */
@@ -2496,4 +2497,94 @@ html { -webkit-tap-highlight-color: transparent; }
   .gtr-tab-core,
   .gtr-tabbar { transition: none; }
   .gtr-tabbar::before { animation: none; opacity: 0.9; }
+}
+
+
+/* =====================================================================
+   HERO В КАБИНЕТЕ ПОСЕТИТЕЛЯ — БЕЗ РАМКИ, ВИДЕО УХОДИТ ЗА КРАЙ
+   ---------------------------------------------------------------------
+   Карточка с рамкой превращала живое видео в экспонат под стеклом.
+   Здесь наоборот: блок выходит за отступы колонки до самых граней
+   экрана, а по краям свет заваливается — как на изогнутом стекле
+   Galaxy edge. Радиусов нет: округляем свет, а не геометрию, иначе
+   поедет фирменная острая огранка.
+   ===================================================================== */
+.gtr-hero-edge {
+  position: relative;
+  /* вылет ровно на отступ колонки: на телефоне это край экрана */
+  margin-inline: calc(-1 * var(--gtr-pad, 14px));
+  margin-bottom: 16px;
+  overflow: hidden;
+  background: #0a0b0d;
+  isolation: isolate;
+}
+
+/* кадр шире контейнера: у картинки нет видимого торца, она продолжается
+   за гранью, а не обрывается ровно по ней */
+.gtr-hero-edge > video,
+.gtr-hero-edge > img {
+  transform: scale(1.06);
+  transform-origin: 50% 45%;
+}
+
+/* загиб: блик на ребре стекла + завал света в тень по самому краю.
+   Один слой, два градиента — лишних узлов и фильтров не заводим. */
+.gtr-hero-edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.14) 1.4%,
+      rgba(255, 255, 255, 0.03) 4%,
+      rgba(255, 255, 255, 0) 7%,
+      rgba(255, 255, 255, 0) 93%,
+      rgba(255, 255, 255, 0.03) 96%,
+      rgba(255, 255, 255, 0.14) 98.6%,
+      rgba(255, 255, 255, 0) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(5, 6, 8, 0.94) 0%,
+      rgba(5, 6, 8, 0.6) 2.2%,
+      rgba(5, 6, 8, 0.24) 5.5%,
+      rgba(5, 6, 8, 0.06) 9%,
+      rgba(5, 6, 8, 0) 14%,
+      rgba(5, 6, 8, 0) 86%,
+      rgba(5, 6, 8, 0.06) 91%,
+      rgba(5, 6, 8, 0.24) 94.5%,
+      rgba(5, 6, 8, 0.6) 97.8%,
+      rgba(5, 6, 8, 0.94) 100%
+    );
+}
+
+/* верхняя грань тоже уходит в темноту — блок не выглядит вырезанным
+   прямоугольником под шапкой */
+.gtr-hero-edge::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 64px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(5, 6, 8, 0.75) 0%, rgba(5, 6, 8, 0) 100%);
+}
+
+/* содержимое поверх всех накладок */
+.gtr-hero-edge > .gtr-hero-edge-in { position: relative; z-index: 3; }
+
+@media (max-width: 860px) {
+  /* текст не должен липнуть к самой грани, раз рамки больше нет */
+  .gtr-hero-edge > .gtr-hero-edge-in { padding-inline: 26px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-hero-edge > video,
+  .gtr-hero-edge > img { transform: none; }
 }

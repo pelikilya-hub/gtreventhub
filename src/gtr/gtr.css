@@ -3603,3 +3603,19 @@ html { -webkit-tap-highlight-color: transparent; }
   animation: gtr-bro-blink 1s steps(1) infinite;
 }
 @keyframes gtr-bro-blink { 50% { opacity: 0; } }
+
+/* Командная строка табло */
+.gtr-bro-cmdrow { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+.gtr-bro-cmd {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #b6ffc4;
+  caret-color: #35ff5c;
+  font: inherit;
+  text-shadow: inherit;
+  padding: 2px 0;
+}
+.gtr-bro-cmd::placeholder { color: #1f9c3d; opacity: 0.6; }

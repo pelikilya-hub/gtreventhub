@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { broLogFn } from "../kv-api";
+import { EMPTY_LINE, fmtDetails, fmtEvents, fmtRoute, HELP_LINES, openerFor, planOf } from "./text";
 import { VOICE_LAB_LINES, type PersonaMode } from "./prompt.ru";
 import { BroSession, type BroCard, type BroLine, type BroState, type BroVoice } from "./session";
 
@@ -95,6 +96,9 @@ export function GtrBroOverlay({
   type Row = { who: "user" | "bro" | "sys"; text: string; done: boolean };
   const [rows, setRows] = useState<Row[]>([]);
   const dosRef = useRef<HTMLDivElement | null>(null);
+  const [cmd, setCmd] = useState("");
+  // Последняя выдача поиска — для «детали N» и «маршрут».
+  const lastEvents = useRef<Record<string, unknown>[]>([]);
   const [cards, setCards] = useState<BroCard[]>([]);
   const [mode, setMode] = useState<PersonaMode>("bro");
   const [voice, setVoice] = useState<BroVoice>("cedar");
@@ -216,6 +220,80 @@ export function GtrBroOverlay({
   };
   const err = state === "error" ? (ERROR_RU[detail ?? ""] ?? "Не получилось. Попробуй ещё раз.") : null;
 
+  const say = (who: Row["who"], text: string) =>
+    setRows((p) => [...p.slice(-120), { who, text, done: true }]);
+
+  const callTool = async (name: string, args: Record<string, unknown>) => {
+    const r = await fetch("/api/gtr-bro-tool", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ name, args, callId: "text" }),
+      signal: AbortSignal.timeout(12_000),
+    });
+    const data = (await r.json()) as { result?: { ok?: boolean; data?: Record<string, unknown>; error?: string } };
+    return data.result ?? { ok: false as const, error: `HTTP ${r.status}` };
+  };
+
+  // Текстовый режим: без нейросети вовсе. Разбор команды — правила,
+  // факты — только из инструментов. Работает, даже когда у голосового
+  // провайдера кончились деньги, и не может выдумать событие.
+  const runText = async (raw: string) => {
+    const q = raw.trim();
+    if (!q) return;
+    metric("bro.text.cmd");
+    say("user", q);
+    const plan = planOf(q);
+
+    if (plan.kind === "help" || plan.kind === "unknown") {
+      if (plan.kind === "unknown") say("bro", "Не разобрал. Вот что умею без голоса:");
+      for (const l of HELP_LINES) say("sys", l);
+      return;
+    }
+
+    if (plan.kind === "open") {
+      say("bro", "Открываю.");
+      onNavigate(plan.route);
+      return;
+    }
+
+    if (plan.kind === "search") {
+      say("bro", openerFor(q));
+      const r = await callTool("search_events", {
+        dateFrom: plan.dateFrom,
+        dateTo: plan.dateTo,
+        district: plan.district,
+        limit: 5,
+      });
+      if (!r.ok) return say("bro", `Афиша не ответила: ${String(r.error ?? "")}`);
+      const events = (r.data?.events as Record<string, unknown>[] | undefined) ?? [];
+      if (!events.length) return say("bro", EMPTY_LINE);
+      lastEvents.current = events;
+      for (const l of fmtEvents(events, plan.label)) say(l.startsWith("  ") ? "sys" : "bro", l);
+      for (const ev of events.slice(0, 3)) setCards((p) => [{ kind: "event" as const, data: ev }, ...p].slice(0, 6));
+      return;
+    }
+
+    if (plan.kind === "details") {
+      const ev = lastEvents.current[plan.index - 1];
+      if (!ev) return say("bro", "Такого номера в последней выдаче нет. Сначала спроси события.");
+      const r = await callTool("get_event_details", { eventId: String(ev.event_id ?? "") });
+      if (!r.ok || !r.data) return say("bro", "Деталей не достал.");
+      for (const l of fmtDetails(r.data)) say(l.startsWith("  ") ? "sys" : "bro", l);
+      return;
+    }
+
+    if (plan.kind === "route") {
+      const vids = [...new Set(lastEvents.current.map((e) => String(e.venue_id ?? "")))].filter(Boolean).slice(0, 3);
+      if (!vids.length) return say("bro", "Маршрут строю из последней выдачи — сначала спроси события.");
+      const r = await callTool("build_night_route", { stops: vids, startHour: 20 });
+      if (!r.ok || !r.data) return say("bro", "Маршрут не собрался.");
+      const legs = (r.data.legs as Record<string, unknown>[] | undefined) ?? [];
+      for (const l of fmtRoute(legs)) say(l.startsWith("  ") ? "sys" : "bro", l);
+      setCards((p) => [{ kind: "route" as const, data: r.data as Record<string, unknown> }, ...p].slice(0, 6));
+    }
+  };
+
   const runLab = async () => {
     setLab(true);
     metric("bro.voicelab.run");
@@ -258,9 +336,29 @@ export function GtrBroOverlay({
               {!r.done && <span className="gtr-bro-cursor">▮</span>}
             </div>
           ))}
-          <div className="gtr-bro-dos-l prompt">
-            C:\GTR&gt;<span className="gtr-bro-cursor">▮</span>
-          </div>
+          <form
+            className="gtr-bro-dos-l prompt gtr-bro-cmdrow"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const q = cmd;
+              setCmd("");
+              void runText(q);
+            }}
+          >
+            C:\GTR&gt;
+            <input
+              className="gtr-bro-cmd"
+              value={cmd}
+              onChange={(e) => setCmd(e.target.value)}
+              placeholder="что сегодня в патонге"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="send"
+              aria-label="Команда BRO"
+            />
+            {!cmd && <span className="gtr-bro-cursor">▮</span>}
+          </form>
         </div>
 
         {/* Визуализатор: единственная деталь, которая честно показывает,

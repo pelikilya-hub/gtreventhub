@@ -1000,11 +1000,46 @@
     position: sticky;
     top: 0;
     z-index: var(--gtr-z-panel);
-    background: rgba(12, 13, 16, 0.94);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: none;
+    border-bottom: none;
     padding: 10px 14px;
     padding-top: calc(10px + env(safe-area-inset-top));
+  }
+  /* стекло шапки — отдельным слоем, чтобы уходило в ноль книзу: контент
+     подныривает под неё, а не упирается в кромку */
+  .gtr-topbar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(10, 11, 13, 0.96) 0%,
+      rgba(10, 11, 13, 0.88) 58%,
+      rgba(10, 11, 13, 0) 100%
+    );
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 100%);
+  }
+  /* нижняя грань шапки — полоса света, гаснущая к краям, как у навигации */
+  .gtr-topbar::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 12%,
+      rgba(255, 255, 255, 0.14) 50%,
+      rgba(255, 255, 255, 0.04) 88%,
+      transparent 100%
+    );
   }
   .gtr-burger {
     display: grid;
@@ -1622,8 +1657,7 @@ html { -webkit-tap-highlight-color: transparent; }
   .gtr-card-hover:active { transform: scale(0.975); }
 
   /* шапка — тяжёлое стекло (fixed: производительности не мешает) */
-  .gtr-topbar {
-    background: rgba(10, 11, 13, 0.7);
+  .gtr-topbar::after {
     -webkit-backdrop-filter: blur(18px) saturate(1.25);
     backdrop-filter: blur(18px) saturate(1.25);
   }
@@ -1840,8 +1874,16 @@ html { -webkit-tap-highlight-color: transparent; }
   .gtr-atmo span {
     opacity: calc(0.5 + var(--gtr-pulse, 0) * 0.4);
   }
-  .gtr-topbar {
-    border-bottom-color: rgba(229, 35, 27, calc(0.1 + var(--gtr-pulse, 0) * 0.55));
+  /* пульс музыки красит световую грань шапки, а не рамку */
+  .gtr-topbar::before {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(229, 35, 27, calc(0.06 + var(--gtr-pulse, 0) * 0.3)) 18%,
+      rgba(229, 35, 27, calc(0.14 + var(--gtr-pulse, 0) * 0.62)) 50%,
+      rgba(229, 35, 27, calc(0.06 + var(--gtr-pulse, 0) * 0.3)) 82%,
+      transparent 100%
+    );
   }
 }
 
@@ -2585,4 +2627,93 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .gtr-hero-edge > video,
   .gtr-hero-edge > img { transform: none; }
+}
+
+
+/* =====================================================================
+   СТИКЕР — ЭТО КНОПКА
+   ---------------------------------------------------------------------
+   Системные эмодзи выглядят чужими: их рисовала Apple, а не мы. Везде,
+   где знак несёт действие, стоит наш стикер, и он же является кнопкой —
+   без подложки, как знак GTR в навигации. Свечение и отклик на нажатие
+   те же, чтобы язык был один.
+   ===================================================================== */
+.gtr-stk {
+  display: inline-block;
+  vertical-align: -0.22em;
+  width: 1.35em;
+  height: 1.35em;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.6));
+  flex: none;
+}
+
+.gtr-stk-btn {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 14px 9px 10px;
+  min-height: 44px;
+  cursor: pointer;
+  color: var(--gtr-t1);
+  font: 600 11px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  transition: color 0.16s ease;
+}
+.gtr-stk-btn .gtr-stk {
+  width: 26px;
+  height: 26px;
+  transition: transform 0.14s cubic-bezier(0.32, 0.72, 0, 1), filter 0.2s ease;
+  filter: drop-shadow(0 2px 7px rgba(0, 0, 0, 0.7));
+}
+/* грань снизу, а не рамка по контуру — тот же приём, что у карточек */
+.gtr-stk-btn::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 100%
+  );
+  transition: background 0.18s ease;
+}
+.gtr-stk-btn:hover .gtr-stk,
+.gtr-stk-btn:focus-visible .gtr-stk {
+  filter: drop-shadow(0 2px 7px rgba(0, 0, 0, 0.7))
+    drop-shadow(0 0 12px rgba(229, 35, 27, 0.55));
+}
+.gtr-stk-btn:hover::before,
+.gtr-stk-btn:focus-visible::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(229, 35, 27, 0.6) 50%,
+    transparent 100%
+  );
+}
+.gtr-stk-btn:active .gtr-stk { transform: scale(0.9); }
+.gtr-stk-btn[disabled] { opacity: 0.45; cursor: default; }
+
+/* согласие и отказ: цвет отдаёт свечение, а не заливку */
+.gtr-stk-btn.ok:hover .gtr-stk {
+  filter: drop-shadow(0 2px 7px rgba(0, 0, 0, 0.7))
+    drop-shadow(0 0 12px rgba(94, 217, 122, 0.6));
+}
+.gtr-stk-btn.ok:hover::before {
+  background: linear-gradient(90deg, transparent, rgba(94, 217, 122, 0.6) 50%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-stk-btn .gtr-stk { transition: none; }
 }

@@ -18,7 +18,7 @@ import {
 } from "../data/app-data";
 import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
-import { Card, Chip, Dot, Eyebrow, Icon, tint } from "../ui";
+import { Card, Chip, Dot, Eyebrow, Icon, StkBtn, tint } from "../ui";
 import {
   broadcastFn,
   communityInviteTextFn,
@@ -372,9 +372,11 @@ function BroadcastBlock() {
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
         />
-        <button className="gtr-btn gtr-btn-red gtr-btn-sm" onClick={send}>
-          📣
-        </button>
+        {/* знак сам кнопка: на красной заливке наши стикеры не читаются —
+            они тёмные с красным акцентом и созданы под тёмный фон */}
+        <StkBtn name="speaker" onClick={send} title="Отправить">
+          Отправить
+        </StkBtn>
       </div>
     </div>
   );
@@ -702,20 +704,24 @@ function PendingCard() {
                   <div style={{ font: golos(10.5), color: "rgba(255,255,255,.6)", marginTop: 3 }}>«{a.about}»</div>
                 ) : null}
               </div>
-              <div style={{ display: "flex", gap: 6 }}>
-                <button
-                  className="gtr-btn gtr-btn-sm gtr-btn-red"
+              {/* решение по заявке — знак и есть кнопка: подтверждение
+                  нашей галочкой, отказ словом, чтобы их нельзя было
+                  перепутать в спешке */}
+              <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                <StkBtn
+                  name="check"
+                  tone="ok"
                   disabled={busy === a.email}
                   onClick={() => void decide(a.email, true)}
                 >
-                  ✅ Принять
-                </button>
+                  Принять
+                </StkBtn>
                 <button
                   className="gtr-btn gtr-btn-sm"
                   disabled={busy === a.email}
                   onClick={() => void decide(a.email, false)}
                 >
-                  ❌ Отклонить
+                  Отклонить
                 </button>
               </div>
             </div>

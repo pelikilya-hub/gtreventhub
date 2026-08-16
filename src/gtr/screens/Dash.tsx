@@ -24,7 +24,7 @@ import { FAMILY_LABEL } from "../match";
 import { useTranslation } from "react-i18next";
 import { ArtistStudio } from "./ArtistStudio";
 import "../i18n";
-import { Card, Chip, Dot, Eyebrow, Icon, Ring, TrashTitle } from "../ui";
+import { Card, Chip, Dot, Eyebrow, Icon, Ring, Stk, TrashTitle } from "../ui";
 import { ImpulseArt } from "../impulse";
 import {
   allAfishaFn,
@@ -1490,12 +1490,12 @@ function ArtistCabinet() {
             onChange={(e) => setAirUrl(e.target.value)}
           />
           <button className={`gtr-btn ${onAir ? "" : "gtr-btn-red"}`} onClick={toggleAir}>
-            {onAir ? "⏹ Завершить эфир" : "🔴 Я в эфире"}
+            {onAir ? "Завершить эфир" : "Я в эфире"}
           </button>
         </div>
         <span style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
           Кнопка в каталоге станет зелёной, зрители перейдут прямо в эфир. Автоотключение через 4 часа.
-          Из Telegram: «🔴 Я в эфире» на клавиатуре бота.
+          Из Telegram: «Я в эфире» на клавиатуре бота.
         </span>
       </Card>
 
@@ -1908,16 +1908,16 @@ function VisitorCabinet() {
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {community.channelUrl ? (
               <button className="gtr-btn gtr-btn-red" onClick={() => openAppLink(community.channelUrl)}>
-                📣 {t("Канал новостей")}
+                <Stk name="speaker" /> {t("Канал новостей")}
               </button>
             ) : null}
             {community.chatUrl ? (
               <button className="gtr-btn" onClick={() => openAppLink(community.chatUrl)}>
-                💬 {t("Чат сообщества")}
+                <Stk name="handshake" /> {t("Чат сообщества")}
               </button>
             ) : null}
             <button className="gtr-btn" onClick={() => openAppLink("https://t.me/bangtaostyle")}>
-              📩 {t("Связь")}
+              <Stk name="door" /> {t("Связь")}
             </button>
           </div>
         </Card>

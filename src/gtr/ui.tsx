@@ -297,3 +297,71 @@ export const SectionHead = ({
 );
 
 export const statusColor = (c: string) => ({ borderColor: chipBorder(c), color: c });
+
+// ---------- фирменные знаки вместо системных эмодзи ----------
+// Системный эмодзи рисовала Apple, а не мы: в продукте с собственной
+// графикой он читается вставкой из чужого набора. Здесь один источник —
+// наш пак, и там, где знак несёт действие, он же и есть кнопка.
+export const STK = {
+  check: "/brand/emoji4/check-256.png",
+  live: "/brand/emoji4/live-256.png",
+  speaker: "/brand/emoji4/speaker-256.png",
+  calendar: "/brand/emoji4/calendar-256.png",
+  ticket: "/brand/emoji4/ticket-256.png",
+  pin: "/brand/emoji4/pin-256.png",
+  star: "/brand/emoji4/star-256.png",
+  gift: "/brand/emoji4/gift-256.png",
+  trophy: "/brand/emoji4/trophy-256.png",
+  crown: "/brand/emoji4/crown2-256.png",
+  handshake: "/brand/emoji4/handshake-256.png",
+  rocket: "/brand/emoji4/rocket-256.png",
+  camera: "/brand/emoji4/camera-256.png",
+  mic: "/brand/emoji4/mic-256.png",
+  headphones: "/brand/emoji4/headphones2-256.png",
+  champagne: "/brand/emoji4/champagne2-256.png",
+  map: "/brand/emoji4/islandmap-256.png",
+  door: "/brand/emoji4/door-256.png",
+  clock: "/brand/emoji4/clock-256.png",
+  medal: "/brand/emoji4/medal-256.png",
+} as const;
+
+export type StkName = keyof typeof STK;
+
+export const Stk = ({ name, size, alt = "" }: { name: StkName; size?: number; alt?: string }) => (
+  <img
+    className="gtr-stk"
+    src={STK[name]}
+    alt={alt}
+    aria-hidden={alt ? undefined : true}
+    loading="lazy"
+    style={size ? { width: size, height: size } : undefined}
+  />
+);
+
+/** Кнопка, которой и является сам знак: подложки нет, есть отклик и свечение. */
+export const StkBtn = ({
+  name,
+  children,
+  onClick,
+  tone,
+  disabled,
+  title,
+}: {
+  name: StkName;
+  children: ReactNode;
+  onClick?: () => void;
+  tone?: "ok";
+  disabled?: boolean;
+  title?: string;
+}) => (
+  <button
+    type="button"
+    className={`gtr-stk-btn${tone ? ` ${tone}` : ""}`}
+    onClick={onClick}
+    disabled={disabled}
+    title={title}
+  >
+    <Stk name={name} />
+    <span>{children}</span>
+  </button>
+);

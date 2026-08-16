@@ -35,7 +35,7 @@ export const Route = createRootRoute({
       {
         property: "og:description",
         content:
-          "Конструктор события, смета с комиссией GTR, каталоги 104 площадок, 312 артистов, подрядчиков и оборудования.",
+          "Конструктор события, смета с комиссией GTR, каталоги 110 площадок, 312 артистов, подрядчиков и оборудования.",
       },
       { name: "twitter:card", content: "summary" },
       { name: "theme-color", content: "#0A0B0D" },

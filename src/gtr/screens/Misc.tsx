@@ -1005,6 +1005,17 @@ export function VenueScreen() {
             ["Официальный сайт", v.website || v.source || "—", v.website || v.source ? GREEN : RED],
             ["Галерея / фото", "только официальная галерея", AMBER],
             ["Instagram", v.social || "не указан", v.social ? AMBER : "rgba(255,255,255,.3)"],
+            [
+              "Telegram",
+              v.telegram ? (
+                <a href={v.telegram} target="_blank" rel="noreferrer" style={{ color: "inherit" }}>
+                  {v.telegram.replace(/^https:\/\/t\.me\//, "@")}
+                </a>
+              ) : (
+                "не указан"
+              ),
+              v.telegram ? GREEN : "rgba(255,255,255,.3)",
+            ],
             ["Телефон", v.phone || ct?.phone || "—", v.phone || ct?.phone ? GREEN : RED],
           ].map(([k, val, c]) => (
             <div

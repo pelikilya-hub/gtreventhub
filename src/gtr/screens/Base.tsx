@@ -736,6 +736,17 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               ],
               ["Instagram", v.social || "не указан", v.social ? AMBER : "rgba(255,255,255,.3)"],
               [
+                "Telegram",
+                v.telegram ? (
+                  <a href={v.telegram} target="_blank" rel="noreferrer" style={{ color: "inherit" }}>
+                    {v.telegram.replace(/^https:\/\/t\.me\//, "@")}
+                  </a>
+                ) : (
+                  "не указан"
+                ),
+                v.telegram ? GREEN : "rgba(255,255,255,.3)",
+              ],
+              [
                 "Телефон",
                 (() => {
                   const t = v.phone || ct?.phone;

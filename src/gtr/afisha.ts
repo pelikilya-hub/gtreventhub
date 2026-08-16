@@ -318,11 +318,63 @@ async function syncResidentAdvisor(raId: number): Promise<VenueAfishaEvent[]> {
     .slice(0, 12);
 }
 
+// CLC (Come Leo Come): WordPress с открытым REST API — берём список событий
+// оттуда, а не парсим вёрстку. Дату читаем из заголовка («… | 29.08»), а не
+// из слуга: у площадки слуг остаётся от первой публикации и расходится с
+// реальной датой (love-story-28-08 при заголовке 29.08).
+async function syncClc(): Promise<VenueAfishaEvent[]> {
+  const res = await fetch("https://clcphuket.com/wp-json/wp/v2/events?per_page=12", {
+    headers: { "user-agent": UA },
+  });
+  if (!res.ok) throw new Error(`clc ${res.status}`);
+  const list = (await res.json()) as { slug: string; link: string; title?: { rendered?: string } }[];
+  const today = new Date().toISOString().slice(0, 10);
+  const now = Date.now();
+  const out: VenueAfishaEvent[] = [];
+  for (const e of list) {
+    const raw = (e.title?.rendered ?? "")
+      .replace(/&#0?38;/g, "&")
+      .replace(/&amp;/g, "&")
+      .replace(/&#8211;/g, "–")
+      .trim();
+    const m = raw.match(/(\d{1,2})\.(\d{2})\s*$/);
+    if (!m) continue; // без даты в заголовке брать нечего
+    const [, day, mon] = m;
+    let year = new Date().getFullYear();
+    let dateIso = `${year}-${mon}-${day.padStart(2, "0")}`;
+    // афиша без года: прошедшее больше месяца назад — это следующий сезон
+    if (new Date(dateIso).getTime() < now - 35 * 86400e3) {
+      year += 1;
+      dateIso = `${year}-${mon}-${day.padStart(2, "0")}`;
+    }
+    if (dateIso < today) continue;
+    const title = raw.replace(/\s*\|\s*\d{1,2}\.\d{2}\s*$/, "").replace(/^CLC\s+/i, "").trim();
+    let poster = "";
+    try {
+      poster = pickPoster(await fetchText(e.link));
+    } catch {
+      // страница события не открылась — событие всё равно показываем
+    }
+    out.push({
+      id: e.slug,
+      title,
+      dateIso,
+      poster: poster || undefined,
+      posterSrc: poster || undefined,
+      url: e.link,
+      artistIds: matchArtists(title),
+      source: "clcphuket.com",
+    });
+  }
+  return out;
+}
+
 export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
   const jobs: [string, () => Promise<VenueAfishaEvent[]>][] = [
     ["VEN-0002", syncCafeDelMar],
     ["VEN-0013", syncIlluzion],
     ["VEN-0003", syncCarpeDiem],
+    ["VEN-0109", syncClc],
   ];
   const counts: Record<string, number> = {};
   const posterBudget = { left: POSTERS_PER_RUN };

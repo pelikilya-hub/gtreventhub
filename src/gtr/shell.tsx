@@ -327,7 +327,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                 textOverflow: "ellipsis",
               }}
             >
-              {venue ? venue.name : t("Сеть · 104 площадки")}
+              {venue ? venue.name : t("Сеть · 110 площадок")}
             </span>
           </span>
         </div>

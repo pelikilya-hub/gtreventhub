@@ -317,12 +317,12 @@ async function finishInvite(
   const caption = [
     `🎟 <b>${who}, это личное приглашение</b>`,
     "",
-    `<b>${tgEsc(su.name ?? su.email)}</b> зовёт вас в GTR EVENT — платформу событий Пхукета: <b>104 площадки · 312 артистов · события под ключ</b>.`,
+    `<b>${tgEsc(su.name ?? su.email)}</b> зовёт вас в GTR EVENT — платформу событий Пхукета: <b>110 площадок · 312 артистов · события под ключ</b>.`,
     "",
     "Один шаг — нажмите Start:",
     deep,
   ].join("\n");
-  const shareText = `${nick ? `@${nick}, ` : ""}личное приглашение в GTR EVENT от ${su.name ?? su.email}. 104 площадки · 312 артистов · события под ключ. Один шаг — нажмите Start: ${deep}`;
+  const shareText = `${nick ? `@${nick}, ` : ""}личное приглашение в GTR EVENT от ${su.name ?? su.email}. 110 площадок · 312 артистов · события под ключ. Один шаг — нажмите Start: ${deep}`;
   const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(POSTER_URL)}&text=${encodeURIComponent(shareText)}`;
   const rows: { text: string; url: string }[][] = [
     [{ text: nick ? `↗️ Отправить @${nick}` : "↗️ Отправить приглашение", url: shareUrl }],
@@ -708,7 +708,7 @@ export const Route = createFileRoute("/api/tg")({
                 text: [
                   "⚡ <b>GTR Event — вся ночная жизнь Пхукета</b>",
                   "",
-                  "🎟 Афиша 104 клубов на сегодня · 🎧 312 артистов · 🍾 бронь столов",
+                  "🎟 Афиша 110 клубов на сегодня · 🎧 312 артистов · 🍾 бронь столов",
                   "",
                   "🏆 Создай аккаунт за 30 секунд и привяжи Telegram — <b>+3 балла в конкурсе</b> (призы 1 сентября!)",
                 ].join("\n"),

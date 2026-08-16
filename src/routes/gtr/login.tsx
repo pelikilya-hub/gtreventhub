@@ -161,7 +161,7 @@ function LoginPage() {
                           textOverflow: "ellipsis",
                         }}
                       >
-                        {d.venue ? V(d.venue).name : "Сеть · 104 площадки"}
+                        {d.venue ? V(d.venue).name : "Сеть · 110 площадок"}
                       </span>
                     </span>
                   </button>

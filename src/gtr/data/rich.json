@@ -795,5 +795,74 @@
    "https://ak-d.tripcdn.com/images/0222b12000sf1yq2d66C7_R_960_660_R5_D.jpg",
    "https://ak-d.tripcdn.com/images/0223712000sf1z85o9277_R_960_660_R5_D.jpg"
   ]
+ },
+ "VEN-0109": {
+  "src": "CLCPHUKET.COM",
+  "credit": "CLC Restaurant · официальный сайт",
+  "hero": "https://clcphuket.com/wp-content/uploads/2026/02/Untitled-99.jpeg",
+  "gallery": [
+   "https://clcphuket.com/wp-content/uploads/2026/02/Untitled-99.jpeg",
+   "https://clcphuket.com/wp-content/uploads/2026/02/Untitled-100.jpeg",
+   "https://clcphuket.com/wp-content/uploads/2026/02/Untitled-90.jpeg",
+   "https://clcphuket.com/wp-content/uploads/2026/02/Untitled-59.jpeg",
+   "https://clcphuket.com/wp-content/uploads/2026/02/Untitled-60.jpeg",
+   "https://clcphuket.com/wp-content/uploads/2026/02/Untitled-61.jpeg",
+   "https://clcphuket.com/wp-content/uploads/2026/01/Untitled-60.jpeg",
+   "https://clcphuket.com/wp-content/uploads/2026/01/Untitled-61.jpeg",
+   "https://clcphuket.com/wp-content/uploads/2026/01/Untitled-63.jpeg",
+   "https://clcphuket.com/wp-content/uploads/2026/01/Untitled-64.jpeg",
+   "https://clcphuket.com/wp-content/uploads/2025/12/Untitled-37.jpeg",
+   "https://clcphuket.com/wp-content/uploads/2025/12/Untitled-49.jpeg",
+   "https://clcphuket.com/wp-content/uploads/2026/02/privet_lounge.png",
+   "https://clcphuket.com/wp-content/uploads/2025/11/Karaoke.png"
+  ],
+  "afisha": [
+   [
+    "21.08",
+    "HOLLYWOOD PARTY · ICONS OF STYLE",
+    "20:00 · dinner & show в трёх актах",
+    "https://clcphuket.com/wp-content/uploads/2026/05/Poster-Hollywood-Party-new.jpeg"
+   ],
+   [
+    "22.08",
+    "COME LEO COME",
+    "20:00 · пять фильмов Ди Каприо за один вечер",
+    "https://clcphuket.com/wp-content/uploads/2026/07/COME_LEO_COME_686x686.jpg"
+   ],
+   [
+    "29.08",
+    "LOVE STORY",
+    "20:00 · живой вокал и акробатика",
+    "https://clcphuket.com/wp-content/uploads/2026/07/Love-Story-2.jpeg"
+   ]
+  ],
+  "artistsNote": "Резидентная шоу-труппа: живой вокал, танцоры, акробаты, ведущий. Программы меняются, афиша обновляется автоматически с сайта площадки."
+ },
+ "VEN-0110": {
+  "src": "SHAMANPHUKET.COM",
+  "credit": "SHAMAN Lounge Cafe Bar · официальный сайт",
+  "hero": "https://shamanphuket.com/img/og/home.jpg",
+  "gallery": [],
+  "afisha": [
+   [
+    "ЧТ",
+    "КАРАОКЕ-ДЕВИЧНИК",
+    "Просекко в подарок девушкам",
+    ""
+   ],
+   [
+    "ВС",
+    "ДЕТСКОЕ ШОУ",
+    "Дневная программа для семей",
+    ""
+   ],
+   [
+    "ЕЖЕДН.",
+    "ЛАУНЖ И ЖИВАЯ МУЗЫКА",
+    "15:00–00:00 · кальян, пять меню",
+    ""
+   ]
+  ],
+  "artistsNote": "Живая музыка в лаунж-зоне и караоке; именной состав площадкой не публикуется — запросить напрямую."
  }
 }

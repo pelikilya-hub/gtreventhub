@@ -1,0 +1,22 @@
+# Мозг GTR BRO: Qwen3-8B через llama.cpp на сервере Hetzner (CPU).
+#
+# Модель скачивается сама при первом старте (флаг -hf) в ./cache.
+# Токен обязателен: без него ручка модели торчит в интернет голой.
+services:
+  brain:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./cache:/root/.cache
+    environment:
+      - LLAMA_ARG_HF_REPO=Qwen/Qwen3-8B-GGUF:Q4_K_M
+    command: >
+      --host 0.0.0.0 --port 8080
+      -c 8192 -t 8 --jinja
+      --api-key ${BRAIN_TOKEN:?задай BRAIN_TOKEN в .env}
+    deploy:
+      resources:
+        limits:
+          memory: 12g

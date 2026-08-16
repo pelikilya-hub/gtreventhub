@@ -245,6 +245,38 @@ export function GtrBroOverlay({
     say("user", q);
     const plan = planOf(q);
 
+    // Живые фразы сначала идут в самохостный мозг (Qwen на сервере GTR).
+    // Мозг не настроен или упал — молча откатываемся на разбор правилами:
+    // деградация, а не отказ.
+    if (plan.kind === "search" || plan.kind === "unknown") {
+      const history = rows
+        .filter((r) => r.who !== "sys" && r.done)
+        .slice(-6)
+        .map((r) => ({ who: r.who, text: r.text }));
+      try {
+        say("sys", "думаю…");
+        const r = await fetch("/api/gtr-bro-text", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ text: q, history }),
+          signal: AbortSignal.timeout(95_000),
+        });
+        const data = (await r.json()) as { ok?: boolean; reply?: string; cards?: BroCard[]; error?: string };
+        if (data.ok && data.reply) {
+          metric("bro.text.brain");
+          say("bro", data.reply);
+          const evs = (data.cards ?? []).filter((c) => c.kind === "event");
+          if (evs.length) lastEvents.current = evs.map((c) => c.data as Record<string, unknown>);
+          for (const c of (data.cards ?? []).slice(0, 4)) setCards((p) => [c, ...p].slice(0, 6));
+          return;
+        }
+        if (data.error && data.error !== "no-brain") say("sys", `мозг: ${data.error}`);
+      } catch {
+        say("sys", "мозг не ответил — работаю по правилам");
+      }
+    }
+
     if (plan.kind === "help" || plan.kind === "unknown") {
       if (plan.kind === "unknown") say("bro", "Не разобрал. Вот что умею без голоса:");
       for (const l of HELP_LINES) say("sys", l);

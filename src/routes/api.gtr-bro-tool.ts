@@ -8,8 +8,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { currentUser } from "../gtr/auth";
-import { getKvNs, kvGetJson, kvListAll } from "../gtr/kv-ns";
-import { handlers, type EventsProvider, type ToolName } from "../gtr/bro/tools";
+import { getKvNs, kvGetJson } from "../gtr/kv-ns";
+import { kvProvider } from "../gtr/bro/provider";
+import { handlers, type ToolName } from "../gtr/bro/tools";
 
 type Flags = { broEnabled?: boolean; broKill?: boolean };
 
@@ -18,27 +19,6 @@ const json = (body: unknown, status = 200) =>
     status,
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
   });
-
-/** Афиша из нашего же кэша разведки: venueevents:<vid>. Демо-источника
- *  нет намеренно — за выдуманный вечер поедет живой человек. */
-const kvProvider = (ns: NonNullable<Awaited<ReturnType<typeof getKvNs>>>): EventsProvider => ({
-  id: "gtr-afisha",
-  async search({ dateFrom, dateTo }) {
-    const keys = await kvListAll(ns, "venueevents:");
-    const out: { vid: string; events: { id?: string; title: string; dateIso: string; poster?: string }[] }[] = [];
-    // Ограничение сверху: результат уходит в модель, и раздутый ответ
-    // и стоит дороже, и топит полезное в шуме.
-    for (const key of keys.slice(0, 60)) {
-      const rec = await kvGetJson<{ events?: { id?: string; title: string; dateIso: string; poster?: string }[] }>(
-        ns,
-        key,
-      );
-      const events = (rec?.events ?? []).filter((e) => e.dateIso >= dateFrom && e.dateIso <= dateTo);
-      if (events.length) out.push({ vid: key.slice("venueevents:".length), events: events.slice(0, 6) });
-    }
-    return out;
-  },
-});
 
 export const Route = createFileRoute("/api/gtr-bro-tool")({
   server: {

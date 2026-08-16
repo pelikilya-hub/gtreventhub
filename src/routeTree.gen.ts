@@ -18,6 +18,7 @@ import { Route as ApiAvideoRouteImport } from './routes/api.avideo'
 import { Route as ApiCommunityDigestRouteImport } from './routes/api.community-digest'
 import { Route as ApiGtrBroSdpRouteImport } from './routes/api.gtr-bro-sdp'
 import { Route as ApiGtrBroSessionRouteImport } from './routes/api.gtr-bro-session'
+import { Route as ApiGtrBroTextRouteImport } from './routes/api.gtr-bro-text'
 import { Route as ApiGtrBroToolRouteImport } from './routes/api.gtr-bro-tool'
 import { Route as ApiPosterRouteImport } from './routes/api.poster'
 import { Route as ApiPushRouteImport } from './routes/api.push'
@@ -78,6 +79,11 @@ const ApiGtrBroSdpRoute = ApiGtrBroSdpRouteImport.update({
 const ApiGtrBroSessionRoute = ApiGtrBroSessionRouteImport.update({
   id: '/api/gtr-bro-session',
   path: '/api/gtr-bro-session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGtrBroTextRoute = ApiGtrBroTextRouteImport.update({
+  id: '/api/gtr-bro-text',
+  path: '/api/gtr-bro-text',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiGtrBroToolRoute = ApiGtrBroToolRouteImport.update({
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-sdp': typeof ApiGtrBroSdpRoute
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
+  '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-sdp': typeof ApiGtrBroSdpRoute
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
+  '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-sdp': typeof ApiGtrBroSdpRoute
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
+  '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
@@ -254,6 +263,7 @@ export interface FileRouteTypes {
     | '/api/community-digest'
     | '/api/gtr-bro-sdp'
     | '/api/gtr-bro-session'
+    | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
     | '/api/poster'
     | '/api/push'
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/api/community-digest'
     | '/api/gtr-bro-sdp'
     | '/api/gtr-bro-session'
+    | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
     | '/api/poster'
     | '/api/push'
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '/api/community-digest'
     | '/api/gtr-bro-sdp'
     | '/api/gtr-bro-session'
+    | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
     | '/api/poster'
     | '/api/push'
@@ -335,6 +347,7 @@ export interface RootRouteChildren {
   ApiCommunityDigestRoute: typeof ApiCommunityDigestRoute
   ApiGtrBroSdpRoute: typeof ApiGtrBroSdpRoute
   ApiGtrBroSessionRoute: typeof ApiGtrBroSessionRoute
+  ApiGtrBroTextRoute: typeof ApiGtrBroTextRoute
   ApiGtrBroToolRoute: typeof ApiGtrBroToolRoute
   ApiPosterRoute: typeof ApiPosterRoute
   ApiPushRoute: typeof ApiPushRoute
@@ -409,6 +422,13 @@ declare module '@tanstack/react-router' {
       path: '/api/gtr-bro-session'
       fullPath: '/api/gtr-bro-session'
       preLoaderRoute: typeof ApiGtrBroSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gtr-bro-text': {
+      id: '/api/gtr-bro-text'
+      path: '/api/gtr-bro-text'
+      fullPath: '/api/gtr-bro-text'
+      preLoaderRoute: typeof ApiGtrBroTextRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/gtr-bro-tool': {
@@ -560,6 +580,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCommunityDigestRoute: ApiCommunityDigestRoute,
   ApiGtrBroSdpRoute: ApiGtrBroSdpRoute,
   ApiGtrBroSessionRoute: ApiGtrBroSessionRoute,
+  ApiGtrBroTextRoute: ApiGtrBroTextRoute,
   ApiGtrBroToolRoute: ApiGtrBroToolRoute,
   ApiPosterRoute: ApiPosterRoute,
   ApiPushRoute: ApiPushRoute,

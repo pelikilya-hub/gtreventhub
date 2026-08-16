@@ -48,6 +48,11 @@ import { TonightScreen } from "./screens/Tonight";
 import { useDeviceTilt } from "./motion";
 import { GtrDancer } from "./dancer";
 import { GtrPlayerBar } from "./player";
+import { broFlagsFn } from "./kv-api";
+
+const GtrBroOverlay = lazy(() =>
+  import("./bro/BroOverlay").then((m) => ({ default: m.GtrBroOverlay })),
+);
 import {
   MyShowsScreen,
   PromoScreen,
@@ -123,6 +128,21 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
 
   // Мобильное меню: на узком экране сайдбар живёт как выезжающая панель
   const [navOpen, setNavOpen] = useState(false);
+
+  // GTR BRO: центральная кнопка GTR — активатор голоса. Флаг спрашиваем
+  // один раз: пока фича выключена, кнопка работает как раньше и никому
+  // ничего не обещает.
+  const [broOn, setBroOn] = useState(false);
+  const [broOpen, setBroOpen] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    broFlagsFn()
+      .then((f) => alive && setBroOn(Boolean(f.enabled && f.keyReady)))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
   useDeviceTilt(); // гироскоп: наклон телефона двигает атмосферный свет
 
   const go = (id: ScreenId) => {
@@ -435,7 +455,11 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
               key={id}
               className={`gtr-tab${center ? " gtr-tab-center" : ""}${on ? " on" : ""}`}
               aria-current={on ? "page" : undefined}
-              onClick={() => go(id)}
+              // Центральная кнопка зовёт голос, когда он включён. Долгое
+              // нажатие всегда ведёт на экран «Сегодня» — чтобы голос не
+              // отбирал у продукта существующий путь.
+              onContextMenu={center && broOn ? (e) => { e.preventDefault(); go(id); } : undefined}
+              onClick={() => (center && broOn ? setBroOpen(true) : go(id))}
             >
               {center ? (
                 <span className="gtr-tab-core">
@@ -449,6 +473,23 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
           );
         })}
       </nav>
+
+      {broOn && (
+        <Suspense fallback={null}>
+          <GtrBroOverlay
+            open={broOpen}
+            onClose={() => setBroOpen(false)}
+            screen={screen}
+            boss={Boolean(user.boss)}
+            onNavigate={(route, entityId) => {
+              setBroOpen(false);
+              if (route === "venueCard" && entityId)
+                navigate({ to: "/gtr/$screen", params: { screen: "base" }, search: { vid: entityId } });
+              else go(route as ScreenId);
+            }}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

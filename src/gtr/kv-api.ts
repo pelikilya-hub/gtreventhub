@@ -2489,3 +2489,56 @@ export const afishaSourcesFn = createServerFn({ method: "GET" }).handler(async (
   );
   return { sources: rows.filter((r): r is NonNullable<typeof r> => Boolean(r)) };
 });
+
+// ------------------------------------------------------------ GTR BRO
+
+export type BroFlags = { enabled: boolean; kill: boolean; roles: string[]; keyReady: boolean };
+
+/** Флаги голосового помощника для клиента.
+ *
+ *  Клиенту нужно знать заранее, включена ли фича: центральная кнопка GTR
+ *  иначе будет обещать голос и упираться в 503. Значение ключа сюда не
+ *  попадает — только факт его наличия. */
+export const broFlagsFn = createServerFn({ method: "GET" }).handler(async (): Promise<BroFlags> => {
+  const off: BroFlags = { enabled: false, kill: false, roles: [], keyReady: false };
+  const user = await currentUser();
+  if (!user) return off;
+  const ns = await getKvNs();
+  if (!ns) return off;
+  const f =
+    (await kvGetJson<{ broEnabled?: boolean; broKill?: boolean; broRoles?: string[] }>(
+      ns,
+      "setting:flags",
+    )) ?? {};
+  const keyReady = Boolean(typeof process !== "undefined" && process.env?.OPENAI_API_KEY);
+  const allowed = !f.broRoles?.length || f.broRoles.includes(user.role);
+  return {
+    enabled: Boolean(f.broEnabled) && !f.broKill && allowed,
+    kill: Boolean(f.broKill),
+    roles: f.broRoles ?? [],
+    keyReady,
+  };
+});
+
+/** Счётчики использования BRO. Пишем агрегат по дням: сколько сессий,
+ *  сколько прервали, какие инструменты звали, какие ошибки. Ни реплик,
+ *  ни аудио, ни текста пользователя здесь нет и быть не должно. */
+export const broLogFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { events: string[] }) => d)
+  .handler(async ({ data }) => {
+    const user = await currentUser();
+    if (!user) return { ok: false };
+    const ns = await getKvNs();
+    if (!ns) return { ok: false };
+    const day = new Date().toISOString().slice(0, 10);
+    const key = `brostat:${day}`;
+    const cur = (await kvGetJson<Record<string, number>>(ns, key)) ?? {};
+    for (const raw of data.events.slice(0, 40)) {
+      // Имя события — только из безопасного алфавита: счётчик не место
+      // для произвольной строки с клиента.
+      const name = String(raw).replace(/[^a-z0-9_.:-]/gi, "").slice(0, 48);
+      if (name) cur[name] = (cur[name] ?? 0) + 1;
+    }
+    await ns.put(key, JSON.stringify(cur), { expirationTtl: 60 * 60 * 24 * 120 });
+    return { ok: true };
+  });

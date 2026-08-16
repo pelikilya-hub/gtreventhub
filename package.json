@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "build:cf": "NITRO_PRESET=cloudflare_module vite build && node scripts/patch-wrangler.mjs",
-    "deploy:cf": "npm run build:cf && wrangler deploy --name gtr-event-hub"
+    "deploy:cf": "npm run build:cf && wrangler deploy --name gtr-event-hub",
+    "test": "vitest run"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.168.25",
@@ -34,6 +35,7 @@
     "nitro": "3.0.260603-beta",
     "typescript": "^5.8.3",
     "vite": "^8.0.16",
-    "vite-tsconfig-paths": "^6.0.2"
+    "vite-tsconfig-paths": "^6.0.2",
+    "vitest": "^3.2.7"
   }
 }

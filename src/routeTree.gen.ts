@@ -16,6 +16,8 @@ import { Route as ApiAfishaSendRouteImport } from './routes/api.afisha-send'
 import { Route as ApiAphotoRouteImport } from './routes/api.aphoto'
 import { Route as ApiAvideoRouteImport } from './routes/api.avideo'
 import { Route as ApiCommunityDigestRouteImport } from './routes/api.community-digest'
+import { Route as ApiGtrBroSessionRouteImport } from './routes/api.gtr-bro-session'
+import { Route as ApiGtrBroToolRouteImport } from './routes/api.gtr-bro-tool'
 import { Route as ApiPosterRouteImport } from './routes/api.poster'
 import { Route as ApiPushRouteImport } from './routes/api.push'
 import { Route as ApiSpotifyCallbackRouteImport } from './routes/api.spotify-callback'
@@ -65,6 +67,16 @@ const ApiAvideoRoute = ApiAvideoRouteImport.update({
 const ApiCommunityDigestRoute = ApiCommunityDigestRouteImport.update({
   id: '/api/community-digest',
   path: '/api/community-digest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGtrBroSessionRoute = ApiGtrBroSessionRouteImport.update({
+  id: '/api/gtr-bro-session',
+  path: '/api/gtr-bro-session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGtrBroToolRoute = ApiGtrBroToolRouteImport.update({
+  id: '/api/gtr-bro-tool',
+  path: '/api/gtr-bro-tool',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPosterRoute = ApiPosterRouteImport.update({
@@ -151,6 +163,8 @@ export interface FileRoutesByFullPath {
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
+  '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
+  '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
@@ -174,6 +188,8 @@ export interface FileRoutesByTo {
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
+  '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
+  '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
@@ -199,6 +215,8 @@ export interface FileRoutesById {
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
+  '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
+  '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
@@ -225,6 +243,8 @@ export interface FileRouteTypes {
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/community-digest'
+    | '/api/gtr-bro-session'
+    | '/api/gtr-bro-tool'
     | '/api/poster'
     | '/api/push'
     | '/api/spotify-callback'
@@ -248,6 +268,8 @@ export interface FileRouteTypes {
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/community-digest'
+    | '/api/gtr-bro-session'
+    | '/api/gtr-bro-tool'
     | '/api/poster'
     | '/api/push'
     | '/api/spotify-callback'
@@ -272,6 +294,8 @@ export interface FileRouteTypes {
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/community-digest'
+    | '/api/gtr-bro-session'
+    | '/api/gtr-bro-tool'
     | '/api/poster'
     | '/api/push'
     | '/api/spotify-callback'
@@ -297,6 +321,8 @@ export interface RootRouteChildren {
   ApiAphotoRoute: typeof ApiAphotoRoute
   ApiAvideoRoute: typeof ApiAvideoRoute
   ApiCommunityDigestRoute: typeof ApiCommunityDigestRoute
+  ApiGtrBroSessionRoute: typeof ApiGtrBroSessionRoute
+  ApiGtrBroToolRoute: typeof ApiGtrBroToolRoute
   ApiPosterRoute: typeof ApiPosterRoute
   ApiPushRoute: typeof ApiPushRoute
   ApiSpotifyCallbackRoute: typeof ApiSpotifyCallbackRoute
@@ -356,6 +382,20 @@ declare module '@tanstack/react-router' {
       path: '/api/community-digest'
       fullPath: '/api/community-digest'
       preLoaderRoute: typeof ApiCommunityDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gtr-bro-session': {
+      id: '/api/gtr-bro-session'
+      path: '/api/gtr-bro-session'
+      fullPath: '/api/gtr-bro-session'
+      preLoaderRoute: typeof ApiGtrBroSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gtr-bro-tool': {
+      id: '/api/gtr-bro-tool'
+      path: '/api/gtr-bro-tool'
+      fullPath: '/api/gtr-bro-tool'
+      preLoaderRoute: typeof ApiGtrBroToolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/poster': {
@@ -498,6 +538,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAphotoRoute: ApiAphotoRoute,
   ApiAvideoRoute: ApiAvideoRoute,
   ApiCommunityDigestRoute: ApiCommunityDigestRoute,
+  ApiGtrBroSessionRoute: ApiGtrBroSessionRoute,
+  ApiGtrBroToolRoute: ApiGtrBroToolRoute,
   ApiPosterRoute: ApiPosterRoute,
   ApiPushRoute: ApiPushRoute,
   ApiSpotifyCallbackRoute: ApiSpotifyCallbackRoute,

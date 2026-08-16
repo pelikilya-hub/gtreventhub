@@ -2,6 +2,7 @@
 // в KV (venueevents:<venueId>). Запуск — cron воркера каждые 6 часов или
 // кнопкой в паспорте площадки. Постеры — og:image событийных страниц.
 import artistsRaw from "./data/artists.json";
+import venuesRaw from "./data/venues.json";
 import { kvGetJson, type KvNs } from "./kv-ns";
 
 export type VenueAfishaEvent = {
@@ -49,6 +50,12 @@ const ARTISTS: ArtistLite[] = ((artistsRaw as { artists?: ArtistLite[] }).artist
   .map((a) => ({ id: a.id, name: a.name }));
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+type VenueLite = { id: string; website?: string };
+const VENUES: VenueLite[] = ((venuesRaw as { venues?: VenueLite[] }).venues ?? []).map((v) => ({
+  id: v.id,
+  website: v.website,
+}));
 
 function matchArtists(text: string): string[] {
   const t = " " + norm(text) + " ";
@@ -125,19 +132,6 @@ async function syncCafeDelMar(): Promise<VenueAfishaEvent[]> {
   return out;
 }
 
-async function syncIlluzion(): Promise<VenueAfishaEvent[]> {
-  const html = await fetchText("https://www.illuzionphuket.com/events/");
-  const links = [
-    ...new Set(html.match(/https:\/\/www\.illuzionphuket\.com\/event\/[a-z0-9-]+\//g) ?? []),
-  ].slice(0, 12);
-  const out: VenueAfishaEvent[] = [];
-  for (const url of links) {
-    const slug = url.split("/event/")[1].replace(/\/$/, "");
-    const ev = await eventFromPage(url, slug, "illuzionphuket.com", /shelter/.test(slug) ? "Shelter" : undefined);
-    if (ev) out.push(ev);
-  }
-  return out;
-}
 
 // Дата из HTML страницы: «December 31», «August 28, 2026» — для сайтов,
 // которые не кладут дату в слуг (WordPress/Webflow-лендинги событий)
@@ -197,7 +191,7 @@ const dedupe = (list: VenueAfishaEvent[]) => {
   const seen = new Set<string>();
   return list
     .filter((e) => {
-      const k = `${e.dateIso}:${norm(e.title)}`;
+      const k = `${e.dateIso}:${norm(e.title)}:${norm(e.room ?? "")}`;
       if (seen.has(k)) return false;
       seen.add(k);
       return true;
@@ -318,63 +312,350 @@ async function syncResidentAdvisor(raId: number): Promise<VenueAfishaEvent[]> {
     .slice(0, 12);
 }
 
-// CLC (Come Leo Come): WordPress с открытым REST API — берём список событий
-// оттуда, а не парсим вёрстку. Дату читаем из заголовка («… | 29.08»), а не
-// из слуга: у площадки слуг остаётся от первой публикации и расходится с
-// реальной датой (love-story-28-08 при заголовке 29.08).
-async function syncClc(): Promise<VenueAfishaEvent[]> {
-  const res = await fetch("https://clcphuket.com/wp-json/wp/v2/events?per_page=12", {
-    headers: { "user-agent": UA },
-  });
-  if (!res.ok) throw new Error(`clc ${res.status}`);
-  const list = (await res.json()) as { slug: string; link: string; title?: { rendered?: string } }[];
+
+
+// ---------- авторазведка источников афиш по всей базе ----------
+// Раньше афиша была там, где я вручную написал адаптер: четыре площадки из
+// ста десяти. Дальше так не масштабируется. Большинство сайтов заведений —
+// WordPress, и у него есть машинные ручки: The Events Calendar отдаёт
+// события структурой (дата, время, зал, постер), а кастомные типы — списком.
+// Движок сам обходит базу, находит рабочую ручку, запоминает её в KV и
+// дальше ходит только туда.
+
+type SrcKind = "tribe" | "wp-events" | "wp-tribe" | "none";
+type SrcRec = { kind: SrcKind; url?: string; checkedAt: string; found: number };
+const srcKey = (vid: string) => `afishasrc:${vid}`;
+
+// Сколько площадок разведываем за один прогон. Ограничение — не наша лень,
+// а лимит подзапросов воркера: разведка одной площадки это до трёх ручек.
+const PROBE_PER_RUN = 12;
+// Как часто перепроверяем площадку, у которой ручек не нашлось: сайты
+// переезжают на WordPress и заводят календари, это не приговор навсегда.
+const RECHECK_DAYS = 14;
+
+// Сайты гостиничных сетей и агрегаторов: даже если там WordPress, это
+// корпоративный портал, а не афиша конкретной площадки на Пхукете.
+const SKIP_HOSTS = [
+  "marriott.com", "ihg.com", "banyantree.com", "trip.com", "booking.com",
+  "hilton.com", "accor.com", "hyatt.com", "agoda.com", "radissonhotels.com",
+];
+
+const siteRoot = (url: string) => {
+  try {
+    const u = new URL(url);
+    return `${u.protocol}//${u.host}`;
+  } catch {
+    return "";
+  }
+};
+
+const jsonOrNull = async (url: string) => {
+  try {
+    const res = await fetch(url, { headers: { "user-agent": UA, accept: "application/json" } });
+    if (!res.ok) return null;
+    const ct = res.headers.get("content-type") ?? "";
+    if (!ct.includes("json")) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+};
+
+// The Events Calendar: самый частый плагин афиш на WordPress. Отдаёт всё,
+// что нам нужно, включая зал — у Illuzion так различаются Main и Shelter.
+type TribeEvent = {
+  id?: number | string;
+  title?: string;
+  url?: string;
+  start_date?: string;
+  image?: string | { url?: string };
+  venue?: { venue?: string };
+};
+
+function fromTribe(list: TribeEvent[], host: string): VenueAfishaEvent[] {
   const today = new Date().toISOString().slice(0, 10);
+  return list
+    .map((e) => {
+      const dateIso = String(e.start_date ?? "").slice(0, 10);
+      const img = typeof e.image === "string" ? e.image : e.image?.url;
+      const title = decodeEntities(String(e.title ?? "")).trim();
+      return {
+        id: `tribe-${e.id ?? title}-${dateIso}`,
+        title,
+        dateIso,
+        poster: img || undefined,
+        posterSrc: img || undefined,
+        url: e.url || `https://${host}`,
+        room: e.venue?.venue || undefined,
+        artistIds: matchArtists(title),
+        source: host,
+      } satisfies VenueAfishaEvent;
+    })
+    .filter((e) => /^\d{4}-\d{2}-\d{2}$/.test(e.dateIso) && e.dateIso >= today);
+}
+
+const decodeEntities = (s: string) =>
+  s
+    .replace(/&#0?38;|&amp;/g, "&")
+    .replace(/&#8211;/g, "–")
+    .replace(/&#8217;|&#039;|&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+
+// Дата из заголовка: «… | 29.08», «Sam Collins 22 August», «AUG 21».
+// Заголовку доверяем больше, чем слугу: слуг остаётся от первой публикации
+// и расходится с реальной датой, если событие переносили.
+function dateFromTitle(raw: string): string | null {
   const now = Date.now();
-  const out: VenueAfishaEvent[] = [];
-  for (const e of list) {
-    const raw = (e.title?.rendered ?? "")
-      .replace(/&#0?38;/g, "&")
-      .replace(/&amp;/g, "&")
-      .replace(/&#8211;/g, "–")
-      .trim();
-    const m = raw.match(/(\d{1,2})\.(\d{2})\s*$/);
-    if (!m) continue; // без даты в заголовке брать нечего
-    const [, day, mon] = m;
-    let year = new Date().getFullYear();
-    let dateIso = `${year}-${mon}-${day.padStart(2, "0")}`;
-    // афиша без года: прошедшее больше месяца назад — это следующий сезон
-    if (new Date(dateIso).getTime() < now - 35 * 86400e3) {
-      year += 1;
-      dateIso = `${year}-${mon}-${day.padStart(2, "0")}`;
+  const bump = (year: number, mon: string, day: string) => {
+    let iso = `${year}-${mon}-${day.padStart(2, "0")}`;
+    if (new Date(iso).getTime() < now - 35 * 86400e3)
+      iso = `${year + 1}-${mon}-${day.padStart(2, "0")}`;
+    return iso;
+  };
+  const dot = raw.match(/(\d{1,2})\.(\d{2})(?:\.(\d{4}))?\s*$/);
+  if (dot) {
+    const year = dot[3] ? Number(dot[3]) : new Date().getFullYear();
+    return dot[3] ? `${year}-${dot[2]}-${dot[1].padStart(2, "0")}` : bump(year, dot[2], dot[1]);
+  }
+  const named = raw.match(
+    /(\d{1,2})\s*(jan|feb|mar|apr|may|jun|jul|aug|sept?|oct|nov|dec)[a-z]*\.?\s*(\d{4})?/i,
+  );
+  if (named) {
+    const mon = MONTHS[named[2].toLowerCase().slice(0, 4)] ?? MONTHS[named[2].toLowerCase().slice(0, 3)];
+    if (mon) {
+      const year = named[3] ? Number(named[3]) : new Date().getFullYear();
+      return named[3] ? `${year}-${mon}-${named[1].padStart(2, "0")}` : bump(year, mon, named[1]);
     }
-    if (dateIso < today) continue;
-    const title = raw.replace(/\s*\|\s*\d{1,2}\.\d{2}\s*$/, "").replace(/^CLC\s+/i, "").trim();
+  }
+  const rev = raw.match(
+    /(jan|feb|mar|apr|may|jun|jul|aug|sept?|oct|nov|dec)[a-z]*\.?\s*(\d{1,2})(?:\s*,?\s*(\d{4}))?/i,
+  );
+  if (rev) {
+    const mon = MONTHS[rev[1].toLowerCase().slice(0, 4)] ?? MONTHS[rev[1].toLowerCase().slice(0, 3)];
+    if (mon) {
+      const year = rev[3] ? Number(rev[3]) : new Date().getFullYear();
+      return rev[3] ? `${year}-${mon}-${rev[2].padStart(2, "0")}` : bump(year, mon, rev[2]);
+    }
+  }
+  return null;
+}
+
+// Кастомный тип записей WordPress (events / tribe_events): дату берём из
+// заголовка или слуга, постер — со страницы события, но не больше четырёх
+// страниц за прогон, иначе съедим бюджет подзапросов на одной площадке.
+async function fromWpCpt(
+  list: { slug?: string; link?: string; title?: { rendered?: string } }[],
+  host: string,
+  posterLimit = 4,
+): Promise<VenueAfishaEvent[]> {
+  const today = new Date().toISOString().slice(0, 10);
+  const out: VenueAfishaEvent[] = [];
+  let posters = posterLimit;
+  for (const e of list) {
+    const raw = decodeEntities(e.title?.rendered ?? "").trim();
+    const dateIso = dateFromTitle(raw) ?? (e.slug ? dateFromSlug(e.slug) : null);
+    if (!dateIso || dateIso < today) continue;
+    const title = raw.replace(/\s*[|·–-]\s*\d{1,2}\.\d{2}(\.\d{4})?\s*$/, "").trim() || raw;
     let poster = "";
-    try {
-      poster = pickPoster(await fetchText(e.link));
-    } catch {
-      // страница события не открылась — событие всё равно показываем
+    if (posters > 0 && e.link) {
+      posters--;
+      try {
+        poster = pickPoster(await fetchText(e.link));
+      } catch {
+        // страница события не открылась — покажем событие без постера
+      }
     }
     out.push({
-      id: e.slug,
+      id: e.slug ?? `${host}-${dateIso}`,
       title,
       dateIso,
       poster: poster || undefined,
       posterSrc: poster || undefined,
-      url: e.link,
+      url: e.link ?? `https://${host}`,
       artistIds: matchArtists(title),
-      source: "clcphuket.com",
+      source: host,
     });
   }
   return out;
 }
 
+async function readSource(site: string, rec: SrcRec): Promise<VenueAfishaEvent[]> {
+  const host = new URL(site).host;
+  if (rec.kind === "tribe") {
+    const j = (await jsonOrNull(rec.url!)) as { events?: TribeEvent[] } | null;
+    return j?.events ? fromTribe(j.events, host) : [];
+  }
+  const j = (await jsonOrNull(rec.url!)) as
+    | { slug?: string; link?: string; title?: { rendered?: string } }[]
+    | null;
+  return Array.isArray(j) ? fromWpCpt(j, host) : [];
+}
+
+// Разведка: пробуем ручки по убыванию качества данных и останавливаемся
+// на первой, которая вернула хотя бы одно будущее событие.
+async function probeSite(site: string): Promise<SrcRec> {
+  const host = new URL(site).host;
+  const today = new Date().toISOString().slice(0, 10);
+  const checkedAt = today;
+
+  const tribeUrl = `${site}/wp-json/tribe/events/v1/events?per_page=12&start_date=${today}`;
+  const t = (await jsonOrNull(tribeUrl)) as { events?: TribeEvent[] } | null;
+  if (t?.events?.length) {
+    const ev = fromTribe(t.events, host);
+    if (ev.length) return { kind: "tribe", url: tribeUrl, checkedAt, found: ev.length };
+  }
+
+  for (const type of ["events", "tribe_events"] as const) {
+    const url = `${site}/wp-json/wp/v2/${type}?per_page=12`;
+    const j = (await jsonOrNull(url)) as
+      | { slug?: string; link?: string; title?: { rendered?: string } }[]
+      | null;
+    if (Array.isArray(j) && j.length) {
+      const ev = await fromWpCpt(j, host, 0); // на разведке постеры не тянем
+      if (ev.length)
+        return {
+          kind: type === "events" ? "wp-events" : "wp-tribe",
+          url,
+          checkedAt,
+          found: ev.length,
+        };
+    }
+  }
+  return { kind: "none", checkedAt, found: 0 };
+}
+
+const daysBetween = (iso: string) =>
+  Math.floor((Date.now() - new Date(`${iso}T00:00:00Z`).getTime()) / 86400000);
+
+/** Один прогон разведки: обновляет известные источники и добирает новые.
+ *  Очередь важна: за прогон разведываем ограниченное число площадок, поэтому
+ *  вперёд идут те, кого не смотрели ни разу, а следом — самые давние. Иначе
+ *  хвост базы никогда не дождётся своей очереди. */
+async function syncDiscovered(
+  ns: KvNs,
+  skip: Set<string>,
+): Promise<Map<string, VenueAfishaEvent[]>> {
+  const found = new Map<string, VenueAfishaEvent[]>();
+  const candidates = VENUES.filter(
+    (v) =>
+      !skip.has(v.id) &&
+      /^https?:\/\//.test(v.website ?? "") &&
+      !SKIP_HOSTS.some((h) => (v.website ?? "").includes(h)),
+  );
+
+  type Row = { vid: string; site: string; rec: SrcRec | null };
+  const rows: Row[] = [];
+  for (const v of candidates) {
+    const site = siteRoot(v.website!);
+    if (site) rows.push({ vid: v.id, site, rec: await kvGetJson<SrcRec>(ns, srcKey(v.id)) });
+  }
+
+  // известные источники обновляем всегда — это дёшево и это основной улов
+  for (const r of rows.filter((x) => x.rec && x.rec.kind !== "none")) {
+    try {
+      const ev = await readSource(r.site, r.rec!);
+      if (ev.length) found.set(r.vid, ev);
+      await ns.put(
+        srcKey(r.vid),
+        JSON.stringify({ ...r.rec!, checkedAt: new Date().toISOString().slice(0, 10), found: ev.length }),
+      );
+    } catch {
+      // сайт прилёг — прошлые данные не трогаем, вернёмся в следующий прогон
+    }
+  }
+
+  const queue = [
+    ...rows.filter((x) => !x.rec),
+    ...rows
+      .filter((x) => x.rec?.kind === "none" && daysBetween(x.rec.checkedAt) >= RECHECK_DAYS)
+      .sort((a, b) => a.rec!.checkedAt.localeCompare(b.rec!.checkedAt)),
+  ].slice(0, PROBE_PER_RUN);
+
+  for (const r of queue) {
+    try {
+      const next = await probeSite(r.site);
+      await ns.put(srcKey(r.vid), JSON.stringify(next));
+      if (next.kind !== "none") {
+        const ev = await readSource(r.site, next);
+        if (ev.length) found.set(r.vid, ev);
+      }
+    } catch {
+      // недоступен — не запоминаем как «источника нет», попробуем ещё раз
+    }
+  }
+  return found;
+}
+
+// ---------- Instagram площадок через Meta Graph ----------
+// Анонимно инстаграм закрыт наглухо: профиль без входа отдаёт пустую
+// оболочку. Легальный путь один — Graph API к бизнес-аккаунту площадки,
+// привязанному к её Facebook-странице, по токену, который площадка выдала
+// нам сама. Токен уже лежит в vmeta:<vid> с магик-формы подтверждения.
+async function syncInstagramBusiness(
+  pageId: string,
+  token: string,
+): Promise<VenueAfishaEvent[]> {
+  const acc = (await fetch(
+    `https://graph.facebook.com/v21.0/${pageId}?fields=instagram_business_account&access_token=${encodeURIComponent(token)}`,
+  ).then((r) => r.json())) as { instagram_business_account?: { id?: string } };
+  const igId = acc.instagram_business_account?.id;
+  if (!igId) return [];
+  const media = (await fetch(
+    `https://graph.facebook.com/v21.0/${igId}/media?fields=caption,media_type,media_url,thumbnail_url,permalink,timestamp&limit=25&access_token=${encodeURIComponent(token)}`,
+  ).then((r) => r.json())) as {
+    data?: {
+      id: string;
+      caption?: string;
+      media_type?: string;
+      media_url?: string;
+      thumbnail_url?: string;
+      permalink?: string;
+    }[];
+  };
+  const today = new Date().toISOString().slice(0, 10);
+  const out: VenueAfishaEvent[] = [];
+  for (const m of media.data ?? []) {
+    const cap = (m.caption ?? "").replace(/\s+/g, " ").trim();
+    if (!cap) continue;
+    // дату ищем в первых строках подписи — там её и пишут афиши
+    const head = cap.slice(0, 160);
+    const dateIso = dateFromTitle(head);
+    if (!dateIso || dateIso < today) continue;
+    const title =
+      head
+        .replace(/https?:\/\/\S+/g, "")
+        .replace(/#[\wЀ-ӿ]+/g, "")
+        .split(/[\n·|]/)[0]
+        .trim()
+        .slice(0, 80) || "Вечеринка";
+    const img = m.media_type === "VIDEO" ? m.thumbnail_url : m.media_url;
+    out.push({
+      id: `ig-${m.id}`,
+      title,
+      dateIso,
+      poster: img,
+      posterSrc: img,
+      url: m.permalink ?? "https://instagram.com",
+      artistIds: matchArtists(cap),
+      source: "instagram",
+    });
+  }
+  return out;
+}
+
+// Занятость площадки: даты, на которые у неё уже стоит своя программа.
+// Отдельным ключом, потому что это спрашивают календарь и конструктор —
+// им не нужен весь список событий, нужен ответ «свободно или нет».
+export const busyKey = (vid: string) => `venuebusy:${vid}`;
+export type VenueBusy = { dates: string[]; updatedAt: number };
+
 export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
   const jobs: [string, () => Promise<VenueAfishaEvent[]>][] = [
     ["VEN-0002", syncCafeDelMar],
-    ["VEN-0013", syncIlluzion],
     ["VEN-0003", syncCarpeDiem],
-    ["VEN-0109", syncClc],
   ];
   const counts: Record<string, number> = {};
   const posterBudget = { left: POSTERS_PER_RUN };
@@ -419,7 +700,31 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
         const fresh = fbEvents.filter((e) => !cur.some((c) => c.dateIso === e.dateIso && c.title.toLowerCase().slice(0, 10) === e.title.toLowerCase().slice(0, 10)));
         byVid.set(vid, dedupe([...cur, ...fresh]));
       }
+      // тем же токеном читаем инстаграм площадки: афиши там появляются
+      // раньше, чем на сайте, а часто вместо сайта
+      const igEvents = await syncInstagramBusiness(vm.pageId, vm.token).catch(() => []);
+      if (igEvents.length) {
+        const cur = byVid.get(vid) ?? [];
+        const fresh = igEvents.filter(
+          (e) => !cur.some((c) => c.dateIso === e.dateIso),
+        );
+        byVid.set(vid, dedupe([...cur, ...fresh]));
+      }
     } catch {}
+  }
+
+  // Разведка по остальной базе: площадки, для которых адаптер не написан
+  // руками. Идёт после ручных источников, поэтому ничего не затирает.
+  // исключаем только рукописные адаптеры: Resident Advisor не источник
+  // площадки, а внешний агрегатор — он дополняет сайт, а не заменяет его
+  const covered = new Set(jobs.map(([vid]) => vid));
+  try {
+    for (const [vid, ev] of await syncDiscovered(ns, covered)) {
+      const cur = byVid.get(vid) ?? [];
+      byVid.set(vid, dedupe([...cur, ...ev]));
+    }
+  } catch {
+    // разведка — необязательный слой, её падение не ломает основной прогон
   }
 
   // Resident Advisor поверх сайтов: одинаковые события (та же дата и
@@ -456,6 +761,15 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
     await ns.put(
       `venueevents:${vid}`,
       JSON.stringify({ events: all, syncedAt: Date.now(), source: all[0]?.source ?? "" } satisfies VenueAfisha),
+    );
+    // и сразу закрываем эти даты: календарь и конструктор спрашивают
+    // «свободно ли», а не «покажи все события»
+    await ns.put(
+      busyKey(vid),
+      JSON.stringify({
+        dates: [...new Set(all.map((e) => e.dateIso))].sort(),
+        updatedAt: Date.now(),
+      } satisfies VenueBusy),
     );
   }
   return counts;

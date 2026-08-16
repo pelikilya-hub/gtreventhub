@@ -6,7 +6,7 @@ const p = ".output/server/wrangler.json";
 const cfg = JSON.parse(readFileSync(p, "utf8"));
 cfg.kv_namespaces = [{ binding: "GTR_KV", id: "a26fc466919d43e4a2e684d8765810b8" }];
 
-// Cron: каждые 6 часов дёргаем сбор афиш через собственный HTTP-роут —
+// Cron: каждые 2 часа дёргаем сбор афиш через собственный HTTP-роут —
 // нитро-энтри не экспортирует scheduled, поэтому оборачиваем.
 writeFileSync(
   ".output/server/cron.mjs",
@@ -54,6 +54,6 @@ export default {
 `,
 );
 cfg.main = "cron.mjs";
-cfg.triggers = { crons: ["0 */6 * * *", "0 13 * * *", "0 10 * * *", "0 2 * * *"] };
+cfg.triggers = { crons: ["0 */2 * * *", "0 13 * * *", "0 10 * * *", "0 2 * * *"] };
 writeFileSync(p, JSON.stringify(cfg, null, 2));
-console.log("wrangler.json: GTR_KV + кроны (афиши 6ч, отчёт 20:00, дайджест 17:00, цены вилл 09:00 Пхукета)");
+console.log("wrangler.json: GTR_KV + кроны (афиши 2ч, отчёт 20:00, дайджест 17:00, цены вилл 09:00 Пхукета)");

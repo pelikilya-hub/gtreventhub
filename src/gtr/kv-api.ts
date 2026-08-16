@@ -2311,3 +2311,39 @@ export const setVillaPriceFn = createServerFn({ method: "POST" })
     await ns.put(priceKey(data.vid), JSON.stringify(price));
     return { ok: true as const, price };
   });
+
+// ---------- занятость площадок: даты, где уже стоит своя программа ----------
+// Календарь и конструктор спрашивают «свободна ли дата», а не «покажи
+// афишу» — держим отдельный лёгкий индекс, чтобы не тянуть события целиком.
+
+export const venueBusyFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { vids: string[] }) => d)
+  .handler(async ({ data }) => {
+    const ns = await getKvNs();
+    if (!ns) return { busy: {} as Record<string, string[]> };
+    const { busyKey } = await import("./afisha");
+    const busy: Record<string, string[]> = {};
+    await Promise.all(
+      data.vids.slice(0, 60).map(async (vid) => {
+        const b = await kvGetJson<import("./afisha").VenueBusy>(ns, busyKey(vid));
+        if (b?.dates?.length) busy[vid] = b.dates;
+      }),
+    );
+    return { busy };
+  });
+
+// Что нашёл движок разведки: для BOSS-дашборда — видно, где афиша живая,
+// а где источник ещё не найден и нужен человек.
+export const afishaSourcesFn = createServerFn({ method: "GET" }).handler(async () => {
+  const me = await currentUser();
+  const ns = await getKvNs();
+  if (!me || me.role !== "gtr" || !ns) return { sources: [] as { vid: string; kind: string; found: number; checkedAt: string }[] };
+  const keys = await kvListAll(ns, "afishasrc:");
+  const rows = await Promise.all(
+    keys.map(async (k) => {
+      const r = await kvGetJson<{ kind: string; found: number; checkedAt: string }>(ns, k);
+      return r ? { vid: k.slice("afishasrc:".length), ...r } : null;
+    }),
+  );
+  return { sources: rows.filter((r): r is NonNullable<typeof r> => Boolean(r)) };
+});

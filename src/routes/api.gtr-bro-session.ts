@@ -45,16 +45,6 @@ const json = (body: unknown, status = 200, origin?: string) =>
     },
   });
 
-/** Идентификатор для провайдера: наш id не отдаём, отдаём его хеш.
- *  Провайдеру достаточно стабильности, а не личности. */
-const safetyIdentifier = async (userId: string): Promise<string> => {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`gtr-bro:${userId}`));
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")
-    .slice(0, 32);
-};
-
 const pickVoice = (raw: unknown): Voice =>
   VOICES.includes(raw as Voice) ? (raw as Voice) : "cedar";
 
@@ -159,12 +149,20 @@ export const Route = createFileRoute("/api/gtr-bro-session")({
                 type: "realtime",
                 model: MODEL,
                 instructions: buildPrompt(ctx),
-                audio: { output: { voice } },
+                audio: {
+                output: { voice },
+                // Расшифровка речи пользователя выключена по умолчанию.
+                // Без неё панель разговора односторонняя: видно только
+                // то, что сказал BRO.
+                input: { transcription: { model: "gpt-4o-mini-transcribe", language: "ru" } },
+              },
                 tools: TOOL_DEFS,
                 tool_choice: "auto",
               },
-              // Приватный идентификатор: хеш вместо адреса.
-              safety_identifier: await safetyIdentifier(user.email),
+              // Идентификатора здесь нет намеренно: ручка выдачи
+              // эфемерных секретов параметра safety_identifier не
+              // принимает и отвечает на него ошибкой. Личность
+              // пользователя провайдеру и не нужна.
             }),
             signal: AbortSignal.timeout(12_000),
           });

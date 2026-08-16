@@ -3251,3 +3251,37 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .gtr-map-pin, .gtr-area { transition: none; }
 }
+
+/* Куст точек: знак самой частой категории внутри плюс счётчик. Форма
+   отличается от одиночной точки намеренно — крупнее и со счётчиком,
+   чтобы куст не читался как одно заведение. */
+.gtr-map-cluster {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: rgba(10, 11, 13, 0.9);
+  border: 1.5px solid var(--c);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55), 0 0 14px color-mix(in srgb, var(--c) 45%, transparent),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.gtr-map-cluster img { width: 19px; height: 19px; object-fit: contain; display: block; opacity: 0.9; }
+.gtr-map-cluster b {
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  min-width: 16px;
+  padding: 0 3px;
+  background: var(--c);
+  color: #0a0b0d;
+  font: 700 9.5px/16px "JetBrains Mono", monospace;
+  text-align: center;
+}
+.gtr-map-cluster:hover { transform: scale(1.14); }
+.gtr-map-cluster.off { opacity: 0.32; }
+.gtr-map-cluster.off:hover { opacity: 1; }

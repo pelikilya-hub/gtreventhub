@@ -3395,5 +3395,1046 @@
    "releases": 5,
    "sets": 0
   }
+ },
+ "MC-0216": {
+  "name": "Funky Wah Wah",
+  "ids": [
+   "synthpop"
+  ],
+  "weights": {
+   "synthpop": 0.667
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "synthpop"
+   ],
+   "musicbrainz": [],
+   "releases": 3,
+   "sets": 0
+  }
+ },
+ "MC-0217": {
+  "name": "Fung",
+  "ids": [
+   "progressive-trance",
+   "dance-pop",
+   "electro-house"
+  ],
+  "weights": {
+   "progressive-trance": 0.146,
+   "dance-pop": 0.146,
+   "electro-house": 0.146
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "dance-pop",
+    "electro-house",
+    "progressive-trance"
+   ],
+   "musicbrainz": [],
+   "releases": 41,
+   "sets": 0
+  }
+ },
+ "MC-0218": {
+  "name": "Groove Riders",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 2,
+   "sets": 0
+  }
+ },
+ "MC-0219": {
+  "name": "Mild",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 44,
+   "sets": 0
+  }
+ },
+ "MC-0220": {
+  "name": "Sqweez Animal",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0221": {
+  "name": "Zom Marie",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0222": {
+  "name": "Friday",
+  "ids": [
+   "electro",
+   "freestyle"
+  ],
+  "weights": {
+   "freestyle": 0.136,
+   "electro": 0.159
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "electro",
+    "freestyle"
+   ],
+   "musicbrainz": [],
+   "releases": 44,
+   "sets": 0
+  }
+ },
+ "MC-0223": {
+  "name": "La Ong Fong",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0224": {
+  "name": "Boy Trai",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0225": {
+  "name": "Taomild",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0226": {
+  "name": "Kaspiyskiy Gruz",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0227": {
+  "name": "Guf",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 26,
+   "sets": 0
+  }
+ },
+ "MC-0228": {
+  "name": "Lesha Svik",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0229": {
+  "name": "Dolphin",
+  "ids": [
+   "industrial",
+   "hardcore",
+   "big-beat",
+   "breakbeat"
+  ],
+  "weights": {
+   "big-beat": 0.211,
+   "breakbeat": 0.132,
+   "industrial": 0.237,
+   "hardcore": 0.237
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "big-beat",
+    "breakbeat",
+    "hardcore",
+    "industrial"
+   ],
+   "musicbrainz": [],
+   "releases": 38,
+   "sets": 0
+  }
+ },
+ "MC-0230": {
+  "name": "Rita Dakota",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0231": {
+  "name": "MACAN",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 12,
+   "sets": 0
+  }
+ },
+ "MC-0232": {
+  "name": "Skriptonit",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0233": {
+  "name": "Grigory Leps",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0234": {
+  "name": "Alexander Vasilyev",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 1,
+   "sets": 0
+  }
+ },
+ "MC-0235": {
+  "name": "Zemfira",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 5,
+   "sets": 0
+  }
+ },
+ "MC-0236": {
+  "name": "Nurlan Saburov",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0237": {
+  "name": "Little Big",
+  "ids": [
+   "dance-pop",
+   "happy-hardcore",
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 0.156,
+   "dance-pop": 0.4,
+   "happy-hardcore": 0.178
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "dance-pop",
+    "deep-house",
+    "happy-hardcore"
+   ],
+   "musicbrainz": [],
+   "releases": 45,
+   "sets": 0
+  }
+ },
+ "MC-0238": {
+  "name": "Diana Arbenina",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0239": {
+  "name": "Max Barskikh",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0240": {
+  "name": "Zivert",
+  "ids": [
+   "europop",
+   "deep-house"
+  ],
+  "weights": {
+   "europop": 0.837,
+   "deep-house": 0.14
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "europop"
+   ],
+   "musicbrainz": [],
+   "releases": 43,
+   "sets": 0
+  }
+ },
+ "MC-0241": {
+  "name": "Egor Kreed",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0242": {
+  "name": "Feduk",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 35,
+   "sets": 0
+  }
+ },
+ "MC-0243": {
+  "name": "Eldzhey",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0244": {
+  "name": "Timati",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0245": {
+  "name": "MOT",
+  "ids": [
+   "downtempo",
+   "breakbeat",
+   "deep-house"
+  ],
+  "weights": {
+   "downtempo": 0.2,
+   "deep-house": 0.143,
+   "breakbeat": 0.2
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "breakbeat",
+    "deep-house",
+    "downtempo"
+   ],
+   "musicbrainz": [],
+   "releases": 35,
+   "sets": 0
+  }
+ },
+ "MC-0246": {
+  "name": "Basta",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 47,
+   "sets": 0
+  }
+ },
+ "MC-0247": {
+  "name": "Splean",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 3,
+   "sets": 0
+  }
+ },
+ "MC-0248": {
+  "name": "Serebro",
+  "ids": [
+   "europop",
+   "electro",
+   "deep-house",
+   "dance-pop"
+  ],
+  "weights": {
+   "europop": 0.886,
+   "electro": 0.159,
+   "deep-house": 0.159,
+   "dance-pop": 0.136
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "dance-pop",
+    "deep-house",
+    "electro",
+    "europop"
+   ],
+   "musicbrainz": [],
+   "releases": 44,
+   "sets": 0
+  }
+ },
+ "MC-0249": {
+  "name": "The Fruits Band",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0250": {
+  "name": "Nogu Svelo!",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0251": {
+  "name": "Philipp Kirkorov",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0252": {
+  "name": "Polina Gagarina",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0253": {
+  "name": "Umaturman",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 19,
+   "sets": 0
+  }
+ },
+ "MC-0254": {
+  "name": "Nikolay Baskov",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0255": {
+  "name": "TOKIO",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 47,
+   "sets": 0
+  }
+ },
+ "MC-0256": {
+  "name": "Soso Pavliashvili",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0257": {
+  "name": "Slava",
+  "ids": [
+   "juke"
+  ],
+  "weights": {
+   "juke": 0.13
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "juke"
+   ],
+   "musicbrainz": [],
+   "releases": 46,
+   "sets": 0
+  }
+ },
+ "MC-0258": {
+  "name": "Sergey Lazarev",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0259": {
+  "name": "Nyusha",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0260": {
+  "name": "Mumiy Troll",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 1,
+   "sets": 0
+  }
+ },
+ "MC-0261": {
+  "name": "Moralny Kodeks",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0262": {
+  "name": "Mitya Fomin",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0263": {
+  "name": "Marcel",
+  "ids": [
+   "downtempo"
+  ],
+  "weights": {
+   "downtempo": 0.162
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "downtempo"
+   ],
+   "musicbrainz": [],
+   "releases": 37,
+   "sets": 0
+  }
+ },
+ "MC-0264": {
+  "name": "Leningrad",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 42,
+   "sets": 0
+  }
+ },
+ "MC-0265": {
+  "name": "Leonid Agutin",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0266": {
+  "name": "Kasta",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 5,
+   "sets": 0
+  }
+ },
+ "MC-0267": {
+  "name": "Kristina Si",
+  "ids": [
+   "eurodance"
+  ],
+  "weights": {
+   "eurodance": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "eurodance"
+   ],
+   "musicbrainz": [],
+   "releases": 8,
+   "sets": 0
+  }
+ },
+ "MC-0268": {
+  "name": "Igor Nikolaev",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0269": {
+  "name": "Intars Busulis",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 4,
+   "sets": 0
+  }
+ },
+ "MC-0270": {
+  "name": "Ivanushki International",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0271": {
+  "name": "Zhenya Lyubich",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0272": {
+  "name": "Elena Temnikova",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0273": {
+  "name": "Eva Polna",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0274": {
+  "name": "Dmitry Malikov",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0275": {
+  "name": "Diskoteka Avariya",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0276": {
+  "name": "Dima Bilan",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0277": {
+  "name": "Gradusy",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0278": {
+  "name": "Vladimir Presnyakov",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0279": {
+  "name": "Vera Brezhneva",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0280": {
+  "name": "What The Duck",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0281": {
+  "name": "LOVEiS Entertainment",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0282": {
+  "name": "Smallroom",
+  "ids": [
+   "melodic-techno"
+  ],
+  "weights": {
+   "melodic-techno": 0.826
+  },
+  "src": {
+   "mixcloud": [
+    "melodic-techno"
+   ],
+   "discogs": [],
+   "musicbrainz": [],
+   "releases": 1,
+   "sets": 23
+  }
+ },
+ "MC-0283": {
+  "name": "SpicyDisc",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0284": {
+  "name": "Por — SpicyDisc",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0285": {
+  "name": "Jaaw — SpicyDisc",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0286": {
+  "name": "Eak — SpicyDisc",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0287": {
+  "name": "Oye — SpicyDisc",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0288": {
+  "name": "Aor — SpicyDisc",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0289": {
+  "name": "Amy — Smallroom",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0290": {
+  "name": "Kaphao — Smallroom",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0291": {
+  "name": "Oum — Smallroom",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0292": {
+  "name": "High Cloud Entertainment",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0293": {
+  "name": "GMM Grammy",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0294": {
+  "name": "Sony Music Thailand",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0295": {
+  "name": "White Fox GMM",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0296": {
+  "name": "Have You Heard?",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 1,
+   "sets": 0
+  }
+ },
+ "MC-0297": {
+  "name": "Polo Ruesz / Live Promotions BKK",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0298": {
+  "name": "Amprovise Group / Lumora Agency",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0299": {
+  "name": "Live Nation Tero Thailand",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0300": {
+  "name": "Seen Scene Space",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0301": {
+  "name": "Fungjai",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0302": {
+  "name": "Wonderfruit",
+  "ids": [
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 0.375
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house"
+   ],
+   "discogs": [],
+   "musicbrainz": [],
+   "releases": 0,
+   "sets": 8
+  }
+ },
+ "MC-0303": {
+  "name": "Bangkok Music City",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0304": {
+  "name": "Helen Stettler / 9 Kick",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0305": {
+  "name": "Cloud9 Inc",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0306": {
+  "name": "Mariah Mu / AMAS Artist Services",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0307": {
+  "name": "Karn Nipat Kamjornpreecha",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0308": {
+  "name": "Bodin Charoenrat (MVL / Mild)",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0309": {
+  "name": "Gent Manopiniwes",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0310": {
+  "name": "Tanapol Thongsawat",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0311": {
+  "name": "Funky Wah Wah",
+  "ids": [
+   "synthpop"
+  ],
+  "weights": {
+   "synthpop": 0.667
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "synthpop"
+   ],
+   "musicbrainz": [],
+   "releases": 3,
+   "sets": 0
+  }
+ },
+ "MC-0312": {
+  "name": "iMe Thailand / iMe Global",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
  }
 }

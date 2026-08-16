@@ -36,6 +36,8 @@ CHAIN = {
     "VEN-0079",  # Cape Sienna — Vanilla Sky живёт внутри отеля
     "VEN-0080",  # Kalima Resort — то же у Malika
     "VEN-0082",  # The Kee Resort — то же у Kee Sky
+    "VEN-0044",  # Aman — знак группы, у Amanpuri своего нет
+    "VEN-0074",  # COMO — то же
 }
 
 

@@ -1,83 +1,139 @@
 {
  "found": [
   {
-   "id": "VEN-0080",
-   "name": "Malika Sky Bar",
-   "src": "https://www.kalimaresort.com/asset_theme/images/icon/logo_khaolak.png",
-   "score": 151.5,
-   "size": "460x215",
-   "bytes": 10663
+   "id": "VEN-0040",
+   "name": "Angsana Laguna Phuket",
+   "src": "https://www.angsana.com/assets/icons/Angsana-Logoblack.png",
+   "score": 173.4,
+   "size": "338x321",
+   "bytes": 45291
   },
   {
-   "id": "VEN-0079",
-   "name": "Vanilla Sky Bar & Lounge",
-   "src": "https://www.capesienna.com/uploads/logoshotel/capesienna_logo.png",
-   "score": 144.2,
-   "size": "168x68",
-   "bytes": 3042
+   "id": "VEN-0074",
+   "name": "COMO Point Yamu",
+   "src": "https://www.comohotels.com/skins/skin-comohotels/favicon.ico",
+   "score": 91.4,
+   "size": "256x256",
+   "bytes": 2925
   },
   {
-   "id": "VEN-0054",
-   "name": "Ska Bar",
-   "src": "https://www.wix.com/favicon.ico",
-   "score": 39.8,
-   "size": "192x192",
-   "bytes": 2628
+   "id": "VEN-0073",
+   "name": "Paresa Resort Phuket",
+   "src": "https://www.paresaresorts.com/wp-content/uploads/2024/02/logo.png",
+   "score": 203.4,
+   "size": "337x203",
+   "bytes": 11308
   },
   {
-   "id": "VEN-0056",
-   "name": "M Beach Club Phuket",
-   "src": "https://www.mbeachclubphuket.com/wp-content/plugins/gdpr-cookie-compliance/dist/images/gdpr-logo.png",
-   "score": 118.8,
-   "size": "350x233",
-   "bytes": 4057
+   "id": "VEN-0045",
+   "name": "The Naka Island, a Luxury Collection Resort & Spa",
+   "src": "https://www.thenakaphuket.com/wp-content/uploads/2020/07/logo-regular.png",
+   "score": 144.3,
+   "size": "171x171",
+   "bytes": 2406
   },
   {
-   "id": "VEN-0007",
-   "name": "KUDO Beach Club",
-   "src": "https://kudohotel.com/wp-content/uploads/2024/09/cropped-kudo-favicon.png",
-   "score": 142.8,
-   "size": "512x512",
-   "bytes": 9912
+   "id": "VEN-0044",
+   "name": "Amanpuri",
+   "src": "https://www.aman.com/themes/custom/aman/assets/dist/media/favicons/apple-touch-icon.png",
+   "score": 79.5,
+   "size": "180x180",
+   "bytes": 3013
   },
   {
-   "id": "VEN-0082",
-   "name": "Kee Sky Lounge",
-   "src": "https://www.thekeeresort.com/images/logo-skylounge.png",
-   "score": 168.1,
-   "size": "114x141",
-   "bytes": 6809
+   "id": "VEN-0085",
+   "name": "Phuket Co Working Space / Summit Tower",
+   "src": "https://phuketcoworkingspace.com/wp-content/uploads/2025/01/LOGO.png",
+   "score": 177.5,
+   "size": "368x438",
+   "bytes": 26653
+  },
+  {
+   "id": "VEN-0087",
+   "name": "VELA Phuket Old Town",
+   "src": "https://www.vela-phuket.com/wp-content/uploads/2025/12/kaladam-home.png",
+   "score": 137.5,
+   "size": "500x500",
+   "bytes": 13101
+  },
+  {
+   "id": "VEN-0072",
+   "name": "Twinpalms Phuket",
+   "src": "https://twinpalmshotelsresorts.com/surin-beach-phuket/wp-content/uploads/sites/15/2024/10/SLH_logo.webp",
+   "score": 185.0,
+   "size": "512x395",
+   "bytes": 76439
+  },
+  {
+   "id": "VEN-0062",
+   "name": "BTC Space Phuket",
+   "src": "https://btc-space.com/wp-content/uploads/2024/07/BTC-Space-logo-2.png",
+   "score": 185.0,
+   "size": "512x120",
+   "bytes": 36356
+  },
+  {
+   "id": "VEN-0088",
+   "name": "Pullman Phuket Karon Beach Resort",
+   "src": "https://www.pullmanphuketkaron.com/wp-content/themes/pullman-template/images/favicon/apple-touch-icon.png",
+   "score": 119.5,
+   "size": "180x180",
+   "bytes": 8458
+  },
+  {
+   "id": "VEN-0092",
+   "name": "Pullman Phuket Arcadia Naithon Beach",
+   "src": "https://www.pullmanphuketarcadia.com/wp-content/themes/pullman-template/images/favicon/apple-touch-icon.png",
+   "score": 119.5,
+   "size": "180x180",
+   "bytes": 8458
+  },
+  {
+   "id": "VEN-0093",
+   "name": "Novotel Phuket Vintage Park Resort",
+   "src": "https://www.novotelphuketvintagepark.com/wp-content/uploads/sites/20/2026/08/Logo-4.png",
+   "score": 184.3,
+   "size": "498x512",
+   "bytes": 75353
   }
  ],
  "nosite": [],
  "nologo": [
   {
-   "id": "VEN-0048",
-   "name": "Casuarina Beach Club",
-   "site": "https://www.dusit.com/dusitthani-lagunaphuket/dining/casuarina-beach-restaurant-pub/",
-   "why": "вектор, нужен Chromium",
-   "svg": [
-    "https://www.dusit.com/dusitthani-lagunaphuket/wp-content/uploads/sites/37/2023/06/DTLP_Black.svg"
-   ],
-   "tried": 1
-  },
-  {
-   "id": "VEN-0012",
-   "name": "COAST Beach Club & Bistro Phuket",
-   "site": "https://www.coast-beach-club.com/phuket/",
-   "why": "вектор, нужен Chromium",
-   "svg": [
-    "https://www.coast-beach-club.com/themes/custom/centara_main/logo.svg"
-   ],
-   "tried": 1
-  },
-  {
-   "id": "VEN-0011",
-   "name": "Endless Summer Beach Club",
-   "site": "https://endlesssummerbeachclub.com/",
+   "id": "VEN-0035",
+   "name": "Paradox Resort Phuket",
+   "site": "https://www.paradoxhotels.com/phuket",
    "why": "кандидатов нет",
    "svg": [],
-   "tried": 1
+   "tried": 0
+  },
+  {
+   "id": "VEN-0070",
+   "name": "The Shore at Katathani",
+   "site": "https://theshorephuket.com",
+   "why": "вектор, нужен Chromium",
+   "svg": [
+    "https://www.theshorephuket.com/asset/images/icon/theshore_logo-w.svg",
+    "https://theshorephuket.com/asset/images/icon/theshore_logo-w.svg",
+    "https://theshorephuket.com/asset/images/icon/theshore_logo.svg"
+   ],
+   "tried": 12
+  },
+  {
+   "id": "VEN-0071",
+   "name": "The Nai Harn Phuket",
+   "site": "https://thenaiharn.com",
+   "why": "кандидатов нет",
+   "svg": [],
+   "tried": 29
+  },
+  {
+   "id": "VEN-0019",
+   "name": "Hard Rock Cafe Phuket",
+   "site": "https://cafe.hardrock.com/phuket/",
+   "why": "кандидатов нет",
+   "svg": [],
+   "tried": 0
   }
  ]
 }

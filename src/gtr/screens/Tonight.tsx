@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import { GREEN, nightOf, richOf, V, PH } from "../data/app-data";
 import geoRaw from "../data/venue-geo.json";
-import { Card, Chip, Eyebrow, tint } from "../ui";
+import { Card, Chip, Eyebrow, tint, VenueLogo } from "../ui";
 import { useGtr } from "../store";
 import { allAfishaFn, bookTableFn, promptpayCfgFn, type PromptpayCfg, type VenueAfisha } from "../kv-api";
 import { openAppLink } from "../applink";
@@ -268,6 +268,9 @@ export function TonightScreen() {
               background: "linear-gradient(180deg, rgba(10,11,13,.04) 40%, rgba(10,11,13,.92) 100%)",
             }}
           />
+          {/* Знак в верхнем углу снимка: гость листает афишу быстро и
+              узнаёт место по логотипу раньше, чем прочитает название. */}
+          <VenueLogo vid={v.id} h={20} style={{ position: "absolute", left: 12, top: 10, zIndex: 2 }} />
           <div
             style={{
               position: "absolute",

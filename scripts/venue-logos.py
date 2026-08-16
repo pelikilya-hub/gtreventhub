@@ -38,7 +38,9 @@ ALIEN = re.compile(
     r"travelife|tripadvisor|certified|certificate|award|badge|partner|sponsor|"
     r"payment|visa|mastercard|promptpay|booking|agoda|expedia|trustpilot|"
     r"facebook|instagram|tiktok|whatsapp|line-|youtube|google|"
-    r"gdpr|cookie|consent|privacy",
+    r"gdpr|cookie|consent|privacy|"
+    r"travellers.?choice|small.?luxury|slh|michelin|forbes|allsafe|"
+    r"accor|loyalty|member|greenglobe|earthcheck",
     re.I,
 )
 

@@ -382,3 +382,72 @@ export const StkBtn = ({
     <span>{children}</span>
   </button>
 );
+
+// ---------- знак площадки ----------
+// Логотипы собраны с официальных сайтов заведений (scripts/venue-logos.py),
+// паспорт каждого лежит в venue-logos.json. Ставить их «как есть» нельзя:
+// половина знаков нарисована тёмным по светлому и на нашем фоне просто
+// исчезнет. Поэтому знак сам решает, на чём ему лежать:
+//
+//   light  — светлый, ложится прямо на тёмный фон продукта;
+//   dark   — тёмный, получает светлую плашку, иначе не виден;
+//   mixed  — двухцветный (у NORA рисунок оранжевый, надпись чёрная),
+//            тоже на светлую плашку — иначе пропадает половина;
+//   plate  — знак пришёл со своей сплошной подложкой, её и держим.
+import LOGOS_RAW from "./data/venue-logos.json";
+
+type LogoRec = {
+  file: string;
+  w: number;
+  h: number;
+  plate: string | null;
+  tone: string;
+  onDark: boolean;
+  name: string;
+  own: boolean;
+};
+const LOGOS = LOGOS_RAW as unknown as Record<string, LogoRec>;
+
+export const hasVenueLogo = (vid: string): boolean => Boolean(LOGOS[vid]);
+
+export const VenueLogo = ({
+  vid,
+  h = 26,
+  title,
+  style,
+}: {
+  vid: string;
+  /** высота знака в точках; ширина считается из пропорций файла */
+  h?: number;
+  title?: string;
+  style?: CSSProperties;
+}) => {
+  const L = LOGOS[vid];
+  if (!L) return null;
+  const pad = Math.round(h * 0.22);
+  const needsPlate = L.tone !== "light";
+  const bg = L.plate ?? (needsPlate ? "rgba(255,255,255,.94)" : undefined);
+  return (
+    <span
+      title={title ?? L.name}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: bg,
+        padding: bg ? `${Math.round(pad * 0.7)}px ${pad}px` : 0,
+        // Тень нужна только тому знаку, что лежит прямо на фоне: плашка
+        // и так отделяет его от подложки.
+        filter: bg ? undefined : "drop-shadow(0 1px 5px rgba(0,0,0,.7))",
+        ...style,
+      }}
+    >
+      <img
+        src={L.file}
+        alt={L.name}
+        loading="lazy"
+        style={{ height: h, width: "auto", maxWidth: h * 4.2, objectFit: "contain", display: "block" }}
+      />
+    </span>
+  );
+};

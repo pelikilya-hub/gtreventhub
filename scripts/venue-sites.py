@@ -81,15 +81,37 @@ def candidates(name: str, social: str):
         stems.append(ck[0] + "beachclub")
         stems.append(ck[0] + "phuket")
 
-    hosts, seen = [], set()
+    # Гостиничные сети чаще всего живут на «первых словах» названия:
+    # у «Pullman Phuket Arcadia Naithon Beach» это pullmanphuketarcadia,
+    # у «Novotel Phuket Vintage Park Resort» — novotelphuketvintagepark.
+    # Полное название слитно такие домены не ловит, поэтому пробуем
+    # каждый префикс от двух до четырёх слов, с «phuket» и без.
+    for k in (2, 3, 4):
+        if len(ws) > k:
+            pre = "".join(ws[:k])
+            stems.append(pre)
+            if "phuket" not in pre:
+                stems.append(pre + "phuket")
+
+    # Часть площадок пишет имя через дефис: twinpalms-phuket.com.
+    for base in ("-".join(ws[:2]), "-".join(ck[:2])):
+        if base.count("-") == 1 and len(base) > 6:
+            stems.append(base)
+            stems.append(base + "-phuket")
+
+    clean, seen = [], set()
     for st in stems:
-        st = re.sub(r"[^a-z0-9]", "", st)
+        st = re.sub(r"[^a-z0-9-]", "", st).strip("-")
         if len(st) < 4 or st in seen:
             continue
         seen.add(st)
-        for tld in TLDS:
-            hosts.append(st + tld)
-    return hosts
+        clean.append(st)
+
+    # Порядок перебора — по зонам, а не по именам: .com у всех имён
+    # вероятнее, чем .org у первого. При обратном порядке очередь
+    # съедали семь зон одного-единственного имени, и до правильного
+    # варианта с префиксом дело не доходило.
+    return [st + tld for tld in TLDS for st in clean]
 
 
 def get(url: str, timeout: int = 9):
@@ -143,7 +165,7 @@ def probe(job):
         # заведением: так thebeachphuket.com оказался отелем в Кароне.
         return vid, name, None
     best = None
-    for host in candidates(name, social)[:22]:
+    for host in candidates(name, social)[:34]:
         url = "https://" + host
         html, code = get(url)
         s = verify(html, code, name)

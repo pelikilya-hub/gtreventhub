@@ -44,7 +44,7 @@
   "bytes": 9912,
   "file": "/venues/logos/VEN-0007-logo.png",
   "name": "KUDO Beach Club",
-  "src": "https://kudohotel.com/wp-content/uploads/2024/09/cropped-kudo-favicon.png",
+  "src": null,
   "own": true
  },
  "VEN-0009": {
@@ -155,6 +155,42 @@
   "src": null,
   "own": false
  },
+ "VEN-0040": {
+  "w": 338,
+  "h": 321,
+  "plate": null,
+  "tone": "dark",
+  "onDark": false,
+  "bytes": 45291,
+  "file": "/venues/logos/VEN-0040-logo.png",
+  "name": "Angsana Laguna Phuket",
+  "src": "https://www.angsana.com/assets/icons/Angsana-Logoblack.png",
+  "own": true
+ },
+ "VEN-0044": {
+  "w": 180,
+  "h": 180,
+  "plate": "#f3eee7",
+  "tone": "dark",
+  "onDark": false,
+  "bytes": 3013,
+  "file": "/venues/logos/VEN-0044-logo.png",
+  "name": "Amanpuri",
+  "src": "https://www.aman.com/themes/custom/aman/assets/dist/media/favicons/apple-touch-icon.png",
+  "own": false
+ },
+ "VEN-0045": {
+  "w": 171,
+  "h": 171,
+  "plate": "#081b48",
+  "tone": "light",
+  "onDark": false,
+  "bytes": 2406,
+  "file": "/venues/logos/VEN-0045-logo.png",
+  "name": "The Naka Island, a Luxury Collection Resort & Spa",
+  "src": "https://www.thenakaphuket.com/wp-content/uploads/2020/07/logo-regular.png",
+  "own": true
+ },
  "VEN-0047": {
   "w": 512,
   "h": 100,
@@ -227,6 +263,18 @@
   "src": null,
   "own": true
  },
+ "VEN-0062": {
+  "w": 512,
+  "h": 120,
+  "plate": null,
+  "tone": "dark",
+  "onDark": false,
+  "bytes": 36356,
+  "file": "/venues/logos/VEN-0062-logo.png",
+  "name": "BTC Space Phuket",
+  "src": "https://btc-space.com/wp-content/uploads/2024/07/BTC-Space-logo-2.png",
+  "own": true
+ },
  "VEN-0066": {
   "w": 238,
   "h": 128,
@@ -263,6 +311,30 @@
   "src": null,
   "own": false
  },
+ "VEN-0073": {
+  "w": 337,
+  "h": 203,
+  "plate": null,
+  "tone": "dark",
+  "onDark": false,
+  "bytes": 11308,
+  "file": "/venues/logos/VEN-0073-logo.png",
+  "name": "Paresa Resort Phuket",
+  "src": "https://www.paresaresorts.com/wp-content/uploads/2024/02/logo.png",
+  "own": true
+ },
+ "VEN-0074": {
+  "w": 256,
+  "h": 256,
+  "plate": "#ffffff",
+  "tone": "dark",
+  "onDark": false,
+  "bytes": 2925,
+  "file": "/venues/logos/VEN-0074-logo.png",
+  "name": "COMO Point Yamu",
+  "src": "https://www.comohotels.com/skins/skin-comohotels/favicon.ico",
+  "own": false
+ },
  "VEN-0076": {
   "w": 291,
   "h": 95,
@@ -296,7 +368,7 @@
   "bytes": 3042,
   "file": "/venues/logos/VEN-0079-logo.png",
   "name": "Vanilla Sky Bar & Lounge",
-  "src": "https://www.capesienna.com/uploads/logoshotel/capesienna_logo.png",
+  "src": null,
   "own": false
  },
  "VEN-0080": {
@@ -308,7 +380,7 @@
   "bytes": 10663,
   "file": "/venues/logos/VEN-0080-logo.png",
   "name": "Malika Sky Bar",
-  "src": "https://www.kalimaresort.com/asset_theme/images/icon/logo_khaolak.png",
+  "src": null,
   "own": false
  },
  "VEN-0081": {
@@ -332,8 +404,20 @@
   "bytes": 6809,
   "file": "/venues/logos/VEN-0082-logo.png",
   "name": "Kee Sky Lounge",
-  "src": "https://www.thekeeresort.com/images/logo-skylounge.png",
+  "src": null,
   "own": false
+ },
+ "VEN-0085": {
+  "w": 368,
+  "h": 438,
+  "plate": null,
+  "tone": "dark",
+  "onDark": false,
+  "bytes": 26653,
+  "file": "/venues/logos/VEN-0085-logo.png",
+  "name": "Phuket Co Working Space / Summit Tower",
+  "src": "https://phuketcoworkingspace.com/wp-content/uploads/2025/01/LOGO.png",
+  "own": true
  },
  "VEN-0101": {
   "w": 512,

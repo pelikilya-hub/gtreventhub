@@ -17,7 +17,7 @@ import {
   V,
 } from "../data/app-data";
 import { EditableImage } from "../EditableImage";
-import { Card, Chip, Eyebrow, Field, tint, TrashTitle } from "../ui";
+import { Card, Chip, Eyebrow, Field, tint, TrashTitle, VenueLogo } from "../ui";
 import { GtrLightbox } from "../lightbox";
 import {
   createVenueLinkFn,
@@ -239,6 +239,13 @@ export function BaseScreen() {
                   />
                 </>
               ) : null}
+              {/* Настоящий знак заведения поверх снимка — карточка сразу
+                  читается как его карточка, а не как наша плашка. */}
+              <VenueLogo
+                vid={x.id}
+                h={22}
+                style={{ position: "absolute", left: 12, top: 10, zIndex: 2 }}
+              />
               {x.readiness ? (
                 <span
                   className="gtr-mono"
@@ -380,6 +387,9 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               marginTop: 8,
             }}
           >
+            {/* Знак идёт перед именем: в паспорте это первое, по чему
+                площадку узнают, а набранное имя — уже подпись под ним. */}
+            <VenueLogo vid={v.id} h={34} />
             <TrashTitle text={v.name} size={29} />
             <Chip color={confColor(v.confidence)}>ДОСТОВЕРНОСТЬ: {v.confidence.toUpperCase()}</Chip>
             {R ? (

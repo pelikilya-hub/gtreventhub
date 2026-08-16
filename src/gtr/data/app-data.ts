@@ -2614,6 +2614,23 @@ const GENRE_EN: Record<string, string> = {
   "эмбиент": "Ambient", "коммерческий": "Commercial", "открытый формат": "Open Format",
   "свадебный сет": "Wedding Set", "живой вокал": "Live Vocals", "саксофон": "Saxophone",
   "electronic": "Electronic", "edm": "EDM", "биг-рум": "Big Room",
+  "тайский инди": "Thai Indie", "электроника": "Electronic",
+  "клубная электроника": "Club Electronic", "рэп": "Rap", "рок": "Rock",
+  "поп-рок": "Pop-Rock", "эстрада": "Variety", "андеграунд-электроника": "Underground Electronic",
+  "r&b": "R&B", "тайский поп": "Thai Pop", "live-программа": "Live Programme",
+  "даунтемпо": "Downtempo", "тайский рок": "Thai Rock", "лаунж / чилаут": "Lounge / Chillout",
+  "live-вокал": "Live Vocals", "прогрессив": "Progressive", "латин-хаус": "Latin House",
+  "танцевальный поп": "Dance Pop", "инди-поп": "Indie Pop",
+  "болливуд / панджаби": "Bollywood / Punjabi", "радио-сет": "Radio Set", "бас": "Bass",
+  "винил-сет": "Vinyl Set", "инди-дэнс": "Indie Dance", "лайв-электроника": "Live Electronic",
+  "вокал-хаус": "Vocal House",
+  "бразилиан-бас": "Brazilian Bass", "трэп": "Trap", "фьючер-бас": "Future Bass",
+  "инди-рок": "Indie Rock", "электро-поп": "Electropop", "синти-поп": "Synthpop",
+  "альт-рок": "Alt Rock", "фолк-рок": "Folk Rock", "ска": "Ska", "фолк": "Folk",
+  "хардстайл": "Hardstyle", "психоделик-транс": "Psytrance", "брейкбит": "Breakbeat",
+  "гэридж": "Garage", "нью-диско": "Nu Disco", "афробит": "Afrobeat",
+  "стендап / комедия": "Stand-up / Comedy", "рейв": "Rave", "панк": "Punk",
+  "кавер-программа": "Cover Programme", "ска-панк": "Ska-Punk", "инструментал": "Instrumental",
 };
 
 const capFirst = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);

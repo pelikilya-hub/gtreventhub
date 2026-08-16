@@ -1907,17 +1907,17 @@ function VisitorCabinet() {
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {community.channelUrl ? (
-              <button className="gtr-btn gtr-btn-red" onClick={() => openAppLink(community.channelUrl)}>
-                <Stk name="speaker" /> {t("Канал новостей")}
+              <button className="gtr-btn gtr-btn-red gtr-btn-stk" onClick={() => openAppLink(community.channelUrl)}>
+                <Stk name="speaker" x2 /> {t("Канал новостей")}
               </button>
             ) : null}
             {community.chatUrl ? (
-              <button className="gtr-btn" onClick={() => openAppLink(community.chatUrl)}>
-                <Stk name="handshake" /> {t("Чат сообщества")}
+              <button className="gtr-btn gtr-btn-stk" onClick={() => openAppLink(community.chatUrl)}>
+                <Stk name="handshake" x2 /> {t("Чат сообщества")}
               </button>
             ) : null}
-            <button className="gtr-btn" onClick={() => openAppLink("https://t.me/bangtaostyle")}>
-              <Stk name="door" /> {t("Связь")}
+            <button className="gtr-btn gtr-btn-stk" onClick={() => openAppLink("https://t.me/bangtaostyle")}>
+              <Stk name="door" x2 /> {t("Связь")}
             </button>
           </div>
         </Card>

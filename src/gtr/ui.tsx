@@ -327,9 +327,20 @@ export const STK = {
 
 export type StkName = keyof typeof STK;
 
-export const Stk = ({ name, size, alt = "" }: { name: StkName; size?: number; alt?: string }) => (
+export const Stk = ({
+  name,
+  size,
+  x2,
+  alt = "",
+}: {
+  name: StkName;
+  size?: number;
+  /** двойной размер: знак несёт вес наравне с подписью, а не сопровождает её */
+  x2?: boolean;
+  alt?: string;
+}) => (
   <img
-    className="gtr-stk"
+    className={`gtr-stk${x2 ? " gtr-stk-2x" : ""}`}
     src={STK[name]}
     alt={alt}
     aria-hidden={alt ? undefined : true}

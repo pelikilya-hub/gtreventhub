@@ -2675,6 +2675,20 @@ html { -webkit-tap-highlight-color: transparent; }
   flex: none;
 }
 
+/* Двойной знак: выравнивание по базовой линии на таком кегле уже не
+   работает, поэтому кнопка с ним становится строкой по центру. */
+.gtr-stk-2x {
+  width: 2.7em;
+  height: 2.7em;
+  vertical-align: middle;
+}
+.gtr-btn-stk {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.gtr-btn-stk .gtr-stk-2x { margin: -0.5em 0; }
+
 .gtr-stk-btn {
   all: unset;
   box-sizing: border-box;

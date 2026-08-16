@@ -54,6 +54,10 @@ const OPEN_ROUTES: [string, string[]][] = [
 const SEARCHY =
   /событ|афиш|вечер|туса|движ|ที่ไหน|что|где|куда|пойти|клуб|бар|пляж|техно|хаус|музык|party|сходить/i;
 
+/** Пасхалка BOSS: «да братан» — и никакой нейросети не нужно. */
+export const EGG_RE = /^да,?\s*братан[!.)]*$/i;
+export const EGG_REPLY = "Тамбовский волк тебе братан!)))";
+
 export const planOf = (raw: string): TextPlan => {
   const q = raw.trim().toLowerCase();
   if (!q) return { kind: "unknown" };

@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { broLogFn } from "../kv-api";
-import { EMPTY_LINE, fmtDetails, fmtEvents, fmtRoute, HELP_LINES, openerFor, planOf } from "./text";
+import { EGG_RE, EGG_REPLY, EMPTY_LINE, fmtDetails, fmtEvents, fmtRoute, HELP_LINES, openerFor, planOf } from "./text";
 import { VOICE_LAB_LINES, type PersonaMode } from "./prompt.ru";
 import { GemSession } from "./gem";
 import { BroSession, type BroCard, type BroState } from "./session";
@@ -308,6 +308,12 @@ export function GtrBroOverlay({
     if (!q) return;
     metric("bro.text.cmd");
     say("user", q);
+    // Пасхалка отвечает мгновенно — за таким не ходят в нейросеть.
+    if (EGG_RE.test(q)) {
+      metric("bro.egg.volk");
+      say("bro", EGG_REPLY);
+      return;
+    }
     const plan = planOf(q);
 
     // Живые фразы сначала идут в самохостный мозг (Qwen на сервере GTR).

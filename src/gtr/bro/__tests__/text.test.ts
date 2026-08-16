@@ -63,3 +63,13 @@ describe("форматтер выдачи", () => {
     expect(lines.at(-1)).toContain("маршрут");
   });
 });
+
+describe("пасхалка", () => {
+  it("«да братан» во всех обличьях", async () => {
+    const { EGG_RE } = await import("../text");
+    for (const q of ["да братан", "Да, братан!", "да, братан)))", "ДА БРАТАН"])
+      expect(EGG_RE.test(q)).toBe(true);
+    expect(EGG_RE.test("да")).toBe(false);
+    expect(EGG_RE.test("братан, что сегодня")).toBe(false);
+  });
+});

@@ -25,8 +25,11 @@ export type GemStart = {
 
 const SESSION_URL = "/api/gtr-bro-gem";
 const TOOL_URL = "/api/gtr-bro-tool";
+// Эфемерные токены живут на отдельном endpoint'е Constrained — обычный
+// BidiGenerateContent их не принимает вовсе (выяснено перебором с прода:
+// сервер сам подсказал «pass it in an access_token»).
 const WS_BASE =
-  "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent";
+  "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained";
 const IDLE_MS = 90_000;
 const MAX_MS = 8 * 60_000;
 const IN_RATE = 16_000;

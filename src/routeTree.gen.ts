@@ -17,6 +17,7 @@ import { Route as ApiAphotoRouteImport } from './routes/api.aphoto'
 import { Route as ApiAvideoRouteImport } from './routes/api.avideo'
 import { Route as ApiCommunityDigestRouteImport } from './routes/api.community-digest'
 import { Route as ApiGtrBroGemRouteImport } from './routes/api.gtr-bro-gem'
+import { Route as ApiGtrBroGemtestRouteImport } from './routes/api.gtr-bro-gemtest'
 import { Route as ApiGtrBroSdpRouteImport } from './routes/api.gtr-bro-sdp'
 import { Route as ApiGtrBroSessionRouteImport } from './routes/api.gtr-bro-session'
 import { Route as ApiGtrBroTextRouteImport } from './routes/api.gtr-bro-text'
@@ -75,6 +76,11 @@ const ApiCommunityDigestRoute = ApiCommunityDigestRouteImport.update({
 const ApiGtrBroGemRoute = ApiGtrBroGemRouteImport.update({
   id: '/api/gtr-bro-gem',
   path: '/api/gtr-bro-gem',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGtrBroGemtestRoute = ApiGtrBroGemtestRouteImport.update({
+  id: '/api/gtr-bro-gemtest',
+  path: '/api/gtr-bro-gemtest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiGtrBroSdpRoute = ApiGtrBroSdpRouteImport.update({
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/api/avideo': typeof ApiAvideoRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
+  '/api/gtr-bro-gemtest': typeof ApiGtrBroGemtestRoute
   '/api/gtr-bro-sdp': typeof ApiGtrBroSdpRoute
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByTo {
   '/api/avideo': typeof ApiAvideoRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
+  '/api/gtr-bro-gemtest': typeof ApiGtrBroGemtestRoute
   '/api/gtr-bro-sdp': typeof ApiGtrBroSdpRoute
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
@@ -240,6 +248,7 @@ export interface FileRoutesById {
   '/api/avideo': typeof ApiAvideoRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
+  '/api/gtr-bro-gemtest': typeof ApiGtrBroGemtestRoute
   '/api/gtr-bro-sdp': typeof ApiGtrBroSdpRoute
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
@@ -271,6 +280,7 @@ export interface FileRouteTypes {
     | '/api/avideo'
     | '/api/community-digest'
     | '/api/gtr-bro-gem'
+    | '/api/gtr-bro-gemtest'
     | '/api/gtr-bro-sdp'
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
@@ -299,6 +309,7 @@ export interface FileRouteTypes {
     | '/api/avideo'
     | '/api/community-digest'
     | '/api/gtr-bro-gem'
+    | '/api/gtr-bro-gemtest'
     | '/api/gtr-bro-sdp'
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/api/avideo'
     | '/api/community-digest'
     | '/api/gtr-bro-gem'
+    | '/api/gtr-bro-gemtest'
     | '/api/gtr-bro-sdp'
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
@@ -358,6 +370,7 @@ export interface RootRouteChildren {
   ApiAvideoRoute: typeof ApiAvideoRoute
   ApiCommunityDigestRoute: typeof ApiCommunityDigestRoute
   ApiGtrBroGemRoute: typeof ApiGtrBroGemRoute
+  ApiGtrBroGemtestRoute: typeof ApiGtrBroGemtestRoute
   ApiGtrBroSdpRoute: typeof ApiGtrBroSdpRoute
   ApiGtrBroSessionRoute: typeof ApiGtrBroSessionRoute
   ApiGtrBroTextRoute: typeof ApiGtrBroTextRoute
@@ -428,6 +441,13 @@ declare module '@tanstack/react-router' {
       path: '/api/gtr-bro-gem'
       fullPath: '/api/gtr-bro-gem'
       preLoaderRoute: typeof ApiGtrBroGemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gtr-bro-gemtest': {
+      id: '/api/gtr-bro-gemtest'
+      path: '/api/gtr-bro-gemtest'
+      fullPath: '/api/gtr-bro-gemtest'
+      preLoaderRoute: typeof ApiGtrBroGemtestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/gtr-bro-sdp': {
@@ -599,6 +619,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAvideoRoute: ApiAvideoRoute,
   ApiCommunityDigestRoute: ApiCommunityDigestRoute,
   ApiGtrBroGemRoute: ApiGtrBroGemRoute,
+  ApiGtrBroGemtestRoute: ApiGtrBroGemtestRoute,
   ApiGtrBroSdpRoute: ApiGtrBroSdpRoute,
   ApiGtrBroSessionRoute: ApiGtrBroSessionRoute,
   ApiGtrBroTextRoute: ApiGtrBroTextRoute,

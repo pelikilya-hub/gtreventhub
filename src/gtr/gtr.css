@@ -1750,6 +1750,17 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-hscroll::-webkit-scrollbar { display: none; }
 .gtr-hscroll > * { scroll-snap-align: start; flex: none; }
 
+/* Лента — не коробка внутри колонки: она идёт от края до края, карточки
+   уходят под правую грань и продолжаются за ней. Первая при этом стоит
+   ровно по сетке, потому что отступ перенесён внутрь прокрутки. */
+@media (max-width: 860px) {
+  .gtr-hscroll {
+    margin-inline: calc(-1 * var(--gtr-pad, 14px));
+    padding-inline: var(--gtr-pad, 14px);
+    scroll-padding-inline: var(--gtr-pad, 14px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gtr-btn-wow, .gtr-btn-wow::after { animation: none; }
 }
@@ -2407,10 +2418,14 @@ html { -webkit-tap-highlight-color: transparent; }
   }
   .gtr-tab-label {
     font: 600 9px/1 "JetBrains Mono", monospace;
-    letter-spacing: 0.06em;
+    /* разрядка ужата: «ПРОФИЛЬ» — самое длинное слово, при 0.06em оно
+       не помещалось в свою пятую часть и срезалось у грани */
+    letter-spacing: 0.01em;
     text-transform: uppercase;
     white-space: nowrap;
+    max-width: 100%;
   }
+  .gtr-tab { padding-inline: 2px; }
   .gtr-tab.on { color: #fff; }
   /* активный пункт — метка сверху, не только цвет: состояние не должно
      передаваться одним лишь цветом (спека §20). Торцы уходят в прозрачность,

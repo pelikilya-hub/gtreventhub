@@ -187,9 +187,41 @@ async function syncCarpeDiem(): Promise<VenueAfishaEvent[]> {
   return out;
 }
 
+// Заголовок из слуга приходит строчными («zoo del mar»), а из og:title —
+// как повезёт. Приводим к виду, пригодному для витрины: каждое слово с
+// заглавной, но аббревиатуры и цифры не трогаем.
+const titleCase = (raw: string) => {
+  const t = raw.trim().replace(/\s+/g, " ");
+  if (!t) return t;
+  // уже есть заглавные — автор постарался, не портим
+  if (/[A-ZА-ЯЁ]/.test(t.slice(1))) return t;
+  return t
+    .split(" ")
+    .map((w) => (w.length > 2 ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+};
+
+// Площадки переиспользуют один промо-постер на всех резидентских страницах:
+// у Café del Mar «Zoo del Mar» и «Bliss Wednesdays» приходили с одинаковой
+// картинкой и в ленте выглядели дублями одного события. Постер оставляем
+// самому раннему событию, остальным честнее показать карточку без него,
+// чем повторять чужую афишу.
+const unshareposters = (list: VenueAfishaEvent[]) => {
+  const seen = new Set<string>();
+  return [...list]
+    .sort((a, b) => a.dateIso.localeCompare(b.dateIso))
+    .map((e) => {
+      const key = e.posterSrc ?? e.poster;
+      if (!key) return e;
+      if (seen.has(key)) return { ...e, poster: undefined, posterSrc: undefined };
+      seen.add(key);
+      return e;
+    });
+};
+
 const dedupe = (list: VenueAfishaEvent[]) => {
   const seen = new Set<string>();
-  return list
+  return unshareposters(list.map((e) => ({ ...e, title: titleCase(e.title) })))
     .filter((e) => {
       const k = `${e.dateIso}:${norm(e.title)}:${norm(e.room ?? "")}`;
       if (seen.has(k)) return false;

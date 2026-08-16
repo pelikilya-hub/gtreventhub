@@ -1,0 +1,634 @@
+{
+ "found": [
+  {
+   "id": "VEN-0003",
+   "name": "Carpe Diem Beach Club",
+   "src": "https://carpediemphuket.com/wp-content/uploads/2024/07/CARPEDIEM-Logo-White.png",
+   "score": 185.0,
+   "size": "512x125",
+   "bytes": 17462
+  },
+  {
+   "id": "VEN-0001",
+   "name": "Catch Beach Club",
+   "src": "https://www.catchbeachclub.com/wp-content/uploads/2023/11/cropped-LOGO-1000x1000-1.webp",
+   "score": 152.8,
+   "size": "512x512",
+   "bytes": 42895
+  },
+  {
+   "id": "VEN-0046",
+   "name": "RAVA Beach Club",
+   "src": "https://www.banyantree.com/banyanTree/apple-touch-icon.png",
+   "score": 78.0,
+   "size": "120x120",
+   "bytes": 8555
+  },
+  {
+   "id": "VEN-0059",
+   "name": "Moonshine Phuket",
+   "src": "https://www.moonshinephuket.net/web-app-manifest-512x512.png",
+   "score": 107.8,
+   "size": "512x512",
+   "bytes": 310825
+  },
+  {
+   "id": "VEN-0068",
+   "name": "My Beach Resort Phuket",
+   "src": "https://www.mybeachphuket.com/wp-content/uploads/2025/01/logo-undated-gold-2.png",
+   "score": 180.5,
+   "size": "512x487",
+   "bytes": 124905
+  },
+  {
+   "id": "VEN-0076",
+   "name": "Sri Panwa Phuket / Baba Nest",
+   "src": "https://www.babaphuket.com/images/logo-main.png",
+   "score": 172.5,
+   "size": "291x95",
+   "bytes": 5891
+  },
+  {
+   "id": "VEN-0002",
+   "name": "Café del Mar Phuket",
+   "src": "https://cdn.prod.website-files.com/675969a2220618a361236fac/67d82fd170484389c32c5f1f_256x256.jpg",
+   "score": 26.4,
+   "size": "256x256",
+   "bytes": 120971
+  },
+  {
+   "id": "VEN-0066",
+   "name": "Royal Phuket Marina",
+   "src": "https://royalphuketmarina.com/wp-content/uploads/2022/05/RPM_Logo.png",
+   "score": 202.5,
+   "size": "238x128",
+   "bytes": 5041
+  },
+  {
+   "id": "VEN-0055",
+   "name": "Paradise Beach Phuket",
+   "src": "https://theparadisebeachphuket.com/wp-content/uploads/2025/11/cropped-514091360_122109894788912301_6362868733687961649_n.jpg",
+   "score": 112.8,
+   "size": "512x512",
+   "bytes": 86749
+  },
+  {
+   "id": "VEN-0047",
+   "name": "Barra Cuda Beach Club",
+   "src": "https://barracuda-r2.tumwebsme.com/cms/barracuda_logo.webp",
+   "score": 160.0,
+   "size": "512x100",
+   "bytes": 19266
+  },
+  {
+   "id": "VEN-0013",
+   "name": "Illuzion Phuket",
+   "src": "https://www.illuzionphuket.com/wp-content/uploads/2023/06/illuzion-phuket-logo-w-2023-head-2@.png",
+   "score": 179.0,
+   "size": "512x176",
+   "bytes": 14699
+  },
+  {
+   "id": "VEN-0014",
+   "name": "Sugar Club Phuket",
+   "src": "https://www.sugarclub-phuket.com/wp-content/uploads/2018/12/logo.png",
+   "score": 165.0,
+   "size": "502x339",
+   "bytes": 52628
+  },
+  {
+   "id": "VEN-0069",
+   "name": "Phuket Marriott Resort & Spa, Merlin Beach",
+   "src": "https://cache.marriott.com/content/dam/marriott-digital/mc/global-property-shared/en_us/logo/assets/mc_logo_L.png",
+   "score": 171.0,
+   "size": "236x178",
+   "bytes": 6404
+  },
+  {
+   "id": "VEN-0101",
+   "name": "BOA Club Phuket",
+   "src": "https://www.boaclubphuket.com/web/image/29534-7e493b59/Logo-1000.webp",
+   "score": 167.2,
+   "size": "512x211",
+   "bytes": 73709
+  },
+  {
+   "id": "VEN-0105",
+   "name": "Lava Restobar",
+   "src": "https://fireandsmokephuket.com/wp-content/uploads/Logo-Fire-Smoke-SD.png",
+   "score": 161.9,
+   "size": "276x300",
+   "bytes": 51318
+  },
+  {
+   "id": "VEN-0110",
+   "name": "SHAMAN Lounge Cafe Bar",
+   "src": "https://shamanphuket.com/img/favicon.png",
+   "score": 116.6,
+   "size": "64x64",
+   "bytes": 434
+  }
+ ],
+ "nosite": [
+  {
+   "id": "VEN-0077",
+   "name": "Akoya Star Lounge at V Villas Phuket",
+   "social": "https://www.instagram.com/akoya.star.lounge/"
+  },
+  {
+   "id": "VEN-0051",
+   "name": "NORA Beach Club",
+   "social": "https://www.instagram.com/norabeachclub/"
+  },
+  {
+   "id": "VEN-0049",
+   "name": "The Beach Phuket",
+   "social": "https://www.instagram.com/thebeach.phuket/"
+  },
+  {
+   "id": "VEN-0040",
+   "name": "Angsana Laguna Phuket",
+   "social": "https://www.instagram.com/angsanalagunaphuket/"
+  },
+  {
+   "id": "VEN-0048",
+   "name": "Casuarina Beach Club",
+   "social": "https://www.instagram.com/casuarinabeachclub/"
+  },
+  {
+   "id": "VEN-0039",
+   "name": "SAii Laguna Phuket",
+   "social": "https://www.instagram.com/saii.lagunaphuket/"
+  },
+  {
+   "id": "VEN-0004",
+   "name": "XANA Beach Club",
+   "social": "https://www.instagram.com/xanaphuket/"
+  },
+  {
+   "id": "VEN-0074",
+   "name": "COMO Point Yamu",
+   "social": "https://www.instagram.com/comopointyamu.phuket/"
+  },
+  {
+   "id": "VEN-0063",
+   "name": "Phuket Yacht Club",
+   "social": ""
+  },
+  {
+   "id": "VEN-0061",
+   "name": "Place Coworking",
+   "social": "https://www.instagram.com/place_coworking_phuket/"
+  },
+  {
+   "id": "VEN-0080",
+   "name": "Malika Sky Bar",
+   "social": "https://www.instagram.com/malikaskybar/"
+  },
+  {
+   "id": "VEN-0026",
+   "name": "Carnival Magic",
+   "social": "https://www.instagram.com/carnivalmagicpark/"
+  },
+  {
+   "id": "VEN-0078",
+   "name": "Casa Boho Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0034",
+   "name": "Hyatt Regency Phuket Resort",
+   "social": ""
+  },
+  {
+   "id": "VEN-0025",
+   "name": "Phuket FantaSea",
+   "social": ""
+  },
+  {
+   "id": "VEN-0008",
+   "name": "Pine Beach Bar",
+   "social": ""
+  },
+  {
+   "id": "VEN-0079",
+   "name": "Vanilla Sky Bar & Lounge",
+   "social": ""
+  },
+  {
+   "id": "VEN-0073",
+   "name": "Paresa Resort Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0012",
+   "name": "COAST Beach Club & Bistro Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0035",
+   "name": "Paradox Resort Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0009",
+   "name": "Tann Terrace Phuket",
+   "social": "https://www.instagram.com/tannterracephuket/"
+  },
+  {
+   "id": "VEN-0036",
+   "name": "Le Méridien Phuket Beach Resort",
+   "social": ""
+  },
+  {
+   "id": "VEN-0075",
+   "name": "Kata Rocks",
+   "social": ""
+  },
+  {
+   "id": "VEN-0054",
+   "name": "Ska Bar",
+   "social": ""
+  },
+  {
+   "id": "VEN-0070",
+   "name": "The Shore at Katathani",
+   "social": ""
+  },
+  {
+   "id": "VEN-0031",
+   "name": "Andamanda Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0067",
+   "name": "Phuket Boat Lagoon",
+   "social": ""
+  },
+  {
+   "id": "VEN-0053",
+   "name": "Laku Beach Club",
+   "social": ""
+  },
+  {
+   "id": "VEN-0057",
+   "name": "The Beach House at Anantara Layan",
+   "social": ""
+  },
+  {
+   "id": "VEN-0042",
+   "name": "Anantara Mai Khao Phuket Villas",
+   "social": ""
+  },
+  {
+   "id": "VEN-0032",
+   "name": "JW Marriott Phuket Resort & Spa",
+   "social": ""
+  },
+  {
+   "id": "VEN-0056",
+   "name": "M Beach Club Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0041",
+   "name": "Renaissance Phuket Resort & Spa",
+   "social": ""
+  },
+  {
+   "id": "VEN-0065",
+   "name": "Phuket Yacht Haven Marina",
+   "social": ""
+  },
+  {
+   "id": "VEN-0071",
+   "name": "The Nai Harn Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0045",
+   "name": "The Naka Island, a Luxury Collection Resort & Spa",
+   "social": ""
+  },
+  {
+   "id": "VEN-0064",
+   "name": "Ao Po Grand Marina",
+   "social": ""
+  },
+  {
+   "id": "VEN-0044",
+   "name": "Amanpuri",
+   "social": "https://www.instagram.com/amanpuri/"
+  },
+  {
+   "id": "VEN-0011",
+   "name": "Endless Summer Beach Club",
+   "social": "https://www.instagram.com/endlesssummerbeachclub/"
+  },
+  {
+   "id": "VEN-0010",
+   "name": "FUGA Beach Club",
+   "social": "https://www.instagram.com/fugabeachclub/"
+  },
+  {
+   "id": "VEN-0037",
+   "name": "Grand Mercure Phuket Patong",
+   "social": "https://www.instagram.com/grandmercurephuketpatong/"
+  },
+  {
+   "id": "VEN-0019",
+   "name": "Hard Rock Cafe Phuket",
+   "social": "https://www.instagram.com/hardrockphuket/"
+  },
+  {
+   "id": "VEN-0007",
+   "name": "KUDO Beach Club",
+   "social": "https://www.instagram.com/kudobeachclub/"
+  },
+  {
+   "id": "VEN-0082",
+   "name": "Kee Sky Lounge",
+   "social": "https://www.instagram.com/keeskylounge/"
+  },
+  {
+   "id": "VEN-0038",
+   "name": "M Social Hotel Phuket",
+   "social": "https://www.instagram.com/msocialphuket/"
+  },
+  {
+   "id": "VEN-0028",
+   "name": "Phuket Simon Cabaret",
+   "social": "https://www.instagram.com/simoncabaretphuket/"
+  },
+  {
+   "id": "VEN-0015",
+   "name": "Shelter Phuket",
+   "social": "https://www.instagram.com/shelter_phuket/"
+  },
+  {
+   "id": "VEN-0058",
+   "name": "The Deck Beach Club Patong",
+   "social": "https://www.instagram.com/thedeckbeachclubpatong/"
+  },
+  {
+   "id": "VEN-0016",
+   "name": "Armania Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0060",
+   "name": "Red Hot Club Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0081",
+   "name": "Sizzle Rooftop Restaurant",
+   "social": "https://www.instagram.com/sizzlerooftopphuket/"
+  },
+  {
+   "id": "VEN-0024",
+   "name": "Lotus Arena Phuket",
+   "social": "https://www.instagram.com/lotus.arena.phuket/"
+  },
+  {
+   "id": "VEN-0085",
+   "name": "Phuket Co Working Space / Summit Tower",
+   "social": ""
+  },
+  {
+   "id": "VEN-0021",
+   "name": "Bebop Live Music Bar",
+   "social": "https://www.instagram.com/bebopphuket/"
+  },
+  {
+   "id": "VEN-0086",
+   "name": "Blue Elephant Governor's Mansion Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0022",
+   "name": "Cue Bar Phuket",
+   "social": "https://www.instagram.com/cuebarphuket/"
+  },
+  {
+   "id": "VEN-0083",
+   "name": "Quip Sky Bar",
+   "social": ""
+  },
+  {
+   "id": "VEN-0087",
+   "name": "VELA Phuket Old Town",
+   "social": "https://www.instagram.com/vela.phuketoldtown/"
+  },
+  {
+   "id": "VEN-0020",
+   "name": "Flame Phuket Town",
+   "social": "https://www.instagram.com/flamephukettown/"
+  },
+  {
+   "id": "VEN-0084",
+   "name": "HOMA Phuket Town",
+   "social": "https://www.instagram.com/hello.homa/"
+  },
+  {
+   "id": "VEN-0072",
+   "name": "Twinpalms Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0043",
+   "name": "Rosewood Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0052",
+   "name": "The G Beach Club",
+   "social": ""
+  },
+  {
+   "id": "VEN-0062",
+   "name": "BTC Space Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0027",
+   "name": "Siam Niramit Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0030",
+   "name": "Rhythm Park Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0029",
+   "name": "Blue Tree Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0023",
+   "name": "The Garage OG Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0005",
+   "name": "MAYA Beach Club Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0088",
+   "name": "Pullman Phuket Karon Beach Resort",
+   "social": ""
+  },
+  {
+   "id": "VEN-0089",
+   "name": "Four Points by Sheraton Phuket Patong Beach Resort",
+   "social": ""
+  },
+  {
+   "id": "VEN-0090",
+   "name": "Courtyard by Marriott Phuket Town",
+   "social": ""
+  },
+  {
+   "id": "VEN-0091",
+   "name": "Courtyard by Marriott Phuket, Patong Beach Resort",
+   "social": ""
+  },
+  {
+   "id": "VEN-0092",
+   "name": "Pullman Phuket Arcadia Naithon Beach",
+   "social": ""
+  },
+  {
+   "id": "VEN-0093",
+   "name": "Novotel Phuket Vintage Park Resort",
+   "social": ""
+  },
+  {
+   "id": "VEN-0094",
+   "name": "Holiday Inn Resort Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0095",
+   "name": "Hotel Indigo Phuket Patong",
+   "social": ""
+  },
+  {
+   "id": "VEN-0096",
+   "name": "ibis Phuket Patong",
+   "social": ""
+  },
+  {
+   "id": "VEN-0097",
+   "name": "ibis Phuket Kata",
+   "social": ""
+  },
+  {
+   "id": "VEN-0099",
+   "name": "Tiger Night Club",
+   "social": ""
+  },
+  {
+   "id": "VEN-0100",
+   "name": "Hollywood Phuket",
+   "social": "https://www.instagram.com/patongbayhillentertainment/"
+  },
+  {
+   "id": "VEN-0103",
+   "name": "Rock City Phuket",
+   "social": ""
+  },
+  {
+   "id": "VEN-0104",
+   "name": "Music Matter Jazz Bar",
+   "social": ""
+  }
+ ],
+ "nologo": [
+  {
+   "id": "VEN-0033",
+   "name": "InterContinental Phuket Resort",
+   "site": "https://www.ihg.com/intercontinental/hotels/us/en/phuket/phukb/hoteldetail/meetings-events",
+   "why": "кандидатов нет",
+   "svg": [],
+   "tried": 0
+  },
+  {
+   "id": "VEN-0050",
+   "name": "Fira Beach Club",
+   "site": "https://firaphuket.com/",
+   "why": "кандидатов нет",
+   "svg": [],
+   "tried": 1
+  },
+  {
+   "id": "VEN-0018",
+   "name": "New York Live Music Bar",
+   "site": "https://newyorklivemusic.club",
+   "why": "сайт не ответил"
+  },
+  {
+   "id": "VEN-0006",
+   "name": "YONA Beach Club",
+   "site": "https://yonabeach.com/",
+   "why": "кандидатов нет",
+   "svg": [],
+   "tried": 0
+  },
+  {
+   "id": "VEN-0017",
+   "name": "TaiPan Nightclub",
+   "site": "https://www.taipanclubphuket.com",
+   "why": "сайт не ответил"
+  },
+  {
+   "id": "VEN-0098",
+   "name": "Seduction Complex",
+   "site": "https://seductionphuket.com",
+   "why": "сайт не ответил"
+  },
+  {
+   "id": "VEN-0102",
+   "name": "Empire Club Phuket",
+   "site": "https://www.empirephuket.com",
+   "why": "кандидатов нет",
+   "svg": [],
+   "tried": 0
+  },
+  {
+   "id": "VEN-0106",
+   "name": "Andaman Riviera",
+   "site": "https://andaman-riviera.com/eng",
+   "why": "сайт не ответил"
+  },
+  {
+   "id": "VEN-0107",
+   "name": "Himmapana Villas - Grand Valley",
+   "site": "https://www.trip.com/hotels/detail/?hotelId=125185668",
+   "why": "кандидатов нет",
+   "svg": [],
+   "tried": 0
+  },
+  {
+   "id": "VEN-0108",
+   "name": "Luxury 3BR Villa Wallaya with Private Pool",
+   "site": "https://www.trip.com/hotels/detail/?hotelId=134685783",
+   "why": "кандидатов нет",
+   "svg": [],
+   "tried": 1
+  },
+  {
+   "id": "VEN-0109",
+   "name": "CLC Restaurant (Come Leo Come)",
+   "site": "https://clcphuket.com/",
+   "why": "вектор, нужен Chromium",
+   "svg": [
+    "https://clcphuket.com/wp-content/uploads/2025/11/logo-header.svg",
+    "https://clcphuket.com/wp-content/uploads/2025/11/Logo-hero.svg"
+   ],
+   "tried": 1
+  }
+ ]
+}

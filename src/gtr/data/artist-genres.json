@@ -810,5 +810,2590 @@
    "releases": 0,
    "sets": 0
   }
+ },
+ "MC-0076": {
+  "name": "Taz Mutcha",
+  "ids": [
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 1.0
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house"
+   ],
+   "musicbrainz": [],
+   "releases": 3,
+   "sets": 0
+  }
+ },
+ "MC-0077": {
+  "name": "Robbie Akbal",
+  "ids": [
+   "tech-house",
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 0.421,
+   "tech-house": 0.474
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 19,
+   "sets": 0
+  }
+ },
+ "MC-0078": {
+  "name": "Joe Gradante",
+  "ids": [
+   "deep-house",
+   "chillout"
+  ],
+  "weights": {
+   "deep-house": 0.571,
+   "chillout": 0.286
+  },
+  "src": {
+   "mixcloud": [
+    "chillout",
+    "deep-house"
+   ],
+   "discogs": [],
+   "musicbrainz": [],
+   "releases": 0,
+   "sets": 7
+  }
+ },
+ "MC-0079": {
+  "name": "Lazykay",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0080": {
+  "name": "Chambord",
+  "ids": [
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 0.333
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house"
+   ],
+   "musicbrainz": [],
+   "releases": 9,
+   "sets": 0
+  }
+ },
+ "MC-0081": {
+  "name": "Mr.Sour",
+  "ids": [
+   "deep-house",
+   "tech-house",
+   "melodic-techno",
+   "deep-tech",
+   "downtempo"
+  ],
+  "weights": {
+   "deep-house": 0.96,
+   "tech-house": 0.48,
+   "melodic-techno": 0.44,
+   "deep-tech": 0.16,
+   "downtempo": 0.12
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house",
+    "deep-tech",
+    "downtempo",
+    "melodic-techno",
+    "tech-house"
+   ],
+   "discogs": [],
+   "musicbrainz": [],
+   "releases": 0,
+   "sets": 25
+  }
+ },
+ "MC-0082": {
+  "name": "Somma",
+  "ids": [
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 0.122
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house"
+   ],
+   "musicbrainz": [],
+   "releases": 41,
+   "sets": 0
+  }
+ },
+ "MC-0083": {
+  "name": "LONNER",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0084": {
+  "name": "MK.Santo",
+  "ids": [
+   "deep-house",
+   "progressive-house",
+   "tech-house",
+   "funky-house",
+   "afro-house",
+   "soulful-house"
+  ],
+  "weights": {
+   "afro-house": 0.125,
+   "progressive-house": 0.375,
+   "tech-house": 0.35,
+   "deep-house": 0.4,
+   "soulful-house": 0.125,
+   "funky-house": 0.175
+  },
+  "src": {
+   "mixcloud": [
+    "afro-house",
+    "deep-house",
+    "funky-house",
+    "progressive-house",
+    "soulful-house",
+    "tech-house"
+   ],
+   "discogs": [],
+   "musicbrainz": [],
+   "releases": 1,
+   "sets": 40
+  }
+ },
+ "MC-0085": {
+  "name": "Trikk",
+  "ids": [
+   "deep-house",
+   "melodic-techno",
+   "tech-house"
+  ],
+  "weights": {
+   "melodic-techno": 0.163,
+   "deep-house": 0.577,
+   "tech-house": 0.163
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "melodic-techno",
+    "tech-house"
+   ],
+   "musicbrainz": [
+    "deep-house"
+   ],
+   "releases": 49,
+   "sets": 0
+  }
+ },
+ "MC-0086": {
+  "name": "Franky Wah",
+  "ids": [
+   "progressive-house",
+   "deep-house",
+   "tech-house",
+   "progressive-breaks",
+   "breakbeat"
+  ],
+  "weights": {
+   "deep-house": 0.26,
+   "progressive-house": 0.42,
+   "progressive-breaks": 0.14,
+   "breakbeat": 0.14,
+   "tech-house": 0.2
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "breakbeat",
+    "deep-house",
+    "progressive-breaks",
+    "progressive-house",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 50,
+   "sets": 0
+  }
+ },
+ "MC-0087": {
+  "name": "Bushwacka!",
+  "ids": [
+   "deep-house",
+   "melodic-techno",
+   "acid-house",
+   "tech-house"
+  ],
+  "weights": {
+   "acid-house": 0.2,
+   "deep-house": 0.9,
+   "tech-house": 0.2,
+   "melodic-techno": 0.3
+  },
+  "src": {
+   "mixcloud": [
+    "acid-house",
+    "deep-house",
+    "melodic-techno",
+    "tech-house"
+   ],
+   "discogs": [],
+   "musicbrainz": [],
+   "releases": 0,
+   "sets": 10
+  }
+ },
+ "MC-0088": {
+  "name": "Bonobo",
+  "ids": [
+   "downtempo",
+   "deep-house",
+   "trip-hop",
+   "electronica",
+   "nu-jazz",
+   "idm",
+   "electro",
+   "melodic-techno",
+   "breakbeat",
+   "nu-disco",
+   "uk-garage",
+   "edm-pop",
+   "bassline",
+   "melodic-house",
+   "organic-house"
+  ],
+  "weights": {
+   "downtempo": 1.0,
+   "deep-house": 0.81,
+   "trip-hop": 0.64,
+   "idm": 0.25,
+   "electro": 0.25,
+   "melodic-techno": 0.25,
+   "electronica": 0.45,
+   "breakbeat": 0.25,
+   "nu-disco": 0.25,
+   "uk-garage": 0.25,
+   "nu-jazz": 0.35,
+   "edm-pop": 0.25,
+   "bassline": 0.25,
+   "melodic-house": 0.25,
+   "organic-house": 0.25
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house"
+   ],
+   "discogs": [
+    "deep-house",
+    "downtempo",
+    "trip-hop"
+   ],
+   "musicbrainz": [
+    "bassline",
+    "breakbeat",
+    "deep-house",
+    "downtempo",
+    "edm-pop",
+    "electro",
+    "electronica",
+    "idm",
+    "melodic-house",
+    "melodic-techno",
+    "nu-disco",
+    "nu-jazz",
+    "organic-house",
+    "trip-hop",
+    "uk-garage"
+   ],
+   "releases": 50,
+   "sets": 5
+  }
+ },
+ "MC-0089": {
+  "name": "WhoMadeWho",
+  "ids": [
+   "electro",
+   "deep-house",
+   "nu-disco",
+   "tech-house",
+   "synthpop",
+   "melodic-techno"
+  ],
+  "weights": {
+   "synthpop": 0.146,
+   "nu-disco": 0.208,
+   "melodic-techno": 0.125,
+   "electro": 0.312,
+   "deep-house": 0.312,
+   "tech-house": 0.188
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "electro",
+    "melodic-techno",
+    "nu-disco",
+    "synthpop",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 48,
+   "sets": 0
+  }
+ },
+ "MC-0090": {
+  "name": "Joseph Capriati",
+  "ids": [
+   "melodic-techno",
+   "tech-house",
+   "minimal-techno",
+   "deep-house"
+  ],
+  "weights": {
+   "melodic-techno": 1.0,
+   "minimal-techno": 0.229,
+   "deep-house": 0.146,
+   "tech-house": 0.583
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "melodic-techno",
+    "minimal-techno",
+    "tech-house"
+   ],
+   "musicbrainz": [
+    "melodic-techno",
+    "tech-house"
+   ],
+   "releases": 48,
+   "sets": 1
+  }
+ },
+ "MC-0091": {
+  "name": "MoBlack",
+  "ids": [
+   "afro-house",
+   "deep-house",
+   "tribal-house",
+   "minimal-techno",
+   "progressive-house"
+  ],
+  "weights": {
+   "progressive-house": 0.167,
+   "deep-house": 0.795,
+   "tribal-house": 0.487,
+   "afro-house": 1.0,
+   "minimal-techno": 0.308
+  },
+  "src": {
+   "mixcloud": [
+    "afro-house",
+    "deep-house",
+    "minimal-techno",
+    "tribal-house"
+   ],
+   "discogs": [
+    "deep-house",
+    "progressive-house",
+    "tribal-house"
+   ],
+   "musicbrainz": [
+    "afro-house"
+   ],
+   "releases": 12,
+   "sets": 13
+  }
+ },
+ "MC-0092": {
+  "name": "Sven Väth",
+  "ids": [
+   "melodic-techno",
+   "progressive-trance",
+   "electro",
+   "deep-house",
+   "minimal-techno",
+   "tech-house"
+  ],
+  "weights": {
+   "melodic-techno": 1.0,
+   "progressive-trance": 0.65,
+   "tech-house": 0.156,
+   "electro": 0.333,
+   "deep-house": 0.222,
+   "minimal-techno": 0.2
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "electro",
+    "melodic-techno",
+    "minimal-techno",
+    "progressive-trance",
+    "tech-house"
+   ],
+   "musicbrainz": [
+    "melodic-techno",
+    "progressive-trance"
+   ],
+   "releases": 45,
+   "sets": 0
+  }
+ },
+ "MC-0093": {
+  "name": "Birds of Mind",
+  "ids": [
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 0.833
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house"
+   ],
+   "musicbrainz": [],
+   "releases": 6,
+   "sets": 0
+  }
+ },
+ "MC-0094": {
+  "name": "Peggy Gou",
+  "ids": [
+   "deep-house",
+   "melodic-techno",
+   "edm-pop"
+  ],
+  "weights": {
+   "deep-house": 1.0,
+   "melodic-techno": 0.39,
+   "edm-pop": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "melodic-techno"
+   ],
+   "musicbrainz": [
+    "deep-house",
+    "edm-pop",
+    "melodic-techno"
+   ],
+   "releases": 50,
+   "sets": 1
+  }
+ },
+ "MC-0095": {
+  "name": "Floyd Lavine",
+  "ids": [
+   "tech-house",
+   "deep-house",
+   "tribal-house"
+  ],
+  "weights": {
+   "deep-house": 0.412,
+   "tribal-house": 0.235,
+   "tech-house": 0.471
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "tech-house",
+    "tribal-house"
+   ],
+   "musicbrainz": [],
+   "releases": 17,
+   "sets": 0
+  }
+ },
+ "MC-0096": {
+  "name": "Jamie Jones",
+  "ids": [
+   "deep-house",
+   "tech-house",
+   "minimal-techno",
+   "electro",
+   "melodic-techno"
+  ],
+  "weights": {
+   "deep-house": 1.0,
+   "minimal-techno": 0.182,
+   "tech-house": 1.0,
+   "electro": 0.159,
+   "melodic-techno": 0.159
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house",
+    "tech-house"
+   ],
+   "discogs": [
+    "deep-house",
+    "electro",
+    "melodic-techno",
+    "minimal-techno",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 44,
+   "sets": 40
+  }
+ },
+ "MC-0097": {
+  "name": "Damian Lazarus",
+  "ids": [
+   "tech-house",
+   "deep-house",
+   "electro",
+   "minimal-techno",
+   "melodic-techno",
+   "downtempo",
+   "progressive-house"
+  ],
+  "weights": {
+   "melodic-techno": 0.22,
+   "deep-house": 0.5,
+   "minimal-techno": 0.26,
+   "tech-house": 0.54,
+   "downtempo": 0.14,
+   "electro": 0.3,
+   "progressive-house": 0.14
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "downtempo",
+    "electro",
+    "melodic-techno",
+    "minimal-techno",
+    "progressive-house",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 50,
+   "sets": 0
+  }
+ },
+ "MC-0098": {
+  "name": "Bedouin",
+  "ids": [
+   "deep-house",
+   "melodic-house",
+   "organic-house",
+   "tech-house",
+   "progressive-house"
+  ],
+  "weights": {
+   "deep-house": 0.686,
+   "tech-house": 0.136,
+   "progressive-house": 0.136,
+   "melodic-house": 0.25,
+   "organic-house": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "progressive-house",
+    "tech-house"
+   ],
+   "musicbrainz": [
+    "deep-house",
+    "melodic-house",
+    "organic-house"
+   ],
+   "releases": 44,
+   "sets": 30
+  }
+ },
+ "MC-0099": {
+  "name": "Fahlberg",
+  "ids": [
+   "progressive-house",
+   "deep-house",
+   "tribal-house"
+  ],
+  "weights": {
+   "deep-house": 0.25,
+   "tribal-house": 0.25,
+   "progressive-house": 0.375
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "progressive-house",
+    "tribal-house"
+   ],
+   "musicbrainz": [],
+   "releases": 8,
+   "sets": 0
+  }
+ },
+ "MC-0100": {
+  "name": "Defected Phuket",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0101": {
+  "name": "Joe Rolét",
+  "ids": [
+   "deep-house",
+   "minimal-techno",
+   "melodic-techno",
+   "tech-house",
+   "uk-garage"
+  ],
+  "weights": {
+   "deep-house": 0.444,
+   "melodic-techno": 0.333,
+   "tech-house": 0.333,
+   "minimal-techno": 0.444,
+   "uk-garage": 0.222
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "melodic-techno",
+    "minimal-techno",
+    "tech-house",
+    "uk-garage"
+   ],
+   "musicbrainz": [],
+   "releases": 9,
+   "sets": 0
+  }
+ },
+ "MC-0102": {
+  "name": "Sam Collins",
+  "ids": [
+   "electro-house"
+  ],
+  "weights": {
+   "electro-house": 0.139
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "electro-house"
+   ],
+   "musicbrainz": [],
+   "releases": 36,
+   "sets": 0
+  }
+ },
+ "MC-0103": {
+  "name": "Wiz Khalifa",
+  "ids": [
+   "edm-trap"
+  ],
+  "weights": {
+   "edm-trap": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "edm-trap"
+   ],
+   "musicbrainz": [],
+   "releases": 8,
+   "sets": 0
+  }
+ },
+ "MC-0104": {
+  "name": "HUGEL",
+  "ids": [
+   "deep-house",
+   "tech-house",
+   "edm-pop",
+   "latin-house"
+  ],
+  "weights": {
+   "deep-house": 0.707,
+   "tech-house": 0.348,
+   "edm-pop": 0.25,
+   "latin-house": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "tech-house"
+   ],
+   "musicbrainz": [
+    "deep-house",
+    "edm-pop",
+    "latin-house"
+   ],
+   "releases": 46,
+   "sets": 1
+  }
+ },
+ "MC-0105": {
+  "name": "MEDUZA",
+  "ids": [
+   "hardcore",
+   "deep-house",
+   "tech-house"
+  ],
+  "weights": {
+   "hardcore": 0.19,
+   "tech-house": 0.143,
+   "deep-house": 0.167
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "hardcore",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 42,
+   "sets": 0
+  }
+ },
+ "MC-0106": {
+  "name": "Timmy Trumpet",
+  "ids": [
+   "edm-pop",
+   "electro-house",
+   "hardstyle",
+   "happy-hardcore",
+   "deep-house",
+   "psytrance",
+   "progressive-house"
+  ],
+  "weights": {
+   "happy-hardcore": 0.16,
+   "deep-house": 0.16,
+   "hardstyle": 0.22,
+   "electro-house": 0.42,
+   "psytrance": 0.12,
+   "progressive-house": 0.12,
+   "edm-pop": 1.0
+  },
+  "src": {
+   "mixcloud": [
+    "edm-pop"
+   ],
+   "discogs": [
+    "deep-house",
+    "electro-house",
+    "happy-hardcore",
+    "hardstyle",
+    "progressive-house",
+    "psytrance"
+   ],
+   "musicbrainz": [],
+   "releases": 50,
+   "sets": 39
+  }
+ },
+ "MC-0107": {
+  "name": "Adam Beyer",
+  "ids": [
+   "melodic-techno",
+   "tech-house",
+   "minimal-techno",
+   "progressive-trance",
+   "electronica",
+   "breakbeat",
+   "edm-pop",
+   "acid-techno",
+   "melodic-house"
+  ],
+  "weights": {
+   "tech-house": 0.55,
+   "melodic-techno": 1.0,
+   "minimal-techno": 0.37,
+   "progressive-trance": 0.25,
+   "electronica": 0.25,
+   "breakbeat": 0.25,
+   "edm-pop": 0.25,
+   "acid-techno": 0.25,
+   "melodic-house": 0.25
+  },
+  "src": {
+   "mixcloud": [
+    "melodic-techno"
+   ],
+   "discogs": [
+    "melodic-techno",
+    "minimal-techno",
+    "tech-house"
+   ],
+   "musicbrainz": [
+    "acid-techno",
+    "breakbeat",
+    "edm-pop",
+    "electronica",
+    "melodic-house",
+    "melodic-techno",
+    "minimal-techno",
+    "progressive-trance",
+    "tech-house"
+   ],
+   "releases": 50,
+   "sets": 40
+  }
+ },
+ "MC-0108": {
+  "name": "French Montana",
+  "ids": [
+   "edm-trap"
+  ],
+  "weights": {
+   "edm-trap": 0.609
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "edm-trap"
+   ],
+   "musicbrainz": [],
+   "releases": 23,
+   "sets": 0
+  }
+ },
+ "MC-0109": {
+  "name": "Nic Fanciulli",
+  "ids": [
+   "deep-house",
+   "melodic-techno",
+   "tech-house",
+   "progressive-house",
+   "electro"
+  ],
+  "weights": {
+   "progressive-house": 0.26,
+   "tech-house": 0.84,
+   "deep-house": 1.0,
+   "electro": 0.18,
+   "melodic-techno": 0.91
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house",
+    "melodic-techno"
+   ],
+   "discogs": [
+    "deep-house",
+    "electro",
+    "melodic-techno",
+    "progressive-house",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 50,
+   "sets": 12
+  }
+ },
+ "MC-0110": {
+  "name": "Claptone",
+  "ids": [
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 1.0
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house"
+   ],
+   "discogs": [
+    "deep-house"
+   ],
+   "musicbrainz": [],
+   "releases": 50,
+   "sets": 40
+  }
+ },
+ "MC-0111": {
+  "name": "Paco Osuna",
+  "ids": [
+   "melodic-techno",
+   "minimal-techno",
+   "tech-house"
+  ],
+  "weights": {
+   "melodic-techno": 0.9,
+   "tech-house": 0.26,
+   "minimal-techno": 0.3
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "melodic-techno",
+    "minimal-techno",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 50,
+   "sets": 0
+  }
+ },
+ "MC-0112": {
+  "name": "GORDO",
+  "ids": [
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 0.463
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house"
+   ],
+   "musicbrainz": [],
+   "releases": 41,
+   "sets": 0
+  }
+ },
+ "MC-0113": {
+  "name": "ALOK",
+  "ids": [
+   "deep-house",
+   "tech-house",
+   "progressive-house",
+   "electro-house",
+   "edm-pop",
+   "tropical-house",
+   "future-bass",
+   "dance-pop"
+  ],
+  "weights": {
+   "deep-house": 0.67,
+   "dance-pop": 0.12,
+   "tech-house": 0.25,
+   "progressive-house": 0.25,
+   "electro-house": 0.25,
+   "edm-pop": 0.25,
+   "tropical-house": 0.25,
+   "future-bass": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "dance-pop",
+    "deep-house"
+   ],
+   "musicbrainz": [
+    "deep-house",
+    "edm-pop",
+    "electro-house",
+    "future-bass",
+    "progressive-house",
+    "tech-house",
+    "tropical-house"
+   ],
+   "releases": 50,
+   "sets": 0
+  }
+ },
+ "MC-0114": {
+  "name": "James Hype",
+  "ids": [
+   "tech-house",
+   "deep-house",
+   "uk-garage"
+  ],
+  "weights": {
+   "tech-house": 1.0,
+   "deep-house": 1.0,
+   "uk-garage": 1.0
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house",
+    "tech-house",
+    "uk-garage"
+   ],
+   "discogs": [
+    "deep-house",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 50,
+   "sets": 10
+  }
+ },
+ "MC-0115": {
+  "name": "DJ Snake",
+  "ids": [
+   "edm-trap",
+   "moombahton",
+   "breakbeat",
+   "deep-house",
+   "dubstep",
+   "dance-pop",
+   "electro",
+   "edm-pop",
+   "electropop",
+   "hardcore",
+   "electronica",
+   "tech-house",
+   "afro-house",
+   "future-bass",
+   "bass-house",
+   "amapiano",
+   "hardstyle"
+  ],
+  "weights": {
+   "edm-trap": 0.863,
+   "electro": 0.396,
+   "dance-pop": 0.438,
+   "deep-house": 0.708,
+   "moombahton": 0.779,
+   "hardstyle": 0.146,
+   "dubstep": 0.542,
+   "breakbeat": 0.75,
+   "hardcore": 0.25,
+   "electronica": 0.25,
+   "electropop": 0.3,
+   "tech-house": 0.25,
+   "edm-pop": 0.35,
+   "afro-house": 0.25,
+   "future-bass": 0.25,
+   "bass-house": 0.25,
+   "amapiano": 0.25
+  },
+  "src": {
+   "mixcloud": [
+    "breakbeat"
+   ],
+   "discogs": [
+    "dance-pop",
+    "deep-house",
+    "dubstep",
+    "edm-trap",
+    "electro",
+    "hardstyle",
+    "moombahton"
+   ],
+   "musicbrainz": [
+    "afro-house",
+    "amapiano",
+    "bass-house",
+    "breakbeat",
+    "deep-house",
+    "dubstep",
+    "edm-pop",
+    "edm-trap",
+    "electronica",
+    "electropop",
+    "future-bass",
+    "hardcore",
+    "moombahton",
+    "tech-house"
+   ],
+   "releases": 48,
+   "sets": 4
+  }
+ },
+ "MC-0116": {
+  "name": "Nelly",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 38,
+   "sets": 0
+  }
+ },
+ "MC-0117": {
+  "name": "Tiësto",
+  "ids": [
+   "progressive-trance",
+   "deep-house",
+   "progressive-house",
+   "electro-house",
+   "dance-pop",
+   "edm-pop",
+   "uplifting-trance",
+   "tech-trance",
+   "big-room-house",
+   "melodic-techno"
+  ],
+  "weights": {
+   "progressive-trance": 1.0,
+   "melodic-techno": 0.174,
+   "progressive-house": 0.489,
+   "deep-house": 0.552,
+   "dance-pop": 0.25,
+   "electro-house": 0.4,
+   "edm-pop": 0.25,
+   "uplifting-trance": 0.25,
+   "tech-trance": 0.25,
+   "big-room-house": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "melodic-techno",
+    "progressive-house",
+    "progressive-trance"
+   ],
+   "musicbrainz": [
+    "big-room-house",
+    "dance-pop",
+    "deep-house",
+    "edm-pop",
+    "electro-house",
+    "progressive-house",
+    "progressive-trance",
+    "tech-trance",
+    "uplifting-trance"
+   ],
+   "releases": 46,
+   "sets": 0
+  }
+ },
+ "MC-0118": {
+  "name": "Martin Garrix",
+  "ids": [
+   "deep-house",
+   "progressive-house",
+   "bass-house",
+   "electro-house",
+   "disco-house"
+  ],
+  "weights": {
+   "deep-house": 1.0,
+   "electro-house": 0.6,
+   "progressive-house": 1.0,
+   "bass-house": 0.85,
+   "disco-house": 0.15
+  },
+  "src": {
+   "mixcloud": [
+    "bass-house",
+    "deep-house",
+    "disco-house",
+    "progressive-house"
+   ],
+   "discogs": [
+    "deep-house",
+    "electro-house",
+    "progressive-house"
+   ],
+   "musicbrainz": [],
+   "releases": 50,
+   "sets": 40
+  }
+ },
+ "MC-0119": {
+  "name": "Marshmello",
+  "ids": [
+   "future-bass",
+   "edm-pop",
+   "edm-trap",
+   "progressive-house",
+   "electro-house",
+   "dance-pop",
+   "dubstep"
+  ],
+  "weights": {
+   "dubstep": 0.18,
+   "edm-trap": 0.34,
+   "future-bass": 0.63,
+   "dance-pop": 0.2,
+   "electro-house": 0.24,
+   "progressive-house": 0.3,
+   "edm-pop": 0.35
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "dance-pop",
+    "dubstep",
+    "edm-trap",
+    "electro-house",
+    "future-bass"
+   ],
+   "musicbrainz": [
+    "edm-pop",
+    "future-bass",
+    "progressive-house"
+   ],
+   "releases": 50,
+   "sets": 0
+  }
+ },
+ "MC-0120": {
+  "name": "Jason Derulo",
+  "ids": [
+   "dance-pop",
+   "deep-house",
+   "electropop",
+   "afro-house",
+   "amapiano",
+   "electro"
+  ],
+  "weights": {
+   "deep-house": 0.333,
+   "dance-pop": 0.452,
+   "electro": 0.212,
+   "electropop": 0.25,
+   "afro-house": 0.25,
+   "amapiano": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "dance-pop",
+    "deep-house",
+    "electro"
+   ],
+   "musicbrainz": [
+    "afro-house",
+    "amapiano",
+    "dance-pop",
+    "electropop"
+   ],
+   "releases": 33,
+   "sets": 0
+  }
+ },
+ "MC-0121": {
+  "name": "Tyga",
+  "ids": [
+   "edm-trap"
+  ],
+  "weights": {
+   "edm-trap": 0.522
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "edm-trap"
+   ],
+   "musicbrainz": [
+    "edm-trap"
+   ],
+   "releases": 9,
+   "sets": 0
+  }
+ },
+ "MC-0122": {
+  "name": "A$AP Rocky",
+  "ids": [
+   "edm-trap"
+  ],
+  "weights": {
+   "edm-trap": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [],
+   "musicbrainz": [
+    "edm-trap"
+   ],
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0123": {
+  "name": "Marco Carola",
+  "ids": [
+   "melodic-techno",
+   "tech-house",
+   "minimal-techno",
+   "deep-house"
+  ],
+  "weights": {
+   "melodic-techno": 1.0,
+   "tech-house": 0.777,
+   "minimal-techno": 0.4,
+   "deep-house": 0.167
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house",
+    "melodic-techno",
+    "tech-house"
+   ],
+   "discogs": [
+    "melodic-techno",
+    "minimal-techno",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 50,
+   "sets": 12
+  }
+ },
+ "MC-0124": {
+  "name": "Dimitri Vegas & Like Mike",
+  "ids": [
+   "progressive-house",
+   "electro-house",
+   "deep-house",
+   "melodic-techno"
+  ],
+  "weights": {
+   "progressive-house": 0.512,
+   "electro-house": 0.463,
+   "deep-house": 0.439,
+   "melodic-techno": 0.146
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "electro-house",
+    "melodic-techno",
+    "progressive-house"
+   ],
+   "musicbrainz": [],
+   "releases": 41,
+   "sets": 0
+  }
+ },
+ "MC-0125": {
+  "name": "Afrojack",
+  "ids": [
+   "electro-house",
+   "deep-house",
+   "progressive-house",
+   "big-room-house",
+   "eurodance",
+   "dance-pop",
+   "electro",
+   "tech-house"
+  ],
+  "weights": {
+   "deep-house": 0.8,
+   "electro": 0.16,
+   "electro-house": 0.85,
+   "progressive-house": 0.59,
+   "tech-house": 0.14,
+   "eurodance": 0.25,
+   "dance-pop": 0.25,
+   "big-room-house": 0.3
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "electro",
+    "electro-house",
+    "progressive-house",
+    "tech-house"
+   ],
+   "musicbrainz": [
+    "big-room-house",
+    "dance-pop",
+    "deep-house",
+    "electro-house",
+    "eurodance",
+    "progressive-house"
+   ],
+   "releases": 50,
+   "sets": 0
+  }
+ },
+ "MC-0126": {
+  "name": "Steve Aoki",
+  "ids": [
+   "deep-house",
+   "electro-house",
+   "progressive-house",
+   "edm-pop",
+   "dubstep",
+   "electro"
+  ],
+  "weights": {
+   "electro-house": 0.91,
+   "dubstep": 0.2,
+   "deep-house": 1.0,
+   "progressive-house": 0.26,
+   "electro": 0.18,
+   "edm-pop": 0.25
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house",
+    "edm-pop",
+    "electro-house"
+   ],
+   "discogs": [
+    "deep-house",
+    "dubstep",
+    "electro",
+    "electro-house",
+    "progressive-house"
+   ],
+   "musicbrainz": [
+    "deep-house"
+   ],
+   "releases": 50,
+   "sets": 40
+  }
+ },
+ "MC-0127": {
+  "name": "FISHER",
+  "ids": [
+   "tech-house",
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 0.214,
+   "tech-house": 0.595
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 42,
+   "sets": 0
+  }
+ },
+ "MC-0128": {
+  "name": "Ron Poe",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0129": {
+  "name": "The Element",
+  "ids": [
+   "melodic-techno",
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 0.133,
+   "melodic-techno": 1.0
+  },
+  "src": {
+   "mixcloud": [
+    "melodic-techno"
+   ],
+   "discogs": [
+    "deep-house"
+   ],
+   "musicbrainz": [],
+   "releases": 30,
+   "sets": 3
+  }
+ },
+ "MC-0130": {
+  "name": "CASSIMM",
+  "ids": [
+   "deep-house",
+   "tech-house"
+  ],
+  "weights": {
+   "deep-house": 0.54,
+   "tech-house": 0.54
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 50,
+   "sets": 2
+  }
+ },
+ "MC-0131": {
+  "name": "Martin Ikin",
+  "ids": [
+   "deep-house",
+   "tech-house",
+   "garage-house"
+  ],
+  "weights": {
+   "deep-house": 0.568,
+   "garage-house": 0.136,
+   "tech-house": 0.545
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "garage-house",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 44,
+   "sets": 0
+  }
+ },
+ "MC-0132": {
+  "name": "Mark Knight",
+  "ids": [
+   "deep-house",
+   "tech-house",
+   "melodic-techno",
+   "nu-disco",
+   "progressive-house"
+  ],
+  "weights": {
+   "progressive-house": 0.25,
+   "deep-house": 1.0,
+   "tech-house": 1.0,
+   "melodic-techno": 0.946,
+   "nu-disco": 0.459
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house",
+    "melodic-techno",
+    "nu-disco",
+    "tech-house"
+   ],
+   "discogs": [
+    "deep-house",
+    "progressive-house",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 48,
+   "sets": 37
+  }
+ },
+ "MC-0133": {
+  "name": "Tony Romera",
+  "ids": [
+   "deep-house",
+   "tech-house",
+   "electro-house",
+   "progressive-house"
+  ],
+  "weights": {
+   "tech-house": 0.347,
+   "deep-house": 0.367,
+   "electro-house": 0.286,
+   "progressive-house": 0.163
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "electro-house",
+    "progressive-house",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 49,
+   "sets": 0
+  }
+ },
+ "MC-0134": {
+  "name": "Jewel Kid",
+  "ids": [
+   "melodic-techno",
+   "tech-house",
+   "deep-house"
+  ],
+  "weights": {
+   "melodic-techno": 1.0,
+   "tech-house": 0.44,
+   "deep-house": 0.16
+  },
+  "src": {
+   "mixcloud": [
+    "melodic-techno"
+   ],
+   "discogs": [
+    "deep-house",
+    "melodic-techno",
+    "tech-house"
+   ],
+   "musicbrainz": [],
+   "releases": 50,
+   "sets": 3
+  }
+ },
+ "MC-0135": {
+  "name": "James Hurr",
+  "ids": [
+   "tech-house",
+   "deep-house",
+   "nu-disco",
+   "edm-pop"
+  ],
+  "weights": {
+   "tech-house": 1.0,
+   "deep-house": 1.0,
+   "nu-disco": 0.5,
+   "edm-pop": 0.25
+  },
+  "src": {
+   "mixcloud": [
+    "deep-house",
+    "nu-disco",
+    "tech-house"
+   ],
+   "discogs": [
+    "deep-house",
+    "tech-house"
+   ],
+   "musicbrainz": [
+    "deep-house",
+    "edm-pop",
+    "tech-house"
+   ],
+   "releases": 50,
+   "sets": 4
+  }
+ },
+ "MC-0136": {
+  "name": "Matt Sassari",
+  "ids": [
+   "melodic-techno",
+   "tech-house",
+   "deep-house",
+   "deep-tech",
+   "peak-time-techno"
+  ],
+  "weights": {
+   "melodic-techno": 0.85,
+   "tech-house": 0.81,
+   "deep-house": 0.39,
+   "deep-tech": 0.25,
+   "peak-time-techno": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "melodic-techno",
+    "tech-house"
+   ],
+   "musicbrainz": [
+    "deep-house",
+    "deep-tech",
+    "melodic-techno",
+    "peak-time-techno",
+    "tech-house"
+   ],
+   "releases": 50,
+   "sets": 0
+  }
+ },
+ "MC-0137": {
+  "name": "Alex Vee",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0138": {
+  "name": "Siberian Soul",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0139": {
+  "name": "Mazzeo",
+  "ids": [
+   "progressive-house"
+  ],
+  "weights": {
+   "progressive-house": 0.375
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "progressive-house"
+   ],
+   "musicbrainz": [],
+   "releases": 16,
+   "sets": 0
+  }
+ },
+ "MC-0140": {
+  "name": "Kay",
+  "ids": [
+   "synthpop",
+   "nu-disco"
+  ],
+  "weights": {
+   "synthpop": 0.256,
+   "nu-disco": 0.154
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "nu-disco",
+    "synthpop"
+   ],
+   "musicbrainz": [],
+   "releases": 39,
+   "sets": 0
+  }
+ },
+ "MC-0141": {
+  "name": "The TOYS",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 36,
+   "sets": 0
+  }
+ },
+ "MC-0142": {
+  "name": "Musketeers",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 43,
+   "sets": 0
+  }
+ },
+ "MC-0143": {
+  "name": "WHAL & DOLPH",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 4,
+   "sets": 0
+  }
+ },
+ "MC-0144": {
+  "name": "bowkylion",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 2,
+   "sets": 0
+  }
+ },
+ "MC-0145": {
+  "name": "Chart Suchart",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0146": {
+  "name": "Valentina Ploy",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 7,
+   "sets": 0
+  }
+ },
+ "MC-0147": {
+  "name": "Pae Arak",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0148": {
+  "name": "Pango",
+  "ids": [
+   "deep-house",
+   "ambient"
+  ],
+  "weights": {
+   "deep-house": 0.25,
+   "ambient": 0.25
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "ambient",
+    "deep-house"
+   ],
+   "musicbrainz": [],
+   "releases": 8,
+   "sets": 0
+  }
+ },
+ "MC-0149": {
+  "name": "Plastic Plastic",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 3,
+   "sets": 0
+  }
+ },
+ "MC-0150": {
+  "name": "Mints",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 40,
+   "sets": 0
+  }
+ },
+ "MC-0151": {
+  "name": "De Flamingo",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0152": {
+  "name": "LANDOKMAI",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 2,
+   "sets": 0
+  }
+ },
+ "MC-0153": {
+  "name": "HENS",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 27,
+   "sets": 0
+  }
+ },
+ "MC-0154": {
+  "name": "Hers",
+  "ids": [
+   "ambient"
+  ],
+  "weights": {
+   "ambient": 0.258
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "ambient"
+   ],
+   "musicbrainz": [],
+   "releases": 31,
+   "sets": 0
+  }
+ },
+ "MC-0155": {
+  "name": "Morvasu",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0156": {
+  "name": "QLER",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0157": {
+  "name": "Loserpop",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0158": {
+  "name": "Mirrr",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0159": {
+  "name": "Uncle Ben",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 11,
+   "sets": 1
+  }
+ },
+ "MC-0160": {
+  "name": "Gabe Watkins",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0161": {
+  "name": "Newery",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0162": {
+  "name": "TONHON",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0163": {
+  "name": "PONCHET",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0164": {
+  "name": "TeyaTaye",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0165": {
+  "name": "YourMOOD",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0166": {
+  "name": "Marc Tatchapon",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0167": {
+  "name": "WANWANWAN",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0168": {
+  "name": "NONT TANONT",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 1,
+   "sets": 0
+  }
+ },
+ "MC-0169": {
+  "name": "Sarah Salola",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0170": {
+  "name": "BLUE PONGTIWAT",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0171": {
+  "name": "MEAN Band",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0172": {
+  "name": "OABNITHI",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0173": {
+  "name": "Gun Napat",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0174": {
+  "name": "JEEP",
+  "ids": [
+   "deep-house",
+   "melodic-techno"
+  ],
+  "weights": {
+   "deep-house": 0.171,
+   "melodic-techno": 0.122
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house",
+    "melodic-techno"
+   ],
+   "musicbrainz": [],
+   "releases": 41,
+   "sets": 0
+  }
+ },
+ "MC-0175": {
+  "name": "LADIIPRANG",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0176": {
+  "name": "PUIMEKSTER",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0177": {
+  "name": "Slapkiss",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0178": {
+  "name": "PEAKSayaa!",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0179": {
+  "name": "Rooftop",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 43,
+   "sets": 0
+  }
+ },
+ "MC-0180": {
+  "name": "MOBYE",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0181": {
+  "name": "TITI Nichaphat",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0182": {
+  "name": "TACE",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 1,
+   "sets": 0
+  }
+ },
+ "MC-0183": {
+  "name": "FETCH",
+  "ids": [
+   "funky-house",
+   "latin-house",
+   "hardcore"
+  ],
+  "weights": {
+   "hardcore": 0.359,
+   "funky-house": 0.5,
+   "latin-house": 0.5
+  },
+  "src": {
+   "mixcloud": [
+    "funky-house",
+    "latin-house"
+   ],
+   "discogs": [
+    "hardcore"
+   ],
+   "musicbrainz": [],
+   "releases": 39,
+   "sets": 4
+  }
+ },
+ "MC-0184": {
+  "name": "COPTER",
+  "ids": [
+   "synthwave"
+  ],
+  "weights": {
+   "synthwave": 0.809
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "synthwave"
+   ],
+   "musicbrainz": [],
+   "releases": 47,
+   "sets": 0
+  }
+ },
+ "MC-0185": {
+  "name": "gizzdear",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0186": {
+  "name": "Jduck",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0187": {
+  "name": "Barbies",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 38,
+   "sets": 0
+  }
+ },
+ "MC-0188": {
+  "name": "Dept",
+  "ids": [
+   "industrial"
+  ],
+  "weights": {
+   "industrial": 0.617
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "industrial"
+   ],
+   "musicbrainz": [],
+   "releases": 47,
+   "sets": 0
+  }
+ },
+ "MC-0189": {
+  "name": "Death Of Heather",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 6,
+   "sets": 0
+  }
+ },
+ "MC-0190": {
+  "name": "Gene Kasidit",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 2,
+   "sets": 0
+  }
+ },
+ "MC-0191": {
+  "name": "Image Suthita",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0192": {
+  "name": "JUST\"",
+  "ids": [
+   "deep-house"
+  ],
+  "weights": {
+   "deep-house": 0.2
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "deep-house"
+   ],
+   "musicbrainz": [],
+   "releases": 35,
+   "sets": 0
+  }
+ },
+ "MC-0193": {
+  "name": "Penguin Villa",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0194": {
+  "name": "Polycat",
+  "ids": [
+   "synthpop",
+   "progressive-house",
+   "progressive-trance",
+   "ambient"
+  ],
+  "weights": {
+   "progressive-house": 0.2,
+   "progressive-trance": 0.133,
+   "ambient": 0.133,
+   "synthpop": 0.467
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "ambient",
+    "progressive-house",
+    "progressive-trance",
+    "synthpop"
+   ],
+   "musicbrainz": [],
+   "releases": 15,
+   "sets": 1
+  }
+ },
+ "MC-0195": {
+  "name": "Postbox",
+  "ids": [
+   "electro",
+   "chiptune"
+  ],
+  "weights": {
+   "electro": 0.917,
+   "chiptune": 0.125
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "chiptune",
+    "electro"
+   ],
+   "musicbrainz": [],
+   "releases": 24,
+   "sets": 0
+  }
+ },
+ "MC-0196": {
+  "name": "phufa",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0197": {
+  "name": "Rattana",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0198": {
+  "name": "SLUR",
+  "ids": [
+   "hardcore"
+  ],
+  "weights": {
+   "hardcore": 0.2
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "hardcore"
+   ],
+   "musicbrainz": [],
+   "releases": 25,
+   "sets": 0
+  }
+ },
+ "MC-0199": {
+  "name": "Spoonfulz",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0200": {
+  "name": "Summer Stop",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0201": {
+  "name": "Syd Vethaka",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0202": {
+  "name": "Tattoo Colour",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 3,
+   "sets": 0
+  }
+ },
+ "MC-0203": {
+  "name": "Television off",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0204": {
+  "name": "The Jukks",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0205": {
+  "name": "The Richman Toy",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 1,
+   "sets": 0
+  }
+ },
+ "MC-0206": {
+  "name": "TOFU",
+  "ids": [
+   "downtempo"
+  ],
+  "weights": {
+   "downtempo": 0.216
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "downtempo"
+   ],
+   "musicbrainz": [],
+   "releases": 37,
+   "sets": 0
+  }
+ },
+ "MC-0207": {
+  "name": "Two Pills After Meal",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 1,
+   "sets": 0
+  }
+ },
+ "MC-0208": {
+  "name": "wadfah",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0209": {
+  "name": "WAV",
+  "ids": [
+   "melodic-techno",
+   "vaporwave",
+   "ambient",
+   "electro"
+  ],
+  "weights": {
+   "electro": 0.122,
+   "melodic-techno": 0.224,
+   "vaporwave": 0.184,
+   "ambient": 0.143
+  },
+  "src": {
+   "mixcloud": [],
+   "discogs": [
+    "ambient",
+    "electro",
+    "melodic-techno",
+    "vaporwave"
+   ],
+   "musicbrainz": [],
+   "releases": 49,
+   "sets": 0
+  }
+ },
+ "MC-0210": {
+  "name": "YODSARUN",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0211": {
+  "name": "The Parkinson",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0212": {
+  "name": "Wan Thanakrit",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0213": {
+  "name": "Kor Notapol",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0214": {
+  "name": "Toh Nap A Lean",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 0,
+   "sets": 0
+  }
+ },
+ "MC-0215": {
+  "name": "MVL",
+  "ids": [],
+  "weights": {},
+  "src": {
+   "releases": 5,
+   "sets": 0
+  }
  }
 }

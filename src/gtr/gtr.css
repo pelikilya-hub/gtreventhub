@@ -3113,3 +3113,141 @@ html { -webkit-tap-highlight-color: transparent; }
   .gtr-comm-btn::before { animation: none; opacity: 0.5; }
   .gtr-comm-btn .gtr-stk { transition: none; }
 }
+
+/* =====================================================================
+   КАРТА: РАЙОНЫ КОНТУРОМ, ТОЧКИ ЗНАКАМИ
+   ===================================================================== */
+
+/* Тайлы Carto приходят синевато-серыми и рядом с нашим чёрно-красным
+   выглядят чужой картинкой. Фильтр уводит их в нашу температуру: чуть
+   темнее, чуть контрастнее, с уходом от синевы. Менять сами тайлы мы не
+   можем — они чужие, — но покрасить их в свой свет можем. */
+.gtr-map-tiles {
+  filter: brightness(0.82) contrast(1.18) saturate(0.55) hue-rotate(-12deg);
+}
+
+.gtr-map-canvas {
+  height: calc(100dvh - 260px);
+  min-height: 380px;
+  margin-top: 10px;
+  background: #0a0b0d;
+  /* рамки нет — край держит та же полоса света, что у шапки и панели */
+  position: relative;
+}
+.gtr-map-canvas::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ---------- строки выбора ---------- */
+/* Строка выбора — одна линия с прокруткой, а не перенос в три ряда.
+   На телефоне ряды съедали треть экрана, и карта — ради которой сюда
+   и заходят — оказывалась в нижней четверти. */
+.gtr-map-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-top: 9px;
+  padding-bottom: 2px;
+}
+.gtr-map-row::-webkit-scrollbar { display: none; }
+.gtr-map-row > * { flex: none; }
+.gtr-map-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.62);
+  padding: 6px 10px;
+  cursor: pointer;
+  font: 500 10.5px/1 "Golos Text", sans-serif;
+  transition: border-color 0.16s, background 0.16s, color 0.16s;
+}
+.gtr-map-chip:hover { border-color: rgba(255, 255, 255, 0.28); color: #fff; }
+.gtr-map-chip.on {
+  border-color: #e5231b;
+  background: rgba(229, 35, 27, 0.14);
+  color: #fff;
+}
+.gtr-map-chip-stk { width: 15px; height: 15px; object-fit: contain; display: block; }
+
+/* ---------- точка ---------- */
+/* Знак в тонком кольце категории. Кольцо тонкое намеренно: на карте со
+   ста точками толстая обводка сливается в кашу и цвет перестаёт
+   различаться. Подложка тёмная и почти непрозрачная — знак нарисован
+   светлым и на светлом куске карты иначе пропадает. */
+.gtr-map-pin {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: rgba(10, 11, 13, 0.86);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55), 0 2px 7px rgba(0, 0, 0, 0.5);
+  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s;
+}
+.gtr-map-pin img {
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+  display: block;
+}
+.gtr-map-pin:hover {
+  transform: scale(1.22);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55), 0 0 14px var(--c), 0 2px 7px rgba(0, 0, 0, 0.5);
+}
+/* Точка вне выбранного района не исчезает, а гаснет: сосед в двух
+   кварталах — часть того же вечера, и убирать его с карты нечестно. */
+.gtr-map-pin.off { opacity: 0.28; }
+.gtr-map-pin.off:hover { opacity: 1; }
+
+/* ---------- контур района ---------- */
+.gtr-area { transition: fill-opacity 0.25s, stroke-opacity 0.25s; }
+.gtr-area.on { filter: drop-shadow(0 0 10px rgba(229, 35, 27, 0.45)); }
+.leaflet-tooltip.gtr-area-tip {
+  background: rgba(10, 11, 13, 0.92);
+  border: none;
+  color: #fff;
+  font: 600 10px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 8px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.leaflet-tooltip.gtr-area-tip::before { display: none; }
+
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
+  /* На телефоне карта занимает экран целиком между строками выбора и
+     нижней панелью: карта — это и есть содержимое экрана. */
+  .gtr-map-canvas {
+    height: calc(100dvh - 250px);
+    width: 100vw;
+    max-width: 100vw;
+    margin-inline: calc(50% - 50vw);
+  }
+  /* строки идут до края экрана, первый чип стоит по сетке колонки */
+  .gtr-map-row {
+    gap: 5px;
+    /* без border-box ширина вьюпорта считается по содержимому, и строка
+       вылезает за экран ровно на свои внутренние поля */
+    box-sizing: border-box;
+    width: 100vw;
+    max-width: 100vw;
+    margin-inline: calc(50% - 50vw);
+    padding-inline: var(--gtr-pad, 14px);
+    scroll-padding-inline: var(--gtr-pad, 14px);
+  }
+  .gtr-map-chip { padding: 5px 8px; font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-map-pin, .gtr-area { transition: none; }
+}

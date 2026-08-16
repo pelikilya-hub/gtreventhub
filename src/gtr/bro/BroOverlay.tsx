@@ -95,6 +95,11 @@ export function GtrBroOverlay({
   const [voice, setVoice] = useState<BroVoice>("cedar");
   const [muted, setMuted] = useState(false);
   const [tune, setTune] = useState(false);
+  // Рация по умолчанию: в клубе авто-детектор речи слышит толпу, а не
+  // человека. Свободный разговор остаётся выбором в настройках.
+  const [hands, setHands] = useState(false);
+  const [holding, setHolding] = useState(false);
+  const held = useRef(false);
   const [lab, setLab] = useState(false);
   const [ask, setAsk] = useState<{ tool: string; summary: string; resolve: (v: boolean) => void } | null>(
     null,
@@ -123,6 +128,9 @@ export function GtrBroOverlay({
         onState: (st, d) => {
           setState(st);
           setDetail(d);
+          // Соединение поднялось, а палец всё ещё на кнопке — открываем
+          // микрофон сразу, без второго нажатия.
+          if (st === "listening" && held.current && ses.current?.isPtt) ses.current.holdStart();
         },
         onLevel: setLevel,
         onLine: (l) => setLines((p) => [...p.slice(-20), l]),
@@ -137,10 +145,13 @@ export function GtrBroOverlay({
         onConfirm: (a) => new Promise<boolean>((resolve) => setAsk({ ...a, resolve })),
       });
       ses.current = s;
-      await s.start({ voice: v, personaMode: m, screen, district });
+      await s.start({ voice: v, personaMode: m, screen, district, ptt: !handsRef.current });
     },
     [district, metric, onNavigate, screen],
   );
+  // Актуальный режим для begin() без пересоздания колбэка.
+  const handsRef = useRef(hands);
+  handsRef.current = hands;
 
   // Закрытие оверлея всегда рвёт соединение: забытая в фоне сессия — это
   // открытый микрофон и счёт по времени.
@@ -162,6 +173,23 @@ export function GtrBroOverlay({
 
   const live = ses.current !== null && state !== "closed" && state !== "idle" && state !== "error";
   const busy = state === "connecting" || state === "requesting_permission";
+  const ptt = !hands;
+
+  // Рация: держишь — говоришь. Отпустил где угодно — реплика ушла.
+  const pttDown = (e: { preventDefault: () => void }) => {
+    if (!ptt) return;
+    e.preventDefault();
+    held.current = true;
+    setHolding(true);
+    if (!live && !busy) void begin(voice, mode);
+    else ses.current?.holdStart();
+  };
+  const pttUp = () => {
+    if (!ptt || !held.current) return;
+    held.current = false;
+    setHolding(false);
+    if (live) ses.current?.holdEnd();
+  };
   const err = state === "error" ? (ERROR_RU[detail ?? ""] ?? "Не получилось. Попробуй ещё раз.") : null;
 
   const runLab = async () => {
@@ -195,21 +223,38 @@ export function GtrBroOverlay({
             что микрофон открыт. Пока он живой — тебя слышат. */}
         <div className="gtr-bro-orb-wrap">
           <button
-            className={`gtr-bro-orb${live ? " on" : ""}${busy ? " busy" : ""}`}
-            style={{ ["--gtr-bro-lvl" as string]: String(0.6 + level * 0.75) }}
-            onClick={() => (live ? stop() : void begin(voice, mode))}
-            aria-label={live ? "Остановить" : "Начать разговор"}
+            className={`gtr-bro-orb${live ? " on" : ""}${busy ? " busy" : ""}${ptt && holding ? " hold" : ""}`}
+            style={{ ["--gtr-bro-lvl" as string]: String(0.6 + level * 0.75), touchAction: "none" }}
+            onPointerDown={ptt ? pttDown : undefined}
+            onPointerUp={ptt ? pttUp : undefined}
+            onPointerLeave={ptt ? pttUp : undefined}
+            onPointerCancel={ptt ? pttUp : undefined}
+            onContextMenu={(e) => e.preventDefault()}
+            onClick={ptt ? undefined : () => (live ? stop() : void begin(voice, mode))}
+            aria-label={ptt ? "Зажми и говори" : live ? "Остановить" : "Начать разговор"}
           >
-            <img src="/raw-pulse/handle-logo.webp" alt="" aria-hidden />
+            <img src="/raw-pulse/handle-logo.webp" alt="" aria-hidden draggable={false} />
           </button>
           <div className="gtr-bro-hint">
-            {live
-              ? state === "speaking"
-                ? "говори — перебью себя сам"
-                : "слушаю"
-              : busy
-                ? "секунду"
-                : "нажми и говори"}
+            {ptt
+              ? live
+                ? holding
+                  ? "говори — отпусти, и отвечу"
+                  : state === "speaking"
+                    ? "зажми, чтобы перебить"
+                    : state === "thinking"
+                      ? "думаю"
+                      : "зажми и говори"
+                : busy
+                  ? "секунду"
+                  : "зажми и говори"
+              : live
+                ? state === "speaking"
+                  ? "говори — перебью себя сам"
+                  : "слушаю"
+                : busy
+                  ? "секунду"
+                  : "нажми и говори"}
           </div>
         </div>
 
@@ -255,6 +300,30 @@ export function GtrBroOverlay({
 
         {tune && (
           <div className="gtr-bro-tune">
+            <div className="gtr-bro-tune-t">Управление</div>
+            <div className="gtr-bro-chips">
+              {[
+                [false, "Рация", "держишь — говоришь"],
+                [true, "Свободно", "он слышит сам"],
+              ].map(([v, name, note]) => (
+                <button
+                  key={String(v)}
+                  className={`gtr-bro-chip${hands === v ? " on" : ""}`}
+                  onClick={() => {
+                    setHands(v as boolean);
+                    metric(v ? "bro.ctl.hands" : "bro.ctl.ptt");
+                    if (live) {
+                      handsRef.current = v as boolean;
+                      void begin(voice, mode);
+                    }
+                  }}
+                >
+                  {name as string}
+                  <i>{note as string}</i>
+                </button>
+              ))}
+            </div>
+
             <div className="gtr-bro-tune-t">Характер</div>
             <div className="gtr-bro-chips">
               {MODES.map(([id, name, note]) => (

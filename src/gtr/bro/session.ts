@@ -57,6 +57,10 @@ export type BroStart = {
   district?: string;
   screen?: string;
   partySize?: number;
+  /** Рация: микрофон открыт только пока держат кнопку. Отпустил — реплика
+   *  ушла целиком, и модель отвечает. В шумном клубе это единственный
+   *  честный режим: авто-детектор речи там слышит толпу, а не человека. */
+  ptt?: boolean;
 };
 
 const SESSION_URL = "/api/gtr-bro-session";
@@ -79,6 +83,8 @@ export class BroSession {
   private state: BroState = "idle";
   private closed = false;
   private startedAt = 0;
+  private ptt = false;
+  private holdAt = 0;
 
   constructor(ev: BroEvents) {
     this.ev = ev;
@@ -98,6 +104,7 @@ export class BroSession {
   async start(opts: BroStart) {
     if (this.pc) return;
     this.closed = false;
+    this.ptt = Boolean(opts.ptt);
     try {
       // Микрофон запрашиваем только здесь — после явного нажатия. Никакого
       // фонового прослушивания в продукте нет.
@@ -149,6 +156,16 @@ export class BroSession {
     this.dc = dc;
     dc.onmessage = (e) => this.onServerEvent(e.data as string);
     dc.onopen = () => {
+      if (this.ptt) {
+        // Рация: гасим серверный детектор речи — конец реплики определяет
+        // палец на кнопке, а не тишина в шумном зале. Микрофон до нажатия
+        // закрыт.
+        this.send({
+          type: "session.update",
+          session: { type: "realtime", audio: { input: { turn_detection: null } } },
+        });
+        this.mute(true);
+      }
       this.set("listening");
       this.touch();
     };
@@ -194,6 +211,37 @@ export class BroSession {
 
   mute(on: boolean) {
     for (const t of this.mic?.getAudioTracks() ?? []) t.enabled = !on;
+  }
+
+  /** Нажал кнопку: если BRO говорит — он замолкает, микрофон открывается. */
+  holdStart() {
+    if (this.dc?.readyState !== "open") return;
+    if (this.state === "speaking" || this.state === "thinking") this.bargeIn();
+    this.send({ type: "input_audio_buffer.clear" });
+    this.mute(false);
+    this.holdAt = Date.now();
+    this.set("listening");
+    this.touch();
+  }
+
+  /** Отпустил кнопку: реплика ушла, ждём ответ. Совсем короткое касание —
+   *  это промах пальцем, а не реплика: пустой буфер не отправляем, иначе
+   *  модель ответит на тишину. */
+  holdEnd() {
+    if (this.dc?.readyState !== "open") return;
+    this.mute(true);
+    if (Date.now() - this.holdAt < 250) {
+      this.send({ type: "input_audio_buffer.clear" });
+      return;
+    }
+    this.send({ type: "input_audio_buffer.commit" });
+    this.send({ type: "response.create" });
+    this.set("thinking");
+    this.touch();
+  }
+
+  get isPtt(): boolean {
+    return this.ptt;
   }
 
   say(text: string) {

@@ -7,12 +7,15 @@
 // получить только через их партнёрскую программу. Пока честный путь —
 // глубокая ссылка с выбранными датами: она открывает объект уже с этими
 // датами, и занятость показывает сам trip.com.
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import villasRaw from "../data/villas.json";
 import { PH, richOf, V } from "../data/app-data";
+import { setVillaPriceFn, villaPricesFn } from "../kv-api";
+import { useGtr } from "../store";
+import { checkLink, daysSince, PRICE_TTL_DAYS, VILLA_MARKUP, type VillaPrice } from "../villa-price";
 import { Card, Chip, Eyebrow } from "../ui";
 import { GtrLightbox } from "../lightbox";
 
@@ -58,9 +61,38 @@ const tripLink = (v: Villa, from: string, to: string) =>
 export function PrivateScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useGtr();
   const [from, setFrom] = useState(plusDays(1));
   const [to, setTo] = useState(plusDays(3));
   const [box, setBox] = useState<{ imgs: string[]; i: number } | null>(null);
+  // живые ставки из KV: villas.json хранит статику с trip.com, а цена
+  // меняется каждый день и живёт отдельно
+  const [prices, setPrices] = useState<Record<string, VillaPrice>>({});
+  const [draft, setDraft] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState("");
+
+  useEffect(() => {
+    villaPricesFn()
+      .then((r) => setPrices(r.prices))
+      .catch(() => {});
+  }, []);
+
+  const canEditPrice = user.role === "gtr";
+  const savePrice = async (vid: string) => {
+    const val = Number(draft[vid]);
+    if (!Number.isFinite(val) || val <= 0) return;
+    setBusy(vid);
+    try {
+      const r = await setVillaPriceFn({ data: { vid, basePerNight: val } });
+      if (r.ok) {
+        setPrices((p) => ({ ...p, [vid]: r.price }));
+        setDraft((d) => ({ ...d, [vid]: "" }));
+      }
+    } catch {
+      /* локальный режим — цена останется прежней */
+    }
+    setBusy("");
+  };
 
   const villas = useMemo(
     () => RAW.villas.filter((v) => PH.venues.some((p) => p.id === v.id)),
@@ -124,6 +156,12 @@ export function PrivateScreen() {
           const venue = V(v.id);
           const rich = richOf(v.id);
           const gallery = v.photos.length ? v.photos : rich.gallery ?? [];
+          // живая ставка из KV главнее статики в JSON
+          const live = prices[v.id];
+          const base = live?.basePerNight ?? v.basePerNight ?? null;
+          const gtr = live?.gtrPerNight ?? v.gtrPerNight ?? null;
+          const checked = live?.checkedAt ?? v.priceCheckedAt ?? null;
+          const fresh = Boolean(checked) && daysSince(checked as string) <= PRICE_TTL_DAYS;
           return (
             <Card key={v.id} style={{ padding: 0, overflow: "hidden" }}>
               <div style={{ position: "relative", aspectRatio: "16/9", overflow: "hidden" }}>
@@ -180,19 +218,32 @@ export function PrivateScreen() {
               </div>
 
               <div style={{ padding: "11px 13px 13px" }}>
-                {/* цена: показываем только подтверждённую. Пока база не
-                    сверена, не выдаём наценённую цифру за факт. */}
-                {v.gtrPrice ? (
+                {/* цена: только подтверждённая ставка. Свежесть видна явно —
+                    «сверено сегодня» и «цена от вчера» это разные вещи, когда
+                    по ней выставляют счёт клиенту. */}
+                {gtr ? (
                   <div style={{ marginBottom: 9 }}>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
                       <span style={{ font: "700 17px/1 'JetBrains Mono',monospace", color: "#fff" }}>
-                        ฿{v.gtrPrice.toLocaleString("ru-RU")}
+                        ฿{gtr.toLocaleString("ru-RU")}
                       </span>
                       <span
                         className="gtr-mono"
                         style={{ font: "500 9.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
                       >
-                        {t("за ночь")} · GTR +{Math.round((v.markup - 1) * 100)}%
+                        {t("за ночь")} · GTR +{Math.round((VILLA_MARKUP - 1) * 100)}%
+                      </span>
+                      <span
+                        className="gtr-mono"
+                        style={{
+                          font: "700 8.5px/1 'JetBrains Mono',monospace",
+                          letterSpacing: ".1em",
+                          padding: "3px 6px",
+                          color: fresh ? "#7BE38A" : "var(--gtr-amber)",
+                          border: `1px solid ${fresh ? "rgba(123,227,138,.4)" : "rgba(245,166,35,.4)"}`,
+                        }}
+                      >
+                        {fresh ? t("СВЕРЕНО СЕГОДНЯ") : t("ЦЕНА УСТАРЕЛА")}
                       </span>
                     </div>
                     {/* база trip.com видна рядом: менеджер всегда знает, из
@@ -201,11 +252,9 @@ export function PrivateScreen() {
                       className="gtr-mono"
                       style={{ font: "500 9px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginTop: 3 }}
                     >
-                      trip.com ฿{v.basePerNight?.toLocaleString("ru-RU")}/{t("ночь")}
-                      {v.basePriceNights
-                        ? ` · ${v.basePriceRaw?.toLocaleString("ru-RU")} ฿ / ${v.basePriceNights} ноч.`
-                        : ""}
-                      {v.priceCheckedAt ? ` · ${t("сверено")} ${v.priceCheckedAt}` : ""}
+                      trip.com ฿{base?.toLocaleString("ru-RU")}/{t("ночь")}
+                      {checked ? ` · ${t("сверено")} ${checked}` : ""}
+                      {live?.by ? ` · ${live.by.split("@")[0]}` : ""}
                     </div>
                   </div>
                 ) : (
@@ -224,6 +273,38 @@ export function PrivateScreen() {
                     {t("(«средняя от», не факт что за ночь)")}
                   </div>
                 )}
+
+                {/* ежедневная сверка: цифру вбивает GTR-админ, наценку
+                    считает сервер. Ссылка открывает объект на завтра —
+                    ровно ту дату, по которой сверяем. */}
+                {canEditPrice ? (
+                  <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 9, flexWrap: "wrap" }}>
+                    <input
+                      className="gtr-input"
+                      style={{ flex: "1 1 120px", minWidth: 100 }}
+                      inputMode="numeric"
+                      placeholder={t("база ฿/ночь")}
+                      value={draft[v.id] ?? ""}
+                      onChange={(e) => setDraft((d) => ({ ...d, [v.id]: e.target.value }))}
+                    />
+                    <button
+                      className="gtr-btn"
+                      disabled={busy === v.id || !draft[v.id]}
+                      onClick={() => savePrice(v.id)}
+                    >
+                      {busy === v.id ? t("…") : t("Сверено")}
+                    </button>
+                    <a
+                      className="gtr-btn gtr-btn-ghost"
+                      href={checkLink(v.tripId)}
+                      target="_blank"
+                      rel="noopener"
+                      style={{ textDecoration: "none" }}
+                    >
+                      {t("Проверить на завтра")}
+                    </a>
+                  </div>
+                ) : null}
 
                 {gallery.length ? (
                   <div style={{ display: "flex", gap: 5, overflowX: "auto", paddingBottom: 6, marginBottom: 9 }}>

@@ -27,6 +27,14 @@ export default {
       );
       return;
     }
+    // 02:00 UTC = 09:00 Пхукета — ежедневная сверка цен вилл Private
+    if (event.cron === "0 2 * * *") {
+      const key = await derive(env, "afisha");
+      ctx.waitUntil(
+        fetch("https://gtr-event-hub.gtr-event.workers.dev/api/villa-check?key=" + key),
+      );
+      return;
+    }
     // 10:00 UTC = 17:00 Пхукета — дайджест вечера в канал комьюнити
     if (event.cron === "0 10 * * *") {
       const key = await derive(env, "afisha");
@@ -46,6 +54,6 @@ export default {
 `,
 );
 cfg.main = "cron.mjs";
-cfg.triggers = { crons: ["0 */6 * * *", "0 13 * * *", "0 10 * * *"] };
+cfg.triggers = { crons: ["0 */6 * * *", "0 13 * * *", "0 10 * * *", "0 2 * * *"] };
 writeFileSync(p, JSON.stringify(cfg, null, 2));
-console.log("wrangler.json: GTR_KV + кроны (афиши 6ч, отчёт 20:00, дайджест 17:00 Пхукета)");
+console.log("wrangler.json: GTR_KV + кроны (афиши 6ч, отчёт 20:00, дайджест 17:00, цены вилл 09:00 Пхукета)");

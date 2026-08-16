@@ -22,6 +22,7 @@ import { Route as ApiSpotifyCallbackRouteImport } from './routes/api.spotify-cal
 import { Route as ApiSpotifyLoginRouteImport } from './routes/api.spotify-login'
 import { Route as ApiSprintReportRouteImport } from './routes/api.sprint-report'
 import { Route as ApiTgRouteImport } from './routes/api.tg'
+import { Route as ApiVillaCheckRouteImport } from './routes/api.villa-check'
 import { Route as ApiVphotoRouteImport } from './routes/api.vphoto'
 import { Route as GtrIndexRouteImport } from './routes/gtr/index'
 import { Route as GtrScreenRouteImport } from './routes/gtr/$screen'
@@ -96,6 +97,11 @@ const ApiTgRoute = ApiTgRouteImport.update({
   path: '/api/tg',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVillaCheckRoute = ApiVillaCheckRouteImport.update({
+  id: '/api/villa-check',
+  path: '/api/villa-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiVphotoRoute = ApiVphotoRouteImport.update({
   id: '/api/vphoto',
   path: '/api/vphoto',
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/api/spotify-login': typeof ApiSpotifyLoginRoute
   '/api/sprint-report': typeof ApiSprintReportRoute
   '/api/tg': typeof ApiTgRoute
+  '/api/villa-check': typeof ApiVillaCheckRoute
   '/api/vphoto': typeof ApiVphotoRoute
   '/gtr/$screen': typeof GtrScreenRoute
   '/gtr/join': typeof GtrJoinRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/api/spotify-login': typeof ApiSpotifyLoginRoute
   '/api/sprint-report': typeof ApiSprintReportRoute
   '/api/tg': typeof ApiTgRoute
+  '/api/villa-check': typeof ApiVillaCheckRoute
   '/api/vphoto': typeof ApiVphotoRoute
   '/gtr/$screen': typeof GtrScreenRoute
   '/gtr/join': typeof GtrJoinRoute
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/api/spotify-login': typeof ApiSpotifyLoginRoute
   '/api/sprint-report': typeof ApiSprintReportRoute
   '/api/tg': typeof ApiTgRoute
+  '/api/villa-check': typeof ApiVillaCheckRoute
   '/api/vphoto': typeof ApiVphotoRoute
   '/gtr/$screen': typeof GtrScreenRoute
   '/gtr/join': typeof GtrJoinRoute
@@ -222,6 +231,7 @@ export interface FileRouteTypes {
     | '/api/spotify-login'
     | '/api/sprint-report'
     | '/api/tg'
+    | '/api/villa-check'
     | '/api/vphoto'
     | '/gtr/$screen'
     | '/gtr/join'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/api/spotify-login'
     | '/api/sprint-report'
     | '/api/tg'
+    | '/api/villa-check'
     | '/api/vphoto'
     | '/gtr/$screen'
     | '/gtr/join'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/api/spotify-login'
     | '/api/sprint-report'
     | '/api/tg'
+    | '/api/villa-check'
     | '/api/vphoto'
     | '/gtr/$screen'
     | '/gtr/join'
@@ -291,6 +303,7 @@ export interface RootRouteChildren {
   ApiSpotifyLoginRoute: typeof ApiSpotifyLoginRoute
   ApiSprintReportRoute: typeof ApiSprintReportRoute
   ApiTgRoute: typeof ApiTgRoute
+  ApiVillaCheckRoute: typeof ApiVillaCheckRoute
   ApiVphotoRoute: typeof ApiVphotoRoute
 }
 
@@ -385,6 +398,13 @@ declare module '@tanstack/react-router' {
       path: '/api/tg'
       fullPath: '/api/tg'
       preLoaderRoute: typeof ApiTgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/villa-check': {
+      id: '/api/villa-check'
+      path: '/api/villa-check'
+      fullPath: '/api/villa-check'
+      preLoaderRoute: typeof ApiVillaCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/vphoto': {
@@ -484,6 +504,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSpotifyLoginRoute: ApiSpotifyLoginRoute,
   ApiSprintReportRoute: ApiSprintReportRoute,
   ApiTgRoute: ApiTgRoute,
+  ApiVillaCheckRoute: ApiVillaCheckRoute,
   ApiVphotoRoute: ApiVphotoRoute,
 }
 export const routeTree = rootRouteImport

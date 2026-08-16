@@ -7,6 +7,13 @@ import type { EventDraft, Offer, OrgRequest, RoleId } from "./data/app-data";
 import { getKvNs, kvGetJson, kvListAll, type KvNs } from "./kv-ns";
 import { tgApi, tgConfigured, tgEsc, tgWebhookSecret } from "./tg";
 import type { VenueAfisha } from "./afisha";
+import {
+  gtrFrom,
+  priceKey,
+  staleVillas,
+  VILLA_MARKUP,
+  type VillaPrice,
+} from "./villa-price";
 
 export const ROLE_LABELS: Record<RoleId, string> = {
   pr: "PR-директор",
@@ -2262,4 +2269,45 @@ export const aiMatchFn = createServerFn({ method: "GET" })
       venues,
       events: events.slice(0, 8),
     };
+  });
+
+// ---------- цены вилл Private: ежедневная сверка ----------
+// Цена живёт в KV, а не в villas.json: JSON — это статика из trip.com,
+// а ставка меняется каждый день. Наценка считается на сервере, чтобы
+// клиент не мог её подкрутить.
+
+export const villaPricesFn = createServerFn({ method: "GET" }).handler(async () => {
+  const u = await currentUser();
+  const { canPrivate } = await import("./data/app-data");
+  if (!u || !canPrivate(u)) return { prices: {} as Record<string, VillaPrice>, stale: [] as string[] };
+  const { villaIds } = await import("./villa-price");
+  const { prices, stale } = await staleVillas(villaIds());
+  return { prices, stale };
+});
+
+export const setVillaPriceFn = createServerFn({ method: "POST" })
+  .inputValidator(
+    (d: { vid: string; basePerNight: number; available?: boolean | null; note?: string }) => d,
+  )
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    if (!u || u.role !== "gtr") return { ok: false as const, error: "Только GTR-админ" };
+    const ns = await getKvNs();
+    if (!ns) return { ok: false as const, error: "Хранилище недоступно" };
+    const base = Math.round(Number(data.basePerNight));
+    if (!Number.isFinite(base) || base <= 0) return { ok: false as const, error: "Нужна ставка за ночь" };
+    const price: VillaPrice = {
+      vid: data.vid,
+      currency: "THB",
+      basePerNight: base,
+      gtrPerNight: gtrFrom(base),
+      markup: VILLA_MARKUP,
+      checkedAt: new Date().toISOString().slice(0, 10),
+      source: "manual",
+      by: u.email,
+      available: data.available ?? null,
+      note: data.note?.trim() || undefined,
+    };
+    await ns.put(priceKey(data.vid), JSON.stringify(price));
+    return { ok: true as const, price };
   });

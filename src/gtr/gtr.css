@@ -2880,11 +2880,11 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-comm-btn::before {
   content: "";
   position: absolute;
-  top: calc(10px + 0.45cm - 1cm); /* центр орбиты = центр знака */
+  top: calc(10px + 0.525cm - 1.125cm); /* центр орбиты = центр знака */
   left: 50%;
-  width: 2cm;
-  height: 2cm;
-  margin-left: -1cm;
+  width: 2.25cm;
+  height: 2.25cm;
+  margin-left: -1.125cm;
   pointer-events: none;
   border-radius: 50%;
   background:
@@ -2935,12 +2935,12 @@ html { -webkit-tap-highlight-color: transparent; }
   to { transform: rotate(360deg); }
 }
 
-/* знак ровно 0.9 × 0.9 см, как задано */
+/* знак 1.05 × 1.05 см — размер выверен на 12 Pro Max */
 .gtr-comm-btn .gtr-stk {
   position: relative;
   z-index: 1;
-  width: 0.9cm;
-  height: 0.9cm;
+  width: 1.05cm;
+  height: 1.05cm;
   vertical-align: middle;
   margin: 0;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.75));
@@ -2950,8 +2950,8 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-comm-label {
   position: relative;
   z-index: 1;
-  font: 600 8.5px/1.15 "JetBrains Mono", monospace;
-  letter-spacing: 0.03em;
+  font: 600 10px/1.15 "JetBrains Mono", monospace;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;

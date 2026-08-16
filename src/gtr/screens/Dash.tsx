@@ -1925,9 +1925,9 @@ function VisitorCabinet() {
               <Stk name="ticket" />
               <span className="gtr-comm-label">{t("Афиша")}</span>
             </button>
-            <button className="gtr-comm-btn" onClick={() => go("map")}>
-              <Stk name="pin" />
-              <span className="gtr-comm-label">{t("Карта")}</span>
+            <button className="gtr-comm-btn" onClick={() => go("artists")}>
+              <Stk name="mic" />
+              <span className="gtr-comm-label">{t("Артисты")}</span>
             </button>
             <button className="gtr-comm-btn" onClick={() => openAppLink("https://t.me/bangtaostyle")}>
               <Stk name="door" />

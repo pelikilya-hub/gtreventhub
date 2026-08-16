@@ -1,5 +1,6 @@
 // Статические данные GTR Event, извлечённые из дизайн-хендоффа (GTR EVENT.dc.html)
 import venuesRaw from "./venues.json";
+import { genreName, resolveGenre } from "../genres";
 import nightRaw from "./venue-night.json";
 import richRaw from "./rich.json";
 import vendorPackagesRaw from "./vendor-packages.json";
@@ -2635,9 +2636,16 @@ const GENRE_EN: Record<string, string> = {
 
 const capFirst = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
-/** Жанр для витрины: перевод, если он есть, иначе аккуратный регистр. */
+/** Жанр для витрины: перевод, если он есть, иначе аккуратный регистр.
+ *
+ *  Сначала спрашиваем дерево жанров — там 262 названия с обеими
+ *  сторонами, русской и английской. Словарь ниже остаётся вторым
+ *  рубежом: в нём лежат неэлектронные подписи и форматы вечера,
+ *  которых в дереве нет и быть не должно. */
 export const genreLabel = (raw: string, lang = "ru") => {
   const key = raw.trim().toLowerCase();
+  const id = resolveGenre(raw);
+  if (id) return genreName(id, lang);
   if (lang !== "ru" && GENRE_EN[key]) return GENRE_EN[key];
   return capFirst(raw.trim());
 };

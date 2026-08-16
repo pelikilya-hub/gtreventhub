@@ -3,6 +3,8 @@
 // сводятся в семейства — сопоставление устойчиво к формулировкам
 // («melodic techno» и «минимал-техно» попадают в одно семейство).
 
+import { genreMatch, resolveGenre } from "./genres";
+
 export type GenreVector = Map<string, number>;
 
 // Семейство → триггер-подстроки (латиница и кириллица, нижний регистр)
@@ -95,4 +97,44 @@ export const FAMILY_LABEL: Record<string, string> = {
   jazz: "Jazz / Blues",
   chill: "Chill / Lounge",
   live: "Live",
+};
+
+
+// ---------- точный слой: дерево жанров ----------
+// Семейства выше — грубое сито на пятнадцать корзин: они спасают, когда
+// про артиста известно только «электроника», но дип-хаус и биг-рум
+// складывают в одну корзину «house» и делают их неразличимыми. Дерево
+// (genres.ts, 262 жанра) различает, и когда обе стороны в нём опознаны,
+// его голос весомее.
+
+export const toGenreIds = (raw: string[]): string[] => {
+  const out: string[] = [];
+  for (const r of raw) {
+    const id = resolveGenre(r);
+    if (id && !out.includes(id)) out.push(id);
+  }
+  return out;
+};
+
+/** Итоговая близость двух наборов живых подписей.
+ *
+ *  Дерево знает только про электронику; поп, рок и тайскую эстраду в нём
+ *  нет вовсе. Поэтому смешиваем: где дерево узнало обе стороны — оно
+ *  ведёт, где промолчало — работают семейства, как и раньше. */
+export const scoreStyles = (
+  a: string[],
+  b: string[],
+): { score: number; reasons: string[] } => {
+  const fam = scoreVectors(normalizeGenres(a), normalizeGenres(b));
+  const ai = toGenreIds(a);
+  const bi = toGenreIds(b);
+  if (!ai.length || !bi.length) return fam;
+
+  const tree = genreMatch(ai, bi);
+  // Симметрия: близость набора A к B и B к A различается, если один
+  // набор шире. Берём среднее, иначе артист с одним жанром всегда
+  // выигрывает у артиста с пятью.
+  const back = genreMatch(bi, ai);
+  const t = (tree + back) / 2;
+  return { score: 0.65 * t + 0.35 * fam.score, reasons: fam.reasons };
 };

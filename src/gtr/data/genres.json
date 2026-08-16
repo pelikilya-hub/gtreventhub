@@ -1,0 +1,4170 @@
+{
+ "order": [
+  "chicago-house",
+  "deep-house",
+  "soulful-house",
+  "funky-house",
+  "disco-house",
+  "french-house",
+  "filter-house",
+  "jackin-house",
+  "garage-house",
+  "acid-house",
+  "piano-house",
+  "vocal-house",
+  "tech-house",
+  "minimal-house",
+  "microhouse",
+  "organic-house",
+  "afro-house",
+  "tribal-house",
+  "latin-house",
+  "melodic-house",
+  "progressive-house",
+  "electro-house",
+  "future-house",
+  "bass-house",
+  "big-room-house",
+  "deep-tech",
+  "minimal-deep-tech",
+  "rominimal",
+  "lo-fi-house",
+  "outsider-house",
+  "ghetto-house",
+  "ghetto-tech",
+  "detroit-techno",
+  "minimal-techno",
+  "dub-techno",
+  "acid-techno",
+  "industrial-techno",
+  "hypnotic-techno",
+  "raw-techno",
+  "hard-techno",
+  "peak-time-techno",
+  "driving-techno",
+  "melodic-techno",
+  "organic-techno",
+  "afro-techno",
+  "tribal-techno",
+  "psytechno",
+  "schranz",
+  "neo-rave",
+  "techno-trance",
+  "classic-trance",
+  "progressive-trance",
+  "uplifting-trance",
+  "vocal-trance",
+  "tech-trance",
+  "acid-trance",
+  "hard-trance",
+  "dream-trance",
+  "balearic-trance",
+  "psytrance",
+  "progressive-psytrance",
+  "full-on",
+  "goa-trance",
+  "dark-psy",
+  "forest-psy",
+  "hi-tech-psy",
+  "twilight-psy",
+  "psycore",
+  "suomisaundi",
+  "breakbeat",
+  "big-beat",
+  "progressive-breaks",
+  "acid-breaks",
+  "funky-breaks",
+  "nu-skool-breaks",
+  "electro-breaks",
+  "florida-breaks",
+  "uk-garage",
+  "2-step-garage",
+  "speed-garage",
+  "bassline",
+  "breakstep",
+  "future-garage",
+  "uk-funky",
+  "liquid-dnb",
+  "atmospheric-dnb",
+  "jungle",
+  "jump-up",
+  "neurofunk",
+  "techstep",
+  "darkstep",
+  "dancefloor-dnb",
+  "drumfunk",
+  "crossbreed",
+  "dubstep",
+  "deep-dubstep",
+  "uk-dubstep",
+  "brostep",
+  "riddim",
+  "tearout",
+  "melodic-dubstep",
+  "future-bass",
+  "wave",
+  "hardwave",
+  "colour-bass",
+  "grime",
+  "uk-bass",
+  "wonky",
+  "purple-sound",
+  "dubstep-grime",
+  "drill-electronic",
+  "deconstructed-club",
+  "electro",
+  "electro-funk",
+  "detroit-electro",
+  "electroclash",
+  "electro-techno",
+  "miami-bass",
+  "freestyle",
+  "hardstyle",
+  "rawstyle",
+  "euphoric-hardstyle",
+  "hardcore",
+  "gabber",
+  "frenchcore",
+  "uptempo-hardcore",
+  "happy-hardcore",
+  "uk-hardcore",
+  "speedcore",
+  "terrorcore",
+  "oldschool-rave",
+  "breakbeat-hardcore",
+  "belgian-rave",
+  "acid-rave",
+  "piano-rave",
+  "nu-rave",
+  "italo-disco",
+  "euro-disco",
+  "space-disco",
+  "nu-disco",
+  "indie-dance",
+  "dark-disco",
+  "cosmic-disco",
+  "hi-nrg",
+  "synthpop",
+  "electropop",
+  "synthwave",
+  "retrowave",
+  "outrun",
+  "darksynth",
+  "dreamwave",
+  "chillwave",
+  "vaporwave",
+  "chiptune",
+  "8-bit",
+  "bitpop",
+  "spacesynth",
+  "future-funk",
+  "industrial",
+  "ebm",
+  "dark-electro",
+  "aggrotech",
+  "futurepop",
+  "power-electronics",
+  "rhythmic-noise",
+  "witch-house",
+  "darkwave",
+  "coldwave",
+  "ambient",
+  "dark-ambient",
+  "drone",
+  "space-ambient",
+  "organic-ambient",
+  "tribal-ambient",
+  "isolationism",
+  "ambient-dub",
+  "ambient-techno",
+  "downtempo",
+  "chillout",
+  "trip-hop",
+  "lounge",
+  "balearic-beat",
+  "psybient",
+  "psychill",
+  "psydub",
+  "ethnic-electronica",
+  "organic-downtempo",
+  "lo-fi-beats",
+  "chillhop",
+  "instrumental-hip-hop",
+  "boom-bap-electronic",
+  "wonky-beats",
+  "abstract-hip-hop",
+  "idm",
+  "glitch",
+  "glitchcore",
+  "clicks-cuts",
+  "braindance",
+  "drill-n-bass",
+  "microsound",
+  "musique-concrete",
+  "electroacoustic",
+  "algorithmic-music",
+  "edm-trap",
+  "festival-trap",
+  "hybrid-trap",
+  "future-trap",
+  "phonk",
+  "drift-phonk",
+  "memphis-phonk",
+  "wave-trap",
+  "dance-pop",
+  "eurodance",
+  "europop",
+  "edm-pop",
+  "tropical-house",
+  "slap-house",
+  "future-pop",
+  "hyperpop",
+  "baile-funk",
+  "brazilian-bass",
+  "amapiano",
+  "gqom",
+  "kuduro",
+  "afro-electronic",
+  "tribal-guaracha",
+  "moombahton",
+  "moombahcore",
+  "dancehall-electronic",
+  "guaracha",
+  "reggaeton-electronic",
+  "cumbia-digital",
+  "afro-tech",
+  "afrobeat-electronic",
+  "kwaito",
+  "chicago-footwork",
+  "juke",
+  "jersey-club",
+  "baltimore-club",
+  "philly-club",
+  "ballroom",
+  "j-core",
+  "kawaii-future-bass",
+  "denpa",
+  "japanese-footwork",
+  "dub",
+  "digital-dub",
+  "steppers",
+  "electronica",
+  "folktronica",
+  "organic-electronica",
+  "ethnotronica",
+  "tribal-electronica",
+  "live-electronic",
+  "electro-acoustic",
+  "jazztronica",
+  "nu-jazz",
+  "electro-swing",
+  "classical-crossover-electronic",
+  "rocktronica",
+  "digital-hardcore",
+  "post-industrial"
+ ],
+ "genres": {
+  "chicago-house": {
+   "id": "chicago-house",
+   "en": "Chicago House",
+   "ru": "чикаго-хаус",
+   "dir": "House",
+   "group": "House",
+   "also": [],
+   "alias": [
+    "chicago house",
+    "chicago-house",
+    "chicagohouse",
+    "чикаго хаус",
+    "чикаго-хаус",
+    "чикагохаус"
+   ]
+  },
+  "deep-house": {
+   "id": "deep-house",
+   "en": "Deep House",
+   "ru": "дип-хаус",
+   "dir": "House",
+   "group": "House",
+   "also": [],
+   "alias": [
+    "deep house",
+    "deep-house",
+    "deephouse",
+    "house",
+    "дип хаус",
+    "дип-хаус",
+    "дипхаус",
+    "хаус"
+   ]
+  },
+  "soulful-house": {
+   "id": "soulful-house",
+   "en": "Soulful House",
+   "ru": "соулфул-хаус",
+   "dir": "House",
+   "group": "House",
+   "also": [],
+   "alias": [
+    "soulful house",
+    "soulful-house",
+    "soulfulhouse",
+    "соул-хаус",
+    "соулфул хаус",
+    "соулфул-хаус",
+    "соулфулхаус"
+   ]
+  },
+  "funky-house": {
+   "id": "funky-house",
+   "en": "Funky House",
+   "ru": "фанки-хаус",
+   "dir": "House",
+   "group": "House",
+   "also": [],
+   "alias": [
+    "funky house",
+    "funky-house",
+    "funkyhouse",
+    "фанк-хаус",
+    "фанки хаус",
+    "фанки-хаус",
+    "фанкихаус"
+   ]
+  },
+  "disco-house": {
+   "id": "disco-house",
+   "en": "Disco House",
+   "ru": "диско-хаус",
+   "dir": "House",
+   "group": "House",
+   "also": [],
+   "alias": [
+    "disco house",
+    "disco-house",
+    "discohouse",
+    "диско хаус",
+    "диско-хаус",
+    "дискохаус"
+   ]
+  },
+  "french-house": {
+   "id": "french-house",
+   "en": "French House",
+   "ru": "френч-хаус",
+   "dir": "House",
+   "group": "House",
+   "also": [],
+   "alias": [
+    "french house",
+    "french-house",
+    "frenchhouse",
+    "френч хаус",
+    "френч-хаус",
+    "френчхаус"
+   ]
+  },
+  "filter-house": {
+   "id": "filter-house",
+   "en": "Filter House",
+   "ru": "фильтр-хаус",
+   "dir": "House",
+   "group": "House",
+   "also": [],
+   "alias": [
+    "filter house",
+    "filter-house",
+    "filterhouse",
+    "фильтр хаус",
+    "фильтр-хаус",
+    "фильтрхаус"
+   ]
+  },
+  "jackin-house": {
+   "id": "jackin-house",
+   "en": "Jackin House",
+   "ru": "джекин-хаус",
+   "dir": "House",
+   "group": "House",
+   "also": [],
+   "alias": [
+    "jackin house",
+    "jackin-house",
+    "jackinhouse",
+    "джекин хаус",
+    "джекин-хаус",
+    "джекинхаус"
+   ]
+  },
+  "garage-house": {
+   "id": "garage-house",
+   "en": "Garage House",
+   "ru": "гэридж-хаус",
+   "dir": "House",
+   "group": "House",
+   "also": [],
+   "alias": [
+    "garage house",
+    "garage-house",
+    "garagehouse",
+    "гэридж хаус",
+    "гэридж-хаус",
+    "гэриджхаус"
+   ]
+  },
+  "acid-house": {
+   "id": "acid-house",
+   "en": "Acid House",
+   "ru": "эйсид-хаус",
+   "dir": "House",
+   "group": "House",
+   "also": [],
+   "alias": [
+    "acid house",
+    "acid-house",
+    "acidhouse",
+    "эйсид хаус",
+    "эйсид-хаус",
+    "эйсидхаус"
+   ]
+  },
+  "piano-house": {
+   "id": "piano-house",
+   "en": "Piano House",
+   "ru": "пиано-хаус",
+   "dir": "House",
+   "group": "House",
+   "also": [],
+   "alias": [
+    "piano house",
+    "piano-house",
+    "pianohouse",
+    "пиано хаус",
+    "пиано-хаус",
+    "пианохаус"
+   ]
+  },
+  "vocal-house": {
+   "id": "vocal-house",
+   "en": "Vocal House",
+   "ru": "вокал-хаус",
+   "dir": "House",
+   "group": "House",
+   "also": [],
+   "alias": [
+    "vocal house",
+    "vocal-house",
+    "vocalhouse",
+    "вокал хаус",
+    "вокал-хаус",
+    "вокалхаус"
+   ]
+  },
+  "tech-house": {
+   "id": "tech-house",
+   "en": "Tech House",
+   "ru": "тек-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "tech house",
+    "tech-house",
+    "techhouse",
+    "тек хаус",
+    "тек-хаус",
+    "текхаус"
+   ]
+  },
+  "minimal-house": {
+   "id": "minimal-house",
+   "en": "Minimal House",
+   "ru": "минимал-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "minimal house",
+    "minimal-house",
+    "minimalhouse",
+    "минимал хаус",
+    "минимал-хаус",
+    "минималхаус"
+   ]
+  },
+  "microhouse": {
+   "id": "microhouse",
+   "en": "Microhouse",
+   "ru": "микро-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "microhouse",
+    "микро хаус",
+    "микро-хаус",
+    "микрохаус"
+   ]
+  },
+  "organic-house": {
+   "id": "organic-house",
+   "en": "Organic House",
+   "ru": "органик-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "organic house",
+    "organic-house",
+    "organichouse",
+    "органик хаус",
+    "органик-хаус",
+    "органикхаус"
+   ]
+  },
+  "afro-house": {
+   "id": "afro-house",
+   "en": "Afro House",
+   "ru": "афро-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "afro house",
+    "afro-house",
+    "afrohouse",
+    "афро хаус",
+    "афро-хаус",
+    "афрохаус"
+   ]
+  },
+  "tribal-house": {
+   "id": "tribal-house",
+   "en": "Tribal House",
+   "ru": "трайбал-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "tribal house",
+    "tribal-house",
+    "tribalhouse",
+    "трайбал хаус",
+    "трайбал-хаус",
+    "трайбалхаус"
+   ]
+  },
+  "latin-house": {
+   "id": "latin-house",
+   "en": "Latin House",
+   "ru": "латин-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "latin house",
+    "latin-house",
+    "latinhouse",
+    "латин хаус",
+    "латин-хаус",
+    "латинхаус"
+   ]
+  },
+  "melodic-house": {
+   "id": "melodic-house",
+   "en": "Melodic House",
+   "ru": "мелодик-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "melodic house",
+    "melodic-house",
+    "melodichouse",
+    "мелодик хаус",
+    "мелодик-хаус",
+    "мелодикхаус"
+   ]
+  },
+  "progressive-house": {
+   "id": "progressive-house",
+   "en": "Progressive House",
+   "ru": "прогрессив-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "progressive house",
+    "progressive-house",
+    "progressivehouse",
+    "прогрессив",
+    "прогрессив хаус",
+    "прогрессив-хаус",
+    "прогрессивхаус"
+   ]
+  },
+  "electro-house": {
+   "id": "electro-house",
+   "en": "Electro House",
+   "ru": "электро-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "electro house",
+    "electro-house",
+    "electrohouse",
+    "электро хаус",
+    "электро-хаус",
+    "электрохаус"
+   ]
+  },
+  "future-house": {
+   "id": "future-house",
+   "en": "Future House",
+   "ru": "фьючер-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "future house",
+    "future-house",
+    "futurehouse",
+    "фьючер хаус",
+    "фьючер-хаус",
+    "фьючерхаус"
+   ]
+  },
+  "bass-house": {
+   "id": "bass-house",
+   "en": "Bass House",
+   "ru": "бас-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "bass house",
+    "bass-house",
+    "basshouse",
+    "бас хаус",
+    "бас-хаус",
+    "басхаус"
+   ]
+  },
+  "big-room-house": {
+   "id": "big-room-house",
+   "en": "Big Room House",
+   "ru": "биг-рум-хаус",
+   "dir": "House",
+   "group": "Современный House",
+   "also": [],
+   "alias": [
+    "big room",
+    "big room house",
+    "big-room-house",
+    "bigroomhouse",
+    "биг рум",
+    "биг рум хаус",
+    "биг-рум",
+    "биг-рум-хаус",
+    "бигрумхаус"
+   ]
+  },
+  "deep-tech": {
+   "id": "deep-tech",
+   "en": "Deep Tech",
+   "ru": "дип-тек",
+   "dir": "House",
+   "group": "Андеграундный House",
+   "also": [],
+   "alias": [
+    "deep tech",
+    "deep-tech",
+    "deeptech",
+    "дип тек",
+    "дип-тек",
+    "диптек"
+   ]
+  },
+  "minimal-deep-tech": {
+   "id": "minimal-deep-tech",
+   "en": "Minimal Deep Tech",
+   "ru": "минимал-дип-тек",
+   "dir": "House",
+   "group": "Андеграундный House",
+   "also": [],
+   "alias": [
+    "minimal deep tech",
+    "minimal-deep-tech",
+    "minimaldeeptech",
+    "минимал дип тек",
+    "минимал-дип-тек",
+    "минималдиптек"
+   ]
+  },
+  "rominimal": {
+   "id": "rominimal",
+   "en": "Rominimal",
+   "ru": "роминимал",
+   "dir": "House",
+   "group": "Андеграундный House",
+   "also": [],
+   "alias": [
+    "rominimal",
+    "роминимал"
+   ]
+  },
+  "lo-fi-house": {
+   "id": "lo-fi-house",
+   "en": "Lo-Fi House",
+   "ru": "лоу-фай-хаус",
+   "dir": "House",
+   "group": "Андеграундный House",
+   "also": [],
+   "alias": [
+    "lo fi house",
+    "lo-fi house",
+    "lo-fi-house",
+    "lofi house",
+    "lofihouse",
+    "лоу фай хаус",
+    "лоу-фай-хаус",
+    "лоуфайхаус"
+   ]
+  },
+  "outsider-house": {
+   "id": "outsider-house",
+   "en": "Outsider House",
+   "ru": "аутсайдер-хаус",
+   "dir": "House",
+   "group": "Андеграундный House",
+   "also": [],
+   "alias": [
+    "outsider house",
+    "outsider-house",
+    "outsiderhouse",
+    "аутсайдер хаус",
+    "аутсайдер-хаус",
+    "аутсайдерхаус"
+   ]
+  },
+  "ghetto-house": {
+   "id": "ghetto-house",
+   "en": "Ghetto House",
+   "ru": "гетто-хаус",
+   "dir": "House",
+   "group": "Андеграундный House",
+   "also": [],
+   "alias": [
+    "ghetto house",
+    "ghetto-house",
+    "ghettohouse",
+    "гетто хаус",
+    "гетто-хаус",
+    "геттохаус"
+   ]
+  },
+  "ghetto-tech": {
+   "id": "ghetto-tech",
+   "en": "Ghetto Tech",
+   "ru": "гетто-тек",
+   "dir": "House",
+   "group": "Андеграундный House",
+   "also": [],
+   "alias": [
+    "ghetto tech",
+    "ghetto-tech",
+    "ghettotech",
+    "гетто тек",
+    "гетто-тек",
+    "геттотек"
+   ]
+  },
+  "detroit-techno": {
+   "id": "detroit-techno",
+   "en": "Detroit Techno",
+   "ru": "детройт-техно",
+   "dir": "Techno",
+   "group": "Techno",
+   "also": [],
+   "alias": [
+    "detroit techno",
+    "detroit-techno",
+    "detroittechno",
+    "детройт техно",
+    "детройт-техно",
+    "детройттехно"
+   ]
+  },
+  "minimal-techno": {
+   "id": "minimal-techno",
+   "en": "Minimal Techno",
+   "ru": "минимал-техно",
+   "dir": "Techno",
+   "group": "Techno",
+   "also": [],
+   "alias": [
+    "minimal",
+    "minimal techno",
+    "minimal-techno",
+    "minimaltechno",
+    "минимал",
+    "минимал техно",
+    "минимал-техно",
+    "минималтехно"
+   ]
+  },
+  "dub-techno": {
+   "id": "dub-techno",
+   "en": "Dub Techno",
+   "ru": "даб-техно",
+   "dir": "Techno",
+   "group": "Techno",
+   "also": [],
+   "alias": [
+    "dub techno",
+    "dub-techno",
+    "dubtechno",
+    "даб техно",
+    "даб-техно",
+    "дабтехно"
+   ]
+  },
+  "acid-techno": {
+   "id": "acid-techno",
+   "en": "Acid Techno",
+   "ru": "эйсид-техно",
+   "dir": "Techno",
+   "group": "Techno",
+   "also": [],
+   "alias": [
+    "acid techno",
+    "acid-techno",
+    "acidtechno",
+    "эйсид техно",
+    "эйсид-техно",
+    "эйсидтехно"
+   ]
+  },
+  "industrial-techno": {
+   "id": "industrial-techno",
+   "en": "Industrial Techno",
+   "ru": "индастриал-техно",
+   "dir": "Techno",
+   "group": "Techno",
+   "also": [],
+   "alias": [
+    "industrial techno",
+    "industrial-techno",
+    "industrialtechno",
+    "индастриал техно",
+    "индастриал-техно",
+    "индастриалтехно"
+   ]
+  },
+  "hypnotic-techno": {
+   "id": "hypnotic-techno",
+   "en": "Hypnotic Techno",
+   "ru": "гипнотик-техно",
+   "dir": "Techno",
+   "group": "Techno",
+   "also": [],
+   "alias": [
+    "hypnotic techno",
+    "hypnotic-techno",
+    "hypnotictechno",
+    "гипнотик техно",
+    "гипнотик-техно",
+    "гипнотиктехно"
+   ]
+  },
+  "raw-techno": {
+   "id": "raw-techno",
+   "en": "Raw Techno",
+   "ru": "роу-техно",
+   "dir": "Techno",
+   "group": "Techno",
+   "also": [],
+   "alias": [
+    "raw techno",
+    "raw-techno",
+    "rawtechno",
+    "роу техно",
+    "роу-техно",
+    "роутехно"
+   ]
+  },
+  "hard-techno": {
+   "id": "hard-techno",
+   "en": "Hard Techno",
+   "ru": "хард-техно",
+   "dir": "Techno",
+   "group": "Techno",
+   "also": [],
+   "alias": [
+    "hard techno",
+    "hard-techno",
+    "hardtechno",
+    "хард техно",
+    "хард-техно",
+    "хардтехно"
+   ]
+  },
+  "peak-time-techno": {
+   "id": "peak-time-techno",
+   "en": "Peak Time Techno",
+   "ru": "пик-тайм-техно",
+   "dir": "Techno",
+   "group": "Techno",
+   "also": [],
+   "alias": [
+    "peak time techno",
+    "peak-time-techno",
+    "peaktimetechno",
+    "пик тайм техно",
+    "пик-тайм-техно",
+    "пиктаймтехно"
+   ]
+  },
+  "driving-techno": {
+   "id": "driving-techno",
+   "en": "Driving Techno",
+   "ru": "драйвинг-техно",
+   "dir": "Techno",
+   "group": "Techno",
+   "also": [],
+   "alias": [
+    "driving techno",
+    "driving-techno",
+    "drivingtechno",
+    "драйвинг техно",
+    "драйвинг-техно",
+    "драйвингтехно"
+   ]
+  },
+  "melodic-techno": {
+   "id": "melodic-techno",
+   "en": "Melodic Techno",
+   "ru": "мелодик-техно",
+   "dir": "Techno",
+   "group": "Современный Techno",
+   "also": [],
+   "alias": [
+    "melodic techno",
+    "melodic-techno",
+    "melodictechno",
+    "techno",
+    "мелодик техно",
+    "мелодик-техно",
+    "мелодиктехно",
+    "техно"
+   ]
+  },
+  "organic-techno": {
+   "id": "organic-techno",
+   "en": "Organic Techno",
+   "ru": "органик-техно",
+   "dir": "Techno",
+   "group": "Современный Techno",
+   "also": [],
+   "alias": [
+    "organic techno",
+    "organic-techno",
+    "organictechno",
+    "органик техно",
+    "органик-техно",
+    "органиктехно"
+   ]
+  },
+  "afro-techno": {
+   "id": "afro-techno",
+   "en": "Afro Techno",
+   "ru": "афро-техно",
+   "dir": "Techno",
+   "group": "Современный Techno",
+   "also": [],
+   "alias": [
+    "afro techno",
+    "afro-techno",
+    "afrotechno",
+    "афро техно",
+    "афро-техно",
+    "афротехно"
+   ]
+  },
+  "tribal-techno": {
+   "id": "tribal-techno",
+   "en": "Tribal Techno",
+   "ru": "трайбал-техно",
+   "dir": "Techno",
+   "group": "Современный Techno",
+   "also": [],
+   "alias": [
+    "tribal techno",
+    "tribal-techno",
+    "tribaltechno",
+    "трайбал техно",
+    "трайбал-техно",
+    "трайбалтехно"
+   ]
+  },
+  "psytechno": {
+   "id": "psytechno",
+   "en": "Psytechno",
+   "ru": "психотехно",
+   "dir": "Techno",
+   "group": "Современный Techno",
+   "also": [],
+   "alias": [
+    "psytechno",
+    "психотехно"
+   ]
+  },
+  "schranz": {
+   "id": "schranz",
+   "en": "Schranz",
+   "ru": "шранц",
+   "dir": "Techno",
+   "group": "Современный Techno",
+   "also": [],
+   "alias": [
+    "schranz",
+    "шранц"
+   ]
+  },
+  "neo-rave": {
+   "id": "neo-rave",
+   "en": "Neo-Rave",
+   "ru": "нео-рейв",
+   "dir": "Techno",
+   "group": "Современный Techno",
+   "also": [],
+   "alias": [
+    "neo rave",
+    "neo-rave",
+    "neorave",
+    "нео рейв",
+    "нео-рейв",
+    "неорейв"
+   ]
+  },
+  "techno-trance": {
+   "id": "techno-trance",
+   "en": "Techno Trance",
+   "ru": "техно-транс",
+   "dir": "Techno",
+   "group": "Современный Techno",
+   "also": [],
+   "alias": [
+    "techno trance",
+    "techno-trance",
+    "technotrance",
+    "техно транс",
+    "техно-транс",
+    "технотранс"
+   ]
+  },
+  "classic-trance": {
+   "id": "classic-trance",
+   "en": "Classic Trance",
+   "ru": "классик-транс",
+   "dir": "Trance",
+   "group": "Trance",
+   "also": [],
+   "alias": [
+    "classic trance",
+    "classic-trance",
+    "classictrance",
+    "классик транс",
+    "классик-транс",
+    "классиктранс"
+   ]
+  },
+  "progressive-trance": {
+   "id": "progressive-trance",
+   "en": "Progressive Trance",
+   "ru": "прогрессив-транс",
+   "dir": "Trance",
+   "group": "Trance",
+   "also": [],
+   "alias": [
+    "progressive trance",
+    "progressive-trance",
+    "progressivetrance",
+    "trance",
+    "прогрессив транс",
+    "прогрессив-транс",
+    "прогрессивтранс",
+    "транс"
+   ]
+  },
+  "uplifting-trance": {
+   "id": "uplifting-trance",
+   "en": "Uplifting Trance",
+   "ru": "аплифтинг-транс",
+   "dir": "Trance",
+   "group": "Trance",
+   "also": [],
+   "alias": [
+    "uplifting trance",
+    "uplifting-trance",
+    "upliftingtrance",
+    "аплифтинг транс",
+    "аплифтинг-транс",
+    "аплифтингтранс"
+   ]
+  },
+  "vocal-trance": {
+   "id": "vocal-trance",
+   "en": "Vocal Trance",
+   "ru": "вокал-транс",
+   "dir": "Trance",
+   "group": "Trance",
+   "also": [],
+   "alias": [
+    "vocal trance",
+    "vocal-trance",
+    "vocaltrance",
+    "вокал транс",
+    "вокал-транс",
+    "вокалтранс"
+   ]
+  },
+  "tech-trance": {
+   "id": "tech-trance",
+   "en": "Tech Trance",
+   "ru": "тек-транс",
+   "dir": "Trance",
+   "group": "Trance",
+   "also": [],
+   "alias": [
+    "tech trance",
+    "tech-trance",
+    "techtrance",
+    "тек транс",
+    "тек-транс",
+    "тектранс"
+   ]
+  },
+  "acid-trance": {
+   "id": "acid-trance",
+   "en": "Acid Trance",
+   "ru": "эйсид-транс",
+   "dir": "Trance",
+   "group": "Trance",
+   "also": [],
+   "alias": [
+    "acid trance",
+    "acid-trance",
+    "acidtrance",
+    "эйсид транс",
+    "эйсид-транс",
+    "эйсидтранс"
+   ]
+  },
+  "hard-trance": {
+   "id": "hard-trance",
+   "en": "Hard Trance",
+   "ru": "хард-транс",
+   "dir": "Trance",
+   "group": "Trance",
+   "also": [],
+   "alias": [
+    "hard trance",
+    "hard-trance",
+    "hardtrance",
+    "хард транс",
+    "хард-транс",
+    "хардтранс"
+   ]
+  },
+  "dream-trance": {
+   "id": "dream-trance",
+   "en": "Dream Trance",
+   "ru": "дрим-транс",
+   "dir": "Trance",
+   "group": "Trance",
+   "also": [],
+   "alias": [
+    "dream trance",
+    "dream-trance",
+    "dreamtrance",
+    "дрим транс",
+    "дрим-транс",
+    "дримтранс"
+   ]
+  },
+  "balearic-trance": {
+   "id": "balearic-trance",
+   "en": "Balearic Trance",
+   "ru": "балеарик-транс",
+   "dir": "Trance",
+   "group": "Trance",
+   "also": [],
+   "alias": [
+    "balearic trance",
+    "balearic-trance",
+    "balearictrance",
+    "балеарик транс",
+    "балеарик-транс",
+    "балеариктранс"
+   ]
+  },
+  "psytrance": {
+   "id": "psytrance",
+   "en": "Psytrance",
+   "ru": "психотранс",
+   "dir": "Trance",
+   "group": "Psychedelic Trance",
+   "also": [],
+   "alias": [
+    "psytrance",
+    "пситранс",
+    "психоделик транс",
+    "психоделик-транс",
+    "психотранс"
+   ]
+  },
+  "progressive-psytrance": {
+   "id": "progressive-psytrance",
+   "en": "Progressive Psytrance",
+   "ru": "прогрессив-психотранс",
+   "dir": "Trance",
+   "group": "Psychedelic Trance",
+   "also": [],
+   "alias": [
+    "progressive psytrance",
+    "progressive-psytrance",
+    "progressivepsytrance",
+    "прогрессив психотранс",
+    "прогрессив-психотранс",
+    "прогрессивпсихотранс"
+   ]
+  },
+  "full-on": {
+   "id": "full-on",
+   "en": "Full-On",
+   "ru": "фулл-он",
+   "dir": "Trance",
+   "group": "Psychedelic Trance",
+   "also": [],
+   "alias": [
+    "full on",
+    "full-on",
+    "fullon",
+    "фулл он",
+    "фулл-он",
+    "фуллон"
+   ]
+  },
+  "goa-trance": {
+   "id": "goa-trance",
+   "en": "Goa Trance",
+   "ru": "гоа-транс",
+   "dir": "Trance",
+   "group": "Psychedelic Trance",
+   "also": [],
+   "alias": [
+    "goa trance",
+    "goa-trance",
+    "goatrance",
+    "гоа транс",
+    "гоа-транс",
+    "гоатранс"
+   ]
+  },
+  "dark-psy": {
+   "id": "dark-psy",
+   "en": "Dark Psy",
+   "ru": "дарк-пси",
+   "dir": "Trance",
+   "group": "Psychedelic Trance",
+   "also": [],
+   "alias": [
+    "dark psy",
+    "dark-psy",
+    "darkpsy",
+    "дарк пси",
+    "дарк-пси",
+    "даркпси"
+   ]
+  },
+  "forest-psy": {
+   "id": "forest-psy",
+   "en": "Forest Psy",
+   "ru": "форест-пси",
+   "dir": "Trance",
+   "group": "Psychedelic Trance",
+   "also": [],
+   "alias": [
+    "forest psy",
+    "forest-psy",
+    "forestpsy",
+    "форест пси",
+    "форест-пси",
+    "форестпси"
+   ]
+  },
+  "hi-tech-psy": {
+   "id": "hi-tech-psy",
+   "en": "Hi-Tech Psy",
+   "ru": "хай-тек-психоделик",
+   "dir": "Trance",
+   "group": "Psychedelic Trance",
+   "also": [],
+   "alias": [
+    "hi tech psy",
+    "hi-tech psy",
+    "hi-tech-psy",
+    "hitech psy",
+    "hitechpsy",
+    "хай тек психоделик",
+    "хай-тек-психоделик",
+    "хайтекпсиходелик"
+   ]
+  },
+  "twilight-psy": {
+   "id": "twilight-psy",
+   "en": "Twilight Psy",
+   "ru": "твайлайт-пси",
+   "dir": "Trance",
+   "group": "Psychedelic Trance",
+   "also": [],
+   "alias": [
+    "twilight psy",
+    "twilight-psy",
+    "twilightpsy",
+    "твайлайт пси",
+    "твайлайт-пси",
+    "твайлайтпси"
+   ]
+  },
+  "psycore": {
+   "id": "psycore",
+   "en": "Psycore",
+   "ru": "псайкор",
+   "dir": "Trance",
+   "group": "Psychedelic Trance",
+   "also": [],
+   "alias": [
+    "psycore",
+    "псайкор"
+   ]
+  },
+  "suomisaundi": {
+   "id": "suomisaundi",
+   "en": "Suomisaundi",
+   "ru": "суомисаунди",
+   "dir": "Trance",
+   "group": "Psychedelic Trance",
+   "also": [],
+   "alias": [
+    "suomisaundi",
+    "суомисаунди"
+   ]
+  },
+  "breakbeat": {
+   "id": "breakbeat",
+   "en": "Breakbeat",
+   "ru": "брейкбит",
+   "dir": "Breakbeat",
+   "group": "Breakbeat",
+   "also": [],
+   "alias": [
+    "breakbeat",
+    "брейкбит"
+   ]
+  },
+  "big-beat": {
+   "id": "big-beat",
+   "en": "Big Beat",
+   "ru": "биг-бит",
+   "dir": "Breakbeat",
+   "group": "Breakbeat",
+   "also": [],
+   "alias": [
+    "big beat",
+    "big-beat",
+    "bigbeat",
+    "биг бит",
+    "биг-бит",
+    "бигбит"
+   ]
+  },
+  "progressive-breaks": {
+   "id": "progressive-breaks",
+   "en": "Progressive Breaks",
+   "ru": "прогрессив-брейкс",
+   "dir": "Breakbeat",
+   "group": "Breakbeat",
+   "also": [],
+   "alias": [
+    "progressive breaks",
+    "progressive-breaks",
+    "progressivebreaks",
+    "прогрессив брейкс",
+    "прогрессив-брейкс",
+    "прогрессивбрейкс"
+   ]
+  },
+  "acid-breaks": {
+   "id": "acid-breaks",
+   "en": "Acid Breaks",
+   "ru": "эйсид-брейкс",
+   "dir": "Breakbeat",
+   "group": "Breakbeat",
+   "also": [],
+   "alias": [
+    "acid breaks",
+    "acid-breaks",
+    "acidbreaks",
+    "эйсид брейкс",
+    "эйсид-брейкс",
+    "эйсидбрейкс"
+   ]
+  },
+  "funky-breaks": {
+   "id": "funky-breaks",
+   "en": "Funky Breaks",
+   "ru": "фанки-брейкс",
+   "dir": "Breakbeat",
+   "group": "Breakbeat",
+   "also": [],
+   "alias": [
+    "funky breaks",
+    "funky-breaks",
+    "funkybreaks",
+    "фанки брейкс",
+    "фанки-брейкс",
+    "фанкибрейкс"
+   ]
+  },
+  "nu-skool-breaks": {
+   "id": "nu-skool-breaks",
+   "en": "Nu Skool Breaks",
+   "ru": "ню-скул-брейкс",
+   "dir": "Breakbeat",
+   "group": "Breakbeat",
+   "also": [],
+   "alias": [
+    "nu skool breaks",
+    "nu-skool-breaks",
+    "nuskoolbreaks",
+    "ню скул брейкс",
+    "ню-скул-брейкс",
+    "нюскулбрейкс"
+   ]
+  },
+  "electro-breaks": {
+   "id": "electro-breaks",
+   "en": "Electro Breaks",
+   "ru": "электро-брейкс",
+   "dir": "Breakbeat",
+   "group": "Breakbeat",
+   "also": [],
+   "alias": [
+    "electro breaks",
+    "electro-breaks",
+    "electrobreaks",
+    "электро брейкс",
+    "электро-брейкс",
+    "электробрейкс"
+   ]
+  },
+  "florida-breaks": {
+   "id": "florida-breaks",
+   "en": "Florida Breaks",
+   "ru": "флорида-брейкс",
+   "dir": "Breakbeat",
+   "group": "Breakbeat",
+   "also": [],
+   "alias": [
+    "florida breaks",
+    "florida-breaks",
+    "floridabreaks",
+    "флорида брейкс",
+    "флорида-брейкс",
+    "флоридабрейкс"
+   ]
+  },
+  "uk-garage": {
+   "id": "uk-garage",
+   "en": "UK Garage",
+   "ru": "UK-гэридж",
+   "dir": "Breakbeat",
+   "group": "UK Breaks",
+   "also": [],
+   "alias": [
+    "uk garage",
+    "uk гэридж",
+    "uk-garage",
+    "uk-гэридж",
+    "ukgarage",
+    "ukгэридж"
+   ]
+  },
+  "2-step-garage": {
+   "id": "2-step-garage",
+   "en": "2-Step Garage",
+   "ru": "ту-степ-гэридж",
+   "dir": "Breakbeat",
+   "group": "UK Breaks",
+   "also": [],
+   "alias": [
+    "2 step garage",
+    "2-step garage",
+    "2-step-garage",
+    "2step garage",
+    "2stepgarage",
+    "ту степ гэридж",
+    "ту-степ-гэридж",
+    "тустепгэридж"
+   ]
+  },
+  "speed-garage": {
+   "id": "speed-garage",
+   "en": "Speed Garage",
+   "ru": "спид-гэридж",
+   "dir": "Breakbeat",
+   "group": "UK Breaks",
+   "also": [],
+   "alias": [
+    "speed garage",
+    "speed-garage",
+    "speedgarage",
+    "спид гэридж",
+    "спид-гэридж",
+    "спидгэридж"
+   ]
+  },
+  "bassline": {
+   "id": "bassline",
+   "en": "Bassline",
+   "ru": "басслайн",
+   "dir": "Breakbeat",
+   "group": "UK Breaks",
+   "also": [],
+   "alias": [
+    "bassline",
+    "басслайн"
+   ]
+  },
+  "breakstep": {
+   "id": "breakstep",
+   "en": "Breakstep",
+   "ru": "брейкстеп",
+   "dir": "Breakbeat",
+   "group": "UK Breaks",
+   "also": [],
+   "alias": [
+    "breakstep",
+    "брейкстеп"
+   ]
+  },
+  "future-garage": {
+   "id": "future-garage",
+   "en": "Future Garage",
+   "ru": "фьючер-гэридж",
+   "dir": "Breakbeat",
+   "group": "UK Breaks",
+   "also": [],
+   "alias": [
+    "future garage",
+    "future-garage",
+    "futuregarage",
+    "фьючер гэридж",
+    "фьючер-гэридж",
+    "фьючергэридж"
+   ]
+  },
+  "uk-funky": {
+   "id": "uk-funky",
+   "en": "UK Funky",
+   "ru": "UK-фанки",
+   "dir": "Breakbeat",
+   "group": "UK Breaks",
+   "also": [],
+   "alias": [
+    "uk funky",
+    "uk фанки",
+    "uk-funky",
+    "uk-фанки",
+    "ukfunky",
+    "ukфанки"
+   ]
+  },
+  "liquid-dnb": {
+   "id": "liquid-dnb",
+   "en": "Liquid DnB",
+   "ru": "ликвид-драм-н-бейс",
+   "dir": "Drum & Bass",
+   "group": "Drum & Bass",
+   "also": [],
+   "alias": [
+    "dnb",
+    "liquid dnb",
+    "liquid-dnb",
+    "liquiddnb",
+    "днб",
+    "драм-н-бейс",
+    "ликвид драм н бейс",
+    "ликвид-драм-н-бейс",
+    "ликвиддрамнбейс"
+   ]
+  },
+  "atmospheric-dnb": {
+   "id": "atmospheric-dnb",
+   "en": "Atmospheric DnB",
+   "ru": "атмосферик-драм-н-бейс",
+   "dir": "Drum & Bass",
+   "group": "Drum & Bass",
+   "also": [],
+   "alias": [
+    "atmospheric dnb",
+    "atmospheric-dnb",
+    "atmosphericdnb",
+    "атмосферик драм н бейс",
+    "атмосферик-драм-н-бейс",
+    "атмосферикдрамнбейс"
+   ]
+  },
+  "jungle": {
+   "id": "jungle",
+   "en": "Jungle",
+   "ru": "джангл",
+   "dir": "Drum & Bass",
+   "group": "Drum & Bass",
+   "also": [],
+   "alias": [
+    "jungle",
+    "джангл"
+   ]
+  },
+  "jump-up": {
+   "id": "jump-up",
+   "en": "Jump Up",
+   "ru": "джамп-ап",
+   "dir": "Drum & Bass",
+   "group": "Drum & Bass",
+   "also": [],
+   "alias": [
+    "jump up",
+    "jump-up",
+    "jumpup",
+    "джамп ап",
+    "джамп-ап",
+    "джампап"
+   ]
+  },
+  "neurofunk": {
+   "id": "neurofunk",
+   "en": "Neurofunk",
+   "ru": "нейрофанк",
+   "dir": "Drum & Bass",
+   "group": "Drum & Bass",
+   "also": [],
+   "alias": [
+    "neurofunk",
+    "нейрофанк"
+   ]
+  },
+  "techstep": {
+   "id": "techstep",
+   "en": "Techstep",
+   "ru": "текстеп",
+   "dir": "Drum & Bass",
+   "group": "Drum & Bass",
+   "also": [],
+   "alias": [
+    "techstep",
+    "текстеп"
+   ]
+  },
+  "darkstep": {
+   "id": "darkstep",
+   "en": "Darkstep",
+   "ru": "даркстеп",
+   "dir": "Drum & Bass",
+   "group": "Drum & Bass",
+   "also": [],
+   "alias": [
+    "darkstep",
+    "даркстеп"
+   ]
+  },
+  "dancefloor-dnb": {
+   "id": "dancefloor-dnb",
+   "en": "Dancefloor DnB",
+   "ru": "дэнсфлор-драм-н-бейс",
+   "dir": "Drum & Bass",
+   "group": "Drum & Bass",
+   "also": [],
+   "alias": [
+    "dancefloor dnb",
+    "dancefloor-dnb",
+    "dancefloordnb",
+    "дэнсфлор драм н бейс",
+    "дэнсфлор-драм-н-бейс",
+    "дэнсфлордрамнбейс"
+   ]
+  },
+  "drumfunk": {
+   "id": "drumfunk",
+   "en": "Drumfunk",
+   "ru": "драмфанк",
+   "dir": "Drum & Bass",
+   "group": "Drum & Bass",
+   "also": [],
+   "alias": [
+    "drumfunk",
+    "драмфанк"
+   ]
+  },
+  "crossbreed": {
+   "id": "crossbreed",
+   "en": "Crossbreed",
+   "ru": "кроссбрид",
+   "dir": "Drum & Bass",
+   "group": "Drum & Bass",
+   "also": [],
+   "alias": [
+    "crossbreed",
+    "кроссбрид"
+   ]
+  },
+  "dubstep": {
+   "id": "dubstep",
+   "en": "Dubstep",
+   "ru": "дабстеп",
+   "dir": "Bass Music",
+   "group": "Dubstep",
+   "also": [],
+   "alias": [
+    "dubstep",
+    "дабстеп"
+   ]
+  },
+  "deep-dubstep": {
+   "id": "deep-dubstep",
+   "en": "Deep Dubstep",
+   "ru": "дип-дабстеп",
+   "dir": "Bass Music",
+   "group": "Dubstep",
+   "also": [],
+   "alias": [
+    "deep dubstep",
+    "deep-dubstep",
+    "deepdubstep",
+    "дип дабстеп",
+    "дип-дабстеп",
+    "дипдабстеп"
+   ]
+  },
+  "uk-dubstep": {
+   "id": "uk-dubstep",
+   "en": "UK Dubstep",
+   "ru": "UK-дабстеп",
+   "dir": "Bass Music",
+   "group": "Dubstep",
+   "also": [],
+   "alias": [
+    "uk dubstep",
+    "uk дабстеп",
+    "uk-dubstep",
+    "uk-дабстеп",
+    "ukdubstep",
+    "ukдабстеп"
+   ]
+  },
+  "brostep": {
+   "id": "brostep",
+   "en": "Brostep",
+   "ru": "бростеп",
+   "dir": "Bass Music",
+   "group": "Dubstep",
+   "also": [],
+   "alias": [
+    "brostep",
+    "бростеп"
+   ]
+  },
+  "riddim": {
+   "id": "riddim",
+   "en": "Riddim",
+   "ru": "риддим",
+   "dir": "Bass Music",
+   "group": "Dubstep",
+   "also": [],
+   "alias": [
+    "riddim",
+    "риддим"
+   ]
+  },
+  "tearout": {
+   "id": "tearout",
+   "en": "Tearout",
+   "ru": "тиэраут",
+   "dir": "Bass Music",
+   "group": "Dubstep",
+   "also": [],
+   "alias": [
+    "tearout",
+    "тиэраут"
+   ]
+  },
+  "melodic-dubstep": {
+   "id": "melodic-dubstep",
+   "en": "Melodic Dubstep",
+   "ru": "мелодик-дабстеп",
+   "dir": "Bass Music",
+   "group": "Dubstep",
+   "also": [],
+   "alias": [
+    "melodic dubstep",
+    "melodic-dubstep",
+    "melodicdubstep",
+    "мелодик дабстеп",
+    "мелодик-дабстеп",
+    "мелодикдабстеп"
+   ]
+  },
+  "future-bass": {
+   "id": "future-bass",
+   "en": "Future Bass",
+   "ru": "фьючер-бас",
+   "dir": "Bass Music",
+   "group": "Dubstep",
+   "also": [],
+   "alias": [
+    "future bass",
+    "future-bass",
+    "futurebass",
+    "фьючер бас",
+    "фьючер-бас",
+    "фьючербас"
+   ]
+  },
+  "wave": {
+   "id": "wave",
+   "en": "Wave",
+   "ru": "вейв",
+   "dir": "Bass Music",
+   "group": "Dubstep",
+   "also": [],
+   "alias": [
+    "wave",
+    "вейв"
+   ]
+  },
+  "hardwave": {
+   "id": "hardwave",
+   "en": "Hardwave",
+   "ru": "хардвейв",
+   "dir": "Bass Music",
+   "group": "Dubstep",
+   "also": [],
+   "alias": [
+    "hardwave",
+    "хардвейв"
+   ]
+  },
+  "colour-bass": {
+   "id": "colour-bass",
+   "en": "Colour Bass",
+   "ru": "колор-бас",
+   "dir": "Bass Music",
+   "group": "Dubstep",
+   "also": [],
+   "alias": [
+    "colour bass",
+    "colour-bass",
+    "colourbass",
+    "колор бас",
+    "колор-бас",
+    "колорбас"
+   ]
+  },
+  "grime": {
+   "id": "grime",
+   "en": "Grime",
+   "ru": "грайм",
+   "dir": "Bass Music",
+   "group": "Grime и UK Bass",
+   "also": [],
+   "alias": [
+    "grime",
+    "грайм"
+   ]
+  },
+  "uk-bass": {
+   "id": "uk-bass",
+   "en": "UK Bass",
+   "ru": "UK-бас",
+   "dir": "Bass Music",
+   "group": "Grime и UK Bass",
+   "also": [],
+   "alias": [
+    "uk bass",
+    "uk бас",
+    "uk-bass",
+    "uk-бас",
+    "ukbass",
+    "ukбас"
+   ]
+  },
+  "wonky": {
+   "id": "wonky",
+   "en": "Wonky",
+   "ru": "вонки",
+   "dir": "Bass Music",
+   "group": "Grime и UK Bass",
+   "also": [],
+   "alias": [
+    "wonky",
+    "вонки"
+   ]
+  },
+  "purple-sound": {
+   "id": "purple-sound",
+   "en": "Purple Sound",
+   "ru": "пёрпл-саунд",
+   "dir": "Bass Music",
+   "group": "Grime и UK Bass",
+   "also": [],
+   "alias": [
+    "purple sound",
+    "purple-sound",
+    "purplesound",
+    "пёрпл саунд",
+    "пёрпл-саунд",
+    "пёрплсаунд"
+   ]
+  },
+  "dubstep-grime": {
+   "id": "dubstep-grime",
+   "en": "Dubstep Grime",
+   "ru": "дабстеп-грайм",
+   "dir": "Bass Music",
+   "group": "Grime и UK Bass",
+   "also": [],
+   "alias": [
+    "dubstep grime",
+    "dubstep-grime",
+    "dubstepgrime",
+    "дабстеп грайм",
+    "дабстеп-грайм",
+    "дабстепграйм"
+   ]
+  },
+  "drill-electronic": {
+   "id": "drill-electronic",
+   "en": "Drill Electronic",
+   "ru": "дрилл-электронный",
+   "dir": "Bass Music",
+   "group": "Grime и UK Bass",
+   "also": [],
+   "alias": [
+    "drill electronic",
+    "drill-electronic",
+    "drillelectronic",
+    "дрилл электронный",
+    "дрилл-электронный",
+    "дриллэлектронный"
+   ]
+  },
+  "deconstructed-club": {
+   "id": "deconstructed-club",
+   "en": "Deconstructed Club",
+   "ru": "деконструкт-клаб",
+   "dir": "Bass Music",
+   "group": "Grime и UK Bass",
+   "also": [],
+   "alias": [
+    "deconstructed club",
+    "deconstructed-club",
+    "deconstructedclub",
+    "деконструкт клаб",
+    "деконструкт-клаб",
+    "деконструктклаб"
+   ]
+  },
+  "electro": {
+   "id": "electro",
+   "en": "Electro",
+   "ru": "электро",
+   "dir": "Electro",
+   "group": "Electro",
+   "also": [],
+   "alias": [
+    "electro",
+    "электро"
+   ]
+  },
+  "electro-funk": {
+   "id": "electro-funk",
+   "en": "Electro-Funk",
+   "ru": "электро-фанк",
+   "dir": "Electro",
+   "group": "Electro",
+   "also": [],
+   "alias": [
+    "electro funk",
+    "electro-funk",
+    "electrofunk",
+    "электро фанк",
+    "электро-фанк",
+    "электрофанк"
+   ]
+  },
+  "detroit-electro": {
+   "id": "detroit-electro",
+   "en": "Detroit Electro",
+   "ru": "детройт-электро",
+   "dir": "Electro",
+   "group": "Electro",
+   "also": [],
+   "alias": [
+    "detroit electro",
+    "detroit-electro",
+    "detroitelectro",
+    "детройт электро",
+    "детройт-электро",
+    "детройтэлектро"
+   ]
+  },
+  "electroclash": {
+   "id": "electroclash",
+   "en": "Electroclash",
+   "ru": "электроклэш",
+   "dir": "Electro",
+   "group": "Electro",
+   "also": [],
+   "alias": [
+    "electroclash",
+    "электроклэш"
+   ]
+  },
+  "electro-techno": {
+   "id": "electro-techno",
+   "en": "Electro Techno",
+   "ru": "электро-техно",
+   "dir": "Electro",
+   "group": "Electro",
+   "also": [],
+   "alias": [
+    "electro techno",
+    "electro-techno",
+    "electrotechno",
+    "электро техно",
+    "электро-техно",
+    "электротехно"
+   ]
+  },
+  "miami-bass": {
+   "id": "miami-bass",
+   "en": "Miami Bass",
+   "ru": "майами-бас",
+   "dir": "Electro",
+   "group": "Electro",
+   "also": [],
+   "alias": [
+    "miami bass",
+    "miami-bass",
+    "miamibass",
+    "майами бас",
+    "майами-бас",
+    "майамибас"
+   ]
+  },
+  "freestyle": {
+   "id": "freestyle",
+   "en": "Freestyle",
+   "ru": "фристайл",
+   "dir": "Electro",
+   "group": "Electro",
+   "also": [],
+   "alias": [
+    "freestyle",
+    "фристайл"
+   ]
+  },
+  "hardstyle": {
+   "id": "hardstyle",
+   "en": "Hardstyle",
+   "ru": "хардстайл",
+   "dir": "Hard Dance",
+   "group": "Hard Dance",
+   "also": [],
+   "alias": [
+    "hardstyle",
+    "хардстайл"
+   ]
+  },
+  "rawstyle": {
+   "id": "rawstyle",
+   "en": "Rawstyle",
+   "ru": "роустайл",
+   "dir": "Hard Dance",
+   "group": "Hard Dance",
+   "also": [],
+   "alias": [
+    "rawstyle",
+    "роустайл"
+   ]
+  },
+  "euphoric-hardstyle": {
+   "id": "euphoric-hardstyle",
+   "en": "Euphoric Hardstyle",
+   "ru": "эйфорик-хардстайл",
+   "dir": "Hard Dance",
+   "group": "Hard Dance",
+   "also": [],
+   "alias": [
+    "euphoric hardstyle",
+    "euphoric-hardstyle",
+    "euphorichardstyle",
+    "эйфорик хардстайл",
+    "эйфорик-хардстайл",
+    "эйфорикхардстайл"
+   ]
+  },
+  "hardcore": {
+   "id": "hardcore",
+   "en": "Hardcore",
+   "ru": "хардкор",
+   "dir": "Hard Dance",
+   "group": "Hard Dance",
+   "also": [],
+   "alias": [
+    "hardcore",
+    "хардкор"
+   ]
+  },
+  "gabber": {
+   "id": "gabber",
+   "en": "Gabber",
+   "ru": "габбер",
+   "dir": "Hard Dance",
+   "group": "Hard Dance",
+   "also": [],
+   "alias": [
+    "gabber",
+    "габбер"
+   ]
+  },
+  "frenchcore": {
+   "id": "frenchcore",
+   "en": "Frenchcore",
+   "ru": "френчкор",
+   "dir": "Hard Dance",
+   "group": "Hard Dance",
+   "also": [],
+   "alias": [
+    "frenchcore",
+    "френчкор"
+   ]
+  },
+  "uptempo-hardcore": {
+   "id": "uptempo-hardcore",
+   "en": "Uptempo Hardcore",
+   "ru": "аптемпо-хардкор",
+   "dir": "Hard Dance",
+   "group": "Hard Dance",
+   "also": [],
+   "alias": [
+    "uptempo hardcore",
+    "uptempo-hardcore",
+    "uptempohardcore",
+    "аптемпо хардкор",
+    "аптемпо-хардкор",
+    "аптемпохардкор"
+   ]
+  },
+  "happy-hardcore": {
+   "id": "happy-hardcore",
+   "en": "Happy Hardcore",
+   "ru": "хэппи-хардкор",
+   "dir": "Hard Dance",
+   "group": "Hard Dance",
+   "also": [],
+   "alias": [
+    "happy hardcore",
+    "happy-hardcore",
+    "happyhardcore",
+    "хэппи хардкор",
+    "хэппи-хардкор",
+    "хэппихардкор"
+   ]
+  },
+  "uk-hardcore": {
+   "id": "uk-hardcore",
+   "en": "UK Hardcore",
+   "ru": "UK-хардкор",
+   "dir": "Hard Dance",
+   "group": "Hard Dance",
+   "also": [],
+   "alias": [
+    "uk hardcore",
+    "uk хардкор",
+    "uk-hardcore",
+    "uk-хардкор",
+    "ukhardcore",
+    "ukхардкор"
+   ]
+  },
+  "speedcore": {
+   "id": "speedcore",
+   "en": "Speedcore",
+   "ru": "спидкор",
+   "dir": "Hard Dance",
+   "group": "Hard Dance",
+   "also": [],
+   "alias": [
+    "speedcore",
+    "спидкор"
+   ]
+  },
+  "terrorcore": {
+   "id": "terrorcore",
+   "en": "Terrorcore",
+   "ru": "терроркор",
+   "dir": "Hard Dance",
+   "group": "Hard Dance",
+   "also": [],
+   "alias": [
+    "terrorcore",
+    "терроркор"
+   ]
+  },
+  "oldschool-rave": {
+   "id": "oldschool-rave",
+   "en": "Oldschool Rave",
+   "ru": "олдскул-рейв",
+   "dir": "Hard Dance",
+   "group": "Rave",
+   "also": [],
+   "alias": [
+    "oldschool rave",
+    "oldschool-rave",
+    "oldschoolrave",
+    "rave",
+    "олдскул рейв",
+    "олдскул-рейв",
+    "олдскулрейв",
+    "рейв"
+   ]
+  },
+  "breakbeat-hardcore": {
+   "id": "breakbeat-hardcore",
+   "en": "Breakbeat Hardcore",
+   "ru": "брейкбит-хардкор",
+   "dir": "Hard Dance",
+   "group": "Rave",
+   "also": [],
+   "alias": [
+    "breakbeat hardcore",
+    "breakbeat-hardcore",
+    "breakbeathardcore",
+    "брейкбит хардкор",
+    "брейкбит-хардкор",
+    "брейкбитхардкор"
+   ]
+  },
+  "belgian-rave": {
+   "id": "belgian-rave",
+   "en": "Belgian Rave",
+   "ru": "бельгийский-рейв",
+   "dir": "Hard Dance",
+   "group": "Rave",
+   "also": [],
+   "alias": [
+    "belgian rave",
+    "belgian-rave",
+    "belgianrave",
+    "бельгийский рейв",
+    "бельгийский-рейв",
+    "бельгийскийрейв"
+   ]
+  },
+  "acid-rave": {
+   "id": "acid-rave",
+   "en": "Acid Rave",
+   "ru": "эйсид-рейв",
+   "dir": "Hard Dance",
+   "group": "Rave",
+   "also": [],
+   "alias": [
+    "acid rave",
+    "acid-rave",
+    "acidrave",
+    "эйсид рейв",
+    "эйсид-рейв",
+    "эйсидрейв"
+   ]
+  },
+  "piano-rave": {
+   "id": "piano-rave",
+   "en": "Piano Rave",
+   "ru": "пиано-рейв",
+   "dir": "Hard Dance",
+   "group": "Rave",
+   "also": [],
+   "alias": [
+    "piano rave",
+    "piano-rave",
+    "pianorave",
+    "пиано рейв",
+    "пиано-рейв",
+    "пианорейв"
+   ]
+  },
+  "nu-rave": {
+   "id": "nu-rave",
+   "en": "Nu-Rave",
+   "ru": "ню-рейв",
+   "dir": "Hard Dance",
+   "group": "Rave",
+   "also": [],
+   "alias": [
+    "nu rave",
+    "nu-rave",
+    "nurave",
+    "ню рейв",
+    "ню-рейв",
+    "нюрейв"
+   ]
+  },
+  "italo-disco": {
+   "id": "italo-disco",
+   "en": "Italo Disco",
+   "ru": "итало-диско",
+   "dir": "Disco",
+   "group": "Disco",
+   "also": [],
+   "alias": [
+    "italo disco",
+    "italo-disco",
+    "italodisco",
+    "итало диско",
+    "итало-диско",
+    "италодиско"
+   ]
+  },
+  "euro-disco": {
+   "id": "euro-disco",
+   "en": "Euro Disco",
+   "ru": "евро-диско",
+   "dir": "Disco",
+   "group": "Disco",
+   "also": [],
+   "alias": [
+    "euro disco",
+    "euro-disco",
+    "eurodisco",
+    "евро диско",
+    "евро-диско",
+    "евродиско"
+   ]
+  },
+  "space-disco": {
+   "id": "space-disco",
+   "en": "Space Disco",
+   "ru": "спейс-диско",
+   "dir": "Disco",
+   "group": "Disco",
+   "also": [],
+   "alias": [
+    "space disco",
+    "space-disco",
+    "spacedisco",
+    "спейс диско",
+    "спейс-диско",
+    "спейсдиско"
+   ]
+  },
+  "nu-disco": {
+   "id": "nu-disco",
+   "en": "Nu-Disco",
+   "ru": "ню-диско",
+   "dir": "Disco",
+   "group": "Disco",
+   "also": [],
+   "alias": [
+    "disco",
+    "nu disco",
+    "nu-disco",
+    "nudisco",
+    "диско",
+    "нью-диско",
+    "ню диско",
+    "ню-диско",
+    "нюдиско"
+   ]
+  },
+  "indie-dance": {
+   "id": "indie-dance",
+   "en": "Indie Dance",
+   "ru": "инди-дэнс",
+   "dir": "Disco",
+   "group": "Disco",
+   "also": [],
+   "alias": [
+    "indie dance",
+    "indie-dance",
+    "indiedance",
+    "инди дэнс",
+    "инди-дэнс",
+    "индидэнс"
+   ]
+  },
+  "dark-disco": {
+   "id": "dark-disco",
+   "en": "Dark Disco",
+   "ru": "дарк-диско",
+   "dir": "Disco",
+   "group": "Disco",
+   "also": [],
+   "alias": [
+    "dark disco",
+    "dark-disco",
+    "darkdisco",
+    "дарк диско",
+    "дарк-диско",
+    "даркдиско"
+   ]
+  },
+  "cosmic-disco": {
+   "id": "cosmic-disco",
+   "en": "Cosmic Disco",
+   "ru": "космик-диско",
+   "dir": "Disco",
+   "group": "Disco",
+   "also": [],
+   "alias": [
+    "cosmic disco",
+    "cosmic-disco",
+    "cosmicdisco",
+    "космик диско",
+    "космик-диско",
+    "космикдиско"
+   ]
+  },
+  "hi-nrg": {
+   "id": "hi-nrg",
+   "en": "Hi-NRG",
+   "ru": "хай-энерджи",
+   "dir": "Disco",
+   "group": "Disco",
+   "also": [],
+   "alias": [
+    "hi nrg",
+    "hi-nrg",
+    "hinrg",
+    "хай энерджи",
+    "хай-энерджи",
+    "хайэнерджи"
+   ]
+  },
+  "synthpop": {
+   "id": "synthpop",
+   "en": "Synthpop",
+   "ru": "синт-поп",
+   "dir": "Synth",
+   "group": "Synth",
+   "also": [],
+   "alias": [
+    "synthpop",
+    "синт поп",
+    "синт-поп",
+    "синти-поп",
+    "синтипоп",
+    "синтпоп"
+   ]
+  },
+  "electropop": {
+   "id": "electropop",
+   "en": "Electropop",
+   "ru": "электро-поп",
+   "dir": "Synth",
+   "group": "Synth",
+   "also": [],
+   "alias": [
+    "electropop",
+    "электро поп",
+    "электро-поп",
+    "электропоп"
+   ]
+  },
+  "synthwave": {
+   "id": "synthwave",
+   "en": "Synthwave",
+   "ru": "синт-вейв",
+   "dir": "Synth",
+   "group": "Synth",
+   "also": [],
+   "alias": [
+    "synthwave",
+    "синт вейв",
+    "синт-вейв",
+    "синтвейв"
+   ]
+  },
+  "retrowave": {
+   "id": "retrowave",
+   "en": "Retrowave",
+   "ru": "ретро-вейв",
+   "dir": "Synth",
+   "group": "Synth",
+   "also": [],
+   "alias": [
+    "retrowave",
+    "ретро вейв",
+    "ретро-вейв",
+    "ретровейв"
+   ]
+  },
+  "outrun": {
+   "id": "outrun",
+   "en": "Outrun",
+   "ru": "аутран",
+   "dir": "Synth",
+   "group": "Synth",
+   "also": [],
+   "alias": [
+    "outrun",
+    "аутран"
+   ]
+  },
+  "darksynth": {
+   "id": "darksynth",
+   "en": "Darksynth",
+   "ru": "дарк-синт",
+   "dir": "Synth",
+   "group": "Synth",
+   "also": [],
+   "alias": [
+    "darksynth",
+    "дарк синт",
+    "дарк-синт",
+    "дарксинт"
+   ]
+  },
+  "dreamwave": {
+   "id": "dreamwave",
+   "en": "Dreamwave",
+   "ru": "дрим-вейв",
+   "dir": "Synth",
+   "group": "Synth",
+   "also": [],
+   "alias": [
+    "dreamwave",
+    "дрим вейв",
+    "дрим-вейв",
+    "дримвейв"
+   ]
+  },
+  "chillwave": {
+   "id": "chillwave",
+   "en": "Chillwave",
+   "ru": "чил-вейв",
+   "dir": "Synth",
+   "group": "Synth",
+   "also": [],
+   "alias": [
+    "chillwave",
+    "чил вейв",
+    "чил-вейв",
+    "чилвейв"
+   ]
+  },
+  "vaporwave": {
+   "id": "vaporwave",
+   "en": "Vaporwave",
+   "ru": "вейпор-вейв",
+   "dir": "Synth",
+   "group": "Synth",
+   "also": [],
+   "alias": [
+    "vaporwave",
+    "вейпор вейв",
+    "вейпор-вейв",
+    "вейпорвейв"
+   ]
+  },
+  "chiptune": {
+   "id": "chiptune",
+   "en": "Chiptune",
+   "ru": "чиптюн",
+   "dir": "Synth",
+   "group": "Ретроэлектроника",
+   "also": [],
+   "alias": [
+    "chiptune",
+    "чиптюн"
+   ]
+  },
+  "8-bit": {
+   "id": "8-bit",
+   "en": "8-Bit",
+   "ru": "8-бит",
+   "dir": "Synth",
+   "group": "Ретроэлектроника",
+   "also": [],
+   "alias": [
+    "8 bit",
+    "8 бит",
+    "8-bit",
+    "8-бит",
+    "8bit",
+    "8бит"
+   ]
+  },
+  "bitpop": {
+   "id": "bitpop",
+   "en": "Bitpop",
+   "ru": "битпоп",
+   "dir": "Synth",
+   "group": "Ретроэлектроника",
+   "also": [],
+   "alias": [
+    "bitpop",
+    "битпоп"
+   ]
+  },
+  "spacesynth": {
+   "id": "spacesynth",
+   "en": "Spacesynth",
+   "ru": "спейссинт",
+   "dir": "Synth",
+   "group": "Ретроэлектроника",
+   "also": [],
+   "alias": [
+    "spacesynth",
+    "спейссинт"
+   ]
+  },
+  "future-funk": {
+   "id": "future-funk",
+   "en": "Future Funk",
+   "ru": "фьючер-фанк",
+   "dir": "Synth",
+   "group": "Ретроэлектроника",
+   "also": [],
+   "alias": [
+    "future funk",
+    "future-funk",
+    "futurefunk",
+    "фьючер фанк",
+    "фьючер-фанк",
+    "фьючерфанк"
+   ]
+  },
+  "industrial": {
+   "id": "industrial",
+   "en": "Industrial",
+   "ru": "индастриал",
+   "dir": "Industrial",
+   "group": "Industrial и Dark Electronic",
+   "also": [],
+   "alias": [
+    "industrial",
+    "индастриал"
+   ]
+  },
+  "ebm": {
+   "id": "ebm",
+   "en": "EBM",
+   "ru": "EBM",
+   "dir": "Industrial",
+   "group": "Industrial и Dark Electronic",
+   "also": [],
+   "alias": [
+    "ebm"
+   ]
+  },
+  "dark-electro": {
+   "id": "dark-electro",
+   "en": "Dark Electro",
+   "ru": "дарк-электро",
+   "dir": "Industrial",
+   "group": "Industrial и Dark Electronic",
+   "also": [],
+   "alias": [
+    "dark electro",
+    "dark-electro",
+    "darkelectro",
+    "дарк электро",
+    "дарк-электро",
+    "даркэлектро"
+   ]
+  },
+  "aggrotech": {
+   "id": "aggrotech",
+   "en": "Aggrotech",
+   "ru": "агротек",
+   "dir": "Industrial",
+   "group": "Industrial и Dark Electronic",
+   "also": [],
+   "alias": [
+    "aggrotech",
+    "агротек"
+   ]
+  },
+  "futurepop": {
+   "id": "futurepop",
+   "en": "Futurepop",
+   "ru": "фьючерпоп",
+   "dir": "Industrial",
+   "group": "Industrial и Dark Electronic",
+   "also": [],
+   "alias": [
+    "futurepop",
+    "фьючерпоп"
+   ]
+  },
+  "power-electronics": {
+   "id": "power-electronics",
+   "en": "Power Electronics",
+   "ru": "пауэр-электроник-s",
+   "dir": "Industrial",
+   "group": "Industrial и Dark Electronic",
+   "also": [],
+   "alias": [
+    "power electronics",
+    "power-electronics",
+    "powerelectronics",
+    "пауэр электроник s",
+    "пауэр-электроник-s",
+    "пауэрэлектроникs"
+   ]
+  },
+  "rhythmic-noise": {
+   "id": "rhythmic-noise",
+   "en": "Rhythmic Noise",
+   "ru": "ритмический-нойз",
+   "dir": "Industrial",
+   "group": "Industrial и Dark Electronic",
+   "also": [],
+   "alias": [
+    "rhythmic noise",
+    "rhythmic-noise",
+    "rhythmicnoise",
+    "ритмический нойз",
+    "ритмический-нойз",
+    "ритмическийнойз"
+   ]
+  },
+  "witch-house": {
+   "id": "witch-house",
+   "en": "Witch House",
+   "ru": "витч-хаус",
+   "dir": "Industrial",
+   "group": "Industrial и Dark Electronic",
+   "also": [],
+   "alias": [
+    "witch house",
+    "witch-house",
+    "witchhouse",
+    "витч хаус",
+    "витч-хаус",
+    "витчхаус"
+   ]
+  },
+  "darkwave": {
+   "id": "darkwave",
+   "en": "Darkwave",
+   "ru": "даркуэйв",
+   "dir": "Industrial",
+   "group": "Industrial и Dark Electronic",
+   "also": [],
+   "alias": [
+    "darkwave",
+    "даркуэйв"
+   ]
+  },
+  "coldwave": {
+   "id": "coldwave",
+   "en": "Coldwave",
+   "ru": "колдвейв",
+   "dir": "Industrial",
+   "group": "Industrial и Dark Electronic",
+   "also": [],
+   "alias": [
+    "coldwave",
+    "колдвейв"
+   ]
+  },
+  "ambient": {
+   "id": "ambient",
+   "en": "Ambient",
+   "ru": "эмбиент",
+   "dir": "Ambient",
+   "group": "Ambient",
+   "also": [],
+   "alias": [
+    "ambient",
+    "эмбиент"
+   ]
+  },
+  "dark-ambient": {
+   "id": "dark-ambient",
+   "en": "Dark Ambient",
+   "ru": "дарк-эмбиент",
+   "dir": "Ambient",
+   "group": "Ambient",
+   "also": [],
+   "alias": [
+    "dark ambient",
+    "dark-ambient",
+    "darkambient",
+    "дарк эмбиент",
+    "дарк-эмбиент",
+    "даркэмбиент"
+   ]
+  },
+  "drone": {
+   "id": "drone",
+   "en": "Drone",
+   "ru": "дрон",
+   "dir": "Ambient",
+   "group": "Ambient",
+   "also": [],
+   "alias": [
+    "drone",
+    "дрон"
+   ]
+  },
+  "space-ambient": {
+   "id": "space-ambient",
+   "en": "Space Ambient",
+   "ru": "спейс-эмбиент",
+   "dir": "Ambient",
+   "group": "Ambient",
+   "also": [],
+   "alias": [
+    "space ambient",
+    "space-ambient",
+    "spaceambient",
+    "спейс эмбиент",
+    "спейс-эмбиент",
+    "спейсэмбиент"
+   ]
+  },
+  "organic-ambient": {
+   "id": "organic-ambient",
+   "en": "Organic Ambient",
+   "ru": "органик-эмбиент",
+   "dir": "Ambient",
+   "group": "Ambient",
+   "also": [],
+   "alias": [
+    "organic ambient",
+    "organic-ambient",
+    "organicambient",
+    "органик эмбиент",
+    "органик-эмбиент",
+    "органикэмбиент"
+   ]
+  },
+  "tribal-ambient": {
+   "id": "tribal-ambient",
+   "en": "Tribal Ambient",
+   "ru": "трайбал-эмбиент",
+   "dir": "Ambient",
+   "group": "Ambient",
+   "also": [],
+   "alias": [
+    "tribal ambient",
+    "tribal-ambient",
+    "tribalambient",
+    "трайбал эмбиент",
+    "трайбал-эмбиент",
+    "трайбалэмбиент"
+   ]
+  },
+  "isolationism": {
+   "id": "isolationism",
+   "en": "Isolationism",
+   "ru": "изоляционизм",
+   "dir": "Ambient",
+   "group": "Ambient",
+   "also": [],
+   "alias": [
+    "isolationism",
+    "изоляционизм"
+   ]
+  },
+  "ambient-dub": {
+   "id": "ambient-dub",
+   "en": "Ambient Dub",
+   "ru": "эмбиент-даб",
+   "dir": "Ambient",
+   "group": "Ambient",
+   "also": [],
+   "alias": [
+    "ambient dub",
+    "ambient-dub",
+    "ambientdub",
+    "эмбиент даб",
+    "эмбиент-даб",
+    "эмбиентдаб"
+   ]
+  },
+  "ambient-techno": {
+   "id": "ambient-techno",
+   "en": "Ambient Techno",
+   "ru": "эмбиент-техно",
+   "dir": "Ambient",
+   "group": "Ambient",
+   "also": [],
+   "alias": [
+    "ambient techno",
+    "ambient-techno",
+    "ambienttechno",
+    "эмбиент техно",
+    "эмбиент-техно",
+    "эмбиенттехно"
+   ]
+  },
+  "downtempo": {
+   "id": "downtempo",
+   "en": "Downtempo",
+   "ru": "даунтемпо",
+   "dir": "Downtempo",
+   "group": "Downtempo",
+   "also": [],
+   "alias": [
+    "downtempo",
+    "даунтемпо"
+   ]
+  },
+  "chillout": {
+   "id": "chillout",
+   "en": "Chillout",
+   "ru": "чилаут",
+   "dir": "Downtempo",
+   "group": "Downtempo",
+   "also": [],
+   "alias": [
+    "chillout",
+    "чил-аут",
+    "чилаут"
+   ]
+  },
+  "trip-hop": {
+   "id": "trip-hop",
+   "en": "Trip-Hop",
+   "ru": "трип-хоп",
+   "dir": "Downtempo",
+   "group": "Downtempo",
+   "also": [],
+   "alias": [
+    "trip hop",
+    "trip-hop",
+    "triphop",
+    "трип хоп",
+    "трип-хоп",
+    "трипхоп"
+   ]
+  },
+  "lounge": {
+   "id": "lounge",
+   "en": "Lounge",
+   "ru": "лаунж",
+   "dir": "Downtempo",
+   "group": "Downtempo",
+   "also": [],
+   "alias": [
+    "lounge",
+    "лаунж"
+   ]
+  },
+  "balearic-beat": {
+   "id": "balearic-beat",
+   "en": "Balearic Beat",
+   "ru": "балеарик-бит",
+   "dir": "Downtempo",
+   "group": "Downtempo",
+   "also": [],
+   "alias": [
+    "balearic beat",
+    "balearic-beat",
+    "balearicbeat",
+    "балеарик бит",
+    "балеарик-бит",
+    "балеарикбит"
+   ]
+  },
+  "psybient": {
+   "id": "psybient",
+   "en": "Psybient",
+   "ru": "псайбиент",
+   "dir": "Downtempo",
+   "group": "Downtempo",
+   "also": [],
+   "alias": [
+    "psybient",
+    "псайбиент"
+   ]
+  },
+  "psychill": {
+   "id": "psychill",
+   "en": "Psychill",
+   "ru": "псайчил",
+   "dir": "Downtempo",
+   "group": "Downtempo",
+   "also": [],
+   "alias": [
+    "psychill",
+    "псайчил"
+   ]
+  },
+  "psydub": {
+   "id": "psydub",
+   "en": "Psydub",
+   "ru": "псайдаб",
+   "dir": "Downtempo",
+   "group": "Downtempo",
+   "also": [],
+   "alias": [
+    "psydub",
+    "псайдаб"
+   ]
+  },
+  "ethnic-electronica": {
+   "id": "ethnic-electronica",
+   "en": "Ethnic Electronica",
+   "ru": "этник-электроника",
+   "dir": "Downtempo",
+   "group": "Downtempo",
+   "also": [],
+   "alias": [
+    "ethnic electronica",
+    "ethnic-electronica",
+    "ethnicelectronica",
+    "этник электроника",
+    "этник-электроника",
+    "этникэлектроника"
+   ]
+  },
+  "organic-downtempo": {
+   "id": "organic-downtempo",
+   "en": "Organic Downtempo",
+   "ru": "органик-даунтемпо",
+   "dir": "Downtempo",
+   "group": "Downtempo",
+   "also": [],
+   "alias": [
+    "organic downtempo",
+    "organic-downtempo",
+    "organicdowntempo",
+    "органик даунтемпо",
+    "органик-даунтемпо",
+    "органикдаунтемпо"
+   ]
+  },
+  "lo-fi-beats": {
+   "id": "lo-fi-beats",
+   "en": "Lo-Fi Beats",
+   "ru": "лоу-фай-битс",
+   "dir": "Downtempo",
+   "group": "Lo-Fi и Beat Music",
+   "also": [],
+   "alias": [
+    "lo fi beats",
+    "lo-fi beats",
+    "lo-fi-beats",
+    "lofi beats",
+    "lofibeats",
+    "лоу фай битс",
+    "лоу-фай-битс",
+    "лоуфайбитс"
+   ]
+  },
+  "chillhop": {
+   "id": "chillhop",
+   "en": "Chillhop",
+   "ru": "чилхоп",
+   "dir": "Downtempo",
+   "group": "Lo-Fi и Beat Music",
+   "also": [],
+   "alias": [
+    "chillhop",
+    "чилхоп"
+   ]
+  },
+  "instrumental-hip-hop": {
+   "id": "instrumental-hip-hop",
+   "en": "Instrumental Hip-Hop",
+   "ru": "инструментал-хип-хоп",
+   "dir": "Downtempo",
+   "group": "Lo-Fi и Beat Music",
+   "also": [],
+   "alias": [
+    "instrumental hip hop",
+    "instrumental hip-hop",
+    "instrumental hiphop",
+    "instrumental-hip-hop",
+    "instrumentalhiphop",
+    "инструментал хип хоп",
+    "инструментал-хип-хоп",
+    "инструменталхипхоп"
+   ]
+  },
+  "boom-bap-electronic": {
+   "id": "boom-bap-electronic",
+   "en": "Boom Bap Electronic",
+   "ru": "бум-бэп-электронный",
+   "dir": "Downtempo",
+   "group": "Lo-Fi и Beat Music",
+   "also": [],
+   "alias": [
+    "boom bap electronic",
+    "boom-bap-electronic",
+    "boombapelectronic",
+    "бум бэп электронный",
+    "бум-бэп-электронный",
+    "бумбэпэлектронный"
+   ]
+  },
+  "wonky-beats": {
+   "id": "wonky-beats",
+   "en": "Wonky Beats",
+   "ru": "вонки-битс",
+   "dir": "Downtempo",
+   "group": "Lo-Fi и Beat Music",
+   "also": [],
+   "alias": [
+    "wonky beats",
+    "wonky-beats",
+    "wonkybeats",
+    "вонки битс",
+    "вонки-битс",
+    "вонкибитс"
+   ]
+  },
+  "abstract-hip-hop": {
+   "id": "abstract-hip-hop",
+   "en": "Abstract Hip-Hop",
+   "ru": "абстракт-хип-хоп",
+   "dir": "Downtempo",
+   "group": "Lo-Fi и Beat Music",
+   "also": [],
+   "alias": [
+    "abstract hip hop",
+    "abstract hip-hop",
+    "abstract hiphop",
+    "abstract-hip-hop",
+    "abstracthiphop",
+    "абстракт хип хоп",
+    "абстракт-хип-хоп",
+    "абстрактхипхоп"
+   ]
+  },
+  "idm": {
+   "id": "idm",
+   "en": "IDM",
+   "ru": "IDM",
+   "dir": "IDM",
+   "group": "IDM и эксперимент",
+   "also": [],
+   "alias": [
+    "idm"
+   ]
+  },
+  "glitch": {
+   "id": "glitch",
+   "en": "Glitch",
+   "ru": "глитч",
+   "dir": "IDM",
+   "group": "IDM и эксперимент",
+   "also": [],
+   "alias": [
+    "glitch",
+    "глитч"
+   ]
+  },
+  "glitchcore": {
+   "id": "glitchcore",
+   "en": "Glitchcore",
+   "ru": "глитч-кор",
+   "dir": "IDM",
+   "group": "IDM и эксперимент",
+   "also": [],
+   "alias": [
+    "glitchcore",
+    "глитч кор",
+    "глитч-кор",
+    "глитчкор"
+   ]
+  },
+  "clicks-cuts": {
+   "id": "clicks-cuts",
+   "en": "Clicks & Cuts",
+   "ru": "кликс-энд-катс",
+   "dir": "IDM",
+   "group": "IDM и эксперимент",
+   "also": [],
+   "alias": [
+    "clicks & cuts",
+    "clicks and cuts",
+    "clicks cuts",
+    "clicks-&-cuts",
+    "clickscuts",
+    "кликс энд катс",
+    "кликс-энд-катс",
+    "кликсэндкатс"
+   ]
+  },
+  "braindance": {
+   "id": "braindance",
+   "en": "Braindance",
+   "ru": "брейндэнс",
+   "dir": "IDM",
+   "group": "IDM и эксперимент",
+   "also": [],
+   "alias": [
+    "braindance",
+    "брейндэнс"
+   ]
+  },
+  "drill-n-bass": {
+   "id": "drill-n-bass",
+   "en": "Drill'n'Bass",
+   "ru": "дрилл-н-бейс",
+   "dir": "IDM",
+   "group": "IDM и эксперимент",
+   "also": [],
+   "alias": [
+    "drill'n'bass",
+    "drillnbass",
+    "дрилл н бейс",
+    "дрилл-н-бейс",
+    "дриллнбейс"
+   ]
+  },
+  "microsound": {
+   "id": "microsound",
+   "en": "Microsound",
+   "ru": "микросаунд",
+   "dir": "IDM",
+   "group": "IDM и эксперимент",
+   "also": [],
+   "alias": [
+    "microsound",
+    "микросаунд"
+   ]
+  },
+  "musique-concrete": {
+   "id": "musique-concrete",
+   "en": "Musique Concrete",
+   "ru": "конкретная музыка",
+   "dir": "IDM",
+   "group": "IDM и эксперимент",
+   "also": [],
+   "alias": [
+    "musique concrete",
+    "musique-concrete",
+    "musiqueconcrete",
+    "конкретная музыка",
+    "конкретная-музыка",
+    "конкретнаямузыка"
+   ]
+  },
+  "electroacoustic": {
+   "id": "electroacoustic",
+   "en": "Electroacoustic",
+   "ru": "электро-акустик",
+   "dir": "IDM",
+   "group": "IDM и эксперимент",
+   "also": [],
+   "alias": [
+    "electroacoustic",
+    "электро акустик",
+    "электро-акустик",
+    "электроакустик"
+   ]
+  },
+  "algorithmic-music": {
+   "id": "algorithmic-music",
+   "en": "Algorithmic Music",
+   "ru": "алгоритмическая-музыка",
+   "dir": "IDM",
+   "group": "IDM и эксперимент",
+   "also": [],
+   "alias": [
+    "algorithmic music",
+    "algorithmic-music",
+    "algorithmicmusic",
+    "алгоритмическая музыка",
+    "алгоритмическая-музыка",
+    "алгоритмическаямузыка"
+   ]
+  },
+  "edm-trap": {
+   "id": "edm-trap",
+   "en": "EDM Trap",
+   "ru": "EDM-трэп",
+   "dir": "Trap",
+   "group": "Trap и электронный Hip-Hop",
+   "also": [],
+   "alias": [
+    "edm trap",
+    "edm трэп",
+    "edm-trap",
+    "edm-трэп",
+    "edmtrap",
+    "edmтрэп",
+    "trap",
+    "трэп"
+   ]
+  },
+  "festival-trap": {
+   "id": "festival-trap",
+   "en": "Festival Trap",
+   "ru": "фестивальный-трэп",
+   "dir": "Trap",
+   "group": "Trap и электронный Hip-Hop",
+   "also": [],
+   "alias": [
+    "festival trap",
+    "festival-trap",
+    "festivaltrap",
+    "фестивальный трэп",
+    "фестивальный-трэп",
+    "фестивальныйтрэп"
+   ]
+  },
+  "hybrid-trap": {
+   "id": "hybrid-trap",
+   "en": "Hybrid Trap",
+   "ru": "гибридный-трэп",
+   "dir": "Trap",
+   "group": "Trap и электронный Hip-Hop",
+   "also": [],
+   "alias": [
+    "hybrid trap",
+    "hybrid-trap",
+    "hybridtrap",
+    "гибридный трэп",
+    "гибридный-трэп",
+    "гибридныйтрэп"
+   ]
+  },
+  "future-trap": {
+   "id": "future-trap",
+   "en": "Future Trap",
+   "ru": "фьючер-трэп",
+   "dir": "Trap",
+   "group": "Trap и электронный Hip-Hop",
+   "also": [],
+   "alias": [
+    "future trap",
+    "future-trap",
+    "futuretrap",
+    "фьючер трэп",
+    "фьючер-трэп",
+    "фьючертрэп"
+   ]
+  },
+  "phonk": {
+   "id": "phonk",
+   "en": "Phonk",
+   "ru": "фонк",
+   "dir": "Trap",
+   "group": "Trap и электронный Hip-Hop",
+   "also": [],
+   "alias": [
+    "phonk",
+    "фонк"
+   ]
+  },
+  "drift-phonk": {
+   "id": "drift-phonk",
+   "en": "Drift Phonk",
+   "ru": "дрифт-фонк",
+   "dir": "Trap",
+   "group": "Trap и электронный Hip-Hop",
+   "also": [],
+   "alias": [
+    "drift phonk",
+    "drift-phonk",
+    "driftphonk",
+    "дрифт фонк",
+    "дрифт-фонк",
+    "дрифтфонк"
+   ]
+  },
+  "memphis-phonk": {
+   "id": "memphis-phonk",
+   "en": "Memphis Phonk",
+   "ru": "мемфис-фонк",
+   "dir": "Trap",
+   "group": "Trap и электронный Hip-Hop",
+   "also": [],
+   "alias": [
+    "memphis phonk",
+    "memphis-phonk",
+    "memphisphonk",
+    "мемфис фонк",
+    "мемфис-фонк",
+    "мемфисфонк"
+   ]
+  },
+  "wave-trap": {
+   "id": "wave-trap",
+   "en": "Wave Trap",
+   "ru": "вейв-трэп",
+   "dir": "Trap",
+   "group": "Trap и электронный Hip-Hop",
+   "also": [],
+   "alias": [
+    "wave trap",
+    "wave-trap",
+    "wavetrap",
+    "вейв трэп",
+    "вейв-трэп",
+    "вейвтрэп"
+   ]
+  },
+  "dance-pop": {
+   "id": "dance-pop",
+   "en": "Dance Pop",
+   "ru": "дэнс-поп",
+   "dir": "Pop",
+   "group": "Pop и коммерческая электроника",
+   "also": [],
+   "alias": [
+    "dance pop",
+    "dance-pop",
+    "dancepop",
+    "дэнс поп",
+    "дэнс-поп",
+    "дэнспоп",
+    "танцевальный поп"
+   ]
+  },
+  "eurodance": {
+   "id": "eurodance",
+   "en": "Eurodance",
+   "ru": "евродэнс",
+   "dir": "Pop",
+   "group": "Pop и коммерческая электроника",
+   "also": [],
+   "alias": [
+    "eurodance",
+    "евродэнс"
+   ]
+  },
+  "europop": {
+   "id": "europop",
+   "en": "Europop",
+   "ru": "европоп",
+   "dir": "Pop",
+   "group": "Pop и коммерческая электроника",
+   "also": [],
+   "alias": [
+    "europop",
+    "европоп"
+   ]
+  },
+  "edm-pop": {
+   "id": "edm-pop",
+   "en": "EDM Pop",
+   "ru": "EDM-поп",
+   "dir": "Pop",
+   "group": "Pop и коммерческая электроника",
+   "also": [],
+   "alias": [
+    "edm",
+    "edm pop",
+    "edm поп",
+    "edm-pop",
+    "edm-поп",
+    "edmpop",
+    "edmпоп"
+   ]
+  },
+  "tropical-house": {
+   "id": "tropical-house",
+   "en": "Tropical House",
+   "ru": "тропикал-хаус",
+   "dir": "Pop",
+   "group": "Pop и коммерческая электроника",
+   "also": [],
+   "alias": [
+    "tropical house",
+    "tropical-house",
+    "tropicalhouse",
+    "тропикал хаус",
+    "тропикал-хаус",
+    "тропикалхаус"
+   ]
+  },
+  "slap-house": {
+   "id": "slap-house",
+   "en": "Slap House",
+   "ru": "слэп-хаус",
+   "dir": "Pop",
+   "group": "Pop и коммерческая электроника",
+   "also": [],
+   "alias": [
+    "slap house",
+    "slap-house",
+    "slaphouse",
+    "слэп хаус",
+    "слэп-хаус",
+    "слэпхаус"
+   ]
+  },
+  "future-pop": {
+   "id": "future-pop",
+   "en": "Future Pop",
+   "ru": "фьючер-поп",
+   "dir": "Pop",
+   "group": "Pop и коммерческая электроника",
+   "also": [],
+   "alias": [
+    "future pop",
+    "future-pop",
+    "futurepop",
+    "фьючер поп",
+    "фьючер-поп",
+    "фьючерпоп"
+   ]
+  },
+  "hyperpop": {
+   "id": "hyperpop",
+   "en": "Hyperpop",
+   "ru": "гиперпоп",
+   "dir": "Pop",
+   "group": "Pop и коммерческая электроника",
+   "also": [],
+   "alias": [
+    "hyperpop",
+    "гиперпоп"
+   ]
+  },
+  "baile-funk": {
+   "id": "baile-funk",
+   "en": "Baile Funk",
+   "ru": "байле-фанк",
+   "dir": "Global Club",
+   "group": "Global Club Music",
+   "also": [],
+   "alias": [
+    "baile funk",
+    "baile-funk",
+    "bailefunk",
+    "байле фанк",
+    "байле-фанк",
+    "байлефанк"
+   ]
+  },
+  "brazilian-bass": {
+   "id": "brazilian-bass",
+   "en": "Brazilian Bass",
+   "ru": "бразилиан-бас",
+   "dir": "Global Club",
+   "group": "Global Club Music",
+   "also": [],
+   "alias": [
+    "brazilian bass",
+    "brazilian-bass",
+    "brazilianbass",
+    "бразилиан бас",
+    "бразилиан-бас",
+    "бразилианбас"
+   ]
+  },
+  "amapiano": {
+   "id": "amapiano",
+   "en": "Amapiano",
+   "ru": "амапиано",
+   "dir": "Global Club",
+   "group": "Global Club Music",
+   "also": [],
+   "alias": [
+    "amapiano",
+    "амапиано"
+   ]
+  },
+  "gqom": {
+   "id": "gqom",
+   "en": "Gqom",
+   "ru": "гком",
+   "dir": "Global Club",
+   "group": "Global Club Music",
+   "also": [],
+   "alias": [
+    "gqom",
+    "гком"
+   ]
+  },
+  "kuduro": {
+   "id": "kuduro",
+   "en": "Kuduro",
+   "ru": "кудуро",
+   "dir": "Global Club",
+   "group": "Global Club Music",
+   "also": [],
+   "alias": [
+    "kuduro",
+    "кудуро"
+   ]
+  },
+  "afro-electronic": {
+   "id": "afro-electronic",
+   "en": "Afro Electronic",
+   "ru": "афро-электронный",
+   "dir": "Global Club",
+   "group": "Global Club Music",
+   "also": [],
+   "alias": [
+    "afro electronic",
+    "afro-electronic",
+    "afroelectronic",
+    "афро электронный",
+    "афро-электронный",
+    "афроэлектронный"
+   ]
+  },
+  "tribal-guaracha": {
+   "id": "tribal-guaracha",
+   "en": "Tribal Guaracha",
+   "ru": "трайбал-гуарача",
+   "dir": "Global Club",
+   "group": "Global Club Music",
+   "also": [],
+   "alias": [
+    "tribal guaracha",
+    "tribal-guaracha",
+    "tribalguaracha",
+    "трайбал гуарача",
+    "трайбал-гуарача",
+    "трайбалгуарача"
+   ]
+  },
+  "moombahton": {
+   "id": "moombahton",
+   "en": "Moombahton",
+   "ru": "мумбатон",
+   "dir": "Global Club",
+   "group": "Global Club Music",
+   "also": [],
+   "alias": [
+    "moombahton",
+    "мумбатон"
+   ]
+  },
+  "moombahcore": {
+   "id": "moombahcore",
+   "en": "Moombahcore",
+   "ru": "мумбакор",
+   "dir": "Global Club",
+   "group": "Global Club Music",
+   "also": [],
+   "alias": [
+    "moombahcore",
+    "мумбакор"
+   ]
+  },
+  "dancehall-electronic": {
+   "id": "dancehall-electronic",
+   "en": "Dancehall Electronic",
+   "ru": "дэнсхолл-электронный",
+   "dir": "Global Club",
+   "group": "Global Club Music",
+   "also": [],
+   "alias": [
+    "dancehall electronic",
+    "dancehall-electronic",
+    "dancehallelectronic",
+    "дэнсхолл электронный",
+    "дэнсхолл-электронный",
+    "дэнсхоллэлектронный"
+   ]
+  },
+  "guaracha": {
+   "id": "guaracha",
+   "en": "Guaracha",
+   "ru": "гуарача",
+   "dir": "Global Club",
+   "group": "Latin Electronic",
+   "also": [],
+   "alias": [
+    "guaracha",
+    "гуарача"
+   ]
+  },
+  "reggaeton-electronic": {
+   "id": "reggaeton-electronic",
+   "en": "Reggaeton Electronic",
+   "ru": "реггетон-электронный",
+   "dir": "Global Club",
+   "group": "Latin Electronic",
+   "also": [],
+   "alias": [
+    "reggaeton electronic",
+    "reggaeton-electronic",
+    "reggaetonelectronic",
+    "реггетон электронный",
+    "реггетон-электронный",
+    "реггетонэлектронный"
+   ]
+  },
+  "cumbia-digital": {
+   "id": "cumbia-digital",
+   "en": "Cumbia Digital",
+   "ru": "кумбия-диджитал",
+   "dir": "Global Club",
+   "group": "Latin Electronic",
+   "also": [],
+   "alias": [
+    "cumbia digital",
+    "cumbia-digital",
+    "cumbiadigital",
+    "кумбия диджитал",
+    "кумбия-диджитал",
+    "кумбиядиджитал"
+   ]
+  },
+  "afro-tech": {
+   "id": "afro-tech",
+   "en": "Afro Tech",
+   "ru": "афро-тек",
+   "dir": "Global Club",
+   "group": "Caribbean и African",
+   "also": [],
+   "alias": [
+    "afro tech",
+    "afro-tech",
+    "afrotech",
+    "афро тек",
+    "афро-тек",
+    "афротек"
+   ]
+  },
+  "afrobeat-electronic": {
+   "id": "afrobeat-electronic",
+   "en": "Afrobeat Electronic",
+   "ru": "афро-бит-электронный",
+   "dir": "Global Club",
+   "group": "Caribbean и African",
+   "also": [],
+   "alias": [
+    "afrobeat electronic",
+    "afrobeat-electronic",
+    "afrobeatelectronic",
+    "афро бит электронный",
+    "афро-бит-электронный",
+    "афробитэлектронный"
+   ]
+  },
+  "kwaito": {
+   "id": "kwaito",
+   "en": "Kwaito",
+   "ru": "квайто",
+   "dir": "Global Club",
+   "group": "Caribbean и African",
+   "also": [],
+   "alias": [
+    "kwaito",
+    "квайто"
+   ]
+  },
+  "chicago-footwork": {
+   "id": "chicago-footwork",
+   "en": "Chicago Footwork",
+   "ru": "чикаго-футворк",
+   "dir": "Global Club",
+   "group": "Footwork и клубные ритмы",
+   "also": [],
+   "alias": [
+    "chicago footwork",
+    "chicago-footwork",
+    "chicagofootwork",
+    "чикаго футворк",
+    "чикаго-футворк",
+    "чикагофутворк"
+   ]
+  },
+  "juke": {
+   "id": "juke",
+   "en": "Juke",
+   "ru": "джук",
+   "dir": "Global Club",
+   "group": "Footwork и клубные ритмы",
+   "also": [],
+   "alias": [
+    "juke",
+    "джук"
+   ]
+  },
+  "jersey-club": {
+   "id": "jersey-club",
+   "en": "Jersey Club",
+   "ru": "джерси-клаб",
+   "dir": "Global Club",
+   "group": "Footwork и клубные ритмы",
+   "also": [],
+   "alias": [
+    "jersey club",
+    "jersey-club",
+    "jerseyclub",
+    "джерси клаб",
+    "джерси-клаб",
+    "джерсиклаб"
+   ]
+  },
+  "baltimore-club": {
+   "id": "baltimore-club",
+   "en": "Baltimore Club",
+   "ru": "балтимор-клаб",
+   "dir": "Global Club",
+   "group": "Footwork и клубные ритмы",
+   "also": [],
+   "alias": [
+    "baltimore club",
+    "baltimore-club",
+    "baltimoreclub",
+    "балтимор клаб",
+    "балтимор-клаб",
+    "балтиморклаб"
+   ]
+  },
+  "philly-club": {
+   "id": "philly-club",
+   "en": "Philly Club",
+   "ru": "филли-клаб",
+   "dir": "Global Club",
+   "group": "Footwork и клубные ритмы",
+   "also": [],
+   "alias": [
+    "philly club",
+    "philly-club",
+    "phillyclub",
+    "филли клаб",
+    "филли-клаб",
+    "филликлаб"
+   ]
+  },
+  "ballroom": {
+   "id": "ballroom",
+   "en": "Ballroom",
+   "ru": "боллрум",
+   "dir": "Global Club",
+   "group": "Footwork и клубные ритмы",
+   "also": [],
+   "alias": [
+    "ballroom",
+    "боллрум"
+   ]
+  },
+  "j-core": {
+   "id": "j-core",
+   "en": "J-Core",
+   "ru": "джей-кор",
+   "dir": "Global Club",
+   "group": "Японская электроника",
+   "also": [],
+   "alias": [
+    "j core",
+    "j-core",
+    "jcore",
+    "джей кор",
+    "джей-кор",
+    "джейкор"
+   ]
+  },
+  "kawaii-future-bass": {
+   "id": "kawaii-future-bass",
+   "en": "Kawaii Future Bass",
+   "ru": "каваи-фьючер-бас",
+   "dir": "Global Club",
+   "group": "Японская электроника",
+   "also": [],
+   "alias": [
+    "kawaii future bass",
+    "kawaii-future-bass",
+    "kawaiifuturebass",
+    "каваи фьючер бас",
+    "каваи-фьючер-бас",
+    "каваифьючербас"
+   ]
+  },
+  "denpa": {
+   "id": "denpa",
+   "en": "Denpa",
+   "ru": "денпа",
+   "dir": "Global Club",
+   "group": "Японская электроника",
+   "also": [],
+   "alias": [
+    "denpa",
+    "денпа"
+   ]
+  },
+  "japanese-footwork": {
+   "id": "japanese-footwork",
+   "en": "Japanese Footwork",
+   "ru": "японский-футворк",
+   "dir": "Global Club",
+   "group": "Японская электроника",
+   "also": [],
+   "alias": [
+    "japanese footwork",
+    "japanese-footwork",
+    "japanesefootwork",
+    "японский футворк",
+    "японский-футворк",
+    "японскийфутворк"
+   ]
+  },
+  "dub": {
+   "id": "dub",
+   "en": "Dub",
+   "ru": "даб",
+   "dir": "Dub",
+   "group": "Dub",
+   "also": [],
+   "alias": [
+    "dub",
+    "даб"
+   ]
+  },
+  "digital-dub": {
+   "id": "digital-dub",
+   "en": "Digital Dub",
+   "ru": "диджитал-даб",
+   "dir": "Dub",
+   "group": "Dub",
+   "also": [],
+   "alias": [
+    "digital dub",
+    "digital-dub",
+    "digitaldub",
+    "диджитал даб",
+    "диджитал-даб",
+    "диджиталдаб"
+   ]
+  },
+  "steppers": {
+   "id": "steppers",
+   "en": "Steppers",
+   "ru": "степперс",
+   "dir": "Dub",
+   "group": "Dub",
+   "also": [],
+   "alias": [
+    "steppers",
+    "степперс"
+   ]
+  },
+  "electronica": {
+   "id": "electronica",
+   "en": "Electronica",
+   "ru": "электроника",
+   "dir": "Live",
+   "group": "Live и органическая электроника",
+   "also": [],
+   "alias": [
+    "electronica",
+    "электроника"
+   ]
+  },
+  "folktronica": {
+   "id": "folktronica",
+   "en": "Folktronica",
+   "ru": "фолктроника",
+   "dir": "Live",
+   "group": "Live и органическая электроника",
+   "also": [],
+   "alias": [
+    "folktronica",
+    "фолктроника"
+   ]
+  },
+  "organic-electronica": {
+   "id": "organic-electronica",
+   "en": "Organic Electronica",
+   "ru": "органик-электроника",
+   "dir": "Live",
+   "group": "Live и органическая электроника",
+   "also": [],
+   "alias": [
+    "organic electronica",
+    "organic-electronica",
+    "organicelectronica",
+    "органик электроника",
+    "органик-электроника",
+    "органикэлектроника"
+   ]
+  },
+  "ethnotronica": {
+   "id": "ethnotronica",
+   "en": "Ethnotronica",
+   "ru": "этнотроника",
+   "dir": "Live",
+   "group": "Live и органическая электроника",
+   "also": [],
+   "alias": [
+    "ethnotronica",
+    "этнотроника"
+   ]
+  },
+  "tribal-electronica": {
+   "id": "tribal-electronica",
+   "en": "Tribal Electronica",
+   "ru": "трайбал-электроника",
+   "dir": "Live",
+   "group": "Live и органическая электроника",
+   "also": [],
+   "alias": [
+    "tribal electronica",
+    "tribal-electronica",
+    "tribalelectronica",
+    "трайбал электроника",
+    "трайбал-электроника",
+    "трайбалэлектроника"
+   ]
+  },
+  "live-electronic": {
+   "id": "live-electronic",
+   "en": "Live Electronic",
+   "ru": "лайв-электронный",
+   "dir": "Live",
+   "group": "Live и органическая электроника",
+   "also": [],
+   "alias": [
+    "live electronic",
+    "live-electronic",
+    "liveelectronic",
+    "лайв электронный",
+    "лайв-электроника",
+    "лайв-электронный",
+    "лайвэлектронный"
+   ]
+  },
+  "electro-acoustic": {
+   "id": "electro-acoustic",
+   "en": "Electro-Acoustic",
+   "ru": "электро-акустик",
+   "dir": "Live",
+   "group": "Live и органическая электроника",
+   "also": [],
+   "alias": [
+    "electro acoustic",
+    "electro-acoustic",
+    "electroacoustic",
+    "электро акустик",
+    "электро-акустик",
+    "электроакустик"
+   ]
+  },
+  "jazztronica": {
+   "id": "jazztronica",
+   "en": "Jazztronica",
+   "ru": "джазтроника",
+   "dir": "Live",
+   "group": "Концептуальные гибриды",
+   "also": [],
+   "alias": [
+    "jazztronica",
+    "джазтроника"
+   ]
+  },
+  "nu-jazz": {
+   "id": "nu-jazz",
+   "en": "Nu Jazz",
+   "ru": "ню-джаз",
+   "dir": "Live",
+   "group": "Концептуальные гибриды",
+   "also": [],
+   "alias": [
+    "nu jazz",
+    "nu-jazz",
+    "nujazz",
+    "ню джаз",
+    "ню-джаз",
+    "нюджаз"
+   ]
+  },
+  "electro-swing": {
+   "id": "electro-swing",
+   "en": "Electro Swing",
+   "ru": "электро-свинг",
+   "dir": "Live",
+   "group": "Концептуальные гибриды",
+   "also": [],
+   "alias": [
+    "electro swing",
+    "electro-swing",
+    "electroswing",
+    "электро свинг",
+    "электро-свинг",
+    "электросвинг"
+   ]
+  },
+  "classical-crossover-electronic": {
+   "id": "classical-crossover-electronic",
+   "en": "Classical Crossover Electronic",
+   "ru": "классик-кроссовер-электронный",
+   "dir": "Live",
+   "group": "Концептуальные гибриды",
+   "also": [],
+   "alias": [
+    "classical crossover electronic",
+    "classical-crossover-electronic",
+    "classicalcrossoverelectronic",
+    "классик кроссовер электронный",
+    "классик-кроссовер-электронный",
+    "классиккроссоверэлектронный"
+   ]
+  },
+  "rocktronica": {
+   "id": "rocktronica",
+   "en": "Rocktronica",
+   "ru": "роктроника",
+   "dir": "Live",
+   "group": "Концептуальные гибриды",
+   "also": [],
+   "alias": [
+    "rocktronica",
+    "роктроника"
+   ]
+  },
+  "digital-hardcore": {
+   "id": "digital-hardcore",
+   "en": "Digital Hardcore",
+   "ru": "диджитал-хардкор",
+   "dir": "Live",
+   "group": "Концептуальные гибриды",
+   "also": [],
+   "alias": [
+    "digital hardcore",
+    "digital-hardcore",
+    "digitalhardcore",
+    "диджитал хардкор",
+    "диджитал-хардкор",
+    "диджиталхардкор"
+   ]
+  },
+  "post-industrial": {
+   "id": "post-industrial",
+   "en": "Post-Industrial",
+   "ru": "пост-индастриал",
+   "dir": "Live",
+   "group": "Концептуальные гибриды",
+   "also": [],
+   "alias": [
+    "post industrial",
+    "post-industrial",
+    "postindustrial",
+    "пост индастриал",
+    "пост-индастриал",
+    "постиндастриал"
+   ]
+  }
+ }
+}

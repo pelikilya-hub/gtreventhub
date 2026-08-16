@@ -2211,7 +2211,7 @@ export const aiMatchFn = createServerFn({ method: "GET" })
       artists: [] as MatchArtist[],
     };
     if (!u || !ns) return empty;
-    const { normalizeGenres, scoreVectors } = await import("./match");
+    const { normalizeGenres, scoreVectors, scoreStyles } = await import("./match");
     const { PH, loadArtists } = await import("./data/app-data");
     const base = await loadArtists();
     const styleOf = new Map(base.artists.map((a) => [a.id, (a.styles ?? []).join(" ")]));
@@ -2231,10 +2231,33 @@ export const aiMatchFn = createServerFn({ method: "GET" })
       return normalizeGenres(parts.filter(Boolean));
     };
 
+    // Живые подписи площадки — тот же набор, из которого строится её
+    // вектор семейств. Дереву нужны именно они: по ним оно узнаёт жанры.
+    const venueStyles = (vid: string) => {
+      const v = PH.venues.find((x) => x.id === vid);
+      const parts: string[] = [v?.music ?? "", v?.concept ?? "", v?.events ?? ""];
+      for (const e of afishaBy.get(vid) ?? [])
+        for (const aid of e.artistIds) parts.push(styleOf.get(aid) ?? "");
+      return parts.filter(Boolean);
+    };
+
+    // Счёт артиста: где дерево узнало обе стороны — ведёт оно, где
+    // промолчало — работают семейства, как и раньше.
+    const scoreArtist = (
+      a: { styles?: string[] },
+      famTarget: ReturnType<typeof normalizeGenres>,
+      styles: string[],
+    ) => {
+      const raw = a.styles ?? [];
+      if (!styles.length) return scoreVectors(normalizeGenres(raw), famTarget);
+      return scoreStyles(raw, styles);
+    };
+
     const teamSide = ["gtr", "pr", "owner", "sales", "organizer"].includes(u.role);
     if (teamSide) {
       const vid = data.vid || "VEN-0002";
       const target = venueVec(vid);
+      const targetStyles = venueStyles(vid);
       const flagsKeys = await kvListAll(ns, "aflag:");
       const verified = new Set<string>();
       for (const k of flagsKeys) {
@@ -2244,7 +2267,10 @@ export const aiMatchFn = createServerFn({ method: "GET" })
       const artists: MatchArtist[] = base.artists
         .filter((a) => (a.styles ?? []).length && a.kind !== "venue")
         .map((a) => {
-          const { score, reasons } = scoreVectors(normalizeGenres(a.styles ?? []), target);
+          // Дерево жанров поверх семейств: у половины каталога есть
+          // размеченные styleIds, и для них счёт считается по родству
+          // жанров, а не по попаданию в одну из пятнадцати корзин.
+          const { score, reasons } = scoreArtist(a, target, targetStyles);
           const hasMedia = Boolean(a.ig || a.sp);
           // бонусы малые: шкала Ружички 0..1, верификация не должна ломать её
           const bonus = (verified.has(a.id) ? 0.08 : 0) + (hasMedia ? 0.04 : 0);

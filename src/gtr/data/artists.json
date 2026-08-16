@@ -357,7 +357,12 @@
    "roleRu": "Болливуд, панджаби, хаус, EDM, хип-хоп; приватные и свадебные сеты",
    "evidenceRu": "Официальный сайт указывает базу на Пхукете и приём заявок.",
    "notesRu": "",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "deep-house",
+    "edm-pop",
+    "big-room-house"
+   ]
   },
   {
    "id": "MC-0003",
@@ -453,7 +458,12 @@
    "evidenceRu": "Официальный профиль артиста и резидентский программинг YONA.",
    "notesRu": "",
    "waRu": "",
-   "bio": "House, indie dance, afro house и melodic techno; резидент Yona Beach Club и Boa Night Club, выступал на Elevation в Illuzion."
+   "bio": "House, indie dance, afro house и melodic techno; резидент Yona Beach Club и Boa Night Club, выступал на Elevation в Illuzion.",
+   "styleIds": [
+    "deep-house",
+    "organic-house",
+    "melodic-house"
+   ]
   },
   {
    "id": "MC-0005",
@@ -501,7 +511,11 @@
    "evidenceRu": "Соцсети артиста публикуют прямые контакты для брони; актуальный программинг Café del Mar.",
    "notesRu": "",
    "waRu": "WhatsApp / телефон: +66 95 092 5128",
-   "bio": "Испанский диджей с Ибицы, живёт на Пхукете; органичный мелодичный beach-house. Международные гиги с 2010 года, экс-резидент Savannah Ibiza; регулярно играет Club Room в Café del Mar."
+   "bio": "Испанский диджей с Ибицы, живёт на Пхукете; органичный мелодичный beach-house. Международные гиги с 2010 года, экс-резидент Savannah Ibiza; регулярно играет Club Room в Café del Mar.",
+   "styleIds": [
+    "organic-house",
+    "melodic-house"
+   ]
   },
   {
    "id": "MC-0006",
@@ -549,7 +563,12 @@
    "evidenceRu": "Официальный профиль артиста и клубный программинг Пхукета.",
    "notesRu": "",
    "waRu": "",
-   "bio": "DJ и продюсер с резиденциями в Illuzion и Shelter; 20+ млн стримов, релизы на Spinnin»/Hysteria, Sony, HEXAGON и Smash The House; энергичный клубный саунд."
+   "bio": "DJ и продюсер с резиденциями в Illuzion и Shelter; 20+ млн стримов, релизы на Spinnin»/Hysteria, Sony, HEXAGON и Smash The House; энергичный клубный саунд.",
+   "styleIds": [
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0007",
@@ -597,7 +616,13 @@
    "evidenceRu": "Официальный профиль указывает действующие резиденции на Пхукете.",
    "notesRu": "",
    "waRu": "",
-   "bio": "Британский диджей (Jay Brett); электронные сеты для люксовых отелей и вечерних событий Пхукета."
+   "bio": "Британский диджей (Jay Brett); электронные сеты для люксовых отелей и вечерних событий Пхукета.",
+   "styleIds": [
+    "lounge",
+    "chillout",
+    "organic-house",
+    "melodic-house"
+   ]
   },
   {
    "id": "MC-0008",
@@ -645,7 +670,11 @@
    "evidenceRu": "Официальный профиль артиста и программинг Fira.",
    "notesRu": "",
    "waRu": "",
-   "bio": "За пультом с 2002 года; резидент Fira Beach Club; ведёт ежемесячный balearic-микстейп OFM на Bangkok Community Radio; балеарика и даунтемпо."
+   "bio": "За пультом с 2002 года; резидент Fira Beach Club; ведёт ежемесячный balearic-микстейп OFM на Bangkok Community Radio; балеарика и даунтемпо.",
+   "styleIds": [
+    "electronica",
+    "deep-house"
+   ]
   },
   {
    "id": "MC-0009",
@@ -693,7 +722,10 @@
    "evidenceRu": "Профили артиста указывают базу на Пхукете и публичный WhatsApp.",
    "notesRu": "",
    "waRu": "WhatsApp: +66 88 445 5330",
-   "bio": "Minimal и deep tech; резиденции FUGA и M Beach Club, эфиры на Radio Red Phuket; сооснователь Underground Sound Of Phuket."
+   "bio": "Minimal и deep tech; резиденции FUGA и M Beach Club, эфиры на Radio Red Phuket; сооснователь Underground Sound Of Phuket.",
+   "styleIds": [
+    "electronica"
+   ]
   },
   {
    "id": "MC-0010",
@@ -741,7 +773,11 @@
    "evidenceRu": "Аккаунт артиста указан официальным комьюнити Enthusiast Place.",
    "notesRu": "",
    "waRu": "",
-   "bio": "House и bass; часть комьюнити Enthusiast Place и андеграундной сети Пхукета."
+   "bio": "House и bass; часть комьюнити Enthusiast Place и андеграундной сети Пхукета.",
+   "styleIds": [
+    "deep-house",
+    "bass-house"
+   ]
   },
   {
    "id": "MC-0011",
@@ -789,7 +825,11 @@
    "evidenceRu": "Профиль артиста публикует email для брони; дата в Café del Mar Phuket 22 августа 2026.",
    "notesRu": "",
    "waRu": "",
-   "bio": "Afro house и мелодичное техно 120–130 BPM; трек Kupala (с Doanro) на лейбле Solomun’а DIYNAMIC входил в Beatport Top 10 Melodic Techno; регулярно Café del Mar и Shelter, поздние эйфоричные сеты."
+   "bio": "Afro house и мелодичное техно 120–130 BPM; трек Kupala (с Doanro) на лейбле Solomun’а DIYNAMIC входил в Beatport Top 10 Melodic Techno; регулярно Café del Mar и Shelter, поздние эйфоричные сеты.",
+   "styleIds": [
+    "melodic-house",
+    "organic-house"
+   ]
   },
   {
    "id": "MC-0012",
@@ -836,7 +876,10 @@
    "evidenceRu": "Профиль артиста публикует email для брони и указан комьюнити Пхукета.",
    "notesRu": "",
    "waRu": "",
-   "bio": "DJ и продюсер, коллектив Rec N Cue; музыкальный директор MuMu Clubhouse; играл на Wonderfruit, в Babaloop и Café del Mar."
+   "bio": "DJ и продюсер, коллектив Rec N Cue; музыкальный директор MuMu Clubhouse; играл на Wonderfruit, в Babaloop и Café del Mar.",
+   "styleIds": [
+    "electronica"
+   ]
   },
   {
    "id": "MC-0013",
@@ -884,7 +927,13 @@
    "evidenceRu": "Аккаунт артиста и лайн-апы площадок Пхукета.",
    "notesRu": "",
    "waRu": "",
-   "bio": "Андеграундный house и techno с фанк- и соул-влиянием; часть бангкокской сцены и Supermodified Agency."
+   "bio": "Андеграундный house и techno с фанк- и соул-влиянием; часть бангкокской сцены и Supermodified Agency.",
+   "styleIds": [
+    "deep-tech",
+    "minimal-techno",
+    "dub-techno",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0014",
@@ -932,7 +981,13 @@
    "evidenceRu": "Аккаунт указан Enthusiast Place и лайн-апами площадок.",
    "notesRu": "",
    "waRu": "",
-   "bio": "Андеграундный DJ и продюсер; играл CIRCOLOCO Phuket 2023; релизы на Beatport; комьюнити Enthusiast Place."
+   "bio": "Андеграундный DJ и продюсер; играл CIRCOLOCO Phuket 2023; релизы на Beatport; комьюнити Enthusiast Place.",
+   "styleIds": [
+    "deep-tech",
+    "minimal-techno",
+    "dub-techno",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0015",
@@ -980,7 +1035,11 @@
    "evidenceRu": "Соцсети артиста; событие Café del Mar Phuket 6 августа 2026.",
    "notesRu": "",
    "waRu": "",
-   "bio": "House-пионер Пхукета, сооснователь Phuket House Mafia и дневных пляжных вечеринок Soundwave Sunday; релизы на Piston Recordings с поддержкой Louie Vega и Miguel Migs; регулярно Café del Mar."
+   "bio": "House-пионер Пхукета, сооснователь Phuket House Mafia и дневных пляжных вечеринок Soundwave Sunday; релизы на Piston Recordings с поддержкой Louie Vega и Miguel Migs; регулярно Café del Mar.",
+   "styleIds": [
+    "organic-house",
+    "melodic-house"
+   ]
   },
   {
    "id": "MC-0016",
@@ -1028,7 +1087,11 @@
    "evidenceRu": "Профиль артиста указывает роль DJ и продюсера и резиденцию на Пхукете.",
    "notesRu": "",
    "waRu": "",
-   "bio": "Более 20 лет за пультом (с 1999); резидент Café del Mar; house, techno, latin и диско-грувы; играл в Британии, на Ибице и в Сиднее; основатель лейбла Knights of Frequency."
+   "bio": "Более 20 лет за пультом (с 1999); резидент Café del Mar; house, techno, latin и диско-грувы; играл в Британии, на Ибице и в Сиднее; основатель лейбла Knights of Frequency.",
+   "styleIds": [
+    "organic-house",
+    "melodic-house"
+   ]
   },
   {
    "id": "MC-0017",
@@ -1076,7 +1139,11 @@
    "evidenceRu": "Профиль артиста указывает базу на Пхукете и действующую резиденцию.",
    "notesRu": "",
    "waRu": "",
-   "bio": "Украинский диджей, на Пхукете с 1995 года; latin house, vocal house, deep house и lounge; играет в Tree Bay Clubhouse, ведёт шоу на Paradisco Radio."
+   "bio": "Украинский диджей, на Пхукете с 1995 года; latin house, vocal house, deep house и lounge; играет в Tree Bay Clubhouse, ведёт шоу на Paradisco Radio.",
+   "styleIds": [
+    "organic-house",
+    "melodic-house"
+   ]
   },
   {
    "id": "MC-0018",
@@ -1122,7 +1189,12 @@
    "roleRu": "Резидентный клубный DJ",
    "evidenceRu": "Аккаунт артиста и упоминания резиденции Illuzion.",
    "notesRu": "",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0019",
@@ -1169,7 +1241,14 @@
    "roleRu": "Резидентный лаунж- и клубный DJ",
    "evidenceRu": "Резидент назван официальным аккаунтом площадки; личный публичный маршрут брони не подтверждён.",
    "notesRu": "Ссылка на Instagram — маршрут площадки, а не подтверждённый личный аккаунт артиста.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "lounge",
+    "chillout",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0020",
@@ -1216,7 +1295,11 @@
    "roleRu": "DJ и продюсер; электроника для бич-клубов",
    "evidenceRu": "Аккаунт артиста и резидентский программинг YONA.",
    "notesRu": "",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "melodic-house",
+    "organic-house"
+   ]
   },
   {
    "id": "MC-0021",
@@ -1264,7 +1347,11 @@
    "evidenceRu": "Аккаунт указан Enthusiast Place и программингом площадок.",
    "notesRu": "",
    "waRu": "",
-   "bio": "Deep house, indie dance и deep tech; экс-профессиональная танцовщица, за пультом с 2019; играла в Amnesia Ibiza; на Пхукете — Yuuhi, Café del Mar и Enthusiast Place."
+   "bio": "Deep house, indie dance и deep tech; экс-профессиональная танцовщица, за пультом с 2019; играла в Amnesia Ibiza; на Пхукете — Yuuhi, Café del Mar и Enthusiast Place.",
+   "styleIds": [
+    "electronica",
+    "melodic-house"
+   ]
   },
   {
    "id": "MC-0022",
@@ -1312,7 +1399,12 @@
    "evidenceRu": "Аккаунт указывает работу продюсера и преподавателя; артист в списке комьюнити Пхукета.",
    "notesRu": "Текущая база вне Пхукета; запись сохранена из-за подтверждённой связи со сценой острова.",
    "waRu": "",
-   "bio": "За пультом с 2005-го, продюсирует с 2015-го; minimal, deep tech, tech house и techno; основатель лейбла DELICOTECH."
+   "bio": "За пультом с 2005-го, продюсирует с 2015-го; minimal, deep tech, tech house и techno; основатель лейбла DELICOTECH.",
+   "styleIds": [
+    "deep-tech",
+    "minimal-techno",
+    "dub-techno"
+   ]
   },
   {
    "id": "MC-0023",
@@ -1360,7 +1452,13 @@
    "evidenceRu": "Профиль артиста и лейбла, а также список Enthusiast Place.",
    "notesRu": "",
    "waRu": "",
-   "bio": "Продюсер и диджей (aka Dawn Razor); релизы на R&S, ARTS, Suara, We Are The Brave и Planet Rhythm."
+   "bio": "Продюсер и диджей (aka Dawn Razor); релизы на R&S, ARTS, Suara, We Are The Brave и Planet Rhythm.",
+   "styleIds": [
+    "deep-tech",
+    "minimal-techno",
+    "dub-techno",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0024",
@@ -1408,7 +1506,10 @@
    "evidenceRu": "Официальный сайт публикует форматы выступлений и прямой email.",
    "notesRu": "Официальные форматы: Thrive Sax & Soul Duo, Loosh / Lucian Pixley, Rai Maia, Thrive Trio, Full Band, Alamode и Sonic Body.",
    "waRu": "",
-   "bio": "Лайв-коллектив из Калифорнии на Пхукете: от дуэта сакс+вокал до полного бэнда; резиденции Café del Mar, Yona, Carpe Diem, FUGA и отели Anantara."
+   "bio": "Лайв-коллектив из Калифорнии на Пхукете: от дуэта сакс+вокал до полного бэнда; резиденции Café del Mar, Yona, Carpe Diem, FUGA и отели Anantara.",
+   "styleIds": [
+    "soulful-house"
+   ]
   },
   {
    "id": "MC-0025",
@@ -1456,7 +1557,10 @@
    "evidenceRu": "Аккаунт артиста и ростер Thrive.",
    "notesRu": "",
    "waRu": "",
-   "bio": "Вокалистка hip-hop и neo-soul с тёплым «ангельским» тембром; часть Thrive Live Music; поёт в Café del Mar, Yona, Carpe Diem и FUGA."
+   "bio": "Вокалистка hip-hop и neo-soul с тёплым «ангельским» тембром; часть Thrive Live Music; поёт в Café del Mar, Yona, Carpe Diem и FUGA.",
+   "styleIds": [
+    "soulful-house"
+   ]
   },
   {
    "id": "MC-0026",
@@ -1777,7 +1881,12 @@
    "evidenceRu": "Сайт площадки публикует прямой контакт и действующий календарь событий.",
    "notesRu": "Адрес: 31 Bangla Road, Patong, Phuket 83150.",
    "waRu": "Телефон / WhatsApp: +66 64 454 4985",
-   "bio": "Флагман Bangla Road: 6500 м², до 5000 гостей, техно-рум Shelter и хип-хоп Empire; №9–11 в DJ Mag Top 100 Clubs; на сцене были Martin Garrix, Tiësto, Marshmello."
+   "bio": "Флагман Bangla Road: 6500 м², до 5000 гостей, техно-рум Shelter и хип-хоп Empire; №9–11 в DJ Mag Top 100 Clubs; на сцене были Martin Garrix, Tiësto, Marshmello.",
+   "styleIds": [
+    "deep-tech",
+    "minimal-techno",
+    "dub-techno"
+   ]
   },
   {
    "id": "MC-0033",
@@ -1958,7 +2067,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0037",
@@ -2006,7 +2121,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Диджей; недавние сеты в Paluba; музыка на SoundCloud и Bandcamp."
+   "bio": "Диджей; недавние сеты в Paluba; музыка на SoundCloud и Bandcamp.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0038",
@@ -2054,7 +2175,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Электронный live-проект Dr.Varicap и Oleginsky (Беларусь): house, techno, electronica и IDM; релизы на Traum Schallplatten, Bonzai и Wavetech."
+   "bio": "Электронный live-проект Dr.Varicap и Oleginsky (Беларусь): house, techno, electronica и IDM; релизы на Traum Schallplatten, Bonzai и Wavetech.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0039",
@@ -2101,7 +2228,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0040",
@@ -2148,7 +2281,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0041",
@@ -2195,7 +2334,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0042",
@@ -2243,7 +2388,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Французский диджей и продюсер, 20 лет в электронике; лейбл AZZUR; сеты на трёх-четырёх вертушках с живой перкуссией; Me Gusta — 2 млн стримов; поддержка Keinemusik, Dixon, Âme и Solomun."
+   "bio": "Французский диджей и продюсер, 20 лет в электронике; лейбл AZZUR; сеты на трёх-четырёх вертушках с живой перкуссией; Me Gusta — 2 млн стримов; поддержка Keinemusik, Dixon, Âme и Solomun.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0043",
@@ -2290,7 +2441,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0044",
@@ -2338,7 +2495,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Родилась в Торонто, играет по миру из Австралии: Panorama Bar, Lost Village, ADE; house и techno, релизы на !K7 и Future Classic."
+   "bio": "Родилась в Торонто, играет по миру из Австралии: Panorama Bar, Lost Village, ADE; house и techno, релизы на !K7 и Future Classic.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0045",
@@ -2387,7 +2550,13 @@
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
    "bio": "Берлинская диджей и лейбл-босс, куратор Beatport, 20+ лет в электронике; релизы на Crosstown Rebels, Get Physical и Nervous; собственный импринт AXEPT.",
-   "twitch": "dj_yula"
+   "twitch": "dj_yula",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0046",
@@ -2434,7 +2603,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0047",
@@ -2481,7 +2656,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0048",
@@ -2529,7 +2710,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Бристольский диджей и продюсер: techno, electro, breaks и drum&bass (псевдоним Brief); альбом Way Home (2023)."
+   "bio": "Бристольский диджей и продюсер: techno, electro, breaks и drum&bass (псевдоним Brief); альбом Way Home (2023).",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0049",
@@ -2576,7 +2763,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0050",
@@ -2624,7 +2817,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Бристольский продюсер, половина Tilt Shift UK; breakbeat, garage и drum&bass; релизы на BELTERS и Maison Fauna."
+   "bio": "Бристольский продюсер, половина Tilt Shift UK; breakbeat, garage и drum&bass; релизы на BELTERS и Maison Fauna.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0051",
@@ -2672,7 +2871,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Диджей из Лондона: techno, electro, EBM, acid и new beat; экс-резидент клуба The Cause."
+   "bio": "Диджей из Лондона: techno, electro, EBM, acid и new beat; экс-резидент клуба The Cause.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0052",
@@ -2720,7 +2925,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Бристольский диджей: басовые брейки, acid и dark electro; ежемесячная резиденция на Rinse FM; релизы на Seagrave и Taipan Trax."
+   "bio": "Бристольский диджей: басовые брейки, acid и dark electro; ежемесячная резиденция на Rinse FM; релизы на Seagrave и Taipan Trax.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0053",
@@ -2767,7 +2978,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0054",
@@ -2815,7 +3032,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Сооснователь Temple de Plastique; часть комьюнити Enthusiast Place."
+   "bio": "Сооснователь Temple de Plastique; часть комьюнити Enthusiast Place.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0055",
@@ -2862,7 +3085,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0056",
@@ -2910,7 +3139,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "UK garage и bass; резидент SUB, играет Holybeats в The Commune; комьюнити Enthusiast Place."
+   "bio": "UK garage и bass; резидент SUB, играет Holybeats в The Commune; комьюнити Enthusiast Place.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0057",
@@ -2957,7 +3192,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0058",
@@ -3004,7 +3245,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0059",
@@ -3051,7 +3298,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0060",
@@ -3098,7 +3351,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0061",
@@ -3146,7 +3405,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Часть комьюнити Enthusiast Place; играет вечеринки SUB."
+   "bio": "Часть комьюнити Enthusiast Place; играет вечеринки SUB.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0062",
@@ -3194,7 +3459,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Электронный продюсер; комьюнити Enthusiast Place."
+   "bio": "Электронный продюсер; комьюнити Enthusiast Place.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0063",
@@ -3242,7 +3513,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Соосновательница медиа MYIDEM, часть команды Resonance Moscow."
+   "bio": "Соосновательница медиа MYIDEM, часть команды Resonance Moscow.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0064",
@@ -3289,7 +3566,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0065",
@@ -3336,7 +3619,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0066",
@@ -3383,7 +3672,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0067",
@@ -3431,7 +3726,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Deep house и minimal; основатель видеоподкаста P14; играет в Enthusiast Place."
+   "bio": "Deep house и minimal; основатель видеоподкаста P14; играет в Enthusiast Place.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0068",
@@ -3478,7 +3779,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0069",
@@ -3526,7 +3833,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Хаус-продюсер (Никита Гатилов); EP на берлинском Rockets Audio: Galactix Ocean, Eclipse, Unalome."
+   "bio": "Хаус-продюсер (Никита Гатилов); EP на берлинском Rockets Audio: Galactix Ocean, Eclipse, Unalome.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0070",
@@ -3573,7 +3886,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0071",
@@ -3621,7 +3940,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Барселонский диджей: deep house, minimal и funky techno; резидент вечеринки FACT в Space Ibiza, основатель Wildl!ve на фестивале Sonar."
+   "bio": "Барселонский диджей: deep house, minimal и funky techno; резидент вечеринки FACT в Space Ibiza, основатель Wildl!ve на фестивале Sonar.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0072",
@@ -3669,7 +3994,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Диджей из Мумбаи, пионер underground-ремиксов Болливуда; afro house, tech house и melodic techno; играл в Германии, ЮАР, Австралии и Дубае."
+   "bio": "Диджей из Мумбаи, пионер underground-ремиксов Болливуда; afro house, tech house и melodic techno; играл в Германии, ЮАР, Австралии и Дубае.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0073",
@@ -3717,7 +4048,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Барселона: house, techno и acid; восемь виниловых релизов; играл на SCI-TEC (Dubfire) и HYTE (Richie Hawtin); резидент фестиваля Epizode."
+   "bio": "Барселона: house, techno и acid; восемь виниловых релизов; играл на SCI-TEC (Dubfire) и HYTE (Richie Hawtin); резидент фестиваля Epizode.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0074",
@@ -3765,7 +4102,13 @@
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
    "waRu": "",
-   "bio": "Владелец студии Enthusiast Place; deep, tech и minimal — только винил; основатель видеоподкаста P14."
+   "bio": "Владелец студии Enthusiast Place; deep, tech и minimal — только винил; основатель видеоподкаста P14.",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0075",
@@ -3812,7 +4155,13 @@
    "roleRu": "DJ, продюсер, электронный артист — по списку комьюнити",
    "evidenceRu": "Аккаунт артиста опубликован на странице комьюнити Enthusiast Place.",
    "notesRu": "Публичный email или телефон не подтверждены; используйте директ или представление через комьюнити.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "electronica",
+    "tech-house",
+    "deep-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0076",
@@ -3859,7 +4208,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "organic-house",
+    "melodic-house"
+   ]
   },
   {
    "id": "MC-0077",
@@ -3906,7 +4259,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "organic-house",
+    "downtempo"
+   ]
   },
   {
    "id": "MC-0078",
@@ -3952,7 +4309,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "organic-house"
+   ]
   },
   {
    "id": "MC-0079",
@@ -3999,7 +4359,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "melodic-house",
+    "afro-house"
+   ]
   },
   {
    "id": "MC-0080",
@@ -4045,7 +4409,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "melodic-house"
+   ]
   },
   {
    "id": "MC-0081",
@@ -4092,7 +4459,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "deep-house"
+   ]
   },
   {
    "id": "MC-0082",
@@ -4139,7 +4509,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "melodic-house",
+    "progressive-house"
+   ]
   },
   {
    "id": "MC-0083",
@@ -4186,7 +4560,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "melodic-house",
+    "organic-house"
+   ]
   },
   {
    "id": "MC-0084",
@@ -4233,7 +4611,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "organic-house",
+    "melodic-house"
+   ]
   },
   {
    "id": "MC-0085",
@@ -4280,7 +4662,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "afro-house",
+    "organic-house"
+   ]
   },
   {
    "id": "MC-0086",
@@ -4327,7 +4713,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "melodic-house",
+    "progressive-house"
+   ]
   },
   {
    "id": "MC-0087",
@@ -4374,7 +4764,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "tech-house",
+    "electronica"
+   ]
   },
   {
    "id": "MC-0088",
@@ -4422,7 +4816,11 @@
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
    "waRu": "Телефон / WhatsApp: +66 93 580 4486",
-   "twitch": "bonobo"
+   "twitch": "bonobo",
+   "styleIds": [
+    "downtempo",
+    "electronica"
+   ]
   },
   {
    "id": "MC-0089",
@@ -4469,7 +4867,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "indie-dance",
+    "live-electronic"
+   ]
   },
   {
    "id": "MC-0090",
@@ -4515,7 +4917,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0091",
@@ -4561,7 +4966,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "afro-house"
+   ]
   },
   {
    "id": "MC-0092",
@@ -4607,7 +5015,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0093",
@@ -4654,7 +5065,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "organic-house",
+    "downtempo"
+   ]
   },
   {
    "id": "MC-0094",
@@ -4701,7 +5116,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "deep-house",
+    "electronica"
+   ]
   },
   {
    "id": "MC-0095",
@@ -4747,7 +5166,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "afro-house"
+   ]
   },
   {
    "id": "MC-0096",
@@ -4793,7 +5215,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "tech-house"
+   ]
   },
   {
    "id": "MC-0097",
@@ -4840,7 +5265,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "melodic-house",
+    "organic-house"
+   ]
   },
   {
    "id": "MC-0098",
@@ -4887,7 +5316,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "melodic-house",
+    "organic-house"
+   ]
   },
   {
    "id": "MC-0099",
@@ -4933,7 +5366,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Café del Mar Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 93 580 4486"
+   "waRu": "Телефон / WhatsApp: +66 93 580 4486",
+   "styleIds": [
+    "melodic-house"
+   ]
   },
   {
    "id": "MC-0100",
@@ -4980,7 +5416,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "deep-house",
+    "vocal-house"
+   ]
   },
   {
    "id": "MC-0101",
@@ -5027,7 +5467,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "deep-house",
+    "tech-house"
+   ]
   },
   {
    "id": "MC-0102",
@@ -5074,7 +5518,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "deep-house",
+    "tech-house"
+   ]
   },
   {
    "id": "MC-0103",
@@ -5168,7 +5616,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "deep-house",
+    "latin-house"
+   ]
   },
   {
    "id": "MC-0105",
@@ -5215,7 +5667,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "deep-house",
+    "dance-pop"
+   ]
   },
   {
    "id": "MC-0106",
@@ -5262,7 +5718,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "big-room-house",
+    "edm-pop"
+   ]
   },
   {
    "id": "MC-0107",
@@ -5308,7 +5768,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0108",
@@ -5402,7 +5865,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "melodic-techno",
+    "tech-house"
+   ]
   },
   {
    "id": "MC-0110",
@@ -5449,7 +5916,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "deep-house"
+   ]
   },
   {
    "id": "MC-0111",
@@ -5495,7 +5965,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0112",
@@ -5542,7 +6015,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "tech-house",
+    "latin-house"
+   ]
   },
   {
    "id": "MC-0113",
@@ -5590,7 +6067,12 @@
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
    "waRu": "Телефон / WhatsApp: +66 64 454 4985",
-   "twitch": "alok"
+   "twitch": "alok",
+   "styleIds": [
+    "edm-pop",
+    "big-room-house",
+    "brazilian-bass"
+   ]
   },
   {
    "id": "MC-0114",
@@ -5638,7 +6120,12 @@
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
    "waRu": "Телефон / WhatsApp: +66 64 454 4985",
-   "twitch": "jameshypetwitch"
+   "twitch": "jameshypetwitch",
+   "styleIds": [
+    "tech-house",
+    "edm-pop",
+    "big-room-house"
+   ]
   },
   {
    "id": "MC-0115",
@@ -5685,7 +6172,12 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "edm-pop",
+    "big-room-house",
+    "edm-trap"
+   ]
   },
   {
    "id": "MC-0116",
@@ -5780,7 +6272,11 @@
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
    "waRu": "Телефон / WhatsApp: +66 64 454 4985",
-   "twitch": "tiesto"
+   "twitch": "tiesto",
+   "styleIds": [
+    "edm-pop",
+    "big-room-house"
+   ]
   },
   {
    "id": "MC-0118",
@@ -5828,7 +6324,11 @@
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
    "waRu": "Телефон / WhatsApp: +66 64 454 4985",
-   "twitch": "martingarrix"
+   "twitch": "martingarrix",
+   "styleIds": [
+    "edm-pop",
+    "big-room-house"
+   ]
   },
   {
    "id": "MC-0119",
@@ -5876,7 +6376,12 @@
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
    "waRu": "Телефон / WhatsApp: +66 64 454 4985",
-   "twitch": "marshmello"
+   "twitch": "marshmello",
+   "styleIds": [
+    "edm-pop",
+    "big-room-house",
+    "future-bass"
+   ]
   },
   {
    "id": "MC-0120",
@@ -6064,7 +6569,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "melodic-techno",
+    "tech-house"
+   ]
   },
   {
    "id": "MC-0124",
@@ -6111,7 +6620,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Телефон / WhatsApp: +66 64 454 4985"
+   "waRu": "Телефон / WhatsApp: +66 64 454 4985",
+   "styleIds": [
+    "big-room-house",
+    "edm-pop"
+   ]
   },
   {
    "id": "MC-0125",
@@ -6159,7 +6672,11 @@
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
    "waRu": "Телефон / WhatsApp: +66 64 454 4985",
-   "twitch": "afrojack"
+   "twitch": "afrojack",
+   "styleIds": [
+    "edm-pop",
+    "big-room-house"
+   ]
   },
   {
    "id": "MC-0126",
@@ -6207,7 +6724,11 @@
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
    "waRu": "Телефон / WhatsApp: +66 64 454 4985",
-   "twitch": "steveaoki"
+   "twitch": "steveaoki",
+   "styleIds": [
+    "edm-pop",
+    "big-room-house"
+   ]
   },
   {
    "id": "MC-0127",
@@ -6254,7 +6775,10 @@
    "evidenceRu": "Указан в календаре событий Illuzion Phuket.",
    "notesRu": "Имя взято из официального архива артистов Illuzion; перед обращением подтвердите новую дату. Контакт площадки не является личным менеджерским контактом артиста.",
    "waRu": "Телефон / WhatsApp: +66 64 454 4985",
-   "twitch": "fisher"
+   "twitch": "fisher",
+   "styleIds": [
+    "tech-house"
+   ]
   },
   {
    "id": "MC-0128",
@@ -6300,7 +6824,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Barfunk Phuket / Armania.",
    "notesRu": "Страница артиста и события площадки проверена; уточните ближайшую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "WhatsApp: +66 95 420 4497"
+   "waRu": "WhatsApp: +66 95 420 4497",
+   "styleIds": [
+    "tech-house"
+   ]
   },
   {
    "id": "MC-0129",
@@ -6347,7 +6874,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Barfunk Phuket / Armania.",
    "notesRu": "Страница артиста и события площадки проверена; уточните ближайшую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "WhatsApp: +66 95 420 4497"
+   "waRu": "WhatsApp: +66 95 420 4497",
+   "styleIds": [
+    "deep-house",
+    "tech-house"
+   ]
   },
   {
    "id": "MC-0130",
@@ -6394,7 +6925,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Barfunk Phuket / Armania.",
    "notesRu": "Страница артиста и события площадки проверена; уточните ближайшую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "WhatsApp: +66 95 420 4497"
+   "waRu": "WhatsApp: +66 95 420 4497",
+   "styleIds": [
+    "deep-house",
+    "tech-house"
+   ]
   },
   {
    "id": "MC-0131",
@@ -6441,7 +6976,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Barfunk Phuket / Armania.",
    "notesRu": "Страница артиста и события площадки проверена; уточните ближайшую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "WhatsApp: +66 95 420 4497"
+   "waRu": "WhatsApp: +66 95 420 4497",
+   "styleIds": [
+    "tech-house",
+    "deep-house"
+   ]
   },
   {
    "id": "MC-0132",
@@ -6488,7 +7027,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Barfunk Phuket / Armania.",
    "notesRu": "Страница артиста и события площадки проверена; уточните ближайшую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "WhatsApp: +66 95 420 4497"
+   "waRu": "WhatsApp: +66 95 420 4497",
+   "styleIds": [
+    "deep-house",
+    "tech-house"
+   ]
   },
   {
    "id": "MC-0133",
@@ -6534,7 +7077,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Barfunk Phuket / Armania.",
    "notesRu": "Страница артиста и события площадки проверена; уточните ближайшую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "WhatsApp: +66 95 420 4497"
+   "waRu": "WhatsApp: +66 95 420 4497",
+   "styleIds": [
+    "tech-house"
+   ]
   },
   {
    "id": "MC-0134",
@@ -6580,7 +7126,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Barfunk Phuket / Armania.",
    "notesRu": "Страница артиста и события площадки проверена; уточните ближайшую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "WhatsApp: +66 95 420 4497"
+   "waRu": "WhatsApp: +66 95 420 4497",
+   "styleIds": [
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0135",
@@ -6626,7 +7175,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Barfunk Phuket / Armania.",
    "notesRu": "Страница артиста и события площадки проверена; уточните ближайшую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "WhatsApp: +66 95 420 4497"
+   "waRu": "WhatsApp: +66 95 420 4497",
+   "styleIds": [
+    "tech-house"
+   ]
   },
   {
    "id": "MC-0136",
@@ -6673,7 +7225,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий Barfunk Phuket / Armania.",
    "notesRu": "Страница артиста и события площадки проверена; уточните ближайшую дату. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "WhatsApp: +66 95 420 4497"
+   "waRu": "WhatsApp: +66 95 420 4497",
+   "styleIds": [
+    "tech-house",
+    "melodic-techno"
+   ]
   },
   {
    "id": "MC-0137",
@@ -6720,7 +7276,12 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий YONA Beach Club.",
    "notesRu": "Маршрут резидентского программинга. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Официальный LINE / WhatsApp на странице контактов"
+   "waRu": "Официальный LINE / WhatsApp на странице контактов",
+   "styleIds": [
+    "deep-house",
+    "organic-house",
+    "melodic-house"
+   ]
   },
   {
    "id": "MC-0138",
@@ -6767,7 +7328,11 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий YONA Beach Club.",
    "notesRu": "Маршрут резидентского программинга. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Официальный LINE / WhatsApp на странице контактов"
+   "waRu": "Официальный LINE / WhatsApp на странице контактов",
+   "styleIds": [
+    "melodic-house",
+    "organic-house"
+   ]
   },
   {
    "id": "MC-0139",
@@ -6813,7 +7378,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий YONA Beach Club.",
    "notesRu": "Маршрут резидентского программинга. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Официальный LINE / WhatsApp на странице контактов"
+   "waRu": "Официальный LINE / WhatsApp на странице контактов",
+   "styleIds": [
+    "deep-house"
+   ]
   },
   {
    "id": "MC-0140",
@@ -6860,7 +7428,10 @@
    "roleRu": "DJ / лайв-электронный артист",
    "evidenceRu": "Указан в календаре событий YONA Beach Club.",
    "notesRu": "Маршрут резидентского программинга. Контакт площадки не является личным менеджерским контактом артиста.",
-   "waRu": "Официальный LINE / WhatsApp на странице контактов"
+   "waRu": "Официальный LINE / WhatsApp на странице контактов",
+   "styleIds": [
+    "deep-house"
+   ]
   },
   {
    "id": "MC-0141",
@@ -9201,7 +9772,10 @@
    "roleRu": "Официальный ростер артистов Smallroom",
    "evidenceRu": "Указан на страницах ростера Smallroom.",
    "notesRu": "Если персональный менеджер публичен — указан он; иначе используется центральный контакт лейбла.",
-   "waRu": "Instagram: @kaphao"
+   "waRu": "Instagram: @kaphao",
+   "styleIds": [
+    "electropop"
+   ]
   },
   {
    "id": "MC-0191",
@@ -9386,7 +9960,10 @@
    "roleRu": "Официальный ростер артистов Smallroom",
    "evidenceRu": "Указан на страницах ростера Smallroom.",
    "notesRu": "Если персональный менеджер публичен — указан он; иначе используется центральный контакт лейбла.",
-   "waRu": ""
+   "waRu": "",
+   "styleIds": [
+    "synthpop"
+   ]
   },
   {
    "id": "MC-0195",
@@ -10172,7 +10749,11 @@
    "roleRu": "Официальный ростер лейбла и менеджмента",
    "evidenceRu": "Указан в ростере SpicyDisc Artist ShowBiz & Booking.",
    "notesRu": "Официальные контакты Artist ShowBiz & Booking. Используйте центральный маршрут, пока не подтверждён персональный менеджер.",
-   "waRu": "LINE: @spicydiscshowbiz"
+   "waRu": "LINE: @spicydiscshowbiz",
+   "styleIds": [
+    "funky-house",
+    "soulful-house"
+   ]
   },
   {
    "id": "MC-0212",
@@ -10357,7 +10938,10 @@
    "roleRu": "Официальный ростер лейбла и менеджмента",
    "evidenceRu": "Указан в ростере SpicyDisc Artist ShowBiz & Booking.",
    "notesRu": "Официальные контакты Artist ShowBiz & Booking. Используйте центральный маршрут, пока не подтверждён персональный менеджер.",
-   "waRu": "LINE: @spicydiscshowbiz"
+   "waRu": "LINE: @spicydiscshowbiz",
+   "styleIds": [
+    "soulful-house"
+   ]
   },
   {
    "id": "MC-0216",
@@ -10404,7 +10988,11 @@
    "roleRu": "Официальный ростер лейбла и менеджмента",
    "evidenceRu": "Указан в ростере SpicyDisc Artist ShowBiz & Booking.",
    "notesRu": "Официальные контакты Artist ShowBiz & Booking. Используйте центральный маршрут, пока не подтверждён персональный менеджер.",
-   "waRu": "LINE: @spicydiscshowbiz"
+   "waRu": "LINE: @spicydiscshowbiz",
+   "styleIds": [
+    "funky-house",
+    "electronica"
+   ]
   },
   {
    "id": "MC-0217",
@@ -10497,7 +11085,11 @@
    "roleRu": "Официальный ростер лейбла и менеджмента",
    "evidenceRu": "Указан в ростере SpicyDisc Artist ShowBiz & Booking.",
    "notesRu": "Официальные контакты Artist ShowBiz & Booking. Используйте центральный маршрут, пока не подтверждён персональный менеджер.",
-   "waRu": "LINE: @spicydiscshowbiz"
+   "waRu": "LINE: @spicydiscshowbiz",
+   "styleIds": [
+    "funky-house",
+    "nu-disco"
+   ]
   },
   {
    "id": "MC-0219",
@@ -11377,7 +11969,10 @@
    "roleRu": "Певец, группа, рэпер или комик — по ростеру агентства",
    "evidenceRu": "Указан на странице букинга Art of Events Phuket.",
    "notesRu": "Контакт агентства — подтверждённый маршрут брони на Пхукете, а не личная линия артиста.",
-   "waRu": "WhatsApp: +66 82 703 0303"
+   "waRu": "WhatsApp: +66 82 703 0303",
+   "styleIds": [
+    "oldschool-rave"
+   ]
   },
   {
    "id": "MC-0238",
@@ -11933,7 +12528,10 @@
    "roleRu": "Певец, группа, рэпер или комик — по ростеру агентства",
    "evidenceRu": "Указан на странице букинга Art of Events Phuket.",
    "notesRu": "Контакт агентства — подтверждённый маршрут брони на Пхукете, а не личная линия артиста.",
-   "waRu": "WhatsApp: +66 82 703 0303"
+   "waRu": "WhatsApp: +66 82 703 0303",
+   "styleIds": [
+    "funky-house"
+   ]
   },
   {
    "id": "MC-0250",
@@ -12673,7 +13271,10 @@
    "roleRu": "Певец, группа, рэпер или комик — по ростеру агентства",
    "evidenceRu": "Указан на странице букинга Art of Events Phuket.",
    "notesRu": "Контакт агентства — подтверждённый маршрут брони на Пхукете, а не личная линия артиста.",
-   "waRu": "WhatsApp: +66 82 703 0303"
+   "waRu": "WhatsApp: +66 82 703 0303",
+   "styleIds": [
+    "nu-jazz"
+   ]
   },
   {
    "id": "MC-0266",
@@ -12859,7 +13460,10 @@
    "roleRu": "Певец, группа, рэпер или комик — по ростеру агентства",
    "evidenceRu": "Указан на странице букинга Art of Events Phuket.",
    "notesRu": "Контакт агентства — подтверждённый маршрут брони на Пхукете, а не личная линия артиста.",
-   "waRu": "WhatsApp: +66 82 703 0303"
+   "waRu": "WhatsApp: +66 82 703 0303",
+   "styleIds": [
+    "nu-jazz"
+   ]
   },
   {
    "id": "MC-0270",
@@ -13136,7 +13740,10 @@
    "roleRu": "Певец, группа, рэпер или комик — по ростеру агентства",
    "evidenceRu": "Указан на странице букинга Art of Events Phuket.",
    "notesRu": "Контакт агентства — подтверждённый маршрут брони на Пхукете, а не личная линия артиста.",
-   "waRu": "WhatsApp: +66 82 703 0303"
+   "waRu": "WhatsApp: +66 82 703 0303",
+   "styleIds": [
+    "dance-pop"
+   ]
   },
   {
    "id": "MC-0276",
@@ -14733,7 +15340,11 @@
    "roleRu": "Электронный продюсер",
    "evidenceRu": "Указан как продюсер и артист в портфолио SpicyDisc.",
    "notesRu": "",
-   "waRu": "LINE: @spicydiscshowbiz"
+   "waRu": "LINE: @spicydiscshowbiz",
+   "styleIds": [
+    "funky-house",
+    "electronica"
+   ]
   },
   {
    "id": "MC-0312",

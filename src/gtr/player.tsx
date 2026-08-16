@@ -25,6 +25,13 @@ export function GtrPlayerBar() {
   const progressRef = useRef<HTMLDivElement | null>(null);
   const wantPlayRef = useRef(false);
 
+  // состояние воспроизведения нужно не только панели: от него выходит и
+  // уходит танцор. Отдаём его в корень документа — так въезд и уход
+  // делает CSS, без лишних перерисовок React.
+  useEffect(() => {
+    document.documentElement.dataset.gtrPlaying = playing ? "1" : "";
+  }, [playing]);
+
   const reduced = () =>
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;

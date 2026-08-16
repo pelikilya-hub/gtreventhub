@@ -2758,3 +2758,79 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .gtr-stk-btn .gtr-stk { transition: none; }
 }
+
+/* =====================================================================
+   ТАНЦОР — ЖИЛЕЦ ПЛЕЕРА
+   ---------------------------------------------------------------------
+   Выходит слева, когда включают музыку, и уходит за край, когда её
+   останавливают. Въезд и уход делает CSS от атрибута в корне документа,
+   React в этом не участвует. Танец собран из трёх слоёв: качание корпуса
+   с наклоном, подскок от баса трека и лёгкий разворот — по отдельности
+   каждый выглядит механикой, вместе читается движением.
+   ===================================================================== */
+.gtr-dancer {
+  position: fixed;
+  left: 10px;
+  bottom: calc(var(--gtr-navh, 0px) + env(safe-area-inset-bottom) + 74px);
+  z-index: calc(var(--gtr-z-panel) - 1);
+  width: 96px;
+  cursor: grab;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+}
+.gtr-dancer.dragging { cursor: grabbing; }
+
+/* въезд и уход: за край и обратно */
+.gtr-dancer-slide {
+  transform: translateX(-190%);
+  opacity: 0;
+  transition:
+    transform 0.85s cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 0.4s ease;
+}
+[data-gtr-playing="1"] .gtr-dancer-slide {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* подскок от баса: величину даёт плеер, та же, что греет шапку */
+.gtr-dancer-pulse {
+  display: block;
+  transform: translateY(calc(var(--gtr-pulse, 0) * -9px))
+    scaleY(calc(1 + var(--gtr-pulse, 0) * 0.05));
+  transform-origin: 50% 100%;
+}
+
+.gtr-dancer-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform-origin: 50% 97%;
+  animation: gtr-dance 820ms ease-in-out infinite;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 0 26px rgba(229, 35, 27, 0.22));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* корпус ходит с ноги на ногу и слегка разворачивается — не маятник */
+@keyframes gtr-dance {
+  0%   { transform: rotate(-3.2deg) translateY(0) skewX(1.1deg); }
+  25%  { transform: rotate(-0.6deg) translateY(-4px) skewX(0deg); }
+  50%  { transform: rotate(3.2deg) translateY(0) skewX(-1.1deg); }
+  75%  { transform: rotate(0.6deg) translateY(-4px) skewX(0deg); }
+  100% { transform: rotate(-3.2deg) translateY(0) skewX(1.1deg); }
+}
+
+/* пока тащат — не дёргается под пальцем */
+.gtr-dancer.dragging .gtr-dancer-img { animation-play-state: paused; }
+
+@media (max-width: 860px) {
+  .gtr-dancer { width: 68px; left: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-dancer-img { animation: none; }
+  .gtr-dancer-slide { transition: opacity 0.3s ease; transform: none; }
+}

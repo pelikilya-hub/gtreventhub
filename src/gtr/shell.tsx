@@ -46,6 +46,7 @@ import {
 } from "./screens/Platform";
 import { TonightScreen } from "./screens/Tonight";
 import { useDeviceTilt } from "./motion";
+import { GtrDancer } from "./dancer";
 import { GtrPlayerBar } from "./player";
 import {
   MyShowsScreen,
@@ -422,6 +423,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
 
       {/* ---------- GTR SOUND: плеер в футере мобильной версии ---------- */}
       <GtrPlayerBar />
+      <GtrDancer />
 
       {/* ---------- нижняя навигация (телефон и iPad) ---------- */}
       <nav className="gtr-tabbar" aria-label={t("Основные разделы")}>

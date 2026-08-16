@@ -2597,3 +2597,30 @@ export const EVENT_QUESTIONS: EventQuestion[] = [
     satisfied: (g) => g.nodes.some((n) => n.kind === "doc"),
   },
 ];
+
+// Жанры лежат в базе артистов по-русски и строчными. На витрине это
+// читалось как недоделка, а в английской версии — как непереведённый
+// текст. Здесь один словарь на три языка: чего нет в словаре, отдаём
+// с заглавной, но не выдумываем перевод.
+const GENRE_EN: Record<string, string> = {
+  "хаус": "House", "дип-хаус": "Deep House", "тек-хаус": "Tech House",
+  "бич-клаб-хаус": "Beach Club House", "органик-хаус": "Organic House",
+  "мелодик-хаус": "Melodic House", "прогрессив-хаус": "Progressive House",
+  "афро-хаус": "Afro House", "техно": "Techno", "мелодик-техно": "Melodic Techno",
+  "минимал": "Minimal", "транс": "Trance", "драм-н-бейс": "Drum & Bass",
+  "дабстеп": "Dubstep", "хип-хоп": "Hip-Hop", "рнб": "R&B", "поп": "Pop",
+  "диско": "Disco", "фанк": "Funk", "соул": "Soul", "джаз": "Jazz",
+  "латина": "Latin", "регги": "Reggae", "лаунж": "Lounge", "чилл": "Chill",
+  "эмбиент": "Ambient", "коммерческий": "Commercial", "открытый формат": "Open Format",
+  "свадебный сет": "Wedding Set", "живой вокал": "Live Vocals", "саксофон": "Saxophone",
+  "electronic": "Electronic", "edm": "EDM", "биг-рум": "Big Room",
+};
+
+const capFirst = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+
+/** Жанр для витрины: перевод, если он есть, иначе аккуратный регистр. */
+export const genreLabel = (raw: string, lang = "ru") => {
+  const key = raw.trim().toLowerCase();
+  if (lang !== "ru" && GENRE_EN[key]) return GENRE_EN[key];
+  return capFirst(raw.trim());
+};

@@ -40,7 +40,7 @@ import {
 } from "../kv-api";
 import { BossCabinet, PushPanel, TgChip } from "./Boss";
 import { openAppLink } from "../applink";
-import { OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
+import { genreLabel, OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
 
 type Action = [string, string, string, ScreenId, string, string];
 type Kpi = [string, string | number, string, string, string];
@@ -1693,7 +1693,7 @@ function InviteLinkButton() {
 
 // ---------- кабинет посетителя (фаза A) ----------
 function VisitorCabinet() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useGtr();
   const navigate = useNavigate();
   const go = (s: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: s } });
@@ -1785,7 +1785,7 @@ function VisitorCabinet() {
             <TrashTitle text={t("Сегодня вечером")} size={40} />
             <div style={{ margin: "10px 0 16px", font: "500 13px/1.5 'Golos Text',sans-serif", color: "rgba(255,255,255,.82)", maxWidth: 420 }}>
               {tonightCount
-                ? `${t("В афише")}: ${tonightCount} · ${t("весь остров открыт — собери свой вечер")}`
+                ? `${t("В афише")}: ${tonightCount} · ${t("Весь остров открыт — собери свой вечер")}`
                 : t("Остров открыт — собери свой вечер: клубы, пляжные вечеринки, живая музыка")}
             </div>
             <div>
@@ -1861,7 +1861,7 @@ function VisitorCabinet() {
                   <div style={{ position: "absolute", left: 9, right: 9, bottom: 8 }}>
                     <div style={{ font: "700 12px/1.2 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".03em" }}>{a.name}</div>
                     <div className="gtr-mono" style={{ marginTop: 3, font: "500 8px/1.3 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase" }}>
-                      {a.styles.join(" · ")}
+                      {a.styles.map((g) => genreLabel(g, i18n.language)).join(" · ")}
                     </div>
                   </div>
                 </div>

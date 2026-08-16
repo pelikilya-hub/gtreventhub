@@ -115,7 +115,13 @@ export const TrashTitle = ({
   size?: number;
   style?: CSSProperties;
 }) => (
-  <h1 className="gtr-trash" style={{ fontSize: size, lineHeight: 1.05, margin: 0, ...style }}>
+  // Размер отдаём переменной, а не жёстким инлайном: инлайн не слышит
+  // ни одного брейкпоинта, и на телефоне набок заголовок оставался
+  // портретным. Переменную же любой @media переопределит.
+  <h1
+    className="gtr-trash"
+    style={{ ["--gtr-trash" as string]: `${size}px`, fontSize: "var(--gtr-trash)", lineHeight: 1.05, margin: 0, ...style }}
+  >
     {text.split(/(\s+)/).map((w, i) => {
       if (!w || /^\s+$/.test(w)) return w;
       const first = w[0];

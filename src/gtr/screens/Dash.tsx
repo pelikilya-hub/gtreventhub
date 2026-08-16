@@ -1778,7 +1778,7 @@ function VisitorCabinet() {
           />
         <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(180deg, rgba(10,11,13,0) 18%, rgba(10,11,13,.45) 58%, rgba(10,11,13,.8) 100%)" }} />
         <div className="gtr-laser" style={{ ["--gtr-run" as string]: "340px", zIndex: 1 }} />
-        <div className="gtr-hero-edge-in" style={{ padding: "26px 22px", display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: "min(46vh, 380px)" }}>
+        <div className="gtr-hero-edge-in gtr-hero-tall">
             <div className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "rgba(255,255,255,.75)", letterSpacing: ".16em", marginBottom: 10 }}>
               {user.name.toUpperCase()} · PHUKET
             </div>

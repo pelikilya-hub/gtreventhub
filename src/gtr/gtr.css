@@ -991,7 +991,14 @@
 .gtr-scrim { display: none; }
 
 /* ---------- мобильный каркас ---------- */
-@media (max-width: 860px) {
+/* Мобильная оболочка включается не только по ширине. Телефон, повёрнутый
+   набок, шире порога в 860 px (у 12 Pro Max это 926), и раньше весь
+   мобильный слой на нём выключался: вылезал десктопный сайдбар, а нижняя
+   панель оставалась голой разметкой без стекла и знаков. Второе условие —
+   «узкий по высоте экран с грубым указателем» — ловит именно телефон в
+   ландшафте и не задевает ни планшет (там высота больше), ни сенсорный
+   монитор (там ширина больше). */
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-shell { display: block; }
   .gtr-topbar {
     display: flex;
@@ -1111,7 +1118,7 @@
 
 /* ---------- адаптивные раскладки ---------- */
 /* Инлайновые стили сильнее классов, поэтому переопределения с !important */
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-md-stack { grid-template-columns: 1fr !important; }
   /* без min-width:0 grid-ячейка раздувается до контента и тянет страницу */
   .gtr-md-stack > * { min-width: 0; }
@@ -1170,7 +1177,7 @@
 }
 .gtr-subhead > i { width: 8px; height: 8px; flex: none; background: var(--gtr-red); }
 
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   /* на телефоне лейбл над значением: колонка лейбла съедала всю ширину */
   .gtr-field { flex-direction: column; gap: 3px; }
   .gtr-field-k { width: auto; padding-top: 0; }
@@ -1210,7 +1217,7 @@
 }
 
 /* галерея паспорта: на телефоне 2 колонки вместо 4 */
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-gallery { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
@@ -1350,7 +1357,7 @@
 
 /* шапка профиля артиста на телефоне: hero-видео/фото полноширинным блоком
    сверху, текст и кнопки — под ним (а не поверх) */
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-heromedia {
     position: relative !important;
     top: auto !important;
@@ -1400,7 +1407,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-boss-grid { grid-template-columns: 1fr; }
   .gtr-boss-kpis { margin-left: 0; }
   .gtr-boss-kpi { padding: 10px 12px; min-width: 84px; }
@@ -1515,8 +1522,12 @@
   max-width: min(96vw, 1400px);
   max-height: calc(100vh - max(64px, env(safe-area-inset-top) + env(safe-area-inset-bottom) + 40px));
   object-fit: contain;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.7);
+  /* Рамки нет: край снимка и есть край. Объём даёт тень и мягкое
+     свечение, а не нарисованная линия в один пиксель. */
+  box-shadow:
+    0 20px 80px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 60px rgba(229, 35, 27, 0.08);
   transition: transform 0.05s linear;
 }
 .gtr-lightbox-x {
@@ -1525,11 +1536,30 @@
   right: calc(12px + env(safe-area-inset-right));
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(10, 11, 13, 0.7);
+  border: none;
+  background: none;
   color: #fff;
   font-size: 16px;
   cursor: pointer;
+  isolation: isolate;
+}
+/* подложка кнопки — стекло, гаснущее к краям, а не коробка с обводкой */
+.gtr-lightbox-x::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    rgba(10, 11, 13, 0.82) 0%,
+    rgba(10, 11, 13, 0.55) 62%,
+    rgba(10, 11, 13, 0) 100%
+  );
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
 }
 .gtr-lightbox-nav {
   position: absolute;
@@ -1553,14 +1583,20 @@
   display: flex;
   align-items: center;
   padding: 8px 14px;
-  background: rgba(10, 11, 13, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(
+    180deg,
+    rgba(10, 11, 13, 0.86) 0%,
+    rgba(10, 11, 13, 0.62) 100%
+  );
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+  border: none;
   color: #fff;
   max-width: 92vw;
   white-space: nowrap;
   overflow: hidden;
 }
-@media (max-width: 700px) {
+@media (max-width: 700px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-lightbox-nav { display: none; } /* на тач-экранах — свайпы */
 }
 
@@ -1575,7 +1611,9 @@
   width: min(348px, 94vw);
   z-index: 60;
   background: #0c0d10;
-  border-left: 1px solid rgba(255, 255, 255, 0.13);
+  /* левая кромка — полоса света, гаснущая к торцам, как у шапки и
+     навигации; сплошная линия читалась швом приклеенной панели */
+  border-left: none;
   box-shadow: -22px 0 54px rgba(0, 0, 0, 0.55);
   transform: translateX(105%);
   transition: transform 0.24s ease;
@@ -1585,6 +1623,23 @@
   gap: 12px;
   align-content: start;
   overscroll-behavior: contain;
+}
+.gtr-cons-drawer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 10%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(255, 255, 255, 0.04) 90%,
+    transparent 100%
+  );
 }
 .gtr-cons-drawer.open { transform: translateX(0); }
 .gtr-cons-scrim {
@@ -1597,16 +1652,20 @@
 
 /* ---------- карта: тёмные попапы Leaflet под бренд ---------- */
 .gtr-popup .leaflet-popup-content-wrapper {
-  background: #101116;
+  background: linear-gradient(180deg, rgba(20, 21, 27, 0.96) 0%, rgba(12, 13, 17, 0.92) 100%);
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: none;
   border-radius: 0;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  backdrop-filter: blur(12px) saturate(1.15);
 }
 .gtr-popup .leaflet-popup-content { margin: 10px 12px; }
 .gtr-popup .leaflet-popup-tip {
-  background: #101116;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(12, 13, 17, 0.94);
+  border: none;
 }
 .leaflet-container { background: #0a0b0d; font-family: 'Golos Text', sans-serif; }
 .leaflet-container a.leaflet-popup-close-button { color: rgba(255,255,255,.6); }
@@ -1635,7 +1694,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-app { touch-action: manipulation; }
 
 /* ---------- мобильная игровая графика (тест: iPhone 12 Pro Max) ---------- */
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   /* перф: blur на скроллящихся карточках роняет кадры —
      на мобиле карточки плотные и мгновенные, стекло уходит на fixed-слои */
   .gtr-app .gtr-card {
@@ -1755,7 +1814,7 @@ html { -webkit-tap-highlight-color: transparent; }
    она читалась швом и рвала графику. Отступ остаётся только у текста
    внутри. Карточки внутри лент и сеток это правило не задевает: они
    лежат глубже по дереву. */
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-app .gtr-main > .gtr-card,
   .gtr-app .gtr-main > * > .gtr-card {
     margin-inline: calc(-1 * var(--gtr-pad, 14px));
@@ -1765,7 +1824,7 @@ html { -webkit-tap-highlight-color: transparent; }
 /* Лента — не коробка внутри колонки: она идёт от края до края, карточки
    уходят под правую грань и продолжаются за ней. Первая при этом стоит
    ровно по сетке, потому что отступ перенесён внутрь прокрутки. */
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-hscroll {
     margin-inline: calc(-1 * var(--gtr-pad, 14px));
     padding-inline: var(--gtr-pad, 14px);
@@ -1783,7 +1842,7 @@ html { -webkit-tap-highlight-color: transparent; }
    прогресса. Свечение кнопки и атмосфера дышат от --gtr-pulse (бас трека). */
 .gtr-playbar { display: none; }
 
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-playbar {
     position: fixed;
     left: 0;
@@ -2329,7 +2388,7 @@ html { -webkit-tap-highlight-color: transparent; }
    ===================================================================== */
 .gtr-tabbar { display: none; }
 
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-app { --gtr-navh: 56px; }
 
   .gtr-tabbar {
@@ -2532,7 +2591,7 @@ html { -webkit-tap-highlight-color: transparent; }
 
   /* ландшафт: панель ещё ниже, подписи прячем — по высоте её почти нет.
      Без подписей знак центрируем по вертикали, а не ставим над ними. */
-  @media (orientation: landscape) and (max-height: 500px) {
+  @media (orientation: landscape) and (max-height: 560px) {
     .gtr-app { --gtr-navh: 44px; }
     .gtr-tab { justify-content: center; padding-bottom: 0; }
     .gtr-tab-label { display: none; }
@@ -2547,7 +2606,7 @@ html { -webkit-tap-highlight-color: transparent; }
 
 /* планшет (iPad) в портрете тоже получает нижнюю панель: там тач, и
    тянуться к бургеру в верхнем углу неудобно */
-@media (min-width: 861px) and (max-width: 1180px) and (any-pointer: coarse) {
+@media (min-width: 861px) and (max-width: 1180px) and (min-height: 561px) and (any-pointer: coarse) {
   .gtr-app { --gtr-navh: 60px; }
   .gtr-tabbar {
     display: grid;
@@ -2646,7 +2705,7 @@ html { -webkit-tap-highlight-color: transparent; }
 /* содержимое поверх кадра */
 .gtr-hero-edge > .gtr-hero-edge-in { position: relative; z-index: 3; }
 
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   /* текст не липнет к грани, раз рамки больше нет */
   .gtr-hero-edge > .gtr-hero-edge-in { padding-inline: 26px; }
 }
@@ -2654,6 +2713,46 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .gtr-hero-edge > video,
   .gtr-hero-edge > img { transform: none; }
+}
+
+/* Высокий кадр приветствия. Размер жил в инлайне и поэтому не слышал ни
+   одного брейкпоинта — вынесен сюда, чтобы у ландшафта была своя мера. */
+.gtr-hero-tall {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 26px 22px;
+  min-height: min(46vh, 380px);
+}
+
+/* ---------- телефон набок ----------
+   Экран в четыре с небольшим сотни точек по высоте: шапка и кадр,
+   отмеренные для портрета, съедают его целиком и до ленты дело не
+   доходит. Здесь вся вертикальная механика ужимается — ширины при
+   этом в избытке, поэтому по горизонтали ничего не режем. */
+@media (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
+  .gtr-topbar { padding: 5px 14px; padding-top: calc(5px + env(safe-area-inset-top)); }
+  .gtr-burger { width: 38px; height: 38px; }
+  .gtr-main { padding-top: 8px; }
+
+  .gtr-hero-tall {
+    min-height: 152px;
+    padding: 14px 22px 16px;
+  }
+  /* заголовок кадра тоже мельче — иначе он один занимает треть экрана */
+  .gtr-hero-tall .gtr-trash { --gtr-trash: 30px; }
+  .gtr-hero-edge { margin-bottom: 10px; }
+
+  /* Плеер и панель вместе забирали четверть экрана. Плеер ужимается и
+     становится плотнее: сквозь него просвечивали афиши и строка мутнела. */
+  .gtr-playbar {
+    gap: 10px;
+    padding: 6px 14px;
+    padding-bottom: 6px;
+    background: rgba(10, 11, 13, 0.88);
+  }
+  .gtr-play-btn { width: 38px; height: 38px; }
+  .gtr-main { padding-bottom: calc(92px + var(--gtr-navh) + env(safe-area-inset-bottom)); }
 }
 
 
@@ -2826,7 +2925,7 @@ html { -webkit-tap-highlight-color: transparent; }
 /* пока тащат — не дёргается под пальцем */
 .gtr-dancer.dragging .gtr-dancer-img { animation-play-state: paused; }
 
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-dancer { width: 68px; left: 4px; }
 }
 
@@ -2845,11 +2944,14 @@ html { -webkit-tap-highlight-color: transparent; }
    бесплатно, а фильтр на движущемся слое стоит кадров.
    Строка держит до пяти пунктов и делит ширину поровну.
    ===================================================================== */
+/* Ряд выходит за поля карточки и колонки — на 428 точках это ровно
+   край экрана. Иначе пять знаков по 2.1 см в 364 точки не встают. */
 .gtr-comm-nav {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-  gap: 4px;
-  margin-top: 4px;
+  gap: 0;
+  margin-top: 6px;
+  margin-inline: calc(-1 * (18px + var(--gtr-pad, 14px)));
 }
 
 .gtr-comm-btn {
@@ -2880,11 +2982,11 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-comm-btn::before {
   content: "";
   position: absolute;
-  top: calc(10px + 0.525cm - 1.125cm); /* центр орбиты = центр знака */
+  top: calc(10px + 1.05cm - 2cm); /* центр орбиты = центр знака */
   left: 50%;
-  width: 2.25cm;
-  height: 2.25cm;
-  margin-left: -1.125cm;
+  width: 4cm;
+  height: 4cm;
+  margin-left: -2cm;
   pointer-events: none;
   border-radius: 50%;
   background:
@@ -2935,12 +3037,14 @@ html { -webkit-tap-highlight-color: transparent; }
   to { transform: rotate(360deg); }
 }
 
-/* знак 1.05 × 1.05 см — размер выверен на 12 Pro Max */
+/* Знак 2.1 × 2.1 см — вдвое против прошлого захода. Пять таких в ряд
+   помещаются только во всю ширину экрана, поэтому строка выходит за
+   поля карточки (см. .gtr-comm-nav). */
 .gtr-comm-btn .gtr-stk {
   position: relative;
   z-index: 1;
-  width: 1.05cm;
-  height: 1.05cm;
+  width: 2.1cm;
+  height: 2.1cm;
   vertical-align: middle;
   margin: 0;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.75));

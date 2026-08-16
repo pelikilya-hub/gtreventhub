@@ -659,11 +659,39 @@
 }
 
 /* ---------- примитивы ---------- */
+/* Блок больше не коробка. Рамки нет ни с одной стороны: снизу подложка
+   сама уходит в прозрачность, а сверху её обозначает полоса света,
+   гаснущая к краям — тот же приём, что у нижней панели. Продукт должен
+   читаться единой световой средой, а не сборкой прямоугольников. */
 .gtr-card {
-  background: var(--gtr-card);
-  border: var(--gtr-hair) solid var(--gtr-border);
+  background: linear-gradient(
+    180deg,
+    rgba(20, 21, 26, 0.86) 0%,
+    rgba(15, 16, 20, 0.62) 48%,
+    rgba(12, 13, 17, 0.32) 100%
+  );
+  border: none;
   border-radius: var(--gtr-r);
   position: relative;
+}
+.gtr-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 9%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.04) 91%,
+    transparent 100%
+  );
+  transition: background 0.18s ease;
 }
 /* срез верхнего правого угла — фирменная фаска */
 .gtr-card-cut {
@@ -676,14 +704,23 @@
   );
 }
 .gtr-card-hover {
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+}
+/* наведение подсвечивает ту же грань, а не обводит блок по контуру */
+.gtr-card-hover:hover::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(229, 35, 27, 0.35) 12%,
+    var(--gtr-red-hot) 50%,
+    rgba(229, 35, 27, 0.35) 88%,
+    transparent 100%
+  );
 }
 .gtr-card-hover:hover {
-  border-color: var(--gtr-red);
   box-shadow:
-    0 0 0 1px rgba(229, 35, 27, 0.28),
-    0 18px 52px rgba(229, 35, 27, 0.14),
-    0 8px 30px rgba(0, 0, 0, 0.55);
+    0 18px 52px rgba(229, 35, 27, 0.13),
+    0 8px 30px rgba(0, 0, 0, 0.5);
   transform: translate(-1px, -2px);
 }
 .gtr-card-hover:active { transform: translate(0, 0); }
@@ -1542,7 +1579,12 @@
 /* стекло: карточки полупрозрачны, дрейфующий свет просвечивает сквозь них */
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
   .gtr-app .gtr-card {
-    background: rgba(15, 16, 19, 0.66);
+    background: linear-gradient(
+      180deg,
+      rgba(18, 19, 24, 0.72) 0%,
+      rgba(14, 15, 19, 0.5) 50%,
+      rgba(12, 13, 17, 0.24) 100%
+    );
     -webkit-backdrop-filter: blur(14px) saturate(1.15);
     backdrop-filter: blur(14px) saturate(1.15);
   }
@@ -2501,86 +2543,42 @@ html { -webkit-tap-highlight-color: transparent; }
 
 
 /* =====================================================================
-   HERO В КАБИНЕТЕ ПОСЕТИТЕЛЯ — БЕЗ РАМКИ, ВИДЕО УХОДИТ ЗА КРАЙ
+   HERO В КАБИНЕТЕ ПОСЕТИТЕЛЯ — БЕЗ ГРАНЕЙ ВООБЩЕ
    ---------------------------------------------------------------------
-   Карточка с рамкой превращала живое видео в экспонат под стеклом.
-   Здесь наоборот: блок выходит за отступы колонки до самых граней
-   экрана, а по краям свет заваливается — как на изогнутом стекле
-   Galaxy edge. Радиусов нет: округляем свет, а не геометрию, иначе
-   поедет фирменная острая огранка.
+   Ни рамки, ни бликов на рёбрах: у кадра просто нет края. Маска уводит
+   картинку в прозрачность по бокам и вниз, и она растворяется в фоне
+   страницы, а не заканчивается линией. Тот же приём, что у нижней
+   панели, — общий язык, а не приём для одного блока.
    ===================================================================== */
 .gtr-hero-edge {
   position: relative;
   /* вылет ровно на отступ колонки: на телефоне это край экрана */
   margin-inline: calc(-1 * var(--gtr-pad, 14px));
   margin-bottom: 16px;
-  overflow: hidden;
-  background: #0a0b0d;
+  background: none;
   isolation: isolate;
 }
 
-/* кадр шире контейнера: у картинки нет видимого торца, она продолжается
-   за гранью, а не обрывается ровно по ней */
+/* кадр шире контейнера — торца не видно даже там, где маска ещё плотная */
 .gtr-hero-edge > video,
 .gtr-hero-edge > img {
   transform: scale(1.06);
-  transform-origin: 50% 45%;
+  transform-origin: 50% 42%;
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, #000 13%, #000 87%, transparent 100%),
+    linear-gradient(180deg, #000 0%, #000 46%, rgba(0, 0, 0, 0.55) 76%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, #000 13%, #000 87%, transparent 100%),
+    linear-gradient(180deg, #000 0%, #000 46%, rgba(0, 0, 0, 0.55) 76%, transparent 100%);
+  mask-composite: intersect;
 }
 
-/* загиб: блик на ребре стекла + завал света в тень по самому краю.
-   Один слой, два градиента — лишних узлов и фильтров не заводим. */
-.gtr-hero-edge::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.14) 1.4%,
-      rgba(255, 255, 255, 0.03) 4%,
-      rgba(255, 255, 255, 0) 7%,
-      rgba(255, 255, 255, 0) 93%,
-      rgba(255, 255, 255, 0.03) 96%,
-      rgba(255, 255, 255, 0.14) 98.6%,
-      rgba(255, 255, 255, 0) 100%
-    ),
-    linear-gradient(
-      90deg,
-      rgba(5, 6, 8, 0.94) 0%,
-      rgba(5, 6, 8, 0.6) 2.2%,
-      rgba(5, 6, 8, 0.24) 5.5%,
-      rgba(5, 6, 8, 0.06) 9%,
-      rgba(5, 6, 8, 0) 14%,
-      rgba(5, 6, 8, 0) 86%,
-      rgba(5, 6, 8, 0.06) 91%,
-      rgba(5, 6, 8, 0.24) 94.5%,
-      rgba(5, 6, 8, 0.6) 97.8%,
-      rgba(5, 6, 8, 0.94) 100%
-    );
-}
-
-/* верхняя грань тоже уходит в темноту — блок не выглядит вырезанным
-   прямоугольником под шапкой */
-.gtr-hero-edge::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 64px;
-  z-index: 2;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(5, 6, 8, 0.75) 0%, rgba(5, 6, 8, 0) 100%);
-}
-
-/* содержимое поверх всех накладок */
+/* содержимое поверх кадра */
 .gtr-hero-edge > .gtr-hero-edge-in { position: relative; z-index: 3; }
 
 @media (max-width: 860px) {
-  /* текст не должен липнуть к самой грани, раз рамки больше нет */
+  /* текст не липнет к грани, раз рамки больше нет */
   .gtr-hero-edge > .gtr-hero-edge-in { padding-inline: 26px; }
 }
 

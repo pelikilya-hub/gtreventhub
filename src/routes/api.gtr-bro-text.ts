@@ -82,6 +82,9 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         messages.push({ role: "user", content: text });
 
         const cards: Card[] = [];
+        // Трассировка вызовов — какие аргументы модель реально передала.
+        // Без неё разбор «почему пусто» превращается в гадание.
+        const trace: { tool: string; args: unknown }[] = [];
         const provider = kvProvider(ns);
 
         // Агентная петля: модель зовёт инструмент → воркер исполняет →
@@ -126,7 +129,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
             const reply = String(msg.content ?? "")
               .replace(/<think>[\s\S]*?<\/think>/g, "")
               .trim();
-            return json({ ok: true, reply: reply || "…", cards });
+            return json({ ok: true, reply: reply || "…", cards, trace });
           }
 
           messages.push(msg);
@@ -141,6 +144,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
               } catch {
                 args = {};
               }
+              trace.push({ tool: name, args });
               try {
                 result = await Promise.race([
                   fn(args, { provider }),

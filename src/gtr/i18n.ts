@@ -28,7 +28,9 @@ if (!i18n.isInitialized) {
       th: { translation: TH },
     },
     lng: stored(),
-    fallbackLng: "ru",
+    // тайский заполнен не целиком: чего нет, показываем по-английски, а
+    // не кириллицей — латиница тайцу читаема, кириллица нет
+    fallbackLng: { th: ["en", "ru"], default: ["ru"] },
     keySeparator: false,
     nsSeparator: false,
     interpolation: { escapeValue: false },

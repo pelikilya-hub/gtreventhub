@@ -49,6 +49,18 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/brand/GTR_favicon.svg", type: "image/svg+xml" },
       { rel: "icon", href: "/icon-256.png", type: "image/png", sizes: "256x256" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
+      // Шрифты подгружались по мере надобности, и текст перерисовывался по
+      // очереди: сначала системный, потом гротеск, потом моно — на телефоне
+      // это читалось как наложение трёх шрифтов. Четыре начертания, которые
+      // держат почти весь текст, забираем сразу, до первой отрисовки.
+      { rel: "preload", as: "font", type: "font/woff2", crossOrigin: "anonymous",
+        href: "/fonts/gtr/GolosText-500-cyrillic.woff2" },
+      { rel: "preload", as: "font", type: "font/woff2", crossOrigin: "anonymous",
+        href: "/fonts/gtr/GolosText-600-cyrillic.woff2" },
+      { rel: "preload", as: "font", type: "font/woff2", crossOrigin: "anonymous",
+        href: "/fonts/gtr/JetBrainsMono-500-cyrillic.woff2" },
+      { rel: "preload", as: "font", type: "font/woff2", crossOrigin: "anonymous",
+        href: "/fonts/gtr/Oswald-600-cyrillic.woff2" },
     ],
   }),
   shellComponent: RootShell,

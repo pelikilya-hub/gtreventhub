@@ -440,7 +440,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                   <img src="/raw-pulse/handle-logo.webp" alt="" aria-hidden />
                 </span>
               ) : (
-                <Icon d={d} size={21} />
+                <Icon d={d} size={23} />
               )}
               <span className="gtr-tab-label">{t(label)}</span>
             </button>

@@ -2222,7 +2222,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-tabbar { display: none; }
 
 @media (max-width: 860px) {
-  .gtr-app { --gtr-navh: 54px; }
+  .gtr-app { --gtr-navh: 56px; }
 
   .gtr-tabbar {
     display: grid;
@@ -2239,11 +2239,61 @@ html { -webkit-tap-highlight-color: transparent; }
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
-    background: rgba(10, 11, 13, 0.9);
-    -webkit-backdrop-filter: blur(18px) saturate(1.2);
-    backdrop-filter: blur(18px) saturate(1.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.09);
+    /* фона и рамки у самой панели нет: и стекло, и линия живут в
+       псевдоэлементах, чтобы их можно было растворить маской, не тронув
+       иконки и приподнятый знак */
+    background: none;
+    border: none;
     transition: opacity 0.2s ease;
+  }
+
+  /* стекло: к верху и плотность, и само размытие уходят в ноль — панель
+     не отрезает контент кромкой, а растворяется в нём */
+  .gtr-tabbar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(10, 11, 13, 0) 0%,
+      rgba(10, 11, 13, 0.45) 30%,
+      rgba(10, 11, 13, 0.86) 66%,
+      rgba(10, 11, 13, 0.96) 100%
+    );
+    -webkit-backdrop-filter: blur(20px) saturate(1.25);
+    backdrop-filter: blur(20px) saturate(1.25);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 38%, #000 100%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 38%, #000 100%);
+  }
+
+  /* верхняя линия: не рамка, а полоса света — по краям её нет вовсе,
+     к центру разгорается. Дыхание еле заметное, 7 секунд на цикл. */
+  .gtr-tabbar::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 14%,
+      rgba(255, 255, 255, 0.17) 42%,
+      rgba(255, 120, 110, 0.2) 50%,
+      rgba(255, 255, 255, 0.17) 58%,
+      rgba(255, 255, 255, 0.04) 86%,
+      transparent 100%
+    );
+    animation: gtr-navline 7s ease-in-out infinite;
+  }
+  @keyframes gtr-navline {
+    0%, 100% { opacity: 0.72; }
+    50% { opacity: 1; }
   }
 
   /* спека §13: при открытом модале/шторке панель гаснет и не кликается */
@@ -2259,11 +2309,11 @@ html { -webkit-tap-highlight-color: transparent; }
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* подписи прижаты к низу у ВСЕХ вкладок: приподнятый центральный круг
-       иначе сдвигал бы поток и ронял «GTR» ниже соседних подписей */
+    /* подписи прижаты к низу у ВСЕХ вкладок: приподнятый знак иначе
+       сдвигал бы поток и ронял «GTR» ниже соседних подписей */
     justify-content: flex-end;
-    padding-bottom: 7px;
-    gap: 4px;
+    padding-bottom: 8px;
+    gap: 3px;
     min-height: 48px; /* touch.minimum по спеке */
     color: var(--gtr-t3);
     cursor: pointer;
@@ -2277,108 +2327,173 @@ html { -webkit-tap-highlight-color: transparent; }
     white-space: nowrap;
   }
   .gtr-tab.on { color: #fff; }
-  /* активный пункт — короткая красная метка сверху, не только цвет:
-     состояние не должно передаваться одним лишь цветом (спека §20) */
+  /* активный пункт — метка сверху, не только цвет: состояние не должно
+     передаваться одним лишь цветом (спека §20). Торцы уходят в прозрачность,
+     чтобы линия не выглядела обрубком. */
   .gtr-tab.on::before {
     content: "";
     position: absolute;
     top: 0;
     left: 50%;
-    width: 26px;
+    width: 38px;
     height: 2px;
-    margin-left: -13px;
-    background: var(--gtr-red);
-    box-shadow: 0 0 10px 1px rgba(229, 35, 27, 0.75);
+    margin-left: -19px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(229, 35, 27, 0.55) 22%,
+      var(--gtr-red-hot) 50%,
+      rgba(229, 35, 27, 0.55) 78%,
+      transparent 100%
+    );
+    box-shadow: 0 0 16px 0 rgba(229, 35, 27, 0.5);
   }
   .gtr-tab:active { color: #fff; }
 
-  /* центральный GTR: приподнят на 8px (спека §13) */
+  /* центр: знак GTR и есть кнопка. Ни круга, ни рамки, ни плашки —
+     только сам стикер и его свечение. */
   .gtr-tab-center { overflow: visible; }
-  /* круг вынесен из потока — тогда он поднимается над панелью, не двигая
-     подпись, и она стоит на одной линии с соседними */
   .gtr-tab-core {
     position: absolute;
     left: 50%;
-    bottom: 20px;
-    margin-left: -23px;
+    bottom: 15px;
+    margin-left: -27px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 34% 28%, #2a1113, #0c0d0f 70%);
-    border: 1px solid rgba(229, 35, 27, 0.8);
-    box-shadow:
-      0 6px 18px rgba(0, 0, 0, 0.55),
-      0 0 22px -6px rgba(229, 35, 27, 0.9);
-    transition: transform 0.14s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.18s;
+    width: 54px;
+    height: 54px;
+    background: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    transition: transform 0.14s cubic-bezier(0.32, 0.72, 0, 1);
   }
-  .gtr-tab-core img { width: 30px; height: auto; display: block; }
-  .gtr-tab-center:active .gtr-tab-core { transform: scale(0.93); }
-  .gtr-tab-center.on .gtr-tab-core {
-    border-color: var(--gtr-red-hot);
-    box-shadow:
-      0 6px 18px rgba(0, 0, 0, 0.55),
-      0 0 30px -4px rgba(255, 52, 39, 1);
+  .gtr-tab-core img {
+    width: 42px;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.7))
+      drop-shadow(0 0 12px rgba(229, 35, 27, 0.4));
+    transition: filter 0.2s ease;
+  }
+  /* знак приподнят над панелью, и палец попадает выше её кромки —
+     невидимый расширитель отдаёт этот участок кнопке */
+  .gtr-tab-center::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    width: 66px;
+    height: 68px;
+    margin-left: -33px;
+  }
+  .gtr-tab-center:active .gtr-tab-core { transform: scale(0.92); }
+  .gtr-tab-center.on .gtr-tab-core img {
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.7))
+      drop-shadow(0 0 18px rgba(255, 52, 39, 0.85));
   }
   .gtr-tab-center.on::before { display: none; }
 
-  /* плеер встаёт НАД панелью, а не поверх неё */
+  /* плеер встаёт НАД панелью, а не поверх неё. 16px сверху — это просвет
+     под знак GTR: он поднят над кромкой панели и без зазора упирался бы
+     в плеер. Заодно панель перестаёт читаться слипшейся с ним. */
   .gtr-playbar {
-    bottom: calc(var(--gtr-navh) + env(safe-area-inset-bottom));
+    bottom: calc(var(--gtr-navh) + env(safe-area-inset-bottom) + 16px);
     padding-bottom: 10px;
   }
 
   /* контент не прячется ни за плеером, ни за панелью */
   .gtr-main {
-    padding-bottom: calc(96px + var(--gtr-navh) + env(safe-area-inset-bottom));
+    padding-bottom: calc(112px + var(--gtr-navh) + env(safe-area-inset-bottom));
   }
 
   /* низкие экраны (iPhone SE/8, 667px) — панель компактнее, иначе на
      таком экране она забирает заметную долю высоты */
   @media (max-height: 700px) {
-    .gtr-app { --gtr-navh: 48px; }
-    .gtr-tab-core { width: 42px; height: 42px; bottom: 18px; margin-left: -21px; }
-    .gtr-tab-core img { width: 27px; }
+    .gtr-app { --gtr-navh: 50px; }
+    .gtr-tab-core { width: 48px; height: 48px; bottom: 13px; margin-left: -24px; }
+    .gtr-tab-core img { width: 37px; }
+    .gtr-tab-center::after { width: 60px; height: 60px; margin-left: -30px; }
     .gtr-tab-label { font-size: 8.5px; }
   }
 
   /* ландшафт: панель ещё ниже, подписи прячем — по высоте её почти нет.
-     Без подписей круг центрируем по вертикали, а не ставим над ними. */
+     Без подписей знак центрируем по вертикали, а не ставим над ними. */
   @media (orientation: landscape) and (max-height: 500px) {
-    .gtr-app { --gtr-navh: 42px; }
+    .gtr-app { --gtr-navh: 44px; }
     .gtr-tab { justify-content: center; padding-bottom: 0; }
     .gtr-tab-label { display: none; }
     .gtr-tab-core {
-      width: 36px; height: 36px;
-      bottom: 50%; margin-bottom: -18px; margin-left: -18px;
+      width: 40px; height: 40px;
+      bottom: 50%; margin-bottom: -20px; margin-left: -20px;
     }
-    .gtr-tab-core img { width: 23px; }
+    .gtr-tab-core img { width: 31px; }
+    .gtr-tab-center::after { width: 54px; height: 44px; bottom: 0; margin-left: -27px; }
   }
 }
 
 /* планшет (iPad) в портрете тоже получает нижнюю панель: там тач, и
    тянуться к бургеру в верхнем углу неудобно */
 @media (min-width: 861px) and (max-width: 1180px) and (any-pointer: coarse) {
-  .gtr-app { --gtr-navh: 58px; }
+  .gtr-app { --gtr-navh: 60px; }
   .gtr-tabbar {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     position: fixed;
     left: 0; right: 0; bottom: 0;
     z-index: var(--gtr-z-panel);
+    box-sizing: border-box;
     height: calc(var(--gtr-navh) + env(safe-area-inset-bottom));
     padding-bottom: env(safe-area-inset-bottom);
-    background: rgba(10, 11, 13, 0.9);
-    -webkit-backdrop-filter: blur(18px) saturate(1.2);
-    backdrop-filter: blur(18px) saturate(1.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.09);
+    background: none;
+    border: none;
   }
-  .gtr-main { padding-bottom: calc(30px + var(--gtr-navh) + env(safe-area-inset-bottom)); }
+  .gtr-tabbar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(10, 11, 13, 0) 0%,
+      rgba(10, 11, 13, 0.45) 30%,
+      rgba(10, 11, 13, 0.86) 66%,
+      rgba(10, 11, 13, 0.96) 100%
+    );
+    -webkit-backdrop-filter: blur(20px) saturate(1.25);
+    backdrop-filter: blur(20px) saturate(1.25);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 38%, #000 100%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 38%, #000 100%);
+  }
+  .gtr-tabbar::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 0; height: 1px;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 14%,
+      rgba(255, 255, 255, 0.17) 42%,
+      rgba(255, 120, 110, 0.2) 50%,
+      rgba(255, 255, 255, 0.17) 58%,
+      rgba(255, 255, 255, 0.04) 86%,
+      transparent 100%
+    );
+    animation: gtr-navline 7s ease-in-out infinite;
+  }
+  .gtr-playbar { bottom: calc(var(--gtr-navh) + env(safe-area-inset-bottom) + 18px); }
+  .gtr-tab-core { width: 58px; height: 58px; bottom: 16px; margin-left: -29px; }
+  .gtr-tab-core img { width: 45px; }
+  .gtr-tab-center::after { width: 72px; height: 74px; margin-left: -36px; }
+  .gtr-main { padding-bottom: calc(48px + var(--gtr-navh) + env(safe-area-inset-bottom)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .gtr-tab-core,
   .gtr-tabbar { transition: none; }
+  .gtr-tabbar::before { animation: none; opacity: 0.9; }
 }

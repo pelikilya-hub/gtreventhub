@@ -13,7 +13,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { broLogFn } from "../kv-api";
 import { EMPTY_LINE, fmtDetails, fmtEvents, fmtRoute, HELP_LINES, openerFor, planOf } from "./text";
 import { VOICE_LAB_LINES, type PersonaMode } from "./prompt.ru";
-import { BroSession, type BroCard, type BroLine, type BroState, type BroVoice } from "./session";
+import { GemSession } from "./gem";
+import { BroSession, type BroCard, type BroState } from "./session";
+
+type VoiceSession = BroSession | GemSession;
+type VoiceProvider = "openai" | "gemini";
 
 const STATE_RU: Record<BroState, string> = {
   idle: "готов",
@@ -45,11 +49,19 @@ const MODES: [PersonaMode, string, string][] = [
   ["unhinged", "Без тормозов", "18+"],
 ];
 
-const VOICES: [BroVoice, string][] = [
-  ["cedar", "Cedar"],
-  ["marin", "Marin"],
-  ["ash", "Ash"],
-];
+// Наборы голосов по провайдерам. Первый в списке — голос по умолчанию.
+const VOICE_SETS: Record<VoiceProvider, [string, string][]> = {
+  gemini: [
+    ["Charon", "Харон · низкий"],
+    ["Fenrir", "Фенрир · жёсткий"],
+    ["Puck", "Пак · живой"],
+  ],
+  openai: [
+    ["cedar", "Cedar"],
+    ["marin", "Marin"],
+    ["ash", "Ash"],
+  ],
+};
 
 // Счётчики шлём пачкой: сорок отдельных запросов на разговор — это
 // нагрузка ради ничего.
@@ -78,6 +90,7 @@ export function GtrBroOverlay({
   screen,
   district,
   boss,
+  provider = "gemini",
   onNavigate,
 }: {
   open: boolean;
@@ -85,6 +98,7 @@ export function GtrBroOverlay({
   screen?: string;
   district?: string;
   boss?: boolean;
+  provider?: VoiceProvider;
   onNavigate: (route: string, entityId?: string) => void;
 }) {
   const [state, setState] = useState<BroState>("idle");
@@ -101,7 +115,8 @@ export function GtrBroOverlay({
   const lastEvents = useRef<Record<string, unknown>[]>([]);
   const [cards, setCards] = useState<BroCard[]>([]);
   const [mode, setMode] = useState<PersonaMode>("bro");
-  const [voice, setVoice] = useState<BroVoice>("cedar");
+  const VOICES = VOICE_SETS[provider];
+  const [voice, setVoice] = useState<string>(VOICES[0][0]);
   const [muted, setMuted] = useState(false);
   const [tune, setTune] = useState(false);
   // Рация по умолчанию: в клубе авто-детектор речи слышит толпу, а не
@@ -113,7 +128,7 @@ export function GtrBroOverlay({
   const [ask, setAsk] = useState<{ tool: string; summary: string; resolve: (v: boolean) => void } | null>(
     null,
   );
-  const ses = useRef<BroSession | null>(null);
+  const ses = useRef<VoiceSession | null>(null);
   const metric = useMetrics();
 
   const reset = () => {
@@ -129,10 +144,11 @@ export function GtrBroOverlay({
   }, []);
 
   const begin = useCallback(
-    async (v: BroVoice, m: PersonaMode) => {
+    async (v: string, m: PersonaMode) => {
       ses.current?.stop("restart");
       reset();
-      const s = new BroSession({
+      const S = provider === "gemini" ? GemSession : BroSession;
+      const s = new S({
         onState: (st, d) => {
           setState(st);
           setDetail(d);
@@ -169,7 +185,7 @@ export function GtrBroOverlay({
       ses.current = s;
       await s.start({ voice: v, personaMode: m, screen, district, ptt: !handsRef.current });
     },
-    [district, metric, onNavigate, screen],
+    [district, metric, onNavigate, provider, screen],
   );
   // Актуальный режим для begin() без пересоздания колбэка.
   const handsRef = useRef(hands);

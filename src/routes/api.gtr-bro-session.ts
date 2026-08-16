@@ -61,13 +61,15 @@ export const Route = createFileRoute("/api/gtr-bro-session")({
         const flags = ns
           ? ((await kvGetJson<Flags>(ns, "setting:flags")) ?? {})
           : {};
+        const oai = Boolean(typeof process !== "undefined" && process.env?.OPENAI_API_KEY);
+        const gem = Boolean(typeof process !== "undefined" && process.env?.GEMINI_API_KEY);
         return json({
           kv: Boolean(ns),
           enabled: Boolean(flags.broEnabled) && !flags.broKill,
           roles: flags.broRoles ?? [],
-          keyReady: Boolean(
-            typeof process !== "undefined" && process.env?.OPENAI_API_KEY,
-          ),
+          keyReady: oai,
+          geminiKey: gem,
+          brain: Boolean(await kvGetJson(ns!, "setting:brain")),
         });
       },
 

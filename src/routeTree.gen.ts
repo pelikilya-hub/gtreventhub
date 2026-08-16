@@ -16,6 +16,7 @@ import { Route as ApiAfishaSendRouteImport } from './routes/api.afisha-send'
 import { Route as ApiAphotoRouteImport } from './routes/api.aphoto'
 import { Route as ApiAvideoRouteImport } from './routes/api.avideo'
 import { Route as ApiCommunityDigestRouteImport } from './routes/api.community-digest'
+import { Route as ApiGtrBroGemRouteImport } from './routes/api.gtr-bro-gem'
 import { Route as ApiGtrBroSdpRouteImport } from './routes/api.gtr-bro-sdp'
 import { Route as ApiGtrBroSessionRouteImport } from './routes/api.gtr-bro-session'
 import { Route as ApiGtrBroTextRouteImport } from './routes/api.gtr-bro-text'
@@ -69,6 +70,11 @@ const ApiAvideoRoute = ApiAvideoRouteImport.update({
 const ApiCommunityDigestRoute = ApiCommunityDigestRouteImport.update({
   id: '/api/community-digest',
   path: '/api/community-digest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGtrBroGemRoute = ApiGtrBroGemRouteImport.update({
+  id: '/api/gtr-bro-gem',
+  path: '/api/gtr-bro-gem',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiGtrBroSdpRoute = ApiGtrBroSdpRouteImport.update({
@@ -175,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
+  '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
   '/api/gtr-bro-sdp': typeof ApiGtrBroSdpRoute
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
+  '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
   '/api/gtr-bro-sdp': typeof ApiGtrBroSdpRoute
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
@@ -231,6 +239,7 @@ export interface FileRoutesById {
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
+  '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
   '/api/gtr-bro-sdp': typeof ApiGtrBroSdpRoute
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/community-digest'
+    | '/api/gtr-bro-gem'
     | '/api/gtr-bro-sdp'
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
@@ -288,6 +298,7 @@ export interface FileRouteTypes {
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/community-digest'
+    | '/api/gtr-bro-gem'
     | '/api/gtr-bro-sdp'
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
@@ -316,6 +327,7 @@ export interface FileRouteTypes {
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/community-digest'
+    | '/api/gtr-bro-gem'
     | '/api/gtr-bro-sdp'
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
@@ -345,6 +357,7 @@ export interface RootRouteChildren {
   ApiAphotoRoute: typeof ApiAphotoRoute
   ApiAvideoRoute: typeof ApiAvideoRoute
   ApiCommunityDigestRoute: typeof ApiCommunityDigestRoute
+  ApiGtrBroGemRoute: typeof ApiGtrBroGemRoute
   ApiGtrBroSdpRoute: typeof ApiGtrBroSdpRoute
   ApiGtrBroSessionRoute: typeof ApiGtrBroSessionRoute
   ApiGtrBroTextRoute: typeof ApiGtrBroTextRoute
@@ -408,6 +421,13 @@ declare module '@tanstack/react-router' {
       path: '/api/community-digest'
       fullPath: '/api/community-digest'
       preLoaderRoute: typeof ApiCommunityDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gtr-bro-gem': {
+      id: '/api/gtr-bro-gem'
+      path: '/api/gtr-bro-gem'
+      fullPath: '/api/gtr-bro-gem'
+      preLoaderRoute: typeof ApiGtrBroGemRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/gtr-bro-sdp': {
@@ -578,6 +598,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAphotoRoute: ApiAphotoRoute,
   ApiAvideoRoute: ApiAvideoRoute,
   ApiCommunityDigestRoute: ApiCommunityDigestRoute,
+  ApiGtrBroGemRoute: ApiGtrBroGemRoute,
   ApiGtrBroSdpRoute: ApiGtrBroSdpRoute,
   ApiGtrBroSessionRoute: ApiGtrBroSessionRoute,
   ApiGtrBroTextRoute: ApiGtrBroTextRoute,

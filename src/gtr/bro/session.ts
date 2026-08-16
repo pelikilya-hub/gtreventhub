@@ -56,7 +56,9 @@ export type BroEvents = {
 export const NEEDS_CONFIRM: Record<string, string> = {};
 
 export type BroStart = {
-  voice: BroVoice;
+  // Сервер валидирует голос сам; узкий тип здесь мешал общему интерфейсу
+  // с транспортом Gemini.
+  voice: string;
   personaMode: BroPersona;
   district?: string;
   screen?: string;

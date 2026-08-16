@@ -2492,7 +2492,16 @@ export const afishaSourcesFn = createServerFn({ method: "GET" }).handler(async (
 
 // ------------------------------------------------------------ GTR BRO
 
-export type BroFlags = { enabled: boolean; kill: boolean; roles: string[]; keyReady: boolean };
+export type BroFlags = {
+  enabled: boolean;
+  kill: boolean;
+  roles: string[];
+  keyReady: boolean;
+  /** Какой голосовой транспорт использовать. По умолчанию — gemini, если
+   *  его ключ есть: это бесплатный путь. Явное значение в setting:flags
+   *  (voiceProvider) перекрывает автоматику. */
+  provider: "openai" | "gemini";
+};
 
 /** Флаги голосового помощника для клиента.
  *
@@ -2500,23 +2509,29 @@ export type BroFlags = { enabled: boolean; kill: boolean; roles: string[]; keyRe
  *  иначе будет обещать голос и упираться в 503. Значение ключа сюда не
  *  попадает — только факт его наличия. */
 export const broFlagsFn = createServerFn({ method: "GET" }).handler(async (): Promise<BroFlags> => {
-  const off: BroFlags = { enabled: false, kill: false, roles: [], keyReady: false };
+  const off: BroFlags = { enabled: false, kill: false, roles: [], keyReady: false, provider: "gemini" };
   const user = await currentUser();
   if (!user) return off;
   const ns = await getKvNs();
   if (!ns) return off;
   const f =
-    (await kvGetJson<{ broEnabled?: boolean; broKill?: boolean; broRoles?: string[] }>(
-      ns,
-      "setting:flags",
-    )) ?? {};
-  const keyReady = Boolean(typeof process !== "undefined" && process.env?.OPENAI_API_KEY);
+    (await kvGetJson<{
+      broEnabled?: boolean;
+      broKill?: boolean;
+      broRoles?: string[];
+      voiceProvider?: "openai" | "gemini";
+    }>(ns, "setting:flags")) ?? {};
+  const oai = Boolean(typeof process !== "undefined" && process.env?.OPENAI_API_KEY);
+  const gem = Boolean(typeof process !== "undefined" && process.env?.GEMINI_API_KEY);
+  const provider = f.voiceProvider ?? (gem ? "gemini" : "openai");
+  const keyReady = provider === "gemini" ? gem : oai;
   const allowed = !f.broRoles?.length || f.broRoles.includes(user.role);
   return {
     enabled: Boolean(f.broEnabled) && !f.broKill && allowed,
     kill: Boolean(f.broKill),
     roles: f.broRoles ?? [],
     keyReady,
+    provider,
   };
 });
 

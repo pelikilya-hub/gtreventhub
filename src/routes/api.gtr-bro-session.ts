@@ -63,7 +63,28 @@ export const Route = createFileRoute("/api/gtr-bro-session")({
           : {};
         const oai = Boolean(typeof process !== "undefined" && process.env?.OPENAI_API_KEY);
         const gem = Boolean(typeof process !== "undefined" && process.env?.GEMINI_API_KEY);
+        // Диагностика мозга: что на самом деле отвечает сервер BOSS.
+        let brainProbe: unknown = null;
+        const brainCfg = await kvGetJson<{ url?: string; token?: string }>(ns!, "setting:brain");
+        if (brainCfg?.url) {
+          const probe = async (path: string, auth: boolean) => {
+            try {
+              const r = await fetch(`${brainCfg.url!.replace(/\/$/, "")}${path}`, {
+                headers: auth && brainCfg.token ? { authorization: `Bearer ${brainCfg.token}` } : {},
+                signal: AbortSignal.timeout(8000),
+              });
+              return `${r.status} ${(await r.text()).slice(0, 120).replace(/\s+/g, " ")}`;
+            } catch (e) {
+              return `err ${String(e).slice(0, 80)}`;
+            }
+          };
+          brainProbe = {
+            health: await probe("/health", false),
+            models: await probe("/v1/models", true),
+          };
+        }
         return json({
+          brainProbe,
           kv: Boolean(ns),
           enabled: Boolean(flags.broEnabled) && !flags.broKill,
           roles: flags.broRoles ?? [],

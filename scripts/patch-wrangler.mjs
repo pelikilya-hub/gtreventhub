@@ -43,11 +43,37 @@ export default {
       );
       return;
     }
+    // Афиши. Раньше крон ходил на свой же публичный адрес по сети: лишний
+    // контур, где молча отваливается и ключ, и сам запрос — синхронизация
+    // встала 14 августа, и понять это можно было только по KV. Теперь зовём
+    // собственный обработчик в процессе: ни DNS, ни TLS, ни самообращения.
+    // И записываем исход прогона, чтобы следующий разбор занимал минуту.
     const key = await derive(env, "afisha");
     ctx.waitUntil(
-      fetch("https://gtr-event-hub.gtr-event.workers.dev/api/afisha", {
-        headers: { "x-afisha-key": key },
-      }),
+      (async () => {
+        const started = Date.now();
+        let status = 0;
+        let body = "";
+        try {
+          const res = await worker.fetch(
+            new Request("https://gtr-event-hub.gtr-event.workers.dev/api/afisha", {
+              headers: { "x-afisha-key": key },
+            }),
+            env,
+            ctx,
+          );
+          status = res.status;
+          body = (await res.text()).slice(0, 500);
+        } catch (e) {
+          body = "throw: " + String(e && e.message ? e.message : e);
+        }
+        try {
+          await env.GTR_KV?.put(
+            "afisha:lastrun",
+            JSON.stringify({ at: started, ms: Date.now() - started, status, body }),
+          );
+        } catch {}
+      })(),
     );
   },
 };

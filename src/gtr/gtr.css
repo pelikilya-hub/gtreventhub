@@ -3564,3 +3564,42 @@ html { -webkit-tap-highlight-color: transparent; }
 }
 .gtr-bro-orb.hold img { filter: drop-shadow(0 0 18px rgba(0, 194, 255, 0.9)); }
 .gtr-bro-orb { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+/* ---------------- GTR BRO: табло в духе старых терминалов ---------------- */
+/* Зелёный фосфор на чёрном — это не ретро ради ретро: на этом табло видна
+   каждая строка лога, включая ошибки связи, которые раньше умирали молча. */
+.gtr-bro-dos {
+  box-sizing: border-box;
+  height: 168px;
+  overflow-y: auto;
+  margin-bottom: 14px;
+  padding: 8px 10px;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0 2px, rgba(0, 40, 0, 0.28) 2px 4px),
+    radial-gradient(120% 140% at 50% 0%, #041504, #010801 80%);
+  box-shadow: inset 0 0 0 1px rgba(51, 255, 51, 0.28), inset 0 0 26px rgba(0, 255, 70, 0.09);
+  font: 500 12px/1.5 "JetBrains Mono", monospace;
+  color: #35ff5c;
+  text-shadow: 0 0 6px rgba(53, 255, 92, 0.45);
+  overscroll-behavior: contain;
+}
+.gtr-bro-dos-h {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: #9dffb0;
+  border-bottom: 1px dashed rgba(51, 255, 51, 0.35);
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.gtr-bro-dos-l { white-space: pre-wrap; word-break: break-word; }
+.gtr-bro-dos-l.user { color: #b6ffc4; }
+.gtr-bro-dos-l.bro { color: #35ff5c; }
+.gtr-bro-dos-l.sys { color: #1f9c3d; opacity: 0.85; font-size: 11px; }
+.gtr-bro-dos-l.prompt { color: #9dffb0; }
+.gtr-bro-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  animation: gtr-bro-blink 1s steps(1) infinite;
+}
+@keyframes gtr-bro-blink { 50% { opacity: 0; } }

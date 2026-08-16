@@ -171,7 +171,14 @@ export const Route = createFileRoute("/api/gtr-bro-session")({
                 // Расшифровка речи пользователя выключена по умолчанию.
                 // Без неё панель разговора односторонняя: видно только
                 // то, что сказал BRO.
-                input: { transcription: { model: "gpt-4o-mini-transcribe", language: "ru" } },
+                input: {
+                  transcription: { model: "gpt-4o-mini-transcribe", language: "ru" },
+                  // Рация задаётся при создании сессии: конец реплики
+                  // определяет палец на кнопке, поэтому серверный детектор
+                  // речи выключен. session.update с клиента не нужен —
+                  // меньше подвижных частей.
+                  turn_detection: body.ptt ? null : { type: "server_vad" },
+                },
               },
                 tools: TOOL_DEFS,
                 tool_choice: "auto",

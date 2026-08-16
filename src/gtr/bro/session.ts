@@ -39,6 +39,10 @@ export type BroEvents = {
   onLevel?: (v: number) => void;
   /** Счётчик для аналитики. Только имя события, без содержания разговора. */
   onMetric?: (name: string) => void;
+  /** Строка на табло: шаги соединения и ошибки как есть. */
+  onLog?: (line: string) => void;
+  /** Кусок расшифровки по мере произнесения — для эффекта печати. */
+  onPartial?: (who: "user" | "bro", delta: string) => void;
   /** Подтверждение действия. Возвращает решение пользователя, сделанное
    *  в интерфейсе — голосовое «да» сюда не приходит и приходить не должно. */
   onConfirm?: (ask: { tool: string; summary: string }) => Promise<boolean>;
@@ -90,6 +94,10 @@ export class BroSession {
     this.ev = ev;
   }
 
+  private log(line: string) {
+    this.ev.onLog?.(line);
+  }
+
   private set(s: BroState, detail?: string) {
     if (this.state === s) return;
     this.state = s;
@@ -136,8 +144,10 @@ export class BroSession {
         return;
       }
       secret = data.clientSecret;
+      this.log(`сеанс создан · голос ${opts.voice} · ${opts.ptt ? "рация" : "свободный"}`);
     } catch {
       this.set("error", "network");
+      this.log("сеанс: сеть не ответила");
       this.releaseMic();
       return;
     }
@@ -156,16 +166,10 @@ export class BroSession {
     this.dc = dc;
     dc.onmessage = (e) => this.onServerEvent(e.data as string);
     dc.onopen = () => {
-      if (this.ptt) {
-        // Рация: гасим серверный детектор речи — конец реплики определяет
-        // палец на кнопке, а не тишина в шумном зале. Микрофон до нажатия
-        // закрыт.
-        this.send({
-          type: "session.update",
-          session: { type: "realtime", audio: { input: { turn_detection: null } } },
-        });
-        this.mute(true);
-      }
+      // Рация: детектор речи выключен ещё при создании сессии на сервере.
+      // Здесь только держим микрофон закрытым до нажатия.
+      if (this.ptt) this.mute(true);
+      this.log("канал открыт — эфир");
       this.set("listening");
       this.touch();
     };
@@ -173,15 +177,25 @@ export class BroSession {
     try {
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      const r = await fetch("https://api.openai.com/v1/realtime/calls", {
+      // Обмен SDP — через наш воркер: прямой запрос к провайдеру из
+      // мобильного браузера падал молча, а так статус ошибки доезжает
+      // до табло.
+      const r = await fetch("/api/gtr-bro-sdp", {
         method: "POST",
-        headers: { authorization: `Bearer ${secret}`, "content-type": "application/sdp" },
-        body: offer.sdp,
-        signal: AbortSignal.timeout(15_000),
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ secret, sdp: offer.sdp }),
+        signal: AbortSignal.timeout(20_000),
       });
-      if (!r.ok) throw new Error(String(r.status));
-      await pc.setRemoteDescription({ type: "answer", sdp: await r.text() });
-    } catch {
+      const data = (await r.json()) as { ok?: boolean; sdp?: string; status?: number; error?: string };
+      if (!data.ok || !data.sdp) {
+        this.log(`SDP отвергнут · ${data.status ?? r.status} · ${String(data.error ?? "").slice(0, 160)}`);
+        throw new Error("sdp");
+      }
+      await pc.setRemoteDescription({ type: "answer", sdp: data.sdp });
+      this.log("SDP принят, жду канал");
+    } catch (err) {
+      if (!(err instanceof Error && err.message === "sdp")) this.log("WebRTC: обмен не состоялся");
       this.set("error", "webrtc");
       this.stop("error");
       return;
@@ -236,6 +250,7 @@ export class BroSession {
     }
     this.send({ type: "input_audio_buffer.commit" });
     this.send({ type: "response.create" });
+    this.log("реплика ушла");
     this.set("thinking");
     this.touch();
   }
@@ -284,7 +299,11 @@ export class BroSession {
     const type = String(e.type ?? "");
     this.touch();
 
-    if (type === "input_audio_buffer.speech_started") this.bargeIn();
+    if (type === "conversation.item.input_audio_transcription.delta")
+      this.ev.onPartial?.("user", String(e.delta ?? ""));
+    else if (type === "response.output_audio_transcript.delta")
+      this.ev.onPartial?.("bro", String(e.delta ?? ""));
+    else if (type === "input_audio_buffer.speech_started") this.bargeIn();
     else if (type === "response.created") this.set("thinking");
     else if (type === "response.output_audio.delta") this.set("speaking");
     else if (type === "response.done") this.set("listening");
@@ -293,7 +312,12 @@ export class BroSession {
     else if (type === "response.output_audio_transcript.done")
       this.ev.onLine?.({ who: "bro", text: String(e.transcript ?? ""), at: Date.now() });
     else if (type === "response.function_call_arguments.done") await this.runTool(e);
-    else if (type === "error") this.ev.onMetric?.("bro.error.api"), this.set("error", String((e.error as { code?: string })?.code ?? "api"));
+    else if (type === "error") {
+      const er = e.error as { code?: string; message?: string } | undefined;
+      this.ev.onMetric?.("bro.error.api");
+      this.log(`ошибка API · ${er?.code ?? ""} ${String(er?.message ?? "").slice(0, 140)}`);
+      this.set("error", String(er?.code ?? "api"));
+    }
   }
 
   private async runTool(e: Record<string, unknown>) {
@@ -305,6 +329,7 @@ export class BroSession {
     } catch {
       args = {};
     }
+    this.log(`инструмент: ${name}`);
     this.ev.onMetric?.(`bro.tool.${name}`);
 
     // Граница подтверждений. Инструмент, который что-то меняет во внешнем
@@ -424,6 +449,7 @@ export class BroSession {
     }
     this.pc = null;
     this.dc = null;
+    this.log(`сессия закрыта · ${reason}`);
     this.ev.onMetric?.(`bro.session.stop.${reason.replace(/[^a-z-]/g, "")}`);
     if (this.startedAt)
       this.ev.onMetric?.(

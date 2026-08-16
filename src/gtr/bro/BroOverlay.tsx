@@ -89,7 +89,12 @@ export function GtrBroOverlay({
   const [state, setState] = useState<BroState>("idle");
   const [detail, setDetail] = useState<string>();
   const [level, setLevel] = useState(0);
-  const [lines, setLines] = useState<BroLine[]>([]);
+  // Табло: расшифровка разговора и служебные строки в одном потоке,
+  // как лог терминала. Незавершённые реплики печатаются по мере
+  // произнесения.
+  type Row = { who: "user" | "bro" | "sys"; text: string; done: boolean };
+  const [rows, setRows] = useState<Row[]>([]);
+  const dosRef = useRef<HTMLDivElement | null>(null);
   const [cards, setCards] = useState<BroCard[]>([]);
   const [mode, setMode] = useState<PersonaMode>("bro");
   const [voice, setVoice] = useState<BroVoice>("cedar");
@@ -108,7 +113,6 @@ export function GtrBroOverlay({
   const metric = useMetrics();
 
   const reset = () => {
-    setLines([]);
     setCards([]);
     setLevel(0);
     setDetail(undefined);
@@ -133,7 +137,21 @@ export function GtrBroOverlay({
           if (st === "listening" && held.current && ses.current?.isPtt) ses.current.holdStart();
         },
         onLevel: setLevel,
-        onLine: (l) => setLines((p) => [...p.slice(-20), l]),
+        onLog: (t) =>
+          setRows((p) => [...p.slice(-120), { who: "sys" as const, text: t, done: true }]),
+        onPartial: (who, delta) =>
+          setRows((p) => {
+            const last = p[p.length - 1];
+            if (last && last.who === who && !last.done)
+              return [...p.slice(0, -1), { ...last, text: last.text + delta }];
+            return [...p.slice(-120), { who, text: delta, done: false }];
+          }),
+        onLine: (l) =>
+          setRows((p) => {
+            const last = p[p.length - 1];
+            const base = last && last.who === l.who && !last.done ? p.slice(0, -1) : p;
+            return [...base.slice(-120), { who: l.who, text: l.text, done: true }];
+          }),
         onCard: (c) => {
           if (c.kind === "navigate") {
             onNavigate(String(c.data.route), c.data.entityId);
@@ -159,6 +177,12 @@ export function GtrBroOverlay({
     if (!open && ses.current) stop();
   }, [open, stop]);
   useEffect(() => () => ses.current?.stop("unmount"), []);
+
+  // Табло всегда прокручено к последней строке — как настоящий терминал.
+  useEffect(() => {
+    const el = dosRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [rows]);
 
   useEffect(() => {
     if (!open) return;
@@ -213,10 +237,30 @@ export function GtrBroOverlay({
       <div className="gtr-bro-sheet">
         <div className="gtr-bro-head">
           <span className="gtr-bro-eyebrow">GTR BRO</span>
-          <span className={`gtr-bro-state s-${state}`}>{STATE_RU[state]}</span>
+          <span className={`gtr-bro-state s-${state}`}>
+            {STATE_RU[state]}
+            {state === "closed" && detail ? ` · ${detail}` : ""}
+          </span>
           <button className="gtr-bro-x" onClick={onClose} aria-label="Закрыть">
             ✕
           </button>
+        </div>
+
+        {/* Табло: что услышал, что ответил, что случилось со связью.
+            Стиль старого терминала — это не украшение, а честность:
+            каждая строка лога видна, ошибки не прячутся. */}
+        <div className="gtr-bro-dos" ref={dosRef} aria-live="polite">
+          <div className="gtr-bro-dos-h">GTR-BRO/9000 · ЭФИР · {STATE_RU[state]}</div>
+          {rows.map((r, i) => (
+            <div key={i} className={`gtr-bro-dos-l ${r.who}`}>
+              {r.who === "user" ? "> " : r.who === "bro" ? "BRO: " : "· "}
+              {r.text}
+              {!r.done && <span className="gtr-bro-cursor">▮</span>}
+            </div>
+          ))}
+          <div className="gtr-bro-dos-l prompt">
+            C:\GTR&gt;<span className="gtr-bro-cursor">▮</span>
+          </div>
         </div>
 
         {/* Визуализатор: единственная деталь, которая честно показывает,
@@ -264,16 +308,6 @@ export function GtrBroOverlay({
           <div className="gtr-bro-cards">
             {cards.map((c, i) => (
               <BroCardView key={i} card={c} onNavigate={onNavigate} />
-            ))}
-          </div>
-        )}
-
-        {lines.length > 0 && (
-          <div className="gtr-bro-lines">
-            {lines.slice(-6).map((l, i) => (
-              <div key={i} className={`gtr-bro-line ${l.who}`}>
-                {l.text}
-              </div>
             ))}
           </div>
         )}

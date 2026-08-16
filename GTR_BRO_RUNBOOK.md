@@ -63,8 +63,13 @@ npx wrangler kv key put --remote --namespace-id a26fc466919d43e4a2e684d8765810b8
   → BroOverlay (src/gtr/bro/BroOverlay.tsx)
       → BroSession (src/gtr/bro/session.ts)
           → POST /api/gtr-bro-session  → эфемерный секрет (10 мин)
-          → WebRTC напрямую к OpenAI Realtime (звук + канал oai-events)
+          → POST /api/gtr-bro-sdp     → обмен SDP через воркер
+          → WebRTC-медиа напрямую к OpenAI Realtime (звук + канал oai-events)
           → вызов инструмента → POST /api/gtr-bro-tool → KV афиши
+
+Обмен SDP идёт через воркер намеренно: прямой запрос из мобильного
+браузера падал молча, а через воркер статус и причина отказа доезжают до
+табло на экране.
 ```
 
 Ключ есть только на сервере. Браузер получает `clientSecret`, который
@@ -155,6 +160,7 @@ npx wrangler kv key get --remote --namespace-id a26fc466919d43e4a2e684d8765810b8
 | «Слишком много запусков подряд» | 429, лимит 6/10 мин | подождать или поднять `RATE_MAX` |
 | «Микрофон закрыт» | пользователь отказал | разрешить в настройках сайта; на iOS нужен HTTPS |
 | 502 upstream | провайдер ответил ошибкой | статус в логах воркера: `wrangler tail --name gtr-event-hub` |
+| «поднимаю связь» → «закрыто», на табло `SDP отвергнут · 429 · insufficient_quota` | на аккаунте OpenAI нет средств: секрет выдаётся, а звонок — нет | пополнить баланс на platform.openai.com → Billing |
 | голос молчит после старта | канал `oai-events` не открылся | смотреть состояние в шапке оверлея; «поднимаю связь» дольше 15 с = сеть |
 | говорит поверх пользователя | перебивание не сработало | `bargeIn()` глушит трек локально на 120 мс; проверить, что событие `input_audio_buffer.speech_started` приходит |
 

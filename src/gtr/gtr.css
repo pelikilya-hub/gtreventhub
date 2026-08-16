@@ -2834,3 +2834,142 @@ html { -webkit-tap-highlight-color: transparent; }
   .gtr-dancer-img { animation: none; }
   .gtr-dancer-slide { transition: opacity 0.3s ease; transform: none; }
 }
+
+/* =====================================================================
+   КОМЬЮНИТИ — ЗНАКИ ПАРЯТ, КНОПКОЙ СЛУЖИТ САМ ЗНАК
+   ---------------------------------------------------------------------
+   Ни заливки, ни рамки, ни подложки: знак висит в пустоте, под ним
+   подпись. Вокруг ходит лазерная обводка — конический градиент,
+   который вращается за знаком. Размытия нет намеренно: рассеивание
+   собрано многоступенчатым градиентом, оно даёт тот же мягкий свет
+   бесплатно, а фильтр на движущемся слое стоит кадров.
+   Строка держит до пяти пунктов и делит ширину поровну.
+   ===================================================================== */
+.gtr-comm-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.gtr-comm-btn {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 4px 8px;
+  min-height: 44px;
+  cursor: pointer;
+  color: var(--gtr-t2);
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.18s ease;
+}
+
+/* лазер: вращается за знаком, к краям сходит в ничто */
+/* Лазер: тонкая искра идёт по орбите СНАРУЖИ знака, знака не касаясь.
+   Орбита — 1.2 см в диаметре при знаке 0.9 см, то есть зазор 1.5 мм по
+   кругу; знак висит в пустоте, свет ходит вокруг него. Ядро искры узкое
+   и яркое, хвост длинный и тусклый — рассеивание собрано ступенями
+   конического градиента, без filter: blur, который на движущемся слое
+   стоит кадров. Радиальная маска гасит полосу к обоим краям, поэтому у
+   света нет ни внутренней, ни внешней границы. */
+.gtr-comm-btn::before {
+  content: "";
+  position: absolute;
+  top: calc(10px + 0.45cm - 1cm); /* центр орбиты = центр знака */
+  left: 50%;
+  width: 2cm;
+  height: 2cm;
+  margin-left: -1cm;
+  pointer-events: none;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(229, 35, 27, 0) 0deg,
+      rgba(229, 35, 27, 0.05) 120deg,
+      rgba(229, 35, 27, 0.13) 220deg,
+      rgba(255, 74, 64, 0.34) 286deg,
+      rgba(255, 138, 128, 0.72) 316deg,
+      rgba(255, 226, 222, 0.95) 328deg,
+      rgba(255, 110, 100, 0.5) 340deg,
+      rgba(229, 35, 27, 0.14) 350deg,
+      rgba(229, 35, 27, 0) 360deg
+    );
+  -webkit-mask-image: radial-gradient(
+    closest-side,
+    transparent 44%,
+    rgba(0, 0, 0, 0.25) 50%,
+    rgba(0, 0, 0, 0.9) 57%,
+    #000 60%,
+    rgba(0, 0, 0, 0.55) 66%,
+    rgba(0, 0, 0, 0.14) 76%,
+    transparent 92%
+  );
+  mask-image: radial-gradient(
+    closest-side,
+    transparent 44%,
+    rgba(0, 0, 0, 0.25) 50%,
+    rgba(0, 0, 0, 0.9) 57%,
+    #000 60%,
+    rgba(0, 0, 0, 0.55) 66%,
+    rgba(0, 0, 0, 0.14) 76%,
+    transparent 92%
+  );
+  opacity: 0.9;
+  animation: gtr-laserspin 3.4s linear infinite;
+}
+
+/* Каждый следующий знак стартует со сдвигом: строка дышит волной,
+   а не марширует в ногу. */
+.gtr-comm-btn:nth-child(2)::before { animation-delay: -0.68s; }
+.gtr-comm-btn:nth-child(3)::before { animation-delay: -1.36s; }
+.gtr-comm-btn:nth-child(4)::before { animation-delay: -2.04s; }
+.gtr-comm-btn:nth-child(5)::before { animation-delay: -2.72s; }
+
+@keyframes gtr-laserspin {
+  to { transform: rotate(360deg); }
+}
+
+/* знак ровно 0.9 × 0.9 см, как задано */
+.gtr-comm-btn .gtr-stk {
+  position: relative;
+  z-index: 1;
+  width: 0.9cm;
+  height: 0.9cm;
+  vertical-align: middle;
+  margin: 0;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.75));
+  transition: transform 0.14s cubic-bezier(0.32, 0.72, 0, 1), filter 0.2s ease;
+}
+
+.gtr-comm-label {
+  position: relative;
+  z-index: 1;
+  font: 600 8.5px/1.15 "JetBrains Mono", monospace;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.gtr-comm-btn:hover,
+.gtr-comm-btn:focus-visible { color: #fff; }
+.gtr-comm-btn:hover .gtr-stk,
+.gtr-comm-btn:focus-visible .gtr-stk {
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.75))
+    drop-shadow(0 0 12px rgba(255, 82, 72, 0.75));
+}
+.gtr-comm-btn:hover::before { opacity: 1; animation-duration: 1.6s; }
+.gtr-comm-btn:active .gtr-stk { transform: scale(0.9); }
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-comm-btn::before { animation: none; opacity: 0.5; }
+  .gtr-comm-btn .gtr-stk { transition: none; }
+}

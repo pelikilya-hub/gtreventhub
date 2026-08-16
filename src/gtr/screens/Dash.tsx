@@ -1905,19 +1905,33 @@ function VisitorCabinet() {
           <div style={{ font: "500 11.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", marginBottom: 10 }}>
             {t("Новости острова и живой чат — вся тусовка в одном месте")}
           </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {/* Навигация комьюнити: кнопкой служит сам знак, заливок и рамок
+              нет — он висит в пустоте, вокруг ходит лазерная обводка.
+              Строка рассчитана на пять пунктов и делит ширину поровну. */}
+          <div className="gtr-comm-nav">
             {community.channelUrl ? (
-              <button className="gtr-btn gtr-btn-red gtr-btn-stk" onClick={() => openAppLink(community.channelUrl)}>
-                <Stk name="speaker" x2 /> {t("Канал новостей")}
+              <button className="gtr-comm-btn" onClick={() => openAppLink(community.channelUrl)}>
+                <Stk name="speaker" />
+                <span className="gtr-comm-label">{t("Канал")}</span>
               </button>
             ) : null}
             {community.chatUrl ? (
-              <button className="gtr-btn gtr-btn-stk" onClick={() => openAppLink(community.chatUrl)}>
-                <Stk name="handshake" x2 /> {t("Чат сообщества")}
+              <button className="gtr-comm-btn" onClick={() => openAppLink(community.chatUrl)}>
+                <Stk name="handshake" />
+                <span className="gtr-comm-label">{t("Чат")}</span>
               </button>
             ) : null}
-            <button className="gtr-btn gtr-btn-stk" onClick={() => openAppLink("https://t.me/bangtaostyle")}>
-              <Stk name="door" x2 /> {t("Связь")}
+            <button className="gtr-comm-btn" onClick={() => go("tonight")}>
+              <Stk name="ticket" />
+              <span className="gtr-comm-label">{t("Афиша")}</span>
+            </button>
+            <button className="gtr-comm-btn" onClick={() => go("map")}>
+              <Stk name="pin" />
+              <span className="gtr-comm-label">{t("Карта")}</span>
+            </button>
+            <button className="gtr-comm-btn" onClick={() => openAppLink("https://t.me/bangtaostyle")}>
+              <Stk name="door" />
+              <span className="gtr-comm-label">{t("Связь")}</span>
             </button>
           </div>
         </Card>

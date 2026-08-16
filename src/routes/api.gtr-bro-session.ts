@@ -54,6 +54,23 @@ const pickMode = (raw: unknown): PersonaMode =>
 export const Route = createFileRoute("/api/gtr-bro-session")({
   server: {
     handlers: {
+      // Диагностика: три булевых значения, по которым видно, почему
+      // кнопка не зовёт голос. Ни ключа, ни ролей, ни личности здесь нет.
+      GET: async () => {
+        const ns = await getKvNs();
+        const flags = ns
+          ? ((await kvGetJson<Flags>(ns, "setting:flags")) ?? {})
+          : {};
+        return json({
+          kv: Boolean(ns),
+          enabled: Boolean(flags.broEnabled) && !flags.broKill,
+          roles: flags.broRoles ?? [],
+          keyReady: Boolean(
+            typeof process !== "undefined" && process.env?.OPENAI_API_KEY,
+          ),
+        });
+      },
+
       OPTIONS: ({ request }) => {
         const origin = request.headers.get("origin") ?? "";
         if (!ORIGINS.includes(origin)) return new Response(null, { status: 403 });

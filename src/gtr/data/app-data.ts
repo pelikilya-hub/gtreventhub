@@ -173,6 +173,7 @@ export type ScreenId =
   | "community"
   | "visas"
   | "promo"
+  | "outreach"
   | "private"
   | "myshows"
   | "admin";
@@ -233,6 +234,12 @@ export const NAV_NET: [ScreenId, string, string, string][] = [
     "Генератор афиш",
     "M4 3h16v18H4z M4 8h16 M8 12l3 3 5-5",
     "",
+  ],
+  [
+    "outreach",
+    "Работа с площадками",
+    "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M17 3l2 2-2 2",
+    "110",
   ],
   ["access", "Доступы и роли", "M7 11V7a5 5 0 0 1 10 0v4 M5 11h14v10H5z M12 15v3", ""],
   ["admin", "GTR-админ", "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z", ""],

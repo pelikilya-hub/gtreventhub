@@ -2839,3 +2839,58 @@ export const artistContactFn = createServerFn({ method: "GET" })
       } as WorkContact,
     };
   });
+
+// ---------- работа с площадками: доска менеджера ----------
+//
+// Прогресс по каждой площадке живёт в KV: кто на связи, что уже собрали,
+// какие ссылки прислали. Это рабочая доска команды, а не витрина, —
+// поэтому и читает, и пишет только команда.
+
+export type OutreachRow = {
+  vid: string;
+  stage: string;
+  owner?: string;
+  contact?: string;
+  links?: Record<string, string>;
+  done?: string[];
+  note?: string;
+  updatedAt: number;
+};
+
+export const outreachAllFn = createServerFn({ method: "GET" }).handler(async () => {
+  const me = await currentUser();
+  const ns = await getKvNs();
+  if (!me || !TEAM.includes(me.role) || !ns) return { rows: [] as OutreachRow[] };
+  const keys = await kvListAll(ns, "outreach:");
+  const rows = (await Promise.all(keys.map((k) => kvGetJson<OutreachRow>(ns, k)))).filter(
+    (r): r is OutreachRow => Boolean(r),
+  );
+  return { rows };
+});
+
+export const outreachSaveFn = createServerFn({ method: "POST" })
+  .inputValidator((d: Partial<OutreachRow> & { vid: string }) => d)
+  .handler(async ({ data }) => {
+    const me = await currentUser();
+    const ns = await getKvNs();
+    if (!me || !TEAM.includes(me.role) || !ns) return { ok: false as const };
+    const key = `outreach:${data.vid}`;
+    const prev = (await kvGetJson<OutreachRow>(ns, key)) ?? { vid: data.vid, stage: "new", updatedAt: 0 };
+    const row: OutreachRow = {
+      ...prev,
+      ...data,
+      links: { ...(prev.links ?? {}), ...(data.links ?? {}) },
+      owner: data.owner ?? prev.owner ?? me.name,
+      updatedAt: Date.now(),
+    };
+    await ns.put(key, JSON.stringify(row));
+    // Согласие площадки — событие для всей команды, а не строка в таблице.
+    if (data.stage === "agreed" && prev.stage !== "agreed") {
+      const { V } = await import("./data/app-data");
+      await notifyBossTg(
+        ns,
+        `🤝 <b>Согласие площадки</b>\n${tgEsc(V(data.vid)?.name ?? data.vid)} — ${tgEsc(row.owner ?? "менеджер")}`,
+      ).catch(() => {});
+    }
+    return { ok: true as const, row };
+  });

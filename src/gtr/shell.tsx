@@ -62,6 +62,9 @@ import {
 const ArtistsScreen = lazy(() =>
   import("./screens/Artists").then((m) => ({ default: m.ArtistsScreen })),
 );
+const OutreachScreen = lazy(() =>
+  import("./screens/Outreach").then((m) => ({ default: m.OutreachScreen })),
+);
 const VendorsScreen = lazy(() =>
   import("./screens/Vendors").then((m) => ({ default: m.VendorsScreen })),
 );
@@ -587,6 +590,8 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
       return <VisasScreen />;
     case "promo":
       return <PromoScreen />;
+    case "outreach":
+      return <OutreachScreen />;
     case "myshows":
       return <MyShowsScreen />;
     case "admin":

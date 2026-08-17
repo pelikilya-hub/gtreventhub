@@ -35,26 +35,41 @@
     border: 1px solid rgba(255,255,255,.08); overflow: hidden;
   }
   .stage.day { background: radial-gradient(circle at 50% 55%, rgba(255,196,120,.14), transparent 62%), #0d0e11; }
-  .frame { position: relative; width: 210px; height: 240px; perspective: 620px; }
+  .frame { position: relative; width: 210px; height: 240px; perspective: 620px; --neck: 62%; --soft: 9%; }
   .spin { position: absolute; inset: 0; transform-style: preserve-3d; animation: rot 14s linear infinite; }
   .plane { position: absolute; inset: 40px 24px; border: 1px solid rgba(229,35,27,.7);
            background: linear-gradient(135deg, rgba(229,35,27,.16), rgba(229,35,27,.02)); }
   .plane.p2 { transform: rotateY(60deg); } .plane.p3 { transform: rotateY(120deg); }
   @keyframes rot { from { transform: rotateX(66deg) rotateZ(0) } to { transform: rotateX(66deg) rotateZ(360deg) } }
   .tilt { position: absolute; inset: 0; display: grid; place-items: end center; transform-style: preserve-3d; }
-  .head, .rim { grid-area: 1/1; width: 84%; align-self: end; object-fit: contain; object-position: bottom center;
-                transform-origin: 50% 88%; }
-  .head { filter: drop-shadow(0 8px 12px rgba(0,0,0,.6)); }
+  .head, .rim { will-change: transform; }
+  .head, .body, .rim { grid-area: 1/1; width: 84%; align-self: end; object-fit: contain; object-position: bottom center; }
+  .body { filter: drop-shadow(0 8px 12px rgba(0,0,0,.6)); }
+  /* Голова — тот же кадр, но видна только выше линии шеи: маска гасит
+     низ с растушёвкой, поэтому поворот не даёт видимого шва. */
+  .head {
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,.45));
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(var(--neck) - var(--soft)), transparent var(--neck));
+    mask-image: linear-gradient(to bottom, #000 0%, #000 calc(var(--neck) - var(--soft)), transparent var(--neck));
+    transform-origin: 50% var(--neck);
+  }
+  /* Тень на шее: голова повернулась — стык ушёл в полутень. */
+  .neckshade {
+    grid-area: 1/1; align-self: end; width: 84%; height: 100%; pointer-events: none;
+    background: linear-gradient(to bottom, transparent calc(var(--neck) - 4%), rgba(0,0,0,.45) var(--neck), transparent calc(var(--neck) + 7%));
+    opacity: var(--neckop, .5);
+  }
   .rim { filter: brightness(0) saturate(100%) invert(24%) sepia(89%) saturate(6000%) hue-rotate(357deg) blur(1.4px);
-         opacity: .5; transform: scale(1.05) translateZ(-1px); }
+         opacity: .5; transform: scale(1.045) translateZ(-1px);
+         -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(var(--neck) - var(--soft)), transparent var(--neck));
+         mask-image: linear-gradient(to bottom, #000 0%, #000 calc(var(--neck) - var(--soft)), transparent var(--neck));
+         transform-origin: 50% var(--neck); }
   .shadow { position: absolute; left: 50%; bottom: 8px; width: 58%; height: 12px; margin-left: -29%;
             background: radial-gradient(ellipse at center, rgba(0,0,0,.7), transparent 72%); filter: blur(3px); }
   .spec { grid-area: 1/1; align-self: end; width: 84%; height: 100%; pointer-events: none;
           background: radial-gradient(ellipse 42% 30% at 34% 34%, rgba(255,255,255,.22), transparent 70%);
           mix-blend-mode: screen; }
   /* движения включаются классами, чтобы можно было выключить по одному */
-  .anim .head { animation: live 11s ease-in-out infinite; }
-  .anim .rim  { animation: live 11s ease-in-out infinite; animation-delay: -.45s; }
   .anim .spec { animation: shine 6.5s ease-in-out infinite; }
   @keyframes live {
     0%   { transform: rotateY(-8deg) rotate(-1.4deg) translateY(0) scale(1) }
@@ -103,12 +118,19 @@
       <div class="spin" id="spin"><span class="plane p1"></span><span class="plane p2"></span><span class="plane p3"></span></div>
       <div class="tilt" id="tilt">
         <img class="rim" id="rim" alt="" />
+        <!-- тело стоит намертво -->
+        <img class="body" id="body" alt="" />
+        <!-- голова: тот же кадр, обрезанный маской по линии шеи -->
         <img class="head" id="head" alt="" />
+        <span class="neckshade" id="neckshade"></span>
         <span class="spec" id="spec"></span>
       </div>
       <span class="shadow"></span>
     </div>
   </div>
+  <div class="mono" style="margin-top:8px">линия шеи <span id="neckV">62</span>% · растушёвка стыка <span id="softV">9</span>%</div>
+  <input id="neck" type="range" min="35" max="85" value="62" />
+  <input id="soft" type="range" min="2" max="25" value="9" />
   <div class="row" style="margin-top:8px">
     <button id="tAnim" class="on">Анимация</button>
     <button id="tSpec" class="on">Блик</button>
@@ -141,7 +163,8 @@ const head = $("head"), rim = $("rim"), stage = $("stage"), frame = $("frame"), 
 let original = null;   // ImageBitmap-исходник
 let currentUrl = "";
 
-const setImg = (url) => { currentUrl = url; head.src = url; rim.src = url; };
+const body = $("body");
+const setImg = (url) => { currentUrl = url; head.src = url; body.src = url; rim.src = url; };
 
 // ---------- загрузка ----------
 $("file").addEventListener("change", async (e) => {
@@ -194,6 +217,14 @@ const cut = (mode) => {
 $("cutDark").onclick = () => cut("dark");
 $("cutCorner").onclick = () => cut("corner");
 $("cutReset").onclick = () => { if (original) setImg(original.src); };
+$("neck").oninput = () => {
+  $("neckV").textContent = $("neck").value;
+  frame.style.setProperty("--neck", $("neck").value + "%");
+};
+$("soft").oninput = () => {
+  $("softV").textContent = $("soft").value;
+  frame.style.setProperty("--soft", $("soft").value + "%");
+};
 $("thr").oninput = () => ($("thrV").textContent = $("thr").value);
 $("feat").oninput = () => ($("featV").textContent = $("feat").value);
 
@@ -210,11 +241,27 @@ frame.classList.add("anim");
 
 // ---------- наклон: палец + гироскоп ----------
 let px = 0, py = 0, gx = 0, gy = 0, cx = 0, cy = 0;
-const loop = () => {
+// Движение головы считается покадрово, а не CSS-анимацией: системное
+// «Уменьшение движения» в iOS гасит CSS-анимации целиком, а кадры — нет.
+// Тело при этом не трогаем вообще: двигается только слой головы.
+const t0 = performance.now();
+const loop = (now) => {
+  const t = ((now ?? performance.now()) - t0) / 1000;
+  // собственная жизнь: медленный разворот и дыхание
+  const selfY = anim ? Math.sin(t / 3.4) * 7 : 0;      // поворот, град
+  const selfX = anim ? Math.sin(t / 5.1) * 3 : 0;      // кивок, град
+  const selfZ = anim ? Math.sin(t / 4.2) * 1.1 : 0;    // наклон вбок
+  const lift  = anim ? (Math.sin(t / 2.6) + 1) * 1.6 : 0;
   const tx = (pointerOn ? px : 0) + gx, ty = (pointerOn ? py : 0) + gy;
   cx += (tx - cx) * .12; cy += (ty - cy) * .12;
-  tilt.style.transform =
-    `rotateY(${(cx * 18).toFixed(2)}deg) rotateX(${(-cy * 13).toFixed(2)}deg) translate3d(${(cx*8).toFixed(1)}px, ${(cy*5).toFixed(1)}px, 0)`;
+  const ry = selfY + cx * 16;
+  const rx = selfX - cy * 12;
+  head.style.transform =
+    `rotateY(${ry.toFixed(2)}deg) rotateX(${rx.toFixed(2)}deg) rotate(${selfZ.toFixed(2)}deg) translateY(${(-lift).toFixed(2)}px)`;
+  rim.style.transform =
+    `rotateY(${(ry * 0.92).toFixed(2)}deg) rotateX(${(rx * 0.92).toFixed(2)}deg) scale(1.045) translateZ(-1px)`;
+  // стык темнеет тем сильнее, чем сильнее повёрнута голова
+  $("neckshade").style.setProperty("--neckop", (0.35 + Math.min(0.4, Math.abs(ry) / 40)).toFixed(2));
   requestAnimationFrame(loop);
 };
 requestAnimationFrame(loop);

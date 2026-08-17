@@ -46,26 +46,43 @@ export function BossHead3D({
   // держаться только на нём нельзя: без разрешения портрет замирает,
   // а неподвижное лицо выглядит сломанным.
   const stage = useRef<HTMLDivElement | null>(null);
+  const headRef = useRef<HTMLImageElement | null>(null);
+  const rimRef = useRef<HTMLImageElement | null>(null);
+  const neckRef = useRef<HTMLSpanElement | null>(null);
   useEffect(() => {
-    const el = stage.current;
-    const root = el?.closest(".bosshead") as HTMLElement | null;
+    const root = stage.current?.closest(".bosshead") as HTMLElement | null;
     if (!root) return;
     let raf = 0;
     let tx = 0;
     let ty = 0;
     let cx = 0;
     let cy = 0;
-    const tick = () => {
+    const t0 = performance.now();
+    // Кадры, а не CSS-анимация: системное «Уменьшение движения» в iOS
+    // гасит анимации целиком, и портрет замирает намертво. Покадровый
+    // расчёт живёт при любых настройках — но амплитуду там уважаем.
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0.35 : 1;
+    const tick = (now: number) => {
+      const t = (now - t0) / 1000;
       cx += (tx - cx) * 0.12;
       cy += (ty - cy) * 0.12;
-      root.style.setProperty("--bh-x", cx.toFixed(3));
-      root.style.setProperty("--bh-y", cy.toFixed(3));
-      raf =
-        Math.abs(tx - cx) + Math.abs(ty - cy) > 0.002 ? requestAnimationFrame(tick) : 0;
+      // Собственная жизнь головы: разворот, кивок, лёгкий наклон, дыхание.
+      const ry = (Math.sin(t / 3.4) * 7) * calm + cx * 16;
+      const rx = (Math.sin(t / 5.1) * 3) * calm - cy * 12;
+      const rz = Math.sin(t / 4.2) * 1.1 * calm;
+      const lift = (Math.sin(t / 2.6) + 1) * 1.6 * calm;
+      if (headRef.current)
+        headRef.current.style.transform =
+          `rotateY(${ry.toFixed(2)}deg) rotateX(${rx.toFixed(2)}deg) rotate(${rz.toFixed(2)}deg) translateY(${(-lift).toFixed(2)}px)`;
+      if (rimRef.current)
+        rimRef.current.style.transform =
+          `rotateY(${(ry * 0.92).toFixed(2)}deg) rotateX(${(rx * 0.92).toFixed(2)}deg) scale(1.045) translateZ(-1px)`;
+      if (neckRef.current)
+        neckRef.current.style.opacity = (0.32 + Math.min(0.4, Math.abs(ry) / 40)).toFixed(2);
+      raf = requestAnimationFrame(tick);
     };
-    const kick = () => {
-      if (!raf) raf = requestAnimationFrame(tick);
-    };
+    raf = requestAnimationFrame(tick);
+    const kick = () => {};
     const onMove = (e: PointerEvent) => {
       const r = root.getBoundingClientRect();
       // Ловим указатель в широкой зоне вокруг эмблемы, а не только
@@ -88,7 +105,7 @@ export function BossHead3D({
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", home);
       window.removeEventListener("pointercancel", home);
-      if (raf) cancelAnimationFrame(raf);
+      cancelAnimationFrame(raf);
     };
   }, []);
 
@@ -116,11 +133,15 @@ export function BossHead3D({
           {/* Слой наклона живёт отдельно от собственной анимации головы:
               иначе одно transform затирает другое, и портрет замирает. */}
           <div className="bosshead-tilt">
-            {/* Контровой свет: красный ободок GTR по краю силуэта. */}
-            <img className="bosshead-rim" src={shown} alt="" />
-            {/* Сам портрет: качается сам, без всяких сенсоров. */}
-            <img className="bosshead-img" src={shown} alt="" />
-            {/* Спекуляр: блик скользит по лицу, как от движущегося прибора. */}
+            {/* Контровой свет по краю головы — идёт за ней. */}
+            <img className="bosshead-rim" src={shown} alt="" ref={rimRef} />
+            {/* Тело стоит намертво: двигается только голова. */}
+            <img className="bosshead-body" src={shown} alt="" />
+            {/* Голова: тот же кадр, обрезанный маской по линии шеи. */}
+            <img className="bosshead-img" src={shown} alt="" ref={headRef} />
+            {/* Полутень на стыке — прячет шов при повороте. */}
+            <span className="bosshead-neck" ref={neckRef} />
+            {/* Блик скользит по лицу, как от движущегося прибора. */}
             <span className="bosshead-spec" />
           </div>
           {/* Тень под подбородком — то, что отличает наклейку от объёма. */}

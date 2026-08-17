@@ -1466,7 +1466,7 @@
    Объём собран слоями: контровой свет по краю силуэта, сам портрет,
    скользящий блик и тень под подбородком. Наклон телефона качает голову
    через те же --gtr-tilt-*, что и атмосферу приложения. */
-.bosshead { position: relative; }
+.bosshead { position: relative; --neck: 62%; --neck-soft: 9%; }
 .bosshead.on .boss3d-spin { opacity: 0.72; }
 .bosshead-stage {
   position: absolute;
@@ -1490,6 +1490,7 @@
   will-change: transform;
 }
 .bosshead-img,
+.bosshead-body,
 .bosshead-rim {
   grid-area: 1 / 1;
   width: 88%;
@@ -1498,21 +1499,50 @@
   object-fit: contain;
   object-position: bottom center;
   align-self: end;
-  transform-origin: 50% 88%;
+}
+/* Тело стоит намертво — оно и есть точка отсчёта: любое его движение
+   сразу читается как «портрет плавает», а не «человек живой». */
+.bosshead-body {
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.55)) contrast(1.04) saturate(1.03);
+}
+/* Голова — тот же кадр, видимый только выше линии шеи. Маска гасит низ
+   с растушёвкой, поэтому поворот не открывает шва. */
+.bosshead-img,
+.bosshead-rim {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(var(--neck) - var(--neck-soft)),
+    transparent var(--neck)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(var(--neck) - var(--neck-soft)),
+    transparent var(--neck)
+  );
+  transform-origin: 50% var(--neck);
   will-change: transform;
+}
+/* Полутень на стыке: чем сильнее повёрнута голова, тем темнее шея. */
+.bosshead-neck {
+  grid-area: 1 / 1;
+  align-self: end;
+  width: 88%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent calc(var(--neck) - 4%),
+    rgba(0, 0, 0, 0.45) var(--neck),
+    transparent calc(var(--neck) + 7%)
+  );
+  opacity: 0.35;
 }
 /* Голова живёт сама: медленный разворот, дыхание, лёгкий кивок. Ничего
    не ждёт от сенсоров и разрешений — работает всегда и везде. */
 .bosshead-img {
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.55)) contrast(1.04) saturate(1.03);
-  animation: bosshead-live 11s ease-in-out infinite;
-}
-@keyframes bosshead-live {
-  0% { transform: rotateY(-7deg) rotateZ(-1.2deg) translateY(0) scale(1); }
-  25% { transform: rotateY(0deg) rotateZ(0deg) translateY(-3px) scale(1.012); }
-  50% { transform: rotateY(7deg) rotateZ(1.2deg) translateY(0) scale(1); }
-  75% { transform: rotateY(0deg) rotateZ(0deg) translateY(-2px) scale(1.008); }
-  100% { transform: rotateY(-7deg) rotateZ(-1.2deg) translateY(0) scale(1); }
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45)) contrast(1.04) saturate(1.03);
 }
 /* Ободок отстаёт на такт — из-за этого между ним и лицом появляется
    глубина, а не плоская обводка. */
@@ -1520,19 +1550,19 @@
   filter: brightness(0) saturate(100%) invert(24%) sepia(89%) saturate(6000%) hue-rotate(357deg)
     brightness(97%) contrast(96%) blur(1.3px);
   opacity: 0.5;
-  animation: bosshead-live 11s ease-in-out infinite,
-    bosshead-rim 5.5s ease-in-out infinite;
-  animation-delay: -0.45s, 0s;
-  transform: scale(1.05) translateZ(-1px);
+  animation: bosshead-rim 5.5s ease-in-out infinite;
+  transform: scale(1.045) translateZ(-1px);
 }
 @keyframes bosshead-rim {
   0%, 100% { opacity: 0.36; }
   50% { opacity: 0.72; }
 }
 /* Ночь холоднее и контрастнее, день — тёплый свет пляжа. */
+.bosshead.night .bosshead-body,
 .bosshead.night .bosshead-img {
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.7)) contrast(1.1) saturate(0.95) brightness(0.92);
 }
+.bosshead.day .bosshead-body,
 .bosshead.day .bosshead-img {
   filter: drop-shadow(0 5px 9px rgba(0, 0, 0, 0.45)) contrast(1.02) saturate(1.08) brightness(1.05);
 }
@@ -1543,7 +1573,9 @@
   align-self: end;
   width: 88%;
   height: 100%;
-  background: linear-gradient(115deg, transparent 36%, rgba(255, 255, 255, 0.2) 47%, transparent 58%);
+  /* Мягкое пятно, а не полоса: линейный градиент по прямоугольнику даёт
+     видимый шов, если у снимка непрозрачный фон. */
+  background: radial-gradient(ellipse 40% 26% at 34% 30%, rgba(255, 255, 255, 0.2), transparent 70%);
   mix-blend-mode: screen;
   animation: bosshead-spec 6.5s ease-in-out infinite;
 }
@@ -1564,17 +1596,10 @@
   margin-left: -31%;
   background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.65), transparent 72%);
   filter: blur(2px);
-  animation: bosshead-shadow 11s ease-in-out infinite;
-}
-@keyframes bosshead-shadow {
-  0%, 50%, 100% { transform: scaleX(1); opacity: 0.75; }
-  25%, 75% { transform: scaleX(0.9); opacity: 0.55; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .bosshead-img,
   .bosshead-rim,
-  .bosshead-spec,
-  .bosshead-shadow { animation: none; }
+  .bosshead-spec { animation: none; }
   .bosshead-spec { opacity: 0; }
 }
 

@@ -121,13 +121,17 @@ export function BossHead3D({
       style={{ width: size, height: size }}
       aria-hidden
     >
-      <div className="boss3d-spin">
-        <span className="boss3d-plane p1" />
-        <span className="boss3d-plane p2" />
-        <span className="boss3d-plane p3" />
-        <span className="boss3d-ring" />
-        {!shown ? <span className="boss3d-core" /> : null}
-      </div>
+      {/* Портрета нет — остаётся прежняя эмблема. Есть портрет — сцена
+          принадлежит только ему: каркас за головой лишь спорит с ней. */}
+      {!shown ? (
+        <div className="boss3d-spin">
+          <span className="boss3d-plane p1" />
+          <span className="boss3d-plane p2" />
+          <span className="boss3d-plane p3" />
+          <span className="boss3d-ring" />
+          <span className="boss3d-core" />
+        </div>
+      ) : null}
       {shown ? (
         <div className="bosshead-stage" ref={stage}>
           {/* Слой наклона живёт отдельно от собственной анимации головы:

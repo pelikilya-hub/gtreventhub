@@ -44,7 +44,12 @@
   .tilt { position: absolute; inset: 0; display: grid; place-items: end center; transform-style: preserve-3d; }
   .head, .rim { will-change: transform; }
   .head, .body, .rim { grid-area: 1/1; width: 84%; align-self: end; object-fit: contain; object-position: bottom center; }
-  .body { filter: drop-shadow(0 8px 12px rgba(0,0,0,.6)); }
+  /* Тело — только ниже шеи: обратная маска к голове. */
+  .body {
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,.6));
+    -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--neck) - var(--soft)), #000 var(--neck));
+    mask-image: linear-gradient(to bottom, transparent calc(var(--neck) - var(--soft)), #000 var(--neck));
+  }
   /* Голова — тот же кадр, но видна только выше линии шеи: маска гасит
      низ с растушёвкой, поэтому поворот не даёт видимого шва. */
   .head {
@@ -135,7 +140,7 @@
     <button id="tAnim" class="on">Анимация</button>
     <button id="tSpec" class="on">Блик</button>
     <button id="tRim" class="on">Ободок</button>
-    <button id="tSpin" class="on">Кристалл</button>
+    <button id="tSpin">Кристалл</button>
     <button id="tDay">День</button>
   </div>
 </div>
@@ -230,7 +235,7 @@ $("feat").oninput = () => ($("featV").textContent = $("feat").value);
 
 // ---------- тумблеры ----------
 const toggle = (btn, on, fn) => { btn.classList.toggle("on", on); fn(on); };
-let anim = true, spec = true, rimOn = true, spin = true, dayMode = false, pointerOn = true;
+let anim = true, spec = true, rimOn = true, spin = false, dayMode = false, pointerOn = true;
 $("tAnim").onclick = () => { anim = !anim; toggle($("tAnim"), anim, (v) => frame.classList.toggle("anim", v)); };
 $("tSpec").onclick = () => { spec = !spec; toggle($("tSpec"), spec, (v) => $("spec").classList.toggle("hidden", !v)); };
 $("tRim").onclick  = () => { rimOn = !rimOn; toggle($("tRim"), rimOn, (v) => rim.classList.toggle("hidden", !v)); };
@@ -238,6 +243,7 @@ $("tSpin").onclick = () => { spin = !spin; toggle($("tSpin"), spin, (v) => $("sp
 $("tDay").onclick  = () => { dayMode = !dayMode; toggle($("tDay"), dayMode, (v) => stage.classList.toggle("day", v)); };
 $("tPointer").onclick = () => { pointerOn = !pointerOn; toggle($("tPointer"), pointerOn, () => {}); };
 frame.classList.add("anim");
+$("spin").classList.add("hidden");
 
 // ---------- наклон: палец + гироскоп ----------
 let px = 0, py = 0, gx = 0, gy = 0, cx = 0, cy = 0;

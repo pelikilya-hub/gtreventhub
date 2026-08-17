@@ -1,0 +1,2171 @@
+{
+ "meta": {
+  "venueId": "VEN-0002",
+  "source": "Официальный флипбук меню Café del Mar Phuket (heyzine b3f6fa38a6), сверка цен по рендерам страниц",
+  "verified": "2026-08-17",
+  "currency": "THB",
+  "note": "Все цены в батах, включая налоги и сервисный сбор"
+ },
+ "sections": [
+  {
+   "id": "food",
+   "name": "Кухня",
+   "groups": [
+    {
+     "id": "platters",
+     "name": "Sharing Platters",
+     "ru": "Платтеры на компанию",
+     "items": [
+      {
+       "id": "platter-del-mar",
+       "name": "Del Mar",
+       "price": 7900,
+       "desc": "Alaska King Crab, Canadian Lobster, Octopus, Spanish Red Prawns, Hokkaido Scallop, Hamachi Ceviche, Patatas Bravas, Mojo & Chili Yuzu Sauce",
+       "photo": "/cdm/menu/platter-del-mar.jpg"
+      },
+      {
+       "id": "platter-mezze",
+       "name": "Mezze",
+       "price": 1450,
+       "desc": "Mini Falafel, Hummus, Toum, Fresh Flatbread, Charred Red Pepper, Pickled Vegetables, Marinated Olives",
+       "photo": "/cdm/menu/platter-mezze.jpg"
+      },
+      {
+       "id": "platter-royal-thai",
+       "name": "Royal Thai Selection",
+       "price": 2250,
+       "desc": "Tenderloin Mala Spice, Flower Crab Yam Tarts, Chicken Larb Spring Rolls, Lotus Miang Kham, Butterfly Pea Shrimp Har Gow, Spiced Beef & Pineapple Bites",
+       "photo": "/cdm/menu/platter-royal-thai.jpg"
+      },
+      {
+       "id": "platter-japanese",
+       "name": "Japanese",
+       "price": 4500,
+       "desc": "Ebi Tempura, Salmonissimo, Piri Piri Tuna, Kimchi Crab, El Sol, Mango Roll, Selection of Nigiri and Sashimi",
+       "photo": "/cdm/menu/platter-japanese.jpg"
+      }
+     ]
+    },
+    {
+     "id": "caviar-oyster",
+     "name": "Caviar & Oyster",
+     "ru": "Икра и устрицы",
+     "items": [
+      {
+       "id": "caviar-oscietre",
+       "name": "Osciètre Prestige Caviar",
+       "price": 3900,
+       "desc": "House-made Blini, Egg White, Egg Yolk, Capers, Shallots & Crème Fraîche",
+       "opts": [
+        {
+         "l": "15 г",
+         "p": 3900
+        },
+        {
+         "l": "30 г",
+         "p": 5500
+        }
+       ],
+       "photo": "/cdm/menu/caviar-oscietre.jpg"
+      },
+      {
+       "id": "oyster-celine",
+       "name": "Celine Oysters",
+       "price": 550,
+       "opts": [
+        {
+         "l": "3 шт",
+         "p": 550
+        },
+        {
+         "l": "6 шт",
+         "p": 1100
+        },
+        {
+         "l": "12 шт",
+         "p": 1950
+        }
+       ],
+       "photo": "/cdm/menu/oyster-celine.jpg"
+      },
+      {
+       "id": "oyster-amulet",
+       "name": "Amulet Oysters",
+       "price": 690,
+       "opts": [
+        {
+         "l": "3 шт",
+         "p": 690
+        },
+        {
+         "l": "6 шт",
+         "p": 1350
+        },
+        {
+         "l": "12 шт",
+         "p": 2650
+        }
+       ],
+       "photo": "/cdm/menu/oyster-amulet.jpg"
+      },
+      {
+       "id": "oyster-ostra-regal",
+       "name": "Ostra Regal Oysters",
+       "price": 950,
+       "opts": [
+        {
+         "l": "3 шт",
+         "p": 950
+        },
+        {
+         "l": "6 шт",
+         "p": 1900
+        },
+        {
+         "l": "12 шт",
+         "p": 3500
+        }
+       ],
+       "photo": "/cdm/menu/oyster-ostra-regal.jpg"
+      }
+     ]
+    },
+    {
+     "id": "crudo",
+     "name": "Crudo",
+     "ru": "Крудо",
+     "items": [
+      {
+       "id": "tropical-truffle-ceviche",
+       "name": "Tropical Truffle Ceviche",
+       "price": 590,
+       "desc": "Hamachi Sashimi, Truffle-Infused Leche de Tigre, Coconut Water, Dragon Fruit, Coriander & Chili Oil",
+       "photo": "/cdm/menu/tropical-truffle-ceviche.jpg"
+      },
+      {
+       "id": "seabream-sashimi",
+       "name": "Seabream Sashimi Acevichada",
+       "price": 1250,
+       "desc": "48-Hour Dry-Aged Seabream Sashimi, Acevichada Vinaigrette, Garden Leaves",
+       "photo": "/cdm/menu/seabream-sashimi.jpg"
+      },
+      {
+       "id": "bad-to-the-bone",
+       "name": "Bad to the Bone",
+       "price": 1180,
+       "desc": "Australian Wagyu Tenderloin Truffle Tartare, Egg Yolk Jam, Taro Chips, Bone Marrow",
+       "photo": "/cdm/menu/bad-to-the-bone.jpg"
+      }
+     ]
+    },
+    {
+     "id": "salads",
+     "name": "Jardin del Mar",
+     "ru": "Салаты",
+     "items": [
+      {
+       "id": "santorini-sun",
+       "name": "Santorini Sun",
+       "price": 530,
+       "desc": "Classic Greek Salad, Heirloom Cherry Tomatoes, Olives, Cucumber, Bell Peppers, Whipped Honey Feta",
+       "photo": "/cdm/menu/santorini-sun.jpg"
+      },
+      {
+       "id": "crab-coral-reef",
+       "name": "Crab Coral Reef",
+       "price": 890,
+       "desc": "Jumbo Crab Lump Salad, Fresh Thai Mango, Avocado & Brazilian Pepper",
+       "photo": "/cdm/menu/crab-coral-reef.jpg"
+      },
+      {
+       "id": "watermelon-kiss",
+       "name": "Watermelon Kiss",
+       "price": 480,
+       "desc": "Watermelon, Grilled Halloumi, Brazilian Pepper Vinaigrette, Mint",
+       "photo": "/cdm/menu/watermelon-kiss.jpg"
+      }
+     ]
+    },
+    {
+     "id": "sushi",
+     "name": "Sushi Bar",
+     "ru": "Суши-бар",
+     "items": [
+      {
+       "id": "sashimi-omakase",
+       "name": "Chef's Sashimi Omakase",
+       "price": 2900,
+       "desc": "Bluefin Tuna, Hamachi, Hokkaido Scallop, Lobster Tartare, Gamba Roja, Caviar, Ikura",
+       "photo": "/cdm/menu/sashimi-omakase.jpg"
+      },
+      {
+       "id": "nigiri-omakase",
+       "name": "Chef's Nigiri Omakase",
+       "price": 1300,
+       "desc": "Bluefin Tuna, Hamachi, Hokkaido Scallop, Gamba Roja, Norwegian Salmon",
+       "photo": "/cdm/menu/nigiri-omakase.jpg"
+      },
+      {
+       "id": "lobster-roll",
+       "name": "Lobster Roll",
+       "price": 990,
+       "desc": "Canadian Lobster, 24K Gold Leaf, Avocado, Cucumber, Tobiko, Masago",
+       "photo": "/cdm/menu/lobster-roll.jpg"
+      },
+      {
+       "id": "oro-toro",
+       "name": "Oro Toro",
+       "price": 1100,
+       "desc": "Otoro Tuna Tartare & Carpaccio, Caviar, 24K Gold Leaf, Pickled Daikon",
+       "photo": "/cdm/menu/oro-toro.jpg"
+      },
+      {
+       "id": "ebi-tempura",
+       "name": "Ebi Tempura",
+       "price": 520,
+       "desc": "Tempura Prawn, Avocado, Shaved Almonds, Teriyaki Sauce",
+       "photo": "/cdm/menu/ebi-tempura.jpg"
+      },
+      {
+       "id": "piri-piri-tuna",
+       "name": "Piri Piri Tuna",
+       "price": 790,
+       "desc": "Blue Fin Tuna Tartare & Carpaccio, Home-made Piri Piri, Yamagobo, Cucumber",
+       "photo": "/cdm/menu/piri-piri-tuna.jpg"
+      },
+      {
+       "id": "salmonissimo",
+       "name": "Salmonissimo",
+       "price": 680,
+       "desc": "Norwegian Salmon, Avocado, Smoked Salmon Pâté Cream Cheese, Spring Onion",
+       "photo": "/cdm/menu/salmonissimo.jpg"
+      },
+      {
+       "id": "mango-roll",
+       "name": "Mango Roll",
+       "price": 420,
+       "desc": "Avocado, Thai Mango, Cucumber, Carrot, Pickled Daikon, Microgreens",
+       "photo": "/cdm/menu/mango-roll.jpg"
+      },
+      {
+       "id": "kimchi-crab",
+       "name": "Kimchi Crab",
+       "price": 480,
+       "desc": "Soft-Shell Crab Tempura, Cabbage Kimchi, Cucumber, Spicy Chili Garlic Sauce",
+       "photo": "/cdm/menu/kimchi-crab.jpg"
+      },
+      {
+       "id": "el-sol",
+       "name": "El Sol",
+       "price": 650,
+       "desc": "Hamachi Tartare & Sashimi, Pico de Gallo, Shichimi Togarashi, Tobiko",
+       "photo": "/cdm/menu/el-sol.jpg"
+      }
+     ]
+    },
+    {
+     "id": "thai",
+     "name": "Welcome to Thailand",
+     "ru": "Тайская кухня",
+     "items": [
+      {
+       "id": "soul-of-siam",
+       "name": "Soul of Siam",
+       "price": 350,
+       "desc": "Pad Thai, Rice Noodles, Egg. Курица +100, тигровая креветка +200",
+       "opts": [
+        {
+         "l": "базовый",
+         "p": 350
+        },
+        {
+         "l": "с курицей",
+         "p": 450
+        },
+        {
+         "l": "с креветкой",
+         "p": 550
+        }
+       ],
+       "photo": "/cdm/menu/soul-of-siam.jpg"
+      },
+      {
+       "id": "tom-yum-tiger",
+       "name": "Tom Yum Tiger",
+       "price": 490,
+       "desc": "Classic Tom Yum with Milk, Peanuts, Pinenuts, Tiger Prawn, Jasmine Rice",
+       "photo": "/cdm/menu/tom-yum-tiger.jpg"
+      },
+      {
+       "id": "crab-curry",
+       "name": "Crab Curry",
+       "price": 720,
+       "desc": "Stir-Fried Crab Curry, Jasmine Rice",
+       "photo": "/cdm/menu/crab-curry.jpg"
+      }
+     ]
+    },
+    {
+     "id": "starters",
+     "name": "Starters",
+     "ru": "Стартеры",
+     "items": [
+      {
+       "id": "grilled-octopus",
+       "name": "Charcoal Grilled Octopus",
+       "price": 750,
+       "desc": "Octopus Kissed by Fire, Shiso Salsa Verde, Smoked Spanish Paprika",
+       "photo": "/cdm/menu/grilled-octopus.jpg"
+      },
+      {
+       "id": "picanha-skewers",
+       "name": "Picanha Skewers",
+       "price": 490,
+       "desc": "Picanha, Prik Num Chili & Red Yuzu Kosho Sauce",
+       "photo": "/cdm/menu/picanha-skewers.jpg"
+      },
+      {
+       "id": "rock-shrimp-tempura",
+       "name": "Rock Shrimp Tempura",
+       "price": 530,
+       "desc": "Phuket River Prawn Tempura Bites, Spicy Chili & Garlic Mayo",
+       "photo": "/cdm/menu/rock-shrimp-tempura.jpg"
+      },
+      {
+       "id": "angus-sliders",
+       "name": "Black Angus Mini Sliders",
+       "price": 550,
+       "desc": "Black Angus Beef, Cheddar, Pickled Peppers, Onions, CDM Secret Sauce",
+       "photo": "/cdm/menu/angus-sliders.jpg"
+      },
+      {
+       "id": "eggplant-miso",
+       "name": "Japanese Eggplant Miso",
+       "price": 450,
+       "desc": "Japanese Eggplant, Umami Sesame Miso Glaze, Katsuobushi",
+       "photo": "/cdm/menu/eggplant-miso.jpg"
+      },
+      {
+       "id": "mini-lobster-rolls",
+       "name": "Mini Lobster Rolls",
+       "price": 990,
+       "desc": "Canadian Lobster, Smoked Butter, Mini Brioche, Osciètre Caviar",
+       "photo": "/cdm/menu/mini-lobster-rolls.jpg"
+      },
+      {
+       "id": "ash-smoke",
+       "name": "Ash & Smoke",
+       "price": 1190,
+       "desc": "Citrus-Cured Hay-Smoked Japanese Mackerel, Kisame Wasabi, Pickled Onion",
+       "photo": "/cdm/menu/ash-smoke.jpg"
+      },
+      {
+       "id": "wagyu-bikini-bites",
+       "name": "Wagyu Bikini Bites",
+       "price": 1250,
+       "desc": "Kagoshima A5 Wagyu Katsu Sando, Oscietra Caviar, 24K Gold Leaf",
+       "photo": "/cdm/menu/wagyu-bikini-bites.jpg"
+      },
+      {
+       "id": "holy-guacamole",
+       "name": "Holy Guacamole",
+       "price": 540,
+       "desc": "Fresh Avocado, Charred Jalapeno, Pico de Gallo, Corn Tortillas",
+       "photo": "/cdm/menu/holy-guacamole.jpg"
+      },
+      {
+       "id": "eau-de-burrata",
+       "name": "Eau de Burrata",
+       "price": 730,
+       "desc": "Burrata, Musk Melon, Parma Ham, Orange Balsamic Glaze, Hot Honey, Pine Nuts",
+       "photo": "/cdm/menu/eau-de-burrata.jpg"
+      }
+     ]
+    },
+    {
+     "id": "grill-meat",
+     "name": "From the Grill · Meat",
+     "ru": "Гриль · мясо (цена за 100 г)",
+     "items": [
+      {
+       "id": "wagyu-striploin",
+       "name": "Kagoshima A5 Wagyu Striploin (JPN)",
+       "price": 1300,
+       "unit": "100 г",
+       "desc": "Miso Mushrooms, Ponzu Sauce, Freshly Grated Wasabi",
+       "photo": "/cdm/menu/wagyu-striploin.jpg"
+      },
+      {
+       "id": "tomahawk",
+       "name": "F4 Wagyu Tomahawk MB4/5 (AUS)",
+       "price": 550,
+       "unit": "100 г",
+       "desc": "Grilled Broccolini, Rainbow Carrots, Asparagus, Confit Garlic, Peppercorn or Chimichurri",
+       "photo": "/cdm/menu/tomahawk.jpg"
+      },
+      {
+       "id": "wagyu-ribeye",
+       "name": "Wagyu Ribeye MB5 (AUS)",
+       "price": 870,
+       "unit": "100 г",
+       "desc": "Grilled Broccolini, Rainbow Carrots, Asparagus, Confit Garlic, Peppercorn or Chimichurri",
+       "photo": "/cdm/menu/wagyu-ribeye.jpg"
+      },
+      {
+       "id": "wagyu-flank",
+       "name": "Wagyu Flank (AUS)",
+       "price": 780,
+       "unit": "100 г",
+       "desc": "Grilled Broccolini, Rainbow Carrots, Asparagus, Confit Garlic, Peppercorn or Chimichurri",
+       "photo": "/cdm/menu/wagyu-flank.jpg"
+      },
+      {
+       "id": "angus-picanha",
+       "name": "Black Angus Picanha (AUS)",
+       "price": 540,
+       "unit": "100 г",
+       "desc": "Grilled Broccolini, Rainbow Carrots, Asparagus, Confit Garlic, Peppercorn or Chimichurri",
+       "photo": "/cdm/menu/angus-picanha.jpg"
+      }
+     ]
+    },
+    {
+     "id": "grill-seafood",
+     "name": "From the Grill · Seafood",
+     "ru": "Гриль · морепродукты (цена за 100 г)",
+     "items": [
+      {
+       "id": "catch-of-the-day",
+       "name": "Catch of the Day",
+       "price": 0,
+       "unit": "100 г",
+       "desc": "Свежий улов от местных рыбаков Пхукета — рыночная цена, ограниченная доступность",
+       "photo": "/cdm/menu/catch-of-the-day.jpg"
+      },
+      {
+       "id": "canadian-lobster",
+       "name": "Canadian Lobster",
+       "price": 440,
+       "unit": "100 г",
+       "desc": "Chili Yuzu Sauce, Mojo Verde, Chili & Coriander Oil, Charred Lemon, Brioche",
+       "photo": "/cdm/menu/canadian-lobster.jpg"
+      },
+      {
+       "id": "king-crab",
+       "name": "King Crab",
+       "price": 1600,
+       "unit": "100 г",
+       "desc": "Chili Yuzu Sauce, Mojo Verde, Chili & Coriander Oil, Charred Lemon, Brioche",
+       "photo": "/cdm/menu/king-crab.jpg"
+      },
+      {
+       "id": "carabinero",
+       "name": "Spanish Carabinero",
+       "price": 1300,
+       "unit": "100 г",
+       "desc": "Chili Yuzu Sauce, Mojo Verde, Chili & Coriander Oil, Charred Lemon, Brioche",
+       "photo": "/cdm/menu/carabinero.jpg"
+      },
+      {
+       "id": "phuket-squid",
+       "name": "Phuket Squid",
+       "price": 375,
+       "unit": "100 г",
+       "desc": "Chili Yuzu Sauce, Mojo Verde, Chili & Coriander Oil, Charred Lemon, Brioche",
+       "photo": "/cdm/menu/phuket-squid.jpg"
+      }
+     ]
+    },
+    {
+     "id": "pasta",
+     "name": "Homemade Pasta",
+     "ru": "Домашняя паста",
+     "items": [
+      {
+       "id": "pil-pil-spaghettoni",
+       "name": "Pil-Pil Spaghettoni",
+       "price": 880,
+       "desc": "Tiger Prawn, White Wine Pil-Pil Sauce, Cherry Tomatoes, Smoked Paprika",
+       "photo": "/cdm/menu/pil-pil-spaghettoni.jpg"
+      },
+      {
+       "id": "radiatori-vodka",
+       "name": "Radiatori alla Vodka",
+       "price": 650,
+       "desc": "Tomato Vodka Sauce, Burrata, Confit Cherry Tomato, Capers, Olives, Basil Oil",
+       "photo": "/cdm/menu/radiatori-vodka.jpg"
+      },
+      {
+       "id": "lobster-paccheri",
+       "name": "Lobster Mezzi Paccheri",
+       "price": 2350,
+       "desc": "Butter Poached Canadian Lobster, Rich Bisque Sauce"
+      }
+     ]
+    },
+    {
+     "id": "signature",
+     "name": "Chef's Signature",
+     "ru": "Фирменные блюда",
+     "items": [
+      {
+       "id": "piri-piri-chicken",
+       "name": "Piri Piri Baby Chicken",
+       "price": 790,
+       "desc": "Charcoal-Grilled, Hand-Cut Patatas Bravas",
+       "photo": "/cdm/menu/piri-piri-chicken.jpg"
+      },
+      {
+       "id": "pata-negra",
+       "name": "Pata Negra",
+       "price": 1150,
+       "desc": "Charcoal-Grilled Spanish Ibérico Pork Collar, Nduja Sauce, Fennel Salad",
+       "photo": "/cdm/menu/pata-negra.jpg"
+      },
+      {
+       "id": "dry-aged-seabream",
+       "name": "Dry-Aged Seabream",
+       "price": 1850,
+       "desc": "48-Hour Dry-Aged Seabream, Creamy Cauda Sauce, Coriander & Chili Oil",
+       "photo": "/cdm/menu/dry-aged-seabream.jpg"
+      },
+      {
+       "id": "meat-me-in-phuket",
+       "name": "Meat Me in Phuket",
+       "price": 1650,
+       "desc": "Charcoal-Grilled Wagyu Tenderloin, Wok-Fired Couscous, Krapow Sauce",
+       "photo": "/cdm/menu/meat-me-in-phuket.jpg"
+      }
+     ]
+    },
+    {
+     "id": "pizza",
+     "name": "Pizza",
+     "ru": "Пиццы",
+     "items": [
+      {
+       "id": "pizza-truffle",
+       "name": "Truffle",
+       "price": 1190,
+       "desc": "Black Truffle, Mushroom, Mozzarella, Parmiggiano Reggiano, Ricotta Cream",
+       "photo": "/cdm/menu/pizza-truffle.jpg"
+      },
+      {
+       "id": "pizza-honey-diavola",
+       "name": "Honey Diavola",
+       "price": 620,
+       "desc": "Spicy Salami, Tomato Confit, Mozzarella, Basil, Hot Honey",
+       "photo": "/cdm/menu/pizza-honey-diavola.jpg"
+      },
+      {
+       "id": "pizza-tie-dye",
+       "name": "Tie-Dye",
+       "price": 690,
+       "desc": "Basil Pesto, Vodka Sauce, Marinara, Buffalo Mozzarella, Toasted Pinenuts",
+       "photo": "/cdm/menu/pizza-tie-dye.jpg"
+      },
+      {
+       "id": "pizza-burrata-parma",
+       "name": "Burrata Parma Ham",
+       "price": 780,
+       "desc": "20-Month-Aged Prosciutto di Parma, Burrata, Wild Rocket, Mozzarella, Marinara",
+       "photo": "/cdm/menu/pizza-burrata-parma.jpg"
+      },
+      {
+       "id": "pizza-cdm-garden",
+       "name": "Café del Mar Garden",
+       "price": 590,
+       "desc": "Fire-Roasted Pumpkin, Pesto, Charred Broccolini, Sun-Dried Tomato, Bell Pepper Cream, Walnuts",
+       "photo": "/cdm/menu/pizza-cdm-garden.jpg"
+      }
+     ]
+    },
+    {
+     "id": "sides",
+     "name": "Sides",
+     "ru": "Гарниры",
+     "items": [
+      {
+       "id": "truffle-fries",
+       "name": "Truffle Fries",
+       "price": 450,
+       "desc": "Truffle Oil, Parmiggiano Reggiano Snow, Sea Salt",
+       "photo": "/cdm/menu/truffle-fries.jpg"
+      },
+      {
+       "id": "patatas-bravas",
+       "name": "Patatas Bravas",
+       "price": 450,
+       "desc": "Hand Cut, Twice Fried, Secret Spice Blend, Bravas Sauce",
+       "photo": "/cdm/menu/patatas-bravas.jpg"
+      },
+      {
+       "id": "pimento-padron",
+       "name": "Pimento Padron",
+       "price": 450,
+       "desc": "Charcoal Grilled, Togarashi, Bravas Sauce",
+       "photo": "/cdm/menu/pimento-padron.jpg"
+      },
+      {
+       "id": "edamame",
+       "name": "Edamame",
+       "price": 250,
+       "desc": "Salt Flakes",
+       "photo": "/cdm/menu/edamame.jpg"
+      },
+      {
+       "id": "spicy-edamame",
+       "name": "Spicy Edamame",
+       "price": 250,
+       "desc": "Salt Flakes, Chilli Oil, Star Anise",
+       "photo": "/cdm/menu/spicy-edamame.jpg"
+      }
+     ]
+    },
+    {
+     "id": "dessert",
+     "name": "Dessert",
+     "ru": "Десерты",
+     "items": [
+      {
+       "id": "mango-sticky-rice-brulee",
+       "name": "Mango Sticky Rice Crème Brûlée",
+       "price": 420,
+       "desc": "Home-made Mango Jam, Toasted Coconut Sticky Rice Cream, Mango Gelato",
+       "photo": "/cdm/menu/mango-sticky-rice-brulee.jpg"
+      },
+      {
+       "id": "hojicha-tea-ramisu",
+       "name": "Hojicha Tea-ramisu",
+       "price": 580,
+       "desc": "Hojicha Tea Soaked Lady Fingers, White Chocolate, Hojicha Cream",
+       "photo": "/cdm/menu/hojicha-tea-ramisu.jpg"
+      },
+      {
+       "id": "dubai-churros",
+       "name": "Dubai Chocolate Churros",
+       "price": 390,
+       "desc": "Home-made Churros, Dubai Chocolate Ice Cream, Kunafa, Pistachio, Cinnamon Sugar",
+       "photo": "/cdm/menu/dubai-churros.jpg"
+      },
+      {
+       "id": "raspberry-champagne-cake",
+       "name": "Raspberry Champagne Cake",
+       "price": 680,
+       "desc": "Raspberry Sponge, Champagne Cream, White Chocolate Cookie, Drunk Raspberries",
+       "photo": "/cdm/menu/raspberry-champagne-cake.jpg"
+      },
+      {
+       "id": "ice-cream",
+       "name": "Daily Ice Cream Selection",
+       "price": 200,
+       "desc": "Мороженое дня, 1 шарик",
+       "photo": "/cdm/menu/ice-cream.jpg"
+      },
+      {
+       "id": "fruits-platter",
+       "name": "Seasonal Fruits Platter",
+       "price": 580,
+       "opts": [
+        {
+         "l": "small",
+         "p": 580
+        },
+        {
+         "l": "extra large",
+         "p": 980
+        }
+       ],
+       "photo": "/cdm/menu/fruits-platter.jpg"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cocktails",
+   "name": "Коктейли",
+   "groups": [
+    {
+     "id": "signature-cocktails",
+     "name": "Signature Cocktails · 490",
+     "ru": "Фирменные",
+     "items": [
+      {
+       "id": "coco-loko",
+       "name": "Coco Loko",
+       "price": 490,
+       "desc": "Bacardi White Rum, Coconut Liqueur, Pineapple Juice, Mango Purée, Lime",
+       "photo": "/cdm/menu/coco-loko.jpg"
+      },
+      {
+       "id": "into-the-jungle",
+       "name": "Into the Jungle",
+       "price": 490,
+       "desc": "Vodka, Passion Fruit Purée, Green Tea Syrup, Honey, Lime",
+       "photo": "/cdm/menu/into-the-jungle.jpg"
+      },
+      {
+       "id": "agua-bendita",
+       "name": "Agua Bendita",
+       "price": 490,
+       "desc": "Tequila, Passion Fruit Purée, Vanilla Syrup, Apple Juice, Agave, Lime",
+       "photo": "/cdm/menu/agua-bendita.jpg"
+      },
+      {
+       "id": "pop-porn",
+       "name": "Pop Porn",
+       "price": 490,
+       "desc": "Whisky, Pineapple Juice, Popcorn Syrup, Lime",
+       "photo": "/cdm/menu/pop-porn.jpg"
+      },
+      {
+       "id": "x-star",
+       "name": "X-Star",
+       "price": 490,
+       "desc": "Vodka, X-Rated Fusion Liqueur, Rhubarb Liqueur, Watermelon Syrup, Soda",
+       "photo": "/cdm/menu/x-star.jpg"
+      }
+     ]
+    },
+    {
+     "id": "twist-cocktails",
+     "name": "Twist Cocktails · 460",
+     "ru": "Твисты",
+     "items": [
+      {
+       "id": "sexy-colada",
+       "name": "Sexy Colada",
+       "price": 460,
+       "desc": "Bacardi Gold Rum, Coconut Purée, Pineapple, Ginger Syrup, Angostura",
+       "photo": "/cdm/menu/sexy-colada.jpg"
+      },
+      {
+       "id": "gin-cumber-smash",
+       "name": "Gin-cumber Smash",
+       "price": 460,
+       "desc": "Bombay Sapphire, Elderflower Liqueur, Cucumber Syrup, Tonic",
+       "photo": "/cdm/menu/gin-cumber-smash.jpg"
+      },
+      {
+       "id": "slushy-mojito",
+       "name": "Slushy Mojito",
+       "price": 460,
+       "desc": "Bacardi White Rum, Peach Liqueur, Pineapple, Honey, Mint",
+       "photo": "/cdm/menu/slushy-mojito.jpg"
+      },
+      {
+       "id": "japanese-island",
+       "name": "Japanese Island",
+       "price": 460,
+       "desc": "Gin, Vodka, Tequila, White Rum, Melon Liqueur, Yuzu Purée, Lime Soda",
+       "photo": "/cdm/menu/japanese-island.jpg"
+      },
+      {
+       "id": "mezcalita",
+       "name": "Mezcalita",
+       "price": 460,
+       "desc": "Tequila, Mezcal, Agave, Pineapple, Tabasco Jalapeño",
+       "photo": "/cdm/menu/mezcalita.jpg"
+      }
+     ]
+    },
+    {
+     "id": "sharing",
+     "name": "Sharing Cocktails & Jugs",
+     "ru": "На компанию",
+     "items": [
+      {
+       "id": "luxury-smuggler",
+       "name": "Luxury Smuggler · 5L",
+       "price": 4500,
+       "desc": "Bacardi White & Dark Rum, Passion Fruit Purée, Almond Syrup, Angostura",
+       "photo": "/cdm/menu/luxury-smuggler.jpg"
+      },
+      {
+       "id": "aperol-spritz-7l",
+       "name": "Aperol Spritz · 7L",
+       "price": 5500,
+       "desc": "Aperol, Sparkling Wine, Soda Water",
+       "photo": "/cdm/menu/aperol-spritz-7l.jpg"
+      },
+      {
+       "id": "champions-cup",
+       "name": "Champion's Cup",
+       "price": 25000,
+       "desc": "2 бутылки шампанского, 1 бутылка водки, тропические сиропы из свежих фруктов",
+       "photo": "/cdm/menu/champions-cup.jpg"
+      },
+      {
+       "id": "jug-frozen-aperol-sour",
+       "name": "Jug · Frozen Aperol Sour",
+       "price": 2250,
+       "desc": "Aperol, Lime Juice, Sugar Syrup",
+       "photo": "/cdm/menu/jug-frozen-aperol-sour.jpg"
+      },
+      {
+       "id": "jug-margarita",
+       "name": "Jug · Margarita",
+       "price": 2250,
+       "desc": "Tequila, Lime Juice, Agave Syrup",
+       "photo": "/cdm/menu/jug-margarita.jpg"
+      },
+      {
+       "id": "jug-sangria",
+       "name": "Jug · Sangria",
+       "price": 2250,
+       "desc": "Red Wine, Vermouth, Mixed Fruits, Juices, Cinnamon, Lime Soda",
+       "photo": "/cdm/menu/jug-sangria.jpg"
+      },
+      {
+       "id": "jug-hugo",
+       "name": "Jug · Hugo",
+       "price": 2250,
+       "desc": "Elderflower Liqueur, Sparkling Wine, Soda, Mint",
+       "photo": "/cdm/menu/jug-hugo.jpg"
+      },
+      {
+       "id": "jug-mojito",
+       "name": "Jug · Mojito",
+       "price": 2250,
+       "desc": "Bacardi White Rum, Lime, Sugar, Soda, Mint",
+       "photo": "/cdm/menu/jug-mojito.jpg"
+      }
+     ]
+    },
+    {
+     "id": "shots",
+     "name": "Shots · поднос 8 шотов",
+     "ru": "Шоты",
+     "items": [
+      {
+       "id": "shots-pirate-cove",
+       "name": "Pirate Cove · 8 shots",
+       "price": 1950,
+       "desc": "Bacardi White & Dark Rum, Passion Fruit, Almond Syrup, Angostura",
+       "photo": "/cdm/menu/shots-pirate-cove.jpg"
+      },
+      {
+       "id": "shots-x-star",
+       "name": "X-Star · 8 shots",
+       "price": 1950,
+       "desc": "Vodka, X-Rated Liqueur, Rhubarb Liqueur, Watermelon Syrup",
+       "photo": "/cdm/menu/shots-x-star.jpg"
+      },
+      {
+       "id": "shots-blue-kamikaze",
+       "name": "Blue Kamikaze · 8 shots",
+       "price": 1950,
+       "desc": "Vodka, Orange Liqueur, Lime Juice",
+       "photo": "/cdm/menu/shots-blue-kamikaze.jpg"
+      },
+      {
+       "id": "shots-b52",
+       "name": "B52 · 8 shots",
+       "price": 3500,
+       "desc": "Coffee Liqueur, Baileys, Orange Liqueur",
+       "photo": "/cdm/menu/shots-b52.jpg"
+      },
+      {
+       "id": "shots-jager-bomb",
+       "name": "Jäger Bomb · 8 shots",
+       "price": 3500,
+       "desc": "Jägermeister, Red Bull",
+       "photo": "/cdm/menu/shots-jager-bomb.jpg"
+      }
+     ]
+    },
+    {
+     "id": "martini",
+     "name": "Timeless Martini · 440",
+     "ru": "Мартини",
+     "items": [
+      {
+       "id": "porn-star-martini",
+       "name": "Porn Star Martini",
+       "price": 440,
+       "desc": "Vodka, Passion Fruit Purée, Lime, Sparkling Wine",
+       "photo": "/cdm/menu/porn-star-martini.jpg"
+      },
+      {
+       "id": "lychee-martini",
+       "name": "Lychee Martini",
+       "price": 440,
+       "desc": "Vodka, Lychee Liqueur, Sugar, Lime",
+       "photo": "/cdm/menu/lychee-martini.jpg"
+      },
+      {
+       "id": "espresso-martini",
+       "name": "Espresso Martini",
+       "price": 440,
+       "desc": "Vodka, Coffee Liqueur, Espresso, Sugar",
+       "photo": "/cdm/menu/espresso-martini.jpg"
+      }
+     ]
+    },
+    {
+     "id": "classic-cocktails",
+     "name": "Classic Cocktails · 390",
+     "ru": "Классика",
+     "items": [
+      {
+       "id": "sex-on-the-beach",
+       "name": "Sex on the Beach",
+       "price": 390,
+       "desc": "Vodka, Peach Liqueur, Orange & Cranberry Juice",
+       "photo": "/cdm/menu/sex-on-the-beach.jpg"
+      },
+      {
+       "id": "hugo",
+       "name": "Hugo",
+       "price": 390,
+       "desc": "Elderflower Liqueur, Sparkling Wine, Soda, Mint",
+       "photo": "/cdm/menu/hugo.jpg"
+      },
+      {
+       "id": "aperol-spritz",
+       "name": "Aperol Spritz",
+       "price": 390,
+       "desc": "Aperol, Sparkling Wine, Soda Water",
+       "photo": "/cdm/menu/aperol-spritz.jpg"
+      },
+      {
+       "id": "mai-tai",
+       "name": "Mai Tai",
+       "price": 390,
+       "desc": "Bacardi White & Dark Rum, Almond Syrup, Orange Liqueur, Angostura",
+       "photo": "/cdm/menu/mai-tai.jpg"
+      },
+      {
+       "id": "south-side",
+       "name": "South Side",
+       "price": 390,
+       "desc": "Bombay Sapphire Gin, Lime, Sugar, Mint",
+       "photo": "/cdm/menu/south-side.jpg"
+      },
+      {
+       "id": "vodka-sour-passion",
+       "name": "Vodka Sour Passion",
+       "price": 390,
+       "desc": "Vodka, Passion Fruit Purée, Lime, Egg Whites, Angostura",
+       "photo": "/cdm/menu/vodka-sour-passion.jpg"
+      },
+      {
+       "id": "whisky-sour",
+       "name": "Whisky Sour",
+       "price": 390,
+       "desc": "Whisky, Sugar, Lime, Egg Whites, Angostura",
+       "photo": "/cdm/menu/whisky-sour.jpg"
+      },
+      {
+       "id": "paloma",
+       "name": "Paloma",
+       "price": 390,
+       "desc": "Tequila, Lime, Sugar, Pink Grapefruit Soda",
+       "photo": "/cdm/menu/paloma.jpg"
+      }
+     ]
+    },
+    {
+     "id": "mocktails",
+     "name": "Mocktails · 290",
+     "ru": "Безалкогольные",
+     "items": [
+      {
+       "id": "virgin-mojito",
+       "name": "Virgin Mojito",
+       "price": 290,
+       "desc": "Lime, Sugar, Mint, Soda",
+       "photo": "/cdm/menu/virgin-mojito.jpg"
+      },
+      {
+       "id": "pin-up-colada",
+       "name": "Pin Up Colada",
+       "price": 290,
+       "desc": "Coconut Purée, Pineapple, Lime",
+       "photo": "/cdm/menu/pin-up-colada.jpg"
+      },
+      {
+       "id": "kaia-pearl",
+       "name": "Kaïa Pearl",
+       "price": 290,
+       "desc": "Butterfly Pea Tea, Lychee Purée, Lime, Mint",
+       "photo": "/cdm/menu/kaia-pearl.jpg"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bar",
+   "name": "Бар",
+   "groups": [
+    {
+     "id": "champagne",
+     "name": "Champagne",
+     "ru": "Шампанское",
+     "items": [
+      {
+       "id": "veuve-clicquot-brut",
+       "name": "Veuve Clicquot Brut",
+       "price": 8900
+      },
+      {
+       "id": "moet-chandon-ice",
+       "name": "Moët & Chandon Ice",
+       "price": 9900
+      },
+      {
+       "id": "ruinart-blanc",
+       "name": "Ruinart Blanc de Blancs",
+       "price": 13500
+      },
+      {
+       "id": "cristal-brut",
+       "name": "Cristal Brut",
+       "price": 36000
+      },
+      {
+       "id": "dom-perignon-brut",
+       "name": "Dom Pérignon Brut",
+       "price": 29000
+      },
+      {
+       "id": "krug-brut",
+       "name": "Krug Brut",
+       "price": 39000
+      },
+      {
+       "id": "armand-de-brignac",
+       "name": "Armand de Brignac Brut",
+       "price": 37000
+      },
+      {
+       "id": "veuve-clicquot-rose",
+       "name": "Veuve Clicquot Rosé",
+       "price": 9900
+      },
+      {
+       "id": "ruinart-rose",
+       "name": "Ruinart Rosé",
+       "price": 14000
+      },
+      {
+       "id": "dom-perignon-rose",
+       "name": "Dom Pérignon Rosé",
+       "price": 46000
+      },
+      {
+       "id": "cristal-rose",
+       "name": "Cristal Rosé",
+       "price": 42000
+      },
+      {
+       "id": "vc-brut-magnum",
+       "name": "Veuve Clicquot Brut Magnum 1.5L",
+       "price": 18000
+      },
+      {
+       "id": "dp-brut-magnum",
+       "name": "Dom Pérignon Brut Magnum 1.5L",
+       "price": 59000
+      },
+      {
+       "id": "vc-brut-3l",
+       "name": "Veuve Clicquot Brut 3L",
+       "price": 39000
+      },
+      {
+       "id": "vc-brut-6l",
+       "name": "Veuve Clicquot Brut 6L",
+       "price": 79000
+      },
+      {
+       "id": "cristal-brut-3l",
+       "name": "Cristal Brut 3L",
+       "price": 155000
+      },
+      {
+       "id": "armand-3l",
+       "name": "Armand de Brignac Brut 3L",
+       "price": 175000
+      }
+     ]
+    },
+    {
+     "id": "rose-wine",
+     "name": "Rosé Wine",
+     "ru": "Розовое вино",
+     "items": [
+      {
+       "id": "whispering-angel",
+       "name": "Whispering Angel",
+       "price": 3300,
+       "desc": "Côtes de Provence, France",
+       "opts": [
+        {
+         "l": "0.75L",
+         "p": 3300
+        },
+        {
+         "l": "1.5L",
+         "p": 6800
+        },
+        {
+         "l": "3L",
+         "p": 15500
+        }
+       ]
+      },
+      {
+       "id": "m-de-minuty",
+       "name": "M de Minuty",
+       "price": 3200,
+       "desc": "Côtes de Provence, France"
+      },
+      {
+       "id": "rock-angel",
+       "name": "Rock Angel",
+       "price": 4800,
+       "desc": "Côtes de Provence, France"
+      },
+      {
+       "id": "garrus",
+       "name": "Garrus",
+       "price": 17000,
+       "desc": "Côtes de Provence, France"
+      },
+      {
+       "id": "minuty-281",
+       "name": "Minuty 281",
+       "price": 9500,
+       "desc": "Côtes de Provence, France"
+      }
+     ]
+    },
+    {
+     "id": "white-wine",
+     "name": "White Wine",
+     "ru": "Белое вино",
+     "items": [
+      {
+       "id": "tahuna",
+       "name": "Tahuna",
+       "price": 2250,
+       "desc": "Sauvignon Blanc | Marlborough, New Zealand"
+      },
+      {
+       "id": "cloudy-bay-white",
+       "name": "Cloudy Bay",
+       "price": 4500,
+       "desc": "Sauvignon Blanc | Marlborough, New Zealand"
+      },
+      {
+       "id": "di-giorgio-frank",
+       "name": "Di Giorgio Frank",
+       "price": 2300,
+       "desc": "Sauvignon Blanc, Semillon, Chardonnay | Limestone Coast, Australia"
+      },
+      {
+       "id": "penfolds-311",
+       "name": "Penfolds 311",
+       "price": 4300,
+       "desc": "Chardonnay | Australia"
+      },
+      {
+       "id": "chablis-patrice",
+       "name": "Chablis Christophe Patrice",
+       "price": 3300,
+       "desc": "Chardonnay | Burgundy, France"
+      },
+      {
+       "id": "chablis-laroche",
+       "name": "Chablis Grand Cru Domaine Laroche",
+       "price": 8800,
+       "desc": "Chardonnay | Burgundy, France"
+      },
+      {
+       "id": "pouilly-fume",
+       "name": "Pouilly-Fumé J. de Villebois",
+       "price": 4400,
+       "desc": "Sauvignon Blanc | Loire Valley, France"
+      },
+      {
+       "id": "sancerre-jolivet",
+       "name": "Sancerre Blanc Pascal Jolivet",
+       "price": 4800,
+       "desc": "Sauvignon Blanc | Loire Valley, France"
+      },
+      {
+       "id": "gavi-ricossa",
+       "name": "Gavi Ricossa DOCG",
+       "price": 2850,
+       "desc": "Cortese | Piemonte, Italy"
+      },
+      {
+       "id": "dasti-gelsomora",
+       "name": "D'Asti Cossetti Gelsomora",
+       "price": 2500,
+       "desc": "Moscato | Piemonte, Italy"
+      },
+      {
+       "id": "larco-principino",
+       "name": "L'Arco Principino",
+       "price": 3000,
+       "desc": "Vermentino | Toscana, Italy"
+      }
+     ]
+    },
+    {
+     "id": "red-wine",
+     "name": "Red Wine",
+     "ru": "Красное вино",
+     "items": [
+      {
+       "id": "portillo-malbec",
+       "name": "Portillo Malbec",
+       "price": 2400,
+       "desc": "Mendoza | Bodegas Salentein, Argentina"
+      },
+      {
+       "id": "cloudy-bay-red",
+       "name": "Cloudy Bay Pinot Noir",
+       "price": 5500,
+       "desc": "Marlborough, New Zealand"
+      },
+      {
+       "id": "handpicked",
+       "name": "Handpicked",
+       "price": 3200,
+       "desc": "Cabernet Sauvignon | Coonawarra, Australia"
+      },
+      {
+       "id": "opus-one",
+       "name": "Opus One",
+       "price": 33000,
+       "desc": "Napa Valley, USA"
+      },
+      {
+       "id": "chianti-vernaiolo",
+       "name": "Chianti Vernaiolo DOCG",
+       "price": 2700,
+       "desc": "Toscana, Italy"
+      },
+      {
+       "id": "amarone-negrar",
+       "name": "Amarone della Valpolicella Cantina di Negrar",
+       "price": 5200,
+       "desc": "Veneto, Italy"
+      },
+      {
+       "id": "ornellaia",
+       "name": "Ornellaia Bolgheri",
+       "price": 19000,
+       "desc": "Toscana, Italy"
+      },
+      {
+       "id": "chateau-divine",
+       "name": "Château Divine Bêtise Saint-Émilion AOP",
+       "price": 3800,
+       "desc": "Bordeaux, France"
+      },
+      {
+       "id": "patriarche-summer",
+       "name": "Patriarche Endless Summer",
+       "price": 2500,
+       "desc": "Pinot Noir | Pays d'Oc, France"
+      },
+      {
+       "id": "michel-lynch",
+       "name": "Michel Lynch Reserve",
+       "price": 2900,
+       "desc": "Cabernet Sauvignon, Cabernet Franc, Merlot | Médoc, France"
+      },
+      {
+       "id": "jolivet-attitude",
+       "name": "Pascal Jolivet Attitude",
+       "price": 3600,
+       "desc": "Pinot Noir | Loire Valley, France"
+      },
+      {
+       "id": "belpoggio",
+       "name": "Belpoggio Rosso di Montalcino",
+       "price": 3400,
+       "desc": "Sangiovese | Toscana, Italy"
+      }
+     ]
+    },
+    {
+     "id": "wine-by-glass",
+     "name": "Wine by Glass",
+     "ru": "Вино по бокалам",
+     "items": [
+      {
+       "id": "veuve-de-vernay",
+       "name": "Veuve de Vernay · sparkling",
+       "price": 390,
+       "desc": "Burgundy, France",
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 390
+        },
+        {
+         "l": "бутылка",
+         "p": 2200
+        }
+       ]
+      },
+      {
+       "id": "bottega-prosecco",
+       "name": "Bottega Prosecco",
+       "price": 420,
+       "desc": "Veneto, Italy",
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 420
+        },
+        {
+         "l": "бутылка",
+         "p": 2350
+        }
+       ]
+      },
+      {
+       "id": "bottega-rose-prosecco",
+       "name": "Bottega Rosé Prosecco",
+       "price": 2600,
+       "desc": "Veneto, Italy · бутылка"
+      },
+      {
+       "id": "bottega-gold-prosecco",
+       "name": "Bottega Gold Prosecco",
+       "price": 4400,
+       "desc": "Veneto, Italy · бутылка"
+      },
+      {
+       "id": "exhib-rose",
+       "name": "Exhib' · rosé",
+       "price": 390,
+       "desc": "Pays d'Oc, France",
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 390
+        },
+        {
+         "l": "бутылка",
+         "p": 2200
+        }
+       ]
+      },
+      {
+       "id": "arcadian-white",
+       "name": "Arcadian · white",
+       "price": 390,
+       "desc": "Sauvignon Blanc | South Australia",
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 390
+        },
+        {
+         "l": "бутылка",
+         "p": 2200
+        }
+       ]
+      },
+      {
+       "id": "bottega-pinot-grigio",
+       "name": "Bottega Pinot Grigio · white",
+       "price": 420,
+       "desc": "Veneto, Italy",
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 420
+        },
+        {
+         "l": "бутылка",
+         "p": 2350
+        }
+       ]
+      },
+      {
+       "id": "villa-maria-red",
+       "name": "Villa Maria · red",
+       "price": 420,
+       "desc": "Pinot Noir | Marlborough, New Zealand",
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 420
+        },
+        {
+         "l": "бутылка",
+         "p": 2350
+        }
+       ]
+      },
+      {
+       "id": "luccarelli-red",
+       "name": "Luccarelli · red",
+       "price": 440,
+       "desc": "Negroamaro | Puglia, Italy",
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 440
+        },
+        {
+         "l": "бутылка",
+         "p": 2400
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "vodka",
+     "name": "Vodka",
+     "ru": "Водка",
+     "items": [
+      {
+       "id": "42-below",
+       "name": "42 Below",
+       "price": 390,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 390
+        }
+       ]
+      },
+      {
+       "id": "grey-goose",
+       "name": "Grey Goose",
+       "price": 490,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 490
+        },
+        {
+         "l": "бутылка",
+         "p": 7500
+        },
+        {
+         "l": "1.75L",
+         "p": 14500
+        },
+        {
+         "l": "4.5L",
+         "p": 42000
+        },
+        {
+         "l": "6L",
+         "p": 65000
+        }
+       ]
+      },
+      {
+       "id": "grey-goose-altius",
+       "name": "Grey Goose Altius",
+       "price": 1250,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 1250
+        },
+        {
+         "l": "бутылка",
+         "p": 18500
+        },
+        {
+         "l": "1.75L",
+         "p": 46000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tequila",
+     "name": "Tequila",
+     "ru": "Текила",
+     "items": [
+      {
+       "id": "jose-cuervo-silver",
+       "name": "Jose Cuervo Silver",
+       "price": 390,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 390
+        }
+       ]
+      },
+      {
+       "id": "patron-silver",
+       "name": "Patrón Silver",
+       "price": 550,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 550
+        },
+        {
+         "l": "бутылка",
+         "p": 7900
+        }
+       ]
+      },
+      {
+       "id": "patron-reposado",
+       "name": "Patrón Reposado",
+       "price": 600,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 600
+        },
+        {
+         "l": "бутылка",
+         "p": 9800
+        }
+       ]
+      },
+      {
+       "id": "patron-anejo",
+       "name": "Patrón Añejo",
+       "price": 650,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 650
+        },
+        {
+         "l": "бутылка",
+         "p": 10900
+        }
+       ]
+      },
+      {
+       "id": "patron-el-alto",
+       "name": "Patrón El Alto",
+       "price": 1950,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 1950
+        },
+        {
+         "l": "бутылка",
+         "p": 34000
+        },
+        {
+         "l": "1.75L",
+         "p": 59000
+        }
+       ]
+      },
+      {
+       "id": "don-julio-1942",
+       "name": "Don Julio 1942",
+       "price": 2250,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 2250
+        },
+        {
+         "l": "бутылка",
+         "p": 39000
+        },
+        {
+         "l": "1.75L",
+         "p": 67000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "gin",
+     "name": "Gin",
+     "ru": "Джин",
+     "items": [
+      {
+       "id": "bombay-sapphire",
+       "name": "Bombay Sapphire",
+       "price": 390,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 390
+        },
+        {
+         "l": "бутылка",
+         "p": 5500
+        }
+       ]
+      },
+      {
+       "id": "bombay-premier-cru",
+       "name": "Bombay Sapphire Premier Cru",
+       "price": 490,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 490
+        },
+        {
+         "l": "бутылка",
+         "p": 6900
+        }
+       ]
+      },
+      {
+       "id": "tanqueray-10",
+       "name": "Tanqueray No.10",
+       "price": 550,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 550
+        },
+        {
+         "l": "бутылка",
+         "p": 7000
+        }
+       ]
+      },
+      {
+       "id": "hendricks",
+       "name": "Hendrick's",
+       "price": 580,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 580
+        },
+        {
+         "l": "бутылка",
+         "p": 8500
+        }
+       ]
+      },
+      {
+       "id": "the-botanist",
+       "name": "The Botanist",
+       "price": 630,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 630
+        },
+        {
+         "l": "бутылка",
+         "p": 8800
+        }
+       ]
+      },
+      {
+       "id": "monkey-47",
+       "name": "Monkey 47",
+       "price": 650,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 650
+        },
+        {
+         "l": "бутылка",
+         "p": 7400
+        }
+       ]
+      },
+      {
+       "id": "roku",
+       "name": "Roku",
+       "price": 500,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 500
+        },
+        {
+         "l": "бутылка",
+         "p": 5700
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "rum",
+     "name": "Rum",
+     "ru": "Ром",
+     "items": [
+      {
+       "id": "bacardi-blanca",
+       "name": "Bacardi Carta Blanca",
+       "price": 390,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 390
+        }
+       ]
+      },
+      {
+       "id": "bacardi-oro",
+       "name": "Bacardi Carta Oro",
+       "price": 420,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 420
+        },
+        {
+         "l": "бутылка",
+         "p": 5500
+        }
+       ]
+      },
+      {
+       "id": "bacardi-8",
+       "name": "Bacardi 8 Years",
+       "price": 480,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 480
+        },
+        {
+         "l": "бутылка",
+         "p": 6200
+        }
+       ]
+      },
+      {
+       "id": "kraken",
+       "name": "Kraken Spiced Rum",
+       "price": 480,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 480
+        },
+        {
+         "l": "бутылка",
+         "p": 5800
+        }
+       ]
+      },
+      {
+       "id": "zacapa-23",
+       "name": "Ron Zacapa 23 Years",
+       "price": 690,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 690
+        },
+        {
+         "l": "бутылка",
+         "p": 8900
+        }
+       ]
+      },
+      {
+       "id": "zacapa-xo",
+       "name": "Ron Zacapa XO",
+       "price": 1650,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 1650
+        },
+        {
+         "l": "бутылка",
+         "p": 22500
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "whiskey",
+     "name": "Whiskey",
+     "ru": "Виски",
+     "items": [
+      {
+       "id": "dewars-white",
+       "name": "Dewar's White Label",
+       "price": 390,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 390
+        }
+       ]
+      },
+      {
+       "id": "dewars-15",
+       "name": "Dewar's 15 Years",
+       "price": 420,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 420
+        },
+        {
+         "l": "бутылка",
+         "p": 5800
+        }
+       ]
+      },
+      {
+       "id": "chivas-12",
+       "name": "Chivas 12 Years",
+       "price": 480,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 480
+        },
+        {
+         "l": "бутылка",
+         "p": 6200
+        }
+       ]
+      },
+      {
+       "id": "jw-gold",
+       "name": "J.W. Gold Label",
+       "price": 630,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 630
+        },
+        {
+         "l": "бутылка",
+         "p": 7500
+        }
+       ]
+      },
+      {
+       "id": "jw-blue",
+       "name": "J.W. Blue Label",
+       "price": 1650,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 1650
+        },
+        {
+         "l": "бутылка",
+         "p": 24000
+        }
+       ]
+      },
+      {
+       "id": "jack-daniels",
+       "name": "Jack Daniel's",
+       "price": 450,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 450
+        },
+        {
+         "l": "бутылка",
+         "p": 6000
+        }
+       ]
+      },
+      {
+       "id": "bulleit-bourbon",
+       "name": "Bulleit Bourbon",
+       "price": 470,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 470
+        },
+        {
+         "l": "бутылка",
+         "p": 6500
+        }
+       ]
+      },
+      {
+       "id": "aultmore-12",
+       "name": "Aultmore 12 Years",
+       "price": 650,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 650
+        },
+        {
+         "l": "бутылка",
+         "p": 8500
+        }
+       ]
+      },
+      {
+       "id": "macallan-12",
+       "name": "Macallan 12 Years",
+       "price": 950,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 950
+        },
+        {
+         "l": "бутылка",
+         "p": 12500
+        }
+       ]
+      },
+      {
+       "id": "macallan-15",
+       "name": "Macallan 15 Years",
+       "price": 1650,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 1650
+        },
+        {
+         "l": "бутылка",
+         "p": 23500
+        }
+       ]
+      },
+      {
+       "id": "aberfeldy-16",
+       "name": "Aberfeldy 16 Years",
+       "price": 890,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 890
+        },
+        {
+         "l": "бутылка",
+         "p": 11500
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "cognac-liqueur",
+     "name": "Cognac & Liqueur",
+     "ru": "Коньяк и ликёры",
+     "items": [
+      {
+       "id": "remy-vsop",
+       "name": "Rémy Martin VSOP",
+       "price": 750,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 750
+        },
+        {
+         "l": "бутылка",
+         "p": 8900
+        }
+       ]
+      },
+      {
+       "id": "remy-xo",
+       "name": "Rémy Martin XO",
+       "price": 1850,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 1850
+        },
+        {
+         "l": "бутылка",
+         "p": 24000
+        }
+       ]
+      },
+      {
+       "id": "louis-xiii",
+       "name": "Louis XIII",
+       "price": 380000,
+       "desc": "Только бутылка"
+      },
+      {
+       "id": "jagermeister",
+       "name": "Jägermeister",
+       "price": 350,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 350
+        },
+        {
+         "l": "бутылка",
+         "p": 5000
+        }
+       ]
+      },
+      {
+       "id": "aperol",
+       "name": "Aperol",
+       "price": 350,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 350
+        },
+        {
+         "l": "бутылка",
+         "p": 5000
+        }
+       ]
+      },
+      {
+       "id": "campari",
+       "name": "Campari",
+       "price": 350,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 350
+        },
+        {
+         "l": "бутылка",
+         "p": 5000
+        }
+       ]
+      },
+      {
+       "id": "baileys",
+       "name": "Baileys",
+       "price": 350,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 350
+        },
+        {
+         "l": "бутылка",
+         "p": 5000
+        }
+       ]
+      },
+      {
+       "id": "patron-xo-cafe",
+       "name": "Patrón XO Café",
+       "price": 600,
+       "opts": [
+        {
+         "l": "бокал",
+         "p": 600
+        },
+        {
+         "l": "бутылка",
+         "p": 6900
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "beer-softs",
+     "name": "Beer · Soft Drinks · Juices",
+     "ru": "Пиво, вода, соки",
+     "items": [
+      {
+       "id": "singha",
+       "name": "Singha",
+       "price": 200
+      },
+      {
+       "id": "singha-reserve",
+       "name": "Singha Reserve",
+       "price": 200
+      },
+      {
+       "id": "corona",
+       "name": "Corona",
+       "price": 250
+      },
+      {
+       "id": "acqua-panna",
+       "name": "Acqua Panna",
+       "price": 220
+      },
+      {
+       "id": "san-pellegrino",
+       "name": "San Pellegrino",
+       "price": 250
+      },
+      {
+       "id": "red-bull",
+       "name": "Red Bull (imported)",
+       "price": 220
+      },
+      {
+       "id": "coca-cola",
+       "name": "Coca-Cola / Zero / Sprite",
+       "price": 150
+      },
+      {
+       "id": "soda-water",
+       "name": "Soda Water",
+       "price": 150
+      },
+      {
+       "id": "fresh-coconut",
+       "name": "Fresh Organic Coconut",
+       "price": 200
+      },
+      {
+       "id": "orange-juice",
+       "name": "Orange Juice",
+       "price": 220
+      },
+      {
+       "id": "carrot-juice",
+       "name": "Carrot Juice",
+       "price": 220
+      },
+      {
+       "id": "pineapple-juice",
+       "name": "Pineapple Juice",
+       "price": 220
+      },
+      {
+       "id": "fruit-shake",
+       "name": "Fruit Shake / Smoothie",
+       "price": 220,
+       "desc": "Banana, Strawberry, Passion Fruit, Mango, Watermelon",
+       "opts": [
+        {
+         "l": "shake",
+         "p": 220
+        },
+        {
+         "l": "smoothie",
+         "p": 240
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

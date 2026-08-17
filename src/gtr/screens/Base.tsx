@@ -16,6 +16,7 @@ import {
   SPACES,
   V,
 } from "../data/app-data";
+import { CdmReserve, cdmZonesOfSpace, hasCdmReserve } from "../cdm-booking";
 import { EditableImage } from "../EditableImage";
 import { Card, Chip, Eyebrow, Field, tint, TrashTitle, VenueLogo } from "../ui";
 import { GtrLightbox } from "../lightbox";
@@ -542,37 +543,86 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           {sp.length ? (
             <Card style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>НОРМАЛИЗОВАННЫЕ ЗАЛЫ · {sp.length}</Eyebrow>
-              {sp.map((s) => (
-                <div
-                  key={s.id}
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    alignItems: "baseline",
-                    padding: "7px 0",
-                    borderBottom: "1px solid rgba(255,255,255,.05)",
-                  }}
-                >
-                  <span style={{ flex: 1, font: "600 12px/1.3 'Golos Text',sans-serif" }}>
-                    {s.name}
-                  </span>
-                  <span
-                    className="gtr-mono"
-                    style={{
-                      font: "500 10px/1.3 'JetBrains Mono',monospace",
-                      color: "var(--gtr-t3)",
-                    }}
+              {sp.map((s) => {
+                const zs = cdmZonesOfSpace(v.id, s.id);
+                return (
+                  <div
+                    key={s.id}
+                    style={{ padding: "7px 0", borderBottom: "1px solid rgba(255,255,255,.05)" }}
                   >
-                    {[
-                      s.sqm && `${s.sqm} м²`,
-                      s.capTheatre && `${s.capTheatre} театр`,
-                      s.capCocktail && `${s.capCocktail} коктейль`,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ") || "—"}
-                  </span>
-                </div>
-              ))}
+                    <div style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
+                      <span style={{ flex: 1, font: "600 12px/1.3 'Golos Text',sans-serif" }}>
+                        {s.name}
+                      </span>
+                      <span
+                        className="gtr-mono"
+                        style={{
+                          font: "500 10px/1.3 'JetBrains Mono',monospace",
+                          color: "var(--gtr-t3)",
+                        }}
+                      >
+                        {[
+                          s.sqm && `${s.sqm} м²`,
+                          s.capTheatre && `${s.capTheatre} театр`,
+                          s.capCocktail && `${s.capCocktail} коктейль`,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ") || (zs.length ? zs.map((z) => z.hours).join(" · ") : "—")}
+                      </span>
+                    </div>
+                    {zs.length ? (
+                      <div style={{ display: "flex", gap: 6, marginTop: 7, flexWrap: "wrap" }}>
+                        {zs.map((z) => (
+                          <figure key={z.id} style={{ margin: 0, width: 132 }}>
+                            <img
+                              src={z.photo}
+                              alt={z.name}
+                              loading="lazy"
+                              style={{
+                                width: "100%",
+                                aspectRatio: "16/10",
+                                objectFit: "cover",
+                                display: "block",
+                                border: "1px solid rgba(255,255,255,.1)",
+                              }}
+                            />
+                            <figcaption
+                              className="gtr-mono"
+                              style={{
+                                marginTop: 3,
+                                font: "500 8.5px/1.3 'JetBrains Mono',monospace",
+                                color: "var(--gtr-t3)",
+                                textTransform: "uppercase",
+                                letterSpacing: ".08em",
+                              }}
+                            >
+                              {z.name}
+                            </figcaption>
+                          </figure>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </Card>
+          ) : null}
+
+          {hasCdmReserve(v.id) ? (
+            <Card style={{ padding: 18 }}>
+              <Eyebrow style={{ marginBottom: 4 }}>
+                {t("РАССАДКА И БРОНЬ")} · SEVENROOMS-ПАРИТЕТ
+              </Eyebrow>
+              <div
+                style={{
+                  margin: "0 0 12px",
+                  font: "500 11px/1.6 'Golos Text',sans-serif",
+                  color: "var(--gtr-t2)",
+                }}
+              >
+                {t("Живая схема зон и столов площадки: депозиты, кредит на еду и напитки, предзаказ по официальному меню. Заявка уходит менеджеру в Telegram, подтверждение — одной кнопкой.")}
+              </div>
+              <CdmReserve vid={v.id} />
             </Card>
           ) : null}
 

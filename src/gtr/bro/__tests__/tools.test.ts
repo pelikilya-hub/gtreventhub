@@ -203,3 +203,81 @@ describe("платформенные инструменты", () => {
     expect(sentText).toContain("через GTR BRO");
   });
 });
+
+describe("рассадка Café del Mar", () => {
+  const guest = { email: "v@v", name: "Гость", role: "visitor" };
+
+  it("зоны находятся сквозь кириллицу и несут депозиты со слотами", async () => {
+    const r = await handlers.get_venue_zones({ venue: "кафе дель мар" }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { zones: { zone: string; tables: { deposit_thb: number; slots: string[] }[] }[] };
+    expect(d.zones.length).toBe(5);
+    const beach = d.zones.find((z) => z.zone === "Beach")!;
+    expect(beach.tables.some((tb) => tb.deposit_thb === 12000)).toBe(true);
+    expect(beach.tables[0].slots).toContain("11:00");
+  });
+
+  it("на чужую площадку честно отказывает", async () => {
+    const r = await handlers.get_venue_zones({ venue: "Illuzion" }, ctx);
+    expect(r.ok).toBe(false);
+  });
+
+  it("меню ищет пасту и не выдумывает цен", async () => {
+    const r = await handlers.get_menu({ query: "паккери" }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const items = (r.data as { items: { item: string; price_thb: number }[] }).items;
+    expect(items[0].item).toBe("Lobster Mezzi Paccheri");
+    expect(items[0].price_thb).toBe(2350);
+  });
+
+  it("бронь резолвит стол и предзаказ по каталогу, цену модели не верит", async () => {
+    let got: Record<string, unknown> = {};
+    const book = async (b: Record<string, unknown>) => {
+      got = b;
+      return { ok: true, id: "BK-TEST" };
+    };
+    const r = await handlers.book_table(
+      {
+        venue: "Cafe del Mar",
+        table: "beach bed",
+        dateIso: "2026-08-22",
+        slot: "13:00",
+        guests: 4,
+        phone: "+66 93 000 0000",
+        preorder: [{ item: "Мохито... Aperol Spritz", qty: 2, price: 1 }],
+      },
+      { ...ctx, user: guest, book: book as never },
+    );
+    // «Мохито... Aperol Spritz» не матчится точно — инструмент обязан отказать
+    expect(r.ok).toBe(false);
+    const r2 = await handlers.book_table(
+      {
+        venue: "Cafe del Mar",
+        table: "Beach Bed",
+        dateIso: "2026-08-22",
+        slot: "13:00",
+        guests: 4,
+        phone: "+66 93 000 0000",
+        preorder: [{ item: "Aperol Spritz", qty: 2 }],
+      },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r2.ok).toBe(true);
+    expect(got.deposit).toBe(8000);
+    const lines = got.preorder as { price: number; name: string }[];
+    expect(lines[0].name).toBe("Aperol Spritz");
+    expect(lines[0].price).toBe(390);
+  });
+
+  it("клубная ночь в понедельник не бронируется", async () => {
+    const book = async () => ({ ok: true, id: "BK-X" });
+    // 2026-08-17 — понедельник, Club Room работает ср–сб
+    const r = await handlers.book_table(
+      { venue: "Cafe del Mar", table: "Club Room VIP A", dateIso: "2026-08-17", guests: 4, phone: "1" },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(false);
+  });
+});

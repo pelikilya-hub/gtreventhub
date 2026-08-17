@@ -71,7 +71,11 @@ export async function notifyBossTg(ns: KvNs, text: string) {
   await push(ops?.chatId);
 }
 
-export async function notifyAdminsTg(ns: KvNs, text: string) {
+export async function notifyAdminsTg(
+  ns: KvNs,
+  text: string,
+  markup?: { inline_keyboard: { text: string; callback_data: string }[][] },
+) {
   const { guardInternalChatId, OPS_KEY } = await import("./community");
   const keys = await kvListAll(ns, "user:");
   const users = (
@@ -82,7 +86,12 @@ export async function notifyAdminsTg(ns: KvNs, text: string) {
     const chat = await guardInternalChatId(ns, raw);
     if (!chat || sent.has(chat)) return;
     sent.add(chat);
-    await tgApi("sendMessage", { chat_id: chat, text, parse_mode: "HTML" });
+    await tgApi("sendMessage", {
+      chat_id: chat,
+      text,
+      parse_mode: "HTML",
+      ...(markup ? { reply_markup: markup } : {}),
+    });
   };
   for (const a of users.filter((u) => u.role === "gtr")) {
     await push(await ns.get(`tg:${a.email}`));
@@ -1826,6 +1835,16 @@ export const communityInviteTextFn = createServerFn({ method: "GET" }).handler(a
 });
 
 // Бронь стола / гостевой список: заявка без оплаты — команде в Telegram.
+// Для площадок с полной рассадкой (Café del Mar) заявка несёт зону, тип
+// стола, слот времени, депозит и предзаказ по меню.
+export type PreorderLine = {
+  id: string;      // id позиции меню
+  name: string;
+  opt?: string;    // выбранный вариант (бокал/бутылка, 3 шт…)
+  qty: number;
+  price: number;   // цена за единицу выбранного варианта
+};
+
 export type TableBooking = {
   id: string;
   vid: string;
@@ -1837,21 +1856,79 @@ export type TableBooking = {
   by: string;
   ts: number;
   status: "new" | "confirmed" | "declined";
+  // рассадка (опционально — есть только у площадок с загруженной схемой)
+  zone?: string;       // человекочитаемое имя зоны
+  tableType?: string;  // человекочитаемое имя стола
+  slot?: string;       // «13:00»
+  deposit?: number;    // THB
+  credit?: number;     // из депозита зачитывается на еду/напитки
+  preorder?: PreorderLine[];
+  preorderTotal?: number;
+  decidedBy?: string;  // кто нажал подтверждение
+  decidedTs?: number;
 };
 
-export const bookTableFn = createServerFn({ method: "POST" })
-  .inputValidator(
-    (d: { vid: string; dateIso: string; guests: number; name: string; phone: string; note?: string }) => d,
-  )
-  .handler(async ({ data }) => {
-    const u = await currentUser();
-    const ns = await getKvNs();
-    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+const bookingTgText = (b: TableBooking, venueName: string) =>
+  [
+    "🪑 <b>GTR · заявка на стол</b>",
+    "",
+    `<b>${tgEsc(venueName)}</b> · ${tgEsc(b.dateIso)}${b.slot ? ` · ${tgEsc(b.slot)}` : ""} · ${b.guests} чел.`,
+    b.zone ? `<b>Зона:</b> ${tgEsc(b.zone)}${b.tableType ? ` · ${tgEsc(b.tableType)}` : ""}` : "",
+    b.deposit
+      ? `<b>Депозит:</b> ${b.deposit.toLocaleString("ru-RU")} THB${b.credit ? ` (кредит на F&B ${b.credit.toLocaleString("ru-RU")})` : ""}`
+      : "",
+    `<b>Гость:</b> ${tgEsc(b.name)} · ${tgEsc(b.phone)}`,
+    b.preorder?.length
+      ? [
+          "<b>Предзаказ:</b>",
+          ...b.preorder.map(
+            (l) => `  · ${tgEsc(l.name)}${l.opt ? ` (${tgEsc(l.opt)})` : ""} ×${l.qty} — ${(l.price * l.qty).toLocaleString("ru-RU")}`,
+          ),
+          `  <b>Итого предзаказ: ${(b.preorderTotal ?? 0).toLocaleString("ru-RU")} THB</b>`,
+        ].join("\n")
+      : "",
+    b.note ? `<b>Комментарий:</b> ${tgEsc(b.note)}` : "",
+    `<i>${tgEsc(b.by)} · ${b.id}</i>`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+export type BookTableInput = {
+  vid: string;
+  dateIso: string;
+  guests: number;
+  name: string;
+  phone: string;
+  note?: string;
+  zone?: string;
+  tableType?: string;
+  slot?: string;
+  deposit?: number;
+  credit?: number;
+  preorder?: PreorderLine[];
+};
+
+/** Ядро брони: используется и формой в приложении, и голосовым BRO. */
+export async function bookTableCore(
+  ns: KvNs,
+  u: { email: string },
+  data: BookTableInput,
+) {
     if (!data.name.trim() || !data.phone.trim() || !data.dateIso)
       return { ok: false as const, reason: "имя, телефон и дата обязательны" };
     if (await ns.get(`bklimit:${u.email}`))
       return { ok: false as const, reason: "не чаще одной заявки в минуту" };
     await ns.put(`bklimit:${u.email}`, "1", { expirationTtl: 60 });
+    const preorder = (data.preorder ?? [])
+      .filter((l) => l && l.qty > 0 && l.price >= 0)
+      .slice(0, 40)
+      .map((l) => ({
+        id: String(l.id).slice(0, 60),
+        name: String(l.name).slice(0, 90),
+        opt: l.opt ? String(l.opt).slice(0, 40) : undefined,
+        qty: Math.max(1, Math.min(99, Math.round(l.qty))),
+        price: Math.max(0, Math.round(l.price)),
+      }));
     const booking: TableBooking = {
       id: `BK-${Date.now().toString(36)}`,
       vid: data.vid,
@@ -1863,23 +1940,92 @@ export const bookTableFn = createServerFn({ method: "POST" })
       by: u.email,
       ts: Date.now(),
       status: "new",
+      zone: data.zone?.slice(0, 60),
+      tableType: data.tableType?.slice(0, 60),
+      slot: data.slot?.slice(0, 10),
+      deposit: data.deposit ? Math.max(0, Math.round(data.deposit)) : undefined,
+      credit: data.credit ? Math.max(0, Math.round(data.credit)) : undefined,
+      preorder: preorder.length ? preorder : undefined,
+      preorderTotal: preorder.length
+        ? preorder.reduce((s, l) => s + l.price * l.qty, 0)
+        : undefined,
     };
     await ns.put(`booking:${booking.id}`, JSON.stringify(booking));
     const { V } = await import("./data/app-data");
-    await notifyAdminsTg(
-      ns,
-      [
-        "🪑 <b>GTR · заявка на стол</b>",
-        "",
-        `<b>${tgEsc(V(booking.vid)?.name ?? booking.vid)}</b> · ${tgEsc(booking.dateIso)} · ${booking.guests} чел.`,
-        `<b>Гость:</b> ${tgEsc(booking.name)} · ${tgEsc(booking.phone)}`,
-        booking.note ? `<b>Комментарий:</b> ${tgEsc(booking.note)}` : "",
-        `<i>${tgEsc(booking.by)}</i>`,
-      ]
-        .filter(Boolean)
-        .join("\n"),
-    );
+    const venueName = V(booking.vid)?.name ?? booking.vid;
+    const text = bookingTgText(booking, venueName);
+    const markup = {
+      inline_keyboard: [
+        [
+          { text: "✅ Подтвердить", callback_data: `bk:ok:${booking.id}` },
+          { text: "❌ Отклонить", callback_data: `bk:no:${booking.id}` },
+        ],
+      ],
+    };
+    await notifyAdminsTg(ns, text, markup);
+    // менеджер площадки: chat_id в KV venuemgr:<vid> (привязывает BOSS)
+    const mgrChat = await ns.get(`venuemgr:${booking.vid}`);
+    if (mgrChat)
+      await tgApi("sendMessage", {
+        chat_id: mgrChat,
+        text,
+        parse_mode: "HTML",
+        reply_markup: markup,
+      }).catch(() => {});
     return { ok: true as const, id: booking.id };
+}
+
+export const bookTableFn = createServerFn({ method: "POST" })
+  .inputValidator((d: BookTableInput) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    return bookTableCore(ns, u, data);
+  });
+
+// Решение по брони: из Telegram-кнопки или из аккаунта площадки/команды.
+export async function decideBookingCore(
+  ns: KvNs,
+  id: string,
+  ok: boolean,
+  byLabel: string,
+) {
+  const b = await kvGetJson<TableBooking>(ns, `booking:${id}`);
+  if (!b) return { ok: false as const, note: "Бронь не найдена" };
+  if (b.status !== "new")
+    return {
+      ok: false as const,
+      note: b.status === "confirmed" ? "Уже подтверждена" : "Уже отклонена",
+    };
+  b.status = ok ? "confirmed" : "declined";
+  b.decidedBy = byLabel;
+  b.decidedTs = Date.now();
+  await ns.put(`booking:${b.id}`, JSON.stringify(b));
+  // гостю — в личку бота, если TG привязан
+  const guestChat = await ns.get(`tg:${b.by}`);
+  if (guestChat) {
+    const { V } = await import("./data/app-data");
+    await tgApi("sendMessage", {
+      chat_id: guestChat,
+      parse_mode: "HTML",
+      text: ok
+        ? `✅ <b>Бронь подтверждена</b>\n${tgEsc(V(b.vid)?.name ?? b.vid)} · ${tgEsc(b.dateIso)}${b.slot ? ` · ${tgEsc(b.slot)}` : ""}${b.tableType ? `\n${tgEsc(b.tableType)}` : ""}\nЖдём вас!`
+        : `❌ <b>Бронь отклонена</b>\n${tgEsc(V(b.vid)?.name ?? b.vid)} · ${tgEsc(b.dateIso)}\nПопробуйте другой стол или дату.`,
+    }).catch(() => {});
+  }
+  return { ok: true as const, note: ok ? "Подтверждена ✅" : "Отклонена ❌", booking: b };
+}
+
+export const decideBookingFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; ok: boolean }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, note: "нужен вход" };
+    if (u.role !== "gtr" && u.role !== "owner")
+      return { ok: false as const, note: "нет прав" };
+    return decideBookingCore(ns, data.id, data.ok, u.name ?? u.email);
   });
 
 export const myBookingsFn = createServerFn({ method: "GET" }).handler(async () => {
@@ -1890,7 +2036,7 @@ export const myBookingsFn = createServerFn({ method: "GET" }).handler(async () =
   const all = (await Promise.all(keys.map((k) => kvGetJson<TableBooking>(ns, k)))).filter(
     (b): b is TableBooking => Boolean(b),
   );
-  const mine = u.role === "gtr" ? all : all.filter((b) => b.by === u.email);
+  const mine = u.role === "gtr" || u.role === "owner" ? all : all.filter((b) => b.by === u.email);
   return { bookings: mine.sort((a, b) => b.ts - a.ts).slice(0, 30) };
 });
 

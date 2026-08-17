@@ -968,6 +968,34 @@ export const Route = createFileRoute("/api/tg")({
             return Response.json({ ok: true, scope: "public-only" });
           }
 
+          // решение по брони стола: команда GTR или менеджер площадки
+          const mb = (cqr.data || "").match(/^bk:(ok|no):(\S+)$/);
+          if (mb && cqr.message) {
+            const chatId = cqr.message.chat.id;
+            const u = await userOfChat(ns, chatId);
+            const su = u as StoredUser | null;
+            const { decideBookingCore } = await import("../gtr/kv-api");
+            const bRaw = await ns.get(`booking:${mb[2]}`);
+            const bk = bRaw ? (JSON.parse(bRaw) as { vid: string }) : null;
+            const mgrChat = bk ? await ns.get(`venuemgr:${bk.vid}`) : null;
+            const allowed =
+              (su && (su.role === "gtr" || su.role === "owner")) ||
+              (mgrChat && String(chatId) === String(mgrChat));
+            if (!allowed) {
+              await tgApi("answerCallbackQuery", { callback_query_id: cqr.id, text: "Недоступно" });
+              return Response.json({ ok: true });
+            }
+            const who = su ? (su.name ?? su.email) : "менеджер площадки";
+            const r = await decideBookingCore(ns, mb[2], mb[1] === "ok", who);
+            await tgApi("answerCallbackQuery", { callback_query_id: cqr.id, text: r.note });
+            await tgApi("editMessageText", {
+              chat_id: chatId,
+              message_id: cqr.message.message_id,
+              text: `${cqr.message.text ?? "Бронь"}\n\n➡️ ${r.note.toUpperCase()} · ${who}`,
+            });
+            return Response.json({ ok: true });
+          }
+
           // решение по заявке на роль: только BOSS
           const ma = (cqr.data || "").match(/^(apr|rej):(\S+)$/);
           if (ma && cqr.message) {

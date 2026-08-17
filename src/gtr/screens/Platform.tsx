@@ -6,12 +6,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { loadArtists, PH, V, type Artist } from "../data/app-data";
+import { CdmReserve, hasCdmReserve } from "../cdm-booking";
 import {
   aiMatchFn,
   allAfishaFn,
   bookTableFn,
   contactTeamFn,
   artistFlagsFn,
+  decideBookingFn,
   musicProfileFn,
   saveTasteFn,
   myBookingsFn,
@@ -656,12 +658,12 @@ export function PromoScreen() {
     declined: [t("ОТКЛОНЕНА"), "#E5231B"],
   };
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto" }}>
+    <div style={{ maxWidth: hasCdmReserve(vid) ? 1080 : 860, margin: "0 auto" }}>
       <h1 className="gtr-oswald gtr-h1" style={{ marginBottom: 6 }}>{t("Промо и бронь столов")}</h1>
       <div className="gtr-mono" style={{ font: "500 10px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 14 }}>
         {t("Билеты и промоакции площадок — следующая фаза; бронь работает уже сейчас.")}
       </div>
-      <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: hasCdmReserve(vid) ? "1.6fr 1fr" : "1fr 1fr", gap: 14 }}>
         <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
           <Eyebrow>{t("НОВАЯ БРОНЬ")}</Eyebrow>
           <div>
@@ -674,51 +676,57 @@ export function PromoScreen() {
                 ))}
             </select>
           </div>
-          <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-            <div>
-              {label(t("Дата"))}
-              <input className="gtr-input" type="date" value={dateIso} onChange={(e) => setDateIso(e.target.value)} />
-            </div>
-            <div>
-              {label(t("Гостей"))}
-              <input
-                className="gtr-input"
-                type="number"
-                min={1}
-                max={100}
-                value={guests}
-                onChange={(e) => setGuests(parseInt(e.target.value, 10) || 1)}
-              />
-            </div>
-          </div>
-          <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-            <div>
-              {label(t("Имя"))}
-              <input className="gtr-input" value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div>
-              {label(t("Телефон / WhatsApp"))}
-              <input className="gtr-input" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-            </div>
-          </div>
-          <div>
-            {label(t("Пожелания"))}
-            <input className="gtr-input" placeholder={t("У сцены, день рождения…")} value={note} onChange={(e) => setNote(e.target.value)} />
-          </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <button
-              className="gtr-btn gtr-btn-red"
-              onClick={() => void submit()}
-              disabled={!dateIso || !name.trim() || !phone.trim() || state === "…"}
-            >
-              {t("Отправить заявку")}
-            </button>
-            {state ? (
-              <span className="gtr-mono" style={{ font: "500 9.5px/1.4 'JetBrains Mono',monospace", color: GREEN }}>
-                {state}
-              </span>
-            ) : null}
-          </div>
+          {hasCdmReserve(vid) ? (
+            <CdmReserve vid={vid} compact />
+          ) : (
+            <>
+              <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                <div>
+                  {label(t("Дата"))}
+                  <input className="gtr-input" type="date" value={dateIso} onChange={(e) => setDateIso(e.target.value)} />
+                </div>
+                <div>
+                  {label(t("Гостей"))}
+                  <input
+                    className="gtr-input"
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={guests}
+                    onChange={(e) => setGuests(parseInt(e.target.value, 10) || 1)}
+                  />
+                </div>
+              </div>
+              <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                <div>
+                  {label(t("Имя"))}
+                  <input className="gtr-input" value={name} onChange={(e) => setName(e.target.value)} />
+                </div>
+                <div>
+                  {label(t("Телефон / WhatsApp"))}
+                  <input className="gtr-input" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                </div>
+              </div>
+              <div>
+                {label(t("Пожелания"))}
+                <input className="gtr-input" placeholder={t("У сцены, день рождения…")} value={note} onChange={(e) => setNote(e.target.value)} />
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <button
+                  className="gtr-btn gtr-btn-red"
+                  onClick={() => void submit()}
+                  disabled={!dateIso || !name.trim() || !phone.trim() || state === "…"}
+                >
+                  {t("Отправить заявку")}
+                </button>
+                {state ? (
+                  <span className="gtr-mono" style={{ font: "500 9.5px/1.4 'JetBrains Mono',monospace", color: GREEN }}>
+                    {state}
+                  </span>
+                ) : null}
+              </div>
+            </>
+          )}
         </Card>
         <Card style={{ padding: "18px 20px", display: "grid", gap: 8, alignContent: "start" }}>
           <Eyebrow>{t("МОИ БРОНИ")} · {bookings.length}</Eyebrow>
@@ -739,8 +747,43 @@ export function PromoScreen() {
                   <Chip color={ST[b.status][1]}>{ST[b.status][0]}</Chip>
                 </div>
                 <span className="gtr-mono" style={{ font: "500 9.5px/1.3 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
-                  {b.dateIso} · {b.guests} {t("чел.")} · {b.id}
+                  {b.dateIso}
+                  {b.slot ? ` · ${b.slot}` : ""} · {b.guests} {t("чел.")} · {b.id}
                 </span>
+                {b.zone || b.tableType ? (
+                  <span className="gtr-mono" style={{ font: "500 9.5px/1.3 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+                    {[b.zone, b.tableType].filter(Boolean).join(" · ")}
+                    {b.deposit ? ` · депозит ${b.deposit.toLocaleString("ru-RU")} THB` : ""}
+                  </span>
+                ) : null}
+                {b.preorder?.length ? (
+                  <span className="gtr-mono" style={{ font: "500 9.5px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+                    {t("предзаказ")}: {b.preorder.map((l) => `${l.name}${l.opt ? ` (${l.opt})` : ""}×${l.qty}`).join(", ")} ·{" "}
+                    <b style={{ color: GREEN }}>{(b.preorderTotal ?? 0).toLocaleString("ru-RU")} THB</b>
+                  </span>
+                ) : null}
+                {b.status === "new" && (user.role === "gtr" || user.role === "owner") ? (
+                  <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
+                    <button
+                      className="gtr-btn"
+                      style={{ borderColor: GREEN, color: GREEN }}
+                      onClick={() =>
+                        void decideBookingFn({ data: { id: b.id, ok: true } }).then(loadBookings)
+                      }
+                    >
+                      {t("Подтвердить")}
+                    </button>
+                    <button
+                      className="gtr-btn"
+                      style={{ borderColor: "#E5231B", color: "#E5231B" }}
+                      onClick={() =>
+                        void decideBookingFn({ data: { id: b.id, ok: false } }).then(loadBookings)
+                      }
+                    >
+                      {t("Отклонить")}
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ))
           )}

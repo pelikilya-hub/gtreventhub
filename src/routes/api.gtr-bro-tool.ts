@@ -67,6 +67,10 @@ export const Route = createFileRoute("/api/gtr-bro-tool")({
             user: { email: user.email, name: user.name, role: user.role, boss: user.boss },
             kv: { put: (k, v, o) => ns.put(k, v, o) },
             tgSend: tgSender(ns),
+            book: async (b) => {
+              const { bookTableCore } = await import("../gtr/kv-api");
+              return bookTableCore(ns, user, b);
+            },
           };
           const result = await Promise.race([
             fn(args as Record<string, unknown>, ctx),

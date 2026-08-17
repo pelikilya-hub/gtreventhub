@@ -43,6 +43,14 @@ export default {
       );
       return;
     }
+    // 04:00 UTC = 11:00 Пхукета — BRO учит одну-две новые темы в день.
+    if (event.cron === "0 4 * * *") {
+      const key = await derive(env, "afisha");
+      ctx.waitUntil(
+        fetch("https://gtr-event-hub.gtr-event.workers.dev/api/bro-learn?key=" + key),
+      );
+      return;
+    }
     // Афиши. Раньше крон ходил на свой же публичный адрес по сети: лишний
     // контур, где молча отваливается и ключ, и сам запрос — синхронизация
     // встала 14 августа, и понять это можно было только по KV. Теперь зовём
@@ -80,6 +88,6 @@ export default {
 `,
 );
 cfg.main = "cron.mjs";
-cfg.triggers = { crons: ["0 */2 * * *", "0 13 * * *", "0 10 * * *", "0 2 * * *"] };
+cfg.triggers = { crons: ["0 */2 * * *", "0 13 * * *", "0 10 * * *", "0 2 * * *", "0 4 * * *"] };
 writeFileSync(p, JSON.stringify(cfg, null, 2));
-console.log("wrangler.json: GTR_KV + кроны (афиши 2ч, отчёт 20:00, дайджест 17:00, цены вилл 09:00 Пхукета)");
+console.log("wrangler.json: GTR_KV + кроны (афиши 2ч, отчёт 20:00, дайджест 17:00, цены вилл 09:00, обучение BRO 11:00 Пхукета)");

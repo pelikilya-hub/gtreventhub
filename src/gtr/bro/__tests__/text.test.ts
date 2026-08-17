@@ -192,3 +192,26 @@ describe("база знаний в текстовом режиме", () => {
     expect(planOf("включи сеты lutang").kind).toBe("music");
   });
 });
+
+describe("рабочие команды в текстовом режиме", () => {
+  it("«прогноз <площадка> <дата>» разбирается в план прогноза", () => {
+    const p = planOf("прогноз illuzion 2026-12-05");
+    expect(p.kind).toBe("forecast");
+    if (p.kind === "forecast") {
+      expect(p.venue).toBe("illuzion");
+      expect(p.date).toBe("2026-12-05");
+    }
+  });
+
+  it("без даты прогноз считается на сегодня", () => {
+    const p = planOf("прогноз кафе дель мар");
+    expect(p.kind).toBe("forecast");
+    if (p.kind === "forecast") expect(p.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("«тяга <артист>» разбирается отдельно от поиска", () => {
+    const p = planOf("тяга lutang");
+    expect(p.kind).toBe("pull");
+    if (p.kind === "pull") expect(p.artist).toBe("lutang");
+  });
+});

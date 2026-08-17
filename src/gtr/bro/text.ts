@@ -19,6 +19,8 @@ export type TextPlan =
   | { kind: "music"; artist: string; source: "youtube" | "spotify" | "soundcloud" | "any" }
   | { kind: "venues"; district?: string; kind2?: string; label: string }
   | { kind: "faq"; question: string }
+  | { kind: "forecast"; venue: string; date: string }
+  | { kind: "pull"; artist: string }
   | { kind: "unknown" };
 
 /** Дата на Пхукете (UTC+7) со сдвигом в днях. Часовой пояс телефона
@@ -75,6 +77,19 @@ export const planOf = (raw: string): TextPlan => {
     return { kind: "greet" };
   if (/(что|чё|че).{0,12}(умеешь|можешь)|твои возможност|расскажи.{0,10}себе|кто ты/.test(q))
     return { kind: "greet" };
+
+  // Рабочие команды команды GTR. Разбор здесь, исполнение — на сервере,
+  // где стоит проверка роли: гость может набрать что угодно, но инструмент
+  // ему не ответит.
+  const fc = raw.trim().match(/^прогноз\s+(.+)$/i);
+  if (fc) {
+    const tail = fc[1].trim();
+    const dm = tail.match(/(\d{4}-\d{2}-\d{2})/);
+    const venue = tail.replace(/(\d{4}-\d{2}-\d{2})/, "").replace(/\s+/g, " ").trim();
+    if (venue) return { kind: "forecast", venue, date: dm ? dm[1] : bkkDate(0) };
+  }
+  const pl = raw.trim().match(/^(?:тяга|популярность)\s+(.+)$/i);
+  if (pl && pl[1].trim()) return { kind: "pull", artist: pl[1].trim() };
 
   const det = q.match(/^(детали|подробнее|инфо)\s+(\d{1,2})$/);
   if (det) return { kind: "details", index: Number(det[2]) };
@@ -211,6 +226,15 @@ export const HELP_LINES = [
   "можно и по-людски: «что сегодня в патонге»",
 ];
 
+/** Рабочие команды видит только команда GTR: гостю показывать то, чего
+ *  ему всё равно не выполнят, — это обещание, которое продукт не держит. */
+export const HELP_TEAM_LINES = [
+  "рабочий контур:",
+  "  прогноз <площадка> [ГГГГ-ММ-ДД] — сколько людей придёт и почему",
+  "  тяга <артист> — оценка тяги 0–100 по частям",
+  "спроси словами: «как считать юнит-экономику вечера», «какие каналы промо работают»",
+];
+
 const OPENERS = ["Погнали.", "Смотрю базу...", "Секунду, листаю афишу..."];
 export const openerFor = (q: string): string => OPENERS[q.length % OPENERS.length];
 
@@ -327,4 +351,35 @@ export const greetLines = (name?: string, role?: string, seed = 0): string[] => 
     GREET_CLOSERS[c],
     "жми рацию и говори или пиши сюда — «что сегодня в патонге», «столы в кафе дель мар», «помощь»",
   ];
+};
+
+
+// ---------------------------------------------- рабочие сводки команды
+
+type Fc = {
+  venue?: unknown; date?: unknown; capacity?: unknown; expected?: unknown;
+  low?: unknown; high?: unknown; fill_pct?: unknown; artist?: unknown;
+  factors?: { name: string; k: number; why: string }[];
+  advice?: unknown[];
+};
+
+/** Прогноз явки на табло. Число без множителей — гадание, поэтому
+ *  показываем всю арифметику: с ней можно спорить. */
+export const fmtForecast = (d: Fc): string[] => {
+  const out = [
+    `${String(d.venue ?? "")} · ${String(d.date ?? "")}${d.artist ? ` · ${String(d.artist)}` : ""}`,
+    `ожидаю ${String(d.expected ?? "?")} чел. (вилка ${String(d.low ?? "?")}–${String(d.high ?? "?")}) — это ${String(d.fill_pct ?? "?")}% зала на ${String(d.capacity ?? "?")}`,
+  ];
+  for (const f of d.factors ?? []) out.push(`  ×${f.k.toFixed(2)} ${f.name} — ${f.why}`);
+  for (const a of (d.advice ?? []) as string[]) out.push(a);
+  return out;
+};
+
+type Pl = { artist?: unknown; score?: unknown; band?: unknown; fans?: unknown; venues_fit?: unknown; parts?: { name: string; k: number; why: string }[] };
+
+export const fmtPull = (d: Pl): string[] => {
+  const out = [`${String(d.artist ?? "")} — тяга ${String(d.score ?? "?")}/100 · ${String(d.band ?? "")}`];
+  for (const p of d.parts ?? []) out.push(`  +${p.k} ${p.name} — ${p.why}`);
+  out.push("тяга — оценка по нашим данным, а не билеты");
+  return out;
 };

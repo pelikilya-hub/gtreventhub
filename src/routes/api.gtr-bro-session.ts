@@ -14,7 +14,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { currentUser } from "../gtr/auth";
 import { getKvNs, kvGetJson } from "../gtr/kv-ns";
 import { buildPrompt, PROMPT_VERSION, type BroContext, type PersonaMode } from "../gtr/bro/prompt.ru";
-import { TOOL_DEFS } from "../gtr/bro/tools";
+import { toolsForRole } from "../gtr/bro/tools";
 
 const MODEL = "gpt-realtime-2.1";
 const VOICES = ["cedar", "marin", "ash"] as const;
@@ -156,6 +156,7 @@ export const Route = createFileRoute("/api/gtr-bro-session")({
         const ctx: BroContext = {
           userId: user.email,
           displayName: user.name,
+          role: user.role,
           language: "ru",
           personaMode,
           timezone: "Asia/Bangkok",
@@ -203,7 +204,10 @@ export const Route = createFileRoute("/api/gtr-bro-session")({
                   turn_detection: body.ptt ? null : { type: "server_vad" },
                 },
               },
-                tools: TOOL_DEFS,
+                // Набор по роли, а не весь список: гостю рабочих инструментов
+                // команды не показываем — модель не может предложить то,
+                // чего не видит.
+                tools: toolsForRole(user.role),
                 tool_choice: "auto",
               },
               // Идентификатора здесь нет намеренно: ручка выдачи

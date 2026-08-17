@@ -479,6 +479,20 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
         })}
       </nav>
 
+      {/* Вызов BRO на десктопе: нижней панели на широком экране нет, и без
+          этого значка помощник был доступен только с телефона. */}
+      {broOn && !broOpen && (
+        <button
+          className="gtr-bro-dock"
+          onClick={() => setBroOpen(true)}
+          aria-label={t("Открыть GTR BRO")}
+          title={t("GTR BRO")}
+        >
+          <img src="/raw-pulse/handle-logo.webp" alt="" aria-hidden draggable={false} />
+          <span>BRO</span>
+        </button>
+      )}
+
       {broOn && (
         <Suspense fallback={null}>
           <GtrBroOverlay

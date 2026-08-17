@@ -89,6 +89,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         const ctx: BroContext = {
           userId: user.email,
           displayName: user.name,
+          role: user.role,
           language: "ru",
           personaMode: "bro",
           timezone: "Asia/Bangkok",

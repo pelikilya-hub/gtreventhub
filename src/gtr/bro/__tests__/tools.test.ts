@@ -511,3 +511,126 @@ describe("ask_gtr — база знаний", () => {
     }
   });
 });
+
+describe("рабочий контур команды", () => {
+  const guest = { email: "g@v", name: "Гость", role: "visitor" };
+  const boss = { email: "b@v", name: "BOSS", role: "gtr", boss: true };
+
+  it("гость не видит рабочих инструментов в схемах", () => {
+    const names = toolsForRole("visitor").map((d) => d.name);
+    expect(names).not.toContain("forecast_attendance");
+    expect(names).not.toContain("artist_pull");
+    expect(toolsForRole("gtr").map((d) => d.name)).toContain("forecast_attendance");
+  });
+
+  it("гость не получает прогноз, даже если позвал инструмент напрямую", async () => {
+    const r = await handlers.forecast_attendance(
+      { venue: "Illuzion", date: "2026-09-05" },
+      { ...ctx, user: guest },
+    );
+    expect(r.ok).toBe(false);
+  });
+
+  it("прогноз считает вилку и показывает все множители", async () => {
+    const r = await handlers.forecast_attendance(
+      { venue: "Illuzion", date: "2026-12-05", price: 800, promo: "сильное" },
+      { ...ctx, user: boss },
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as {
+      capacity: number; expected: number; low: number; high: number;
+      factors: { name: string; k: number }[];
+    };
+    expect(d.capacity).toBeGreaterThan(0);
+    expect(d.low).toBeLessThanOrEqual(d.expected);
+    expect(d.high).toBeGreaterThanOrEqual(d.expected);
+    // Зал не резиновый ни при каком сочетании удачных факторов.
+    expect(d.high).toBeLessThanOrEqual(Math.round(d.capacity * 1.02));
+    expect(d.factors.length).toBe(7);
+  });
+
+  it("суббота даёт больше людей, чем понедельник, при прочих равных", async () => {
+    const mon = await handlers.forecast_attendance({ venue: "Illuzion", date: "2026-12-07" }, { ...ctx, user: boss });
+    const sat = await handlers.forecast_attendance({ venue: "Illuzion", date: "2026-12-05" }, { ...ctx, user: boss });
+    expect(mon.ok && sat.ok).toBe(true);
+    if (!mon.ok || !sat.ok) return;
+    expect((sat.data as { expected: number }).expected).toBeGreaterThan(
+      (mon.data as { expected: number }).expected,
+    );
+  });
+
+  it("тяга артиста считается и объясняется по частям", async () => {
+    const r = await handlers.artist_pull({ artist: "lutang" }, { ...ctx, user: boss });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { score: number; band: string; parts: unknown[] };
+    expect(d.score).toBeGreaterThanOrEqual(0);
+    expect(d.score).toBeLessThanOrEqual(100);
+    expect(d.parts.length).toBeGreaterThan(3);
+    expect(d.band).toBeTruthy();
+  });
+});
+
+describe("слои базы знаний", () => {
+  const guest = { email: "gq@v", name: "Гость", role: "visitor" };
+  const boss = { email: "bq@v", name: "BOSS", role: "gtr", boss: true };
+  const mem = new Map<string, string>();
+  const kv = {
+    put: async (k: string, v: string) => {
+      mem.set(k, v);
+    },
+    get: async (k: string) => mem.get(k) ?? null,
+  };
+
+  it("маркетинговые темы открыты команде и закрыты гостю", async () => {
+    const q = { question: "как считать юнит-экономику вечера" };
+    const team = await handlers.ask_gtr(q, { ...ctx, user: boss, kv });
+    const vis = await handlers.ask_gtr(q, { ...ctx, user: guest, kv });
+    expect(team.ok).toBe(true);
+    expect(vis.ok).toBe(false);
+  });
+
+  it("выученная кроном тема отвечает всем, включая гостя", async () => {
+    // Тема из бэклога, которой в базовых пятидесяти нет вовсе.
+    const q = { question: "что такое b2b" };
+    const before = await handlers.ask_gtr(q, { ...ctx, user: guest, kv });
+    expect(before.ok).toBe(false);
+    mem.set("broqa:learned", JSON.stringify({ ids: ["les-b2b"] }));
+    const after = await handlers.ask_gtr(q, { ...ctx, user: guest, kv });
+    expect(after.ok).toBe(true);
+    if (!after.ok) return;
+    expect((after.data as { topic: string }).topic).toBe("les-b2b");
+  });
+
+  it("битая запись в KV не ломает ответ", async () => {
+    mem.set("broqa:learned", "{не json");
+    const r = await handlers.ask_gtr({ question: "как забронировать стол" }, { ...ctx, user: guest, kv });
+    expect(r.ok).toBe(true);
+  });
+});
+
+describe("музыка ведёт на музыку", () => {
+  const guest = { email: "m@v", name: "Гость", role: "visitor" };
+
+  it("прямая ссылка выигрывает у поисковой выдачи", async () => {
+    const r = await handlers.open_music({ artist: "lutang" }, { ...ctx, user: guest });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { open: { url: string; direct: boolean }; links: { direct: boolean }[] };
+    // Первой всегда идёт прямая ссылка, если она вообще есть.
+    if (d.links.some((l) => l.direct)) expect(d.open.direct).toBe(true);
+  });
+
+  it("поисковая ссылка помечена честно, а не выдана за трек", async () => {
+    const r = await handlers.open_music({ artist: "lutang" }, { ...ctx, user: guest });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { links: { url: string; direct: boolean; label: string }[] };
+    for (const l of d.links) {
+      const search = /\/results\?|\/search(\?|\/|$)|open\.spotify\.com\/search/.test(l.url);
+      expect(l.direct).toBe(!search);
+      if (search) expect(l.label).toContain("Поиск");
+    }
+  });
+});

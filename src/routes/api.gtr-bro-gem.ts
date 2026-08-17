@@ -99,6 +99,7 @@ export const Route = createFileRoute("/api/gtr-bro-gem")({
         const ctx: BroContext = {
           userId: user.email,
           displayName: user.name,
+          role: user.role,
           language: "ru",
           personaMode: pickMode(body.personaMode),
           timezone: "Asia/Bangkok",

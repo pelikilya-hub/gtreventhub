@@ -48,16 +48,17 @@ const PLAYERS = playersRaw as Record<string, ArtistPlayer>;
 // Встроенные плееры сняты (виджеты сервисов разнобойные) — вместо них
 // прямая ссылка на музыку. Spotify — основной инструмент: прямой профиль,
 // если известен; SoundCloud — для локальной сцены; остальным — Spotify-поиск.
-const playerLink = (p: ArtistPlayer, spFallback?: string): { url: string; label: string } =>
-  p.kind === "spotify"
-    ? { url: `https://open.spotify.com/artist/${p.ref}`, label: "Музыка · Spotify" }
-    : p.kind === "sc"
-      ? { url: p.ref, label: "Музыка · SoundCloud" }
-      : spFallback
-        ? { url: spFallback, label: "Музыка · Spotify" }
-        : p.kind === "mixcloud"
-          ? { url: `https://www.mixcloud.com${p.ref}`, label: "Музыка · Mixcloud" }
-          : { url: `https://www.deezer.com/artist/${p.ref}`, label: "Музыка" };
+const playerLink = (p: ArtistPlayer, spFallback?: string): { url: string; label: string } => {
+  // Spotify-фолбэк годится, только если это прямой профиль артиста.
+  // Поисковая выдача — не музыка: жмёшь «Музыка», а попадаешь в список.
+  // Прямая ссылка Deezer или Mixcloud честнее любого поиска.
+  const spDirect = spFallback && /open\.spotify\.com\/artist\//.test(spFallback) ? spFallback : undefined;
+  if (p.kind === "spotify") return { url: `https://open.spotify.com/artist/${p.ref}`, label: "Музыка · Spotify" };
+  if (p.kind === "sc") return { url: p.ref, label: "Музыка · SoundCloud" };
+  if (p.kind === "mixcloud") return { url: `https://www.mixcloud.com${p.ref}`, label: "Музыка · Mixcloud" };
+  if (p.kind === "deezer") return { url: `https://www.deezer.com/artist/${p.ref}`, label: "Музыка · Deezer" };
+  return spDirect ? { url: spDirect, label: "Музыка · Spotify" } : { url: `https://www.deezer.com/artist/${p.ref}`, label: "Музыка" };
+};
 
 // Группы базы — служебные английские метки; посетителю показываем
 // человеческое название сцены (ключи RU — под естественную i18n-схему)
@@ -926,25 +927,31 @@ function ArtistCard({
                 const pk = PLAYERS[a.id]?.kind;
                 if (pk === "spotify" && k === "sp") return false;
                 if (pk === "sc" && k === "sc") return false;
-                // deezer/mixcloud идут через Spotify-фолбэк — прячем дубль sp
-                if ((pk === "deezer" || pk === "mixcloud") && k === "sp") return false;
                 return true;
-              }).map(([k, label]) => (
-                <a
-                  key={String(k)}
-                  className="gtr-btn"
-                  style={{ textDecoration: "none" }}
-                  href={String(linkOf(k))}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    openAppLink(String(linkOf(k)));
-                  }}
-                >
-                  {label} ↗
-                </a>
-              ))}
+              }).map(([k, label]) => {
+                // Часть ссылок в базе — поисковые выдачи: прямой записи у
+                // артиста пока нет. Прятать их нельзя (иначе у человека не
+                // останется ничего), но и выдавать за музыку — обман.
+                const url = String(linkOf(k));
+                const search = /\/results\?|\/search(\?|\/|$)|open\.spotify\.com\/search/.test(url);
+                return (
+                  <a
+                    key={String(k)}
+                    className="gtr-btn"
+                    style={{ textDecoration: "none", opacity: search ? 0.72 : 1 }}
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={search ? "Поиск по сервису — прямой записи пока нет" : undefined}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openAppLink(url);
+                    }}
+                  >
+                    {label}{search ? " · поиск" : ""} ↗
+                  </a>
+                );
+              })}
             </div>
             {!fanView && (MEDIA[a.id]?.heroVideo || PHOTOS[a.id]) ? (
               <div

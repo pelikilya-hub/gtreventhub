@@ -23,10 +23,14 @@ import {
   fmtVenues,
   greetLines,
   HELP_LINES,
+  HELP_TEAM_LINES,
   openerFor,
   planOf,
+  fmtForecast,
+  fmtPull,
 } from "./text";
 import { VOICE_LAB_LINES, type PersonaMode } from "./prompt.ru";
+import { isTeam } from "./tools";
 import { GemSession } from "./gem";
 import { BroSession, type BroCard, type BroState } from "./session";
 
@@ -80,13 +84,30 @@ const VOICE_SETS: Record<VoiceProvider, [string, string][]> = {
 /** Быстрые команды под табло: то, ради чего человек и открыл BRO.
  *  Значки — из фирменного пака, а не системные эмодзи: системные на
  *  каждом телефоне свои и рядом с нашей типографикой смотрятся чужими. */
-const QUICK: { icon: StkName; t: string; q: string }[] = [
+// Быстрые команды разведены по контурам. Гость пришёл за движем, музыкой
+// и артистами; команда за столом — за цифрами. Один и тот же ряд кнопок
+// для обоих был бы враньём в обе стороны.
+type Quick = { icon: StkName; t: string; q: string };
+
+const QUICK_GUEST: Quick[] = [
   { icon: "champagne", t: "Пожрать", q: "столы в кафе дель мар" },
   { icon: "disco", t: "Нажраться", q: "что сегодня" },
   { icon: "palm", t: "Клубы рядом", q: "какие клубы в патонге" },
   { icon: "pin", t: "Маршрут", q: "маршрут" },
   { icon: "headphones", t: "Артисты", q: "открой артисты" },
+  { icon: "vinyl", t: "Про стили", q: "что такое техно" },
   { icon: "door", t: "Такси", q: "вызови такси" },
+  { icon: "star", t: "Что умею", q: "что ты умеешь" },
+];
+
+const QUICK_TEAM: Quick[] = [
+  { icon: "hundred", t: "Прогноз явки", q: "прогноз illuzion" },
+  { icon: "equalizer", t: "Тяга артиста", q: "тяга lutang" },
+  { icon: "calendar", t: "Афиша", q: "что сегодня" },
+  { icon: "map", t: "База площадок", q: "какие клубы в патонге" },
+  { icon: "fader", t: "Экономика", q: "как считать юнит-экономику вечера" },
+  { icon: "rocket", t: "Промо", q: "какие каналы промо работают на пхукете" },
+  { icon: "mic", t: "Артисты", q: "открой артисты" },
   { icon: "star", t: "Что умею", q: "что ты умеешь" },
 ];
 
@@ -451,6 +472,22 @@ export function GtrBroOverlay({
       return;
     }
 
+    if (plan.kind === "forecast" || plan.kind === "pull") {
+      metric(`bro.text.${plan.kind}`);
+      say("bro", openerFor(q));
+      const r =
+        plan.kind === "forecast"
+          ? await callTool("forecast_attendance", { venue: plan.venue, date: plan.date })
+          : await callTool("artist_pull", { artist: plan.artist });
+      if (!r.ok) return say("bro", `Не посчитал: ${String(r.error ?? "")}`);
+      const lines =
+        plan.kind === "forecast"
+          ? fmtForecast(r.data as Record<string, unknown>)
+          : fmtPull(r.data as Record<string, unknown>);
+      for (const l of lines) say(l.startsWith("  ") ? "sys" : "bro", l);
+      return;
+    }
+
     if (plan.kind === "greet") {
       metric("bro.greet.ask");
       const g = greetLines(userName, role, rows.length);
@@ -462,6 +499,7 @@ export function GtrBroOverlay({
     if (plan.kind === "help" || plan.kind === "unknown") {
       if (plan.kind === "unknown") say("bro", "Не разобрал. Вот что умею без голоса:");
       for (const l of HELP_LINES) say("sys", l);
+      if (isTeam(role)) for (const l of HELP_TEAM_LINES) say("sys", l);
       return;
     }
 
@@ -620,7 +658,7 @@ export function GtrBroOverlay({
         {/* Тапы вместо набора: человек в клубе не печатает «что сегодня
             в патонге» одной рукой с коктейлем в другой. */}
         <div className="gtr-bro-quick">
-          {QUICK.map((q) => (
+          {(isTeam(role) ? QUICK_TEAM : QUICK_GUEST).map((q) => (
             <button key={q.t} className="gtr-bro-q" onClick={() => void runText(q.q)}>
               <Stk name={q.icon} size={30} x2 />
               <span>{q.t}</span>

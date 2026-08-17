@@ -1728,12 +1728,17 @@ function VisitorCabinet() {
       ([base, ph, pl]) => {
         const photos = (ph as { default: { photos: Record<string, { photo: string }> } }).default.photos;
         const players = (pl as { default: Record<string, { kind: string; ref: string }> }).default;
+        // Кнопка у хедлайнера обязана заиграть, а не открыть поиск:
+        // прямой профиль всегда выигрывает у поисковой выдачи Spotify.
         const linkOf = (id: string, sp?: string) => {
           const p = players[id];
-          if (!p) return sp;
+          const spDirect = sp && /open\.spotify\.com\/artist\//.test(sp) ? sp : undefined;
+          if (!p) return spDirect ?? sp;
           if (p.kind === "spotify") return `https://open.spotify.com/artist/${p.ref}`;
           if (p.kind === "sc") return p.ref;
-          return sp;
+          if (p.kind === "deezer") return spDirect ?? `https://www.deezer.com/artist/${p.ref}`;
+          if (p.kind === "mixcloud") return spDirect ?? `https://www.mixcloud.com${p.ref}`;
+          return spDirect ?? sp;
         };
         setHeads(
           base.artists

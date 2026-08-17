@@ -34,6 +34,9 @@ import {
   promptpayCfgFn,
   setCommunityCfgFn,
   setMetaCfgFn,
+  setThreadsFn,
+  threadsPostFn,
+  threadsStatusFn,
   setPromptpayCfgFn,
   listUsersFn,
   pendingDecideFn,
@@ -752,6 +755,7 @@ export function BossCabinet() {
         <PromptpayCard />
         <CommunityCard />
         <MetaCard />
+        <ThreadsCard />
       </div>
     </div>
   );
@@ -1014,6 +1018,92 @@ function CommunityCard() {
           style={{ marginTop: 8, width: "100%", minHeight: 120, font: "500 11px/1.5 'Golos Text',sans-serif" }}
         />
       ) : null}
+    </Card>
+  );
+}
+
+
+/** Threads — отдельное подключение от страниц Facebook: свой токен, свои
+ *  права, свой домен API. Поэтому и карточка отдельная: одна кнопка
+ *  «подключить» и одна «проверить постом», чтобы связку было видно
+ *  сразу, а не вечером после крона. */
+function ThreadsCard() {
+  const [token, setToken] = useState("");
+  const [state, setState] = useState("");
+  const [who, setWho] = useState<string | null>(null);
+  const [daysLeft, setDaysLeft] = useState<number | null>(null);
+
+  useEffect(() => {
+    void threadsStatusFn()
+      .then((r) => {
+        if (r.connected) {
+          setWho(r.username);
+          setDaysLeft(r.daysLeft ?? null);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const save = async () => {
+    setState("Проверяю токен у Threads…");
+    try {
+      const r = await setThreadsFn({ data: { token } });
+      if (r.ok) {
+        setWho(r.username);
+        setDaysLeft(60);
+        setToken("");
+        setState(`✓ Подключён профиль @${r.username}`);
+      } else setState(r.reason ?? "…");
+    } catch {
+      setState("Сервер недоступен");
+    }
+  };
+
+  const test = async () => {
+    setState("Публикую проверочный пост…");
+    try {
+      const r = await threadsPostFn({
+        data: { text: "GTR Event — афиша ночного Пхукета. Проверка связи." },
+      });
+      setState(r.ok ? "✓ Пост опубликован — проверь профиль" : (r.reason ?? "…"));
+    } catch {
+      setState("Сервер недоступен");
+    }
+  };
+
+  return (
+    <Card style={{ padding: 14, gridColumn: "1 / -1" }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+        <Eyebrow>THREADS · ПУБЛИКАЦИЯ АФИШИ</Eyebrow>
+        <Chip color={who ? GREEN : AMBER}>{who ? `@${who.toUpperCase()}` : "НЕ ПОДКЛЮЧЁН"}</Chip>
+        {daysLeft !== null ? (
+          <Chip color={daysLeft < 10 ? RED : "#7B4DFF"}>ТОКЕН · {daysLeft} ДН.</Chip>
+        ) : null}
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <input
+          className="gtr-input"
+          style={{ flex: "1 1 280px" }}
+          placeholder="Access Token профиля Threads"
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+        />
+        <button className="gtr-btn gtr-btn-red" onClick={save}>
+          Подключить
+        </button>
+        {who ? (
+          <button className="gtr-btn" onClick={test}>
+            Проверить постом
+          </button>
+        ) : null}
+      </div>
+      <div
+        className="gtr-mono"
+        style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+      >
+        {state ||
+          "Вечерний дайджест уходит в Threads вместе с Telegram. Лимит поста — 500 знаков, разметки нет: текст режется по строкам, а не по буквам. Токен живёт 60 дней."}
+      </div>
     </Card>
   );
 }

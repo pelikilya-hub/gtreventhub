@@ -26,6 +26,24 @@ export const Route = createFileRoute("/api/community-digest")({
         let res: { ok: boolean; description?: string } = { ok: true };
         if (!opsOnly) {
           const text = await buildDigestText(ns);
+          // Тот же вечер уходит в Threads, если он подключён. Отдельным
+          // текстом: там нет разметки и жёсткий лимит в 500 знаков, а
+          // молчаливый обрез посреди лайнапа выглядит как поломка.
+          try {
+            const { threadsCfg, threadsPost, threadsDigest } = await import("../gtr/threads");
+            const tcfg = await threadsCfg(ns);
+            if (tcfg) {
+              const short = threadsDigest(text.split("\n"), APP_URL);
+              const tr = await threadsPost(tcfg, short);
+              if (!tr.ok) {
+                const { notifyBossTg } = await import("../gtr/kv-api");
+                await notifyBossTg(ns, `⚠️ Threads не принял дайджест: ${tr.reason}`).catch(() => {});
+              }
+            }
+          } catch {
+            // Threads — дополнительный канал: его сбой не должен ронять
+            // публикацию в Telegram, ради которой крон и запускается.
+          }
           res = await tgApi("sendMessage", {
             chat_id: cfg.channelId,
             text,

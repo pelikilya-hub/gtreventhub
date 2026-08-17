@@ -2894,3 +2894,61 @@ export const outreachSaveFn = createServerFn({ method: "POST" })
     }
     return { ok: true as const, row };
   });
+
+// ---------- Threads: подключение и публикация ----------
+//
+// Threads — отдельное подключение от страниц Facebook: свой домен API,
+// свой токен, свои права. Токен страницы здесь не работает, поэтому и
+// настройка отдельная.
+
+export const setThreadsFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string }) => d)
+  .handler(async ({ data }) => {
+    const me = await currentUser();
+    const ns = await getKvNs();
+    if (!me?.boss || !ns) return { ok: false as const, reason: "только BOSS" };
+    const token = data.token.trim();
+    if (token.length < 20) return { ok: false as const, reason: "токен слишком короткий" };
+    const { threadsMe, THREADS_KEY } = await import("./threads");
+    const who = await threadsMe(token);
+    if (!who.ok) return { ok: false as const, reason: who.reason };
+    await ns.put(
+      THREADS_KEY,
+      JSON.stringify({
+        userId: who.id,
+        username: who.username,
+        token,
+        // Долгоживущий токен Threads живёт 60 дней: помечаем срок сразу,
+        // чтобы напомнить до того, как публикации начнут молча падать.
+        expiresAt: Date.now() + 60 * 24 * 3600 * 1000,
+        savedAt: Date.now(),
+      }),
+    );
+    return { ok: true as const, username: who.username ?? who.id };
+  });
+
+export const threadsStatusFn = createServerFn({ method: "GET" }).handler(async () => {
+  const me = await currentUser();
+  const ns = await getKvNs();
+  if (!me?.boss || !ns) return { connected: false as const };
+  const { threadsCfg } = await import("./threads");
+  const cfg = await threadsCfg(ns);
+  if (!cfg) return { connected: false as const };
+  const daysLeft = cfg.expiresAt ? Math.round((cfg.expiresAt - Date.now()) / 86_400_000) : null;
+  return { connected: true as const, username: cfg.username ?? cfg.userId, daysLeft };
+});
+
+/** Ручная публикация: BOSS проверяет связку одной кнопкой, не дожидаясь
+ *  вечернего крона. */
+export const threadsPostFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { text: string; imageUrl?: string }) => d)
+  .handler(async ({ data }) => {
+    const me = await currentUser();
+    const ns = await getKvNs();
+    if (!me?.boss || !ns) return { ok: false as const, reason: "только BOSS" };
+    const { threadsCfg, threadsPost } = await import("./threads");
+    const cfg = await threadsCfg(ns);
+    if (!cfg) return { ok: false as const, reason: "Threads не подключён" };
+    const r = await threadsPost(cfg, data.text, data.imageUrl);
+    return r.ok ? { ok: true as const, id: r.id } : { ok: false as const, reason: r.reason };
+  });

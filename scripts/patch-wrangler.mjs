@@ -16,8 +16,42 @@ const derive = async (env, salt) => {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(salt + ":" + base));
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 48);
 };
+// ------------------------------------------------------------------
+// Периметр воркера: сюда приходит каждый запрос к продукту, и здесь же
+// дешевле всего отсечь то, чему в продукте делать нечего.
+//
+// Краулеры ИИ и скрейперы представляются честно — по User-Agent. Это не
+// защита от целенаправленного копирования (агент подделает заголовок),
+// но она снимает поток промышленного сбора данных и, вместе с robots.txt,
+// фиксирует заявленную волю правообладателя.
+const BOTS = /(GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|anthropic-ai|PerplexityBot|Perplexity-User|Google-Extended|Applebot-Extended|Bytespider|CCBot|Amazonbot|meta-externalagent|cohere-ai|Diffbot|omgili|Timpibot|ImagesiftBot|DataForSeoBot|SemrushBot|AhrefsBot|MJ12bot|DotBot|scrapy|python-requests|python-urllib|Go-http-client|node-fetch|axios|libwww-perl|HTTrack|Wget|curl)/i;
+
+// Заголовки безопасности на каждый ответ. Главное здесь — frame-ancestors:
+// без него чужой сайт может встроить продукт в iframe и выдать за свой.
+const SECURITY = {
+  "content-security-policy": "frame-ancestors 'self'",
+  "x-content-type-options": "nosniff",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "permissions-policy": "interest-cohort=(), browsing-topics=()",
+  "x-robots-tag": "noai, noimageai",
+};
+
+const withSecurity = (res) => {
+  const h = new Headers(res.headers);
+  for (const [k, v] of Object.entries(SECURITY)) h.set(k, v);
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
+};
+
 export default {
-  fetch: (req, env, ctx) => worker.fetch(req, env, ctx),
+  async fetch(req, env, ctx) {
+    const ua = req.headers.get("user-agent") || "";
+    if (BOTS.test(ua))
+      return new Response(
+        "GTR Event: автоматический сбор данных запрещён. Каталог площадок и артистов, база знаний и логика продукта защищены авторским правом. По вопросам доступа: pelikilya@gmail.com",
+        { status: 403, headers: { "content-type": "text/plain; charset=utf-8", "x-robots-tag": "noai, noindex" } },
+      );
+    return withSecurity(await worker.fetch(req, env, ctx));
+  },
   async scheduled(event, env, ctx) {
     // 13:00 UTC = 20:00 Пхукета — вечерний отчёт спринта; остальное — афиши
     if (event.cron === "0 13 * * *") {

@@ -30,7 +30,7 @@ import {
   fmtPull,
 } from "./text";
 import { VOICE_LAB_LINES, type PersonaMode } from "./prompt.ru";
-import { isTeam } from "./tools";
+import { isTeam } from "./roles";
 import { GemSession } from "./gem";
 import { BroSession, type BroCard, type BroState } from "./session";
 

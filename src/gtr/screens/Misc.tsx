@@ -16,7 +16,6 @@ import { notifyAssignFn } from "../notify";
 import { openAppLink } from "../applink";
 import {
   AMBER,
-  CONTACT,
   finBlockerOf,
   finKpiOf,
   fmtThb,
@@ -30,6 +29,7 @@ import {
   SPACES_TECH,
   V,
 } from "../data/app-data";
+import { useVenueContacts } from "../work-contacts";
 import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow, tint } from "../ui";
 
@@ -887,7 +887,7 @@ export function VenueScreen() {
   const navigate = useNavigate();
   const vid = user.venueId || "VEN-0013";
   const v = V(vid);
-  const ct = CONTACT(vid);
+  const ct = useVenueContacts()(vid);
   const rich = richOf(vid);
   const R = v.readiness;
 
@@ -1510,7 +1510,7 @@ function TeamPanel() {
       : [];
   const loadArts = () => {
     if (!artBase)
-      import("../data/artists.json").then((m) => {
+      import("../data/artists.public.json").then((m) => {
         const arts = (m.default as unknown as { artists: { id: string; name: string; kind?: string; role?: string }[] }).artists;
         setArtBase(arts.filter((a) => a.kind === "artist").map(({ id, name, role: r }) => ({ id, name, role: r })));
       });

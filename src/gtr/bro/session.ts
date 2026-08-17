@@ -58,7 +58,7 @@ export type BroEvents = {
  *  Источник — WRITE_TOOLS в tools.ts: новый пишущий инструмент нельзя
  *  выпустить, не решив, что именно показать человеку перед выполнением. */
 import { LoudOut, routeAudio } from "./audio-out";
-import { WRITE_TOOLS } from "./tools";
+import { WRITE_TOOLS } from "./write-tools";
 export const NEEDS_CONFIRM: Record<string, string> = WRITE_TOOLS;
 
 export type BroStart = {

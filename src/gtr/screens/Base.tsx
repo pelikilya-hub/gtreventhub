@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   AMBER,
-  CONTACT,
   fmtThb,
   GREEN,
   PH,
@@ -31,6 +30,7 @@ import {
   type StyleProfile,
   type VenueConfirm,
 } from "../kv-api";
+import { useVenueContacts } from "../work-contacts";
 import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
 
@@ -337,11 +337,12 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
       </div>
     );
 
+  const venueContact = useVenueContacts();
   const rich = richOf(v.id);
   const night = nightOf(v.id);
   const sp = SPACES(v.id);
   const rate = rateOf(v.id);
-  const ct = CONTACT(v.id);
+  const ct = venueContact(v.id);
   const R = v.readiness;
   // Публичной аудитории (артисты, посетители) — витрина без коммерции:
   // прайсы, контакты площадки и внутренние статусы видит только команда

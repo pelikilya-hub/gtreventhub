@@ -15,37 +15,20 @@ export const Route = createFileRoute("/gtr/login")({
   component: LoginPage,
 });
 
-const DEMO = [
-  {
-    email: "pr@gtr.events",
-    label: "PR-директор",
-    ini: "ПД",
-    venue: "VEN-0013",
-  },
-  {
-    email: "owner@gtr.events",
-    label: "Владелец",
-    ini: "ВЛ",
-    venue: "VEN-0061",
-  },
-  {
-    email: "sales@gtr.events",
-    label: "Event-продажи",
-    ini: "ПР",
-    venue: "VEN-0033",
-  },
-  { email: "admin@gtr.events", label: "GTR-админ", ini: "АД", venue: "" },
-];
+// Список демо-аккаунтов приходит с сервера и только в демо-режиме:
+// в обычной сборке в бандле экрана входа нет ни одного валидного адреса.
+type DemoHint = { email: string; label: string; ini: string; venue: string };
+
 
 function LoginPage() {
-  const { demo } = Route.useLoaderData();
+  const { demo, hints } = Route.useLoaderData() as { demo: boolean; hints: DemoHint[] };
   const navigate = useNavigate();
   // Пригласительная ссылка: /gtr/login?invite=email — поле входа уже заполнено
   const invited =
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search).get("invite") || ""
       : "";
-  const [email, setEmail] = useState(invited || "pr@gtr.events");
+  const [email, setEmail] = useState(invited);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -117,7 +100,7 @@ function LoginPage() {
                   marginBottom: 18,
                 }}
               >
-                {DEMO.map((d) => (
+                {(hints ?? []).map((d: DemoHint) => (
                   <button
                     key={d.email}
                     className="gtr-pal-btn"

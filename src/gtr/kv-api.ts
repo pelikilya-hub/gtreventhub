@@ -1507,6 +1507,12 @@ export const signupVisitorFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const ns = await getKvNs();
     if (!ns) return { ok: false as const, error: "Хранилище недоступно" };
+    // Массовая регистрация ботами — это мусор в базе, спам BOSS в
+    // Telegram и накрутка реферальных баллов. Пять аккаунтов в час с
+    // одного адреса живому человеку хватит с запасом.
+    const { clientIp, tooMany, LIMITS, TOO_MANY_MSG } = await import("./abuse");
+    if (await tooMany("signup", clientIp(), LIMITS.signup, ns))
+      return { ok: false as const, error: TOO_MANY_MSG };
     const email = data.email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return { ok: false as const, error: "Некорректный email" };
@@ -1574,6 +1580,9 @@ export const signupApplyFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const ns = await getKvNs();
     if (!ns) return { ok: false as const, error: "Хранилище недоступно" };
+    const { clientIp, tooMany, LIMITS, TOO_MANY_MSG } = await import("./abuse");
+    if (await tooMany("apply", clientIp(), LIMITS.apply, ns))
+      return { ok: false as const, error: TOO_MANY_MSG };
     const role = APPLY_ROLES[data.kind];
     if (!role) return { ok: false as const, error: "Неизвестная роль" };
     const email = data.email.trim().toLowerCase();
@@ -2745,4 +2754,88 @@ export const broLogFn = createServerFn({ method: "POST" })
     }
     await ns.put(key, JSON.stringify(cur), { expirationTtl: 60 * 60 * 24 * 120 });
     return { ok: true };
+  });
+
+// ---------- рабочие контакты: только команде и только по запросу ----------
+//
+// Раньше контакты приезжали в браузер вместе с базой и лежали в бандле,
+// который отдаётся анонимно. Теперь их отдаёт сервер и только тем ролям,
+// которым они положены по работе.
+
+export type WorkContact = {
+  venueId?: string;
+  artistId?: string;
+  name?: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+  wa?: string;
+  mgmt?: string;
+  person?: string;
+  rider?: string;
+  notes?: string;
+  evidence?: string;
+  channel?: string;
+  status?: string;
+  verified?: string;
+};
+
+const TEAM = ["gtr", "organizer", "pr", "owner", "sales"];
+
+/** Все контакты площадок разом: рабочие экраны показывают их списком. */
+export const venueContactsFn = createServerFn({ method: "GET" }).handler(async () => {
+  const me = await currentUser();
+  if (!me || !TEAM.includes(me.role)) return { contacts: [] as WorkContact[] };
+  // Даже у своих есть потолок: угнанная сессия не должна превращаться в
+  // выгрузку всей базы контактов.
+  const { tooMany, LIMITS } = await import("./abuse");
+  if (await tooMany("contacts", me.email, LIMITS.contacts)) return { contacts: [] as WorkContact[] };
+  const { loadVenuesFull } = await import("./data/private-data");
+  const full = await loadVenuesFull();
+  const out: WorkContact[] = full.contacts.map((c) => ({
+    venueId: c.venueId,
+    name: c.name,
+    role: c.role,
+    phone: c.phone,
+    email: c.email,
+    channel: c.channel,
+    status: c.status,
+    verified: c.verified,
+    notes: c.notes,
+  }));
+  // Телефон и почта из самой записи площадки — тот же рабочий контакт.
+  for (const v of full.venues) {
+    if (!v.phone && !v.email) continue;
+    if (out.some((c) => c.venueId === v.id)) continue;
+    out.push({ venueId: v.id, phone: v.phone, email: v.email, role: "Площадка" });
+  }
+  return { contacts: out };
+});
+
+/** Контакт и рабочая карточка одного артиста. */
+export const artistContactFn = createServerFn({ method: "GET" })
+  .validator((d: { artistId: string }) => d)
+  .handler(async ({ data }) => {
+    const me = await currentUser();
+    if (!me || !TEAM.includes(me.role)) return { contact: null as WorkContact | null };
+    const { tooMany, LIMITS } = await import("./abuse");
+    if (await tooMany("contacts", me.email, LIMITS.contacts))
+      return { contact: null as WorkContact | null };
+    const { loadArtistsFull } = await import("./data/private-data");
+    const full = await loadArtistsFull();
+    const a = full.artists.find((x) => x.id === data.artistId);
+    if (!a) return { contact: null as WorkContact | null };
+    return {
+      contact: {
+        artistId: a.id,
+        phone: a.phone,
+        email: a.email,
+        wa: a.waRu || a.wa,
+        mgmt: a.mgmtRu || a.mgmt,
+        person: a.person,
+        rider: a.riderName || a.rider,
+        notes: a.notesRu || a.notes,
+        evidence: a.evidenceRu || a.evidence,
+      } as WorkContact,
+    };
   });

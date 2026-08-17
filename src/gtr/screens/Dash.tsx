@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AMBER,
   computeQuote,
-  CONTACT,
   draftTitle,
   fmtThb,
   GREEN,
@@ -19,6 +18,7 @@ import {
   type EventStage,
   type ScreenId,
 } from "../data/app-data";
+import { useVenueContacts } from "../work-contacts";
 import { useGtr } from "../store";
 import { FAMILY_LABEL } from "../match";
 import { useTranslation } from "react-i18next";
@@ -85,6 +85,8 @@ type DashData = {
 export function DashScreen() {
   const { t } = useTranslation();
   const { user, shared } = useGtr();
+  // Контакты приходят с сервера и только команде — в бандле их больше нет.
+  const venueContact = useVenueContacts();
   const navigate = useNavigate();
   const go = (s: ScreenId, vid?: string) =>
     navigate({ to: "/gtr/$screen", params: { screen: s }, search: vid ? { vid } : undefined });
@@ -399,7 +401,7 @@ export function DashScreen() {
     };
   }
 
-  const contact = vid ? CONTACT(vid) : undefined;
+  const contact = venueContact(vid);
 
   return (
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>

@@ -1,10 +1,16 @@
 // Статические данные GTR Event, извлечённые из дизайн-хендоффа (GTR EVENT.dc.html)
-import venuesRaw from "./venues.json";
+// Публичная витрина: в браузер уезжает только то, что показывается на
+// экране. Контакты, телефоны и разведка живут на сервере и приходят
+// server-функцией с проверкой роли (venueContactsFn).
+import venuesRaw from "./venues.public.json";
 import { genreName, resolveGenre } from "../genres";
 import nightRaw from "./venue-night.json";
 import richRaw from "./rich.json";
-import vendorPackagesRaw from "./vendor-packages.json";
-import equipmentRaw from "./equipment.json";
+// Контакты подрядчиков — наша переговорная сеть; в браузер уходят
+// только пакеты и цены, нужные смете на экране.
+import vendorPackagesRaw from "./vendor-packages.public.json";
+// Контакты поставщиков оборудования остаются на сервере.
+import equipmentRaw from "./equipment.public.json";
 import venueRatesRaw from "./venue-rates.json";
 
 export type Venue = {
@@ -608,21 +614,24 @@ export const VENDOR_CATALOG: Partial<Record<NodeKind, Vendor[]>> = {
       name: "SoundWave Phuket",
       meta: "DJ-оборудование (CDJ/XDJ) и PA-система",
       price: "฿4 000–31 000 / день",
-      contact: "+66 65 204 7442",
+      // контакт подрядчика — рабочие данные, живут на сервере
+      contact: "",
       source: "soundwavephuket.com",
     },
     {
       name: "Phuket Sound",
       meta: "Backline: контроллеры, гитары, комбо-усилители, проектор",
       price: "по запросу",
-      contact: "+66 89 587 1841",
+      // контакт подрядчика — рабочие данные, живут на сервере
+      contact: "",
       source: "phuketsound.com",
     },
     {
       name: "MS Media Thailand",
       meta: "Готовый пакет LED + свет + звук (party / concert)",
       price: "฿100 000–350 000 / пакет",
-      contact: "+66 80 591 9292",
+      // контакт подрядчика — рабочие данные, живут на сервере
+      contact: "",
       source: "msmediathailand.com",
     },
   ],
@@ -631,21 +640,24 @@ export const VENDOR_CATALOG: Partial<Record<NodeKind, Vendor[]>> = {
       name: "Phuket Sound and Lighting",
       meta: "LED PAR, moving head, лазер, дым-машина, экран",
       price: "по запросу",
-      contact: "081 891 9920",
+      // контакт подрядчика — рабочие данные, живут на сервере
+      contact: "",
       source: "phuketsoundandlighting.com",
     },
     {
       name: "PMI / Lotus Arena",
       meta: "Концертный AV: line-array, GrandMA2, LED-экран, ферма",
       price: "по запросу",
-      contact: "+66 82 151 1406",
+      // контакт подрядчика — рабочие данные, живут на сервере
+      contact: "",
       source: "pmi.team",
     },
     {
       name: "MS Media Thailand",
       meta: "Готовый пакет LED + свет + звук",
       price: "฿50 000–350 000 / пакет",
-      contact: "+66 80 591 9292",
+      // контакт подрядчика — рабочие данные, живут на сервере
+      contact: "",
       source: "msmediathailand.com",
     },
   ],
@@ -654,21 +666,24 @@ export const VENDOR_CATALOG: Partial<Record<NodeKind, Vendor[]>> = {
       name: "Art of Events Phuket",
       meta: "Мебель и декор: стулья Chiavari, посуда, оформление",
       price: "по запросу",
-      contact: "+66 82 703 0303",
+      // контакт подрядчика — рабочие данные, живут на сервере
+      contact: "",
       source: "arteventsphuket.com",
     },
     {
       name: "Phuket Event Company",
       meta: "Мебель, подиум, тенты, AV и декор",
       price: "по запросу",
-      contact: "+66 65 749 5221",
+      // контакт подрядчика — рабочие данные, живут на сервере
+      contact: "",
       source: "phuketeventcompany.com",
     },
     {
       name: "Southern Media",
       meta: "Стенды, ковры, тенты, мебель, генераторы",
       price: "по запросу",
-      contact: "+66 89 873 1652",
+      // контакт подрядчика — рабочие данные, живут на сервере
+      contact: "",
       source: "southerngroup.asia",
     },
   ],
@@ -1155,7 +1170,7 @@ export const GRAPH_SEED: Record<string, Graph> = {
         "P0",
         [
           ["КОНТАКТ", "Отдел встреч и событий"],
-          ["ТЕЛЕФОН", "+66 76 629 999"],
+          ["ТЕЛЕФОН", "по запросу у команды"],
           ["ПРИОРИТЕТ", "P0"],
           ["ЗАДАЧА", "Capacity chart и net rates"],
         ],
@@ -1932,7 +1947,7 @@ export const entityColor = (kind?: string) =>
   ENTITY_KIND_COLOR[String(kind)] ?? "rgba(255,255,255,.35)";
 
 export const loadArtists = () =>
-  import("./artists.json").then((m) => m.default as unknown as ArtistBase);
+  import("./artists.public.json").then((m) => m.default as unknown as ArtistBase);
 
 // ---------- ценовая модель и смета события ----------
 // Все суммы в тайских батах (THB). Оценки — консервативная нижняя граница

@@ -1,0 +1,363 @@
+[
+  {
+    "vendor": "SoundWave Phuket",
+    "system": "DJ",
+    "package": "XDJ-RX3",
+    "price": 4000,
+    "unit": "day",
+    "verified": "",
+    "note": ""
+  },
+  {
+    "vendor": "SoundWave Phuket",
+    "system": "DJ",
+    "package": "XDJ-AZ",
+    "price": 7000,
+    "unit": "day",
+    "verified": "",
+    "note": ""
+  },
+  {
+    "vendor": "SoundWave Phuket",
+    "system": "DJ",
+    "package": "2×CDJ-2000NXS2 + DJM-900NXS2",
+    "price": 10000,
+    "unit": "day",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "SoundWave Phuket",
+    "system": "DJ",
+    "package": "2×CDJ-3000 + DJM-900NXS2",
+    "price": 13000,
+    "unit": "day",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "SoundWave Phuket",
+    "system": "DJ",
+    "package": "2×CDJ-3000 + DJM-A9",
+    "price": 15000,
+    "unit": "day",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "SoundWave Phuket",
+    "system": "DJ",
+    "package": "2×CDJ-3000 + DJM-V10",
+    "price": 20000,
+    "unit": "day",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "SoundWave Phuket",
+    "system": "DJ",
+    "package": "4×CDJ-3000 + DJM-V10",
+    "price": 31000,
+    "unit": "day",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "SoundWave Phuket",
+    "system": "Sound",
+    "package": "2×Opera 15 + Sub 618",
+    "price": 12000,
+    "unit": "day",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "SoundWave Phuket",
+    "system": "Sound",
+    "package": "2×Martin Audio XP15 + XP118",
+    "price": 16000,
+    "unit": "day",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "SoundWave Phuket",
+    "system": "Sound",
+    "package": "Комбо: 2×Opera 15 + Sub 618 + XDJ-AZ",
+    "price": 16000,
+    "unit": "day",
+    "verified": "2026-08-10",
+    "note": "Акционный пакет для вилл и приватных вечеринок. Звук идёт вместе с DJ-оборудованием — в поштучном подборе задвоил бы деку.",
+    "combo": true
+  },
+  {
+    "vendor": "SoundWave Phuket",
+    "system": "Sound",
+    "package": "Надбавка за сложный занос",
+    "price": 2000,
+    "unit": "add-on",
+    "verified": "2026-08-10",
+    "note": "฿2 000–4 000: лестницы, верхние этажи, длинный ручной пронос. Подтверждается в смете заранее"
+  },
+  {
+    "vendor": "MS Media Thailand",
+    "system": "Turnkey",
+    "package": "Пресс-конференция: LED + свет + звук",
+    "price": 50000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "MS Media Thailand",
+    "system": "Turnkey",
+    "package": "Вечеринка: LED + свет + звук",
+    "price": 100000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "MS Media Thailand",
+    "system": "Turnkey",
+    "package": "Концерт: LED + свет + звук",
+    "price": 350000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "Noi Chanthasri",
+    "system": "Photo",
+    "package": "Событийная съёмка 1 ч",
+    "price": 5000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": "1 фотограф, 100+ обработанных фото"
+  },
+  {
+    "vendor": "Noi Chanthasri",
+    "system": "Photo",
+    "package": "Событийная съёмка 2 ч",
+    "price": 9000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": "1 фотограф, 200+ обработанных фото"
+  },
+  {
+    "vendor": "Noi Chanthasri",
+    "system": "Photo",
+    "package": "Событийная съёмка 4 ч",
+    "price": 15000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": "1 фотограф, 300+ обработанных фото"
+  },
+  {
+    "vendor": "Noi Chanthasri",
+    "system": "Photo",
+    "package": "Событийная съёмка 8 ч",
+    "price": 22000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": "1 фотограф, 600+ обработанных фото"
+  },
+  {
+    "vendor": "Noi Chanthasri",
+    "system": "Photo",
+    "package": "Час сверх 8 ч",
+    "price": 2500,
+    "unit": "hour",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "Noi Chanthasri",
+    "system": "Photo",
+    "package": "Второй фотограф",
+    "price": 2500,
+    "unit": "hour",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "CADO07",
+    "system": "Photo",
+    "package": "Съёмка 1 ч / 25–35 фото",
+    "price": 7000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "CADO07",
+    "system": "Photo",
+    "package": "Съёмка 2 ч / 40–60 фото",
+    "price": 12000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "CADO07",
+    "system": "Photo",
+    "package": "Съёмка 3 ч / 70–100 фото",
+    "price": 16000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "CADO07",
+    "system": "Drone",
+    "package": "Съёмка с дрона",
+    "price": 3000,
+    "unit": "add-on",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "CADO07",
+    "system": "Photo",
+    "package": "Ассистент",
+    "price": 1500,
+    "unit": "add-on",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "CADO07",
+    "system": "Video",
+    "package": "Insta Reels",
+    "price": 1500,
+    "unit": "add-on",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "CADO07",
+    "system": "Photo",
+    "package": "Трансфер",
+    "price": 2000,
+    "unit": "add-on",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "CADO07",
+    "system": "Photo",
+    "package": "Макияж и причёска",
+    "price": 5000,
+    "unit": "add-on",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "Phuket Photography by Wasan",
+    "system": "Photo",
+    "package": "Essence Collection — 5 ч",
+    "price": 50000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": "2 фотографа, 800+ фото"
+  },
+  {
+    "vendor": "Phuket Photography by Wasan",
+    "system": "Photo",
+    "package": "Signature Story — 8 ч",
+    "price": 75000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": "2 фотографа, 1 000+ фото"
+  },
+  {
+    "vendor": "Phuket Photography by Wasan",
+    "system": "Photo",
+    "package": "The Legacy Edition — 12 ч",
+    "price": 98000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": "2 фотографа, 1 200+ фото"
+  },
+  {
+    "vendor": "Phuket Photography by Wasan",
+    "system": "Photo",
+    "package": "Час сверх пакета",
+    "price": 10000,
+    "unit": "hour",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "Phuket Photography by Wasan",
+    "system": "Video",
+    "package": "Видеосъёмка 5 ч",
+    "price": 35000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": "2 оператора, дрон при возможности"
+  },
+  {
+    "vendor": "Phuket Photography by Wasan",
+    "system": "Video",
+    "package": "Видеосъёмка 8 ч",
+    "price": 50000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": "2 оператора, дрон при возможности"
+  },
+  {
+    "vendor": "Phuket Photography by Wasan",
+    "system": "Video",
+    "package": "Видеосъёмка 12 ч",
+    "price": 65000,
+    "unit": "package",
+    "verified": "2026-08-10",
+    "note": "2 оператора, дрон при возможности"
+  },
+  {
+    "vendor": "Phuket Photography by Wasan",
+    "system": "Video",
+    "package": "Час сверх пакета",
+    "price": 5000,
+    "unit": "hour",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "Phuket Photography by Wasan",
+    "system": "Photo",
+    "package": "Выезд в Краби",
+    "price": 1500,
+    "unit": "add-on",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "Phuket Photography by Wasan",
+    "system": "Photo",
+    "package": "Выезд на Пхи-Пхи / Ко Яо / Ланта",
+    "price": 6000,
+    "unit": "add-on",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "Phuket Photography by Wasan",
+    "system": "Photo",
+    "package": "Выезд на Самуи",
+    "price": 12000,
+    "unit": "add-on",
+    "verified": "2026-08-10",
+    "note": ""
+  },
+  {
+    "vendor": "Phuket Photography by Wasan",
+    "system": "Photo",
+    "package": "Исходники на диске 1 ТБ",
+    "price": 5000,
+    "unit": "add-on",
+    "verified": "2026-08-10",
+    "note": ""
+  }
+]

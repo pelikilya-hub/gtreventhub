@@ -46,6 +46,12 @@ export const Route = createFileRoute("/api/gtr-bro-tool")({
 
         const ns = await getKvNs();
         if (!ns) return json({ ok: false, error: "no-kv" }, 503);
+        // Инструменты BRO ходят в нашу базу и в чужие API. Потолок на
+        // человека в час — чтобы один аккаунт не превращался в бесплатный
+        // шлюз к базе и к модели.
+        const { tooMany, LIMITS } = await import("../gtr/abuse");
+        if (await tooMany("bro", user.email, LIMITS.bro, ns))
+          return json({ ok: false, error: "rate" }, 429);
         const flags = (await kvGetJson<Flags>(ns, "setting:flags")) ?? {};
         if (flags.broKill || !flags.broEnabled) return json({ ok: false, error: "disabled" }, 503);
 

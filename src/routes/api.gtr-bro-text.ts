@@ -86,6 +86,18 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         const text = String(body.text ?? "").slice(0, 500).trim();
         if (!text) return json({ ok: false, error: "empty" }, 400);
 
+        // Потолок на человека: разговор с BRO — часть продукта, а не
+        // бесплатный шлюз к нашей модели и нашей базе.
+        const { tooMany, LIMITS } = await import("../gtr/abuse");
+        if (await tooMany("bro", user.email, LIMITS.bro, ns))
+          return json({ ok: false, error: "rate" }, 429);
+
+        // Попытка вытащить устройство помощника: системный промпт, список
+        // инструментов, сырой дамп базы. Это не любопытство пользователя —
+        // так снимают продукт целиком, чтобы собрать копию.
+        const { looksLikeExtraction, EXTRACTION_REPLY } = await import("../gtr/bro/guard");
+        if (looksLikeExtraction(text)) return json({ ok: true, reply: EXTRACTION_REPLY });
+
         const ctx: BroContext = {
           userId: user.email,
           displayName: user.name,

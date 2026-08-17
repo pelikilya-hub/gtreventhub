@@ -101,44 +101,6 @@ const expectedHash = async () => {
   return pw ? await sha256(pw) : DEMO_PASS_HASH;
 };
 
-const USERS: DemoUser[] = [
-  {
-    email: "pr@gtr.events",
-    name: "Ника Соболева",
-    role: "pr",
-    roleLabel: "PR-директор",
-    venueId: "VEN-0013",
-    initials: "ПД",
-    passHash: DEMO_PASS_HASH,
-  },
-  {
-    email: "owner@gtr.events",
-    name: "Артём Ким",
-    role: "owner",
-    roleLabel: "Владелец",
-    venueId: "VEN-0061",
-    initials: "ВЛ",
-    passHash: DEMO_PASS_HASH,
-  },
-  {
-    email: "sales@gtr.events",
-    name: "Мария Чан",
-    role: "sales",
-    roleLabel: "Event-продажи",
-    venueId: "VEN-0033",
-    initials: "ПР",
-    passHash: DEMO_PASS_HASH,
-  },
-  {
-    email: "admin@gtr.events",
-    name: "GTR HQ",
-    role: "gtr",
-    roleLabel: "GTR-админ",
-    venueId: "",
-    initials: "АД",
-    passHash: DEMO_PASS_HASH,
-  },
-];
 
 const COOKIE = "gtr_session";
 const WEEK = 60 * 60 * 24 * 7;
@@ -223,6 +185,19 @@ export const loginFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const email = data.email.trim().toLowerCase();
 
+    // Перебор пароля — самая дешёвая атака на продукт с регистрацией.
+    // Считаем попытки и по адресу, и по аккаунту: первый лимит ловит
+    // перебор одного пароля по многим почтам, второй — многих паролей
+    // по одной почте.
+    const { clientIp, tooMany, LIMITS, TOO_MANY_MSG } = await import("./abuse");
+    const ip = clientIp();
+    if (
+      (await tooMany("login", ip, LIMITS.login)) ||
+      (await tooMany("login-acc", email, LIMITS.login)) ||
+      (await tooMany("login-day", ip, LIMITS.loginDay))
+    )
+      return { ok: false as const, error: TOO_MANY_MSG };
+
     // 1) Приглашённые менеджеры: личные аккаунты в KV со своими паролями
     const ns = await getKvNs();
     if (ns) {
@@ -250,7 +225,10 @@ export const loginFn = createServerFn({ method: "POST" })
     }
 
     // 2) Демо-состав: общий пароль стенда (или демо-пароль без гейта)
-    const user = USERS.find((u) => u.email === email);
+    // Список демо-аккаунтов подгружается на сервере в момент проверки:
+    // в браузер он не попадает вовсе.
+    const { demoUsers } = await import("./auth-users");
+    const user = demoUsers(DEMO_PASS_HASH).find((u) => u.email === email);
     if (!user || (await expectedHash()) !== (await sha256(data.password))) {
       return { ok: false as const, error: "Неверный email или пароль" };
     }
@@ -286,11 +264,20 @@ export const sessionFn = createServerFn({ method: "GET" }).handler(async () => {
 
 // Экран входа спрашивает, показывать ли демо-подсказки: на стенде с заданным
 // паролем они выдали бы доступ любому, кто открыл ссылку
-export const accessModeFn = createServerFn({ method: "GET" }).handler(
-  async () => ({
-    demo: isDemoAccess(),
-  }),
-);
+export const accessModeFn = createServerFn({ method: "GET" }).handler(async () => {
+  // Подсказки со списком демо-аккаунтов приезжают только когда демо-режим
+  // реально включён. Раньше они лежали в бандле экрана входа всегда — и
+  // любой посетитель получал перечень действующих адресов даром.
+  const demo = isDemoAccess();
+  if (!demo) return { demo, hints: [] as { email: string; label: string; ini: string; venue: string }[] };
+  const { demoUsers } = await import("./auth-users");
+  return {
+    demo,
+    hints: demoUsers("")
+      .filter((u) => u.role !== "gtr" || u.email === "admin@gtr.events")
+      .map((u) => ({ email: u.email, label: u.roleLabel, ini: u.initials, venue: u.venueId })),
+  };
+});
 
 // Матрица прав (экран «Доступы и роли» + фактические проверки в интерфейсе)
 export const PERMISSIONS: {

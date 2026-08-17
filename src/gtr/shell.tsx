@@ -71,9 +71,6 @@ const MapScreen = lazy(() =>
 const AfishaGenScreen = lazy(() =>
   import("./screens/AfishaGen").then((m) => ({ default: m.AfishaGenScreen })),
 );
-const FlingScreen = lazy(() =>
-  import("./screens/FlingScreen").then((m) => ({ default: m.FlingScreen })),
-);
 
 export type GtrSearch = { vid?: string; artist?: string; draft?: string };
 
@@ -576,8 +573,6 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
       return <PromoScreen />;
     case "myshows":
       return <MyShowsScreen />;
-    case "fling":
-      return <FlingScreen />;
     case "admin":
       return <AdminScreen />;
     default:

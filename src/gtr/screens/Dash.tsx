@@ -1929,9 +1929,9 @@ function VisitorCabinet() {
               <Stk name="mic" />
               <span className="gtr-comm-label">{t("Артисты")}</span>
             </button>
-            <button className="gtr-comm-btn" onClick={() => go("fling")}>
-              <Stk name="camera" />
-              <span className="gtr-comm-label">FLING</span>
+            <button className="gtr-comm-btn" onClick={() => openAppLink("https://t.me/bangtaostyle")}>
+              <Stk name="door" />
+              <span className="gtr-comm-label">{t("Связь")}</span>
             </button>
           </div>
         </Card>

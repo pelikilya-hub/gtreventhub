@@ -460,3 +460,54 @@ describe("релевантность поиска по базе", () => {
     expect(r.ok).toBe(true);
   });
 });
+
+describe("ask_gtr — база знаний", () => {
+  const guest = { email: "qa@v", name: "Гость", role: "visitor" };
+  // Память о выданных вариантах живёт в KV: тут её заменяет обычная карта.
+  const mem = new Map<string, string>();
+  const kv = {
+    put: async (k: string, v: string) => {
+      mem.set(k, v);
+    },
+    get: async (k: string) => mem.get(k) ?? null,
+  };
+
+  it("отвечает по теме и не повторяет формулировку подряд", async () => {
+    const seen = new Set<string>();
+    let topic = "";
+    for (let i = 0; i < 3; i += 1) {
+      const r = await handlers.ask_gtr({ question: "как забронировать стол" }, { ...ctx, user: guest, kv });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const d = r.data as { topic: string; answer: string };
+      topic = d.topic;
+      expect(d.answer.length).toBeGreaterThan(10);
+      seen.add(d.answer);
+    }
+    expect(topic).toBeTruthy();
+    // Тема заведомо многовариантная: три подряд одинаковых ответа —
+    // ровно та болванчатость, ради которой инструмент и делался.
+    expect(seen.size).toBeGreaterThan(1);
+  });
+
+  it("чужой вопрос честно отдаёт промах, а не выдумку", async () => {
+    const r = await handlers.ask_gtr({ question: "квантовая хромодинамика" }, { ...ctx, user: guest, kv });
+    expect(r.ok).toBe(false);
+  });
+
+  it("у каждой темы есть ключи и хотя бы один ответ", async () => {
+    const qa = (await import("../../data/bro-qa.json")) as unknown as {
+      default?: { items: { id: string; keys: string[]; answers: string[]; tag: string }[] };
+      items?: { id: string; keys: string[]; answers: string[]; tag: string }[];
+    };
+    const items = (qa.default ?? qa).items!;
+    expect(items.length).toBeGreaterThanOrEqual(50);
+    const ids = new Set(items.map((i) => i.id));
+    expect(ids.size).toBe(items.length);
+    for (const it of items) {
+      expect(it.keys.length, it.id).toBeGreaterThan(0);
+      expect(it.answers.length, it.id).toBeGreaterThan(0);
+      for (const a of it.answers) expect(a.length, it.id).toBeGreaterThan(10);
+    }
+  });
+});

@@ -3655,21 +3655,53 @@ html { -webkit-tap-highlight-color: transparent; }
 }
 .gtr-bro-note { font: 500 11.5px/1.45 "Golos Text", sans-serif; color: var(--gtr-t2); }
 .gtr-bro-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-/* Ряд быстрых команд прямо под табло: живёт отдельно от чипов настроек. */
-.gtr-bro-sheet > .gtr-bro-chips { margin: 10px 0 2px; }
-.gtr-bro-sheet > .gtr-bro-chips .gtr-bro-chip {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(53, 255, 92, 0.06);
-  color: #cfe9d4;
-  font: 600 11px/1.2 "Golos Text", sans-serif;
-  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+/* Ряд быстрых команд прямо под табло. Без рамок и плашек: фирменный
+   стикер висит в воздухе, подпись — мелким шрифтом под ним. Кнопка
+   как таковая не рисуется, её роль играет сам значок. */
+.gtr-bro-quick {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(62px, 1fr));
+  gap: 4px 2px;
+  margin: 12px 0 2px;
 }
-.gtr-bro-sheet > .gtr-bro-chips .gtr-bro-chip:active { transform: translateY(1px); }
+.gtr-bro-q {
+  border: 0;
+  background: none;
+  padding: 6px 2px 7px;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  cursor: pointer;
+  color: var(--gtr-t2);
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.16s ease, transform 0.16s ease;
+}
+.gtr-bro-q span {
+  font: 600 10.5px/1.15 "Golos Text", sans-serif;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+/* Значок держится на собственной тени, а не на подложке: так он читается
+   как наклейка поверх стекла, а не как иконка в кнопке. */
+.gtr-bro-q .gtr-stk {
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
+  animation: gtr-bro-float 4.4s ease-in-out infinite;
+  will-change: transform;
+}
+.gtr-bro-q:nth-child(2n) .gtr-stk { animation-delay: -0.7s; animation-duration: 5.1s; }
+.gtr-bro-q:nth-child(3n) .gtr-stk { animation-delay: -1.6s; animation-duration: 4.8s; }
+.gtr-bro-q:nth-child(4n) .gtr-stk { animation-delay: -2.4s; animation-duration: 5.4s; }
+.gtr-bro-q:active { transform: scale(0.93); color: #fff; }
 @media (hover: hover) {
-  .gtr-bro-sheet > .gtr-bro-chips .gtr-bro-chip:hover {
-    background: rgba(53, 255, 92, 0.16);
-    color: #fff;
-  }
+  .gtr-bro-q:hover { color: #fff; }
+  .gtr-bro-q:hover .gtr-stk { filter: drop-shadow(0 8px 16px rgba(53, 255, 92, 0.35)); }
+}
+@keyframes gtr-bro-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(-2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-bro-q .gtr-stk { animation: none; }
 }
 .gtr-bro-chip {
   border: 0;

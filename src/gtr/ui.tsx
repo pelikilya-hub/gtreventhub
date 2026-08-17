@@ -333,6 +333,18 @@ export const STK = {
   door: "/brand/emoji4/door-256.png",
   clock: "/brand/emoji4/clock-256.png",
   medal: "/brand/emoji4/medal-256.png",
+  cocktail: "/brand/emoji4/cocktail-256.png",
+  dance: "/brand/emoji4/dance-256.png",
+  disco: "/brand/emoji4/discoball2-256.png",
+  palm: "/brand/emoji4/palm-256.png",
+  sunset: "/brand/emoji4/sunset-256.png",
+  moon: "/brand/emoji4/moon-256.png",
+  notes: "/brand/emoji4/notes-256.png",
+  vinyl: "/brand/emoji4/vinyl-256.png",
+  equalizer: "/brand/emoji4/equalizer-256.png",
+  fader: "/brand/emoji4/fader-256.png",
+  hundred: "/brand/emoji4/hundred-256.png",
+  bomb: "/brand/emoji4/bomb-256.png",
 } as const;
 
 export type StkName = keyof typeof STK;

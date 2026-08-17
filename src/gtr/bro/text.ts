@@ -18,6 +18,7 @@ export type TextPlan =
   | { kind: "open"; route: string }
   | { kind: "music"; artist: string; source: "youtube" | "spotify" | "soundcloud" | "any" }
   | { kind: "venues"; district?: string; kind2?: string; label: string }
+  | { kind: "faq"; question: string }
   | { kind: "unknown" };
 
 /** Дата на Пхукете (UTC+7) со сдвигом в днях. Часовой пояс телефона
@@ -152,6 +153,15 @@ export const planOf = (raw: string): TextPlan => {
         label: [kind2 ? PLURAL[kind2] : "площадки", d].filter(Boolean).join(" · "),
       };
   }
+
+  // Вопрос «как/почему/что такое» — это база знаний GTR, а не афиша.
+  // Раньше такое падало в поиск событий и возвращало пустоту, а человек
+  // слышал одну и ту же отговорку. Спрашиваем ask_gtr: он держит по
+  // несколько формулировок на тему и не повторяет уже сказанную.
+  // Хвост (?![а-яё]) обязателен: без него «как» съедает «какие клубы».
+  const FAQ_RE =
+    /^(каким образом|как|почему|зачем|что такое|что за|чем отлич[а-яё]*|а можно|можно ли|нужно ли|надо ли|стоит ли|во сколько|до скольки|с какого|сколько|правда ли|опасно ли|обязательно ли|безопасно ли|расскажи про|расскажи о|объясни|подскажи по)(?![а-яё])/;
+  if (FAQ_RE.test(q)) return { kind: "faq", question: raw.trim() };
 
   const open = q.match(/^открой\s+(.+)$/);
   if (open)

@@ -65,7 +65,7 @@ export const Route = createFileRoute("/api/gtr-bro-tool")({
           const ctx: ToolCtx = {
             provider: kvProvider(ns),
             user: { email: user.email, name: user.name, role: user.role, boss: user.boss },
-            kv: { put: (k, v, o) => ns.put(k, v, o) },
+            kv: { put: (k, v, o) => ns.put(k, v, o), get: (k) => ns.get(k) },
             tgSend: tgSender(ns),
             book: async (b) => {
               const { bookTableCore } = await import("../gtr/kv-api");

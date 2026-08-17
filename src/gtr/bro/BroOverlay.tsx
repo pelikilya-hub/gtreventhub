@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { broLogFn } from "../kv-api";
+import { Stk, type StkName } from "../ui";
 import { GAIN_MAX, GAIN_MIN, loadGain, routeAudio } from "./audio-out";
 import {
   EGG_RE,
@@ -76,15 +77,17 @@ const VOICE_SETS: Record<VoiceProvider, [string, string][]> = {
   ],
 };
 
-/** Быстрые команды под табло: то, ради чего человек и открыл BRO. */
-const QUICK: { t: string; q: string }[] = [
-  { t: "🍽 Пожрать", q: "столы в кафе дель мар" },
-  { t: "🔥 Нажраться", q: "что сегодня" },
-  { t: "🏝 Клубы рядом", q: "какие клубы в патонге" },
-  { t: "🗺 Маршрут", q: "маршрут" },
-  { t: "🎧 Артисты", q: "открой артисты" },
-  { t: "🚕 Такси", q: "вызови такси" },
-  { t: "❓ Что умеешь", q: "что ты умеешь" },
+/** Быстрые команды под табло: то, ради чего человек и открыл BRO.
+ *  Значки — из фирменного пака, а не системные эмодзи: системные на
+ *  каждом телефоне свои и рядом с нашей типографикой смотрятся чужими. */
+const QUICK: { icon: StkName; t: string; q: string }[] = [
+  { icon: "champagne", t: "Пожрать", q: "столы в кафе дель мар" },
+  { icon: "disco", t: "Нажраться", q: "что сегодня" },
+  { icon: "palm", t: "Клубы рядом", q: "какие клубы в патонге" },
+  { icon: "pin", t: "Маршрут", q: "маршрут" },
+  { icon: "headphones", t: "Артисты", q: "открой артисты" },
+  { icon: "door", t: "Такси", q: "вызови такси" },
+  { icon: "star", t: "Что умею", q: "что ты умеешь" },
 ];
 
 // Счётчики шлём пачкой: сорок отдельных запросов на разговор — это
@@ -433,6 +436,21 @@ export function GtrBroOverlay({
       }
     }
 
+    // База знаний: 50 тем про продукт, остров и заведения. Инструмент сам
+    // выбирает вариант, который человек ещё не слышал, — поэтому дважды
+    // одну формулировку он не получит. Не нашлось темы — идём в помощь.
+    if (plan.kind === "faq") {
+      metric("bro.text.faq");
+      const r = await callTool("ask_gtr", { question: plan.question });
+      if (r.ok) {
+        say("bro", String((r.data as Record<string, unknown> | undefined)?.answer ?? ""));
+        return;
+      }
+      say("bro", "Такого в базе знаний нет. Вот что могу прямо сейчас:");
+      for (const l of HELP_LINES) say("sys", l);
+      return;
+    }
+
     if (plan.kind === "greet") {
       metric("bro.greet.ask");
       const g = greetLines(userName, role, rows.length);
@@ -601,10 +619,11 @@ export function GtrBroOverlay({
 
         {/* Тапы вместо набора: человек в клубе не печатает «что сегодня
             в патонге» одной рукой с коктейлем в другой. */}
-        <div className="gtr-bro-chips">
+        <div className="gtr-bro-quick">
           {QUICK.map((q) => (
-            <button key={q.t} className="gtr-bro-chip" onClick={() => void runText(q.q)}>
-              {q.t}
+            <button key={q.t} className="gtr-bro-q" onClick={() => void runText(q.q)}>
+              <Stk name={q.icon} size={30} x2 />
+              <span>{q.t}</span>
             </button>
           ))}
         </div>

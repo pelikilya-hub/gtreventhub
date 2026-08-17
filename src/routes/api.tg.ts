@@ -46,8 +46,13 @@ const slugify = (name: string) =>
 type TgUpdate = {
   message?: {
     text?: string;
-    chat: { id: number };
+    /** Подпись под фото: афиши приходят картинкой с текстом в caption. */
+    caption?: string;
+    chat: { id: number; type?: string; title?: string };
     from?: { first_name?: string; username?: string; language_code?: string };
+    /** Пересланный пост: так афиша попадает к нам из чужой ленты. */
+    forward_origin?: { type?: string; chat?: { title?: string; username?: string } };
+    forward_from_chat?: { title?: string; username?: string };
   };
   callback_query?: {
     id: string;
@@ -517,6 +522,43 @@ export const Route = createFileRoute("/api/tg")({
             }
           }
           return Response.json({ ok: true });
+        }
+
+        // ---------- приёмник афиш ----------
+        //
+        // Афиша приходит двумя путями: пересылкой в личку от команды и
+        // сообщением в группе, где бот состоит. Разбор один и тот же.
+        // Пост картинкой несёт текст в caption — его тоже берём.
+        //
+        // Условие входа жёсткое: длинный текст с датой. Разговорные
+        // реплики и команды сюда не попадают, иначе бот начнёт заводить
+        // события из болтовни в чате.
+        {
+          const m = up.message;
+          const body = (m?.caption ?? m?.text ?? "").trim();
+          const fromChannel =
+            m?.forward_from_chat?.title || m?.forward_origin?.chat?.title || undefined;
+          const inGroup = (m?.chat.id ?? 0) < 0;
+          const looksAfisha = body.length >= 40 && !body.startsWith("/");
+          if (m && looksAfisha && (fromChannel || inGroup || m.caption)) {
+            const staff = inGroup ? null : await userOfChat(ns, m.chat.id);
+            // В личке разбираем только у команды: чужие пересылки в базу
+            // не пускаем. В группе — только там, где бот свой.
+            if (inGroup || (staff && isStaff(staff as { role?: string }))) {
+              const { intakePost, intakeReport } = await import("../gtr/intake");
+              const src = fromChannel || m.chat.title || (inGroup ? `chat:${m.chat.id}` : "личка");
+              const r = await intakePost(ns, body, String(src).slice(0, 60));
+              if (r.ok) {
+                const { notifyBossTg } = await import("../gtr/kv-api");
+                const report = intakeReport(r);
+                if (!inGroup) await reply(m.chat.id, report);
+                await notifyBossTg(ns, `📥 <b>Афиша из «${tgEsc(String(src))}»</b>\n${report}`).catch(() => {});
+                return Response.json({ ok: true });
+              }
+              // Не афиша — молчим и пропускаем дальше по обычному пути:
+              // человек мог просто написать длинное сообщение.
+            }
+          }
         }
 
         // ---------- сообщения ----------

@@ -736,6 +736,27 @@ export const Route = createFileRoute("/api/tg")({
           const u = await userOfChat(ns, chatId);
 
           if (cmd === "/start" || cmd === "/menu") {
+            // Пригласительная ссылка t.me/бот?start=<токен>: один тап вместо
+            // «набери свою почту». Токен одноразовый и живёт неделю — этого
+            // хватает на выход нового человека, но не на утечку доступа.
+            const payload = text.split(/\s+/)[1]?.slice(0, 40) ?? "";
+            if (!u && payload) {
+              const email = await ns.get(`tgbind:${payload}`);
+              if (email) {
+                await ns.delete(`tgbind:${payload}`);
+                await ns.put(`tg:${email}`, String(chatId));
+                await ns.put(`tgrev:${chatId}`, email);
+                const linked = await kvGetJson<StoredUser>(ns, `user:${email}`);
+                const hello = await ns.get(`invitemsg:${email}`);
+                if (hello) await ns.delete(`invitemsg:${email}`);
+                await reply(
+                  chatId,
+                  hello ?? `✅ Telegram привязан к аккаунту <b>${tgEsc(email)}</b>.`,
+                  linked ? kbFor(linked) : undefined,
+                );
+                return Response.json({ ok: true });
+              }
+            }
             if (u) {
               await reply(
                 chatId,

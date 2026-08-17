@@ -165,6 +165,15 @@ export function GtrBroOverlay({
   const [rows, setRows] = useState<Row[]>([]);
   const dosRef = useRef<HTMLDivElement | null>(null);
   const [cmd, setCmd] = useState("");
+  // Вид разговора. По умолчанию чат: служебные строки — это отладка, а не
+  // общение, и человеку в клубе они мешают читать ответ.
+  const [chatView, setChatView] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("gtr.bro.view") !== "dos";
+    } catch {
+      return true;
+    }
+  });
   // Последняя выдача поиска — для «детали N» и «маршрут».
   const lastEvents = useRef<Record<string, unknown>[]>([]);
   const [cards, setCards] = useState<BroCard[]>([]);
@@ -246,13 +255,13 @@ export function GtrBroOverlay({
         },
         onLevel: setLevel,
         onLog: (t) =>
-          setRows((p) => [...p.slice(-120), { who: "sys" as const, text: t, done: true }]),
+          setRows((p) => [...p.slice(-60), { who: "sys" as const, text: t, done: true }]),
         onPartial: (who, delta) =>
           setRows((p) => {
             const last = p[p.length - 1];
             if (last && last.who === who && !last.done)
               return [...p.slice(0, -1), { ...last, text: last.text + delta }];
-            return [...p.slice(-120), { who, text: delta, done: false }];
+            return [...p.slice(-60), { who, text: delta, done: false }];
           }),
         onLine: (l) =>
           setRows((p) => {
@@ -266,7 +275,7 @@ export function GtrBroOverlay({
                 return next.slice(-120);
               }
             }
-            return [...p.slice(-120), { who: l.who, text: l.text, done: true }];
+            return [...p.slice(-60), { who: l.who, text: l.text, done: true }];
           }),
         onCard: (c) => {
           if (c.kind === "navigate") {
@@ -335,7 +344,7 @@ export function GtrBroOverlay({
       timers.push(
         window.setTimeout(() => {
           setRows((p) => [
-            ...p.slice(-120),
+            ...p.slice(-60),
             { who: l.startsWith("·") || l.startsWith("жми") ? "sys" : "bro", text: l, done: true },
           ]);
         }, 90 + i * 190),
@@ -343,6 +352,15 @@ export function GtrBroOverlay({
     });
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, [open, userName, role]);
+
+  // Пока эфир открыт — фон продукта замирает. Атмосфера, лучи и танцор
+  // не видны сквозь размытие скрима, но кадры на телефоне отъедают у
+  // того, что действительно работает: микрофона и печати по табло.
+  useEffect(() => {
+    if (!open) return;
+    document.body.classList.add("gtr-bro-live");
+    return () => document.body.classList.remove("gtr-bro-live");
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -404,7 +422,7 @@ export function GtrBroOverlay({
 
   const say = (who: Row["who"], text: string) => {
     touchChat();
-    setRows((p) => [...p.slice(-120), { who, text, done: true }]);
+    setRows((p) => [...p.slice(-60), { who, text, done: true }]);
   };
 
   const callTool = async (name: string, args: Record<string, unknown>) => {
@@ -632,42 +650,68 @@ export function GtrBroOverlay({
           </button>
         </div>
 
-        {/* Табло: что услышал, что ответил, что случилось со связью.
-            Стиль старого терминала — это не украшение, а честность:
-            каждая строка лога видна, ошибки не прячутся. */}
-        <div className="gtr-bro-dos" ref={dosRef} aria-live="polite">
-          <div className="gtr-bro-dos-h">GTR-BRO/9000 · ЭФИР · {STATE_RU[state]}</div>
-          {rows.map((r, i) => (
-            <div key={i} className={`gtr-bro-dos-l ${r.who}`}>
-              {r.who === "user" ? "> " : r.who === "bro" ? "BRO: " : "· "}
-              {r.text}
-              {!r.done && <span className="gtr-bro-cursor">▮</span>}
-            </div>
-          ))}
-          <form
-            className="gtr-bro-dos-l prompt gtr-bro-cmdrow"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const q = cmd;
-              setCmd("");
-              void runText(q);
-            }}
-          >
-            C:\GTR&gt;
-            <input
-              className="gtr-bro-cmd"
-              value={cmd}
-              onChange={(e) => setCmd(e.target.value)}
-              placeholder="что сегодня в патонге"
-              autoCapitalize="off"
-              autoCorrect="off"
-              spellCheck={false}
-              enterKeyHint="send"
-              aria-label="Команда BRO"
-            />
-            {!cmd && <span className="gtr-bro-cursor">▮</span>}
-          </form>
-        </div>
+        {/* Разговор. По умолчанию — обычный чат: реплики человека и BRO,
+            без служебных строк. Терминал никуда не делся — он честнее
+            показывает, что происходит со связью и инструментами, — но
+            листать его каждый вечер незачем, и он ушёл под тумблер. */}
+        {chatView ? (
+          <div className="gtr-bro-chat" ref={dosRef} aria-live="polite">
+            {rows.filter((r) => r.who !== "sys").length === 0 ? (
+              <div className="gtr-bro-chat-empty">Напиши или нажми кнопку ниже</div>
+            ) : null}
+            {rows
+              .filter((r) => r.who !== "sys")
+              .map((r, i) => (
+                <div key={i} className={`gtr-bro-msg ${r.who}`}>
+                  {r.text}
+                  {!r.done && <span className="gtr-bro-cursor">▮</span>}
+                </div>
+              ))}
+          </div>
+        ) : (
+          <div className="gtr-bro-dos" ref={dosRef} aria-live="polite">
+            <div className="gtr-bro-dos-h">GTR-BRO/9000 · ЭФИР · {STATE_RU[state]}</div>
+            {rows.map((r, i) => (
+              <div key={i} className={`gtr-bro-dos-l ${r.who}`}>
+                {r.who === "user" ? "> " : r.who === "bro" ? "BRO: " : "· "}
+                {r.text}
+                {!r.done && <span className="gtr-bro-cursor">▮</span>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Строка ввода живёт отдельно от ленты: в чате она обычное поле
+            сообщения, в терминале — приглашение командной строки. */}
+        <form
+          className={chatView ? "gtr-bro-say" : "gtr-bro-dos-l prompt gtr-bro-cmdrow"}
+          onSubmit={(e) => {
+            e.preventDefault();
+            const q = cmd;
+            setCmd("");
+            void runText(q);
+          }}
+        >
+          {chatView ? null : <span>C:\GTR&gt;</span>}
+          <input
+            className={chatView ? "gtr-bro-sayin" : "gtr-bro-cmd"}
+            value={cmd}
+            onChange={(e) => setCmd(e.target.value)}
+            placeholder={chatView ? "Напиши сообщение" : "что сегодня в патонге"}
+            autoCapitalize={chatView ? "sentences" : "off"}
+            autoCorrect={chatView ? "on" : "off"}
+            spellCheck={chatView}
+            enterKeyHint="send"
+            aria-label="Сообщение для BRO"
+          />
+          {chatView ? (
+            <button className="gtr-bro-saygo" type="submit" aria-label="Отправить" disabled={!cmd.trim()}>
+              ↑
+            </button>
+          ) : (
+            !cmd && <span className="gtr-bro-cursor">▮</span>
+          )}
+        </form>
 
         {/* Тапы вместо набора: человек в клубе не печатает «что сегодня
             в патонге» одной рукой с коктейлем в другой. */}
@@ -740,6 +784,20 @@ export function GtrBroOverlay({
             }}
           >
             {muted ? "Микрофон выкл" : "Микрофон вкл"}
+          </button>
+          <button
+            className="gtr-bro-btn"
+            onClick={() => {
+              const next = !chatView;
+              setChatView(next);
+              try {
+                localStorage.setItem("gtr.bro.view", next ? "chat" : "dos");
+              } catch {
+                // приватный режим: выбор просто не переживёт перезагрузку
+              }
+            }}
+          >
+            {chatView ? "Табло" : "Чат"}
           </button>
           <button className="gtr-bro-btn" onClick={() => setTune((v) => !v)}>
             Настройки

@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { broLogFn } from "../kv-api";
+import { GAIN_MAX, GAIN_MIN, loadGain, routeAudio } from "./audio-out";
 import {
   EGG_RE,
   EGG_REPLY,
@@ -146,6 +147,13 @@ export function GtrBroOverlay({
   const VOICES = VOICE_SETS[provider];
   const [voice, setVoice] = useState<string>(VOICES[0][0]);
   const [muted, setMuted] = useState(false);
+  // Громкость голоса. В клубе штатного уровня не хватает, а на iPhone
+  // звук вдобавок уходит в разговорный динамик — держим свой усилитель.
+  const [gain, setGain] = useState(() => loadGain());
+  // Держим последнее значение в ref: begin() не должен пересобираться
+  // при каждом повороте ручки громкости.
+  const gainRef = useRef(gain);
+  gainRef.current = gain;
   const [tune, setTune] = useState(false);
   // Рация по умолчанию: в клубе авто-детектор речи слышит толпу, а не
   // человека. Свободный разговор остаётся выбором в настройках.
@@ -165,6 +173,11 @@ export function GtrBroOverlay({
   const hello = useRef(false);
   const greeted = useRef(false);
   const metric = useMetrics();
+
+  // Новое значение уходит в живой разговор сразу, без перезапуска.
+  useEffect(() => {
+    ses.current?.setGain(gain);
+  }, [gain]);
 
   const reset = () => {
     setCards([]);
@@ -246,6 +259,7 @@ export function GtrBroOverlay({
       ses.current = s;
       try {
         await s.start({ voice: v, personaMode: m, screen, district, ptt: !handsRef.current });
+        s.setGain(gainRef.current);
       } finally {
         starting.current = false;
       }
@@ -666,6 +680,25 @@ export function GtrBroOverlay({
 
         {tune && (
           <div className="gtr-bro-tune">
+            <div className="gtr-bro-tune-t">Громкость голоса</div>
+            <div className="gtr-bro-chips">
+              {([1, 2, 3, 4, 6] as const).map((g) => (
+                <button
+                  key={g}
+                  className={`gtr-bro-chip${Math.round(gain) === g ? " on" : ""}`}
+                  onClick={() => {
+                    setGain(g);
+                    // Заодно возвращаем звук на громкий динамик: iOS мог
+                    // увести его к уху, пока держали микрофон.
+                    routeAudio("playback");
+                    metric("bro.gain." + g);
+                  }}
+                >
+                  {g === GAIN_MIN ? "как есть" : g === GAIN_MAX ? "макс" : `×${g}`}
+                  <i>{g === GAIN_MAX ? "для клуба" : g >= 3 ? "громко" : "тихо"}</i>
+                </button>
+              ))}
+            </div>
             <div className="gtr-bro-tune-t">Управление</div>
             <div className="gtr-bro-chips">
               {[

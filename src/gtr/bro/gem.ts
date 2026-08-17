@@ -12,6 +12,7 @@
 // подтверждений — то же, что в петле Realtime: интерфейс не знает,
 // какой провайдер под ним.
 
+import { LoudOut, routeAudio } from "./audio-out";
 import type { BroCard, BroEvents, BroPersona, BroState } from "./session";
 import { NEEDS_CONFIRM } from "./session";
 
@@ -53,6 +54,7 @@ export class GemSession {
   private ws: WebSocket | null = null;
   private mic: MediaStream | null = null;
   private ctx: AudioContext | null = null;
+  private out: LoudOut | null = null;
   private proc: ScriptProcessorNode | null = null;
   private playing = new Set<AudioBufferSourceNode>();
   private playT = 0;
@@ -96,6 +98,10 @@ export class GemSession {
   }
 
   async start(opts: GemStart) {
+    // Пока страница держит микрофон, iOS считает разговор телефонным и
+    // уводит звук в динамик у уха. Просим систему вести его в громкий:
+    // на время реплики пользователя вернём режим записи.
+    routeAudio("play-and-record");
     if (this.ws) return;
     this.closed = false;
     this.ptt = Boolean(opts.ptt);
@@ -274,6 +280,7 @@ export class GemSession {
     try {
       const ctx = new AudioContext();
       this.ctx = ctx;
+      this.out = new LoudOut(ctx);
       const src = ctx.createMediaStreamSource(this.mic);
       const proc = ctx.createScriptProcessor(4096, 1, 1);
       this.proc = proc;
@@ -293,7 +300,13 @@ export class GemSession {
         this.send({ realtimeInput: { audio: { data: b64(out), mimeType: `audio/pcm;rate=${IN_RATE}` } } });
       };
       src.connect(proc);
-      proc.connect(ctx.destination);
+      // ScriptProcessor обязан быть подключён, иначе браузер его не
+      // вызывает. Но пускать микрофон в динамик нельзя — это заводит
+      // помещение. Ведём в глухой узел с нулевым усилением.
+      const mute = ctx.createGain();
+      mute.gain.value = 0;
+      proc.connect(mute);
+      mute.connect(ctx.destination);
     } catch {
       this.log("микрофонный тракт не поднялся");
     }
@@ -310,7 +323,9 @@ export class GemSession {
     for (let i = 0; i < pcm.length; i++) ch[i] = pcm[i] / 32768;
     const srcNode = ctx.createBufferSource();
     srcNode.buffer = buf;
-    srcNode.connect(ctx.destination);
+    // Через компрессор и усиление: прямое подключение к выходу и давало
+    // тот самый «слишком тихо».
+    srcNode.connect(this.out ? this.out.input : ctx.destination);
     const at = Math.max(ctx.currentTime + 0.02, this.playT);
     srcNode.start(at);
     this.playT = at + buf.duration;
@@ -458,6 +473,7 @@ export class GemSession {
   }
 
   holdStart() {
+    routeAudio("play-and-record");
     if (this.ws?.readyState !== WebSocket.OPEN) return;
     if (this.state === "speaking" || this.state === "thinking") this.bargeIn();
     this.send({ realtimeInput: { activityStart: {} } });
@@ -468,6 +484,8 @@ export class GemSession {
   }
 
   holdEnd() {
+    // Палец отпущен — говорить будет BRO, и говорить он должен громко.
+    routeAudio("playback");
     if (this.ws?.readyState !== WebSocket.OPEN) return;
     this.sending = false;
     if (Date.now() - this.holdAt < 250) return;
@@ -475,6 +493,11 @@ export class GemSession {
     this.log("реплика ушла");
     this.set("thinking");
     this.touch();
+  }
+
+  /** Громкость голоса: 1 — как есть, 6 — предел без каши. */
+  setGain(v: number) {
+    this.out?.setGain(v);
   }
 
   say(text: string) {
@@ -495,6 +518,7 @@ export class GemSession {
   }
 
   stop(reason = "user") {
+    routeAudio("auto");
     if (this.closed) return;
     this.closed = true;
     clearTimeout(this.idleTimer);

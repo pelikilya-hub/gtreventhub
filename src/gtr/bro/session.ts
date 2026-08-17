@@ -57,6 +57,7 @@ export type BroEvents = {
 /** Инструменты, требующие подтверждения в интерфейсе перед выполнением.
  *  Источник — WRITE_TOOLS в tools.ts: новый пишущий инструмент нельзя
  *  выпустить, не решив, что именно показать человеку перед выполнением. */
+import { LoudOut, routeAudio } from "./audio-out";
 import { WRITE_TOOLS } from "./tools";
 export const NEEDS_CONFIRM: Record<string, string> = WRITE_TOOLS;
 
@@ -87,6 +88,8 @@ export class BroSession {
   private mic: MediaStream | null = null;
   private audio: HTMLAudioElement | null = null;
   private ctxAudio: AudioContext | null = null;
+  private outCtx: AudioContext | null = null;
+  private out: LoudOut | null = null;
   private raf = 0;
   private idleTimer = 0;
   private maxTimer = 0;
@@ -164,8 +167,25 @@ export class BroSession {
 
     this.audio = document.createElement("audio");
     this.audio.autoplay = true;
+    // iOS не покажет звук без этого атрибута и попробует открыть плеер.
+    this.audio.setAttribute("playsinline", "");
+    routeAudio("play-and-record");
     pc.ontrack = (e) => {
-      if (this.audio) this.audio.srcObject = e.streams[0];
+      if (!this.audio) return;
+      this.audio.srcObject = e.streams[0];
+      // Голос идёт вторым путём — через Web Audio с компрессором и
+      // усилением. Сам элемент глушим, иначе получим двойной звук.
+      try {
+        const ctx = new AudioContext();
+        this.outCtx = ctx;
+        const out = new LoudOut(ctx);
+        this.out = out;
+        ctx.createMediaStreamSource(e.streams[0]).connect(out.input);
+        this.audio.volume = 0;
+      } catch {
+        // Не поднялся Web Audio — пусть звучит элемент, тихо, но живо.
+        this.audio.volume = 1;
+      }
     };
     for (const track of this.mic!.getTracks()) pc.addTrack(track, this.mic!);
 
@@ -277,6 +297,11 @@ export class BroSession {
 
   /** Voice Lab: заставить голос произнести реплику дословно.
    *  Нужен именно verbatim — иначе сравниваются тексты, а не голоса. */
+  /** Громкость голоса: 1 — как есть, 6 — предел без каши. */
+  setGain(v: number) {
+    this.out?.setGain(v);
+  }
+
   speakVerbatim(text: string) {
     this.send({
       type: "response.create",

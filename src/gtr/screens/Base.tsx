@@ -476,6 +476,95 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
         style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 14 }}
       >
         <div style={{ display: "grid", gap: 14, alignContent: "start" }}>
+          {/* Гостю первым делом нужно не «нормализованные залы», а ответ
+              на вопрос «что я тут буду делать». Витрина отдыха идёт до
+              паспорта и говорит человеческим языком. */}
+          {!commercial ? (
+            <Card style={{ padding: 18 }}>
+              <Eyebrow style={{ marginBottom: 10 }}>{t("ЧЕМ ЗАНЯТЬСЯ ЗДЕСЬ")}</Eyebrow>
+              <div style={{ font: "500 12.5px/1.65 'Golos Text',sans-serif", color: "var(--gtr-t1)" }}>
+                {v.concept || v.events || v.facilities}
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))",
+                  gap: 8,
+                  marginTop: 12,
+                }}
+              >
+                {(
+                  [
+                    ["ЧАСЫ", night.hours || "уточняем"],
+                    ["ВХОД", night.entry || "по ситуации"],
+                    ["ЛУЧШИЕ ВЕЧЕРА", night.best || "смотри афишу"],
+                    ["ЗВУК", v.music],
+                  ] as [string, string | undefined][]
+                )
+                  .filter(([, val]) => val)
+                  .map(([k, val]) => (
+                    <div key={k} style={{ border: "1px solid rgba(255,255,255,.08)", padding: "9px 11px" }}>
+                      <div
+                        className="gtr-mono"
+                        style={{
+                          font: "600 8.5px/1 'JetBrains Mono',monospace",
+                          letterSpacing: ".12em",
+                          color: "var(--gtr-t3)",
+                        }}
+                      >
+                        {t(k)}
+                      </div>
+                      <div style={{ marginTop: 5, font: "600 11.5px/1.45 'Golos Text',sans-serif" }}>
+                        {String(val)}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+                <button
+                  className="gtr-btn gtr-btn-red"
+                  onClick={() =>
+                    hasCdmReserve(v.id)
+                      ? document
+                          .getElementById("gtr-reserve")
+                          ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                      : navigate({ to: "/gtr/$screen", params: { screen: "promo" } })
+                  }
+                >
+                  {t("Забронировать стол")}
+                </button>
+                {hasCdmReserve(v.id) ? (
+                  <button
+                    className="gtr-btn"
+                    onClick={() =>
+                      document
+                        .getElementById("gtr-reserve")
+                        ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                    }
+                  >
+                    {t("Посмотреть меню")}
+                  </button>
+                ) : null}
+                <button
+                  className="gtr-btn"
+                  onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "tonight" } })}
+                >
+                  {t("Что здесь сегодня")}
+                </button>
+              </div>
+              <div
+                className="gtr-mono"
+                style={{
+                  marginTop: 10,
+                  font: "500 9.5px/1.5 'JetBrains Mono',monospace",
+                  color: "var(--gtr-t3)",
+                }}
+              >
+                {t("Не решил — спроси GTR BRO кнопкой снизу: подберёт стол, расскажет про артистов и вызовет такси.")}
+              </div>
+            </Card>
+          ) : null}
+
           <Card style={{ padding: 18 }}>
             <Eyebrow style={{ marginBottom: 10 }}>{t("ПРОФИЛЬ ПЛОЩАДКИ")}</Eyebrow>
             {[
@@ -609,7 +698,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           ) : null}
 
           {hasCdmReserve(v.id) ? (
-            <Card style={{ padding: 18 }}>
+            <Card id="gtr-reserve" style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 4 }}>
                 {t("РАССАДКА И БРОНЬ")} · SEVENROOMS-ПАРИТЕТ
               </Eyebrow>

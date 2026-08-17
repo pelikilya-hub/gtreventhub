@@ -486,6 +486,8 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
             onClose={() => setBroOpen(false)}
             screen={screen}
             boss={Boolean(user.boss)}
+            userName={user.name}
+            role={user.role}
             provider={broProv}
             onNavigate={(route, entityId) => {
               setBroOpen(false);

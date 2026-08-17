@@ -185,14 +185,18 @@ export const Card = ({
   style,
   className = "",
   onClick,
+  id,
 }: {
   children: ReactNode;
   hover?: boolean;
   style?: CSSProperties;
   className?: string;
   onClick?: () => void;
+  /** Якорь для прокрутки: «покажи мне бронь» должно куда-то вести. */
+  id?: string;
 }) => (
   <div
+    id={id}
     className={`gtr-card ${hover ? "gtr-card-hover" : ""} ${className}`}
     style={{ ...(onClick ? { cursor: "pointer" } : {}), ...style }}
     onClick={onClick}

@@ -2,7 +2,8 @@
 // но не притворяться умнее, чем есть: непонятное честно уходит в help.
 import { describe, expect, it } from "vitest";
 
-import { bkkDate, fmtEvents, planOf } from "../text";
+import { looksInvented } from "../guard";
+import { bkkDate, fmtEvents, greetLines, planOf } from "../text";
 
 describe("разбор команд", () => {
   it("район и «сегодня» из живой фразы", () => {
@@ -71,5 +72,52 @@ describe("пасхалка", () => {
       expect(EGG_RE.test(q)).toBe(true);
     expect(EGG_RE.test("да")).toBe(false);
     expect(EGG_RE.test("братан, что сегодня")).toBe(false);
+  });
+});
+
+describe("визитка BRO", () => {
+  it("зовёт по имени и перечисляет только реальные умения", () => {
+    const g = greetLines("Илья Пелихосов", "visitor", 0);
+    expect(g[0]).toContain("Илья");
+    // фамилия в обращении — это уже не приятель, а повестка
+    expect(g[0]).not.toContain("Пелихосов");
+    const body = g.join(" ");
+    expect(body).toContain("Café del Mar");
+    expect(body).toContain("маршрут");
+    // гостю не обещаем инструменты команды
+    expect(body).not.toContain("подрядчик");
+  });
+
+  it("команде добавляет её инструменты", () => {
+    const g = greetLines("Фёдор", "gtr", 0).join(" ");
+    expect(g).toContain("подрядчик");
+    expect(g).toContain("черновик события");
+  });
+
+  it("без имени не выдумывает его", () => {
+    expect(greetLines(undefined, "visitor", 0)[0]).toContain("брат");
+  });
+
+  it("«привет» и «что ты умеешь» — это знакомство, а не поиск афиши", () => {
+    expect(planOf("привет").kind).toBe("greet");
+    expect(planOf("что ты умеешь?").kind).toBe("greet");
+    expect(planOf("кто ты").kind).toBe("greet");
+    // а вот это по-прежнему поиск
+    expect(planOf("что сегодня в патонге").kind).toBe("search");
+  });
+});
+
+describe("карантин выдумки", () => {
+  it("список мест без единого вызова инструмента не доходит до человека", () => {
+    const invented =
+      "Брат, сегодня в Патонге жара:\n- Café de la Luna — бар с кавой\n- Coco's — клуб с диджеями";
+    expect(looksInvented(invented, 0)).toBe(true);
+    // тот же текст, но факты пришли из инструмента — пропускаем
+    expect(looksInvented(invented, 1)).toBe(false);
+  });
+
+  it("уточняющий вопрос и честный отказ проходят свободно", () => {
+    expect(looksInvented("Брат, давай поищем. Ты сейчас где?", 0)).toBe(false);
+    expect(looksInvented("По базе на сегодня пусто — не буду выдумывать.", 0)).toBe(false);
   });
 });

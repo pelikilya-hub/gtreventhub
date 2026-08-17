@@ -3502,6 +3502,22 @@ html { -webkit-tap-highlight-color: transparent; }
 }
 .gtr-bro-note { font: 500 11.5px/1.45 "Golos Text", sans-serif; color: var(--gtr-t2); }
 .gtr-bro-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+/* Ряд быстрых команд прямо под табло: живёт отдельно от чипов настроек. */
+.gtr-bro-sheet > .gtr-bro-chips { margin: 10px 0 2px; }
+.gtr-bro-sheet > .gtr-bro-chips .gtr-bro-chip {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(53, 255, 92, 0.06);
+  color: #cfe9d4;
+  font: 600 11px/1.2 "Golos Text", sans-serif;
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+.gtr-bro-sheet > .gtr-bro-chips .gtr-bro-chip:active { transform: translateY(1px); }
+@media (hover: hover) {
+  .gtr-bro-sheet > .gtr-bro-chips .gtr-bro-chip:hover {
+    background: rgba(53, 255, 92, 0.16);
+    color: #fff;
+  }
+}
 .gtr-bro-chip {
   border: 0;
   padding: 9px 11px;

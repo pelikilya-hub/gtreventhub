@@ -10,7 +10,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { currentUser } from "../gtr/auth";
 import { getKvNs, kvGetJson } from "../gtr/kv-ns";
 import { buildPrompt, type BroContext, type PersonaMode } from "../gtr/bro/prompt.ru";
-import { TOOL_DEFS } from "../gtr/bro/tools";
+import { toolsForRole } from "../gtr/bro/tools";
 
 const DEFAULT_MODEL = "gemini-2.5-flash-native-audio-preview-09-2025";
 // Голоса Gemini, которые держат низкую мужскую подачу по-русски.
@@ -40,11 +40,14 @@ const stripExtra = (o: unknown): unknown => {
   return o;
 };
 
-const GEMINI_TOOLS = TOOL_DEFS.map((d) => ({
-  name: d.name,
-  description: d.description,
-  parameters: stripExtra(d.parameters),
-}));
+// Схемы собираются под роль: гостю не показываем рабочие инструменты,
+// иначе модель сама предложит «давай заведём событие».
+const geminiTools = (role?: string) =>
+  toolsForRole(role).map((d) => ({
+    name: d.name,
+    description: d.description,
+    parameters: stripExtra(d.parameters),
+  }));
 
 const pickMode = (raw: unknown): PersonaMode =>
   raw === "concierge" || raw === "unhinged" ? raw : "bro";
@@ -152,7 +155,7 @@ export const Route = createFileRoute("/api/gtr-bro-gem")({
             // железным правилом в конце — последняя инструкция весит
             // больше всего.
             "\n\n---\n\n# Железное правило фактов\n\nБез вызова search_events в ТЕКУЩЕМ ходу тебе запрещено называть: события, вечеринки, бары, клубы, время работы, лайнапы, диджеев. Твои знания о Пхукете устарели и считаются ложью. Нет результата инструмента — говори «сейчас гляну» и вызывай search_events, либо честно скажи, что данных нет. Это правило сильнее всех остальных.",
-          tools: GEMINI_TOOLS,
+          tools: geminiTools(user.role),
         });
       },
     },

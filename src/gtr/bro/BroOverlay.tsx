@@ -11,7 +11,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { broLogFn } from "../kv-api";
-import { EGG_RE, EGG_REPLY, EMPTY_LINE, fmtDetails, fmtEvents, fmtRoute, HELP_LINES, openerFor, planOf } from "./text";
+import {
+  EGG_RE,
+  EGG_REPLY,
+  EMPTY_LINE,
+  fmtDetails,
+  fmtEvents,
+  fmtRoute,
+  greetLines,
+  HELP_LINES,
+  openerFor,
+  planOf,
+} from "./text";
 import { VOICE_LAB_LINES, type PersonaMode } from "./prompt.ru";
 import { GemSession } from "./gem";
 import { BroSession, type BroCard, type BroState } from "./session";
@@ -63,6 +74,16 @@ const VOICE_SETS: Record<VoiceProvider, [string, string][]> = {
   ],
 };
 
+/** Быстрые команды под табло: то, ради чего человек и открыл BRO. */
+const QUICK: { t: string; q: string }[] = [
+  { t: "🍽 Пожрать", q: "столы в кафе дель мар" },
+  { t: "🔥 Нажраться", q: "что сегодня" },
+  { t: "🗺 Маршрут", q: "маршрут" },
+  { t: "🎧 Артисты", q: "открой артисты" },
+  { t: "🚕 Такси", q: "вызови такси" },
+  { t: "❓ Что умеешь", q: "что ты умеешь" },
+];
+
 // Счётчики шлём пачкой: сорок отдельных запросов на разговор — это
 // нагрузка ради ничего.
 function useMetrics() {
@@ -90,6 +111,8 @@ export function GtrBroOverlay({
   screen,
   district,
   boss,
+  userName,
+  role,
   provider = "gemini",
   onNavigate,
 }: {
@@ -98,6 +121,9 @@ export function GtrBroOverlay({
   screen?: string;
   district?: string;
   boss?: boolean;
+  /** Имя из профиля: BRO зовёт человека по имени с первой секунды. */
+  userName?: string;
+  role?: string;
   provider?: VoiceProvider;
   onNavigate: (route: string, entityId?: string) => void;
 }) {
@@ -133,6 +159,9 @@ export function GtrBroOverlay({
   const [mini, setMini] = useState(false);
   const ses = useRef<VoiceSession | null>(null);
   const starting = useRef(false);
+  // Визитка — один раз на открытие оверлея: на табло текстом, голосом — репликой.
+  const hello = useRef(false);
+  const greeted = useRef(false);
   const metric = useMetrics();
 
   const reset = () => {
@@ -163,6 +192,17 @@ export function GtrBroOverlay({
           // Соединение поднялось, а палец всё ещё на кнопке — открываем
           // микрофон сразу, без второго нажатия.
           if (st === "listening" && held.current && ses.current?.isPtt) ses.current.holdStart();
+          // Голос знакомится сам: канал открылся — BRO говорит визитку
+          // по имени, не дожидаясь, пока человек догадается что-то сказать.
+          // Один раз за открытие оверлея, и только если человек не начал
+          // говорить первым (палец на рации = у него уже есть вопрос).
+          if (st === "listening" && !hello.current && !held.current) {
+            hello.current = true;
+            metric("bro.greet.voice");
+            ses.current?.say(
+              `Начни разговор визиткой по правилу «First reply». Имя человека: ${userName ?? "не указано"}.`,
+            );
+          }
         },
         onLevel: setLevel,
         onLog: (t) =>
@@ -218,6 +258,10 @@ export function GtrBroOverlay({
   // открытый микрофон и счёт по времени.
   useEffect(() => {
     if (!open && ses.current) stop();
+    if (!open) {
+      hello.current = false;
+      greeted.current = false;
+    }
   }, [open, stop]);
   useEffect(() => () => ses.current?.stop("unmount"), []);
 
@@ -226,6 +270,27 @@ export function GtrBroOverlay({
     const el = dosRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [rows]);
+
+  // Визитка. Первое открытие за сеанс — BRO представляется по имени и
+  // перечисляет, что реально умеет. Строки выпадают по одной: табло
+  // должно ожить, а не выплюнуть простыню разом.
+  useEffect(() => {
+    if (!open || greeted.current) return;
+    greeted.current = true;
+    const lines = greetLines(userName, role, new Date().getDate());
+    const timers: number[] = [];
+    lines.forEach((l, i) => {
+      timers.push(
+        window.setTimeout(() => {
+          setRows((p) => [
+            ...p.slice(-120),
+            { who: l.startsWith("·") || l.startsWith("жми") ? "sys" : "bro", text: l, done: true },
+          ]);
+        }, 90 + i * 190),
+      );
+    });
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [open, userName, role]);
 
   useEffect(() => {
     if (!open) return;
@@ -342,10 +407,22 @@ export function GtrBroOverlay({
           for (const c of (data.cards ?? []).slice(0, 4)) setCards((p) => [c, ...p].slice(0, 6));
           return;
         }
-        if (data.error && data.error !== "no-brain") say("sys", `мозг: ${data.error}`);
+        // no-brain — мозг не настроен, invented — его ответ не прошёл
+        // проверку на выдумку. И то и другое человеку знать незачем:
+        // молча идём разбирать по правилам, по нашей базе.
+        if (data.error === "invented") metric("bro.text.invented");
+        else if (data.error && data.error !== "no-brain") say("sys", `мозг: ${data.error}`);
       } catch {
         say("sys", "мозг не ответил — работаю по правилам");
       }
+    }
+
+    if (plan.kind === "greet") {
+      metric("bro.greet.ask");
+      const g = greetLines(userName, role, rows.length);
+      say("bro", g[0]);
+      for (const l of g.slice(1)) say(l.startsWith("·") || l.startsWith("жми") ? "sys" : "bro", l);
+      return;
     }
 
     if (plan.kind === "help" || plan.kind === "unknown") {
@@ -462,6 +539,16 @@ export function GtrBroOverlay({
             />
             {!cmd && <span className="gtr-bro-cursor">▮</span>}
           </form>
+        </div>
+
+        {/* Тапы вместо набора: человек в клубе не печатает «что сегодня
+            в патонге» одной рукой с коктейлем в другой. */}
+        <div className="gtr-bro-chips">
+          {QUICK.map((q) => (
+            <button key={q.t} className="gtr-bro-chip" onClick={() => void runText(q.q)}>
+              {q.t}
+            </button>
+          ))}
         </div>
 
         {/* Визуализатор: единственная деталь, которая честно показывает,

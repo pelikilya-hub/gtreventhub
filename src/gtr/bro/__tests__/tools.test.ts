@@ -3,7 +3,7 @@
 // незнание за знание.
 import { describe, expect, it } from "vitest";
 
-import { handlers, TOOL_DEFS, type EventsProvider } from "../tools";
+import { handlers, TOOL_DEFS, toolsForRole, type EventsProvider } from "../tools";
 
 const provider = (
   rows: { vid: string; events: { title: string; dateIso: string }[] }[] = [],
@@ -142,7 +142,8 @@ describe("платформенные инструменты", () => {
   });
 
   it("каталог подрядчиков находит LED и не отдаёт цену 0", async () => {
-    const r = await handlers.search_vendors({ query: "LED" }, ctx);
+    // Каталог — рабочий инструмент: вызываем от лица команды.
+    const r = await handlers.search_vendors({ query: "LED" }, { ...ctx, user: team });
     expect(r.ok).toBe(true);
     for (const it2 of (r as { data: { items: { price: number | null }[] } }).data.items)
       expect(it2.price === null || it2.price > 0).toBe(true);
@@ -278,6 +279,61 @@ describe("рассадка Café del Mar", () => {
       { venue: "Cafe del Mar", table: "Club Room VIP A", dateIso: "2026-08-17", guests: 4, phone: "1" },
       { ...ctx, user: guest, book: book as never },
     );
+    expect(r.ok).toBe(false);
+  });
+});
+
+describe("границы роли гостя", () => {
+  const guest = { email: "v@v", name: "Гость", role: "visitor" };
+  const team = { email: "boss@gtr", name: "BOSS", role: "gtr", boss: true };
+
+  it("гость не видит рабочих инструментов в схемах", () => {
+    const names = toolsForRole("visitor").map((d) => d.name);
+    expect(names).not.toContain("create_event_draft");
+    expect(names).not.toContain("search_vendors");
+    // а гостевые — на месте
+    expect(names).toContain("search_events");
+    expect(names).toContain("book_table");
+    expect(names).toContain("get_artist_profile");
+    expect(toolsForRole("gtr").map((d) => d.name)).toContain("create_event_draft");
+  });
+
+  it("рабочие экраны гостю не открываются", async () => {
+    const r = await handlers.open_in_app({ route: "constructor" }, { ...ctx, user: guest });
+    expect(r.ok).toBe(false);
+    const ok1 = await handlers.open_in_app({ route: "tonight" }, { ...ctx, user: guest });
+    expect(ok1.ok).toBe(true);
+    const ok2 = await handlers.open_in_app({ route: "constructor" }, { ...ctx, user: team });
+    expect(ok2.ok).toBe(true);
+  });
+
+  it("каталог подрядчиков закрыт для гостя даже прямым вызовом", async () => {
+    const r = await handlers.search_vendors({ query: "LED" }, { ...ctx, user: guest });
+    expect(r.ok).toBe(false);
+  });
+});
+
+describe("артист для гостя", () => {
+  const guest = { email: "v@v", name: "Гость", role: "visitor" };
+
+  it("досье несёт стиль и ссылки послушать, но не контакты для брони", async () => {
+    const r = await handlers.get_artist_profile({ artist: "DJ Meet" }, { ...ctx, user: guest });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as {
+      name: string;
+      listen: { spotify: string | null; soundcloud: string | null; youtube: string | null };
+      booking: string | null;
+    };
+    expect(d.name).toBe("DJ Meet");
+    expect(d.listen.spotify).toContain("spotify.com");
+    expect(d.listen.soundcloud).toContain("soundcloud.com");
+    expect(d.listen.youtube).toContain("youtube.com");
+    expect(d.booking).toBeNull();
+  });
+
+  it("незнакомого артиста не выдумывает", async () => {
+    const r = await handlers.get_artist_profile({ artist: "Пётр Несуществующий" }, { ...ctx, user: guest });
     expect(r.ok).toBe(false);
   });
 });

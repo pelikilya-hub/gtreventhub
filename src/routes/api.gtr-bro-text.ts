@@ -14,7 +14,8 @@ import { currentUser } from "../gtr/auth";
 import { getKvNs, kvGetJson } from "../gtr/kv-ns";
 import { buildTextPrompt, type BroContext } from "../gtr/bro/prompt.ru";
 import { kvProvider } from "../gtr/bro/provider";
-import { handlers, TOOL_DEFS, WRITE_TOOLS, type ToolCtx, type ToolName } from "../gtr/bro/tools";
+import { looksInvented } from "../gtr/bro/guard";
+import { handlers, toolsForRole, WRITE_TOOLS, type ToolCtx, type ToolName } from "../gtr/bro/tools";
 
 type Flags = { broEnabled?: boolean; broKill?: boolean };
 type Brain = { url?: string; token?: string; model?: string };
@@ -30,11 +31,13 @@ const stripExtra = (o: unknown): unknown => {
   }
   return o;
 };
-const GEM_TOOLS = TOOL_DEFS.map((d) => ({
-  name: d.name,
-  description: d.description,
-  parameters: stripExtra(d.parameters),
-}));
+const gemTools = (role?: string) =>
+  toolsForRole(role).map((d) => ({
+    name: d.name,
+    description: d.description,
+    parameters: stripExtra(d.parameters),
+  }));
+
 type Msg = {
   role: "system" | "user" | "assistant" | "tool";
   content: string | null;
@@ -51,10 +54,11 @@ const json = (body: unknown, status = 200) =>
 
 // Схемы инструментов — в формате chat completions, который понимает
 // llama.cpp с шаблоном Qwen.
-const OPENAI_TOOLS = TOOL_DEFS.map((d) => ({
-  type: "function" as const,
-  function: { name: d.name, description: d.description, parameters: d.parameters },
-}));
+const openaiTools = (role?: string) =>
+  toolsForRole(role).map((d) => ({
+    type: "function" as const,
+    function: { name: d.name, description: d.description, parameters: d.parameters },
+  }));
 
 export const Route = createFileRoute("/api/gtr-bro-text")({
   server: {
@@ -190,7 +194,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
                   body: JSON.stringify({
                     systemInstruction: { parts: [{ text: buildTextPrompt(ctx) }] },
                     contents,
-                    tools: [{ functionDeclarations: GEM_TOOLS }],
+                    tools: [{ functionDeclarations: gemTools(user.role) }],
                     generationConfig: { temperature: 0.7, maxOutputTokens: 600 },
                   }),
                   signal: AbortSignal.timeout(25_000),
@@ -217,7 +221,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
                   body: JSON.stringify({
                     systemInstruction: { parts: [{ text: buildTextPrompt(ctx) }] },
                     contents,
-                    tools: [{ functionDeclarations: GEM_TOOLS }],
+                    tools: [{ functionDeclarations: gemTools(user.role) }],
                     generationConfig: { temperature: 0.7, maxOutputTokens: 600 },
                   }),
                   signal: AbortSignal.timeout(25_000),
@@ -244,6 +248,10 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
                 .map((p) => String((p as { text?: string }).text ?? ""))
                 .join("")
                 .trim();
+              if (reply && looksInvented(reply, trace.length)) {
+                console.warn("gtr-bro-text: ответ без инструментов отброшен", gmodel);
+                return json({ ok: false, error: "invented", engine: gmodel }, 200);
+              }
               if (reply) {
                 await saveDialog(reply, gmodel);
                 return json({ ok: true, reply, cards, trace, engine: gmodel });
@@ -291,7 +299,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
               body: JSON.stringify({
                 model: brain.model ?? "qwen3-8b",
                 messages,
-                tools: OPENAI_TOOLS,
+                tools: openaiTools(user.role),
                 tool_choice: "auto",
                 temperature: 0.7,
                 max_tokens: 400,
@@ -318,6 +326,10 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
             const reply = String(msg.content ?? "")
               .replace(/<think>[\s\S]*?<\/think>/g, "")
               .trim();
+            if (looksInvented(reply, trace.length)) {
+              console.warn("gtr-bro-text: ответ без инструментов отброшен", "qwen3-8b");
+              return json({ ok: false, error: "invented", engine: "qwen3-8b" }, 200);
+            }
             await saveDialog(reply, "qwen3-8b");
             return json({ ok: true, reply: reply || "…", cards, trace, engine: "qwen3-8b" });
           }

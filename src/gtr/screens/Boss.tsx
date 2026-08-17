@@ -16,10 +16,12 @@ import {
   V,
   type ScreenId,
 } from "../data/app-data";
+import { BossHead3D, isDaylight, type BossHead } from "../boss-head";
 import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
 import { Card, Chip, Dot, Eyebrow, Icon, StkBtn, tint } from "../ui";
 import {
+  bossHeadFn,
   broadcastFn,
   communityInviteTextFn,
   communityPostFn,
@@ -41,6 +43,7 @@ import {
   pushSubscribeFn,
   pushTaskFn,
   pushTestFn,
+  saveBossHeadFn,
   tgActivateFn,
   tgLinkFn,
   tgStatusFn,
@@ -56,25 +59,138 @@ const mono = (s: number, w = 500) => `${w} ${s}px/1.3 'JetBrains Mono',monospace
 const golos = (s: number, w = 500) => `${w} ${s}px/1.4 'Golos Text',sans-serif`;
 
 // ---------- 3D-эмблема: вращающееся ядро импульса ----------
-function Boss3D() {
-  return (
-    <div className="boss3d" aria-hidden>
-      <div className="boss3d-spin">
-        <span className="boss3d-plane p1" />
-        <span className="boss3d-plane p2" />
-        <span className="boss3d-plane p3" />
-        <span className="boss3d-ring" />
-        <span className="boss3d-core" />
-      </div>
-    </div>
-  );
-}
-
 const b64ToU8 = (s: string) => {
   const pad = "=".repeat((4 - (s.length % 4)) % 4);
   const b = atob((s + pad).replace(/-/g, "+").replace(/_/g, "/"));
   return Uint8Array.from(b, (c) => c.charCodeAt(0));
 };
+
+
+// ---------- портрет BOSS в эмблеме: день и ночь ----------
+// Снимок готовится в браузере: масштаб до 640 px по высоте и PNG, чтобы
+// уцелела прозрачность вырезанного силуэта. Всё остальное сделает CSS.
+function shrinkToPng(file: File, max = 640): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onerror = () => reject(new Error("read"));
+    fr.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("decode"));
+      img.onload = () => {
+        const k = Math.min(1, max / Math.max(1, img.height));
+        const w = Math.round(img.width * k);
+        const h = Math.round(img.height * k);
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const g = c.getContext("2d");
+        if (!g) return reject(new Error("canvas"));
+        g.drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL("image/png"));
+      };
+      img.src = String(fr.result);
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+function BossHeadCard({ head, onSaved }: { head: BossHead | null; onSaved: (h: BossHead) => void }) {
+  const [busy, setBusy] = useState("");
+  const [preview, setPreview] = useState<"day" | "night" | null>(null);
+  const put = async (slot: "day" | "night", file?: File | null) => {
+    if (!file) return;
+    setBusy("готовлю снимок…");
+    try {
+      const dataUrl = await shrinkToPng(file);
+      const r = await saveBossHeadFn({ data: { [slot]: dataUrl } });
+      if (r.ok) {
+        const next = { ...(head ?? {}), [slot]: dataUrl };
+        onSaved(next);
+        setBusy("сохранено");
+      } else setBusy(r.reason ?? "не вышло");
+    } catch {
+      setBusy("файл не читается — нужен PNG с прозрачным фоном");
+    }
+    setTimeout(() => setBusy(""), 4000);
+  };
+  const drop = async (slot: "day" | "night") => {
+    setBusy("убираю…");
+    const r = await saveBossHeadFn({ data: { [slot]: null } });
+    if (r.ok) {
+      const next = { ...(head ?? {}) };
+      delete next[slot];
+      onSaved(next);
+    }
+    setBusy("");
+  };
+  const slot = (id: "day" | "night", title: string, hint: string) => (
+    <div style={{ display: "grid", gap: 6 }}>
+      <span style={{ font: mono(8.5, 600), color: "rgba(255,255,255,.45)", letterSpacing: ".12em" }}>
+        {title}
+      </span>
+      <div
+        style={{
+          height: 96,
+          border: `1px solid ${head?.[id] ? "rgba(46,204,113,.4)" : "rgba(255,255,255,.12)"}`,
+          display: "grid",
+          placeItems: "center",
+          background: "rgba(255,255,255,.02)",
+          overflow: "hidden",
+        }}
+      >
+        {head?.[id] ? (
+          <img src={head[id]} alt="" style={{ maxHeight: "100%", objectFit: "contain" }} />
+        ) : (
+          <span style={{ font: mono(9), color: "rgba(255,255,255,.3)" }}>пусто</span>
+        )}
+      </div>
+      <span style={{ font: mono(8), color: "rgba(255,255,255,.35)" }}>{hint}</span>
+      <div style={{ display: "flex", gap: 6 }}>
+        <label className="gtr-btn" style={{ cursor: "pointer" }}>
+          Загрузить
+          <input
+            type="file"
+            accept="image/png,image/webp"
+            hidden
+            onChange={(e) => void put(id, e.target.files?.[0])}
+          />
+        </label>
+        {head?.[id] ? (
+          <button className="gtr-btn" onClick={() => void drop(id)}>
+            Убрать
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+  return (
+    <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        <Eyebrow>ПОРТРЕТ В ЭМБЛЕМЕ · ДЕНЬ И НОЧЬ</Eyebrow>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <span style={{ font: mono(8.5), color: "rgba(255,255,255,.4)" }}>
+            сейчас на острове: {isDaylight() ? "день" : "ночь"}
+          </span>
+          <button className="gtr-btn" onClick={() => setPreview(preview === "day" ? "night" : "day")}>
+            {preview === null ? "Примерить" : preview === "day" ? "Показать ночь" : "Показать день"}
+          </button>
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
+        <BossHead3D head={head} size={132} force={preview} />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, flex: 1, minWidth: 260 }}>
+          {slot("day", "ДЕНЬ · 06–18", "прозрачные очки, дневной свет")}
+          {slot("night", "НОЧЬ · 18–06", "тёмные очки, клубный свет")}
+        </div>
+      </div>
+      <span style={{ font: mono(8.5), color: "rgba(255,255,255,.4)" }}>
+        Нужен PNG с уже вырезанным фоном — прозрачность и есть объём: по её краю строится контровой
+        свет. Высота ужимается до 640 px прямо в браузере.
+        {busy ? ` · ${busy}` : ""}
+      </span>
+    </Card>
+  );
+}
 
 // ---------- Push-панель: разрешение → подписка → тест ----------
 export function PushPanel() {
@@ -388,10 +504,12 @@ export function BossCabinet() {
   const navigate = useNavigate();
   const go = (s: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: s } });
   const [users, setUsers] = useState<PublicUser[]>([]);
+  const [head, setHead] = useState<BossHead | null>(null);
   useEffect(() => {
     listUsersFn().then((r) => {
       if (r.ok) setUsers(r.users);
     });
+    bossHeadFn().then((r) => setHead(r.head)).catch(() => {});
   }, []);
 
   const money = useMemo(() => {
@@ -465,7 +583,7 @@ export function BossCabinet() {
       {/* -------- шапка BOSS -------- */}
       <Card style={{ padding: 0, overflow: "hidden" }}>
         <div className="gtr-boss-hero">
-          <Boss3D />
+          <BossHead3D head={head} />
           <div style={{ flex: 1, minWidth: 220, padding: "16px 0" }}>
             <Eyebrow style={{ color: RED }}>КОНТРОЛЬ ОПЕРАЦИИ · GTR EVENT</Eyebrow>
             <h1
@@ -630,6 +748,7 @@ export function BossCabinet() {
         </Card>
 
         <PendingCard />
+        <BossHeadCard head={head} onSaved={(h) => setHead(h)} />
         <PromptpayCard />
         <CommunityCard />
         <MetaCard />

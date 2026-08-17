@@ -2654,6 +2654,49 @@ export type BroFlags = {
  *  Клиенту нужно знать заранее, включена ли фича: центральная кнопка GTR
  *  иначе будет обещать голос и упираться в 503. Значение ключа сюда не
  *  попадает — только факт его наличия. */
+// ---------- портрет BOSS для эмблемы дашборда ----------
+// Два снимка: день (прозрачные очки) и ночь (тёмные). Храним как
+// data-URL в KV: файлов у нас негде держать, а два PNG по паре сотен
+// килобайт — это ровно тот размер, ради которого не стоит заводить
+// объектное хранилище.
+export type BossHeadCfg = { day?: string; night?: string; updated?: number };
+
+const HEAD_KEY = "boss:head";
+const HEAD_MAX = 900_000; // ~0.9 МБ на снимок после сжатия в браузере
+
+export const bossHeadFn = createServerFn({ method: "GET" }).handler(async () => {
+  const ns = await getKvNs();
+  if (!ns) return { head: null as BossHeadCfg | null };
+  return { head: (await kvGetJson<BossHeadCfg>(ns, HEAD_KEY)) ?? null };
+});
+
+export const saveBossHeadFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { day?: string | null; night?: string | null }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    if (!u.boss) return { ok: false as const, reason: "только BOSS" };
+    const cur = (await kvGetJson<BossHeadCfg>(ns, HEAD_KEY)) ?? {};
+    const clean = (v: string | null | undefined, keep: string | undefined) => {
+      if (v === null) return undefined; // явное «убрать»
+      if (v === undefined) return keep;
+      if (!/^data:image\/(png|webp|jpeg);base64,/.test(v))
+        return keep; // чужой формат игнорируем молча, прозрачность нужна
+      if (v.length > HEAD_MAX) return keep;
+      return v;
+    };
+    const next: BossHeadCfg = {
+      day: clean(data.day, cur.day),
+      night: clean(data.night, cur.night),
+      updated: Date.now(),
+    };
+    if ((data.day && next.day !== data.day) || (data.night && next.night !== data.night))
+      return { ok: false as const, reason: "снимок слишком тяжёлый — сожми до 900 КБ" };
+    await ns.put(HEAD_KEY, JSON.stringify(next));
+    return { ok: true as const };
+  });
+
 export const broFlagsFn = createServerFn({ method: "GET" }).handler(async (): Promise<BroFlags> => {
   const off: BroFlags = { enabled: false, kill: false, roles: [], keyReady: false, provider: "gemini" };
   const user = await currentUser();

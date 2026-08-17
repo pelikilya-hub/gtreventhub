@@ -1462,6 +1462,95 @@
   .boss3d-spin { animation: none; transform: rotateX(62deg) rotateZ(24deg); }
 }
 
+/* ---------- голова BOSS внутри эмблемы ----------
+   Объём собран слоями: контровой свет по краю силуэта, сам портрет,
+   скользящий блик и тень под подбородком. Наклон телефона качает голову
+   через те же --gtr-tilt-*, что и атмосферу приложения. */
+.bosshead { position: relative; }
+.bosshead.on .boss3d-spin { opacity: 0.72; }
+.bosshead-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: end center;
+  perspective: 520px;
+  pointer-events: none;
+}
+.bosshead-img,
+.bosshead-rim {
+  grid-area: 1 / 1;
+  width: 88%;
+  height: auto;
+  max-height: 104%;
+  object-fit: contain;
+  object-position: bottom center;
+  align-self: end;
+  transform: translate3d(calc(var(--gtr-tilt-x, 0px) * 0.16), calc(var(--gtr-tilt-y, 0px) * 0.1), 0)
+    rotateY(calc(var(--gtr-tilt-x, 0px) * 0.35deg)) rotateX(calc(var(--gtr-tilt-y, 0px) * -0.25deg));
+  transform-origin: 50% 90%;
+  will-change: transform;
+}
+/* Ободок: тот же снимок, залитый цветом GTR и раздутый на пиксель —
+   даёт контровой свет сцены за спиной. */
+.bosshead-rim {
+  filter: brightness(0) saturate(100%) invert(24%) sepia(89%) saturate(6000%) hue-rotate(357deg)
+    brightness(97%) contrast(96%) blur(1.2px);
+  opacity: 0.55;
+  transform: translate3d(calc(var(--gtr-tilt-x, 0px) * 0.16), calc(var(--gtr-tilt-y, 0px) * 0.1), -1px)
+    scale(1.045);
+  animation: bosshead-rim 5.5s ease-in-out infinite;
+}
+@keyframes bosshead-rim {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+.bosshead-img {
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.55)) contrast(1.04) saturate(1.03);
+  animation: bosshead-float 7s ease-in-out infinite;
+}
+@keyframes bosshead-float {
+  0%, 100% { margin-bottom: 0; }
+  50% { margin-bottom: 3px; }
+}
+/* Ночь холоднее и контрастнее, день — тёплый свет пляжа. */
+.bosshead.night .bosshead-img { filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.7)) contrast(1.1) saturate(0.95) brightness(0.92); }
+.bosshead.day .bosshead-img { filter: drop-shadow(0 5px 9px rgba(0, 0, 0, 0.45)) contrast(1.02) saturate(1.08) brightness(1.05); }
+.bosshead.day .bosshead-rim { opacity: 0.32; }
+/* Блик проходит по лицу — сцена живая, прибор движется. */
+.bosshead-spec {
+  grid-area: 1 / 1;
+  align-self: end;
+  width: 88%;
+  height: 100%;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.16) 48%, transparent 58%);
+  mix-blend-mode: screen;
+  animation: bosshead-spec 6.5s ease-in-out infinite;
+  opacity: 0.9;
+}
+@keyframes bosshead-spec {
+  0%, 100% { transform: translateX(-38%); opacity: 0; }
+  45% { opacity: 0.9; }
+  50% { transform: translateX(38%); opacity: 0.55; }
+  70% { opacity: 0; }
+}
+/* Контактная тень: без неё портрет висит наклейкой. */
+.bosshead-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 62%;
+  height: 10px;
+  margin-left: -31%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.65), transparent 72%);
+  filter: blur(2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bosshead-img,
+  .bosshead-rim,
+  .bosshead-spec { animation: none; }
+  .bosshead-spec { opacity: 0; }
+}
+
 /* ---------- индикатор «в эфире» ---------- */
 .gtr-live-dot {
   display: inline-block;

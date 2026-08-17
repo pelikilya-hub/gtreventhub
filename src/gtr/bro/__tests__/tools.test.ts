@@ -337,3 +337,38 @@ describe("артист для гостя", () => {
     expect(r.ok).toBe(false);
   });
 });
+
+describe("музыка открывается наружу, а не навигацией", () => {
+  const guest = { email: "v@v", name: "Гость", role: "visitor" };
+
+  it("сеты отдаются ссылкой на YouTube первой строкой", async () => {
+    const r = await handlers.open_music({ artist: "LUTANG", source: "youtube" }, { ...ctx, user: guest });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as {
+      artist: string;
+      open: { source: string; url: string };
+      links: { source: string; url: string }[];
+    };
+    expect(d.artist).toBe("LUTANG");
+    expect(d.open.source).toBe("youtube");
+    expect(d.open.url).toContain("youtube.com");
+    expect(d.links.some((l) => l.source === "soundcloud")).toBe(true);
+  });
+
+  it("без указания площадки первым идёт YouTube — там сеты и клипы", async () => {
+    const r = await handlers.open_music({ artist: "DJ Meet" }, { ...ctx, user: guest });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect((r.data as { open: { source: string } }).open.source).toBe("youtube");
+  });
+
+  it("незнакомое имя не превращается в случайную ссылку", async () => {
+    const r = await handlers.open_music({ artist: "Кто-то Неизвестный" }, { ...ctx, user: guest });
+    expect(r.ok).toBe(false);
+  });
+
+  it("инструмент доступен гостю", () => {
+    expect(toolsForRole("visitor").map((d) => d.name)).toContain("open_music");
+  });
+});

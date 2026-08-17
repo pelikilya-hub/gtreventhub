@@ -431,6 +431,18 @@ export function GtrBroOverlay({
       return;
     }
 
+    if (plan.kind === "music") {
+      metric("bro.text.music");
+      const r = await callTool("open_music", { artist: plan.artist, source: plan.source });
+      if (!r.ok)
+        return say("bro", `Музыку не нашёл: ${String(r.error ?? "нет в базе GTR")}`);
+      const d = (r.data ?? {}) as Record<string, unknown>;
+      const primary = (d.open ?? {}) as { label?: string };
+      say("bro", `${String(d.artist ?? plan.artist)} — держи. ${String(primary.label ?? "Ссылки ниже")}.`);
+      setCards((p2) => [{ kind: "music" as const, data: d }, ...p2].slice(0, 6));
+      return;
+    }
+
     if (plan.kind === "open") {
       say("bro", "Открываю.");
       onNavigate(plan.route);
@@ -758,6 +770,48 @@ function BroCardView({
           <a className="gtr-bro-btn go" href={String(d.grab ?? "#")} target="_blank" rel="noreferrer">Grab</a>
           <a className="gtr-bro-btn go" href={String(d.bolt ?? "#")} target="_blank" rel="noreferrer">Bolt</a>
           <a className="gtr-bro-btn" href={String(d.maps ?? "#")} target="_blank" rel="noreferrer">Карта</a>
+        </div>
+      </div>
+    );
+  }
+
+  if (card.kind === "music") {
+    // Музыка открывается наружу: в приложении её нет, и подменять сет
+    // экраном платформы — ровно тот баг, из-за которого «включи сеты»
+    // приводил человека в список заведений.
+    const links = Array.isArray(d.links)
+      ? (d.links as { source: string; label: string; url: string }[])
+      : [];
+    const listen = (d.listen ?? null) as Record<string, string | null> | null;
+    const rows = links.length
+      ? links
+      : listen
+        ? ([
+            ["youtube", "Сеты и клипы на YouTube", listen.youtube],
+            ["spotify", "Треки в Spotify", listen.spotify],
+            ["soundcloud", "Микстейпы на SoundCloud", listen.soundcloud],
+          ] as [string, string, string | null][])
+            .filter(([, , url]) => Boolean(url))
+            .map(([source, label, url]) => ({ source, label, url: String(url) }))
+        : [];
+    if (!rows.length) return null;
+    const who = String(d.artist ?? d.name ?? "");
+    return (
+      <div className="gtr-bro-card">
+        <div className="gtr-bro-card-k">Слушать · {who}</div>
+        {d.role ? <div className="gtr-bro-card-n">{String(d.role)}</div> : null}
+        <div className="gtr-bro-taxirow">
+          {rows.slice(0, 3).map((l) => (
+            <a
+              key={l.source}
+              className={`gtr-bro-btn${l.source === "youtube" ? " go" : ""}`}
+              href={l.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {l.source === "youtube" ? "YouTube" : l.source === "spotify" ? "Spotify" : "SoundCloud"}
+            </a>
+          ))}
         </div>
       </div>
     );

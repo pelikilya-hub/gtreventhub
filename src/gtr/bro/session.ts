@@ -30,6 +30,10 @@ export type BroCard =
   | { kind: "route"; data: Record<string, unknown> }
   | { kind: "taxi"; data: Record<string, unknown> }
   | { kind: "confirm"; data: Record<string, unknown> }
+  // Музыка живёт снаружи: Spotify, SoundCloud, YouTube. Открывать её
+  // «навигацией по приложению» нельзя — там её нет, и человек уезжает
+  // в случайный раздел вместо сета, который просил.
+  | { kind: "music"; data: Record<string, unknown> }
   | { kind: "navigate"; data: { route: string; entityId?: string } };
 
 export type BroLine = { who: "user" | "bro"; text: string; at: number };
@@ -385,6 +389,8 @@ export class BroSession {
           this.ev.onCard?.({ kind: "event", data: ev });
       else if (name === "get_event_details") this.ev.onCard?.({ kind: "venue", data });
       else if (name === "build_night_route") this.ev.onCard?.({ kind: "route", data });
+      else if (name === "open_music" || name === "get_artist_profile")
+        this.ev.onCard?.({ kind: "music", data });
       else if (name === "open_in_app")
         this.ev.onCard?.({ kind: "navigate", data: data as { route: string; entityId?: string } });
     }

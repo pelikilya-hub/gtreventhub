@@ -44,7 +44,10 @@ type Msg = {
   tool_calls?: { id: string; type: "function"; function: { name: string; arguments: string } }[];
   tool_call_id?: string;
 };
-type Card = { kind: "event" | "venue" | "route" | "taxi" | "confirm"; data: Record<string, unknown> };
+type Card = {
+  kind: "event" | "venue" | "route" | "taxi" | "confirm" | "music";
+  data: Record<string, unknown>;
+};
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -148,6 +151,8 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
           else if (name === "get_event_details") cards.push({ kind: "venue", data: rr.data });
           else if (name === "build_night_route") cards.push({ kind: "route", data: rr.data });
           else if (name === "call_taxi") cards.push({ kind: "taxi", data: rr.data });
+          else if (name === "open_music" || name === "get_artist_profile")
+            cards.push({ kind: "music", data: rr.data });
           else if (name === "get_venue_profile") cards.push({ kind: "venue", data: rr.data });
         };
         const saveDialog = async (reply: string, engine: string) => {

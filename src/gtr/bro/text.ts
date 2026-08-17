@@ -16,6 +16,7 @@ export type TextPlan =
   | { kind: "details"; index: number }
   | { kind: "route" }
   | { kind: "open"; route: string }
+  | { kind: "music"; artist: string; source: "youtube" | "spotify" | "soundcloud" | "any" }
   | { kind: "unknown" };
 
 /** Дата на Пхукете (UTC+7) со сдвигом в днях. Часовой пояс телефона
@@ -77,6 +78,35 @@ export const planOf = (raw: string): TextPlan => {
   if (det) return { kind: "details", index: Number(det[2]) };
 
   if (/^маршрут/.test(q)) return { kind: "route" };
+
+  // Музыка раньше падала в «открой …» и уводила человека в базу
+  // площадок: экрана с чужими сетами в приложении нет и не будет.
+  // Ловим музыкальную просьбу до навигации.
+  const music = q.match(
+    /(?:включи|поставь|послушать|послушаем|найди|покажи|открой|скинь)?\s*(?:мне\s+)?(?:сеты?|сет|треки?|музыку|микс(?:ы|тейпы?)?|клипы?|видео)\s*(.*)$/,
+  );
+  if (music && /сет|трек|музык|микс|клип|видео/.test(q)) {
+    const tail = music[1] ?? "";
+    const src: TextPlan extends never ? never : "youtube" | "spotify" | "soundcloud" | "any" =
+      /youtube|ютуб|ютьюб/.test(q)
+        ? "youtube"
+        : /spotify|спотифай|спотик/.test(q)
+          ? "spotify"
+          : /soundcloud|саундклауд|ск\b/.test(q)
+            ? "soundcloud"
+            : "any";
+    // Имя артиста — то, что осталось после служебных слов и площадки.
+    // Чистим по токенам: \b в JS не видит кириллицу, а regexp-замена
+    // оставляла огрызки вроде «lutang на е».
+    const STOP =
+      /^(на|в|во|из|по|мне|его|её|ее|их|плиз|please|пожалуйста|youtube|ютуб[а-яё]*|ютьюб[а-яё]*|spotify|спотиф[а-яё]*|спотик[а-яё]*|soundcloud|саундклауд[а-яё]*|сет[а-яё]*|трек[а-яё]*|музык[а-яё]*|микс[а-яё]*|клип[а-яё]*|видео)$/;
+    const artist = tail
+      .split(/[\s,.;!?]+/)
+      .filter((w) => w && !STOP.test(w))
+      .join(" ")
+      .trim();
+    if (artist) return { kind: "music", artist, source: src };
+  }
 
   const open = q.match(/^открой\s+(.+)$/);
   if (open)

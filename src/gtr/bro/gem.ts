@@ -426,6 +426,8 @@ export class GemSession {
         else if (name === "get_event_details") this.ev.onCard?.({ kind: "venue", data });
         else if (name === "build_night_route") this.ev.onCard?.({ kind: "route", data });
         else if (name === "call_taxi") this.ev.onCard?.({ kind: "taxi", data } as BroCard);
+        else if (name === "open_music" || name === "get_artist_profile")
+          this.ev.onCard?.({ kind: "music", data } as BroCard);
         else if (name === "get_venue_profile") this.ev.onCard?.({ kind: "venue", data });
         else if (name === "open_in_app")
           this.ev.onCard?.({ kind: "navigate", data: data as { route: string; entityId?: string } });

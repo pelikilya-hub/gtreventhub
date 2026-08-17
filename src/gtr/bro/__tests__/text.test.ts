@@ -121,3 +121,27 @@ describe("карантин выдумки", () => {
     expect(looksInvented("По базе на сегодня пусто — не буду выдумывать.", 0)).toBe(false);
   });
 });
+
+describe("музыкальные команды не уводят в навигацию", () => {
+  it("«открой сеты X на ютубе» — это музыка, а не экран приложения", () => {
+    const p = planOf("открой сеты LUTANG на ютубе");
+    expect(p.kind).toBe("music");
+    if (p.kind === "music") {
+      expect(p.artist).toBe("lutang");
+      expect(p.source).toBe("youtube");
+    }
+  });
+
+  it("площадка распознаётся по-русски и по-английски", () => {
+    const a = planOf("послушать треки лутанг в спотифай");
+    const b = planOf("включи микс dj meet на саундклауде");
+    expect(a.kind === "music" && a.source).toBe("spotify");
+    expect(b.kind === "music" && b.source).toBe("soundcloud");
+    expect(b.kind === "music" && b.artist).toBe("dj meet");
+  });
+
+  it("навигация по экранам приложения не сломалась", () => {
+    expect(planOf("открой карту").kind).toBe("open");
+    expect(planOf("открой артисты").kind).toBe("open");
+  });
+});

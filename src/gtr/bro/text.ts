@@ -17,6 +17,7 @@ export type TextPlan =
   | { kind: "route" }
   | { kind: "open"; route: string }
   | { kind: "music"; artist: string; source: "youtube" | "spotify" | "soundcloud" | "any" }
+  | { kind: "venues"; district?: string; kind2?: string; label: string }
   | { kind: "unknown" };
 
 /** Дата на Пхукете (UTC+7) со сдвигом в днях. Часовой пояс телефона
@@ -108,6 +109,50 @@ export const planOf = (raw: string): TextPlan => {
     if (artist) return { kind: "music", artist, source: src };
   }
 
+  // Поиск по базе площадок. Раньше такие фразы уходили в поиск событий
+  // и возвращали пустоту — человек делал вывод, что поиск сломан. База
+  // и афиша — разные вопросы: «какие клубы есть» и «что там сегодня».
+  // Границы слов задаём руками: \b в JS не видит кириллицу и «клубы»
+  // мимо такого шаблона проходят молча.
+  const VKIND: [string, RegExp][] = [
+    ["пляжный клуб", /пляжн[а-яё]*\s*клуб|бич\s*клаб|beach\s*club/],
+    ["клуб", /клуб|nightclub/],
+    ["бар", /(^|[^а-яё])бар/, ],
+    ["ресторан", /ресторан|поесть|поужинать|покушать|поужина/],
+    ["лаундж", /лаундж|lounge|rooftop|руфтоп/],
+  ];
+  const askVenues =
+    /(какие|какой|найди|подбери|покажи|список|есть ли|посоветуй|где)/.test(q) ||
+    /^(клубы|бары|рестораны|площадки|заведения|база)/.test(q);
+  if (askVenues && !/сегодня|завтра|выходн|афиш|событ|играет|лайнап/.test(q)) {
+    let kind2: string | undefined;
+    for (const [name, re] of VKIND)
+      if (re.test(q)) {
+        kind2 = name;
+        break;
+      }
+    let d: string | undefined;
+    for (const [canon, aliases] of DISTRICTS)
+      if (aliases.some((a) => q.includes(a))) {
+        d = canon;
+        break;
+      }
+    const PLURAL: Record<string, string> = {
+      "клуб": "клубы",
+      "бар": "бары",
+      "ресторан": "рестораны",
+      "лаундж": "лаунджи",
+      "пляжный клуб": "пляжные клубы",
+    };
+    if (kind2 || d)
+      return {
+        kind: "venues",
+        district: d,
+        kind2,
+        label: [kind2 ? PLURAL[kind2] : "площадки", d].filter(Boolean).join(" · "),
+      };
+  }
+
   const open = q.match(/^открой\s+(.+)$/);
   if (open)
     for (const [route, aliases] of OPEN_ROUTES)
@@ -149,6 +194,7 @@ export const planOf = (raw: string): TextPlan => {
 export const HELP_LINES = [
   "команды эфира:",
   "  события [район] [сегодня|завтра|выходные]",
+  "  какие клубы|бары|рестораны в <районе> — поиск по базе площадок",
   "  детали <номер из списка>",
   "  маршрут — вечер из последней выдачи",
   "  открой карта|артисты|календарь|подбор",
@@ -176,6 +222,18 @@ export const fmtEvents = (events: Ev[], label: string): string[] => {
     out.push(`  ${i + 1}. ${String(e.venue ?? "")} — ${String(e.title ?? "")} · ${String(e.start_at ?? "")}${dist}`);
   });
   out.push("детали <номер> — подробнее; маршрут — соберу вечер");
+  return out;
+};
+
+type Ven = { name?: unknown; type?: unknown; area?: unknown; music?: unknown; menu?: unknown };
+
+export const fmtVenues = (venues: Ven[], label: string): string[] => {
+  const out = [`по базе GTR — ${label}: ${venues.length}`];
+  venues.forEach((v, i) => {
+    out.push(`  ${i + 1}. ${String(v.name ?? "")} — ${String(v.type ?? "")} · ${String(v.area ?? "")}`);
+    if (v.music) out.push(`     звук: ${String(v.music).slice(0, 70)}`);
+  });
+  out.push("скажи название — расскажу подробно, забронирую стол или вызову такси");
   return out;
 };
 

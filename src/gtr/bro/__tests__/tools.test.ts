@@ -372,3 +372,91 @@ describe("музыка открывается наружу, а не навига
     expect(toolsForRole("visitor").map((d) => d.name)).toContain("open_music");
   });
 });
+
+describe("поиск по базе площадок", () => {
+  const guest = { email: "v@v", name: "Гость", role: "visitor" };
+
+  it("находит клубы в районе и говорит, что там можно сделать", async () => {
+    const r = await handlers.search_venues({ district: "Патонг", kind: "клуб", limit: 5 }, { ...ctx, user: guest });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { venues: { name: string; area: string; table_booking: string }[]; total: number };
+    expect(d.total).toBeGreaterThan(0);
+    expect(d.venues[0].area.toLowerCase()).toContain("patong");
+    expect(d.venues[0].table_booking).toBeTruthy();
+  });
+
+  it("у Café del Mar отмечены схема столов и меню", async () => {
+    const r = await handlers.search_venues({ query: "cafe del mar" }, { ...ctx, user: guest });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const v = (r.data as { venues: { name: string; menu: boolean }[] }).venues[0];
+    expect(v.menu).toBe(true);
+  });
+
+  it("бессмысленный запрос честно возвращает пусто, а не случайные места", async () => {
+    const r = await handlers.search_venues({ query: "зззхуфыв" }, { ...ctx, user: guest });
+    expect(r.ok).toBe(false);
+  });
+
+  it("гость видит инструмент в своём наборе", () => {
+    expect(toolsForRole("visitor").map((d) => d.name)).toContain("search_venues");
+  });
+});
+
+describe("пустой день не выглядит поломкой", () => {
+  it("на дату без событий возвращается ближайшее живое", async () => {
+    const prov: EventsProvider = {
+      id: "test",
+      search: async ({ dateFrom }) =>
+        dateFrom === "2026-08-17"
+          ? []
+          : [{ vid: "VEN-0002", events: [{ title: "Bliss Wednesdays", dateIso: "2026-08-19" }] }],
+    };
+    const r = await handlers.search_events(
+      { dateFrom: "2026-08-17", dateTo: "2026-08-17" },
+      { provider: prov },
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { events: unknown[]; nearest: { start_at: string; venue: string }[] };
+    expect(d.events).toHaveLength(0);
+    expect(d.nearest[0].start_at).toBe("2026-08-19");
+    expect(d.nearest[0].venue).toContain("Caf");
+  });
+});
+
+describe("релевантность поиска по базе", () => {
+  const guest = { email: "v@v", name: "Гость", role: "visitor" };
+
+  it("русский район и тип находят англоязычную базу", async () => {
+    const r = await handlers.search_venues(
+      { district: "Банг Тао", kind: "пляжный клуб", limit: 3 },
+      { ...ctx, user: guest },
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const v = (r.data as { venues: { name: string; area: string }[] }).venues;
+    expect(v.length).toBeGreaterThan(0);
+    expect(v.every((x) => /beach/i.test(x.name) || /beach/i.test(x.area))).toBe(true);
+  });
+
+  it("«клуб» отдаёт ночные клубы раньше пляжных", async () => {
+    const r = await handlers.search_venues({ district: "Патонг", kind: "клуб", limit: 3 }, { ...ctx, user: guest });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect((r.data as { venues: { name: string }[] }).venues[0].name).toContain("Illuzion");
+  });
+
+  it("поиск по имени ставит это заведение первым", async () => {
+    const r = await handlers.search_venues({ query: "illuzion" }, { ...ctx, user: guest });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect((r.data as { venues: { name: string }[] }).venues[0].name).toContain("Illuzion");
+  });
+
+  it("жанр ищется по-русски", async () => {
+    const r = await handlers.search_venues({ music: "техно", limit: 3 }, { ...ctx, user: guest });
+    expect(r.ok).toBe(true);
+  });
+});

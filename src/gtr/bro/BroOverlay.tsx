@@ -18,6 +18,7 @@ import {
   fmtDetails,
   fmtEvents,
   fmtRoute,
+  fmtVenues,
   greetLines,
   HELP_LINES,
   openerFor,
@@ -78,6 +79,7 @@ const VOICE_SETS: Record<VoiceProvider, [string, string][]> = {
 const QUICK: { t: string; q: string }[] = [
   { t: "🍽 Пожрать", q: "столы в кафе дель мар" },
   { t: "🔥 Нажраться", q: "что сегодня" },
+  { t: "🏝 Клубы рядом", q: "какие клубы в патонге" },
   { t: "🗺 Маршрут", q: "маршрут" },
   { t: "🎧 Артисты", q: "открой артисты" },
   { t: "🚕 Такси", q: "вызови такси" },
@@ -431,6 +433,22 @@ export function GtrBroOverlay({
       return;
     }
 
+    if (plan.kind === "venues") {
+      metric("bro.text.venues");
+      say("bro", openerFor(q));
+      const r = await callTool("search_venues", {
+        district: plan.district,
+        kind: plan.kind2,
+        limit: 5,
+      });
+      if (!r.ok) return say("bro", `По базе пусто: ${String(r.error ?? "")}`);
+      const venues = (r.data?.venues as Record<string, unknown>[] | undefined) ?? [];
+      for (const l of fmtVenues(venues, plan.label)) say(l.startsWith("  ") ? "sys" : "bro", l);
+      for (const v of venues.slice(0, 3))
+        setCards((p2) => [{ kind: "venue" as const, data: v }, ...p2].slice(0, 6));
+      return;
+    }
+
     if (plan.kind === "music") {
       metric("bro.text.music");
       const r = await callTool("open_music", { artist: plan.artist, source: plan.source });
@@ -459,7 +477,21 @@ export function GtrBroOverlay({
       });
       if (!r.ok) return say("bro", `Афиша не ответила: ${String(r.error ?? "")}`);
       const events = (r.data?.events as Record<string, unknown>[] | undefined) ?? [];
-      if (!events.length) return say("bro", EMPTY_LINE);
+      if (!events.length) {
+        // Пустой день — не тупик: сразу показываем ближайшее живое,
+        // иначе человек решает, что поиск сломан.
+        const near = (r.data?.nearest as Record<string, unknown>[] | undefined) ?? [];
+        say("bro", EMPTY_LINE);
+        if (near.length) {
+          say("bro", "Ближайшее по базе:");
+          for (const e of near)
+            say("sys", `  ${String(e.start_at ?? "")} · ${String(e.venue ?? "")} — ${String(e.title ?? "")}`);
+          lastEvents.current = near;
+          for (const e of near.slice(0, 3))
+            setCards((p2) => [{ kind: "event" as const, data: e }, ...p2].slice(0, 6));
+        }
+        return;
+      }
       lastEvents.current = events;
       for (const l of fmtEvents(events, plan.label)) say(l.startsWith("  ") ? "sys" : "bro", l);
       for (const ev of events.slice(0, 3)) setCards((p) => [{ kind: "event" as const, data: ev }, ...p].slice(0, 6));

@@ -145,3 +145,27 @@ describe("музыкальные команды не уводят в навиг�
     expect(planOf("открой артисты").kind).toBe("open");
   });
 });
+
+describe("поиск по базе площадок в текстовом режиме", () => {
+  it("«какие клубы в патонге» ищет базу, а не афишу", () => {
+    const p = planOf("какие клубы в патонге");
+    expect(p.kind).toBe("venues");
+    if (p.kind === "venues") {
+      expect(p.district).toBe("Патонг");
+      expect(p.kind2).toBe("клуб");
+    }
+  });
+
+  it("типы мест распознаются, включая пляжные клубы и еду", () => {
+    const a = planOf("найди пляжный клуб в банг тао");
+    const b = planOf("где поесть в камале");
+    expect(a.kind === "venues" && a.kind2).toBe("пляжный клуб");
+    expect(b.kind === "venues" && b.kind2).toBe("ресторан");
+  });
+
+  it("вопрос про афишу остаётся поиском событий", () => {
+    expect(planOf("что сегодня в патонге").kind).toBe("search");
+    expect(planOf("куда пойти сегодня").kind).toBe("search");
+    expect(planOf("какие клубы играют сегодня").kind).toBe("search");
+  });
+});

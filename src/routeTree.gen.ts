@@ -15,6 +15,7 @@ import { Route as ApiAfishaRouteImport } from './routes/api.afisha'
 import { Route as ApiAfishaSendRouteImport } from './routes/api.afisha-send'
 import { Route as ApiAphotoRouteImport } from './routes/api.aphoto'
 import { Route as ApiAvideoRouteImport } from './routes/api.avideo'
+import { Route as ApiBossHeadRouteImport } from './routes/api.boss-head'
 import { Route as ApiCommunityDigestRouteImport } from './routes/api.community-digest'
 import { Route as ApiGtrBroGemRouteImport } from './routes/api.gtr-bro-gem'
 import { Route as ApiGtrBroGemtestRouteImport } from './routes/api.gtr-bro-gemtest'
@@ -66,6 +67,11 @@ const ApiAphotoRoute = ApiAphotoRouteImport.update({
 const ApiAvideoRoute = ApiAvideoRouteImport.update({
   id: '/api/avideo',
   path: '/api/avideo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBossHeadRoute = ApiBossHeadRouteImport.update({
+  id: '/api/boss-head',
+  path: '/api/boss-head',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCommunityDigestRoute = ApiCommunityDigestRouteImport.update({
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
+  '/api/boss-head': typeof ApiBossHeadRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
   '/api/gtr-bro-gemtest': typeof ApiGtrBroGemtestRoute
@@ -215,6 +222,7 @@ export interface FileRoutesByTo {
   '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
+  '/api/boss-head': typeof ApiBossHeadRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
   '/api/gtr-bro-gemtest': typeof ApiGtrBroGemtestRoute
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
+  '/api/boss-head': typeof ApiBossHeadRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
   '/api/gtr-bro-gemtest': typeof ApiGtrBroGemtestRoute
@@ -278,6 +287,7 @@ export interface FileRouteTypes {
     | '/api/afisha-send'
     | '/api/aphoto'
     | '/api/avideo'
+    | '/api/boss-head'
     | '/api/community-digest'
     | '/api/gtr-bro-gem'
     | '/api/gtr-bro-gemtest'
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/api/afisha-send'
     | '/api/aphoto'
     | '/api/avideo'
+    | '/api/boss-head'
     | '/api/community-digest'
     | '/api/gtr-bro-gem'
     | '/api/gtr-bro-gemtest'
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
     | '/api/afisha-send'
     | '/api/aphoto'
     | '/api/avideo'
+    | '/api/boss-head'
     | '/api/community-digest'
     | '/api/gtr-bro-gem'
     | '/api/gtr-bro-gemtest'
@@ -368,6 +380,7 @@ export interface RootRouteChildren {
   ApiAfishaSendRoute: typeof ApiAfishaSendRoute
   ApiAphotoRoute: typeof ApiAphotoRoute
   ApiAvideoRoute: typeof ApiAvideoRoute
+  ApiBossHeadRoute: typeof ApiBossHeadRoute
   ApiCommunityDigestRoute: typeof ApiCommunityDigestRoute
   ApiGtrBroGemRoute: typeof ApiGtrBroGemRoute
   ApiGtrBroGemtestRoute: typeof ApiGtrBroGemtestRoute
@@ -427,6 +440,13 @@ declare module '@tanstack/react-router' {
       path: '/api/avideo'
       fullPath: '/api/avideo'
       preLoaderRoute: typeof ApiAvideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/boss-head': {
+      id: '/api/boss-head'
+      path: '/api/boss-head'
+      fullPath: '/api/boss-head'
+      preLoaderRoute: typeof ApiBossHeadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/community-digest': {
@@ -617,6 +637,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAfishaSendRoute: ApiAfishaSendRoute,
   ApiAphotoRoute: ApiAphotoRoute,
   ApiAvideoRoute: ApiAvideoRoute,
+  ApiBossHeadRoute: ApiBossHeadRoute,
   ApiCommunityDigestRoute: ApiCommunityDigestRoute,
   ApiGtrBroGemRoute: ApiGtrBroGemRoute,
   ApiGtrBroGemtestRoute: ApiGtrBroGemtestRoute,

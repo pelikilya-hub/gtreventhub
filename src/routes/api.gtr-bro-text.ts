@@ -14,7 +14,7 @@ import { currentUser } from "../gtr/auth";
 import { getKvNs, kvGetJson } from "../gtr/kv-ns";
 import { buildTextPrompt, type BroContext } from "../gtr/bro/prompt.ru";
 import { kvProvider } from "../gtr/bro/provider";
-import { handlers, TOOL_DEFS, type ToolName } from "../gtr/bro/tools";
+import { handlers, TOOL_DEFS, WRITE_TOOLS, type ToolCtx, type ToolName } from "../gtr/bro/tools";
 
 type Flags = { broEnabled?: boolean; broKill?: boolean };
 type Brain = { url?: string; token?: string; model?: string };
@@ -41,7 +41,7 @@ type Msg = {
   tool_calls?: { id: string; type: "function"; function: { name: string; arguments: string } }[];
   tool_call_id?: string;
 };
-type Card = { kind: "event" | "venue" | "route"; data: Record<string, unknown> };
+type Card = { kind: "event" | "venue" | "route" | "taxi" | "confirm"; data: Record<string, unknown> };
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -108,9 +108,25 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
           const fn = handlers[name];
           if (!fn) return { ok: false, error: "unknown-tool", retryable: false };
           trace.push({ tool: name, args });
+          // Пишущие инструменты в текстовой петле не исполняются: на табло
+          // уходит карточка подтверждения, и только нажатие человека
+          // отправит вызов в /api/gtr-bro-tool. Голосовое «да» и решение
+          // модели этой границы не проходят.
+          if (WRITE_TOOLS[name]) {
+            cards.push({ kind: "confirm", data: { name, args, summary: WRITE_TOOLS[name] } });
+            return {
+              ok: false,
+              error: "awaiting-user-confirmation",
+              note: "Пользователю показана кнопка подтверждения — скажи, что ждёшь нажатия.",
+            };
+          }
+          const ctx2: ToolCtx = {
+            provider,
+            user: { email: user.email, name: user.name, role: user.role, boss: user.boss },
+          };
           try {
             return await Promise.race([
-              fn(args, { provider }),
+              fn(args, ctx2),
               new Promise<{ ok: false; error: string; retryable: boolean }>((r) =>
                 setTimeout(() => r({ ok: false, error: "timeout", retryable: true }), 8000),
               ),
@@ -127,6 +143,8 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
               cards.push({ kind: "event", data: ev });
           else if (name === "get_event_details") cards.push({ kind: "venue", data: rr.data });
           else if (name === "build_night_route") cards.push({ kind: "route", data: rr.data });
+          else if (name === "call_taxi") cards.push({ kind: "taxi", data: rr.data });
+          else if (name === "get_venue_profile") cards.push({ kind: "venue", data: rr.data });
         };
         const saveDialog = async (reply: string, engine: string) => {
           try {

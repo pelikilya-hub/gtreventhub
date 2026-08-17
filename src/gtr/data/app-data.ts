@@ -169,6 +169,7 @@ export type ScreenId =
   | "promo"
   | "private"
   | "myshows"
+  | "fling"
   | "admin";
 
 export const NAV_VENUE: [ScreenId, string, string, string][] = [

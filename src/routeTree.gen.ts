@@ -22,6 +22,7 @@ import { Route as ApiGtrBroSdpRouteImport } from './routes/api.gtr-bro-sdp'
 import { Route as ApiGtrBroSessionRouteImport } from './routes/api.gtr-bro-session'
 import { Route as ApiGtrBroTextRouteImport } from './routes/api.gtr-bro-text'
 import { Route as ApiGtrBroToolRouteImport } from './routes/api.gtr-bro-tool'
+import { Route as ApiGtrFlingRouteImport } from './routes/api.gtr-fling'
 import { Route as ApiPosterRouteImport } from './routes/api.poster'
 import { Route as ApiPushRouteImport } from './routes/api.push'
 import { Route as ApiSpotifyCallbackRouteImport } from './routes/api.spotify-callback'
@@ -101,6 +102,11 @@ const ApiGtrBroTextRoute = ApiGtrBroTextRouteImport.update({
 const ApiGtrBroToolRoute = ApiGtrBroToolRouteImport.update({
   id: '/api/gtr-bro-tool',
   path: '/api/gtr-bro-tool',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGtrFlingRoute = ApiGtrFlingRouteImport.update({
+  id: '/api/gtr-fling',
+  path: '/api/gtr-fling',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPosterRoute = ApiPosterRouteImport.update({
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
+  '/api/gtr-fling': typeof ApiGtrFlingRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
@@ -222,6 +229,7 @@ export interface FileRoutesByTo {
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
+  '/api/gtr-fling': typeof ApiGtrFlingRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
@@ -253,6 +261,7 @@ export interface FileRoutesById {
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
+  '/api/gtr-fling': typeof ApiGtrFlingRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
@@ -285,6 +294,7 @@ export interface FileRouteTypes {
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
+    | '/api/gtr-fling'
     | '/api/poster'
     | '/api/push'
     | '/api/spotify-callback'
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
+    | '/api/gtr-fling'
     | '/api/poster'
     | '/api/push'
     | '/api/spotify-callback'
@@ -344,6 +355,7 @@ export interface FileRouteTypes {
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
+    | '/api/gtr-fling'
     | '/api/poster'
     | '/api/push'
     | '/api/spotify-callback'
@@ -375,6 +387,7 @@ export interface RootRouteChildren {
   ApiGtrBroSessionRoute: typeof ApiGtrBroSessionRoute
   ApiGtrBroTextRoute: typeof ApiGtrBroTextRoute
   ApiGtrBroToolRoute: typeof ApiGtrBroToolRoute
+  ApiGtrFlingRoute: typeof ApiGtrFlingRoute
   ApiPosterRoute: typeof ApiPosterRoute
   ApiPushRoute: typeof ApiPushRoute
   ApiSpotifyCallbackRoute: typeof ApiSpotifyCallbackRoute
@@ -476,6 +489,13 @@ declare module '@tanstack/react-router' {
       path: '/api/gtr-bro-tool'
       fullPath: '/api/gtr-bro-tool'
       preLoaderRoute: typeof ApiGtrBroToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gtr-fling': {
+      id: '/api/gtr-fling'
+      path: '/api/gtr-fling'
+      fullPath: '/api/gtr-fling'
+      preLoaderRoute: typeof ApiGtrFlingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/poster': {
@@ -624,6 +644,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGtrBroSessionRoute: ApiGtrBroSessionRoute,
   ApiGtrBroTextRoute: ApiGtrBroTextRoute,
   ApiGtrBroToolRoute: ApiGtrBroToolRoute,
+  ApiGtrFlingRoute: ApiGtrFlingRoute,
   ApiPosterRoute: ApiPosterRoute,
   ApiPushRoute: ApiPushRoute,
   ApiSpotifyCallbackRoute: ApiSpotifyCallbackRoute,

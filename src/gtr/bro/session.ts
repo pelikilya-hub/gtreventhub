@@ -28,6 +28,8 @@ export type BroCard =
   | { kind: "event"; data: Record<string, unknown> }
   | { kind: "venue"; data: Record<string, unknown> }
   | { kind: "route"; data: Record<string, unknown> }
+  | { kind: "taxi"; data: Record<string, unknown> }
+  | { kind: "confirm"; data: Record<string, unknown> }
   | { kind: "navigate"; data: { route: string; entityId?: string } };
 
 export type BroLine = { who: "user" | "bro"; text: string; at: number };
@@ -48,12 +50,11 @@ export type BroEvents = {
   onConfirm?: (ask: { tool: string; summary: string }) => Promise<boolean>;
 };
 
-/** Инструменты, требующие подтверждения в интерфейсе перед выполнением:
- *  покупка, бронь, приглашения, передача геолокации третьей стороне,
- *  заказ транспорта. В MVP таких инструментов нет — набор пуст намеренно,
- *  и это защёлка на будущее: новый write-инструмент нельзя выпустить,
- *  не решив, что именно показать человеку перед выполнением. */
-export const NEEDS_CONFIRM: Record<string, string> = {};
+/** Инструменты, требующие подтверждения в интерфейсе перед выполнением.
+ *  Источник — WRITE_TOOLS в tools.ts: новый пишущий инструмент нельзя
+ *  выпустить, не решив, что именно показать человеку перед выполнением. */
+import { WRITE_TOOLS } from "./tools";
+export const NEEDS_CONFIRM: Record<string, string> = WRITE_TOOLS;
 
 export type BroStart = {
   // Сервер валидирует голос сам; узкий тип здесь мешал общему интерфейсу

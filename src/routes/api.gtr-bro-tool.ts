@@ -8,9 +8,26 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { currentUser } from "../gtr/auth";
-import { getKvNs, kvGetJson } from "../gtr/kv-ns";
+import { COMMUNITY_KEY } from "../gtr/community";
+import { getKvNs, kvGetJson, type KvNs } from "../gtr/kv-ns";
+import { tgApi } from "../gtr/tg";
 import { kvProvider } from "../gtr/bro/provider";
-import { handlers, type ToolName } from "../gtr/bro/tools";
+import { handlers, type ToolCtx, type ToolName } from "../gtr/bro/tools";
+
+/** Отправка в Telegram для инструментов BRO. Цели закрыты списком:
+ *  boss — рабочий чат команды (секрет воркера), chat — чат сообщества
+ *  из настроек. Произвольных chat_id отсюда не бывает. */
+const tgSender = (ns: KvNs) => async (target: "boss" | "chat", text: string) => {
+  let chatId: string | number | undefined =
+    typeof process !== "undefined" ? process.env?.TELEGRAM_CHAT_ID : undefined;
+  if (target === "chat") {
+    const cfg = await kvGetJson<{ chatId?: number }>(ns, COMMUNITY_KEY);
+    chatId = cfg?.chatId;
+  }
+  if (!chatId) return false;
+  const r = await tgApi<unknown>("sendMessage", { chat_id: chatId, text }).catch(() => null);
+  return Boolean(r && (r as { ok?: boolean }).ok);
+};
 
 type Flags = { broEnabled?: boolean; broKill?: boolean };
 
@@ -45,8 +62,14 @@ export const Route = createFileRoute("/api/gtr-bro-tool")({
 
         const args = body.args && typeof body.args === "object" ? body.args : {};
         try {
+          const ctx: ToolCtx = {
+            provider: kvProvider(ns),
+            user: { email: user.email, name: user.name, role: user.role, boss: user.boss },
+            kv: { put: (k, v, o) => ns.put(k, v, o) },
+            tgSend: tgSender(ns),
+          };
           const result = await Promise.race([
-            fn(args as Record<string, unknown>, { provider: kvProvider(ns) }),
+            fn(args as Record<string, unknown>, ctx),
             // Зависший инструмент хуже отсутствующего: модель будет ждать
             // и молчать, а пользователь решит, что связь оборвалась.
             new Promise<{ ok: false; error: string; retryable: boolean }>((r) =>

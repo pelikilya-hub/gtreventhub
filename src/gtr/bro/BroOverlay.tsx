@@ -508,7 +508,7 @@ export function GtrBroOverlay({
         {cards.length > 0 && (
           <div className="gtr-bro-cards">
             {cards.map((c, i) => (
-              <BroCardView key={i} card={c} onNavigate={onNavigate} />
+              <BroCardView key={i} card={c} onNavigate={onNavigate} onSay={say} />
             ))}
           </div>
         )}
@@ -652,11 +652,73 @@ const VERIF_RU: Record<string, string> = {
 function BroCardView({
   card,
   onNavigate,
+  onSay,
 }: {
   card: BroCard;
   onNavigate: (route: string, entityId?: string) => void;
+  onSay?: (who: "bro" | "sys", text: string) => void;
 }) {
   const d = card.data as Record<string, unknown>;
+
+  if (card.kind === "taxi") {
+    // Заказ подтверждает сам человек в приложении такси — здесь только
+    // маршрут с уже поставленной точкой.
+    return (
+      <div className="gtr-bro-card">
+        <div className="gtr-bro-card-k">Такси → {String(d.venue ?? "")}</div>
+        <div className="gtr-bro-card-n">{String(d.area ?? "")} · точка назначения уже в ссылке</div>
+        <div className="gtr-bro-taxirow">
+          <a className="gtr-bro-btn go" href={String(d.grab ?? "#")} target="_blank" rel="noreferrer">Grab</a>
+          <a className="gtr-bro-btn go" href={String(d.bolt ?? "#")} target="_blank" rel="noreferrer">Bolt</a>
+          <a className="gtr-bro-btn" href={String(d.maps ?? "#")} target="_blank" rel="noreferrer">Карта</a>
+        </div>
+      </div>
+    );
+  }
+
+  if (card.kind === "confirm") {
+    // Единственная дверь для пишущих действий из текстовой петли.
+    return (
+      <div className="gtr-bro-card">
+        <div className="gtr-bro-card-k">Подтверди действие</div>
+        <div className="gtr-bro-card-t">{String(d.summary ?? "")}</div>
+        <div className="gtr-bro-card-n">{JSON.stringify(d.args ?? {}).slice(0, 140)}</div>
+        <div className="gtr-bro-taxirow">
+          <button
+            className="gtr-bro-btn go"
+            onClick={() => {
+              void (async () => {
+                try {
+                  const r = await fetch("/api/gtr-bro-tool", {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
+                    credentials: "same-origin",
+                    body: JSON.stringify({ name: d.name, args: d.args ?? {}, callId: "confirm" }),
+                    signal: AbortSignal.timeout(15_000),
+                  });
+                  const data = (await r.json()) as { result?: { ok?: boolean; data?: { note?: string }; error?: string } };
+                  const res = data.result;
+                  onSay?.(
+                    "bro",
+                    res?.ok
+                      ? (res.data?.note ?? "Сделано.")
+                      : `Не вышло: ${res?.error ?? "ошибка"}`,
+                  );
+                } catch {
+                  onSay?.("sys", "подтверждение не дошло до сервера");
+                }
+              })();
+            }}
+          >
+            Да, делаем
+          </button>
+          <button className="gtr-bro-btn" onClick={() => onSay?.("sys", "действие отменено")}>
+            Отмена
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (card.kind === "route") {
     const legs = (d.legs as Record<string, unknown>[] | undefined) ?? [];
@@ -677,7 +739,7 @@ function BroCardView({
   const verif = String(d.verification_status ?? "unknown");
   return (
     <button className="gtr-bro-card act" onClick={() => onNavigate("venueCard", vid)}>
-      <div className="gtr-bro-card-k">{String(d.venue ?? d.title ?? "")}</div>
+      <div className="gtr-bro-card-k">{String(d.venue ?? d.name ?? d.title ?? "")}</div>
       {Boolean(d.title) && card.kind === "event" && <div className="gtr-bro-card-t">{String(d.title)}</div>}
       <div className="gtr-bro-card-m">
         {d.start_at ? <span>{String(d.start_at)}</span> : null}

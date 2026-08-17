@@ -3661,3 +3661,76 @@ html { -webkit-tap-highlight-color: transparent; }
   font-size: 12px;
   cursor: pointer;
 }
+
+/* ================================================================== */
+/* GTR FLING — видео-рулетка                                           */
+/* ================================================================== */
+.gtr-fling { display: flex; flex-direction: column; gap: 10px; }
+.gtr-fling-stage {
+  position: relative;
+  box-sizing: border-box;
+  width: 100vw;
+  max-width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  height: min(68svh, 640px);
+  background: #05060f;
+  overflow: hidden;
+}
+.gtr-fling-remote { width: 100%; height: 100%; object-fit: cover; background: #05060f; }
+.gtr-fling-self {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 96px;
+  height: 128px;
+  object-fit: cover;
+  background: #0a0c1c;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25), 0 6px 24px rgba(0, 0, 0, 0.5);
+  transform: scaleX(-1);
+}
+.gtr-fling-veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+  background: radial-gradient(90% 70% at 50% 40%, rgba(123, 77, 255, 0.16), transparent 70%);
+  padding: 0 24px;
+}
+.gtr-fling-veil img { width: 64px; height: 64px; animation: gtr-fling-spin 5s linear infinite; }
+@keyframes gtr-fling-spin { to { transform: rotate(360deg); } }
+.gtr-fling-status { font: 500 13px/1.5 "Golos Text", sans-serif; color: var(--gtr-t2); max-width: 34ch; }
+.gtr-fling-bar { display: flex; gap: 8px; }
+.gtr-fling-btn {
+  flex: 1;
+  border: 0;
+  padding: 14px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font: 700 12px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.gtr-fling-btn.go { background: linear-gradient(90deg, rgba(123, 77, 255, 0.55), rgba(0, 194, 255, 0.45)); }
+.gtr-fling-btn.danger { background: rgba(229, 35, 27, 0.3); }
+.gtr-fling-btn:disabled { opacity: 0.4; cursor: default; }
+.gtr-fling-hint { font: 500 10.5px/1.5 "JetBrains Mono", monospace; color: var(--gtr-t2); text-align: center; }
+.gtr-fling-gate-t { font: 700 18px/1.3 "Golos Text", sans-serif; margin: 8px 0 10px; }
+.gtr-fling-rules p { font: 500 12.5px/1.6 "Golos Text", sans-serif; color: var(--gtr-t2); margin: 0 0 10px; }
+.gtr-fling-agree {
+  border: 0;
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(90deg, rgba(123, 77, 255, 0.55), rgba(255, 79, 216, 0.4));
+  color: #fff;
+  font: 700 12px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.gtr-bro-taxirow { display: flex; gap: 6px; margin-top: 6px; }
+.gtr-bro-taxirow .gtr-bro-btn { text-align: center; text-decoration: none; line-height: 1.2; padding: 10px 8px; }

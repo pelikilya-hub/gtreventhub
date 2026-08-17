@@ -6,8 +6,8 @@ import { describe, expect, it } from "vitest";
 import { NEEDS_CONFIRM } from "../session";
 
 describe("граница подтверждений", () => {
-  it("в MVP нет write-инструментов", () => {
-    expect(Object.keys(NEEDS_CONFIRM)).toHaveLength(0);
+  it("оба пишущих инструмента под замком", () => {
+    expect(Object.keys(NEEDS_CONFIRM).sort()).toEqual(["create_event_draft", "send_telegram"]);
   });
 
   it("каждая запись несёт текст для человека", () => {

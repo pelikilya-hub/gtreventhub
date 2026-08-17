@@ -30,6 +30,7 @@ import {
   fmtPull,
 } from "./text";
 import { VOICE_LAB_LINES, type PersonaMode } from "./prompt.ru";
+import { chatStale, touchChat } from "./chat-life";
 import { isTeam } from "./roles";
 import { GemSession } from "./gem";
 import { BroSession, type BroCard, type BroState } from "./session";
@@ -299,6 +300,9 @@ export function GtrBroOverlay({
   useEffect(() => {
     if (!open && ses.current) stop();
     if (!open) {
+      // Отмечаем момент выхода: три минуты считаются от него, а не от
+      // последней реплики BRO.
+      touchChat();
       hello.current = false;
       greeted.current = false;
     }
@@ -317,6 +321,14 @@ export function GtrBroOverlay({
   useEffect(() => {
     if (!open || greeted.current) return;
     greeted.current = true;
+    // Свежий разговор — просто продолжаем: ни чистки, ни повторной
+    // визитки. Человек вышел на минуту, а не начал заново.
+    const stale = chatStale();
+    touchChat();
+    if (!stale) return;
+    setRows([]);
+    setCards([]);
+    lastEvents.current = [];
     const lines = greetLines(userName, role, new Date().getDate());
     const timers: number[] = [];
     lines.forEach((l, i) => {
@@ -390,8 +402,10 @@ export function GtrBroOverlay({
   };
   const err = state === "error" ? (ERROR_RU[detail ?? ""] ?? "Не получилось. Попробуй ещё раз.") : null;
 
-  const say = (who: Row["who"], text: string) =>
+  const say = (who: Row["who"], text: string) => {
+    touchChat();
     setRows((p) => [...p.slice(-120), { who, text, done: true }]);
+  };
 
   const callTool = async (name: string, args: Record<string, unknown>) => {
     const r = await fetch("/api/gtr-bro-tool", {

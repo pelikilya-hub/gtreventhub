@@ -657,7 +657,7 @@ export function GtrBroOverlay({
         {chatView ? (
           <div className="gtr-bro-chat" ref={dosRef} aria-live="polite">
             {rows.filter((r) => r.who !== "sys").length === 0 ? (
-              <div className="gtr-bro-chat-empty">Напиши или нажми кнопку ниже</div>
+              <div className="gtr-bro-chat-empty">Напиши сообщение или нажми знак ниже</div>
             ) : null}
             {rows
               .filter((r) => r.who !== "sys")

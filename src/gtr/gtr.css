@@ -3973,51 +3973,64 @@ html { -webkit-tap-highlight-color: transparent; }
 /* ответила связь. Это честно на отладке и утомительно в клубе, где    */
 /* человеку нужен ответ, а не лог. Чат оставляет только реплики.       */
 /* ------------------------------------------------------------------ */
+/* Разговор висит в воздухе: ни рамки, ни подложки. Реплики идут сверху
+   вниз, как в записной книжке, а не прижимаются ко дну терминала. */
 .gtr-bro-chat {
   box-sizing: border-box;
   height: 208px;
   overflow-y: auto;
   overscroll-behavior: contain;
   margin-bottom: 10px;
-  padding: 12px 12px 4px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  padding: 4px 2px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  justify-content: flex-start;
+  gap: 10px;
 }
 .gtr-bro-chat-empty {
-  margin: auto;
+  margin: 6px 0 0;
   font: 500 12px/1.5 "Golos Text", sans-serif;
   color: var(--gtr-t3);
 }
 .gtr-bro-msg {
-  max-width: 86%;
-  padding: 9px 12px;
-  font: 500 13.5px/1.5 "Golos Text", sans-serif;
+  max-width: 88%;
+  padding: 8px 12px;
+  font: 500 13.5px/1.55 "Golos Text", sans-serif;
   white-space: pre-wrap;
   word-break: break-word;
+  /* Появление стоит ровно два свойства: смещение и прозрачность. Оба
+     считает композитор, поэтому лента не дёргается даже на телефоне. */
+  animation: gtr-bro-rise 0.22s cubic-bezier(0.22, 0.9, 0.24, 1) both;
 }
-/* Реплика человека прижата вправо и подсвечена — как в любом мессенджере:
-   переучивать человека новому языку интерфейса ради стиля не стоит. */
+/* Реплика человека — справа и светится, ответ BRO — слева и почти без
+   подложки: он должен читаться как голос, а не как плашка. */
 .gtr-bro-msg.user {
   align-self: flex-end;
-  background: rgba(123, 77, 255, 0.26);
+  background: rgba(123, 77, 255, 0.2);
+  box-shadow: 0 6px 18px rgba(123, 77, 255, 0.14);
   color: #fff;
 }
 .gtr-bro-msg.bro {
   align-self: flex-start;
-  background: rgba(255, 255, 255, 0.07);
+  padding-left: 2px;
+  background: none;
   color: var(--gtr-t1);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
 }
+@keyframes gtr-bro-rise {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: none; }
+}
+/* Поле ввода — единственная плотная деталь в эфире: к нему тянется рука,
+   и оно обязано быть видимым без прицеливания. */
 .gtr-bro-say {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
   padding: 4px 4px 4px 12px;
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 .gtr-bro-sayin {
   flex: 1;
@@ -4045,4 +4058,20 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-bro-saygo:disabled { opacity: 0.35; cursor: default; }
 @media (min-width: 861px) {
   .gtr-bro-chat { height: min(46vh, 420px); }
+}
+
+/* ------------------------------------------------------------------ */
+/* Плавность на телефоне                                               */
+/*                                                                     */
+/* Четыре пятна света во весь экран, каждое со своим бесконечным        */
+/* дрейфом, — самый дорогой фон продукта. На телефоне оставляем два и   */
+/* замедляем ход: картинка та же, работы вдвое меньше.                  */
+@media (any-pointer: coarse) {
+  .gtr-atmo span:nth-child(3),
+  .gtr-atmo span:nth-child(4) {
+    display: none;
+  }
+  .gtr-atmo span {
+    animation-duration: 52s;
+  }
 }

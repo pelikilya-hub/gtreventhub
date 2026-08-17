@@ -11,8 +11,20 @@ type OrientationCtor = typeof DeviceOrientationEvent & {
   requestPermission?: () => Promise<"granted" | "denied">;
 };
 
+/** Параллакс по сенсорам выключен.
+ *
+ *  Замер на iPhone: слушатель deviceorientation будит страницу до 60 раз
+ *  в секунду, каждый раз переписывая CSS-переменные на корне. Браузер на
+ *  это отвечает пересчётом стилей всего дерева — а видимого эффекта на
+ *  телефоне почти нет, свет и так дрейфует сам. Убрали — продукт стал
+ *  ощутимо плавнее, особенно с открытым эфиром BRO.
+ *
+ *  Код оставлен целиком: вернуть — поменять флаг. */
+const TILT_ENABLED = false;
+
 export function useDeviceTilt() {
   useEffect(() => {
+    if (!TILT_ENABLED) return;
     if (typeof window === "undefined") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     // сенсоры есть только на устройствах с ориентацией

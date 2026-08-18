@@ -35,13 +35,19 @@ $dir = "$env:USERPROFILE\gtr-brain"
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
 Set-Location $dir
 
+# Качаем потоково через WebClient: Invoke-WebRequest в PowerShell 5.1
+# держит весь файл в памяти — на модели в 5 ГБ это конец.
+function Get-File($url, $out) {
+    (New-Object System.Net.WebClient).DownloadFile($url, $out)
+}
+
 function Get-GithubAsset($repo, $pattern, $out) {
     if (Test-Path $out) { return }
     Write-Host ">> Скачиваю $pattern из $repo ..."
     $rel = Invoke-RestMethod "https://api.github.com/repos/$repo/releases/latest"
     $asset = $rel.assets | Where-Object { $_.name -match $pattern } | Select-Object -First 1
     if (-not $asset) { throw "Не нашёл ассет $pattern в $repo — проверьте вручную." }
-    Invoke-WebRequest $asset.browser_download_url -OutFile $out
+    Get-File $asset.browser_download_url $out
 }
 
 # ---- 1. Проверка GPU --------------------------------------------------
@@ -88,15 +94,17 @@ if (-not $serverExe) {
 # ---- 3. Модель: Qwen3-8B Q4_K_M (~5 ГБ) ------------------------------
 $model = "$dir\Qwen3-8B-Q4_K_M.gguf"
 if (-not (Test-Path $model)) {
-    Write-Host ">> Скачиваю Qwen3-8B Q4_K_M (~5 ГБ, один раз)..."
-    Invoke-WebRequest "https://huggingface.co/Qwen/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf" -OutFile $model
+    Write-Host ">> Скачиваю Qwen3-8B Q4_K_M (~5 ГБ, один раз — наберись терпения)..."
+    Get-File "https://huggingface.co/Qwen/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf" $model
 }
 
 # ---- 4. Токен доступа -------------------------------------------------
 $tokenFile = "$dir\token.txt"
 if (-not (Test-Path $tokenFile)) {
+    # RNGCryptoServiceProvider — работает и в старом Windows PowerShell 5.1,
+    # где у RandomNumberGenerator ещё нет статического Fill().
     $bytes = New-Object byte[] 24
-    [System.Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+    (New-Object System.Security.Cryptography.RNGCryptoServiceProvider).GetBytes($bytes)
     ([System.BitConverter]::ToString($bytes) -replace "-", "").ToLower() | Set-Content $tokenFile -NoNewline
 }
 $token = Get-Content $tokenFile

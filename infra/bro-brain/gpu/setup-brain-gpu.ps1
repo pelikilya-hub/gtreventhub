@@ -57,14 +57,25 @@ try {
 # ---- 2. llama.cpp (CUDA) ---------------------------------------------
 # Ничего не перемещаем: находим llama-server.exe где бы он ни лежал в
 # распакованном архиве и запускаем прямо оттуда; cudart-DLL кладём рядом.
-$serverExe = Get-ChildItem "$dir\llama" -Recurse -Filter "llama-server.exe" -ErrorAction SilentlyContinue |
-    Select-Object -First 1
+# Чужая папка, случайно перенесённая с C:\ первым (багованным) прогоном —
+# возвращаем на место, чтобы не мешала и не потерялась.
+$stray = Get-ChildItem "$dir\llama" -Directory -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -match "^[0-9a-f]{16,}$" }
+foreach ($s in $stray) {
+    Write-Host ">> Возвращаю на C:\ случайно перенесённую папку: $($s.Name)"
+    try { Move-Item $s.FullName "C:\" -Force } catch { Write-Host "   не вышло ($_) — верни вручную" }
+}
+
+$find = { Get-ChildItem "$dir\llama" -Recurse -Filter "llama-server.exe" -Force -ErrorAction SilentlyContinue |
+    Select-Object -First 1 }
+$serverExe = & $find
 if (-not $serverExe) {
     Get-GithubAsset "ggml-org/llama.cpp" "bin-win-cuda.*x64\.zip$" "$dir\llama-cuda.zip"
     Expand-Archive "$dir\llama-cuda.zip" -DestinationPath "$dir\llama" -Force
-    $serverExe = Get-ChildItem "$dir\llama" -Recurse -Filter "llama-server.exe" | Select-Object -First 1
+    $serverExe = & $find
     if (-not $serverExe) {
-        Write-Host "Содержимое архива:"; Get-ChildItem "$dir\llama" -Recurse | Select-Object -Expand FullName
+        Write-Host "Содержимое архива:"
+        Get-ChildItem "$dir\llama" -Recurse -ErrorAction SilentlyContinue | Select-Object -Expand FullName
         throw "llama-server.exe не найден в скачанном архиве — пришли Claude список выше."
     }
     Get-GithubAsset "ggml-org/llama.cpp" "cudart-.*win.*x64\.zip$" "$dir\cudart.zip"

@@ -232,7 +232,9 @@ export const loginFn = createServerFn({ method: "POST" })
         }
         const { passHash: _p, created: _c, invitedBy: _i, ...sessionUser } = stored;
         await issueSession(sessionUser);
-        await countLogin("ok");
+        // Роль в исходе (без почты): «вошёл ли BOSS» и «вошла ли команда»
+        // различимы, и при этом счётчик по-прежнему не хранит личность.
+        await countLogin(stored.boss ? "ok-boss" : `ok-${stored.role}`);
         return { ok: true as const, user: sessionUser };
       }
       // заявка на роль ещё не одобрена — честно говорим статус

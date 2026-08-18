@@ -16,6 +16,21 @@
 # адреса нужен именованный туннель на своём домене в Cloudflare.
 
 $ErrorActionPreference = "Stop"
+# Windows PowerShell 5.1 по умолчанию может ходить по старому TLS — тогда
+# github.com и huggingface.co отваливаются мгновенно. Включаем TLS 1.2.
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+# Прогресс-бар Invoke-WebRequest замедляет скачивание в разы — глушим.
+$ProgressPreference = "SilentlyContinue"
+
+# Любая ошибка: показать её и НЕ закрывать окно, чтобы было что прислать.
+trap {
+    Write-Host ""
+    Write-Host "!! ОШИБКА: $_" -ForegroundColor Red
+    Write-Host ($_.ScriptStackTrace)
+    Read-Host "Скопируй текст ошибки и пришли Claude. Enter — закрыть"
+    exit 1
+}
+
 $dir = "$env:USERPROFILE\gtr-brain"
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
 Set-Location $dir
@@ -35,6 +50,7 @@ try {
     Write-Host ">> GPU: $gpu"
 } catch {
     Write-Host "!! nvidia-smi не найден — поставьте драйвер NVIDIA и повторите."
+    Read-Host "Enter — закрыть"
     exit 1
 }
 

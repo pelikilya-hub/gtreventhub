@@ -286,7 +286,7 @@ export function BaseScreen() {
                 {x.type} · {x.area}
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                <Chip color={confColor(x.confidence)}>{x.confidence.toUpperCase()}</Chip>
+                <Chip color={confColor(x.confidence)}>{(x.confidence ?? "—").toUpperCase()}</Chip>
                 {x.readiness?.state === "Бронируемая" ? (
                   <Chip color={GREEN}>{t("БРОНИРУЕМАЯ")}</Chip>
                 ) : null}
@@ -378,7 +378,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
         <div className="gtr-beam" />
         <div style={{ position: "relative" }}>
           <Eyebrow>
-            {v.id} · {v.cluster.toUpperCase()}
+            {v.id} · {(v.cluster ?? "").toUpperCase()}
           </Eyebrow>
           <div
             style={{
@@ -393,7 +393,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 площадку узнают, а набранное имя — уже подпись под ним. */}
             <VenueLogo vid={v.id} h={34} />
             <TrashTitle text={v.name} size={29} />
-            <Chip color={confColor(v.confidence)}>ДОСТОВЕРНОСТЬ: {v.confidence.toUpperCase()}</Chip>
+            <Chip color={confColor(v.confidence)}>ДОСТОВЕРНОСТЬ: {(v.confidence ?? "—").toUpperCase()}</Chip>
             {R ? (
               <Chip color={R.state === "Бронируемая" ? GREEN : AMBER}>{R.state.toUpperCase()}</Chip>
             ) : null}

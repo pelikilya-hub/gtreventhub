@@ -28,7 +28,13 @@
       "social": "https://www.instagram.com/akoya.star.lounge/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-rooftop-bars/",
+      "sourceType": "Official/current guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Boutique / confirm",
+      "capacitySource": "Ориентир GTR по классу «Rooftop»"
     },
     {
       "id": "VEN-0003",
@@ -58,7 +64,13 @@
         "contactVerified": "Yes"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://carpediemphuket.com/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0051",
@@ -79,7 +91,13 @@
       "address": "Bang Tao Beach, Phuket",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Social/local guide",
+      "capacityKind": "guide",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://www.amorahotels.com/amora-beach-resort-phuket/"
     },
     {
       "id": "VEN-0049",
@@ -99,7 +117,13 @@
       "social": "https://www.instagram.com/thebeach.phuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Official/local guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0001",
@@ -130,7 +154,13 @@
         "contactVerified": "Yes"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.catchbeachclub.com/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0046",
@@ -160,7 +190,13 @@
         "contactVerified": "Yes"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://www.koktailmagazine.com/2026/07/26/rava-beach-club-by-banyan-tree-phuket-a-coastal-enclave-the-place-to-be-for-unforgettable-celebrations"
     },
     {
       "id": "VEN-0040",
@@ -180,7 +216,13 @@
       "social": "https://www.instagram.com/angsanalagunaphuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.angsana.com/thailand/laguna-phuket/meetings",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Large / confirm",
+      "capacitySource": "https://www.angsana.com/thailand/laguna-phuket/meeting-venues/angsana-convention-and-exhibition-space-aces"
     },
     {
       "id": "VEN-0048",
@@ -200,7 +242,13 @@
       "social": "https://www.instagram.com/casuarinabeachclub/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Official/local guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0039",
@@ -220,7 +268,13 @@
       "social": "https://www.instagram.com/saii.lagunaphuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.saiihotels.com/phuket/meetings-events/",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Not publicly stated here",
+      "capacitySource": "https://www.saiihotels.com/press/saii-laguna-phuket-becomes-major-mice-wedding-venue-with-launch-of-new-meetings-events-centre/"
     },
     {
       "id": "VEN-0004",
@@ -241,7 +295,13 @@
       "address": "Angsana Laguna Phuket, 10 Moo 4, Srisoonthorn Road, Choeng Thale, Phuket 83110",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket.net/directory/profile/xana-beach-club/",
+      "sourceType": "Mixed official/directory",
+      "capacityKind": "guide",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://www.hotels.com/go/thailand/xana-beach-club"
     },
     {
       "id": "VEN-0059",
@@ -262,7 +322,13 @@
       "address": "Lagoon Road, Bang Tao, Phuket",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/best-live-music-bars-in-phuket/",
+      "sourceType": "Social/current guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Small-medium / confirm",
+      "capacitySource": "Ориентир GTR по классу «Bar / Lounge»"
     },
     {
       "id": "VEN-0068",
@@ -292,7 +358,13 @@
         "contactVerified": "Yes"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.mybeachphuket.com/meetings-and-events/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Resort / MICE»"
     },
     {
       "id": "VEN-0076",
@@ -312,7 +384,13 @@
       "social": "https://www.instagram.com/babaphuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-rooftop-bars/",
+      "sourceType": "Official/current guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Boutique / confirm",
+      "capacitySource": "Ориентир GTR по классу «Rooftop»"
     },
     {
       "id": "VEN-0074",
@@ -332,7 +410,13 @@
       "social": "https://www.instagram.com/comopointyamu.phuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/best-hotels-for-weddings-in-phuket/",
+      "sourceType": "Official/local guide",
+      "capacityKind": "published",
+      "capacityOriginal": "Up to 200 with resort buyout",
+      "capacitySource": "https://www.comohotels.com/thailand/como-point-yamu/occasions"
     },
     {
       "id": "VEN-0063",
@@ -352,7 +436,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://phuketyachtclub.com/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Marina / Yacht»"
     },
     {
       "id": "VEN-0061",
@@ -382,7 +472,13 @@
         "contactVerified": "Yes"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://placecoworking.com/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Event space»"
     },
     {
       "id": "VEN-0080",
@@ -402,7 +498,13 @@
       "social": "https://www.instagram.com/malikaskybar/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-rooftop-bars/",
+      "sourceType": "Official/current guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Rooftop»"
     },
     {
       "id": "VEN-0002",
@@ -433,7 +535,13 @@
         "contactVerified": "Yes"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://phuket.cafedelmar.com/contacts",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://djmag.com/top100clubs/2025/45/cafe-del-mar-phuket"
     },
     {
       "id": "VEN-0026",
@@ -453,7 +561,13 @@
       "social": "https://www.instagram.com/carnivalmagicpark/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.carnivalmagic.fun/eng/",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Large / confirm",
+      "capacitySource": "https://www.tripthaitour.com/blog/carnival-magic-phuket-guide"
     },
     {
       "id": "VEN-0078",
@@ -473,7 +587,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-rooftop-bars/",
+      "sourceType": "Official/current guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Rooftop»"
     },
     {
       "id": "VEN-0034",
@@ -493,7 +613,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.hyatt.com/hyatt-regency/en-US/phuhr-hyatt-regency-phuket-resort/meetings",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Coral Ballroom up to 160; other setups vary",
+      "capacitySource": "https://www.experiencehyattphuket.com/meetings-events-phuket/"
     },
     {
       "id": "VEN-0033",
@@ -523,7 +649,13 @@
         "contactVerified": "No"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.ihg.com/intercontinental/hotels/us/en/phuket/phukb/hoteldetail/meetings-events",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Up to 300 cocktail for Arlang; confirm layouts",
+      "capacitySource": "https://phuket.intercontinental.com/venues/arlang"
     },
     {
       "id": "VEN-0025",
@@ -543,7 +675,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket-fantasea.com/",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Large / confirm",
+      "capacitySource": "https://www.phuket-fantasea.com/eng/information/theater.php"
     },
     {
       "id": "VEN-0008",
@@ -563,7 +701,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://phuket.intercontinental.com/dining/pine-beach-bar",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Resort / MICE»"
     },
     {
       "id": "VEN-0079",
@@ -583,7 +727,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-rooftop-bars/",
+      "sourceType": "Official/current guide",
+      "capacityKind": "published",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://www.capesienna.com/uploads/cms_apps/files/Cape_Wedding_zAqbIIg.pdf"
     },
     {
       "id": "VEN-0073",
@@ -603,7 +753,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/best-hotels-for-weddings-in-phuket/",
+      "sourceType": "Official/local guide",
+      "capacityKind": "guide",
+      "capacityOriginal": "Boutique / confirm",
+      "capacitySource": "https://www.myoverseaswedding.com/wedding-destinations/thailand/paresa/food-packages"
     },
     {
       "id": "VEN-0012",
@@ -623,7 +779,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.centarahotelsresorts.com/centaragrand/cpbr/coast-beach-club-bistro",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0035",
@@ -643,7 +805,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.paradoxhotels.com/phuket/events/meetings",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Up to 800",
+      "capacitySource": "https://www.paradoxhotels.com/phuket/events/meetings/grand-ballroom"
     },
     {
       "id": "VEN-0009",
@@ -664,7 +832,13 @@
       "address": "Karon Beach, Phuket",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://tannterracephuket.com/",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://www.centerwedding.com/phuket/en/venues/460246/"
     },
     {
       "id": "VEN-0036",
@@ -684,7 +858,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.marriott.com/en-us/hotels/hktmd-le-meridien-phuket-beach-resort/events/",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Breakouts up to 95 theatre each; ballroom confirm",
+      "capacitySource": "https://www.1000meetings.com.sg/meeting-destination/23525/le-meridien-phuket-beach-resort/"
     },
     {
       "id": "VEN-0075",
@@ -704,7 +884,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.katarocks.com/events/",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Boutique / confirm",
+      "capacitySource": "https://www.katarocks.com/weddings-events/meeting-events/"
     },
     {
       "id": "VEN-0054",
@@ -725,7 +911,13 @@
       "address": "Southern end of Kata Beach, Phuket",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Social/local guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Small / confirm",
+      "capacitySource": "Ориентир GTR по классу «Bar / Lounge»"
     },
     {
       "id": "VEN-0050",
@@ -756,7 +948,13 @@
         "contactVerified": "Yes"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0070",
@@ -776,7 +974,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/best-hotels-for-weddings-in-phuket/",
+      "sourceType": "Official/local guide",
+      "capacityKind": "guide",
+      "capacityOriginal": "Up to 40 seated in chapel",
+      "capacitySource": "https://www.myoverseaswedding.com/wedding-destinations/thailand/the-shore-at-katathani"
     },
     {
       "id": "VEN-0031",
@@ -796,7 +1000,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.andamandaphuket.com/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Large / confirm",
+      "capacitySource": "Ориентир GTR по классу «Other»"
     },
     {
       "id": "VEN-0067",
@@ -826,7 +1036,13 @@
         "contactVerified": "Public contact"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuketboatlagoon.com/",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Large / confirm",
+      "capacitySource": "https://www.madeinspace.com/global-travel-news/boat-lagoon-resort-phuket-perfect-venue-for-events-and-team-building-activities/"
     },
     {
       "id": "VEN-0066",
@@ -856,7 +1072,13 @@
         "contactVerified": "Yes"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://royalphuketmarina.com/",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Large / event-specific",
+      "capacitySource": "https://royalphuketmarina.com/commercial/venue-space-rental/"
     },
     {
       "id": "VEN-0053",
@@ -876,7 +1098,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Official/local guide",
+      "capacityKind": "guide",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://lakubeachclub.com/"
     },
     {
       "id": "VEN-0057",
@@ -896,7 +1124,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Official/local guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Boutique / confirm",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0042",
@@ -916,7 +1150,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.anantara.com/en/mai-khao-phuket/weddings",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Boutique / confirm",
+      "capacitySource": "https://www.anantara.com/en/mai-khao-phuket/meetings"
     },
     {
       "id": "VEN-0032",
@@ -946,7 +1186,13 @@
         "contactVerified": "Public contact"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.marriott.com/en-us/hotels/hktjw-jw-marriott-phuket-resort-and-spa/events/",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Ballroom up to ~400 theatre; confirm setup",
+      "capacitySource": "https://www.marriott.com/en-us/hotels/hktjw-jw-marriott-phuket-resort-and-spa/events/"
     },
     {
       "id": "VEN-0056",
@@ -966,7 +1212,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Official/local guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0041",
@@ -986,7 +1238,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.marriott.com/en-us/hotels/hktbr-renaissance-phuket-resort-and-spa/events/",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Not publicly stated here",
+      "capacitySource": "https://www.cvent.com/venues/phuket/resort/renaissance-phuket-resort-spa/venue-cb90a13a-1363-44ba-b8ce-e8b76338a802"
     },
     {
       "id": "VEN-0065",
@@ -1016,7 +1274,10 @@
         "contactVerified": "Public contact"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.thailandinternationalboatshow.com/the-show/",
+      "sourceType": "Official/event organizer"
     },
     {
       "id": "VEN-0071",
@@ -1036,7 +1297,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/best-hotels-for-weddings-in-phuket/",
+      "sourceType": "Official/local guide",
+      "capacityKind": "guide",
+      "capacityOriginal": "Weddings up to 170",
+      "capacitySource": "https://planner.ttgmice.com/venue/the-nai-harn-phuket/"
     },
     {
       "id": "VEN-0045",
@@ -1056,7 +1323,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.marriott.com/en-us/hotels/hktlc-the-naka-island-a-luxury-collection-resort-and-spa-phuket/events/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Boutique / confirm",
+      "capacitySource": "Ориентир GTR по классу «Resort / MICE»"
     },
     {
       "id": "VEN-0064",
@@ -1086,7 +1359,13 @@
         "contactVerified": "Public contact"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://aopograndmarina.com/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Large / event-specific",
+      "capacitySource": "Ориентир GTR по классу «Marina / Yacht»"
     },
     {
       "id": "VEN-0044",
@@ -1106,7 +1385,13 @@
       "social": "https://www.instagram.com/amanpuri/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.aman.com/resorts/amanpuri",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Boutique / confirm",
+      "capacitySource": "https://beyondweddings.com/venue/amanpuri-wedding/"
     },
     {
       "id": "VEN-0055",
@@ -1137,7 +1422,13 @@
         "contactVerified": "Yes"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Large / event-specific",
+      "capacitySource": "https://www.viberate.com/venue/paradise-beach-phuket/"
     },
     {
       "id": "VEN-0047",
@@ -1157,7 +1448,13 @@
       "social": "https://www.instagram.com/barracudaphuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Local current guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0011",
@@ -1177,7 +1474,13 @@
       "social": "https://www.instagram.com/endlesssummerbeachclub/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://endlesssummerbeachclub.com/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0010",
@@ -1198,7 +1501,13 @@
       "address": "Patong Beach, Phuket",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://fugabeachclub.com/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0037",
@@ -1218,7 +1527,13 @@
       "social": "https://www.instagram.com/grandmercurephuketpatong/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://grandmercurephuketpatong.com/meetings-events/meeting-rooms-event-venue-phuket-patong/",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Up to 300 cocktail / 200 theatre",
+      "capacitySource": "https://grandmercurephuketpatong.com/meetings-events/grand-m-ballroom/"
     },
     {
       "id": "VEN-0019",
@@ -1238,7 +1553,13 @@
       "social": "https://www.instagram.com/hardrockphuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/best-live-music-bars-in-phuket/",
+      "sourceType": "Official/directory",
+      "capacityKind": "guide",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://www.cvent.com/venues/phuket/special-event-venue/hard-rock-cafe-phuket/venue-cd4abffe-1495-49b2-920f-4a24bfe6004e"
     },
     {
       "id": "VEN-0007",
@@ -1259,7 +1580,13 @@
       "address": "Patong Beach Road, Patong, Phuket",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://kudohotel.com/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0082",
@@ -1279,7 +1606,13 @@
       "social": "https://www.instagram.com/keeskylounge/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-rooftop-bars/",
+      "sourceType": "Official/current guide",
+      "capacityKind": "published",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://www.thekeeresort.com/sky-bar-seaview-patong-beach.php"
     },
     {
       "id": "VEN-0038",
@@ -1299,7 +1632,13 @@
       "social": "https://www.instagram.com/msocialphuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.msocial.com/en/phuket/m-social-phuket/venues/",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Up to 300",
+      "capacitySource": "https://www.1000meetings.com/en/venue/32682/m-social-hotel-phuket/"
     },
     {
       "id": "VEN-0028",
@@ -1319,7 +1658,13 @@
       "social": "https://www.instagram.com/simoncabaretphuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.phuket-simoncabaret.com/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Bar / Lounge»"
     },
     {
       "id": "VEN-0015",
@@ -1340,7 +1685,13 @@
       "address": "Bangla Road, Patong, Phuket",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.illuzionphuket.com/",
+      "sourceType": "Official group/social",
+      "capacityKind": "guide",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://phuketprivateparty.com/shelter-club-phuket/"
     },
     {
       "id": "VEN-0058",
@@ -1360,7 +1711,13 @@
       "social": "https://www.instagram.com/thedeckbeachclubpatong/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Official/local guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Resort / MICE»"
     },
     {
       "id": "VEN-0016",
@@ -1381,7 +1738,13 @@
       "address": "Bangla Road, Patong, Phuket",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.instagram.com/armaniaphuket/",
+      "sourceType": "Social",
+      "capacityKind": "guide",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://partyphuket.com/armania-club-phuket/"
     },
     {
       "id": "VEN-0013",
@@ -1412,7 +1775,13 @@
         "contactVerified": "Yes"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/night-clubs-phuket/",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Up to 5,000 standing",
+      "capacitySource": "https://www.illuzionphuket.com/"
     },
     {
       "id": "VEN-0018",
@@ -1432,7 +1801,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "",
+      "sourceType": "Directory",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Bar / Lounge»"
     },
     {
       "id": "VEN-0060",
@@ -1452,7 +1827,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "",
+      "sourceType": "Current local guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Bar / Lounge»"
     },
     {
       "id": "VEN-0014",
@@ -1473,7 +1854,13 @@
       "address": "70/3 Bangla Road, Patong, Phuket 83150",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/night-clubs-phuket/",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://partyphuket.com/sugar-club-phuket/"
     },
     {
       "id": "VEN-0081",
@@ -1493,7 +1880,13 @@
       "social": "https://www.instagram.com/sizzlerooftopphuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-rooftop-bars/",
+      "sourceType": "Official/current guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Boutique / confirm",
+      "capacitySource": "Ориентир GTR по классу «Rooftop»"
     },
     {
       "id": "VEN-0006",
@@ -1524,7 +1917,13 @@
         "contactVerified": "Yes"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://www.renown-travel.com/daytripsphuket/yonabeachclub.html"
     },
     {
       "id": "VEN-0024",
@@ -1542,7 +1941,13 @@
       "social": "https://www.instagram.com/lotus.arena.phuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://lotusarena.life/en/",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://lotusarena.life/"
     },
     {
       "id": "VEN-0085",
@@ -1560,7 +1965,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://phuketcoworkingspace.com/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Small-medium / confirm",
+      "capacitySource": "Ориентир GTR по классу «Event space»"
     },
     {
       "id": "VEN-0021",
@@ -1580,7 +1991,13 @@
       "social": "https://www.instagram.com/bebopphuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "",
+      "sourceType": "Directory",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Small / confirm",
+      "capacitySource": "Ориентир GTR по классу «Bar / Lounge»"
     },
     {
       "id": "VEN-0086",
@@ -1600,7 +2017,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-baba-wedding-festival/",
+      "sourceType": "Official/current guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Other»"
     },
     {
       "id": "VEN-0022",
@@ -1620,7 +2043,13 @@
       "social": "https://www.instagram.com/cuebarphuket/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "",
+      "sourceType": "Directory",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Small / confirm",
+      "capacitySource": "Ориентир GTR по классу «Bar / Lounge»"
     },
     {
       "id": "VEN-0083",
@@ -1640,7 +2069,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.phuket101.net/phuket-rooftop-bars/",
+      "sourceType": "Official/current guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Small / confirm",
+      "capacitySource": "Ориентир GTR по классу «Rooftop»"
     },
     {
       "id": "VEN-0087",
@@ -1661,7 +2096,13 @@
       "address": "Corner of Yaowarat Road and Phang Nga Road, Phuket Old Town",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/bebop-live-music-bar/",
+      "sourceType": "Social/current guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Other»"
     },
     {
       "id": "VEN-0020",
@@ -1682,7 +2123,13 @@
       "address": "Phuket Town, Phuket",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.tripadvisor.com/Attractions-g293920-Activities-c58-t113-Phuket.html",
+      "sourceType": "Social/directory",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Show / Park»"
     },
     {
       "id": "VEN-0084",
@@ -1702,7 +2149,13 @@
       "social": "https://www.instagram.com/hello.homa/",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.homa.co/coworking",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Small-medium / confirm",
+      "capacitySource": "Ориентир GTR по классу «Event space»"
     },
     {
       "id": "VEN-0072",
@@ -1722,7 +2175,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/best-hotels-for-weddings-in-phuket/",
+      "sourceType": "Official/local guide",
+      "capacityKind": "published",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "https://www.twinpalmshotelsresorts.com/events/events-venue-view-all/"
     },
     {
       "id": "VEN-0043",
@@ -1742,7 +2201,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.rosewoodhotels.com/en/phuket/events",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Boutique / confirm",
+      "capacitySource": "https://www.rosewoodhotels.com/en/phuket/meetings-and-events"
     },
     {
       "id": "VEN-0069",
@@ -1772,7 +2237,10 @@
         "contactVerified": "No"
       },
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.marriott.com/en-us/hotels/hktmb-phuket-marriott-resort-and-spa-merlin-beach/events/",
+      "sourceType": "Official"
     },
     {
       "id": "VEN-0052",
@@ -1792,7 +2260,13 @@
       "social": "",
       "readiness": null,
       "status": "Active / verify",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "",
+      "sourceType": "Local guide",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0017",
@@ -1812,7 +2286,13 @@
       "social": "",
       "readiness": null,
       "status": "Active / verify",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Low",
+      "source": "",
+      "sourceType": "Directory",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Nightclub»"
     },
     {
       "id": "VEN-0062",
@@ -1831,7 +2311,13 @@
       "address": "Phuket, Thailand",
       "readiness": null,
       "status": "Active / verify",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.facebook.com/BTCSpaceHKT/",
+      "sourceType": "Social",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Other»"
     },
     {
       "id": "VEN-0027",
@@ -1851,7 +2337,13 @@
       "social": "",
       "readiness": null,
       "status": "Active / verify",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://www.siamniramitphuket.com/",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Large / confirm",
+      "capacitySource": "https://www.tripthaitour.com/blog/siam-niramit-phuket-show-guide"
     },
     {
       "id": "VEN-0030",
@@ -1871,7 +2363,13 @@
       "social": "",
       "readiness": null,
       "status": "Event-specific / verify",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Low",
+      "source": "",
+      "sourceType": "Event reference",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Very large / event-specific",
+      "capacitySource": "Ориентир GTR по классу «Other»"
     },
     {
       "id": "VEN-0029",
@@ -1891,7 +2389,13 @@
       "social": "",
       "readiness": null,
       "status": "Active / verify event format",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Medium",
+      "source": "https://bluetree.fun/",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Large / confirm",
+      "capacitySource": "https://thethaiger.com/hot-news/events/blue-tree-phuket-becomes-world-class-event-venue-with-bastas-phenomenal-concert"
     },
     {
       "id": "VEN-0023",
@@ -1909,7 +2413,13 @@
       "social": "",
       "readiness": null,
       "status": "Verify",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "Low",
+      "source": "",
+      "sourceType": "Directory",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Bar / Lounge»"
     },
     {
       "id": "VEN-0005",
@@ -1929,7 +2439,13 @@
       "social": "",
       "readiness": null,
       "status": "Closed until further notice",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "sourceType": "Official",
+      "capacityKind": "gtr-estimate",
+      "capacityOriginal": "Not publicly stated",
+      "capacitySource": "Ориентир GTR по классу «Beach club»"
     },
     {
       "id": "VEN-0088",
@@ -1949,7 +2465,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://all.accor.com/hotel/C1D6/index.en.shtml",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Up to 1,200",
+      "capacitySource": "https://www.pullmanphuketkaron.com/meetings-events/grand-ballroom/"
     },
     {
       "id": "VEN-0089",
@@ -1969,7 +2491,10 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.marriott.com/en-us/hotels/hktfp-four-points-phuket-patong-beach-resort/events/",
+      "sourceType": "Official"
     },
     {
       "id": "VEN-0090",
@@ -1989,7 +2514,10 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.marriott.com/en-us/hotels/hktct-courtyard-phuket-town/events/",
+      "sourceType": "Official"
     },
     {
       "id": "VEN-0091",
@@ -2009,7 +2537,10 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.marriott.com/en-us/hotels/hktcp-courtyard-phuket-patong-beach-resort/events/",
+      "sourceType": "Official"
     },
     {
       "id": "VEN-0092",
@@ -2029,7 +2560,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://pullman.accor.com/en/hotels/phuket/7488/meetings/s001.html",
+      "sourceType": "Official",
+      "capacityKind": "published",
+      "capacityOriginal": "Up to 320 theatre",
+      "capacitySource": "https://www.pullmanphuketarcadia.com/meeting-in-phuket/meeting-venue-in-phuket/arcadia-ballroom/"
     },
     {
       "id": "VEN-0093",
@@ -2049,7 +2586,10 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://all.accor.com/hotel/8099/index.en.shtml",
+      "sourceType": "Official"
     },
     {
       "id": "VEN-0094",
@@ -2069,7 +2609,13 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.ihg.com/holidayinnresorts/hotels/us/en/phuket/phuth/hoteldetail/events-facilities",
+      "sourceType": "Official",
+      "capacityKind": "guide",
+      "capacityOriginal": "Up to 120",
+      "capacitySource": "https://www.meetings-conventions.com/Meeting-Event-Venues/Patong-Beach-Thailand/Convention-Hotel/Holiday-Inn-Resort-Phuket-p3421159"
     },
     {
       "id": "VEN-0095",
@@ -2089,7 +2635,10 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://www.ihg.com/hotelindigo/hotels/us/en/phuket/phupp/hoteldetail/events-facilities",
+      "sourceType": "Official"
     },
     {
       "id": "VEN-0096",
@@ -2109,7 +2658,10 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://all.accor.com/hotel/6538/index.en.shtml",
+      "sourceType": "Official"
     },
     {
       "id": "VEN-0097",
@@ -2129,7 +2681,10 @@
       "social": "",
       "readiness": null,
       "status": "Active",
-      "verified": "2026-08-06"
+      "verified": "2026-08-06",
+      "confidence": "High",
+      "source": "https://all.accor.com/hotel/7273/index.en.shtml",
+      "sourceType": "Official"
     },
     {
       "id": "VEN-0098",
@@ -2150,7 +2705,10 @@
       "address": "Bangla Road, Patong, Phuket",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "high",
+      "source": "https://www.siam2nite.com/en/phuket/locations/clubs/seduction",
+      "sourceType": "nightlife-sweep-2026"
     },
     {
       "id": "VEN-0099",
@@ -2171,7 +2729,10 @@
       "address": "Bangla Road (Level 2), Patong, Phuket",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "high",
+      "source": "https://www.tripadvisor.com/Attraction_Review-g297930-d13340151",
+      "sourceType": "nightlife-sweep-2026"
     },
     {
       "id": "VEN-0100",
@@ -2192,7 +2753,10 @@
       "address": "Soi Easy, Bangla Road, Patong, Phuket",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "high",
+      "source": "https://phuket-insider.com/en/places/hollywood-phuket/",
+      "sourceType": "nightlife-sweep-2026"
     },
     {
       "id": "VEN-0101",
@@ -2213,7 +2777,10 @@
       "address": "Bangla Road, Patong, Phuket",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "high",
+      "source": "https://www.boaclubphuket.com/",
+      "sourceType": "nightlife-sweep-2026"
     },
     {
       "id": "VEN-0102",
@@ -2234,7 +2801,10 @@
       "address": "Bangla Road (над Illuzion), Patong, Phuket",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "high",
+      "source": "https://www.empirephuket.com/",
+      "sourceType": "nightlife-sweep-2026"
     },
     {
       "id": "VEN-0103",
@@ -2255,7 +2825,10 @@
       "address": "Bangla Rd / Rat-U-Thit intersection, Patong, Phuket",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "high",
+      "source": "https://www.tripadvisor.com/",
+      "sourceType": "nightlife-sweep-2026"
     },
     {
       "id": "VEN-0104",
@@ -2276,7 +2849,10 @@
       "address": "Phuket Old Town, Phuket",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "high",
+      "source": "https://www.phuket.com/phuket-magazine/phuket-live-music-bars.htm",
+      "sourceType": "nightlife-sweep-2026"
     },
     {
       "id": "VEN-0105",
@@ -2297,7 +2873,10 @@
       "address": "277, 1 Srisoonthorn Rd, Choeng Thale, Phuket 83110",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "medium",
+      "source": "https://fireandsmokephuket.com/",
+      "sourceType": "nightlife-sweep-2026"
     },
     {
       "id": "VEN-0106",
@@ -2318,7 +2897,10 @@
       "address": "Soi Choeng Thale 14, Choeng Thale, Phuket 83110",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "medium",
+      "source": "https://www.hospitalitynet.org/news/4124875.html",
+      "sourceType": "nightlife-sweep-2026"
     },
     {
       "id": "VEN-0107",
@@ -2339,7 +2921,10 @@
       "address": "Bang Whan Rd, Kamala, Kathu 83150, Провинция Пхукет, Таиланд",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "high",
+      "source": "https://www.trip.com/m/vacation-rentals/w/detail?h-id=125185668&locale=ru-RU&curr=THB",
+      "sourceType": "trip.com"
     },
     {
       "id": "VEN-0108",
@@ -2360,7 +2945,10 @@
       "address": "Thanon Si Sunthon 13, Thalang 83110, Провинция Пхукет, Таиланд",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "high",
+      "source": "https://www.trip.com/m/vacation-rentals/w/detail?h-id=134685783&locale=ru-RU&curr=THB",
+      "sourceType": "trip.com"
     },
     {
       "id": "VEN-0109",
@@ -2381,7 +2969,10 @@
       "address": "Choeng Thale, Thalang District, Phuket 83110",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "high",
+      "source": "https://clcphuket.com/private-events/",
+      "sourceType": "official-site-2026"
     },
     {
       "id": "VEN-0110",
@@ -2402,7 +2993,10 @@
       "address": "2/1 Soi Cherng Taley 1, Cherng Talay, Thalang District, Phuket 83110",
       "readiness": "",
       "status": "active",
-      "verified": false
+      "verified": false,
+      "confidence": "high",
+      "source": "https://shamanphuket.com/",
+      "sourceType": "official-site-2026"
     }
   ],
   "spaces": [

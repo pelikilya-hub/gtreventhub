@@ -34,6 +34,11 @@ const VENUE_PUBLIC = [
   "id", "name", "type", "tag", "area", "cluster", "district", "concept",
   "events", "facilities", "capacity", "catering", "music", "website", "social",
   "address", "gallery", "readiness", "status", "verified",
+  // Провенанс данных — метка качества, которую интерфейс показывает
+  // команде: откуда взяли и насколько уверены. Секрета в ней нет, а без
+  // неё падал экран базы: код читал confidence без защиты.
+  "confidence", "source", "sourceType",
+  "capacityKind", "capacityOriginal", "capacitySource",
 ];
 
 const pick = (obj, keys) => {

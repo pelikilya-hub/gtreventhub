@@ -388,7 +388,7 @@ function VenueTile({ v, onPick }: { v: Venue; onPick: () => void }) {
         />
         <div style={{ position: "absolute", left: 12, right: 12, bottom: 10 }}>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            <Chip color="rgba(255,255,255,.6)">{v.tag.toUpperCase()}</Chip>
+            <Chip color="rgba(255,255,255,.6)">{(v.tag ?? "").toUpperCase()}</Chip>
             {rate ? (
               <Chip color={RATE_COLOR[rate.kind]}>{RATE_LABEL[rate.kind].toUpperCase()}</Chip>
             ) : null}

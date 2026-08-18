@@ -683,6 +683,9 @@ describe("витрина без рабочих данных", () => {
     const d = pub.default ?? (pub as unknown as { venues: Record<string, unknown>[]; contacts: unknown[]; research: unknown[] });
     expect(d.contacts.length).toBe(0);
     expect(d.research.length).toBe(0);
-    for (const v of d.venues) for (const k of ["phone", "email", "notes", "source"]) expect(v[k]).toBeUndefined();
+    // «source» — это провенанс каталога (откуда взяли запись), он
+    // показывается команде на экране и утечкой не является. Приватны
+    // именно контакты и внутренние заметки.
+    for (const v of d.venues) for (const k of ["phone", "email", "telegram", "notes"]) expect(v[k]).toBeUndefined();
   });
 });

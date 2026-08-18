@@ -826,20 +826,25 @@ export function GtrBroOverlay({
           </div>
         )}
 
+        {/* Пульт — фирменные плашки BOSS. Состояние читается обработкой
+            самой плашки: выключенный микрофон гаснет в серый, активное
+            Табло горит красным, Стоп вне эфира тускнеет. */}
         <div className="gtr-bro-bar">
           <button
-            className={`gtr-bro-btn${muted ? " on" : ""}`}
+            className={`gtr-bro-bbtn${muted ? " off" : ""}`}
             disabled={!live}
+            aria-label={muted ? "Микрофон выключен — включить" : "Микрофон включён — выключить"}
             onClick={() => {
               const next = !muted;
               setMuted(next);
               ses.current?.mute(next);
             }}
           >
-            {muted ? "Микрофон выкл" : "Микрофон вкл"}
+            <img src="/bro/btn-mic.webp" alt="" draggable={false} />
           </button>
           <button
-            className="gtr-bro-btn"
+            className={`gtr-bro-bbtn${chatView ? "" : " on"}`}
+            aria-label={chatView ? "Открыть табло" : "Вернуться в чат"}
             onClick={() => {
               const next = !chatView;
               setChatView(next);
@@ -850,13 +855,17 @@ export function GtrBroOverlay({
               }
             }}
           >
-            {chatView ? "Табло" : "Чат"}
+            <img src="/bro/btn-tablo.webp" alt="" draggable={false} />
           </button>
-          <button className="gtr-bro-btn" onClick={() => setTune((v) => !v)}>
-            Настройки
+          <button
+            className={`gtr-bro-bbtn${tune ? " on" : ""}`}
+            aria-label="Настройки"
+            onClick={() => setTune((v) => !v)}
+          >
+            <img src="/bro/btn-tune.webp" alt="" draggable={false} />
           </button>
-          <button className="gtr-bro-btn danger" disabled={!live} onClick={stop}>
-            Стоп
+          <button className="gtr-bro-bbtn" disabled={!live} aria-label="Стоп" onClick={stop}>
+            <img src="/bro/btn-stop.webp" alt="" draggable={false} />
           </button>
         </div>
 

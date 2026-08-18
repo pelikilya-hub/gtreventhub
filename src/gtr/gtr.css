@@ -4597,3 +4597,30 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-bro-orb.hold::before {
   background: radial-gradient(circle, rgba(255, 52, 39, 0.5), rgba(229, 35, 27, 0.3) 60%, transparent 75%);
 }
+
+/* ---- пульт из фирменных плашек ---- */
+.gtr-bro-bbtn {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.gtr-bro-bbtn img {
+  width: 100%;
+  height: auto;
+  max-height: 64px;
+  object-fit: contain;
+  display: block;
+  transition: filter 0.18s ease;
+}
+.gtr-bro-bbtn:active { transform: scale(0.94); }
+/* выключенный микрофон: плашка гаснет в серый — «ВКЛ» перестаёт гореть */
+.gtr-bro-bbtn.off img { filter: grayscale(1) brightness(0.62); }
+/* активный режим (Табло открыто, Настройки открыты) — красное дыхание */
+.gtr-bro-bbtn.on img { filter: drop-shadow(0 0 12px rgba(255, 52, 39, 0.55)); }
+.gtr-bro-bbtn:disabled { cursor: default; }
+.gtr-bro-bbtn:disabled img { filter: grayscale(0.7) brightness(0.5); }

@@ -55,16 +55,20 @@ try {
 }
 
 # ---- 2. llama.cpp (CUDA) ---------------------------------------------
-if (-not (Test-Path "$dir\llama\llama-server.exe")) {
+# Ничего не перемещаем: находим llama-server.exe где бы он ни лежал в
+# распакованном архиве и запускаем прямо оттуда; cudart-DLL кладём рядом.
+$serverExe = Get-ChildItem "$dir\llama" -Recurse -Filter "llama-server.exe" -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+if (-not $serverExe) {
     Get-GithubAsset "ggml-org/llama.cpp" "bin-win-cuda.*x64\.zip$" "$dir\llama-cuda.zip"
-    Get-GithubAsset "ggml-org/llama.cpp" "cudart-.*win.*x64\.zip$" "$dir\cudart.zip"
     Expand-Archive "$dir\llama-cuda.zip" -DestinationPath "$dir\llama" -Force
-    Expand-Archive "$dir\cudart.zip"     -DestinationPath "$dir\llama" -Force
-    # В некоторых релизах бинарники лежат во вложенной папке — поднимаем.
-    $exe = Get-ChildItem "$dir\llama" -Recurse -Filter "llama-server.exe" | Select-Object -First 1
-    if ($exe.DirectoryName -ne "$dir\llama") {
-        Move-Item "$($exe.DirectoryName)\*" "$dir\llama" -Force
+    $serverExe = Get-ChildItem "$dir\llama" -Recurse -Filter "llama-server.exe" | Select-Object -First 1
+    if (-not $serverExe) {
+        Write-Host "Содержимое архива:"; Get-ChildItem "$dir\llama" -Recurse | Select-Object -Expand FullName
+        throw "llama-server.exe не найден в скачанном архиве — пришли Claude список выше."
     }
+    Get-GithubAsset "ggml-org/llama.cpp" "cudart-.*win.*x64\.zip$" "$dir\cudart.zip"
+    Expand-Archive "$dir\cudart.zip" -DestinationPath $serverExe.DirectoryName -Force
 }
 
 # ---- 3. Модель: Qwen3-8B Q4_K_M (~5 ГБ) ------------------------------
@@ -93,8 +97,8 @@ if (-not (Test-Path $cf)) {
 # -ngl 99: вся модель на GPU; -c 8192: контекст; --api-key: без токена
 # сервер не отвечает — публичный туннель не станет бесплатным API для всех.
 Write-Host ">> Запускаю llama-server (порт 8080, вся модель на GPU)..."
-Start-Process -FilePath "$dir\llama\llama-server.exe" -ArgumentList @(
-    "-m", $model, "-ngl", "99", "-c", "8192",
+Start-Process -FilePath $serverExe.FullName -ArgumentList @(
+    "-m", $model, "-ngl", "99", "-c", "6144",
     "--host", "127.0.0.1", "--port", "8080", "--api-key", $token
 ) -WindowStyle Minimized
 

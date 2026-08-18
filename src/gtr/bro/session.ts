@@ -99,6 +99,9 @@ export class BroSession {
   private startedAt = 0;
   private ptt = false;
   private holdAt = 0;
+  // Пик уровня микрофона за время удержания кнопки: по нему отличаем
+  // реплику от случайного нажатия в шумном зале.
+  private holdPeak = 0;
 
   constructor(ev: BroEvents) {
     this.ev = ev;
@@ -269,6 +272,7 @@ export class BroSession {
     this.send({ type: "input_audio_buffer.clear" });
     this.mute(false);
     this.holdAt = Date.now();
+    this.holdPeak = 0;
     this.set("listening");
     this.touch();
   }
@@ -283,6 +287,15 @@ export class BroSession {
     routeAudio("playback");
     if (Date.now() - this.holdAt < 250) {
       this.send({ type: "input_audio_buffer.clear" });
+      return;
+    }
+    // Тихий эфир: кнопку держали, но речи не было — шорох пальца, карман,
+    // случайный зажим. Не отправляем: модель, получив шум, отвечает на
+    // него, и это выглядит как «BRO реагирует непонятно на что».
+    if (this.holdPeak < 0.09) {
+      this.send({ type: "input_audio_buffer.clear" });
+      this.log("в эфире тишина — реплику не отправил");
+      this.set("listening");
       return;
     }
     this.send({ type: "input_audio_buffer.commit" });
@@ -454,7 +467,12 @@ export class BroSession {
         an.getByteFrequencyData(buf);
         let sum = 0;
         for (const v of buf) sum += v;
-        this.ev.onLevel?.(Math.min(1, sum / buf.length / 90));
+        const level = Math.min(1, sum / buf.length / 90);
+        // Пока микрофон открыт (кнопка зажата), запоминаем пик — holdEnd
+        // по нему решит, была ли речь вообще.
+        if (this.mic?.getAudioTracks().some((t) => t.enabled))
+          this.holdPeak = Math.max(this.holdPeak, level);
+        this.ev.onLevel?.(level);
         this.raf = requestAnimationFrame(tick);
       };
       tick();

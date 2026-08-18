@@ -42,9 +42,26 @@ export function UpdateGate() {
     if (!live || live === MINE) return;
     // Возврат на вкладку с пустыми полями — лучший момент забрать новую
     // версию молча: человек ещё ничего не начал и подмены не заметит.
+    // Но не чаще раза в три минуты: если устройство упрямо держит старый
+    // HTML (iOS это умеет), без предохранителя перезагрузка зациклится —
+    // экран мигает, и человек читает это как «всё сломалось».
     if (silentOk && !busy.current) {
-      window.location.reload();
-      return;
+      const K = "gtr.upd.last";
+      let last = 0;
+      try {
+        last = Number(sessionStorage.getItem(K) ?? 0);
+      } catch {
+        /* приватный режим */
+      }
+      if (Date.now() - last > 3 * 60_000) {
+        try {
+          sessionStorage.setItem(K, String(Date.now()));
+        } catch {
+          /* приватный режим */
+        }
+        window.location.reload();
+        return;
+      }
     }
     setStale(true);
   }, []);

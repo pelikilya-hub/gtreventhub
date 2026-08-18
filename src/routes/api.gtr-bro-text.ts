@@ -75,7 +75,13 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         if (flags.broKill || !flags.broEnabled) return json({ ok: false, error: "disabled" }, 503);
 
         const brain = (await kvGetJson<Brain>(ns, "setting:brain")) ?? {};
-        if (!brain.url || !brain.token) return json({ ok: false, error: "no-brain" }, 503);
+        const hasBrain = Boolean(brain.url && brain.token);
+
+        // Общий срок ответа. Без него разговор упирается в сумму чужих
+        // таймаутов: полторы минуты ожидания на телефоне человек читает
+        // как поломку продукта, а не как задумчивость модели.
+        const deadline = Date.now() + 26_000;
+        const timeLeft = () => deadline - Date.now();
 
         let body: { text?: string; history?: { who: string; text: string }[] } = {};
         try {
@@ -209,6 +215,10 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
 
           let gemFail = "";
           for (let round = 0; round < 3 && !gemFail; round++) {
+            if (timeLeft() < 3_000) {
+              gemFail = "deadline";
+              break;
+            }
             let res: Response;
             try {
               res = await fetch(
@@ -222,7 +232,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
                     tools: [{ functionDeclarations: gemTools(user.role) }],
                     generationConfig: { temperature: 0.7, maxOutputTokens: 600 },
                   }),
-                  signal: AbortSignal.timeout(25_000),
+                  signal: AbortSignal.timeout(Math.min(12_000, Math.max(2_000, timeLeft()))),
                 },
               );
             } catch {
@@ -230,11 +240,30 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
               break;
             }
             if (res.status === 429) {
-              // Лимит Gemini исчерпан — считаем и честно откатываемся на Qwen.
-              gemFail = "429";
-              break;
-            }
-            if (res.status === 503 || res.status === 500) {
+              // Свободный тариф Gemini считает запросы поминутно, и пачка
+              // вопросов подряд упирается в лимит на секунды. Один короткий
+              // повтор вытаскивает такой случай дешевле, чем весь откат.
+              await new Promise((r) => setTimeout(r, 1200));
+              const retry = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${gmodel}:generateContent?key=${gemKey}`,
+                {
+                  method: "POST",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({
+                    systemInstruction: { parts: [{ text: buildTextPrompt(ctx) }] },
+                    contents,
+                    tools: [{ functionDeclarations: gemTools(user.role) }],
+                    generationConfig: { temperature: 0.7, maxOutputTokens: 600 },
+                  }),
+                  signal: AbortSignal.timeout(Math.min(12_000, Math.max(2_000, timeLeft()))),
+                },
+              ).catch(() => null);
+              if (!retry || !retry.ok) {
+                gemFail = "429";
+                break;
+              }
+              res = retry;
+            } else if (res.status === 503 || res.status === 500) {
               // Перегруз на стороне Google — мимолётный. Один повтор
               // дешевле, чем 30 секунд запасного мозга.
               await new Promise((r) => setTimeout(r, 1500));
@@ -249,7 +278,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
                     tools: [{ functionDeclarations: gemTools(user.role) }],
                     generationConfig: { temperature: 0.7, maxOutputTokens: 600 },
                   }),
-                  signal: AbortSignal.timeout(25_000),
+                  signal: AbortSignal.timeout(Math.min(12_000, Math.max(2_000, timeLeft()))),
                 },
               ).catch(() => null);
               if (!retry || !retry.ok) {
@@ -312,10 +341,13 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         // Агентная петля: модель зовёт инструмент → воркер исполняет →
         // результат обратно. Три круга хватает на «найди и собери маршрут»;
         // больше — уже зацикливание, режем.
+        if (!hasBrain || !brain.url) return json({ ok: false, error: "no-brain" }, 503);
+        const brainUrl = brain.url.replace(/\/$/, "");
         for (let round = 0; round < 3; round++) {
+          if (timeLeft() < 3_000) return json({ ok: false, error: "deadline" }, 504);
           let res: Response;
           try {
-            res = await fetch(`${brain.url.replace(/\/$/, "")}/v1/chat/completions`, {
+            res = await fetch(`${brainUrl}/v1/chat/completions`, {
               method: "POST",
               headers: {
                 authorization: `Bearer ${brain.token}`,
@@ -331,8 +363,9 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
                 // Первый запрос прогревает кэш промпта — дальше быстрее.
                 cache_prompt: true,
               }),
-              // CPU-модель думает небыстро, особенно холодная.
-              signal: AbortSignal.timeout(90_000),
+              // CPU-модель думает небыстро, но ждать её дольше общего
+              // срока бессмысленно: правила на клиенте ответят раньше.
+              signal: AbortSignal.timeout(Math.max(3_000, timeLeft())),
             });
           } catch {
             return json({ ok: false, error: "brain-network" }, 502);

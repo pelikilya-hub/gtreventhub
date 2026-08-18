@@ -162,7 +162,7 @@ export function GtrBroOverlay({
   // Табло: расшифровка разговора и служебные строки в одном потоке,
   // как лог терминала. Незавершённые реплики печатаются по мере
   // произнесения.
-  type Row = { who: "user" | "bro" | "sys"; text: string; done: boolean };
+  type Row = { who: "user" | "bro" | "sys"; text: string; done: boolean; wait?: boolean };
   const [rows, setRows] = useState<Row[]>([]);
   const dosRef = useRef<HTMLDivElement | null>(null);
   const [cmd, setCmd] = useState("");
@@ -423,8 +423,17 @@ export function GtrBroOverlay({
 
   const say = (who: Row["who"], text: string) => {
     touchChat();
-    setRows((p) => [...p.slice(-60), { who, text, done: true }]);
+    setRows((p) => [...p.filter((r) => !r.wait).slice(-60), { who, text, done: true }]);
   };
+
+  // «Думаю» — это состояние, а не реплика: строка живёт, пока идёт
+  // запрос, и исчезает вместе с ответом. Иначе в ленте копятся следы
+  // ожидания, и разговор читается как лог отладки.
+  const waitOn = (text: string) => {
+    touchChat();
+    setRows((p) => [...p.filter((r) => !r.wait).slice(-60), { who: "sys", text, done: false, wait: true }]);
+  };
+  const waitOff = () => setRows((p) => (p.some((r) => r.wait) ? p.filter((r) => !r.wait) : p));
 
   const callTool = async (name: string, args: Record<string, unknown>) => {
     const r = await fetch("/api/gtr-bro-tool", {
@@ -478,13 +487,16 @@ export function GtrBroOverlay({
         .slice(-6)
         .map((r) => ({ who: r.who, text: r.text }));
       try {
-        say("sys", "думаю…");
+        waitOn("думаю…");
+        // Полторы минуты ожидания на телефоне неотличимы от зависания.
+        // Тридцати секунд хватает живому ответу, а всё что дольше —
+        // это уже не разговор, и по правилам мы ответим быстрее.
         const r = await fetch("/api/gtr-bro-text", {
           method: "POST",
           headers: { "content-type": "application/json" },
           credentials: "same-origin",
           body: JSON.stringify({ text: q, history }),
-          signal: AbortSignal.timeout(95_000),
+          signal: AbortSignal.timeout(30_000),
         });
         const data = (await r.json()) as { ok?: boolean; reply?: string; cards?: BroCard[]; error?: string };
         if (data.ok && data.reply) {
@@ -495,13 +507,15 @@ export function GtrBroOverlay({
           for (const c of (data.cards ?? []).slice(0, 4)) setCards((p) => [c, ...p].slice(0, 6));
           return;
         }
-        // no-brain — мозг не настроен, invented — его ответ не прошёл
-        // проверку на выдумку. И то и другое человеку знать незачем:
-        // молча идём разбирать по правилам, по нашей базе.
-        if (data.error === "invented") metric("bro.text.invented");
-        else if (data.error && data.error !== "no-brain") say("sys", `мозг: ${data.error}`);
+        // Любая поломка мозга — наше внутреннее дело. Человек в клубе не
+        // должен читать «brain-http 502»: для него это сбой продукта, хотя
+        // ниже его вопрос отработают правила по нашей же базе. Причину
+        // забираем в счётчики и молча идём дальше.
+        if (data.error) metric(`bro.text.fail.${String(data.error).replace(/[^a-z0-9_.-]/gi, "")}`);
+        waitOff();
       } catch {
-        say("sys", "мозг не ответил — работаю по правилам");
+        metric("bro.text.fail.timeout");
+        waitOff();
       }
     }
 

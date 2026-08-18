@@ -134,6 +134,19 @@ export const Route = createFileRoute("/api/bro-dev")({
         }
         const action = String(body.action ?? "");
 
+        // Настройка мозга от Claude — по ключу пульта: BOSS присылает адрес
+        // туннеля в чат, Claude вписывает его сюда и сразу проверяет.
+        if (action === "pult.brain") {
+          if (String(body.key ?? "") !== (await pultAccessKey()))
+            return json({ ok: false, error: "key" }, 401);
+          const url = String(body.url ?? "").slice(0, 200);
+          const token = String(body.token ?? "").slice(0, 200);
+          const model = String(body.model ?? "qwen3-8b").slice(0, 60);
+          if (!url || !token) return json({ ok: false, error: "empty" }, 400);
+          await ns.put("setting:brain", JSON.stringify({ url, token, model }));
+          return json({ ok: true });
+        }
+
         // Отметка исполнения от Claude — по ключу пульта, без cookie.
         if (action === "pult.ack") {
           if (String(body.key ?? "") !== (await pultAccessKey()))

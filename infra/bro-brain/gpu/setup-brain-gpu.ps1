@@ -57,10 +57,10 @@ try {
 # ---- 2. llama.cpp (CUDA) ---------------------------------------------
 # Ничего не перемещаем: находим llama-server.exe где бы он ни лежал в
 # распакованном архиве и запускаем прямо оттуда; cudart-DLL кладём рядом.
-# Чужая папка, случайно перенесённая с C:\ первым (багованным) прогоном —
-# возвращаем на место, чтобы не мешала и не потерялась.
+# Чужие папки, случайно перенесённые с C:\ первым (багованным) прогоном —
+# возвращаем на место, чтобы не мешали и не потерялись.
 $stray = Get-ChildItem "$dir\llama" -Directory -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -match "^[0-9a-f]{16,}$" }
+    Where-Object { $_.Name -match "^[0-9a-f]{16,}$" -or $_.Name -in @("Cakewalk", "common_attachment", "inetpub", "PerfLogs", "Intel") }
 foreach ($s in $stray) {
     Write-Host ">> Возвращаю на C:\ случайно перенесённую папку: $($s.Name)"
     try { Move-Item $s.FullName "C:\" -Force } catch { Write-Host "   не вышло ($_) — верни вручную" }
@@ -70,7 +70,10 @@ $find = { Get-ChildItem "$dir\llama" -Recurse -Filter "llama-server.exe" -Force 
     Select-Object -First 1 }
 $serverExe = & $find
 if (-not $serverExe) {
-    Get-GithubAsset "ggml-org/llama.cpp" "bin-win-cuda.*x64\.zip$" "$dir\llama-cuda.zip"
+    # Старые архивы могли скачаться не те (шаблон цеплял cudart вместо
+    # сервера) — сносим кэш и качаем заново по точным именам.
+    Remove-Item "$dir\llama-cuda.zip", "$dir\cudart.zip" -Force -ErrorAction SilentlyContinue
+    Get-GithubAsset "ggml-org/llama.cpp" "^llama-.*bin-win-cuda-12\.4-x64\.zip$" "$dir\llama-cuda.zip"
     Expand-Archive "$dir\llama-cuda.zip" -DestinationPath "$dir\llama" -Force
     $serverExe = & $find
     if (-not $serverExe) {
@@ -78,7 +81,7 @@ if (-not $serverExe) {
         Get-ChildItem "$dir\llama" -Recurse -ErrorAction SilentlyContinue | Select-Object -Expand FullName
         throw "llama-server.exe не найден в скачанном архиве — пришли Claude список выше."
     }
-    Get-GithubAsset "ggml-org/llama.cpp" "cudart-.*win.*x64\.zip$" "$dir\cudart.zip"
+    Get-GithubAsset "ggml-org/llama.cpp" "^cudart-.*cuda-12\.4-x64\.zip$" "$dir\cudart.zip"
     Expand-Archive "$dir\cudart.zip" -DestinationPath $serverExe.DirectoryName -Force
 }
 

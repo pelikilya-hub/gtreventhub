@@ -194,8 +194,13 @@ export class BroSession {
     dc.onmessage = (e) => this.onServerEvent(e.data as string);
     dc.onopen = () => {
       // Рация: детектор речи выключен ещё при создании сессии на сервере.
-      // Здесь только держим микрофон закрытым до нажатия.
-      if (this.ptt) this.mute(true);
+      // Здесь только держим микрофон закрытым до нажатия. И сразу просим
+      // громкий динамик: в play-and-record iOS считает разговор звонком и
+      // приглушает звук — та самая жалоба «голос становится тише».
+      if (this.ptt) {
+        this.mute(true);
+        routeAudio("playback");
+      }
       this.log("канал открыт — эфир");
       this.set("listening");
       this.touch();
@@ -258,6 +263,9 @@ export class BroSession {
   holdStart() {
     if (this.dc?.readyState !== "open") return;
     if (this.state === "speaking" || this.state === "thinking") this.bargeIn();
+    // Запись нужна только пока палец на кнопке — просим у iOS режим
+    // записи ровно на это время.
+    routeAudio("play-and-record");
     this.send({ type: "input_audio_buffer.clear" });
     this.mute(false);
     this.holdAt = Date.now();
@@ -271,6 +279,8 @@ export class BroSession {
   holdEnd() {
     if (this.dc?.readyState !== "open") return;
     this.mute(true);
+    // Кнопка отпущена — ответ должен звучать громко, из медиа-динамика.
+    routeAudio("playback");
     if (Date.now() - this.holdAt < 250) {
       this.send({ type: "input_audio_buffer.clear" });
       return;
@@ -456,6 +466,8 @@ export class BroSession {
   private releaseMic() {
     for (const t of this.mic?.getTracks() ?? []) t.stop();
     this.mic = null;
+    // Микрофона больше нет — вернуть системе обычный громкий маршрут.
+    routeAudio("playback");
   }
 
   stop(reason = "user") {

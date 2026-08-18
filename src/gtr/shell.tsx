@@ -45,6 +45,7 @@ import {
   FeedScreen,
 } from "./screens/Platform";
 import { TonightScreen } from "./screens/Tonight";
+import { ScreenErrorBoundary } from "./error-boundary";
 import { useDeviceTilt } from "./motion";
 import { GtrDancer } from "./dancer";
 import { GtrPlayerBar } from "./player";
@@ -444,7 +445,12 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
             </div>
           }
         >
-          <ScreenSwitch screen={screen} search={search} />
+          {/* Падение раздела больше не превращается в пустую страницу:
+              человек видит, что упало, и может перезапустить, а команда
+              видит текст ошибки прямо на экране. */}
+          <ScreenErrorBoundary key={screen} where={screen} detailed={!["visitor", "artist"].includes(user.role)}>
+            <ScreenSwitch screen={screen} search={search} />
+          </ScreenErrorBoundary>
         </Suspense>
         </div>
       </main>

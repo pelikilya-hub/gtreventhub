@@ -339,7 +339,9 @@ export function GtrBroOverlay({
     setRows([]);
     setCards([]);
     lastEvents.current = [];
-    const lines = greetLines(userName, role, new Date().getDate());
+    // Случайный seed: одно и то же приветствие два вечера подряд — верный
+    // способ надоесть. Детерминизм остаётся внутри greetLines для тестов.
+    const lines = greetLines(userName, role, Math.floor(Math.random() * 1e6));
     const timers: number[] = [];
     lines.forEach((l, i) => {
       timers.push(
@@ -552,7 +554,7 @@ export function GtrBroOverlay({
 
     if (plan.kind === "greet") {
       metric("bro.greet.ask");
-      const g = greetLines(userName, role, rows.length);
+      const g = greetLines(userName, role, Math.floor(Math.random() * 1e6));
       say("bro", g[0]);
       for (const l of g.slice(1)) say(l.startsWith("·") || l.startsWith("жми") ? "sys" : "bro", l);
       return;

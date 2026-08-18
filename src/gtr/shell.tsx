@@ -369,7 +369,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
         <NavGroup label={isArtist || isVisitor ? t("ПЛАТФОРМА") : t("ПЛОЩАДКА")} items={navVenue} />
         {navNetFull.length ? <NavGroup label={t("СЕТЬ GTR")} items={navNetFull} /> : null}
 
-        <div style={{ marginTop: "auto" }}>
+        <div className="gtr-navfoot" style={{ marginTop: "auto" }}>
           {peers.length > 0 ? (
             <div style={{ padding: "0 11px", marginBottom: 12 }}>
               <Eyebrow style={{ marginBottom: 8 }}>{t("СЕЙЧАС В СИСТЕМЕ")}</Eyebrow>
@@ -431,7 +431,24 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
             }}
           >
             <Icon d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9" size={15} />
-            {t("Выйти")} · {user.email}
+            {/* Почта длиннее панели: на телефоне «выйти · fedor.pavlysh@gtr.events»
+                не помещалось в строку и уезжало за край. Ставим её второй
+                строкой и обрезаем, действие остаётся читаемым всегда. */}
+            <span style={{ display: "grid", gap: 1, minWidth: 0, textAlign: "left" }}>
+              <span>{t("Выйти")}</span>
+              <span
+                className="gtr-mono"
+                style={{
+                  font: "500 9px/1.2 'JetBrains Mono',monospace",
+                  color: "var(--gtr-t3)",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {user.email}
+              </span>
+            </span>
           </button>
         </div>
       </aside>

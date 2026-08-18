@@ -1,8 +1,8 @@
 # Каталог голосовых команд GTR BRO — покрытие
 
-Каталог: 60 команд, версия 1.0.0. Реализовано в продукте: **24**, осталось: **36**.
+Каталог: 60 команд. Реализовано: **28**, осталось: **32**.
 
-Сверка автоматическая: ищем имя обработчика (`handler`/`tool`) в исходниках. Она показывает, есть ли механизм, а не качество формулировок.
+Группа safety закрыта полностью: правила в `bro/safety.ts` ловят намерение до модели, ответы одинаковы в текстовом и голосовом контуре.
 
 ## Осталось реализовать
 
@@ -24,10 +24,6 @@
 | route | CMD-ROUTE-005 | optimize_route_time | `route.optimize` |
 | route | CMD-ROUTE-006 | preview_safe_transport | `preview_transport` |
 | route | CMD-ROUTE-007 | go_home_safely | `preview_transport` |
-| safety | CMD-SAFETY-001 | illegal_substances | `safety.redirectIllegalSubstances` |
-| safety | CMD-SAFETY-002 | intoxicated_driving | `preview_transport` |
-| safety | CMD-SAFETY-003 | medical_emergency | `safety.openEmergencyHelp` |
-| safety | CMD-SAFETY-004 | minor_and_adult_venue | `safety.redirectMinorToAgeAppropriate` |
 | session | CMD-SESSION-001 | stop_speaking | `audio.stopPlayback` |
 | session | CMD-SESSION-002 | repeat_last | `session.repeatLastSpeech` |
 | session | CMD-SESSION-003 | make_shorter | `session.setVerbosity` |
@@ -44,30 +40,3 @@
 | transaction | CMD-TXN-006 | send_invites | `send_friend_invites` |
 | transaction | CMD-TXN-007 | book_transport | `book_transport` |
 | transaction | CMD-TXN-008 | cancel_preview | `confirmation.cancelActivePreview` |
-
-## Уже работает
-
-- CMD-DETAIL-001 · event_time — `get_event_details`
-- CMD-DETAIL-002 · event_price — `get_event_details`
-- CMD-DETAIL-003 · ticket_availability — `get_event_details`
-- CMD-DETAIL-004 · lineup — `get_event_details`
-- CMD-DETAIL-005 · venue_live_status — `get_venue_live_status`
-- CMD-DETAIL-006 · dress_code — `get_event_details`
-- CMD-DETAIL-007 · age_policy — `get_event_details`
-- CMD-DETAIL-008 · show_media — `open_in_app`
-- CMD-DISCOVERY-001 · discover_today — `search_events`
-- CMD-DISCOVERY-002 · discover_tonight — `search_events`
-- CMD-DISCOVERY-003 · discover_tomorrow — `search_events`
-- CMD-DISCOVERY-004 · discover_weekend — `search_events`
-- CMD-DISCOVERY-005 · discover_nearby — `search_events`
-- CMD-DISCOVERY-006 · discover_genre — `search_events`
-- CMD-DISCOVERY-007 · discover_by_vibe — `search_events`
-- CMD-DISCOVERY-008 · discover_by_budget — `search_events`
-- CMD-DISCOVERY-009 · discover_premium — `search_events`
-- CMD-DISCOVERY-010 · discover_family_day — `search_events`
-- CMD-DISCOVERY-011 · discover_local — `search_events`
-- CMD-DISCOVERY-012 · surprise_me — `search_events`
-- CMD-ROUTE-001 · build_night_route — `build_night_route`
-- CMD-ROUTE-002 · navigate_to_selected — `open_in_app`
-- CMD-SESSION-005 · go_back — `navigation.back`
-- CMD-SESSION-006 · close_assistant — `session.close`

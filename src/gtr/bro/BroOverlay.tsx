@@ -32,6 +32,7 @@ import {
 import { VOICE_LAB_LINES, type PersonaMode } from "./prompt.ru";
 import { chatStale, touchChat } from "./chat-life";
 import { isTeam } from "./roles";
+import { safetyOf } from "./safety";
 import { GemSession } from "./gem";
 import { BroSession, type BroCard, type BroState } from "./session";
 
@@ -451,6 +452,21 @@ export function GtrBroOverlay({
       say("bro", EGG_REPLY);
       return;
     }
+    // Безопасность идёт первой и не ходит ни в модель, ни в инструменты:
+    // ответ обязан быть одинаковым в любую ночь и при любом состоянии
+    // провайдера. Скорая не должна ждать, пока ответит чужой сервер.
+    const risk = safetyOf(q);
+    if (risk) {
+      metric(`bro.safety.${risk.kind}`);
+      say("bro", risk.reply);
+      if (risk.hint) say("bro", risk.hint);
+      if (risk.kind === "drunk_drive") {
+        const r = await callTool("call_taxi", {});
+        if (r.ok) setCards((p2) => [{ kind: "taxi" as const, data: r.data as Record<string, unknown> }, ...p2].slice(0, 6));
+      }
+      return;
+    }
+
     const plan = planOf(q);
 
     // Живые фразы сначала идут в самохостный мозг (Qwen на сервере GTR).

@@ -92,6 +92,13 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         if (await tooMany("bro", user.email, LIMITS.bro, ns))
           return json({ ok: false, error: "rate" }, 429);
 
+        // Безопасность — раньше модели и раньше лимитов: скорая не ждёт
+        // ни очереди к чужому серверу, ни исчерпанной квоты.
+        const { safetyOf } = await import("../gtr/bro/safety");
+        const risk = safetyOf(text);
+        if (risk)
+          return json({ ok: true, reply: risk.hint ? `${risk.reply}\n\n${risk.hint}` : risk.reply });
+
         // Попытка вытащить устройство помощника: системный промпт, список
         // инструментов, сырой дамп базы. Это не любопытство пользователя —
         // так снимают продукт целиком, чтобы собрать копию.

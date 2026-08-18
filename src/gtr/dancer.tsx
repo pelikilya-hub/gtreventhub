@@ -53,29 +53,54 @@ export function GtrDancer() {
 
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    // Флаг «цикл жив» отдельно от состояния видео. Первый урок этой
+    // фичи: цикл, который выходит при «кадров ещё нет» и планирует
+    // следующий тик только после удачной отрисовки, умирает на старте
+    // навсегда — видео грузится асинхронно, и первый тик всегда пустой.
+    let running = false;
+
     const draw = () => {
-      if (v.paused || v.videoWidth === 0) return;
-      g.drawImage(v, 0, 0, W, H);
-      const img = g.getImageData(0, 0, W, H);
-      const d = img.data;
-      // белый — в прозрачность, край — в полупрозрачность: мягкий кеинг
-      // без ореола. Порог 232 оставляет светлые блики на самой фигуре.
-      for (let i = 0; i < d.length; i += 4) {
-        const m = Math.min(d[i], d[i + 1], d[i + 2]);
-        if (m > 232) d[i + 3] = Math.max(0, 255 - (m - 232) * 12);
+      if (!running) return;
+      if (v.readyState >= 2 && !v.paused && v.videoWidth > 0) {
+        g.drawImage(v, 0, 0, W, H);
+        const img = g.getImageData(0, 0, W, H);
+        const d = img.data;
+        // белый — в прозрачность, край — в полупрозрачность: мягкий
+        // кеинг без ореола. Порог 232 оставляет блики на самой фигуре.
+        for (let i = 0; i < d.length; i += 4) {
+          const m = Math.min(d[i], d[i + 1], d[i + 2]);
+          if (m > 232) d[i + 3] = Math.max(0, 255 - (m - 232) * 12);
+        }
+        g.putImageData(img, 0, 0);
       }
-      g.putImageData(img, 0, 0);
       drawRef.current = requestAnimationFrame(draw);
     };
+
+    // Видео не сыграло (старый кодек, странный WebView) — рисуем прежний
+    // спрайт: пустая тень вместо танцовщицы хуже статичной фигуры.
+    const fallback = () => {
+      const img = new Image();
+      img.onload = () => {
+        g.clearRect(0, 0, W, H);
+        const k = Math.min(W / img.width, H / img.height);
+        const dw = img.width * k;
+        const dh = img.height * k;
+        g.drawImage(img, (W - dw) / 2, H - dh, dw, dh);
+      };
+      img.src = "/brand/dancer.png";
+    };
+    v.addEventListener("error", fallback);
 
     const start = () => {
       if (still) return; // системное «меньше движения» — стоим смирно
       if (!v.src) v.src = SRC; // первый запуск музыки — первый байт видео
-      void v.play().catch(() => {});
+      void v.play().catch(fallback);
+      running = true;
       cancelAnimationFrame(drawRef.current);
       drawRef.current = requestAnimationFrame(draw);
     };
     const halt = () => {
+      running = false;
       v.pause();
       cancelAnimationFrame(drawRef.current);
     };
@@ -103,7 +128,9 @@ export function GtrDancer() {
     document.addEventListener("visibilitychange", onVis);
 
     return () => {
+      running = false;
       mo.disconnect();
+      v.removeEventListener("error", fallback);
       window.removeEventListener("gtr:bpm", onBpm);
       document.removeEventListener("visibilitychange", onVis);
       cancelAnimationFrame(drawRef.current);

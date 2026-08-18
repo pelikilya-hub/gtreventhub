@@ -4220,3 +4220,260 @@ html { -webkit-tap-highlight-color: transparent; }
     scroll-padding-bottom: calc(96px + var(--gtr-navh) + env(safe-area-inset-bottom));
   }
 }
+
+/* =====================================================================
+   GTR BRO SYSTEM v1.0 — премиальный слой по референсу запуска.
+   Язык дизайна: угловые скобки-прицелы на каждом функциональном блоке,
+   красный контур на голосе человека, живой дым по кромкам. Слой ложится
+   ПОВЕРХ существующих правил BRO и сознательно ничего не ломает: те же
+   классы, тот же DOM, только новая кожа.
+
+   Скобки — фоном из восьми градиентов, а не восемью элементами: одна
+   нода, ноль перерисовок, работает на любом размере блока.
+   ===================================================================== */
+
+.gtr-bro-sheet {
+  --brk: rgba(229, 35, 27, 0.55);
+  background:
+    radial-gradient(90% 40% at 108% 8%, rgba(140, 18, 14, 0.20), transparent 60%),
+    radial-gradient(70% 34% at -6% 96%, rgba(120, 16, 12, 0.14), transparent 60%),
+    linear-gradient(178deg, #0b0c0f 0%, #08090b 100%);
+}
+
+/* канвас дыма: под контентом, поверх фона; касания сквозь него */
+.gtr-bro-smoke {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.gtr-bro-sheet { position: relative; }
+.gtr-bro-sheet > *:not(.gtr-bro-smoke) { position: relative; z-index: 1; }
+
+/* ---- скобки-прицелы: восемь штрихов фоном одной ноды ---- */
+.gtr-bro-chat,
+.gtr-bro-dos,
+.gtr-bro-q,
+.gtr-bro-btn,
+.gtr-bro-state,
+.gtr-bro-x,
+.gtr-bro-say {
+  --ck: rgba(229, 35, 27, 0.5);
+  --cl: 11px; /* длина штриха */
+  background-image:
+    linear-gradient(var(--ck), var(--ck)), linear-gradient(var(--ck), var(--ck)),
+    linear-gradient(var(--ck), var(--ck)), linear-gradient(var(--ck), var(--ck)),
+    linear-gradient(var(--ck), var(--ck)), linear-gradient(var(--ck), var(--ck)),
+    linear-gradient(var(--ck), var(--ck)), linear-gradient(var(--ck), var(--ck));
+  background-repeat: no-repeat;
+  background-size:
+    var(--cl) 1px, 1px var(--cl),
+    var(--cl) 1px, 1px var(--cl),
+    var(--cl) 1px, 1px var(--cl),
+    var(--cl) 1px, 1px var(--cl);
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+}
+
+/* ---- шапка: GTR BRO + чип состояния + крест ---- */
+.gtr-bro-head { gap: 10px; padding: 4px 2px 10px; }
+.gtr-bro-eyebrow {
+  font: 700 15px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.34em;
+  color: #fff;
+}
+.gtr-bro-state {
+  --ck: rgba(255, 255, 255, 0.22);
+  --cl: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 11px;
+  font: 500 10.5px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.14em;
+  color: var(--gtr-t2);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background-color: rgba(255, 255, 255, 0.02);
+}
+.gtr-bro-state::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gtr-red-hot);
+  box-shadow: 0 0 8px rgba(255, 52, 39, 0.8);
+  animation: gtr-bro-dotb 2.6s ease-in-out infinite;
+}
+.gtr-bro-state.s-listening::before { background: #2ecc71; box-shadow: 0 0 8px rgba(46, 204, 113, 0.8); }
+.gtr-bro-state.s-speaking::before { background: #7de2ff; box-shadow: 0 0 8px rgba(125, 226, 255, 0.8); }
+@keyframes gtr-bro-dotb {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.gtr-bro-x {
+  --ck: rgba(229, 35, 27, 0.6);
+  --cl: 8px;
+  border: 1px solid rgba(229, 35, 27, 0.28);
+  background-color: rgba(229, 35, 27, 0.06);
+  padding: 7px 11px;
+}
+
+/* ---- разговор: рамка-панель, голос человека в красном контуре ---- */
+.gtr-bro-chat {
+  --cl: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(6, 7, 9, 0.5);
+  padding: 16px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.gtr-bro-msg {
+  font: 400 15.5px/1.5 "Golos Text", sans-serif;
+  color: var(--gtr-t1);
+  max-width: 92%;
+  animation: gtr-bro-msgin 380ms cubic-bezier(0.22, 0.9, 0.3, 1) both;
+}
+.gtr-bro-msg.user {
+  align-self: flex-end;
+  padding: 10px 15px;
+  border: 1px solid rgba(229, 35, 27, 0.6);
+  background:
+    linear-gradient(180deg, rgba(229, 35, 27, 0.13), rgba(229, 35, 27, 0.05));
+  box-shadow:
+    0 0 18px rgba(229, 35, 27, 0.18),
+    inset 0 1px 0 rgba(255, 120, 110, 0.22);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+}
+/* реплики BRO разделяет тонкая трасса с засечками на торцах */
+.gtr-bro-msg.bro + .gtr-bro-msg.user,
+.gtr-bro-msg.user + .gtr-bro-msg.bro {
+  position: relative;
+  margin-top: 12px;
+}
+.gtr-bro-msg.user + .gtr-bro-msg.bro::before,
+.gtr-bro-msg.bro + .gtr-bro-msg.user::before {
+  content: "";
+  position: absolute;
+  top: -13px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0.22) 0, rgba(255, 255, 255, 0.22) 6px,
+    rgba(255, 255, 255, 0.06) 6px, rgba(255, 255, 255, 0.06) calc(100% - 6px),
+    rgba(255, 255, 255, 0.22) calc(100% - 6px));
+}
+@keyframes gtr-bro-msgin {
+  from { opacity: 0; transform: translateY(7px); filter: blur(2px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+/* ---- строка сообщения: тёмное поле + красная стрелка ---- */
+.gtr-bro-say {
+  --ck: rgba(255, 255, 255, 0.16);
+  --cl: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background-color: rgba(255, 255, 255, 0.025);
+  padding: 4px;
+}
+.gtr-bro-sayin { font-size: 15px; }
+.gtr-bro-saygo {
+  background: linear-gradient(180deg, rgba(229, 35, 27, 0.28), rgba(229, 35, 27, 0.1));
+  border: 1px solid rgba(229, 35, 27, 0.55);
+  color: var(--gtr-red-hot);
+  box-shadow: 0 0 14px rgba(229, 35, 27, 0.25);
+}
+.gtr-bro-saygo:not(:disabled):active { background: rgba(229, 35, 27, 0.4); color: #fff; }
+
+/* ---- быстрые команды: квадратные плитки с прицелами ---- */
+.gtr-bro-quick {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+  gap: 9px;
+}
+.gtr-bro-q {
+  --ck: rgba(229, 35, 27, 0.42);
+  --cl: 9px;
+  aspect-ratio: 1 / 0.92;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background-color: rgba(255, 255, 255, 0.02);
+  transition: border-color 0.15s, background-color 0.15s, transform 0.12s;
+}
+.gtr-bro-q:active {
+  transform: scale(0.95);
+  border-color: rgba(229, 35, 27, 0.5);
+  background-color: rgba(229, 35, 27, 0.07);
+}
+.gtr-bro-q span {
+  font: 500 11px/1.25 "Golos Text", sans-serif;
+  color: var(--gtr-t2);
+  text-align: center;
+}
+
+/* ---- центр: сплэш GTR в кольце свечения + «зажми и говори» ---- */
+.gtr-bro-orb::before {
+  background:
+    radial-gradient(closest-side, rgba(229, 35, 27, 0.28), rgba(229, 35, 27, 0.07) 55%, transparent 72%);
+}
+.gtr-bro-hint {
+  font: 600 11.5px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.32em;
+  text-transform: lowercase;
+  color: var(--gtr-red-hot);
+}
+.gtr-bro-hint::before { content: "[ "; color: rgba(229, 35, 27, 0.55); }
+.gtr-bro-hint::after { content: " ]"; color: rgba(229, 35, 27, 0.55); }
+
+/* ---- нижний пульт ---- */
+.gtr-bro-bar { gap: 8px; }
+.gtr-bro-btn {
+  --ck: rgba(255, 255, 255, 0.2);
+  --cl: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.025);
+  font-family: "Golos Text", sans-serif;
+  letter-spacing: 0.02em;
+}
+.gtr-bro-btn.danger {
+  --ck: rgba(229, 35, 27, 0.7);
+  border-color: rgba(229, 35, 27, 0.5);
+  background:
+    linear-gradient(180deg, rgba(229, 35, 27, 0.2), rgba(229, 35, 27, 0.07));
+  color: #ffb4ae;
+}
+
+/* ---- подпись системы ---- */
+.gtr-bro-sys {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+  font: 500 9px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.42em;
+  color: var(--gtr-t3);
+  white-space: nowrap;
+}
+.gtr-bro-sys::before,
+.gtr-bro-sys::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1));
+}
+.gtr-bro-sys::after {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-bro-msg { animation: none; }
+  .gtr-bro-state::before { animation: none; }
+}

@@ -33,6 +33,7 @@ import { VOICE_LAB_LINES, type PersonaMode } from "./prompt.ru";
 import { chatStale, touchChat } from "./chat-life";
 import { isTeam } from "./roles";
 import { safetyOf } from "./safety";
+import { BroSmoke } from "./smoke";
 import { GemSession } from "./gem";
 import { BroSession, type BroCard, type BroState } from "./session";
 
@@ -671,6 +672,7 @@ export function GtrBroOverlay({
       <button className="gtr-bro-scrim" aria-label="Закрыть" onClick={onClose} />
 
       <div className="gtr-bro-sheet">
+        <BroSmoke />
         <div className="gtr-bro-head">
           <span className="gtr-bro-eyebrow">GTR BRO</span>
           <span className={`gtr-bro-state s-${state}`}>
@@ -838,6 +840,8 @@ export function GtrBroOverlay({
             Стоп
           </button>
         </div>
+
+        <div className="gtr-bro-sys">GTR SYSTEM v1.0</div>
 
         {tune && (
           <div className="gtr-bro-tune">

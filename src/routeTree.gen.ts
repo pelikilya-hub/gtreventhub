@@ -18,6 +18,7 @@ import { Route as ApiAvideoRouteImport } from './routes/api.avideo'
 import { Route as ApiBossHeadRouteImport } from './routes/api.boss-head'
 import { Route as ApiBroDevRouteImport } from './routes/api.bro-dev'
 import { Route as ApiBroLearnRouteImport } from './routes/api.bro-learn'
+import { Route as ApiClientLogRouteImport } from './routes/api.client-log'
 import { Route as ApiCommunityDigestRouteImport } from './routes/api.community-digest'
 import { Route as ApiGtrBroGemRouteImport } from './routes/api.gtr-bro-gem'
 import { Route as ApiGtrBroGemtestRouteImport } from './routes/api.gtr-bro-gemtest'
@@ -85,6 +86,11 @@ const ApiBroDevRoute = ApiBroDevRouteImport.update({
 const ApiBroLearnRoute = ApiBroLearnRouteImport.update({
   id: '/api/bro-learn',
   path: '/api/bro-learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiClientLogRoute = ApiClientLogRouteImport.update({
+  id: '/api/client-log',
+  path: '/api/client-log',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCommunityDigestRoute = ApiCommunityDigestRouteImport.update({
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/api/boss-head': typeof ApiBossHeadRoute
   '/api/bro-dev': typeof ApiBroDevRoute
   '/api/bro-learn': typeof ApiBroLearnRoute
+  '/api/client-log': typeof ApiClientLogRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
   '/api/gtr-bro-gemtest': typeof ApiGtrBroGemtestRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByTo {
   '/api/boss-head': typeof ApiBossHeadRoute
   '/api/bro-dev': typeof ApiBroDevRoute
   '/api/bro-learn': typeof ApiBroLearnRoute
+  '/api/client-log': typeof ApiClientLogRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
   '/api/gtr-bro-gemtest': typeof ApiGtrBroGemtestRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/api/boss-head': typeof ApiBossHeadRoute
   '/api/bro-dev': typeof ApiBroDevRoute
   '/api/bro-learn': typeof ApiBroLearnRoute
+  '/api/client-log': typeof ApiClientLogRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
   '/api/gtr-bro-gemtest': typeof ApiGtrBroGemtestRoute
@@ -317,6 +326,7 @@ export interface FileRouteTypes {
     | '/api/boss-head'
     | '/api/bro-dev'
     | '/api/bro-learn'
+    | '/api/client-log'
     | '/api/community-digest'
     | '/api/gtr-bro-gem'
     | '/api/gtr-bro-gemtest'
@@ -350,6 +360,7 @@ export interface FileRouteTypes {
     | '/api/boss-head'
     | '/api/bro-dev'
     | '/api/bro-learn'
+    | '/api/client-log'
     | '/api/community-digest'
     | '/api/gtr-bro-gem'
     | '/api/gtr-bro-gemtest'
@@ -384,6 +395,7 @@ export interface FileRouteTypes {
     | '/api/boss-head'
     | '/api/bro-dev'
     | '/api/bro-learn'
+    | '/api/client-log'
     | '/api/community-digest'
     | '/api/gtr-bro-gem'
     | '/api/gtr-bro-gemtest'
@@ -419,6 +431,7 @@ export interface RootRouteChildren {
   ApiBossHeadRoute: typeof ApiBossHeadRoute
   ApiBroDevRoute: typeof ApiBroDevRoute
   ApiBroLearnRoute: typeof ApiBroLearnRoute
+  ApiClientLogRoute: typeof ApiClientLogRoute
   ApiCommunityDigestRoute: typeof ApiCommunityDigestRoute
   ApiGtrBroGemRoute: typeof ApiGtrBroGemRoute
   ApiGtrBroGemtestRoute: typeof ApiGtrBroGemtestRoute
@@ -500,6 +513,13 @@ declare module '@tanstack/react-router' {
       path: '/api/bro-learn'
       fullPath: '/api/bro-learn'
       preLoaderRoute: typeof ApiBroLearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/client-log': {
+      id: '/api/client-log'
+      path: '/api/client-log'
+      fullPath: '/api/client-log'
+      preLoaderRoute: typeof ApiClientLogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/community-digest': {
@@ -700,6 +720,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiBossHeadRoute: ApiBossHeadRoute,
   ApiBroDevRoute: ApiBroDevRoute,
   ApiBroLearnRoute: ApiBroLearnRoute,
+  ApiClientLogRoute: ApiClientLogRoute,
   ApiCommunityDigestRoute: ApiCommunityDigestRoute,
   ApiGtrBroGemRoute: ApiGtrBroGemRoute,
   ApiGtrBroGemtestRoute: ApiGtrBroGemtestRoute,

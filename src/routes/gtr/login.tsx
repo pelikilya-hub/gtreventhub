@@ -33,6 +33,23 @@ function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // Сбой входа на чужом устройстве — короткий отчёт на сервер: где упало
+  // и какой браузер внутри. Иначе диагностика превращается в переписку
+  // «а что там написано?». Без личных данных: ни почты, ни пароля.
+  const report = (where: string, msg: string) => {
+    try {
+      void fetch("/api/client-log", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ where, msg, ua: navigator.userAgent }),
+        keepalive: true,
+      });
+    } catch {
+      /* отчёт не важнее входа */
+    }
+  };
+
   const submit = async (em: string, pw: string) => {
     setBusy(true);
     setError(null);
@@ -41,9 +58,11 @@ function LoginPage() {
       if (res.ok) {
         navigate({ to: "/gtr/$screen", params: { screen: "dash" } });
       } else {
+        report("login-rejected", res.error ?? "");
         setError(res.error);
       }
-    } catch {
+    } catch (e) {
+      report("login-network", String(e).slice(0, 200));
       setError("Не удалось выполнить вход. Попробуйте ещё раз.");
     } finally {
       setBusy(false);

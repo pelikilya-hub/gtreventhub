@@ -4,6 +4,7 @@
 // корпуса или чистая палитра. Рендер — canvas, экспорт — PNG.
 // Доступ: BOSS и организаторы/продюсер.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { loadArtists, PH, type Artist } from "../data/app-data";
 import mediaRaw from "../data/artist-media.json";
@@ -80,6 +81,7 @@ const wrap = (ctx: CanvasRenderingContext2D, text: string, maxW: number) => {
 };
 
 export function AfishaGenScreen() {
+  const { t } = useTranslation();
   const { user } = useGtr();
   const allowed = Boolean(user.boss) || user.role === "organizer";
 
@@ -369,7 +371,7 @@ export function AfishaGenScreen() {
         className="gtr-mono"
         style={{ padding: 60, textAlign: "center", color: "var(--gtr-t3)" }}
       >
-        Генератор афиш доступен BOSS, организаторам и продюсеру.
+        {t("Генератор афиш доступен BOSS, организаторам и продюсеру.")}
       </div>
     );
 
@@ -397,7 +399,7 @@ export function AfishaGenScreen() {
   return (
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-        <h1 className="gtr-oswald gtr-h1">Генератор афиш</h1>
+        <h1 className="gtr-oswald gtr-h1">{t("Генератор афиш")}</h1>
         {style ? (
           <span
             title={`Корпус стиля: ${style.posters} афиш`}
@@ -408,7 +410,7 @@ export function AfishaGenScreen() {
             ))}
           </span>
         ) : (
-          <Chip color="rgba(255,255,255,.4)">СТИЛЬ: БРЕНД GTR (корпуса площадки пока нет)</Chip>
+          <Chip color="rgba(255,255,255,.4)">{t("СТИЛЬ: БРЕНД GTR (корпуса площадки пока нет)")}</Chip>
         )}
       </div>
 
@@ -419,7 +421,7 @@ export function AfishaGenScreen() {
         {/* -------- бриф -------- */}
         <div style={{ display: "grid", gap: 14, alignContent: "start" }}>
           <Card style={{ padding: "16px 18px", display: "grid", gap: 12 }}>
-            <Eyebrow>БРИФ</Eyebrow>
+            <Eyebrow>{t("БРИФ")}</Eyebrow>
             <div>
               {label("Площадка")}
               <select
@@ -443,7 +445,7 @@ export function AfishaGenScreen() {
               {label("Артист")}
               <input
                 className="gtr-input"
-                placeholder="Поиск по 312…"
+                placeholder={t("Поиск по 312…")}
                 value={artist ? artist.name : aq}
                 onChange={(e) => {
                   setArtistId("");
@@ -481,7 +483,7 @@ export function AfishaGenScreen() {
                           className="gtr-mono"
                           style={{ font: "600 8.5px/1 'JetBrains Mono',monospace", color: "#2ECC71" }}
                         >
-                          МЕДИА
+                          {t("МЕДИА")}
                         </span>
                       ) : null}
                     </button>
@@ -542,7 +544,7 @@ export function AfishaGenScreen() {
           </Card>
 
           <Card style={{ padding: "16px 18px", display: "grid", gap: 12 }}>
-            <Eyebrow>ОФОРМЛЕНИЕ</Eyebrow>
+            <Eyebrow>{t("ОФОРМЛЕНИЕ")}</Eyebrow>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {(Object.keys(SIZES) as SizeId[]).map((s) => (
                 <button
@@ -576,7 +578,7 @@ export function AfishaGenScreen() {
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 <button
                   onClick={() => setBg("")}
-                  title="Палитра площадки"
+                  title={t("Палитра площадки")}
                   style={{
                     width: 64,
                     height: 80,
@@ -617,14 +619,13 @@ export function AfishaGenScreen() {
                     color: "var(--gtr-t3)",
                   }}
                 >
-                  У площадки пока нет корпуса афиш — фон соберётся из палитры.
-                  Выберите артиста с меткой «МЕДИА», чтобы взять его hero-кадр.
+                  {t("У площадки пока нет корпуса афиш — фон соберётся из палитры. Выберите артиста с меткой «МЕДИА», чтобы взять его hero-кадр.")}
                 </div>
               ) : null}
             </div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               <button className="gtr-btn gtr-btn-red" onClick={download} disabled={rendering}>
-                Скачать PNG · {SIZES[size].w}×{SIZES[size].h}
+                {t("Скачать PNG ·")} {SIZES[size].w}×{SIZES[size].h}
               </button>
               <button
                 className="gtr-btn"

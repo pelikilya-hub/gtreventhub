@@ -594,7 +594,7 @@ export function DashScreen() {
               borderBottom: "1px solid rgba(255,255,255,.05)",
             }}
           >
-            Приоритетные действия
+            {t("Приоритетные действия")}
           </div>
           {d.actions.map(([title, desc, cta, goTo, icon, c], i) => (
             <div
@@ -895,7 +895,7 @@ function SalesCabinet() {
                 className="gtr-mono"
                 style={{ font: "500 10.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
               >
-                {user.email} · событий: {rows.length}
+                {user.email} {t("· событий:")} {rows.length}
               </span>
             </div>
           </div>
@@ -934,7 +934,7 @@ function SalesCabinet() {
               setPrefsFn({ data: { prefLang: v2 } }).catch(() => {});
             }}
           >
-            <option value="ru">Русский</option>
+            <option value="ru">{t("Русский")}</option>
             <option value="en">English</option>
             <option value="th">ไทย</option>
           </select>
@@ -1026,7 +1026,7 @@ function SalesCabinet() {
               className="gtr-mono"
               style={{ marginLeft: "auto", font: "500 9.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
             >
-              суммы смет с датой события
+              {t("суммы смет с датой события")}
             </span>
           </div>
           <div
@@ -1127,7 +1127,7 @@ function SalesCabinet() {
                     className="gtr-mono"
                     style={{ display: "block", marginTop: 2, font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
-                    {r.venueName} · {r.date || "дата не указана"} · {r.guests || "—"} гостей ·{" "}
+                    {r.venueName} · {r.date || "дата не указана"} · {r.guests || "—"} {t("гостей ·")}{" "}
                     {r.organizerName || "организатор"}
                   </span>
                 </span>
@@ -1158,7 +1158,7 @@ function SalesCabinet() {
         style={{ display: "grid", gridTemplateColumns: "minmax(280px,1fr) 1.4fr", gap: 18 }}
       >
         <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
-          <Eyebrow>БЛИЖАЙШИЕ СОБЫТИЯ</Eyebrow>
+          <Eyebrow>{t("БЛИЖАЙШИЕ СОБЫТИЯ")}</Eyebrow>
           {upcoming.length ? (
             upcoming.map(({ d }) => (
               <button
@@ -1208,21 +1208,20 @@ function SalesCabinet() {
             ))
           ) : (
             <span style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              Дат впереди нет. Укажите дату в мастере события или в слоте конструктора — событие
-              появится здесь и в пайплайне по месяцам.
+              {t("Дат впереди нет. Укажите дату в мастере события или в слоте конструктора — событие появится здесь и в пайплайне по месяцам.")}
             </span>
           )}
         </Card>
 
         <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Eyebrow>МОИ СОБЫТИЯ</Eyebrow>
+            <Eyebrow>{t("МОИ СОБЫТИЯ")}</Eyebrow>
             <button
               className="gtr-btn"
               style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10 }}
               onClick={() => go("events")}
             >
-              Все →
+              {t("Все →")}
             </button>
           </div>
           {latest.length ? (
@@ -1283,8 +1282,7 @@ function SalesCabinet() {
             ))
           ) : (
             <span style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              В кабинете пока пусто. Нажмите «{t("+ Новое событие")}» — мастер проведёт по шагам: сценарий,
-              дата, вместимость, площадка.
+              {t("В кабинете пока пусто. Нажмите «")}{t("+ Новое событие")}{t("» — мастер проведёт по шагам: сценарий, дата, вместимость, площадка.")}
             </span>
           )}
         </Card>
@@ -1302,6 +1300,7 @@ function CabinetMonth({
   rows: { d: import("../data/app-data").EventDraft }[];
   onOpen: (draftId: string) => void;
 }) {
+  const { t } = useTranslation();
   const now = new Date();
   const [ym, setYm] = useState<[number, number]>([now.getFullYear(), now.getMonth()]);
   const [y, m] = ym;
@@ -1370,7 +1369,7 @@ function CabinetMonth({
         })}
       </div>
       <span style={{ font: "500 10px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-        Красные дни — ваши события; клик открывает конструктор.
+        {t("Красные дни — ваши события; клик открывает конструктор.")}
       </span>
     </div>
   );
@@ -1380,6 +1379,7 @@ function CabinetMonth({
 // Предложения выступить (принять/отклонить здесь или в Telegram),
 // подтверждённые выступления и привязка Telegram.
 function ArtistCabinet() {
+  const { t } = useTranslation();
   const { user, shared, applyOffer } = useGtr();
   const [tg, setTg] = useState<{ configured: boolean; linked: boolean; bot: string } | null>(null);
   const [tgLink, setTgLink] = useState("");
@@ -1452,7 +1452,7 @@ function ArtistCabinet() {
             {user.initials}
           </span>
           <div style={{ minWidth: 0, flex: 1 }}>
-            <Eyebrow>КАБИНЕТ АРТИСТА</Eyebrow>
+            <Eyebrow>{t("КАБИНЕТ АРТИСТА")}</Eyebrow>
             <h1
               className="gtr-oswald"
               style={{ font: "700 28px/1.05 Oswald,sans-serif", letterSpacing: ".02em", margin: "8px 0 0" }}
@@ -1476,10 +1476,10 @@ function ArtistCabinet() {
       {/* Эфир: зелёная кнопка в каталоге артистов */}
       <Card style={{ padding: "16px 20px", marginBottom: 18, display: "grid", gap: 9 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <Eyebrow>ПРЯМОЙ ЭФИР</Eyebrow>
+          <Eyebrow>{t("ПРЯМОЙ ЭФИР")}</Eyebrow>
           {onAir ? (
             <span className="gtr-live-chip">
-              <span className="gtr-live-dot" /> В ЭФИРЕ
+              <span className="gtr-live-dot" /> {t("В ЭФИРЕ")}
             </span>
           ) : null}
         </div>
@@ -1487,7 +1487,7 @@ function ArtistCabinet() {
           <input
             className="gtr-input"
             style={{ flex: "1 1 220px", minWidth: 0 }}
-            placeholder="Ссылка на эфир (Instagram Live, Twitch…) — можно пустую"
+            placeholder={t("Ссылка на эфир (Instagram Live, Twitch…) — можно пустую")}
             value={airUrl}
             onChange={(e) => setAirUrl(e.target.value)}
           />
@@ -1496,8 +1496,7 @@ function ArtistCabinet() {
           </button>
         </div>
         <span style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-          Кнопка в каталоге станет зелёной, зрители перейдут прямо в эфир. Автоотключение через 4 часа.
-          Из Telegram: «Я в эфире» на клавиатуре бота.
+          {t("Кнопка в каталоге станет зелёной, зрители перейдут прямо в эфир. Автоотключение через 4 часа. Из Telegram: «Я в эфире» на клавиатуре бота.")}
         </span>
       </Card>
 
@@ -1506,11 +1505,11 @@ function ArtistCabinet() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <Eyebrow>TELEGRAM</Eyebrow>
           {tg?.linked ? (
-            <Chip color={GREEN}>ПРИВЯЗАН — ПРЕДЛОЖЕНИЯ ПРИХОДЯТ В ЧАТ</Chip>
+            <Chip color={GREEN}>{t("ПРИВЯЗАН — ПРЕДЛОЖЕНИЯ ПРИХОДЯТ В ЧАТ")}</Chip>
           ) : tg?.bot ? (
             <>
               <span style={{ font: "500 11.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-                Привяжите чат — предложения будут приходить с кнопками «Принять / Отклонить».
+                {t("Привяжите чат — предложения будут приходить с кнопками «Принять / Отклонить».")}
               </span>
               {tgLink ? (
                 <a
@@ -1524,17 +1523,17 @@ function ArtistCabinet() {
                     openAppLink(tgLink);
                   }}
                 >
-                  Открыть @{tg.bot} и привязать ↗
+                  {t("Открыть @")}{tg.bot} {t("и привязать ↗")}
                 </a>
               ) : (
                 <button className="gtr-btn" onClick={linkTg}>
-                  Привязать Telegram
+                  {t("Привязать Telegram")}
                 </button>
               )}
             </>
           ) : (
             <span style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              Бот GTR ещё не активирован администратором.
+              {t("Бот GTR ещё не активирован администратором.")}
             </span>
           )}
           {tgMsg ? (
@@ -1548,7 +1547,7 @@ function ArtistCabinet() {
 
       <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 18 }}>
         <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
-          <Eyebrow>ПРЕДЛОЖЕНИЯ · {open.length}</Eyebrow>
+          <Eyebrow>{t("ПРЕДЛОЖЕНИЯ ·")} {open.length}</Eyebrow>
           {open.length ? (
             open.map((o) => (
               <div
@@ -1571,28 +1570,28 @@ function ArtistCabinet() {
                   style={{ font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                 >
                   {o.fee ? `условия: ${o.fee}` : "условия обсуждаются"}
-                  {o.note ? ` · ${o.note}` : ""} · от {o.fromName}
+                  {o.note ? ` · ${o.note}` : ""} {t("· от")} {o.fromName}
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button className="gtr-btn gtr-btn-red" style={{ padding: "8px 14px" }} onClick={() => decide(o.id, true)}>
-                    ✓ Принять
+                    {t("✓ Принять")}
                   </button>
                   <button className="gtr-btn" style={{ padding: "8px 14px" }} onClick={() => decide(o.id, false)}>
-                    Отклонить
+                    {t("Отклонить")}
                   </button>
                 </div>
               </div>
             ))
           ) : (
             <span style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              Новых предложений нет. Когда площадка позовёт вас в событие, оно появится здесь
+              {t("Новых предложений нет. Когда площадка позовёт вас в событие, оно появится здесь")}
               {tg?.linked ? " и в Telegram" : ""}.
             </span>
           )}
         </Card>
 
         <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
-          <Eyebrow>МОИ ВЫСТУПЛЕНИЯ · {accepted.length}</Eyebrow>
+          <Eyebrow>{t("МОИ ВЫСТУПЛЕНИЯ ·")} {accepted.length}</Eyebrow>
           {accepted.length ? (
             accepted.map((o) => (
               <div
@@ -1624,7 +1623,7 @@ function ArtistCabinet() {
             ))
           ) : (
             <span style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              Подтверждённых выступлений пока нет.
+              {t("Подтверждённых выступлений пока нет.")}
             </span>
           )}
           {mine.some((o) => o.status === "declined") ? (
@@ -1632,7 +1631,7 @@ function ArtistCabinet() {
               className="gtr-mono"
               style={{ font: "500 9px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
             >
-              отклонённых: {mine.filter((o) => o.status === "declined").length}
+              {t("отклонённых:")} {mine.filter((o) => o.status === "declined").length}
             </span>
           ) : null}
         </Card>

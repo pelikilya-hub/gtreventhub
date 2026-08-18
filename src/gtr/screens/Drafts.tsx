@@ -5,6 +5,7 @@
 // половина «новых площадок» окажется опечаткой, а половина «артистов» —
 // названием вечеринки. Здесь человек смотрит на собранное и решает.
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { draftDecideFn, draftsFn, type ArtistDraftRow, type VenueDraftRow } from "../kv-api";
 import { Card, Chip, Eyebrow } from "../ui";
@@ -13,6 +14,7 @@ const GREEN = "#2ECC71";
 const AMBER = "#F5A623";
 
 export function DraftsScreen() {
+  const { t } = useTranslation();
   const [venues, setVenues] = useState<VenueDraftRow[]>([]);
   const [artists, setArtists] = useState<ArtistDraftRow[]>([]);
   const [busy, setBusy] = useState("");
@@ -49,7 +51,7 @@ export function DraftsScreen() {
 
   return (
     <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-      <Eyebrow style={{ marginBottom: 12 }}>ЧЕРНОВИКИ ИЗ ПРИЁМНИКА АФИШ</Eyebrow>
+      <Eyebrow style={{ marginBottom: 12 }}>{t("ЧЕРНОВИКИ ИЗ ПРИЁМНИКА АФИШ")}</Eyebrow>
 
       {note ? (
         <Card style={{ padding: 12, marginBottom: 12 }}>
@@ -60,21 +62,20 @@ export function DraftsScreen() {
       {loaded && !venues.length && !artists.length ? (
         <Card style={{ padding: 20 }}>
           <div style={{ font: "500 13.5px/1.6 'Golos Text',sans-serif" }}>
-            Пусто — всё разобрано. Черновики появляются, когда в присланной афише
-            встречается площадка или имя, которых нет в базе.
+            {t("Пусто — всё разобрано. Черновики появляются, когда в присланной афише встречается площадка или имя, которых нет в базе.")}
           </div>
           <div
             className="gtr-mono"
             style={{ marginTop: 10, font: "500 10.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
           >
-            Как прислать: перешли пост с афишей боту @Gtrcom1_bot в личку.
+            {t("Как прислать: перешли пост с афишей боту @Gtrcom1_bot в личку.")}
           </div>
         </Card>
       ) : null}
 
       {venues.length ? (
         <>
-          <Eyebrow style={{ margin: "18px 0 8px" }}>ПЛОЩАДКИ · {venues.length}</Eyebrow>
+          <Eyebrow style={{ margin: "18px 0 8px" }}>{t("ПЛОЩАДКИ ·")} {venues.length}</Eyebrow>
           <div style={{ display: "grid", gap: 10 }}>
             {venues.map((v) => (
               <Card key={v.slug} style={{ padding: 14 }}>
@@ -82,7 +83,7 @@ export function DraftsScreen() {
                   <span style={{ font: "700 15px/1.3 'Golos Text',sans-serif" }}>{v.name}</span>
                   {v.kind ? <Chip color={AMBER}>{v.kind.toUpperCase()}</Chip> : null}
                   {v.waiting.length ? (
-                    <Chip color={GREEN}>СОБЫТИЙ ЖДЁТ: {v.waiting.length}</Chip>
+                    <Chip color={GREEN}>{t("СОБЫТИЙ ЖДЁТ:")} {v.waiting.length}</Chip>
                   ) : null}
                 </div>
 
@@ -90,10 +91,10 @@ export function DraftsScreen() {
                   className="gtr-mono"
                   style={{ marginTop: 6, font: "500 10.5px/1.6 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
                 >
-                  {v.address ? <div>адрес: {v.address}</div> : null}
-                  {v.hours ? <div>часы: {v.hours}</div> : null}
-                  {v.lat && v.lon ? <div>координаты: {v.lat.toFixed(4)}, {v.lon.toFixed(4)}</div> : null}
-                  <div>источник: {v.seenIn.join(" · ") || "—"}</div>
+                  {v.address ? <div>{t("адрес:")} {v.address}</div> : null}
+                  {v.hours ? <div>{t("часы:")} {v.hours}</div> : null}
+                  {v.lat && v.lon ? <div>{t("координаты:")} {v.lat.toFixed(4)}, {v.lon.toFixed(4)}</div> : null}
+                  <div>{t("источник:")} {v.seenIn.join(" · ") || "—"}</div>
                 </div>
 
                 {v.waiting.length ? (
@@ -123,7 +124,7 @@ export function DraftsScreen() {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    На карте ↗
+                    {t("На карте ↗")}
                   </a>
                   <a
                     className="gtr-btn"
@@ -135,7 +136,7 @@ export function DraftsScreen() {
                   </a>
                   {v.website ? (
                     <a className="gtr-btn" href={v.website} target="_blank" rel="noreferrer">
-                      Сайт ↗
+                      {t("Сайт ↗")}
                     </a>
                   ) : null}
                   <button
@@ -143,14 +144,14 @@ export function DraftsScreen() {
                     disabled={busy === v.slug}
                     onClick={() => void decide("venue", v.slug, true)}
                   >
-                    Завести площадку
+                    {t("Завести площадку")}
                   </button>
                   <button
                     className="gtr-btn"
                     disabled={busy === v.slug}
                     onClick={() => void decide("venue", v.slug, false)}
                   >
-                    Не наша
+                    {t("Не наша")}
                   </button>
                 </div>
               </Card>
@@ -161,7 +162,7 @@ export function DraftsScreen() {
 
       {artists.length ? (
         <>
-          <Eyebrow style={{ margin: "22px 0 8px" }}>ИМЕНА ИЗ ЛАЙНАПОВ · {artists.length}</Eyebrow>
+          <Eyebrow style={{ margin: "22px 0 8px" }}>{t("ИМЕНА ИЗ ЛАЙНАПОВ ·")} {artists.length}</Eyebrow>
           <div style={{ display: "grid", gap: 8 }}>
             {artists.map((a) => (
               <Card key={a.slug} style={{ padding: 12 }}>
@@ -169,7 +170,7 @@ export function DraftsScreen() {
                   <span style={{ font: "700 14px/1.3 'Golos Text',sans-serif", flex: "1 1 160px" }}>{a.name}</span>
                   {/* Счётчик встреч — главный признак: имя из одного поста
                       чаще всего название вечеринки, из пяти — артист. */}
-                  <Chip color={a.seen > 2 ? GREEN : AMBER}>ВСТРЕЧАЛОСЬ: {a.seen}</Chip>
+                  <Chip color={a.seen > 2 ? GREEN : AMBER}>{t("ВСТРЕЧАЛОСЬ:")} {a.seen}</Chip>
                 </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
                   <a
@@ -178,7 +179,7 @@ export function DraftsScreen() {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Сеты ↗
+                    {t("Сеты ↗")}
                   </a>
                   <a
                     className="gtr-btn"
@@ -193,14 +194,14 @@ export function DraftsScreen() {
                     disabled={busy === a.slug}
                     onClick={() => void decide("artist", a.slug, true)}
                   >
-                    Это артист
+                    {t("Это артист")}
                   </button>
                   <button
                     className="gtr-btn"
                     disabled={busy === a.slug}
                     onClick={() => void decide("artist", a.slug, false)}
                   >
-                    Не артист
+                    {t("Не артист")}
                   </button>
                 </div>
               </Card>

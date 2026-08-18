@@ -964,7 +964,7 @@ function ArtistCard({
               >
                 {MEDIA[a.id]?.heroVideo ? (
                   <>
-                    видео:{" "}
+                    {t("видео:")}{" "}
                     <a
                       href={`https://www.instagram.com/reel/${MEDIA[a.id].igReel}/`}
                       target="_blank"
@@ -976,7 +976,7 @@ function ArtistCard({
                     {PHOTOS[a.id] ? " · " : ""}
                   </>
                 ) : null}
-                {PHOTOS[a.id] ? <>фото: {PHOTOS[a.id].source}</> : null}
+                {PHOTOS[a.id] ? <>{t("фото:")} {PHOTOS[a.id].source}</> : null}
               </div>
             ) : null}
         </div>
@@ -1091,7 +1091,7 @@ function ArtistCard({
           {rider ? (
             <>
               <SubHead color="#22D3C7" style={{ margin: "8px 0 7px" }}>
-                Технический
+                {t("Технический")}
               </SubHead>
               {rider.tech.map((t) => (
                 <Li key={t} color="#22D3C7">
@@ -1099,7 +1099,7 @@ function ArtistCard({
                 </Li>
               ))}
               <SubHead color="#FFD166" style={{ margin: "14px 0 7px" }}>
-                Гостеприимство
+                {t("Гостеприимство")}
               </SubHead>
               {rider.hosp.map((t) => (
                 <Li key={t} color="#FFD166">
@@ -1114,7 +1114,7 @@ function ArtistCard({
                 color: "var(--gtr-t3)",
               }}
             >
-              Для этой записи шаблон райдера GTR не назначен.
+              {t("Для этой записи шаблон райдера GTR не назначен.")}
             </div>
           )}
         </Card>

@@ -98,6 +98,7 @@ function shrinkToPng(file: File, max = 640): Promise<string> {
 }
 
 function BossHeadCard({ head, onSaved }: { head: BossHead | null; onSaved: (h: BossHead) => void }) {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState("");
   const [preview, setPreview] = useState<"day" | "night" | null>(null);
   const put = async (slot: "day" | "night", file?: File | null) => {
@@ -144,13 +145,13 @@ function BossHeadCard({ head, onSaved }: { head: BossHead | null; onSaved: (h: B
         {head?.[id] ? (
           <img src={head[id]} alt="" style={{ maxHeight: "100%", objectFit: "contain" }} />
         ) : (
-          <span style={{ font: mono(9), color: "rgba(255,255,255,.3)" }}>пусто</span>
+          <span style={{ font: mono(9), color: "rgba(255,255,255,.3)" }}>{t("пусто")}</span>
         )}
       </div>
       <span style={{ font: mono(8), color: "rgba(255,255,255,.35)" }}>{hint}</span>
       <div style={{ display: "flex", gap: 6 }}>
         <label className="gtr-btn" style={{ cursor: "pointer" }}>
-          Загрузить
+          {t("Загрузить")}
           <input
             type="file"
             accept="image/png,image/webp"
@@ -160,7 +161,7 @@ function BossHeadCard({ head, onSaved }: { head: BossHead | null; onSaved: (h: B
         </label>
         {head?.[id] ? (
           <button className="gtr-btn" onClick={() => void drop(id)}>
-            Убрать
+            {t("Убрать")}
           </button>
         ) : null}
       </div>
@@ -169,10 +170,10 @@ function BossHeadCard({ head, onSaved }: { head: BossHead | null; onSaved: (h: B
   return (
     <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-        <Eyebrow>ПОРТРЕТ В ЭМБЛЕМЕ · ДЕНЬ И НОЧЬ</Eyebrow>
+        <Eyebrow>{t("ПОРТРЕТ В ЭМБЛЕМЕ · ДЕНЬ И НОЧЬ")}</Eyebrow>
         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
           <span style={{ font: mono(8.5), color: "rgba(255,255,255,.4)" }}>
-            сейчас на острове: {isDaylight() ? "день" : "ночь"}
+            {t("сейчас на острове:")} {isDaylight() ? "день" : "ночь"}
           </span>
           <button className="gtr-btn" onClick={() => setPreview(preview === "day" ? "night" : "day")}>
             {preview === null ? "Примерить" : preview === "day" ? "Показать ночь" : "Показать день"}
@@ -187,8 +188,7 @@ function BossHeadCard({ head, onSaved }: { head: BossHead | null; onSaved: (h: B
         </div>
       </div>
       <span style={{ font: mono(8.5), color: "rgba(255,255,255,.4)" }}>
-        Нужен PNG с уже вырезанным фоном — прозрачность и есть объём: по её краю строится контровой
-        свет. Высота ужимается до 640 px прямо в браузере.
+        {t("Нужен PNG с уже вырезанным фоном — прозрачность и есть объём: по её краю строится контровой свет. Высота ужимается до 640 px прямо в браузере.")}
         {busy ? ` · ${busy}` : ""}
       </span>
     </Card>
@@ -287,6 +287,7 @@ export function TgChip() {
 
 // ---------- Задачи ----------
 function TasksBlock({ users, me }: { users: PublicUser[]; me: string }) {
+  const { t } = useTranslation();
   const [tasks, setTasks] = useState<GtrTask[]>([]);
   const [title, setTitle] = useState("");
   const [assignee, setAssignee] = useState("");
@@ -349,16 +350,16 @@ function TasksBlock({ users, me }: { users: PublicUser[]; me: string }) {
   return (
     <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Eyebrow>ЗАДАЧИ КОМАНДЫ</Eyebrow>
+        <Eyebrow>{t("ЗАДАЧИ КОМАНДЫ")}</Eyebrow>
         <span style={{ font: mono(9), color: "rgba(255,255,255,.4)" }}>
-          {open.length} откр.
+          {open.length} {t("откр.")}
         </span>
       </div>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         <input
           className="gtr-input"
           style={{ flex: "2 1 160px", minWidth: 0 }}
-          placeholder="Что сделать…"
+          placeholder={t("Что сделать…")}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && add()}
@@ -369,7 +370,7 @@ function TasksBlock({ users, me }: { users: PublicUser[]; me: string }) {
           value={assignee}
           onChange={(e) => setAssignee(e.target.value)}
         >
-          <option value="">— исполнитель —</option>
+          <option value="">{t("— исполнитель —")}</option>
           {users.map((u) => (
             <option key={u.email} value={u.email}>
               {u.name}
@@ -384,12 +385,12 @@ function TasksBlock({ users, me }: { users: PublicUser[]; me: string }) {
           onChange={(e) => setDue(e.target.value)}
         />
         <button className="gtr-btn gtr-btn-red gtr-btn-sm" onClick={add}>
-          Поставить
+          {t("Поставить")}
         </button>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 250, overflowY: "auto" }}>
         {open.length === 0 ? (
-          <span style={{ font: golos(11), color: "var(--gtr-t3)" }}>Открытых задач нет.</span>
+          <span style={{ font: golos(11), color: "var(--gtr-t3)" }}>{t("Открытых задач нет.")}</span>
         ) : null}
         {open.map((t) => (
           <div
@@ -444,6 +445,7 @@ function TasksBlock({ users, me }: { users: PublicUser[]; me: string }) {
 
 // ---------- Рассылка ----------
 function BroadcastBlock() {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   const [aud, setAud] = useState<"all" | "team" | "artists" | "organizers">("all");
   const [note, setNote] = useState("");
@@ -486,15 +488,15 @@ function BroadcastBlock() {
         <input
           className="gtr-input"
           style={{ flex: 1, minWidth: 0 }}
-          placeholder="Сообщение в Telegram + push…"
+          placeholder={t("Сообщение в Telegram + push…")}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
         />
         {/* знак сам кнопка: на красной заливке наши стикеры не читаются —
             они тёмные с красным акцентом и созданы под тёмный фон */}
-        <StkBtn name="speaker" onClick={send} title="Отправить">
-          Отправить
+        <StkBtn name="speaker" onClick={send} title={t("Отправить")}>
+          {t("Отправить")}
         </StkBtn>
       </div>
     </div>
@@ -503,6 +505,7 @@ function BroadcastBlock() {
 
 // ---------- Кабинет BOSS ----------
 export function BossCabinet() {
+  const { t } = useTranslation();
   const { user, shared } = useGtr();
   const navigate = useNavigate();
   const go = (s: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: s } });
@@ -588,7 +591,7 @@ export function BossCabinet() {
         <div className="gtr-boss-hero">
           <BossHead3D head={head} />
           <div style={{ flex: 1, minWidth: 220, padding: "16px 0" }}>
-            <Eyebrow style={{ color: RED }}>КОНТРОЛЬ ОПЕРАЦИИ · GTR EVENT</Eyebrow>
+            <Eyebrow style={{ color: RED }}>{t("КОНТРОЛЬ ОПЕРАЦИИ · GTR EVENT")}</Eyebrow>
             <h1
               style={{
                 margin: "6px 0 2px",
@@ -623,9 +626,9 @@ export function BossCabinet() {
         {/* -------- деньги -------- */}
         <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Eyebrow>ДЕНЬГИ И СМЕТЫ</Eyebrow>
+            <Eyebrow>{t("ДЕНЬГИ И СМЕТЫ")}</Eyebrow>
             <button className="gtr-btn gtr-btn-sm" onClick={() => go("events")}>
-              Все события →
+              {t("Все события →")}
             </button>
           </div>
           {[...money.byStage.entries()].map(([st, x]) => (
@@ -655,9 +658,9 @@ export function BossCabinet() {
         {/* -------- заявки + события -------- */}
         <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Eyebrow>ЗАЯВКИ И БЛИЖАЙШЕЕ</Eyebrow>
+            <Eyebrow>{t("ЗАЯВКИ И БЛИЖАЙШЕЕ")}</Eyebrow>
             <button className="gtr-btn gtr-btn-sm" onClick={() => go("inquiries")}>
-              Канбан →
+              {t("Канбан →")}
             </button>
           </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -694,16 +697,16 @@ export function BossCabinet() {
               </div>
             ))
           ) : (
-            <span style={{ font: golos(11), color: "var(--gtr-t3)" }}>Ближайших дат нет.</span>
+            <span style={{ font: golos(11), color: "var(--gtr-t3)" }}>{t("Ближайших дат нет.")}</span>
           )}
         </Card>
 
         {/* -------- команда + лента -------- */}
         <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Eyebrow>КОМАНДА · ЖИВАЯ ЛЕНТА</Eyebrow>
+            <Eyebrow>{t("КОМАНДА · ЖИВАЯ ЛЕНТА")}</Eyebrow>
             <button className="gtr-btn gtr-btn-sm" onClick={() => go("admin")}>
-              Управление →
+              {t("Управление →")}
             </button>
           </div>
           <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
@@ -741,7 +744,7 @@ export function BossCabinet() {
         {/* -------- связь + уведомления -------- */}
         <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10, gridColumn: "1 / -1" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-            <Eyebrow>СВЯЗЬ И УВЕДОМЛЕНИЯ</Eyebrow>
+            <Eyebrow>{t("СВЯЗЬ И УВЕДОМЛЕНИЯ")}</Eyebrow>
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
               <TgChip />
               <PushPanel />
@@ -770,6 +773,7 @@ const PENDING_ROLE_LABEL: Record<string, string> = {
   gtr: "Команда GTR", artist: "Артист", organizer: "Организатор", visitor: "Посетитель",
 };
 function PendingCard() {
+  const { t } = useTranslation();
   const [items, setItems] = useState<PendingApp[]>([]);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState("");
@@ -794,7 +798,7 @@ function PendingCard() {
   return (
     <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10, gridColumn: "1 / -1" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-        <Eyebrow>ЗАЯВКИ НА РОЛИ · ПОДТВЕРЖДЕНИЕ BOSS</Eyebrow>
+        <Eyebrow>{t("ЗАЯВКИ НА РОЛИ · ПОДТВЕРЖДЕНИЕ BOSS")}</Eyebrow>
         <span style={{ font: mono(9.5, 700), color: items.length ? RED : "rgba(255,255,255,.35)" }}>
           {items.length}
         </span>
@@ -837,14 +841,14 @@ function PendingCard() {
                   disabled={busy === a.email}
                   onClick={() => void decide(a.email, true)}
                 >
-                  Принять
+                  {t("Принять")}
                 </StkBtn>
                 <button
                   className="gtr-btn gtr-btn-sm"
                   disabled={busy === a.email}
                   onClick={() => void decide(a.email, false)}
                 >
-                  Отклонить
+                  {t("Отклонить")}
                 </button>
               </div>
             </div>
@@ -852,7 +856,7 @@ function PendingCard() {
         </div>
       ) : (
         <span style={{ font: golos(11), color: "var(--gtr-t3)" }}>
-          Новых заявок нет. Артисты, организаторы, площадки и кандидаты в команду появятся здесь и в Telegram.
+          {t("Новых заявок нет. Артисты, организаторы, площадки и кандидаты в команду появятся здесь и в Telegram.")}
         </span>
       )}
       {note ? <span style={{ font: golos(10.5), color: "rgba(255,255,255,.6)" }}>{note}</span> : null}
@@ -866,6 +870,7 @@ function PendingCard() {
 // что добавлен админом, и дальше умеет постить дайджест вечера и
 // приглашение тестовой группы.
 function CommunityCard() {
+  const { t } = useTranslation();
   const [channelUrl, setChannelUrl] = useState("");
   const [chatUrl, setChatUrl] = useState("");
   const [channelTitle, setChannelTitle] = useState("");
@@ -934,7 +939,7 @@ function CommunityCard() {
   return (
     <Card style={{ padding: 14, gridColumn: "1 / -1" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
-        <Eyebrow>КОМЬЮНИТИ TELEGRAM · НОВОСТИ И ОБЩЕНИЕ</Eyebrow>
+        <Eyebrow>{t("КОМЬЮНИТИ TELEGRAM · НОВОСТИ И ОБЩЕНИЕ")}</Eyebrow>
         <Chip color={channelTitle ? GREEN : AMBER}>
           {channelTitle ? `КАНАЛ · ${channelTitle.toUpperCase()}` : "КАНАЛ НЕ ПРИВЯЗАН"}
         </Chip>
@@ -946,60 +951,59 @@ function CommunityCard() {
         className="gtr-mono"
         style={{ font: "500 9.5px/1.6 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 10 }}
       >
-        1) создай публичный канал (новости) и группу (чат) · 2) добавь бота @Gtrcom1_bot админом в оба ·
-        3) вставь ссылки t.me и привяжи. Дайджест вечера уходит в канал сам — каждый день в 17:00.
+        {t("1) создай публичный канал (новости) и группу (чат) · 2) добавь бота @Gtrcom1_bot админом в оба · 3) вставь ссылки t.me и привяжи. Дайджест вечера уходит в канал сам — каждый день в 17:00.")}
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
         <input
           className="gtr-input"
           style={{ flex: "1 1 220px" }}
-          placeholder="Канал: t.me/имя_канала"
+          placeholder={t("Канал: t.me/имя_канала")}
           value={channelUrl}
           onChange={(e) => setChannelUrl(e.target.value)}
         />
         <input
           className="gtr-input"
           style={{ flex: "1 1 220px" }}
-          placeholder="Группа: t.me/имя_группы"
+          placeholder={t("Группа: t.me/имя_группы")}
           value={chatUrl}
           onChange={(e) => setChatUrl(e.target.value)}
         />
-        <button className="gtr-btn gtr-btn-red" onClick={save}>Привязать и проверить</button>
+        <button className="gtr-btn gtr-btn-red" onClick={save}>{t("Привязать и проверить")}</button>
       </div>
       <div
         className="gtr-mono"
         style={{ font: "600 9px/1 'JetBrains Mono',monospace", letterSpacing: "0.09em", color: "var(--gtr-t3)", marginBottom: 6 }}
       >
-        ПУБЛИКАЦИЯ
+        {t("ПУБЛИКАЦИЯ")}
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
         <button className="gtr-btn" onClick={() => post("digest", "channel")}>
           <Icon d="M3 9v6h4l6 4V5L7 9H3z M15.5 8.5a4 4 0 0 1 0 7" size={13} />
-          Дайджест в канал сейчас
+          {t("Дайджест в канал сейчас")}
         </button>
         <button className="gtr-btn" onClick={() => post("invite", "channel")}>
           <Icon d="M11 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6 M15 8l4 4-4 4 M19 12H9" size={13} />
-          Приглашение в канал
+          {t("Приглашение в канал")}
         </button>
         <button className="gtr-btn" onClick={() => post("contest", "channel")}>
           <Icon d="M7 4h10v4a5 5 0 0 1-10 0V4z M5 5H3v2a4 4 0 0 0 4 4 M21 5h-2v2a4 4 0 0 0-4 4 M9 21h6 M12 17v4" size={13} />
-          Конкурс инвайтинга в канал
+          {t("Конкурс инвайтинга в канал")}
         </button>
       </div>
       <div
         className="gtr-mono"
         style={{ font: "600 9px/1 'JetBrains Mono',monospace", letterSpacing: "0.09em", color: "var(--gtr-t3)", marginBottom: 6 }}
       >
-        ИНСТРУМЕНТЫ
+        {t("ИНСТРУМЕНТЫ")}
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button className="gtr-btn gtr-btn-ghost" onClick={copyInvite}>
           <Icon d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1z M6 5h12v15H6z M9 10h6 M9 14h6" size={13} />
-          Текст приглашения (разослать)
+          {t("Текст приглашения (разослать)")}
         </button>
         <button className="gtr-btn gtr-btn-ghost" onClick={activate}>
           <Icon d="M20 11a8 8 0 1 0-2.2 6.6 M20 6v5h-5" size={13} />
-          Обновить вебхук (для конкурса)
+          {t("Обновить вебхук (для конкурса)")}
         </button>
       </div>
       {state ? (
@@ -1028,6 +1032,7 @@ function CommunityCard() {
  *  «подключить» и одна «проверить постом», чтобы связку было видно
  *  сразу, а не вечером после крона. */
 function ThreadsCard() {
+  const { t } = useTranslation();
   const [token, setToken] = useState("");
   const [state, setState] = useState("");
   const [who, setWho] = useState<string | null>(null);
@@ -1074,26 +1079,26 @@ function ThreadsCard() {
   return (
     <Card style={{ padding: 14, gridColumn: "1 / -1" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
-        <Eyebrow>THREADS · ПУБЛИКАЦИЯ АФИШИ</Eyebrow>
+        <Eyebrow>{t("THREADS · ПУБЛИКАЦИЯ АФИШИ")}</Eyebrow>
         <Chip color={who ? GREEN : AMBER}>{who ? `@${who.toUpperCase()}` : "НЕ ПОДКЛЮЧЁН"}</Chip>
         {daysLeft !== null ? (
-          <Chip color={daysLeft < 10 ? RED : "#7B4DFF"}>ТОКЕН · {daysLeft} ДН.</Chip>
+          <Chip color={daysLeft < 10 ? RED : "#7B4DFF"}>{t("ТОКЕН ·")} {daysLeft} {t("ДН.")}</Chip>
         ) : null}
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <input
           className="gtr-input"
           style={{ flex: "1 1 280px" }}
-          placeholder="Access Token профиля Threads"
+          placeholder={t("Access Token профиля Threads")}
           value={token}
           onChange={(e) => setToken(e.target.value)}
         />
         <button className="gtr-btn gtr-btn-red" onClick={save}>
-          Подключить
+          {t("Подключить")}
         </button>
         {who ? (
           <button className="gtr-btn" onClick={test}>
-            Проверить постом
+            {t("Проверить постом")}
           </button>
         ) : null}
       </div>
@@ -1109,6 +1114,7 @@ function ThreadsCard() {
 }
 
 function MetaCard() {
+  const { t } = useTranslation();
   const [token, setToken] = useState("");
   const [pageName, setPageName] = useState("");
   const [igUser, setIgUser] = useState("");
@@ -1164,7 +1170,7 @@ function MetaCard() {
   return (
     <Card style={{ padding: 14, gridColumn: "1 / -1" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
-        <Eyebrow>META · СТРАНИЦА FACEBOOK / INSTAGRAM</Eyebrow>
+        <Eyebrow>{t("META · СТРАНИЦА FACEBOOK / INSTAGRAM")}</Eyebrow>
         <Chip color={connected ? GREEN : AMBER}>
           {connected ? `ПОДКЛЮЧЕНА${pageName ? ` · ${pageName.toUpperCase()}` : ""}` : "НЕ ПОДКЛЮЧЕНА"}
         </Chip>
@@ -1174,16 +1180,16 @@ function MetaCard() {
         <input
           className="gtr-input"
           style={{ flex: "1 1 280px" }}
-          placeholder="Access Token из Graph API Explorer (вставить и сохранить)"
+          placeholder={t("Access Token из Graph API Explorer (вставить и сохранить)")}
           value={token}
           onChange={(e) => setToken(e.target.value)}
         />
         <button className="gtr-btn gtr-btn-red" onClick={save}>
-          Подключить
+          {t("Подключить")}
         </button>
         {connected ? (
           <button className="gtr-btn" onClick={sync}>
-            Синк публикаций
+            {t("Синк публикаций")}
           </button>
         ) : null}
       </div>
@@ -1200,12 +1206,12 @@ function MetaCard() {
             className="gtr-input"
             style={{ flex: "1 1 200px" }}
             type="password"
-            placeholder="App Secret (Show → скопировать)"
+            placeholder={t("App Secret (Show → скопировать)")}
             value={appSecret}
             onChange={(e) => setAppSecret(e.target.value)}
           />
           <button className="gtr-btn" onClick={exchange}>
-            Сделать токены вечными
+            {t("Сделать токены вечными")}
           </button>
         </div>
       ) : null}
@@ -1218,7 +1224,7 @@ function MetaCard() {
       </div>
       {feed.length ? (
         <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
-          <Eyebrow>ЛЕНТА СТРАНИЦ · {feed.length}</Eyebrow>
+          <Eyebrow>{t("ЛЕНТА СТРАНИЦ ·")} {feed.length}</Eyebrow>
           {feed.map((f) => (
             <a
               key={f.url ?? f.text}
@@ -1262,6 +1268,7 @@ function MetaCard() {
 // PromptPay: реквизит для QR-оплат (бронь, депозиты, вход). Деньги идут
 // напрямую на счёт — без эквайринга. Виден и правится только здесь.
 function PromptpayCard() {
+  const { t } = useTranslation();
   const [id, setId] = useState("");
   const [name, setName] = useState("GTR Event");
   const [saved, setSaved] = useState<string>("");
@@ -1290,26 +1297,26 @@ function PromptpayCard() {
   return (
     <Card style={{ padding: 14, gridColumn: "1 / -1" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
-        <Eyebrow>PROMPTPAY · ПРИЁМ ОПЛАТ</Eyebrow>
+        <Eyebrow>{t("PROMPTPAY · ПРИЁМ ОПЛАТ")}</Eyebrow>
         <Chip color={saved ? GREEN : AMBER}>{saved ? "ВКЛЮЧЕНО" : "НЕ НАСТРОЕНО"}</Chip>
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <input
           className="gtr-input"
           style={{ flex: "1 1 200px" }}
-          placeholder="Телефон (10 цифр) / Tax ID (13) / e-wallet (15)"
+          placeholder={t("Телефон (10 цифр) / Tax ID (13) / e-wallet (15)")}
           value={id}
           onChange={(e) => setId(e.target.value)}
         />
         <input
           className="gtr-input"
           style={{ flex: "1 1 160px" }}
-          placeholder="Имя получателя на экране оплаты"
+          placeholder={t("Имя получателя на экране оплаты")}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <button className="gtr-btn gtr-btn-red" onClick={save}>
-          Сохранить
+          {t("Сохранить")}
         </button>
       </div>
       <div
@@ -1327,6 +1334,7 @@ function PromptpayCard() {
 // отправлено → открыто → подтверждено из vconfirm-записей, живьём.
 const SPRINT_GOAL = 15;
 function SprintBlock({ go }: { go: (s: ScreenId) => void }) {
+  const { t } = useTranslation();
   const [confirms, setConfirms] = useState<Record<string, VenueConfirm>>({});
   useEffect(() => {
     const load = () =>
@@ -1348,16 +1356,16 @@ function SprintBlock({ go }: { go: (s: ScreenId) => void }) {
   return (
     <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Eyebrow style={{ color: RED }}>ЦЕЛЬ НЕДЕЛИ · ПОДТВЕРЖДЁННЫЕ ПРАЙСЫ</Eyebrow>
+        <Eyebrow style={{ color: RED }}>{t("ЦЕЛЬ НЕДЕЛИ · ПОДТВЕРЖДЁННЫЕ ПРАЙСЫ")}</Eyebrow>
         <button className="gtr-btn gtr-btn-sm" onClick={() => go("base")}>
-          К базе →
+          {t("К базе →")}
         </button>
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
         <span style={{ font: "700 26px/1 'Oswald',sans-serif", color: confirmed.length ? GREEN : "#fff" }}>
           {confirmed.length}
         </span>
-        <span style={{ font: mono(11, 600), color: "rgba(255,255,255,.45)" }}>/ {SPRINT_GOAL} площадок</span>
+        <span style={{ font: mono(11, 600), color: "rgba(255,255,255,.45)" }}>/ {SPRINT_GOAL} {t("площадок")}</span>
       </div>
       <div style={{ height: 6, background: "rgba(255,255,255,.08)" }}>
         <div
@@ -1397,8 +1405,7 @@ function SprintBlock({ go }: { go: (s: ScreenId) => void }) {
         </div>
       ) : (
         <div style={{ font: golos(10.5), color: "rgba(255,255,255,.4)" }}>
-          Отправляйте площадкам ссылки подтверждения из паспорта — каждое
-          подтверждение появится здесь.
+          {t("Отправляйте площадкам ссылки подтверждения из паспорта — каждое подтверждение появится здесь.")}
         </div>
       )}
       {bySender.size ? (

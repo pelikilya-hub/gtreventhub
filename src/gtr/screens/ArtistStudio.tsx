@@ -2,6 +2,7 @@
 // hero-видео — и пишет команде из приложения. Всё сразу видно в публичной
 // карточке каталога.
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   artistExtrasFn,
@@ -87,6 +88,7 @@ const posterFromVideo = (f: File) =>
   });
 
 export function ArtistStudio({ artistId }: { artistId: string }) {
+  const { t } = useTranslation();
   const [bio, setBio] = useState("");
   const [links, setLinks] = useState<Record<string, string>>({});
   const [sets, setSets] = useState<{ title: string; url: string }[]>([]);
@@ -226,8 +228,8 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
       {/* ---------- мой профиль ---------- */}
       <Card style={{ padding: "16px 20px", display: "grid", gap: 10, alignContent: "start" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Eyebrow>МОЙ ПРОФИЛЬ</Eyebrow>
-          {saved ? <Chip color={GREEN}>СОХРАНЕНО</Chip> : null}
+          <Eyebrow>{t("МОЙ ПРОФИЛЬ")}</Eyebrow>
+          {saved ? <Chip color={GREEN}>{t("СОХРАНЕНО")}</Chip> : null}
         </div>
         <div>
           {label("О СЕБЕ · ВИДНО В КАТАЛОГЕ")}
@@ -235,7 +237,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
             className="gtr-input"
             rows={4}
             style={{ resize: "vertical", height: "auto" }}
-            placeholder="Стиль, опыт, чем цепляют ваши сеты…"
+            placeholder={t("Стиль, опыт, чем цепляют ваши сеты…")}
             value={bio}
             onChange={(e) => setBio(e.target.value)}
           />
@@ -263,7 +265,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
       <div style={{ display: "grid", gap: 14, alignContent: "start" }}>
         {/* ---------- медиа ---------- */}
         <Card style={{ padding: "16px 20px", display: "grid", gap: 10 }}>
-          <Eyebrow>МЕДИА</Eyebrow>
+          <Eyebrow>{t("МЕДИА")}</Eyebrow>
           <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
             {avatar ? (
               <img
@@ -296,7 +298,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
                 }}
               />
             </label>
-            {heroVideo ? <Chip color={GREEN}>ВИДЕО В ПРОФИЛЕ</Chip> : null}
+            {heroVideo ? <Chip color={GREEN}>{t("ВИДЕО В ПРОФИЛЕ")}</Chip> : null}
           </div>
           <div>
             {label(`ФОТО · ${photos.length}/8`)}
@@ -310,7 +312,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
                   />
                   <button
                     onClick={() => void delPhoto(src)}
-                    aria-label="Удалить фото"
+                    aria-label={t("Удалить фото")}
                     style={{
                       position: "absolute",
                       top: -6,
@@ -352,7 +354,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
 
         {/* ---------- сеты ---------- */}
         <Card style={{ padding: "16px 20px", display: "grid", gap: 8 }}>
-          <Eyebrow>МОИ СЕТЫ · {sets.length}/12</Eyebrow>
+          <Eyebrow>{t("МОИ СЕТЫ ·")} {sets.length}/12</Eyebrow>
           {sets.map((sSet, i) => (
             <div key={`${sSet.url}-${i}`} style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <span style={{ flex: 1, minWidth: 0, font: "500 11.5px/1.3 'Golos Text',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -374,13 +376,13 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
           <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
             <input
               className="gtr-input"
-              placeholder="Название сета"
+              placeholder={t("Название сета")}
               value={setTitle}
               onChange={(e) => setSetTitle(e.target.value)}
             />
             <input
               className="gtr-input"
-              placeholder="Ссылка (SoundCloud / YouTube…)"
+              placeholder={t("Ссылка (SoundCloud / YouTube…)")}
               value={setUrl}
               onChange={(e) => setSetUrl(e.target.value)}
             />
@@ -396,24 +398,24 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
               void saveProfile({ sets: next });
             }}
           >
-            + Добавить сет
+            {t("+ Добавить сет")}
           </button>
         </Card>
 
         {/* ---------- связь с командой ---------- */}
         <Card style={{ padding: "16px 20px", display: "grid", gap: 8 }}>
-          <Eyebrow>СВЯЗЬ С КОМАНДОЙ GTR</Eyebrow>
+          <Eyebrow>{t("СВЯЗЬ С КОМАНДОЙ GTR")}</Eyebrow>
           <textarea
             className="gtr-input"
             rows={3}
             style={{ resize: "vertical", height: "auto" }}
-            placeholder="Вопрос по выступлению, гонорару, датам — команда ответит в Telegram…"
+            placeholder={t("Вопрос по выступлению, гонорару, датам — команда ответит в Telegram…")}
             value={teamMsg}
             onChange={(e) => setTeamMsg(e.target.value)}
           />
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <button className="gtr-btn gtr-btn-red" onClick={() => void sendTeam()} disabled={!teamMsg.trim()}>
-              Отправить команде
+              {t("Отправить команде")}
             </button>
             {teamState ? (
               <span className="gtr-mono" style={{ font: "500 9.5px/1.3 'JetBrains Mono',monospace", color: teamState.startsWith("Доставлено") ? GREEN : "var(--gtr-t3)" }}>

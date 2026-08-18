@@ -161,7 +161,7 @@ export function ContactsScreen() {
     <div style={{ maxWidth: 980, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 12 }}>
         <h1 className="gtr-oswald gtr-h1">{t("Центр связи")}</h1>
-        <span style={{ font: mono(10), color: "var(--gtr-t3)" }}>{rows.length} контактов</span>
+        <span style={{ font: mono(10), color: "var(--gtr-t3)" }}>{rows.length} {t("контактов")}</span>
       </div>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
         {TABS.filter(([k, , n]) => n > 0 || k === tab).map(([k, label, n]) => (
@@ -194,14 +194,14 @@ export function ContactsScreen() {
           rows.map((r) => <ContactRow key={r.id} r={r} />)
         ) : (
           <span style={{ padding: 20, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-            Никого не найдено.
+            {t("Никого не найдено.")}
           </span>
         )}
       </Card>
       {user.role === "gtr" ? (
         <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8 }}>
           <Eyebrow>{t("РАССЫЛКА ВСЕМ")}</Eyebrow>
-          <Chip color={AMBER}>В ДАШБОРДЕ BOSS — «СВЯЗЬ И УВЕДОМЛЕНИЯ»</Chip>
+          <Chip color={AMBER}>{t("В ДАШБОРДЕ BOSS — «СВЯЗЬ И УВЕДОМЛЕНИЯ»")}</Chip>
         </div>
       ) : null}
     </div>

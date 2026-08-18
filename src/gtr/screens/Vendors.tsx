@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   EQUIPMENT,
@@ -28,6 +29,7 @@ const CATS: [Cat, string][] = [
 ];
 
 export function VendorsScreen() {
+  const { t } = useTranslation();
   const [cat, setCat] = useState<Cat>("all");
   const [q, setQ] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -96,7 +98,7 @@ export function VendorsScreen() {
       <input
         className="gtr-input"
         style={{ maxWidth: 300, marginBottom: 16 }}
-        placeholder="Поиск по названию и специализации…"
+        placeholder={t("Поиск по названию и специализации…")}
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
@@ -261,13 +263,14 @@ function EquipCard({ e, kind }: { e: EquipItem; kind: "gear" | "interactive" }) 
 }
 
 function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
+  const { t } = useTranslation();
   const K = KINDS[v.category];
   const site = v.source ? (v.source.startsWith("http") ? v.source : `https://${v.source}`) : null;
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
       <button className="gtr-btn" style={{ marginBottom: 14 }} onClick={onBack}>
-        ← Ко всем подрядчикам
+        {t("← Ко всем подрядчикам")}
       </button>
 
       <Card
@@ -343,7 +346,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
               borderBottom: "1px solid rgba(255,255,255,.05)",
             }}
           >
-            Прайс-лист · {v.packages.length} позиций
+            {t("Прайс-лист ·")} {v.packages.length} {t("позиций")}
           </div>
           <div
             style={{
@@ -397,9 +400,9 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
         </Card>
       ) : (
         <Card style={{ padding: 20 }}>
-          <Eyebrow style={{ marginBottom: 8 }}>ПРАЙС</Eyebrow>
+          <Eyebrow style={{ marginBottom: 8 }}>{t("ПРАЙС")}</Eyebrow>
           <div style={{ font: "500 12px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-            Стоимость — по запросу ({v.price}). Свяжитесь напрямую: {v.contact || "см. источник"}.
+            {t("Стоимость — по запросу (")}{v.price}{t("). Свяжитесь напрямую:")} {v.contact || "см. источник"}.
           </div>
         </Card>
       )}
@@ -412,8 +415,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
           color: "var(--gtr-t3)",
         }}
       >
-        Данные из вендор-пакета GTR (официальные источники подрядчиков). Подрядчик доступен в
-        конструкторе события — категория «{VENDOR_CAT_LABEL[v.category]}».
+        {t("Данные из вендор-пакета GTR (официальные источники подрядчиков). Подрядчик доступен в конструкторе события — категория «")}{VENDOR_CAT_LABEL[v.category]}».
       </div>
     </div>
   );

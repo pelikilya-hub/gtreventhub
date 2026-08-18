@@ -2,6 +2,7 @@
 // До этого экрана событие было намертво привязано к площадке в единственном
 // экземпляре — создать второе или начать с чистого листа было нечем.
 import { useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -39,6 +40,7 @@ const FORMATS = [
 ];
 
 export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
+  const { t } = useTranslation();
   const { user, myDrafts, createDraft, deleteDraft } = useGtr();
   const navigate = useNavigate();
 
@@ -95,7 +97,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
         }}
       >
         <h1 className="gtr-oswald gtr-h1">
-          События
+          {t("События")}
         </h1>
         <Chip color="rgba(255,255,255,.5)">{scoped.length}</Chip>
         <button
@@ -125,7 +127,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
         <input
           className="gtr-input"
           style={{ maxWidth: 300, padding: "8px 11px", fontSize: 12 }}
-          placeholder="Событие, формат или площадка…"
+          placeholder={t("Событие, формат или площадка…")}
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
@@ -277,11 +279,11 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                   <span>
                     {v.name ?? d.venueId} · {d.venueId}
                   </span>
-                  <span>залов: {rooms}</span>
-                  <span>артистов: {artists}</span>
-                  <span>подрядчиков: {vendors}</span>
+                  <span>{t("залов:")} {rooms}</span>
+                  <span>{t("артистов:")} {artists}</span>
+                  <span>{t("подрядчиков:")} {vendors}</span>
                   {d.date ? <span>{d.date}</span> : null}
-                  {d.guests ? <span>{d.guests} гостей</span> : null}
+                  {d.guests ? <span>{d.guests} {t("гостей")}</span> : null}
                 </div>
 
                 <div
@@ -316,7 +318,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                       });
                     }}
                   >
-                    Дублировать
+                    {t("Дублировать")}
                   </button>
                   <button
                     className="gtr-btn"
@@ -327,7 +329,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                         deleteDraft(d.id);
                     }}
                   >
-                    Удалить
+                    {t("Удалить")}
                   </button>
                 </div>
               </Card>
@@ -477,6 +479,7 @@ function NewEvent({
     brief?: BriefAnswers;
   }) => void;
 }) {
+  const { t } = useTranslation();
   // ownVenue приходит и из паспорта площадки — тогда он есть и у админа
   const [venueId, setVenueId] = useState(ownVenue || "");
   const [presetId, setPresetId] = useState<string | "blank" | "">("");
@@ -584,11 +587,11 @@ function NewEvent({
 
   return (
     <Card style={{ padding: "20px 22px", marginBottom: 16, display: "grid", gap: 18 }}>
-      <Eyebrow>НОВОЕ СОБЫТИЕ</Eyebrow>
+      <Eyebrow>{t("НОВОЕ СОБЫТИЕ")}</Eyebrow>
 
       {/* сценарий: готовый каркас или пустое событие */}
       <div style={{ display: "grid", gap: 8 }}>
-        <Step n={next()} title="Сценарий" />
+        <Step n={next()} title={t("Сценарий")} />
         <div
           style={{
             display: "grid",
@@ -637,7 +640,7 @@ function NewEvent({
                     color: on ? "#2ECC71" : "rgba(255,255,255,.35)",
                   }}
                 >
-                  {p.format} · зал + слот + {blocks} блоков
+                  {p.format} {t("· зал + слот +")} {blocks} {t("блоков")}
                 </span>
               </button>
             );
@@ -662,10 +665,10 @@ function NewEvent({
             <span
               style={{ font: "600 12px/1.3 'Golos Text',sans-serif", color: "rgba(255,255,255,.75)" }}
             >
-              Пустое событие
+              {t("Пустое событие")}
             </span>
             <span style={{ font: "500 10px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              Только площадка, залы и слот — состав собираете сами
+              {t("Только площадка, залы и слот — состав собираете сами")}
             </span>
           </button>
         </div>
@@ -698,7 +701,7 @@ function NewEvent({
       {/* дата и время: полноценный календарь вместо текстового поля */}
       <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 18 }}>
         <div style={{ display: "grid", gap: 8, alignContent: "start" }}>
-          <Step n={next()} title="Дата" note={dateIso ? humanDate(dateIso) : "необязательно"} />
+          <Step n={next()} title={t("Дата")} note={dateIso ? humanDate(dateIso) : "необязательно"} />
           <GtrCalendar value={dateIso} onChange={setDateIso} />
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", maxWidth: 340 }}>
             {TIME_SLOTS.map((t) => {
@@ -727,7 +730,7 @@ function NewEvent({
 
         {/* вместимость: регулятор вместо свободного текста */}
         <div style={{ display: "grid", gap: 8, alignContent: "start", minWidth: 0 }}>
-          <Step n={next()} title="Вместимость" note="фильтрует подбор площадки" />
+          <Step n={next()} title={t("Вместимость")} note="фильтрует подбор площадки" />
           <GtrCapacity value={guests} onChange={setGuests} />
         </div>
       </div>
@@ -736,7 +739,7 @@ function NewEvent({
       <div style={{ display: "grid", gap: 8 }}>
         <Step
           n={next()}
-          title="Площадка"
+          title={t("Площадка")}
           note={canChoose ? `${venues.length} подходит` : "закреплена за кабинетом"}
         />
         {picked ? (
@@ -751,7 +754,7 @@ function NewEvent({
               {picked.capacity ? ` · до ${capOf(picked.capacity)} гостей` : ""}
             </span>
             {pickedCapShort ? (
-              <Chip color="#F5A623">МАЛА ДЛЯ {guests}</Chip>
+              <Chip color="#F5A623">{t("МАЛА ДЛЯ")} {guests}</Chip>
             ) : null}
             {canChoose ? (
               <button
@@ -759,7 +762,7 @@ function NewEvent({
                 style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10.5 }}
                 onClick={() => setVenueId("")}
               >
-                Изменить
+                {t("Изменить")}
               </button>
             ) : null}
           </div>
@@ -769,7 +772,7 @@ function NewEvent({
               <input
                 className="gtr-input"
                 style={{ flex: "1 1 220px", maxWidth: 320, padding: "8px 11px", fontSize: 12 }}
-                placeholder="Название, район, ID…"
+                placeholder={t("Название, район, ID…")}
                 value={vq}
                 onChange={(e) => setVq(e.target.value)}
               />
@@ -845,7 +848,7 @@ function NewEvent({
                           }}
                         >
                           ✓ {fmtThb(cRate.amount)}
-                          {cRate.unit !== "событие" ? ` / ${cRate.unit}` : ""} · площадка
+                          {cRate.unit !== "событие" ? ` / ${cRate.unit}` : ""} {t("· площадка")}
                         </span>
                       ) : rate ? (
                         <span
@@ -898,7 +901,7 @@ function NewEvent({
                     padding: "8px 2px",
                   }}
                 >
-                  Под фильтры ничего не подошло — снимите район или уменьшите вместимость.
+                  {t("Под фильтры ничего не подошло — снимите район или уменьшите вместимость.")}
                 </span>
               ) : null}
             </div>
@@ -911,7 +914,7 @@ function NewEvent({
         <div style={{ display: "grid", gap: 8 }}>
           <Step
             n={next()}
-            title="Залы и зоны"
+            title={t("Залы и зоны")}
             note="сюда будут закрепляться артисты, интерактив и оборудование"
           />
           {venueRooms.length ? (
@@ -956,8 +959,7 @@ function NewEvent({
             </div>
           ) : (
             <span style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              Залы этой площадки ещё не нормализованы в базе — событие соберётся по площадке
-              целиком, зоны можно включить ниже.
+              {t("Залы этой площадки ещё не нормализованы в базе — событие соберётся по площадке целиком, зоны можно включить ниже.")}
             </span>
           )}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -1045,7 +1047,7 @@ function NewEvent({
 
       {/* название */}
       <div style={{ display: "grid", gap: 8 }}>
-        <Step n={next()} title="Название" note="необязательно" />
+        <Step n={next()} title={t("Название")} note="необязательно" />
         <input
           className="gtr-input"
           style={{ padding: "8px 11px", fontSize: 12 }}
@@ -1068,10 +1070,10 @@ function NewEvent({
           disabled={!ready}
           onClick={create}
         >
-          Создать и открыть конструктор →
+          {t("Создать и открыть конструктор →")}
         </button>
         <button className="gtr-btn" style={{ padding: "9px 14px" }} onClick={onCancel}>
-          Отмена
+          {t("Отмена")}
         </button>
         {!ready ? (
           <span style={{ font: "500 10.5px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>

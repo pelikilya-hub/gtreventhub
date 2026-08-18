@@ -1,4 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -106,6 +107,7 @@ export function ConstructorScreen({
   intake?: EventIntake;
   onSubmitted?: (requestId: string) => void;
 } = {}) {
+  const { t } = useTranslation();
   const { user, peers, shared, myDrafts, draftOf, draftsOf, createDraft, setDraftGraph, updateDraft, addRequest } =
     useGtr();
   const navigate = useNavigate();
@@ -375,7 +377,7 @@ export function ConstructorScreen({
     return (
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
         <h1 className="gtr-oswald gtr-h1" style={{ marginBottom: 6 }}>
-          Конструктор события
+          {t("Конструктор события")}
         </h1>
         <div
           style={{
@@ -384,12 +386,11 @@ export function ConstructorScreen({
             marginBottom: 16,
           }}
         >
-          Каждое событие привязано к своей площадке: залы, слоты и смета берутся из её данных.
-          Откройте существующее событие или создайте новое с выбором площадки.
+          {t("Каждое событие привязано к своей площадке: залы, слоты и смета берутся из её данных. Откройте существующее событие или создайте новое с выбором площадки.")}
         </div>
         {myDrafts.length ? (
           <Card style={{ padding: 14, marginBottom: 14 }}>
-            <Eyebrow style={{ marginBottom: 10 }}>СОБЫТИЯ · {myDrafts.length}</Eyebrow>
+            <Eyebrow style={{ marginBottom: 10 }}>{t("СОБЫТИЯ ·")} {myDrafts.length}</Eyebrow>
             <div style={{ display: "grid", gap: 6 }}>
               {myDrafts.map((d) => (
                 <button
@@ -428,7 +429,7 @@ export function ConstructorScreen({
           className="gtr-btn gtr-btn-red"
           onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "events" } })}
         >
-          + Новое событие · выбрать площадку
+          {t("+ Новое событие · выбрать площадку")}
         </button>
       </div>
     );
@@ -440,13 +441,12 @@ export function ConstructorScreen({
     return (
       <div style={{ maxWidth: 620, margin: "60px auto" }}>
         <Card style={{ padding: "34px 32px", display: "grid", gap: 14 }}>
-          <Eyebrow>КОНСТРУКТОР СОБЫТИЯ</Eyebrow>
+          <Eyebrow>{t("КОНСТРУКТОР СОБЫТИЯ")}</Eyebrow>
           <h1 className="gtr-oswald" style={{ font: "700 24px/1.2 Oswald,sans-serif", margin: 0 }}>
-            На площадке «{v.name ?? vid}» пока нет событий
+            {t("На площадке «")}{v.name ?? vid}{t("» пока нет событий")}
           </h1>
           <p style={{ margin: 0, color: "var(--gtr-t2)", font: "500 13px/1.6 'Golos Text',sans-serif" }}>
-            Событие больше не привязано к площадке намертво: их может быть сколько угодно, каждое со
-            своим составом, сметой и историей.
+            {t("Событие больше не привязано к площадке намертво: их может быть сколько угодно, каждое со своим составом, сметой и историей.")}
           </p>
           <button
             className="gtr-btn gtr-btn-red"
@@ -456,7 +456,7 @@ export function ConstructorScreen({
               navigate({ to: "/gtr/$screen", params: { screen: "constructor" }, search: { draft: id } });
             }}
           >
-            Создать событие →
+            {t("Создать событие →")}
           </button>
         </Card>
       </div>
@@ -724,9 +724,9 @@ export function ConstructorScreen({
               border: "1px solid rgba(229,35,27,.5)",
             }}
           >
-            <Eyebrow>КУДА СТАВИМ</Eyebrow>
+            <Eyebrow>{t("КУДА СТАВИМ")}</Eyebrow>
             <div style={{ font: "600 14px/1.35 'Golos Text',sans-serif" }}>
-              «{placing.title}» — в какой зал или зону?
+              «{placing.title}{t("» — в какой зал или зону?")}
             </div>
             <div style={{ display: "grid", gap: 6 }}>
               {g.nodes
@@ -792,12 +792,12 @@ export function ConstructorScreen({
                 }}
               >
                 <span style={{ flex: 1, textAlign: "left", fontSize: 11.5 }}>
-                  Вся площадка — без привязки к залу
+                  {t("Вся площадка — без привязки к залу")}
                 </span>
               </button>
             </div>
             <button className="gtr-btn" style={{ padding: "7px 12px" }} onClick={() => setPlacing(null)}>
-              Отмена
+              {t("Отмена")}
             </button>
           </div>
         </div>
@@ -812,14 +812,14 @@ export function ConstructorScreen({
         }}
       >
         <h1 className="gtr-oswald gtr-h1">
-          Конструктор события
+          {t("Конструктор события")}
         </h1>
         <Chip color="rgba(255,255,255,.5)">{v.name ?? vid}</Chip>
         <Chip color={STAGE_COLOR[stage]}>{STAGE_LABEL[stage].toUpperCase()}</Chip>
         {eventVibe?.colors ? (
           <span
             className="gtr-mono"
-            title="Вайб события из брифа"
+            title={t("Вайб события из брифа")}
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -852,25 +852,25 @@ export function ConstructorScreen({
             ? "СОБЫТИЕ В ПОРЯДКЕ"
             : `${health.problems + health.delays} ПРОБЛЕМ · ${health.warns} ВНИМАНИЕ`}
         </Chip>
-        {linkFrom ? <Chip color={GREEN}>СВЯЗЬ: выберите левый порт целевого блока</Chip> : null}
+        {linkFrom ? <Chip color={GREEN}>{t("СВЯЗЬ: выберите левый порт целевого блока")}</Chip> : null}
         <button
           className={briefOpen ? "gtr-btn gtr-btn-red" : "gtr-btn"}
           style={{ padding: "6px 12px", fontSize: 11 }}
           onClick={() => setBriefOpen((x) => !x)}
         >
-          Бриф · {briefProgress(briefFormat, briefAnswers).done}/
+          {t("Бриф ·")} {briefProgress(briefFormat, briefAnswers).done}/
           {briefProgress(briefFormat, briefAnswers).total}
         </button>
         <button
           className={panelOpen ? "gtr-btn gtr-btn-red" : "gtr-btn"}
           style={{ padding: "6px 12px", fontSize: 11 }}
-          title="Смета, контроль, история. Или удержите блок на графе"
+          title={t("Смета, контроль, история. Или удержите блок на графе")}
           onClick={() => setPanelOpen((x) => !x)}
         >
-          Панель события ⧉
+          {t("Панель события ⧉")}
         </button>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
-          <Eyebrow>УЧАСТНИКИ ОНЛАЙН</Eyebrow>
+          <Eyebrow>{t("УЧАСТНИКИ ОНЛАЙН")}</Eyebrow>
           <div style={{ display: "flex", gap: 5 }}>
             <span
               className="gtr-presence"
@@ -916,7 +916,7 @@ export function ConstructorScreen({
       {organizer ? (
         <Card style={{ padding: "14px 16px", marginBottom: 14, borderColor: "rgba(229,35,27,.3)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <Eyebrow style={{ color: "#E5231B" }}>ЗАПРОС ПЛОЩАДКЕ · {v.name}</Eyebrow>
+            <Eyebrow style={{ color: "#E5231B" }}>{t("ЗАПРОС ПЛОЩАДКЕ ·")} {v.name}</Eyebrow>
             <span
               className="gtr-mono"
               style={{
@@ -925,7 +925,7 @@ export function ConstructorScreen({
                 marginLeft: "auto",
               }}
             >
-              Смета: {fmtThb(quote.total)}
+              {t("Смета:")} {fmtThb(quote.total)}
             </span>
           </div>
           <div
@@ -939,42 +939,42 @@ export function ConstructorScreen({
             <input
               className="gtr-input"
               style={{ fontSize: 11 }}
-              placeholder="Формат события *"
+              placeholder={t("Формат события *")}
               value={org.title}
               onChange={(e) => setOrg({ ...org, title: e.target.value })}
             />
             <input
               className="gtr-input"
               style={{ fontSize: 11 }}
-              placeholder="Дата / слот"
+              placeholder={t("Дата / слот")}
               value={org.date}
               onChange={(e) => setOrg({ ...org, date: e.target.value })}
             />
             <input
               className="gtr-input"
               style={{ fontSize: 11 }}
-              placeholder="Гостей"
+              placeholder={t("Гостей")}
               value={org.guests}
               onChange={(e) => setOrg({ ...org, guests: e.target.value })}
             />
             <input
               className="gtr-input"
               style={{ fontSize: 11 }}
-              placeholder="Бюджет, ฿"
+              placeholder={t("Бюджет, ฿")}
               value={org.budget}
               onChange={(e) => setOrg({ ...org, budget: e.target.value })}
             />
             <input
               className="gtr-input"
               style={{ fontSize: 11 }}
-              placeholder="Ваше имя / компания *"
+              placeholder={t("Ваше имя / компания *")}
               value={org.name}
               onChange={(e) => setOrg({ ...org, name: e.target.value })}
             />
             <input
               className="gtr-input"
               style={{ fontSize: 11 }}
-              placeholder="Контакт (email / телефон) *"
+              placeholder={t("Контакт (email / телефон) *")}
               value={org.contact}
               onChange={(e) => setOrg({ ...org, contact: e.target.value })}
             />
@@ -985,7 +985,7 @@ export function ConstructorScreen({
               }
               onClick={submitRequest}
             >
-              Отправить площадке →
+              {t("Отправить площадке →")}
             </button>
           </div>
         </Card>
@@ -1021,7 +1021,7 @@ export function ConstructorScreen({
             overflowY: "auto",
           }}
         >
-          <Eyebrow style={{ marginBottom: 10 }}>БЛОКИ СОБЫТИЯ</Eyebrow>
+          <Eyebrow style={{ marginBottom: 10 }}>{t("БЛОКИ СОБЫТИЯ")}</Eyebrow>
           <div style={{ display: "grid", gap: 6 }}>
             {CX_PALETTE.map(([kind, label]) => {
               const K = KINDS[kind];
@@ -1098,7 +1098,7 @@ export function ConstructorScreen({
                           style={{ fontSize: 8.5, marginTop: 2, color: eventVibe?.colors?.[0] }}
                           title={(eventVibe?.styles ?? []).join(" · ")}
                         >
-                          ПОД ВАЙБ · {(eventVibe?.styles ?? []).slice(0, 2).join(", ")}
+                          {t("ПОД ВАЙБ ·")} {(eventVibe?.styles ?? []).slice(0, 2).join(", ")}
                         </div>
                       ) : null}
                       {vibeMatches.map((a) => (
@@ -1111,7 +1111,7 @@ export function ConstructorScreen({
                       ))}
                       {lineupArtists.length ? (
                         <div className="gtr-eyebrow" style={{ fontSize: 8.5, marginTop: 2 }}>
-                          ИЗ ЛАЙНАПА · {lineupArtists.length}
+                          {t("ИЗ ЛАЙНАПА ·")} {lineupArtists.length}
                         </div>
                       ) : null}
                       {lineupArtists.map((a) => (
@@ -1119,7 +1119,7 @@ export function ConstructorScreen({
                       ))}
                       {artQ.trim() ? (
                         <div className="gtr-eyebrow" style={{ fontSize: 8.5, marginTop: 2 }}>
-                          НАЙДЕНО · {artSearch.length}
+                          {t("НАЙДЕНО ·")} {artSearch.length}
                         </div>
                       ) : null}
                       {artSearch.map((a) => (
@@ -1132,8 +1132,7 @@ export function ConstructorScreen({
                             color: "rgba(255,255,255,.4)",
                           }}
                         >
-                          Добавьте артистов в лайнап на экране «Артисты и диджеи» или найдите по
-                          имени.
+                          {t("Добавьте артистов в лайнап на экране «Артисты и диджеи» или найдите по имени.")}
                         </div>
                       ) : null}
                       <button
@@ -1143,7 +1142,7 @@ export function ConstructorScreen({
                           navigate({ to: "/gtr/$screen", params: { screen: "artists" } })
                         }
                       >
-                        Открыть базу артистов →
+                        {t("Открыть базу артистов →")}
                       </button>
                     </div>
                   ) : null}
@@ -1182,7 +1181,7 @@ export function ConstructorScreen({
                             </span>
                             {p.fromBase ? (
                               <span
-                                title="Из данных площадки"
+                                title={t("Из данных площадки")}
                                 style={{
                                   width: 5,
                                   height: 5,
@@ -1200,7 +1199,7 @@ export function ConstructorScreen({
                         style={{ padding: "7px 9px", color: "rgba(255,255,255,.55)" }}
                         onClick={addBlank}
                       >
-                        + Свой блок
+                        {t("+ Свой блок")}
                       </button>
                     </div>
                   ) : null}
@@ -1391,7 +1390,7 @@ export function ConstructorScreen({
                         style={{ padding: "7px 9px", color: "rgba(255,255,255,.55)" }}
                         onClick={addBlank}
                       >
-                        + Свой подрядчик
+                        {t("+ Свой подрядчик")}
                       </button>
                     </div>
                   ) : null}
@@ -1612,12 +1611,12 @@ export function ConstructorScreen({
         {panelOpen ? <div className="gtr-cons-scrim" onClick={() => setPanelOpen(false)} /> : null}
         <div className={`gtr-cons-drawer ${panelOpen ? "open" : ""}`}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Eyebrow>ПАНЕЛЬ СОБЫТИЯ</Eyebrow>
+            <Eyebrow>{t("ПАНЕЛЬ СОБЫТИЯ")}</Eyebrow>
             <button
               className="gtr-btn"
               style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 11 }}
               onClick={() => setPanelOpen(false)}
-              aria-label="Закрыть панель"
+              aria-label={t("Закрыть панель")}
             >
               ✕
             </button>
@@ -1654,7 +1653,7 @@ export function ConstructorScreen({
                   }}
                   disabled={selNode.kind === "venue"}
                 >
-                  Удалить блок
+                  {t("Удалить блок")}
                 </button>
               </div>
               <input
@@ -1697,7 +1696,7 @@ export function ConstructorScreen({
               ) ? (
                 <div style={{ marginTop: 10, display: "grid", gap: 5 }}>
                   <span className="gtr-eyebrow" style={{ fontSize: 8.5 }}>
-                    ЗАЛ / ЗОНА БЛОКА
+                    {t("ЗАЛ / ЗОНА БЛОКА")}
                   </span>
                   <select
                     className="gtr-input"
@@ -1747,7 +1746,7 @@ export function ConstructorScreen({
                       });
                     }}
                   >
-                    <option value="">Вся площадка</option>
+                    <option value="">{t("Вся площадка")}</option>
                     {g.nodes
                       .filter((n) => n.kind === "room")
                       .map((r) => (
@@ -1770,7 +1769,7 @@ export function ConstructorScreen({
                     })
                   }
                 >
-                  Открыть карточку артиста →
+                  {t("Открыть карточку артиста →")}
                 </button>
               ) : null}
               {selNode.kind === "artist" && selNode.fields.find((f) => f[0] === "КАРТОЧКА")?.[1] ? (
@@ -1792,7 +1791,7 @@ export function ConstructorScreen({
                   borderTop: "1px solid rgba(255,255,255,.07)",
                 }}
               >
-                <Eyebrow style={{ marginBottom: 7 }}>СТАТУС БЛОКА</Eyebrow>
+                <Eyebrow style={{ marginBottom: 7 }}>{t("СТАТУС БЛОКА")}</Eyebrow>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5 }}>
                   {(["ok", "warn", "delay", "problem"] as NodeStatus[]).map((s) => {
                     const active = selNode.status === s;
@@ -1843,7 +1842,7 @@ export function ConstructorScreen({
                   <input
                     className="gtr-input"
                     style={{ marginTop: 7, padding: "7px 10px", fontSize: 11 }}
-                    placeholder="Что случилось? (виден всем участникам)"
+                    placeholder={t("Что случилось? (виден всем участникам)")}
                     value={selNode.note ?? ""}
                     onChange={(e) => updateSel({ note: e.target.value })}
                   />
@@ -1855,7 +1854,7 @@ export function ConstructorScreen({
                       color: "var(--gtr-t3)",
                     }}
                   >
-                    Авто: {nodeStatus(selNode).reason || "—"}
+                    {t("Авто:")} {nodeStatus(selNode).reason || "—"}
                   </div>
                 )}
               </div>
@@ -1863,7 +1862,7 @@ export function ConstructorScreen({
           ) : null}
 
           <Card style={{ padding: 14 }}>
-            <Eyebrow style={{ marginBottom: 9 }}>ПОДРЯДЧИКИ СОБЫТИЯ</Eyebrow>
+            <Eyebrow style={{ marginBottom: 9 }}>{t("ПОДРЯДЧИКИ СОБЫТИЯ")}</Eyebrow>
             <div style={{ display: "grid", gap: 7 }}>
               {VENDOR_KINDS.map((k) => {
                 const nodes = g.nodes.filter((n) => n.kind === k);
@@ -1904,7 +1903,7 @@ export function ConstructorScreen({
                 alignItems: "baseline",
               }}
             >
-              <Eyebrow>БЮДЖЕТ ПОДРЯДЧИКОВ</Eyebrow>
+              <Eyebrow>{t("БЮДЖЕТ ПОДРЯДЧИКОВ")}</Eyebrow>
               <span
                 className="gtr-mono"
                 style={{
@@ -1927,14 +1926,14 @@ export function ConstructorScreen({
                 marginBottom: 10,
               }}
             >
-              <Eyebrow>СМЕТА СОБЫТИЯ</Eyebrow>
+              <Eyebrow>{t("СМЕТА СОБЫТИЯ")}</Eyebrow>
               <button
                 className="gtr-btn"
                 style={{ padding: "5px 9px", fontSize: 9.5, marginRight: 6 }}
                 onClick={openDeck}
-                title="Клиентская презентация события в PDF"
+                title={t("Клиентская презентация события в PDF")}
               >
-                ДЕКА
+                {t("ДЕКА")}
               </button>
               <button
                 className="gtr-btn"
@@ -1942,7 +1941,7 @@ export function ConstructorScreen({
                 onClick={exportQuote}
                 disabled={!quote.lines.length}
               >
-                Экспорт
+                {t("Экспорт")}
               </button>
             </div>
             {quote.lines.length ? (
@@ -2022,7 +2021,7 @@ export function ConstructorScreen({
                     gap: 6,
                   }}
                 >
-                  <Row label="Подытог" value={fmtThb(quote.subtotal)} />
+                  <Row label={t("Подытог")} value={fmtThb(quote.subtotal)} />
                   <Row
                     label={`Комиссия GTR · ${quote.commissionPct}%`}
                     value={fmtThb(quote.commission)}
@@ -2039,7 +2038,7 @@ export function ConstructorScreen({
                     }}
                   >
                     <span className="gtr-oswald" style={{ font: "700 13px/1 Oswald,sans-serif" }}>
-                      ИТОГО
+                      {t("ИТОГО")}
                     </span>
                     <span
                       className="gtr-mono"
@@ -2057,7 +2056,7 @@ export function ConstructorScreen({
                       color: "var(--gtr-t3)",
                     }}
                   >
-                    Оценка (THB). Точные ставки подтверждает площадка и подрядчики
+                    {t("Оценка (THB). Точные ставки подтверждает площадка и подрядчики")}
                     {quote.missing.length ? ` · уточнить: ${quote.missing.length}` : ""}.
                   </div>
                 ) : null}
@@ -2066,7 +2065,7 @@ export function ConstructorScreen({
               <div
                 style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
               >
-                Добавьте площадку, артистов и подрядчиков — смета соберётся автоматически.
+                {t("Добавьте площадку, артистов и подрядчиков — смета соберётся автоматически.")}
               </div>
             )}
           </Card>
@@ -2076,7 +2075,7 @@ export function ConstructorScreen({
           {draft ? <GuestPanel draft={draft} /> : null}
 
           <Card style={{ padding: 14 }}>
-            <Eyebrow style={{ marginBottom: 9 }}>СВЯЗИ · {g.links.length}</Eyebrow>
+            <Eyebrow style={{ marginBottom: 9 }}>{t("СВЯЗИ ·")} {g.links.length}</Eyebrow>
             <div style={{ display: "grid", gap: 5, maxHeight: 150, overflowY: "auto" }}>
               {g.links.map((l, i) => (
                 <div
@@ -2124,7 +2123,7 @@ export function ConstructorScreen({
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <Eyebrow>КОНТРОЛЬ СОБЫТИЯ</Eyebrow>
+              <Eyebrow>{t("КОНТРОЛЬ СОБЫТИЯ")}</Eyebrow>
               {!health.clean ? (
                 <span
                   className="gtr-mono"
@@ -2147,7 +2146,7 @@ export function ConstructorScreen({
                     color: GREEN,
                   }}
                 >
-                  ВСЁ ЗЕЛЁНОЕ
+                  {t("ВСЁ ЗЕЛЁНОЕ")}
                 </span>
               )}
             </div>
@@ -2166,7 +2165,7 @@ export function ConstructorScreen({
               >
                 <Dot color={GREEN} top={0} />
                 <span style={{ font: "600 11px/1.4 'Golos Text',sans-serif", color: "#fff" }}>
-                  Все связки зелёные — событие идёт по плану.
+                  {t("Все связки зелёные — событие идёт по плану.")}
                 </span>
               </div>
             ) : (
@@ -2192,7 +2191,7 @@ export function ConstructorScreen({
                         {a.nodeId ? (
                           <span style={{ color: STATUS_COLOR[a.severity], fontWeight: 600 }}>
                             {" "}
-                            · перейти →
+                            {t("· перейти →")}
                           </span>
                         ) : null}
                       </div>
@@ -2215,7 +2214,7 @@ export function ConstructorScreen({
           {/* Умные вопросы — чтобы событие собралось без казусов */}
           <Card style={{ padding: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 9 }}>
-              <Eyebrow>ВОПРОСЫ ПО СОБЫТИЮ</Eyebrow>
+              <Eyebrow>{t("ВОПРОСЫ ПО СОБЫТИЮ")}</Eyebrow>
               <span
                 className="gtr-mono"
                 style={{
@@ -2262,7 +2261,7 @@ export function ConstructorScreen({
                     >
                       {qq.q}
                       {!qq.required ? (
-                        <span style={{ color: "var(--gtr-t3)", fontWeight: 500 }}> · опц.</span>
+                        <span style={{ color: "var(--gtr-t3)", fontWeight: 500 }}> {t("· опц.")}</span>
                       ) : null}
                     </div>
                     {!qq.ok ? (
@@ -2285,7 +2284,7 @@ export function ConstructorScreen({
           {/* Статус события и короткая история изменений */}
           <Card style={{ padding: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <Eyebrow>СТАТУС И ИСТОРИЯ</Eyebrow>
+              <Eyebrow>{t("СТАТУС И ИСТОРИЯ")}</Eyebrow>
               <Chip color={STAGE_COLOR[stage]} style={{ marginLeft: "auto" }}>
                 {STAGE_LABEL[stage].toUpperCase()}
               </Chip>
@@ -2299,7 +2298,7 @@ export function ConstructorScreen({
                     style={{ flex: 1 }}
                     onClick={() => setStage("approved", "Событие утверждено")}
                   >
-                    Утвердить событие
+                    {t("Утвердить событие")}
                   </button>
                 ) : (
                   <button
@@ -2307,7 +2306,7 @@ export function ConstructorScreen({
                     style={{ flex: 1 }}
                     onClick={() => setStage("draft", "Возвращено в черновик")}
                   >
-                    Вернуть в черновик
+                    {t("Вернуть в черновик")}
                   </button>
                 )}
               </div>
@@ -2332,7 +2331,7 @@ export function ConstructorScreen({
                   marginBottom: 6,
                 }}
               >
-                Утверждено, но открыто для правок — изменения фиксируются в истории.
+                {t("Утверждено, но открыто для правок — изменения фиксируются в истории.")}
               </div>
             ) : null}
 
@@ -2373,7 +2372,7 @@ export function ConstructorScreen({
                 <div
                   style={{ font: "500 10px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
                 >
-                  История появится по мере сборки события.
+                  {t("История появится по мере сборки события.")}
                 </div>
               )}
             </div>
@@ -2789,6 +2788,7 @@ function BriefPanel({
 // Три уровня комплектации одного и того же события. Площадка и артисты
 // не меняются — сравнивается только подряд, поэтому разница читается честно.
 function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const plans = useMemo(() => tierPlans(graph, venueId), [graph, venueId]);
   const turnkey = useMemo(() => turnkeyPackages(), []);
@@ -2810,7 +2810,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
           color: "inherit",
         }}
       >
-        <Eyebrow>ВАРИАНТЫ КОМПЛЕКТАЦИИ</Eyebrow>
+        <Eyebrow>{t("ВАРИАНТЫ КОМПЛЕКТАЦИИ")}</Eyebrow>
         <span
           className="gtr-mono"
           style={{
@@ -2832,8 +2832,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
             color: "var(--gtr-t3)",
           }}
         >
-          Подрядчики этого события прайс не публикуют — сравнивать нечего. Добавьте блок звука или
-          съёмки.
+          {t("Подрядчики этого события прайс не публикуют — сравнивать нечего. Добавьте блок звука или съёмки.")}
         </div>
       ) : (
         <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
@@ -2911,7 +2910,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
                     color: "var(--gtr-t3)",
                   }}
                 >
-                  <span>площадка и артисты</span>
+                  <span>{t("площадка и артисты")}</span>
                   <span>{fmtThb(plan.base)}</span>
                 </div>
               </div>
@@ -2924,13 +2923,12 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
               color: "var(--gtr-t3)",
             }}
           >
-            Пакеты отличаются не только ценой, но и объёмом — часами съёмки, числом дек, составом
-            звука. Сравнивайте состав, а не только итог.
+            {t("Пакеты отличаются не только ценой, но и объёмом — часами съёмки, числом дек, составом звука. Сравнивайте состав, а не только итог.")}
           </div>
 
           {turnkey.length ? (
             <div style={{ borderTop: "1px solid rgba(255,255,255,.08)", paddingTop: 8 }}>
-              <Eyebrow style={{ marginBottom: 6 }}>ПОД КЛЮЧ · АЛЬТЕРНАТИВА</Eyebrow>
+              <Eyebrow style={{ marginBottom: 6 }}>{t("ПОД КЛЮЧ · АЛЬТЕРНАТИВА")}</Eyebrow>
               {turnkey.map((t) => (
                 <div
                   key={t.package}
@@ -2961,7 +2959,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
                   color: "var(--gtr-t3)",
                 }}
               >
-                Один подряд закрывает звук, свет и LED сразу — в поштучный расчёт выше не входит.
+                {t("Один подряд закрывает звук, свет и LED сразу — в поштучный расчёт выше не входит.")}
               </div>
             </div>
           ) : null}
@@ -2987,6 +2985,7 @@ function OfferPanel({
   venueName: string;
   vid: string;
 }) {
+  const { t } = useTranslation();
   const { shared, applyOffer } = useGtr();
   const [fee, setFee] = useState("");
   const [note, setNote] = useState("");
@@ -3048,7 +3047,7 @@ function OfferPanel({
         gap: 7,
       }}
     >
-      <Eyebrow style={{ fontSize: 8.5 }}>ПРЕДЛОЖЕНИЕ АРТИСТУ</Eyebrow>
+      <Eyebrow style={{ fontSize: 8.5 }}>{t("ПРЕДЛОЖЕНИЕ АРТИСТУ")}</Eyebrow>
       {existing ? (
         <div
           className="gtr-mono"
@@ -3070,20 +3069,20 @@ function OfferPanel({
               className="gtr-mono"
               style={{ font: "500 9.5px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
             >
-              Прошлое предложение отклонено — можно отправить новое.
+              {t("Прошлое предложение отклонено — можно отправить новое.")}
             </div>
           ) : null}
           <input
             className="gtr-input"
             style={{ padding: "7px 9px", fontSize: 11 }}
-            placeholder="Гонорар / условия (например: ฿25 000 + трансфер)"
+            placeholder={t("Гонорар / условия (например: ฿25 000 + трансфер)")}
             value={fee}
             onChange={(e) => setFee(e.target.value)}
           />
           <input
             className="gtr-input"
             style={{ padding: "7px 9px", fontSize: 11 }}
-            placeholder="Комментарий (необязательно)"
+            placeholder={t("Комментарий (необязательно)")}
             value={note}
             onChange={(e) => setNote(e.target.value)}
           />
@@ -3106,7 +3105,7 @@ function OfferPanel({
               </button>
             ))}
             <span style={{ font: "500 9px/2 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
-              язык сообщения артисту
+              {t("язык сообщения артисту")}
             </span>
           </div>
           <button
@@ -3115,7 +3114,7 @@ function OfferPanel({
             disabled={busy}
             onClick={send}
           >
-            Отправить предложение →
+            {t("Отправить предложение →")}
           </button>
         </>
       )}
@@ -3132,6 +3131,7 @@ function OfferPanel({
 // Гостевой список пополняется из приложения и командой /guest в Telegram —
 // код события написан прямо в блоке.
 function GuestPanel({ draft }: { draft: EventDraft }) {
+  const { t } = useTranslation();
   const { user, updateDraft } = useGtr();
   const [name, setName] = useState("");
   const list = draft.guestList ?? [];
@@ -3148,7 +3148,7 @@ function GuestPanel({ draft }: { draft: EventDraft }) {
   return (
     <Card style={{ padding: 14 }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-        <Eyebrow style={{ marginBottom: 9 }}>СПЕЦ-ГОСТИ · {list.length}</Eyebrow>
+        <Eyebrow style={{ marginBottom: 9 }}>{t("СПЕЦ-ГОСТИ ·")} {list.length}</Eyebrow>
         <span
           className="gtr-mono"
           style={{
@@ -3157,7 +3157,7 @@ function GuestPanel({ draft }: { draft: EventDraft }) {
             color: "var(--gtr-t3)",
           }}
         >
-          /guest {draft.id} Имя — из Telegram
+          /guest {draft.id} {t("Имя — из Telegram")}
         </span>
       </div>
       <div style={{ display: "grid", gap: 5, maxHeight: 150, overflowY: "auto" }}>
@@ -3191,7 +3191,7 @@ function GuestPanel({ draft }: { draft: EventDraft }) {
         ))}
         {!list.length ? (
           <span style={{ font: "500 10px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-            Артисты и команда добавляют гостей списком — здесь или через бота.
+            {t("Артисты и команда добавляют гостей списком — здесь или через бота.")}
           </span>
         ) : null}
       </div>
@@ -3199,13 +3199,13 @@ function GuestPanel({ draft }: { draft: EventDraft }) {
         <input
           className="gtr-input"
           style={{ flex: 1, padding: "7px 9px", fontSize: 11 }}
-          placeholder="Имя гостя"
+          placeholder={t("Имя гостя")}
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && add()}
         />
         <button className="gtr-btn" style={{ padding: "7px 11px" }} onClick={add}>
-          Добавить
+          {t("Добавить")}
         </button>
       </div>
     </Card>

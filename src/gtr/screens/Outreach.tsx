@@ -5,6 +5,7 @@
 // подставлены под имя менеджера — переключаться между заметками,
 // мессенджером и таблицей не нужно.
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { PH, V } from "../data/app-data";
 import {
@@ -55,6 +56,7 @@ const copy = async (text: string): Promise<boolean> => {
 };
 
 export function OutreachScreen() {
+  const { t } = useTranslation();
   const { user } = useGtr();
   const [rows, setRows] = useState<Record<string, OutreachRow>>({});
   const [openVid, setOpenVid] = useState<string | null>(null);
@@ -111,7 +113,7 @@ export function OutreachScreen() {
 
   return (
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-      <Eyebrow style={{ marginBottom: 12 }}>РАБОТА С ПЛОЩАДКАМИ</Eyebrow>
+      <Eyebrow style={{ marginBottom: 12 }}>{t("РАБОТА С ПЛОЩАДКАМИ")}</Eyebrow>
 
       {/* Личный счёт: сколько пройдено и где сейчас узкое место */}
       <Card style={{ padding: 18, marginBottom: 14 }}>
@@ -138,7 +140,7 @@ export function OutreachScreen() {
           className="gtr-mono"
           style={{ marginTop: 12, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
-          Всего площадок: {PH.venues.length}. Твоя цель — довести каждую до «Карточка готова».
+          {t("Всего площадок:")} {PH.venues.length}{t(". Твоя цель — довести каждую до «Карточка готова».")}
         </div>
       </Card>
 
@@ -212,7 +214,7 @@ export function OutreachScreen() {
                     ) : null}
                     {v.website ? (
                       <a className="gtr-btn" href={v.website} target="_blank" rel="noreferrer">
-                        Сайт ↗
+                        {t("Сайт ↗")}
                       </a>
                     ) : null}
                     <a
@@ -229,7 +231,7 @@ export function OutreachScreen() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      Поиск в IG ↗
+                      {t("Поиск в IG ↗")}
                     </a>
                   </div>
 
@@ -256,7 +258,7 @@ export function OutreachScreen() {
 
                   {/* Что собрано: галочки по требованиям */}
                   <div>
-                    <Eyebrow style={{ marginBottom: 8 }}>ЧТО НУЖНО СОБРАТЬ</Eyebrow>
+                    <Eyebrow style={{ marginBottom: 8 }}>{t("ЧТО НУЖНО СОБРАТЬ")}</Eyebrow>
                     <div style={{ display: "grid", gap: 6 }}>
                       {NEEDS.map((n) => {
                         const done = (r?.done ?? []).includes(n.key);
@@ -302,7 +304,7 @@ export function OutreachScreen() {
 
                   {/* Ссылки на найденный контент */}
                   <div>
-                    <Eyebrow style={{ marginBottom: 8 }}>ССЫЛКИ НА МАТЕРИАЛЫ</Eyebrow>
+                    <Eyebrow style={{ marginBottom: 8 }}>{t("ССЫЛКИ НА МАТЕРИАЛЫ")}</Eyebrow>
                     <div style={{ display: "grid", gap: 6 }}>
                       {(["фото", "меню", "прайс", "афиша", "контакт"] as const).map((k) => (
                         <input
@@ -321,19 +323,19 @@ export function OutreachScreen() {
 
                   {/* Готовые тексты — уже с именем менеджера */}
                   <div>
-                    <Eyebrow style={{ marginBottom: 8 }}>ТЕКСТЫ В ОДИН ТАП</Eyebrow>
+                    <Eyebrow style={{ marginBottom: 8 }}>{t("ТЕКСТЫ В ОДИН ТАП")}</Eyebrow>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                       <button className="gtr-btn" onClick={() => void hit(msgFirst(manager, v.name), "Первое сообщение скопировано")}>
-                        Первое сообщение
+                        {t("Первое сообщение")}
                       </button>
                       <button className="gtr-btn" onClick={() => void hit(msgInstagram(manager, v.name), "Директ скопирован")}>
-                        Директ в Instagram
+                        {t("Директ в Instagram")}
                       </button>
                       <button className="gtr-btn" onClick={() => void hit(msgFollowUp(manager, v.name), "Напоминание скопировано")}>
-                        Напоминание
+                        {t("Напоминание")}
                       </button>
                       <button className="gtr-btn" onClick={() => void hit(msgChecklist(manager, v.name), "Чек-лист скопирован")}>
-                        Что прислать
+                        {t("Что прислать")}
                       </button>
                       <button
                         className="gtr-btn"
@@ -346,7 +348,7 @@ export function OutreachScreen() {
                           )
                         }
                       >
-                        Скрипт звонка
+                        {t("Скрипт звонка")}
                       </button>
                     </div>
                   </div>
@@ -354,7 +356,7 @@ export function OutreachScreen() {
                   <textarea
                     className="gtr-input"
                     rows={2}
-                    placeholder="Заметка: что сказали, когда перезвонить"
+                    placeholder={t("Заметка: что сказали, когда перезвонить")}
                     defaultValue={r?.note ?? ""}
                     onBlur={(e) => {
                       if (e.target.value.trim() !== (r?.note ?? "")) void save(v.id, { note: e.target.value.trim() });
@@ -368,7 +370,7 @@ export function OutreachScreen() {
       </div>
 
       <div style={{ height: 40 }} />
-      <Chip color="rgba(123,77,255,.7)">Тексты и скрипт подставляют твоё имя из профиля</Chip>
+      <Chip color="rgba(123,77,255,.7)">{t("Тексты и скрипт подставляют твоё имя из профиля")}</Chip>
     </div>
   );
 }

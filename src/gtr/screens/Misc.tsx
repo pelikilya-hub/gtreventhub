@@ -1,4 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
+import i18n from "../i18n";
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 
 import { can, PERMISSIONS } from "../auth";
@@ -45,17 +47,17 @@ const NoAccess = ({ what }: { what: string }) => (
       className="gtr-oswald"
       style={{ font: "600 18px/1.2 Oswald,sans-serif", marginBottom: 10 }}
     >
-      Доступ ограничен
+      {i18n.t("Доступ ограничен")}
     </div>
     <div style={{ font: "500 12px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-      Для вашей роли раздел «{what}» закрыт матрицей прав. Запросите доступ у GTR-админа — раздел
-      «Доступы и роли».
+      {i18n.t("Для вашей роли раздел «")}{what}{i18n.t("» закрыт матрицей прав. Запросите доступ у GTR-админа — раздел «Доступы и роли».")}
     </div>
   </Card>
 );
 
 // ---------- заявки организаторов ----------
 export function InquiriesScreen() {
+  const { t } = useTranslation();
   const { user, shared, updateRequest, setDraftGraph, draftsOf } = useGtr();
   const vid = user.venueId || "VEN-0013";
   const rows = inqOf(vid);
@@ -127,11 +129,11 @@ export function InquiriesScreen() {
     <div style={{ maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 16 }}>
         <h1 className="gtr-oswald gtr-h1">
-          Заявки организаторов
+          {t("Заявки организаторов")}
         </h1>
         {incoming.length ? (
           <Chip color="#2ECC71" style={{ animation: "gtrpulse 2s ease-out infinite" }}>
-            +{incoming.length} ЧЕРЕЗ GTR
+            +{incoming.length} {t("ЧЕРЕЗ GTR")}
           </Chip>
         ) : null}
         <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
@@ -186,7 +188,7 @@ export function InquiriesScreen() {
                   color: "#2ECC71",
                 }}
               >
-                Входящие через GTR · {incoming.length}
+                {t("Входящие через GTR ·")} {incoming.length}
               </div>
               {incoming.map((r) => (
                 <div
@@ -212,7 +214,7 @@ export function InquiriesScreen() {
                           color: "var(--gtr-t2)",
                         }}
                       >
-                        {r.organizerName} · {r.date} · {r.guests} гостей · {r.organizerContact}
+                        {r.organizerName} · {r.date} · {r.guests} {t("гостей ·")} {r.organizerContact}
                       </span>
                     </span>
                     <span style={{ textAlign: "right", flex: "none" }}>
@@ -227,7 +229,7 @@ export function InquiriesScreen() {
                         {fmtThb(r.quoteTotal)}
                       </span>
                       <span className="gtr-eyebrow" style={{ fontSize: 8 }}>
-                        КОМ. GTR {fmtThb(r.quoteCommission)}
+                        {t("КОМ. GTR")} {fmtThb(r.quoteCommission)}
                       </span>
                     </span>
                   </div>
@@ -274,7 +276,7 @@ export function InquiriesScreen() {
                             disabled={!can(user.role, "inquiries.reply")}
                             onClick={() => acceptRequest(r.id, r.title)}
                           >
-                            Принять
+                            {t("Принять")}
                           </button>
                           <button
                             className="gtr-btn"
@@ -282,7 +284,7 @@ export function InquiriesScreen() {
                             disabled={!can(user.role, "inquiries.reply")}
                             onClick={() => updateRequest(r.id, { status: "declined" })}
                           >
-                            Отклонить
+                            {t("Отклонить")}
                           </button>
                         </>
                       ) : null}
@@ -305,9 +307,9 @@ export function InquiriesScreen() {
                   color: "var(--gtr-t2)",
                 }}
               >
-                История заявок по этой площадке пока не собрана.
+                {t("История заявок по этой площадке пока не собрана.")}
                 <br />
-                Новые запросы с витрины появятся здесь сразу.
+                {t("Новые запросы с витрины появятся здесь сразу.")}
               </div>
             ) : null}
             {rows.map(([day, mon, title, meta, budget, sla, status, c, cta], i) => (
@@ -358,7 +360,7 @@ export function InquiriesScreen() {
                       color: "var(--gtr-t3)",
                     }}
                   >
-                    Бюджет: {budget} · {sla}
+                    {t("Бюджет:")} {budget} · {sla}
                   </span>
                 </span>
                 <Chip color={c} style={{ width: 108, textAlign: "center" }}>
@@ -376,7 +378,7 @@ export function InquiriesScreen() {
           </Card>
         </div>
         <Card style={{ alignSelf: "start", padding: 18 }}>
-          <Eyebrow style={{ marginBottom: 10 }}>ЧТО БЛОКИРУЕТ БЫСТРЫЙ ОТВЕТ</Eyebrow>
+          <Eyebrow style={{ marginBottom: 10 }}>{t("ЧТО БЛОКИРУЕТ БЫСТРЫЙ ОТВЕТ")}</Eyebrow>
           <div style={{ display: "grid", gap: 10 }}>
             {blockers.map(([t, d, c]) => (
               <div key={String(t)} style={{ display: "flex", gap: 9 }}>
@@ -406,6 +408,7 @@ export function InquiriesScreen() {
 // Ссылки-приглашения: человек сам заводит аккаунт на /gtr/join.
 // Быстрее, чем вводить пароль за него: одна ссылка — до 10 вступлений.
 function InviteLinks() {
+  const { t } = useTranslation();
   const [role, setRole] = useState<"organizer" | "sales" | "artist">("organizer");
   const [link, setLink] = useState("");
   const [msg, setMsg] = useState("");
@@ -429,7 +432,7 @@ function InviteLinks() {
   };
   return (
     <div style={{ display: "grid", gap: 8, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,.07)" }}>
-      <Eyebrow style={{ fontSize: 8.5 }}>ССЫЛКА-ПРИГЛАШЕНИЕ (АККАУНТ ЗАВОДИТ САМ ЧЕЛОВЕК)</Eyebrow>
+      <Eyebrow style={{ fontSize: 8.5 }}>{t("ССЫЛКА-ПРИГЛАШЕНИЕ (АККАУНТ ЗАВОДИТ САМ ЧЕЛОВЕК)")}</Eyebrow>
       <div style={{ display: "flex", gap: 7, flexWrap: "wrap", alignItems: "center" }}>
         {(
           [
@@ -455,7 +458,7 @@ function InviteLinks() {
           </button>
         ))}
         <button className="gtr-btn" style={{ padding: "8px 12px" }} onClick={make}>
-          Создать ссылку
+          {t("Создать ссылку")}
         </button>
         {msg ? <span style={{ font: "500 10px/1.3 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>{msg}</span> : null}
       </div>
@@ -494,6 +497,7 @@ function RequestsKanban({
     status: import("../data/app-data").OrgRequestStatus,
   ) => void;
 }) {
+  const { t } = useTranslation();
   const [dragId, setDragId] = useState<string | null>(null);
   const [overCol, setOverCol] = useState<string | null>(null);
 
@@ -501,8 +505,7 @@ function RequestsKanban({
     return (
       <Card style={{ padding: "26px 24px", marginBottom: 16, textAlign: "center" }}>
         <div style={{ font: "500 12.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-          Заявок пока нет. Они появляются, когда организатор отправляет запрос с витрины —
-          и сразу встают в колонку «Новые».
+          {t("Заявок пока нет. Они появляются, когда организатор отправляет запрос с витрины — и сразу встают в колонку «Новые».")}
         </div>
       </Card>
     );
@@ -612,6 +615,7 @@ function KanbanCard({
     status: import("../data/app-data").OrgRequestStatus,
   ) => void;
 }) {
+  const { t } = useTranslation();
   const idx = KANBAN_COLS.findIndex(([sName]) => sName === col);
   const prev = KANBAN_COLS[idx - 1]?.[0];
   const next = KANBAN_COLS[idx + 1]?.[0];
@@ -656,7 +660,7 @@ function KanbanCard({
           className="gtr-mono"
           style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
-          ком. {fmtThb(r.quoteCommission)}
+          {t("ком.")} {fmtThb(r.quoteCommission)}
         </span>
         {r.assignee ? (
           <span
@@ -705,6 +709,7 @@ function KanbanCard({
 // Кто ведёт заявку: менеджер берёт на себя, GTR-админ может назначить любого
 // из приглашённых. Назначение уходит уведомлением в Telegram-канал GTR.
 function AssignControl({ r }: { r: import("../data/app-data").OrgRequest }) {
+  const { t } = useTranslation();
   const { user, updateRequest } = useGtr();
   const [pick, setPick] = useState(false);
   const [managers, setManagers] = useState<{ email: string; name: string }[]>([]);
@@ -728,7 +733,7 @@ function AssignControl({ r }: { r: import("../data/app-data").OrgRequest }) {
   if (r.assignee)
     return (
       <Chip color="#7B9EFF">
-        ВЕДЁТ: {(r.assigneeName || r.assignee).toUpperCase()}
+        {t("ВЕДЁТ:")} {(r.assigneeName || r.assignee).toUpperCase()}
       </Chip>
     );
 
@@ -739,7 +744,7 @@ function AssignControl({ r }: { r: import("../data/app-data").OrgRequest }) {
         style={{ padding: "5px 10px", fontSize: 10 }}
         onClick={() => assign(user.email, user.name)}
       >
-        Взять на себя
+        {t("Взять на себя")}
       </button>
       {user.role === "gtr" ? (
         <button
@@ -751,7 +756,7 @@ function AssignControl({ r }: { r: import("../data/app-data").OrgRequest }) {
               listManagersFn().then((res) => setManagers(res.managers)).catch(() => {});
           }}
         >
-          Назначить…
+          {t("Назначить…")}
         </button>
       ) : null}
       {pick
@@ -768,7 +773,7 @@ function AssignControl({ r }: { r: import("../data/app-data").OrgRequest }) {
         : null}
       {pick && !managers.length ? (
         <span style={{ font: "500 10px/1.3 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-          приглашённых пока нет
+          {t("приглашённых пока нет")}
         </span>
       ) : null}
     </span>
@@ -776,6 +781,7 @@ function AssignControl({ r }: { r: import("../data/app-data").OrgRequest }) {
 }
 
 export function SpacesScreen() {
+  const { t } = useTranslation();
   const { user } = useGtr();
   const vid = user.venueId || "VEN-0013";
   const sp = SPACES(vid);
@@ -783,7 +789,7 @@ export function SpacesScreen() {
 
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-      <Title>Залы и прайс</Title>
+      <Title>{t("Залы и прайс")}</Title>
       <Card style={{ marginBottom: 16 }}>
         <div
           style={{
@@ -872,7 +878,7 @@ export function SpacesScreen() {
       </Card>
 
       <Card style={{ padding: 20 }}>
-        <Eyebrow style={{ marginBottom: 10 }}>ТЕХНИКА И ИНФРАСТРУКТУРА</Eyebrow>
+        <Eyebrow style={{ marginBottom: 10 }}>{t("ТЕХНИКА И ИНФРАСТРУКТУРА")}</Eyebrow>
         <div style={{ font: "500 12px/1.7 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
           {SPACES_TECH[vid] ?? v.facilities ?? "Данные уточняются у площадки."}
         </div>
@@ -883,6 +889,7 @@ export function SpacesScreen() {
 
 // ---------- паспорт площадки ----------
 export function VenueScreen() {
+  const { t } = useTranslation();
   const { user } = useGtr();
   const navigate = useNavigate();
   const vid = user.venueId || "VEN-0013";
@@ -893,7 +900,7 @@ export function VenueScreen() {
 
   return (
     <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-      <Title>Паспорт площадки</Title>
+      <Title>{t("Паспорт площадки")}</Title>
 
       <Card
         style={{
@@ -965,7 +972,7 @@ export function VenueScreen() {
 
       <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 14, marginBottom: 16 }}>
         <Card style={{ padding: 18 }}>
-          <Eyebrow style={{ marginBottom: 10 }}>ДАННЫЕ ПЛОЩАДКИ</Eyebrow>
+          <Eyebrow style={{ marginBottom: 10 }}>{t("ДАННЫЕ ПЛОЩАДКИ")}</Eyebrow>
           {[
             ["ФОРМАТЫ СОБЫТИЙ", v.events],
             ["ЗОНЫ И ИНФРАСТРУКТУРА", v.facilities],
@@ -1000,7 +1007,7 @@ export function VenueScreen() {
         </Card>
 
         <Card style={{ padding: 18, alignSelf: "start" }}>
-          <Eyebrow style={{ marginBottom: 10 }}>ИСТОЧНИКИ</Eyebrow>
+          <Eyebrow style={{ marginBottom: 10 }}>{t("ИСТОЧНИКИ")}</Eyebrow>
           {[
             ["Официальный сайт", v.website || v.source || "—", v.website || v.source ? GREEN : RED],
             ["Галерея / фото", "только официальная галерея", AMBER],
@@ -1055,7 +1062,7 @@ export function VenueScreen() {
           ))}
           {R ? (
             <>
-              <Eyebrow style={{ margin: "14px 0 8px" }}>ЧЕК-ЛИСТ · {R.score}/100</Eyebrow>
+              <Eyebrow style={{ margin: "14px 0 8px" }}>{t("ЧЕК-ЛИСТ ·")} {R.score}/100</Eyebrow>
               {[
                 ["Контакт подтверждён", R.contactVerified === "Yes" ? GREEN : AMBER],
                 ["Прайс-лист", /Missing/i.test(R.rate) ? RED : GREEN],
@@ -1083,7 +1090,7 @@ export function VenueScreen() {
 
       {rich.gallery?.length ? (
         <Card style={{ padding: 18, marginBottom: 16 }}>
-          <Eyebrow style={{ marginBottom: 10 }}>ОФИЦИАЛЬНАЯ ГАЛЕРЕЯ · {rich.credit}</Eyebrow>
+          <Eyebrow style={{ marginBottom: 10 }}>{t("ОФИЦИАЛЬНАЯ ГАЛЕРЕЯ ·")} {rich.credit}</Eyebrow>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
             {rich.gallery.slice(0, 8).map((src) => (
               <img
@@ -1106,7 +1113,7 @@ export function VenueScreen() {
 
       {rich.afisha?.length ? (
         <Card style={{ padding: 18 }}>
-          <Eyebrow style={{ marginBottom: 10 }}>ОФИЦИАЛЬНАЯ АФИША · {rich.src}</Eyebrow>
+          <Eyebrow style={{ marginBottom: 10 }}>{t("ОФИЦИАЛЬНАЯ АФИША ·")} {rich.src}</Eyebrow>
           <div
             style={{
               display: "grid",
@@ -1174,7 +1181,7 @@ export function VenueScreen() {
           style={{ marginTop: 14 }}
           onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "base" } })}
         >
-          ← К базе Пхукета
+          {t("← К базе Пхукета")}
         </button>
       ) : null}
     </div>
@@ -1183,6 +1190,7 @@ export function VenueScreen() {
 
 // ---------- финансы ----------
 export function FinanceScreen() {
+  const { t } = useTranslation();
   const { user } = useGtr();
   if (!can(user.role, "finance.view")) return <NoAccess what="Финансы" />;
 
@@ -1229,7 +1237,7 @@ export function FinanceScreen() {
 
   return (
     <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-      <Title>Финансы</Title>
+      <Title>{t("Финансы")}</Title>
       {!finKpiOf(vid).length ? (
         <Card style={{ padding: "22px 20px", marginBottom: 16 }}>
           <div
@@ -1238,8 +1246,7 @@ export function FinanceScreen() {
               color: "var(--gtr-t2)",
             }}
           >
-            Финансовые показатели по этой площадке ещё не заведены. Чтобы они появились, нужны
-            ставка аренды, условия оплаты и договор — их заполняют в паспорте площадки.
+            {t("Финансовые показатели по этой площадке ещё не заведены. Чтобы они появились, нужны ставка аренды, условия оплаты и договор — их заполняют в паспорте площадки.")}
           </div>
         </Card>
       ) : null}
@@ -1281,7 +1288,7 @@ export function FinanceScreen() {
             borderBottom: "1px solid rgba(255,255,255,.05)",
           }}
         >
-          Коммерческие условия
+          {t("Коммерческие условия")}
         </div>
         {terms.map(([label, desc, status, c]) => (
           <div
@@ -1315,7 +1322,7 @@ export function FinanceScreen() {
       </Card>
 
       <Card style={{ padding: 20, borderColor: "rgba(229,35,27,.3)" }}>
-        <Eyebrow style={{ marginBottom: 8, color: "#E5231B" }}>ГЛАВНЫЙ БЛОКЕР</Eyebrow>
+        <Eyebrow style={{ marginBottom: 8, color: "#E5231B" }}>{t("ГЛАВНЫЙ БЛОКЕР")}</Eyebrow>
         <div style={{ font: "500 12px/1.7 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
           {finBlockerOf(vid)}
         </div>
@@ -1326,10 +1333,11 @@ export function FinanceScreen() {
 
 // ---------- доступы и роли ----------
 export function AccessScreen() {
+  const { t } = useTranslation();
   const { user } = useGtr();
   return (
     <div style={{ maxWidth: 980, margin: "0 auto" }}>
-      <Title>Доступы и роли</Title>
+      <Title>{t("Доступы и роли")}</Title>
       <Card style={{ overflow: "auto" }}>
         <div
           style={{
@@ -1341,7 +1349,7 @@ export function AccessScreen() {
             minWidth: 640,
           }}
         >
-          <span className="gtr-eyebrow">ПРАВО</span>
+          <span className="gtr-eyebrow">{t("ПРАВО")}</span>
           {ROLES.map(([id, label]) => (
             <span
               key={id}
@@ -1399,7 +1407,7 @@ export function AccessScreen() {
           color: "var(--gtr-t3)",
         }}
       >
-        Права применяются на сервере при входе и в интерфейсе (кнопки/разделы). Ваша роль:{" "}
+        {t("Права применяются на сервере при входе и в интерфейсе (кнопки/разделы). Ваша роль:")}{" "}
         {user.roleLabel}.
       </div>
     </div>
@@ -1409,6 +1417,7 @@ export function AccessScreen() {
 // ---------- привязка Telegram (все роли) ----------
 // Предложения, заявки и /guest работают в личном чате с ботом GTR.
 function TgPanel() {
+  const { t } = useTranslation();
   const [tg, setTg] = useState<{ configured: boolean; linked: boolean; bot: string } | null>(null);
   const [link, setLink] = useState("");
   const [msg, setMsg] = useState("");
@@ -1429,11 +1438,11 @@ function TgPanel() {
     <Card style={{ marginTop: 16, padding: "14px 20px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
       <Eyebrow>TELEGRAM</Eyebrow>
       {tg?.linked ? (
-        <Chip color={GREEN}>ПРИВЯЗАН · УВЕДОМЛЕНИЯ ИДУТ В ЧАТ</Chip>
+        <Chip color={GREEN}>{t("ПРИВЯЗАН · УВЕДОМЛЕНИЯ ИДУТ В ЧАТ")}</Chip>
       ) : tg?.bot ? (
         <>
           <span style={{ font: "500 11.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-            Бот @{tg.bot}: предложения, заявки и команда /guest — в личном чате.
+            {t("Бот @")}{tg.bot}{t(": предложения, заявки и команда /guest — в личном чате.")}
           </span>
           {link ? (
             <a
@@ -1447,11 +1456,11 @@ function TgPanel() {
                 openAppLink(link);
               }}
             >
-              Открыть @{tg.bot} и привязать ↗
+              {t("Открыть @")}{tg.bot} {t("и привязать ↗")}
             </a>
           ) : (
             <button className="gtr-btn" onClick={getLink}>
-              Привязать Telegram
+              {t("Привязать Telegram")}
             </button>
           )}
         </>
@@ -1469,6 +1478,7 @@ function TgPanel() {
 // Аккаунты живут в общей базе (Workers KV): у каждого менеджера свой пароль
 // и свой кабинет. В локальном dev-режиме база недоступна — панель скажет об этом.
 function TeamPanel() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<PublicUser[] | null>(null);
   const [storeOk, setStoreOk] = useState(true);
   const [role, setRole] = useState<"sales" | "artist" | "owner" | "organizer">("sales");
@@ -1564,8 +1574,8 @@ function TeamPanel() {
   return (
     <Card style={{ marginTop: 16, padding: "18px 20px", display: "grid", gap: 14 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <Eyebrow>КОМАНДА · ПРИГЛАШЕНИЯ МЕНЕДЖЕРОВ</Eyebrow>
-        {!storeOk ? <Chip color={AMBER}>ЛОКАЛЬНЫЙ РЕЖИМ — БАЗА НЕДОСТУПНА</Chip> : null}
+        <Eyebrow>{t("КОМАНДА · ПРИГЛАШЕНИЯ МЕНЕДЖЕРОВ")}</Eyebrow>
+        {!storeOk ? <Chip color={AMBER}>{t("ЛОКАЛЬНЫЙ РЕЖИМ — БАЗА НЕДОСТУПНА")}</Chip> : null}
       </div>
 
       <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
@@ -1612,7 +1622,7 @@ function TeamPanel() {
                   setArtistName("");
                 }}
               >
-                Убрать
+                {t("Убрать")}
               </button>
             </div>
           ) : (
@@ -1658,7 +1668,7 @@ function TeamPanel() {
         <input
           className="gtr-input"
           style={{ padding: "8px 11px", fontSize: 12 }}
-          placeholder="Имя и фамилия"
+          placeholder={t("Имя и фамилия")}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -1673,12 +1683,12 @@ function TeamPanel() {
           <input
             className="gtr-input"
             style={{ flex: 1, padding: "8px 11px", fontSize: 12 }}
-            placeholder="Пароль (от 6 символов)"
+            placeholder={t("Пароль (от 6 символов)")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <button className="gtr-btn" style={{ padding: "8px 10px", fontSize: 10.5 }} onClick={genPassword}>
-            Сгенерировать
+            {t("Сгенерировать")}
           </button>
         </div>
       </div>
@@ -1693,7 +1703,7 @@ function TeamPanel() {
               style={{ padding: "4px 9px", fontSize: 10 }}
               onClick={() => setVenueId("")}
             >
-              Убрать
+              {t("Убрать")}
             </button>
           </div>
         ) : (
@@ -1701,7 +1711,7 @@ function TeamPanel() {
             <input
               className="gtr-input"
               style={{ maxWidth: 360, padding: "8px 11px", fontSize: 12 }}
-              placeholder="Площадка менеджера (необязательно) — поиск…"
+              placeholder={t("Площадка менеджера (необязательно) — поиск…")}
               value={venueQ}
               onChange={(e) => setVenueQ(e.target.value)}
             />
@@ -1765,7 +1775,7 @@ function TeamPanel() {
 
       {users?.length ? (
         <div style={{ display: "grid", gap: 6, marginTop: 4 }}>
-          <Eyebrow style={{ fontSize: 8.5 }}>ПРИГЛАШЁННЫЕ · {users.length}</Eyebrow>
+          <Eyebrow style={{ fontSize: 8.5 }}>{t("ПРИГЛАШЁННЫЕ ·")} {users.length}</Eyebrow>
           {users.map((u) => (
             <div
               key={u.email}
@@ -1795,7 +1805,7 @@ function TeamPanel() {
                       href={`/gtr/artists?artist=${u.artistId}`}
                       style={{ color: "#7B4DFF", marginLeft: 6, textDecoration: "none" }}
                     >
-                      карточка {u.artistId} ↗
+                      {t("карточка")} {u.artistId} ↗
                     </a>
                   ) : u.venueId ? (
                     ` · ${V(u.venueId).name ?? u.venueId}`
@@ -1812,7 +1822,7 @@ function TeamPanel() {
                     deleteUserFn({ data: { email: u.email } }).then(refresh);
                 }}
               >
-                Удалить
+                {t("Удалить")}
               </button>
             </div>
           ))}
@@ -1824,6 +1834,7 @@ function TeamPanel() {
 
 // ---------- GTR-админ ----------
 export function AdminScreen() {
+  const { t } = useTranslation();
   const { user } = useGtr();
   const navigate = useNavigate();
   if (!can(user.role, "network.manage")) return <NoAccess what="GTR-админ" />;
@@ -1837,7 +1848,7 @@ export function AdminScreen() {
 
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-      <Title>GTR-админ · консоль сети</Title>
+      <Title>{t("GTR-админ · консоль сети")}</Title>
 
       <div
         style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 16 }}
@@ -1874,7 +1885,7 @@ export function AdminScreen() {
               borderBottom: "1px solid rgba(255,255,255,.05)",
             }}
           >
-            Пайплайн онбординга
+            {t("Пайплайн онбординга")}
           </div>
           {ready.slice(0, 8).map((x) => (
             <div
@@ -1936,7 +1947,7 @@ export function AdminScreen() {
               borderBottom: "1px solid rgba(255,255,255,.05)",
             }}
           >
-            Карантин источников · {quar.length}
+            {t("Карантин источников ·")} {quar.length}
           </div>
           {quar.slice(0, 8).map((x) => (
             <div
@@ -1968,7 +1979,7 @@ export function AdminScreen() {
             </div>
           ))}
           <div style={{ padding: "13px 20px" }}>
-            <Eyebrow style={{ marginBottom: 8 }}>ОЧЕРЕДЬ ИССЛЕДОВАНИЙ</Eyebrow>
+            <Eyebrow style={{ marginBottom: 8 }}>{t("ОЧЕРЕДЬ ИССЛЕДОВАНИЙ")}</Eyebrow>
             {PH.research.map((r) => (
               <div key={r.task} style={{ display: "flex", gap: 9, padding: "6px 0" }}>
                 <Dot color={r.priority === "P0" ? RED : AMBER} />

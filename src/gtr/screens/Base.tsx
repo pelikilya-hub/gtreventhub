@@ -327,12 +327,12 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
         className="gtr-mono"
         style={{ padding: 60, textAlign: "center", color: "var(--gtr-t3)" }}
       >
-        Площадка не найдена.{" "}
+        {t("Площадка не найдена.")}{" "}
         <button
           className="gtr-btn"
           onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "base" } })}
         >
-          К базе
+          {t("К базе")}
         </button>
       </div>
     );
@@ -393,7 +393,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 площадку узнают, а набранное имя — уже подпись под ним. */}
             <VenueLogo vid={v.id} h={34} />
             <TrashTitle text={v.name} size={29} />
-            <Chip color={confColor(v.confidence)}>ДОСТОВЕРНОСТЬ: {(v.confidence ?? "—").toUpperCase()}</Chip>
+            <Chip color={confColor(v.confidence)}>{t("ДОСТОВЕРНОСТЬ:")} {(v.confidence ?? "—").toUpperCase()}</Chip>
             {R ? (
               <Chip color={R.state === "Бронируемая" ? GREEN : AMBER}>{R.state.toUpperCase()}</Chip>
             ) : null}
@@ -441,7 +441,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 className="gtr-mono"
                 style={{ font: "700 12px/1 'JetBrains Mono',monospace", color: GREEN }}
               >
-                аренда {fmtThb(cRate.amount)} / {cRate.unit} · подтверждено площадкой
+                {t("аренда")} {fmtThb(cRate.amount)} / {cRate.unit} {t("· подтверждено площадкой")}
               </span>
             ) : commercial && rate ? (
               <span
@@ -466,7 +466,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 color: "var(--gtr-t3)",
               }}
             >
-              фото: {rich.credit}
+              {t("фото:")} {rich.credit}
             </div>
           ) : null}
         </div>
@@ -632,7 +632,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
 
           {sp.length ? (
             <Card style={{ padding: 18 }}>
-              <Eyebrow style={{ marginBottom: 10 }}>НОРМАЛИЗОВАННЫЕ ЗАЛЫ · {sp.length}</Eyebrow>
+              <Eyebrow style={{ marginBottom: 10 }}>{t("НОРМАЛИЗОВАННЫЕ ЗАЛЫ ·")} {sp.length}</Eyebrow>
               {sp.map((s) => {
                 const zs = cdmZonesOfSpace(v.id, s.id);
                 return (
@@ -701,7 +701,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           {hasCdmReserve(v.id) ? (
             <Card id="gtr-reserve" style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 4 }}>
-                {t("РАССАДКА И БРОНЬ")} · SEVENROOMS-ПАРИТЕТ
+                {t("РАССАДКА И БРОНЬ")} {t("· SEVENROOMS-ПАРИТЕТ")}
               </Eyebrow>
               <div
                 style={{
@@ -863,7 +863,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               </div>
             ) : null}
             {commercial ? (<>
-            <Eyebrow style={{ marginBottom: 10 }}>ИСТОЧНИКИ И КОНТАКТ</Eyebrow>
+            <Eyebrow style={{ marginBottom: 10 }}>{t("ИСТОЧНИКИ И КОНТАКТ")}</Eyebrow>
             {[
               [
                 "Официальный сайт",
@@ -936,7 +936,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           {commercial && R ? (
             <Card style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>
-                ГОТОВНОСТЬ К БРОНИРОВАНИЮ · {R.score}/100
+                {t("ГОТОВНОСТЬ К БРОНИРОВАНИЮ ·")} {R.score}/100
               </Eyebrow>
               {[
                 ["Прайс-лист", R.rate, /Missing/i.test(R.rate) ? RED : GREEN],
@@ -992,7 +992,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
 
           {rich.afisha?.length ? (
             <Card style={{ padding: 18 }}>
-              <Eyebrow style={{ marginBottom: 10 }}>ОФИЦИАЛЬНАЯ АФИША</Eyebrow>
+              <Eyebrow style={{ marginBottom: 10 }}>{t("ОФИЦИАЛЬНАЯ АФИША")}</Eyebrow>
               <div style={{ display: "grid", gap: 8 }}>
                 {rich.afisha.map(([date, title, meta]) => (
                   <div
@@ -1050,6 +1050,7 @@ type AfishaEvent = {
 };
 
 function AfishaBlock({ vid }: { vid: string }) {
+  const { t } = useTranslation();
   const { user } = useGtr();
   const navigate = useNavigate();
   const [data, setData] = useState<{ events: AfishaEvent[]; syncedAt: number } | null>(null);
@@ -1080,13 +1081,13 @@ function AfishaBlock({ vid }: { vid: string }) {
   return (
     <Card style={{ padding: 18 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-        <Eyebrow>АФИША</Eyebrow>
+        <Eyebrow>{t("АФИША")}</Eyebrow>
         {data?.syncedAt ? (
           <span
             className="gtr-mono"
             style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
           >
-            обновлено {new Date(data.syncedAt).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+            {t("обновлено")} {new Date(data.syncedAt).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
           </span>
         ) : null}
         {style?.colors.length ? (
@@ -1123,7 +1124,7 @@ function AfishaBlock({ vid }: { vid: string }) {
           <input
             className="gtr-input"
             style={{ flex: "1 1 180px" }}
-            placeholder="Название события"
+            placeholder={t("Название события")}
             value={mTitle}
             onChange={(e) => setMTitle(e.target.value)}
           />
@@ -1146,7 +1147,7 @@ function AfishaBlock({ vid }: { vid: string }) {
               setTimeout(() => setMNote(""), 3000);
             }}
           >
-            + Добавить
+            {t("+ Добавить")}
           </button>
           {mNote ? (
             <span className="gtr-mono" style={{ font: "500 9px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
@@ -1211,7 +1212,7 @@ function AfishaBlock({ vid }: { vid: string }) {
                           navigate({ to: "/gtr/$screen", params: { screen: "artists" }, search: { artist: id } });
                         }}
                       >
-                        НАШ АРТИСТ ↗
+                        {t("НАШ АРТИСТ ↗")}
                       </button>
                     ))}
                   </span>
@@ -1222,7 +1223,7 @@ function AfishaBlock({ vid }: { vid: string }) {
         </div>
       ) : (
         <span style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-          Источник этой площадки ещё не подключён — собираем Café del Mar и Illuzion, дальше расширяем.
+          {t("Источник этой площадки ещё не подключён — собираем Café del Mar и Illuzion, дальше расширяем.")}
         </span>
       )}
     </Card>
@@ -1233,6 +1234,7 @@ function AfishaBlock({ vid }: { vid: string }) {
 // и шлёт в WhatsApp/Telegram. Статус показывает путь: отправлено → открыто
 // → подтверждено.
 function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm | null }) {
+  const { t } = useTranslation();
   const { user } = useGtr();
   const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
@@ -1264,7 +1266,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
   return (
     <Card style={{ padding: 18 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-        <Eyebrow>ПОДТВЕРЖДЕНИЕ ПЛОЩАДКОЙ</Eyebrow>
+        <Eyebrow>{t("ПОДТВЕРЖДЕНИЕ ПЛОЩАДКОЙ")}</Eyebrow>
         {st ? (
           <Chip
             color={st === "confirmed" ? GREEN : st === "opened" ? AMBER : "rgba(255,255,255,.5)"}
@@ -1280,8 +1282,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
           marginBottom: 10,
         }}
       >
-        Персональная ссылка для менеджера площадки: без регистрации проверит
-        вместимость и прайс, оставит контакт и подтвердит. EN / TH / RU.
+        {t("Персональная ссылка для менеджера площадки: без регистрации проверит вместимость и прайс, оставит контакт и подтвердит. EN / TH / RU.")}
       </div>
       <button className="gtr-btn" disabled={busy} onClick={make}>
         {busy ? "…" : link ? "Новая ссылка" : "Создать ссылку"}

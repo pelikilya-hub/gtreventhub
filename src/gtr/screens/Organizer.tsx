@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   fmtThb,
@@ -91,6 +92,7 @@ function IntakeWizard({
   onBack: () => void;
   onDone: (intake: EventIntake) => void;
 }) {
+  const { t } = useTranslation();
   const v = V(vid);
   const [format, setFormat] = useState("");
   const [date, setDate] = useState("");
@@ -110,17 +112,17 @@ function IntakeWizard({
           {v.name}
         </span>
         <button className="gtr-btn" onClick={onBack}>
-          ← Другая площадка
+          {t("← Другая площадка")}
         </button>
       </TopBar>
 
       <div className="gtr-fade" style={{ maxWidth: 640, margin: "0 auto", padding: "36px 30px" }}>
-        <Eyebrow>ШАГ 1 · ПАРАМЕТРЫ СОБЫТИЯ</Eyebrow>
+        <Eyebrow>{t("ШАГ 1 · ПАРАМЕТРЫ СОБЫТИЯ")}</Eyebrow>
         <h1
           className="gtr-oswald"
           style={{ font: "700 26px/1.1 Oswald,sans-serif", margin: "10px 0 6px" }}
         >
-          Расскажите о событии
+          {t("Расскажите о событии")}
         </h1>
         <div
           style={{
@@ -129,12 +131,12 @@ function IntakeWizard({
             marginBottom: 20,
           }}
         >
-          Несколько вопросов, чтобы собрать событие без казусов — площадка {v.name}
+          {t("Несколько вопросов, чтобы собрать событие без казусов — площадка")} {v.name}
           {cap ? ` · вместимость ${cap}` : ""}.
         </div>
 
         <Card style={{ padding: 22 }}>
-          <Eyebrow style={{ marginBottom: 9 }}>ФОРМАТ СОБЫТИЯ</Eyebrow>
+          <Eyebrow style={{ marginBottom: 9 }}>{t("ФОРМАТ СОБЫТИЯ")}</Eyebrow>
           <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: hint ? 10 : 18 }}>
             {FORMATS.map(([f]) => (
               <button
@@ -178,28 +180,28 @@ function IntakeWizard({
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <label style={{ display: "grid", gap: 5 }}>
-              <Eyebrow>ДАТА / ВРЕМЯ</Eyebrow>
+              <Eyebrow>{t("ДАТА / ВРЕМЯ")}</Eyebrow>
               <input
                 className="gtr-input"
-                placeholder="напр. 15 авг, 22:00"
+                placeholder={t("напр. 15 авг, 22:00")}
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
               />
             </label>
             <label style={{ display: "grid", gap: 5 }}>
-              <Eyebrow>ГОСТЕЙ</Eyebrow>
+              <Eyebrow>{t("ГОСТЕЙ")}</Eyebrow>
               <input
                 className="gtr-input"
-                placeholder="напр. 300"
+                placeholder={t("напр. 300")}
                 value={guests}
                 onChange={(e) => setGuests(e.target.value)}
               />
             </label>
             <label style={{ display: "grid", gap: 5, gridColumn: "1 / -1" }}>
-              <Eyebrow>БЮДЖЕТ, ฿ (необязательно)</Eyebrow>
+              <Eyebrow>{t("БЮДЖЕТ, ฿ (необязательно)")}</Eyebrow>
               <input
                 className="gtr-input"
-                placeholder="напр. 500000"
+                placeholder={t("напр. 500000")}
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
               />
@@ -212,7 +214,7 @@ function IntakeWizard({
             disabled={!format}
             onClick={() => onDone({ title: format, date, guests, budget })}
           >
-            Собрать событие в конструкторе →
+            {t("Собрать событие в конструкторе →")}
           </button>
           {!format ? (
             <div
@@ -223,7 +225,7 @@ function IntakeWizard({
                 color: "var(--gtr-t3)",
               }}
             >
-              Выберите формат события, чтобы продолжить
+              {t("Выберите формат события, чтобы продолжить")}
             </div>
           ) : null}
         </Card>
@@ -233,6 +235,7 @@ function IntakeWizard({
 }
 
 function TopBar({ children }: { children?: React.ReactNode }) {
+  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -253,7 +256,7 @@ function TopBar({ children }: { children?: React.ReactNode }) {
         alt="GTR"
         style={{ height: 34, width: "auto" }}
       />
-      <Chip color="rgba(255,255,255,.5)">ВИТРИНА ОРГАНИЗАТОРА</Chip>
+      <Chip color="rgba(255,255,255,.5)">{t("ВИТРИНА ОРГАНИЗАТОРА")}</Chip>
       <div style={{ marginLeft: "auto", display: "flex", gap: 10, alignItems: "center" }}>
         {children}
       </div>
@@ -262,6 +265,7 @@ function TopBar({ children }: { children?: React.ReactNode }) {
 }
 
 function PickVenue({ onPick }: { onPick: (vid: string) => void }) {
+  const { t } = useTranslation();
   const [q, setQ] = useState("");
   const [cluster, setCluster] = useState("Все");
 
@@ -288,12 +292,12 @@ function PickVenue({ onPick }: { onPick: (vid: string) => void }) {
       <TopBar />
       <div style={{ maxWidth: 1180, margin: "0 auto", padding: "26px 30px 40px" }}>
         <div className="gtr-fade">
-          <Eyebrow>СОБЕРИТЕ СОБЫТИЕ НА ПХУКЕТЕ</Eyebrow>
+          <Eyebrow>{t("СОБЕРИТЕ СОБЫТИЕ НА ПХУКЕТЕ")}</Eyebrow>
           <h1
             className="gtr-oswald"
             style={{ font: "700 30px/1.05 Oswald,sans-serif", margin: "10px 0 8px" }}
           >
-            Выберите площадку
+            {t("Выберите площадку")}
           </h1>
           <div
             style={{
@@ -302,8 +306,7 @@ function PickVenue({ onPick }: { onPick: (vid: string) => void }) {
               maxWidth: 640,
             }}
           >
-            Соберите событие из площадки, залов, артистов и подрядчиков в конструкторе, получите
-            смету с комиссией GTR и отправьте запрос напрямую в кабинет площадки.
+            {t("Соберите событие из площадки, залов, артистов и подрядчиков в конструкторе, получите смету с комиссией GTR и отправьте запрос напрямую в кабинет площадки.")}
           </div>
         </div>
 
@@ -329,7 +332,7 @@ function PickVenue({ onPick }: { onPick: (vid: string) => void }) {
         <input
           className="gtr-input"
           style={{ maxWidth: 320, marginBottom: 18 }}
-          placeholder="Поиск площадки…"
+          placeholder={t("Поиск площадки…")}
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
@@ -351,6 +354,7 @@ function PickVenue({ onPick }: { onPick: (vid: string) => void }) {
 }
 
 function VenueTile({ v, onPick }: { v: Venue; onPick: () => void }) {
+  const { t } = useTranslation();
   const rich = richOf(v.id);
   const rate = rateOf(v.id);
   // Зелёный чип только у подтверждённых ставок: ориентир GTR — это не цена.
@@ -416,7 +420,7 @@ function VenueTile({ v, onPick }: { v: Venue; onPick: () => void }) {
               : "аренда по запросу"}
           </span>
           <span className="gtr-btn gtr-btn-red" style={{ padding: "6px 11px", fontSize: 10.5 }}>
-            Собрать →
+            {t("Собрать →")}
           </span>
         </div>
       </div>
@@ -433,6 +437,7 @@ function BuildFrame({
   onBack: () => void;
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   const v = V(vid);
   return (
     <div>
@@ -444,7 +449,7 @@ function BuildFrame({
           {v.name}
         </span>
         <button className="gtr-btn" onClick={onBack}>
-          ← Другая площадка
+          {t("← Другая площадка")}
         </button>
       </TopBar>
       <div className="gtr-fade" style={{ padding: "22px 30px 40px" }}>
@@ -455,6 +460,7 @@ function BuildFrame({
 }
 
 function DoneScreen({ vid, reqId, onAgain }: { vid: string; reqId: string; onAgain: () => void }) {
+  const { t } = useTranslation();
   const { shared } = useGtr();
   const v = V(vid);
   const req = shared.requests.find((r) => r.id === reqId);
@@ -489,15 +495,14 @@ function DoneScreen({ vid, reqId, onAgain }: { vid: string; reqId: string; onAga
               className="gtr-oswald"
               style={{ font: "700 24px/1.1 Oswald,sans-serif", margin: "0 0 10px" }}
             >
-              Запрос отправлен площадке
+              {t("Запрос отправлен площадке")}
             </h1>
             <div style={{ font: "500 12.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-              <b style={{ color: "#fff" }}>{v.name}</b> получит ваш собранный event и смету
+              <b style={{ color: "#fff" }}>{v.name}</b> {t("получит ваш собранный event и смету")}
               {req ? (
                 <>
                   {" "}
-                  на <b style={{ color: "#2ECC71" }}>{fmtThb(req.quoteTotal)}</b> в кабинете «Заявки
-                  организаторов».
+                  {t("на")} <b style={{ color: "#2ECC71" }}>{fmtThb(req.quoteTotal)}</b> {t("в кабинете «Заявки организаторов».")}
                 </>
               ) : (
                 "."
@@ -514,7 +519,7 @@ function DoneScreen({ vid, reqId, onAgain }: { vid: string; reqId: string; onAga
               № {reqId}
             </div>
             <button className="gtr-btn gtr-btn-red" style={{ marginTop: 20 }} onClick={onAgain}>
-              Собрать ещё событие
+              {t("Собрать ещё событие")}
             </button>
           </div>
         </Card>

@@ -3,6 +3,7 @@
 // по-разному в iOS/Android — рисуем свой месячный календарь в геометрии
 // дизайн-системы (90°, моно-подписи, красный выбор).
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const MONTHS = [
   "Январь",
@@ -51,6 +52,7 @@ export function GtrCalendar({
   value: string; // ISO YYYY-MM-DD или ""
   onChange: (isoDate: string) => void;
 }) {
+  const { t } = useTranslation();
   const today = new Date();
   const todayIso = iso(today.getFullYear(), today.getMonth(), today.getDate());
   const start = value ? new Date(`${value}T12:00:00`) : today;
@@ -80,14 +82,14 @@ export function GtrCalendar({
           className="gtr-cal-nav"
           onClick={() => nav(-1)}
           disabled={atPast}
-          aria-label="Предыдущий месяц"
+          aria-label={t("Предыдущий месяц")}
         >
           ‹
         </button>
         <span className="gtr-cal-title">
           {MONTHS[m]} <b>{y}</b>
         </span>
-        <button type="button" className="gtr-cal-nav" onClick={() => nav(1)} aria-label="Следующий месяц">
+        <button type="button" className="gtr-cal-nav" onClick={() => nav(1)} aria-label={t("Следующий месяц")}>
           ›
         </button>
       </div>

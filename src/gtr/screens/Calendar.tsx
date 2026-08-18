@@ -560,7 +560,7 @@ export function CalendarScreen() {
                             color: "rgba(255,255,255,.35)",
                           }}
                         >
-                          +{cellChips.length - 3} ещё
+                          +{cellChips.length - 3} {t("ещё")}
                         </div>
                       ) : null}
                     </div>
@@ -702,14 +702,14 @@ export function CalendarScreen() {
                         style={{ padding: "5px 9px", fontSize: 10 }}
                         onClick={() => shift(e.id, -30)}
                       >
-                        −30 мин
+                        {t("−30 мин")}
                       </button>
                       <button
                         className="gtr-btn"
                         style={{ padding: "5px 9px", fontSize: 10 }}
                         onClick={() => shift(e.id, 30)}
                       >
-                        +30 мин
+                        {t("+30 мин")}
                       </button>
                       <button
                         className="gtr-btn"
@@ -847,12 +847,12 @@ export function CalendarScreen() {
                         color: "rgba(255,255,255,.4)",
                       }}
                     >
-                      {(a.styles || []).slice(0, 2).join(" · ")} · из лайнапа
+                      {(a.styles || []).slice(0, 2).join(" · ")} {t("· из лайнапа")}
                     </span>
                   </span>
                   <span
                     role="link"
-                    title="Открыть страницу артиста"
+                    title={t("Открыть страницу артиста")}
                     style={{ color: "#7B4DFF", fontWeight: 700, padding: "0 4px" }}
                     onClick={(e) => {
                       e.stopPropagation();

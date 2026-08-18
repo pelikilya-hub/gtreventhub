@@ -180,6 +180,22 @@ export const issueSession = createServerOnlyFn(async (sessionUser: SessionUser) 
   });
 });
 
+// Счётчик исходов входа: без почт и паролей, только «что произошло».
+// Нужен, чтобы отличать «человек ошибается паролем» от «запрос вообще
+// не долетает» — снаружи эти случаи выглядят одинаково: «не заходит».
+const countLogin = async (outcome: string) => {
+  try {
+    const ns = await getKvNs();
+    if (!ns) return;
+    const key = `loginstat:${new Date().toISOString().slice(0, 10)}`;
+    const cur = ((await kvGetJson<Record<string, number>>(ns, key)) ?? {}) as Record<string, number>;
+    cur[outcome] = (cur[outcome] ?? 0) + 1;
+    await ns.put(key, JSON.stringify(cur), { expirationTtl: 60 * 60 * 24 * 30 });
+  } catch {
+    /* счётчик не важнее входа */
+  }
+};
+
 export const loginFn = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string; password: string }) => d)
   .handler(async ({ data }) => {
@@ -195,8 +211,10 @@ export const loginFn = createServerFn({ method: "POST" })
       (await tooMany("login", ip, LIMITS.login)) ||
       (await tooMany("login-acc", email, LIMITS.login)) ||
       (await tooMany("login-day", ip, LIMITS.loginDay))
-    )
+    ) {
+      await countLogin("rate");
       return { ok: false as const, error: TOO_MANY_MSG };
+    }
 
     // 1) Приглашённые менеджеры: личные аккаунты в KV со своими паролями
     const ns = await getKvNs();
@@ -204,6 +222,7 @@ export const loginFn = createServerFn({ method: "POST" })
       const stored = await kvGetJson<StoredUser>(ns, `user:${email}`);
       if (stored) {
         if (!(await verifyPassword(data.password, stored.passHash))) {
+          await countLogin("badpass");
           return { ok: false as const, error: "Неверный email или пароль" };
         }
         // легаси-хэш без соли — тихо перехэшируем на PBKDF2, раз пароль уже подтверждён
@@ -213,6 +232,7 @@ export const loginFn = createServerFn({ method: "POST" })
         }
         const { passHash: _p, created: _c, invitedBy: _i, ...sessionUser } = stored;
         await issueSession(sessionUser);
+        await countLogin("ok");
         return { ok: true as const, user: sessionUser };
       }
       // заявка на роль ещё не одобрена — честно говорим статус

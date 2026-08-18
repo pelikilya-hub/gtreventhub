@@ -1,11 +1,35 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { accessModeFn, loginFn, sessionFn } from "@/gtr/auth";
+import { accessModeFn, formLogin, loginFn, sessionFn } from "@/gtr/auth";
 import { V } from "@/gtr/data/app-data";
 import { Eyebrow } from "@/gtr/ui";
 
 export const Route = createFileRoute("/gtr/login")({
+  server: {
+    handlers: {
+      // Вход без JavaScript: браузер отправляет обычную форму, сервер
+      // ставит куку заголовком и уводит в кабинет. Нужен старым WebView
+      // в Android-оболочке, где наш скрипт не исполняется: страница там
+      // рисуется, а все обработчики кнопок мертвы.
+      POST: async ({ request }: { request: Request }) => {
+        const fd = await request.formData().catch(() => null);
+        const email = String(fd?.get("email") ?? "");
+        const password = String(fd?.get("password") ?? "");
+        const ip = (
+          request.headers.get("cf-connecting-ip") ||
+          request.headers.get("x-real-ip") ||
+          "unknown"
+        ).slice(0, 64);
+        const res = await formLogin(email, password, ip);
+        const headers = new Headers({
+          location: res.ok ? "/gtr/dash" : `/gtr/login?err=${encodeURIComponent(res.error)}`,
+        });
+        if (res.ok) headers.set("set-cookie", res.setCookie);
+        return new Response(null, { status: 303, headers });
+      },
+    },
+  },
   beforeLoad: async () => {
     const { user } = await sessionFn();
     if (user)
@@ -30,7 +54,13 @@ function LoginPage() {
       : "";
   const [email, setEmail] = useState(invited);
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  // Отскок формы без скрипта возвращает причину в адресе: показываем её
+  // как обычную ошибку входа.
+  const formErr =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("err")
+      : null;
+  const [error, setError] = useState<string | null>(formErr);
   const [busy, setBusy] = useState(false);
 
   // Сбой входа на чужом устройстве — короткий отчёт на сервер: где упало
@@ -175,7 +205,11 @@ function LoginPage() {
           <Eyebrow style={{ marginBottom: 10 }}>
             {demo ? "ИЛИ ПО EMAIL И ПАРОЛЮ" : "ВХОД ПО EMAIL И ПАРОЛЮ"}
           </Eyebrow>
+          {/* method/action — запасной ход для браузера без скрипта:
+              с живым скриптом preventDefault оставляет вход современным */}
           <form
+            method="post"
+            action="/gtr/login"
             onSubmit={(e) => {
               e.preventDefault();
               submit(email, password);
@@ -185,6 +219,7 @@ function LoginPage() {
             <input
               className="gtr-input"
               type="email"
+              name="email"
               autoComplete="username"
               placeholder="email@gtr.events"
               value={email}
@@ -193,6 +228,7 @@ function LoginPage() {
             <input
               className="gtr-input"
               type="password"
+              name="password"
               autoComplete="current-password"
               placeholder={demo ? "Пароль (демо: gtr2026)" : "Пароль"}
               value={password}

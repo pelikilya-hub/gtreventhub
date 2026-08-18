@@ -196,71 +196,95 @@ const countLogin = async (outcome: string) => {
   }
 };
 
+// Ядро входа: лимиты, проверка пароля, перехэш и счётчик — без выдачи
+// куки. У входа две двери: server-fn для живого скрипта и обычная
+// HTML-форма для браузера, где скрипт не исполнился (старый WebView в
+// Android-оболочке). Кука выдаётся по-разному, проверки — одни.
+const loginCore = async (
+  emailRaw: string,
+  password: string,
+  ip: string,
+  channel: "" | "-form",
+): Promise<{ ok: true; user: SessionUser } | { ok: false; error: string }> => {
+  const email = emailRaw.trim().toLowerCase();
+  const { tooMany, LIMITS, TOO_MANY_MSG } = await import("./abuse");
+  const ns = await getKvNs();
+  if (
+    (await tooMany("login", ip, LIMITS.login, ns)) ||
+    (await tooMany("login-acc", email, LIMITS.login, ns)) ||
+    (await tooMany("login-day", ip, LIMITS.loginDay, ns))
+  ) {
+    await countLogin(`rate${channel}`);
+    return { ok: false, error: TOO_MANY_MSG };
+  }
+
+  // 1) Приглашённые менеджеры: личные аккаунты в KV со своими паролями
+  if (ns) {
+    const stored = await kvGetJson<StoredUser>(ns, `user:${email}`);
+    if (stored) {
+      if (!(await verifyPassword(password, stored.passHash))) {
+        await countLogin(`badpass${channel}`);
+        return { ok: false, error: "Неверный email или пароль" };
+      }
+      // легаси-хэш без соли — тихо перехэшируем на PBKDF2, раз пароль уже подтверждён
+      if (!stored.passHash.startsWith("pbkdf2$")) {
+        stored.passHash = await hashPassword(password);
+        await ns.put(`user:${email}`, JSON.stringify(stored));
+      }
+      const { passHash: _p, created: _c, invitedBy: _i, ...sessionUser } = stored;
+      // Роль в исходе (без почты): «вошёл ли BOSS» и «вошла ли команда»
+      // различимы, и при этом счётчик по-прежнему не хранит личность.
+      await countLogin(`${stored.boss ? "ok-boss" : `ok-${stored.role}`}${channel}`);
+      return { ok: true, user: sessionUser };
+    }
+    // заявка на роль ещё не одобрена — честно говорим статус
+    if (await ns.get(`pending:${email}`)) {
+      return {
+        ok: false,
+        error: "Заявка на рассмотрении у основателя GTR. После одобрения вход откроется с вашим паролем.",
+      };
+    }
+  }
+
+  // 2) Демо-состав: общий пароль стенда (или демо-пароль без гейта)
+  // Список демо-аккаунтов подгружается на сервере в момент проверки:
+  // в браузер он не попадает вовсе.
+  const { demoUsers } = await import("./auth-users");
+  const user = demoUsers(DEMO_PASS_HASH).find((u) => u.email === email);
+  if (!user || (await expectedHash()) !== (await sha256(password))) {
+    // Сюда попадает и опечатка в почте: личной записи в KV нет, демо
+    // не совпало. Без счётчика этот случай неотличим от «запрос не
+    // долетел» — а лечатся они по-разному.
+    await countLogin(`${user ? "badpass-demo" : "nouser"}${channel}`);
+    return { ok: false, error: "Неверный email или пароль" };
+  }
+  const { passHash: _ph, ...sessionUser } = user;
+  return { ok: true, user: sessionUser };
+};
+
+// Вход HTML-формой: файловый роут не имеет контекста server-fn, поэтому
+// адрес берёт из заголовков сам, а куку получает готовой строкой.
+export const formLogin = createServerOnlyFn(
+  async (email: string, password: string, ip: string) => {
+    const res = await loginCore(email, password, ip, "-form");
+    if (!res.ok) return { ok: false as const, error: res.error };
+    const token = await makeToken(res.user);
+    const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+    return {
+      ok: true as const,
+      setCookie: `${COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=${WEEK}; HttpOnly; SameSite=Lax${secure}`,
+    };
+  },
+);
+
 export const loginFn = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string; password: string }) => d)
   .handler(async ({ data }) => {
-    const email = data.email.trim().toLowerCase();
-
-    // Перебор пароля — самая дешёвая атака на продукт с регистрацией.
-    // Считаем попытки и по адресу, и по аккаунту: первый лимит ловит
-    // перебор одного пароля по многим почтам, второй — многих паролей
-    // по одной почте.
-    const { clientIp, tooMany, LIMITS, TOO_MANY_MSG } = await import("./abuse");
-    const ip = clientIp();
-    if (
-      (await tooMany("login", ip, LIMITS.login)) ||
-      (await tooMany("login-acc", email, LIMITS.login)) ||
-      (await tooMany("login-day", ip, LIMITS.loginDay))
-    ) {
-      await countLogin("rate");
-      return { ok: false as const, error: TOO_MANY_MSG };
-    }
-
-    // 1) Приглашённые менеджеры: личные аккаунты в KV со своими паролями
-    const ns = await getKvNs();
-    if (ns) {
-      const stored = await kvGetJson<StoredUser>(ns, `user:${email}`);
-      if (stored) {
-        if (!(await verifyPassword(data.password, stored.passHash))) {
-          await countLogin("badpass");
-          return { ok: false as const, error: "Неверный email или пароль" };
-        }
-        // легаси-хэш без соли — тихо перехэшируем на PBKDF2, раз пароль уже подтверждён
-        if (!stored.passHash.startsWith("pbkdf2$")) {
-          stored.passHash = await hashPassword(data.password);
-          await ns.put(`user:${email}`, JSON.stringify(stored));
-        }
-        const { passHash: _p, created: _c, invitedBy: _i, ...sessionUser } = stored;
-        await issueSession(sessionUser);
-        // Роль в исходе (без почты): «вошёл ли BOSS» и «вошла ли команда»
-        // различимы, и при этом счётчик по-прежнему не хранит личность.
-        await countLogin(stored.boss ? "ok-boss" : `ok-${stored.role}`);
-        return { ok: true as const, user: sessionUser };
-      }
-      // заявка на роль ещё не одобрена — честно говорим статус
-      if (await ns.get(`pending:${email}`)) {
-        return {
-          ok: false as const,
-          error: "Заявка на рассмотрении у основателя GTR. После одобрения вход откроется с вашим паролем.",
-        };
-      }
-    }
-
-    // 2) Демо-состав: общий пароль стенда (или демо-пароль без гейта)
-    // Список демо-аккаунтов подгружается на сервере в момент проверки:
-    // в браузер он не попадает вовсе.
-    const { demoUsers } = await import("./auth-users");
-    const user = demoUsers(DEMO_PASS_HASH).find((u) => u.email === email);
-    if (!user || (await expectedHash()) !== (await sha256(data.password))) {
-      // Сюда попадает и опечатка в почте: личной записи в KV нет, демо
-      // не совпало. Без счётчика этот случай неотличим от «запрос не
-      // долетел» — а лечатся они по-разному.
-      await countLogin(user ? "badpass-demo" : "nouser");
-      return { ok: false as const, error: "Неверный email или пароль" };
-    }
-    const { passHash: _ph, ...sessionUser } = user;
-    await issueSession(sessionUser);
-    return { ok: true as const, user: sessionUser };
+    const { clientIp } = await import("./abuse");
+    const res = await loginCore(data.email, data.password, clientIp(), "");
+    if (!res.ok) return { ok: false as const, error: res.error };
+    await issueSession(res.user);
+    return { ok: true as const, user: res.user };
   });
 
 // Текущий пользователь запроса — для проверок прав в других серверных

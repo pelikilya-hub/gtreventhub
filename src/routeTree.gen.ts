@@ -16,6 +16,7 @@ import { Route as ApiAfishaSendRouteImport } from './routes/api.afisha-send'
 import { Route as ApiAphotoRouteImport } from './routes/api.aphoto'
 import { Route as ApiAvideoRouteImport } from './routes/api.avideo'
 import { Route as ApiBossHeadRouteImport } from './routes/api.boss-head'
+import { Route as ApiBroDevRouteImport } from './routes/api.bro-dev'
 import { Route as ApiBroLearnRouteImport } from './routes/api.bro-learn'
 import { Route as ApiCommunityDigestRouteImport } from './routes/api.community-digest'
 import { Route as ApiGtrBroGemRouteImport } from './routes/api.gtr-bro-gem'
@@ -74,6 +75,11 @@ const ApiAvideoRoute = ApiAvideoRouteImport.update({
 const ApiBossHeadRoute = ApiBossHeadRouteImport.update({
   id: '/api/boss-head',
   path: '/api/boss-head',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBroDevRoute = ApiBroDevRouteImport.update({
+  id: '/api/bro-dev',
+  path: '/api/bro-dev',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBroLearnRoute = ApiBroLearnRouteImport.update({
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/boss-head': typeof ApiBossHeadRoute
+  '/api/bro-dev': typeof ApiBroDevRoute
   '/api/bro-learn': typeof ApiBroLearnRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/boss-head': typeof ApiBossHeadRoute
+  '/api/bro-dev': typeof ApiBroDevRoute
   '/api/bro-learn': typeof ApiBroLearnRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/boss-head': typeof ApiBossHeadRoute
+  '/api/bro-dev': typeof ApiBroDevRoute
   '/api/bro-learn': typeof ApiBroLearnRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/boss-head'
+    | '/api/bro-dev'
     | '/api/bro-learn'
     | '/api/community-digest'
     | '/api/gtr-bro-gem'
@@ -338,6 +348,7 @@ export interface FileRouteTypes {
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/boss-head'
+    | '/api/bro-dev'
     | '/api/bro-learn'
     | '/api/community-digest'
     | '/api/gtr-bro-gem'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/boss-head'
+    | '/api/bro-dev'
     | '/api/bro-learn'
     | '/api/community-digest'
     | '/api/gtr-bro-gem'
@@ -405,6 +417,7 @@ export interface RootRouteChildren {
   ApiAphotoRoute: typeof ApiAphotoRoute
   ApiAvideoRoute: typeof ApiAvideoRoute
   ApiBossHeadRoute: typeof ApiBossHeadRoute
+  ApiBroDevRoute: typeof ApiBroDevRoute
   ApiBroLearnRoute: typeof ApiBroLearnRoute
   ApiCommunityDigestRoute: typeof ApiCommunityDigestRoute
   ApiGtrBroGemRoute: typeof ApiGtrBroGemRoute
@@ -473,6 +486,13 @@ declare module '@tanstack/react-router' {
       path: '/api/boss-head'
       fullPath: '/api/boss-head'
       preLoaderRoute: typeof ApiBossHeadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bro-dev': {
+      id: '/api/bro-dev'
+      path: '/api/bro-dev'
+      fullPath: '/api/bro-dev'
+      preLoaderRoute: typeof ApiBroDevRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/bro-learn': {
@@ -678,6 +698,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAphotoRoute: ApiAphotoRoute,
   ApiAvideoRoute: ApiAvideoRoute,
   ApiBossHeadRoute: ApiBossHeadRoute,
+  ApiBroDevRoute: ApiBroDevRoute,
   ApiBroLearnRoute: ApiBroLearnRoute,
   ApiCommunityDigestRoute: ApiCommunityDigestRoute,
   ApiGtrBroGemRoute: ApiGtrBroGemRoute,

@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex" />
+<title>GTR BRO · DEV</title>
+<style>
+  :root { color-scheme: dark; --red:#e5231b; --ok:#2ecc71; --warn:#f5a623; --mut:#8b8b93; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; background: #0a0b0d; color: #e8e8ea;
+    font: 500 14px/1.5 -apple-system, "Golos Text", system-ui, sans-serif;
+    padding: 14px 14px calc(30px + env(safe-area-inset-bottom));
+    max-width: 780px; margin-inline: auto;
+  }
+  h1 { font: 700 17px/1.2 system-ui; margin: 0 0 2px; letter-spacing: .02em; }
+  h1 b { color: var(--red); }
+  .sub { font: 500 11px/1.5 ui-monospace, monospace; color: var(--mut); margin-bottom: 12px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; position: sticky; top: 0; background: #0a0b0d; padding: 8px 0; z-index: 5; }
+  .tabs button { border: 1px solid rgba(255,255,255,.16); background: transparent; color: #e8e8ea; padding: 8px 11px; font: 600 12px/1 system-ui; cursor: pointer; min-height: 38px; }
+  .tabs button.on { border-color: var(--red); background: rgba(229,35,27,.18); }
+  .card { border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.02); padding: 12px; margin-bottom: 10px; }
+  .lbl { font: 700 9px/1 ui-monospace, monospace; letter-spacing: .14em; color: var(--mut); text-transform: uppercase; margin-bottom: 8px; display: block; }
+  button, label.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid rgba(255,255,255,.16); background: transparent; color: #e8e8ea; padding: 10px 12px; font: 600 12px/1 system-ui; cursor: pointer; min-height: 40px; }
+  button.go { background: var(--red); border-color: var(--red); color: #fff; }
+  button.sm { min-height: 30px; padding: 5px 9px; font-size: 11px; }
+  button:disabled { opacity: .4; cursor: default; }
+  input[type=text], input[type=password], textarea { width: 100%; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.14); color: #e8e8ea; padding: 9px 10px; font: 500 13px/1.4 ui-monospace, monospace; }
+  textarea { resize: vertical; min-height: 64px; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .mono { font: 500 10.5px/1.6 ui-monospace, monospace; color: #9a9aa2; white-space: pre-wrap; word-break: break-word; }
+  .ok { color: var(--ok); } .bad { color: var(--red); } .warn { color: var(--warn); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--mut); margin-right: 7px; vertical-align: baseline; }
+  .dot.ok { background: var(--ok); } .dot.bad { background: var(--red); } .dot.warn { background: var(--warn); }
+  table.checks { width: 100%; border-collapse: collapse; }
+  table.checks td { padding: 6px 4px; border-top: 1px solid rgba(255,255,255,.06); font-size: 12.5px; vertical-align: top; }
+  table.checks td:last-child { text-align: right; font: 500 11px/1.5 ui-monospace, monospace; color: var(--mut); }
+  .chip { display: inline-flex; align-items: center; border: 1px solid rgba(255,255,255,.16); padding: 6px 10px; font: 600 11px/1 system-ui; cursor: pointer; user-select: none; }
+  .chip.on { border-color: var(--red); background: rgba(229,35,27,.18); }
+  .sw { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-top: 1px solid rgba(255,255,255,.06); }
+  .sw:first-of-type { border-top: 0; }
+  .hint { font: 500 11px/1.5 system-ui; color: var(--mut); margin-top: 6px; }
+  .msg { margin: 8px 0; }
+  .msg .who { font: 700 9px/1 ui-monospace, monospace; letter-spacing: .12em; color: var(--mut); text-transform: uppercase; }
+  .msg.bro .who { color: var(--red); }
+  .msg .txt { margin-top: 3px; white-space: pre-wrap; }
+  .qitem { border-top: 1px solid rgba(255,255,255,.06); padding: 8px 0; }
+  .qitem .st { font: 700 9px/1 ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; }
+  .st.new { color: var(--warn); } .st.taken { color: #5ab0ff; } .st.done { color: var(--ok); }
+  .gate { text-align: center; padding: 40px 10px; }
+  .gate a { color: var(--red); }
+  section { display: none; } section.on { display: block; }
+  .spin { opacity: .6; }
+</style>
+</head>
+<body>
+<h1>GTR <b>BRO</b> · DEV</h1>
+<div class="sub" id="head-sub">стенд разработчика — соединения · настройки · обучение · разговор · пульт Claude</div>
+
+<div class="tabs" id="tabs">
+  <button data-t="conn" class="on">Соединения</button>
+  <button data-t="set">Настройки</button>
+  <button data-t="learn">Обучение</button>
+  <button data-t="chat">Разговор</button>
+  <button data-t="pult">Пульт Claude</button>
+</div>
+
+<div id="gate" class="card gate" style="display:none"></div>
+
+<!-- ═══ Соединения ═══ -->
+<section id="s-conn" class="on">
+  <div class="card">
+    <span class="lbl">Живые проверки продукта</span>
+    <table class="checks" id="checks"></table>
+    <div class="row" style="margin-top:10px">
+      <button class="go" onclick="runChecks()">Проверить снова</button>
+      <button onclick="probeVoice()">Голосовой канал</button>
+      <button onclick="probeText()">Текстовый мозг</button>
+    </div>
+    <div class="hint">«Голосовой канал» создаёт настоящую Realtime-сессию (эфемерный секрет),
+      «текстовый мозг» задаёт BRO реальный вопрос — обе проверки тратят живые лимиты, жми осмысленно.</div>
+    <div class="mono" id="probe-out" style="margin-top:8px"></div>
+  </div>
+</section>
+
+<!-- ═══ Настройки ═══ -->
+<section id="s-set">
+  <div class="card">
+    <span class="lbl">Флаги BRO (KV setting:flags)</span>
+    <div class="sw"><span>broEnabled — фича включена</span><span class="chip" id="f-enabled" onclick="toggleFlag('broEnabled')">…</span></div>
+    <div class="sw"><span>broKill — рубильник (гасит всё)</span><span class="chip" id="f-kill" onclick="toggleFlag('broKill')">…</span></div>
+    <div style="margin-top:8px">
+      <span class="lbl">Роли с доступом (пусто = всем)</span>
+      <div class="row" id="f-roles"></div>
+    </div>
+    <div class="hint">Изменения применяются сразу, без деплоя. Рубильник действует на новые сессии; открытая доживает максимум 8 минут.</div>
+  </div>
+  <div class="card">
+    <span class="lbl">Быстрый мозг · Gemini</span>
+    <div class="row">
+      <input type="text" id="g-model" placeholder="gemini-flash-latest" style="flex:1;min-width:200px" />
+      <button onclick="saveGemini()">Сохранить</button>
+    </div>
+    <div class="hint" id="g-hint"></div>
+  </div>
+  <div class="card">
+    <span class="lbl">Запасной мозг · сервер BOSS (KV setting:brain)</span>
+    <input type="text" id="b-url" placeholder="http://IP:8080" style="margin-bottom:6px" />
+    <div class="row">
+      <input type="password" id="b-token" placeholder="токен (пусто = не менять)" style="flex:1;min-width:160px" />
+      <input type="text" id="b-model" placeholder="qwen3-8b" style="width:130px" />
+      <button onclick="saveBrain()">Сохранить</button>
+    </div>
+    <div class="hint">Пустой URL при сохранении отключает мозг совсем. Статус живости — на вкладке «Соединения».</div>
+  </div>
+</section>
+
+<!-- ═══ Обучение ═══ -->
+<section id="s-learn">
+  <div class="card">
+    <span class="lbl">База знаний</span>
+    <div id="l-progress" class="mono"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="go" onclick="learnNow()">Выучить следующие темы сейчас</button>
+    </div>
+    <div class="mono" id="l-out" style="margin-top:8px"></div>
+  </div>
+  <div class="card">
+    <span class="lbl">Диалоги за сегодня (датасет)</span>
+    <div id="l-dialogs" class="mono">—</div>
+  </div>
+  <div class="card">
+    <span class="lbl">Метрики BRO</span>
+    <div id="l-stats" class="mono">—</div>
+  </div>
+</section>
+
+<!-- ═══ Разговор ═══ -->
+<section id="s-chat">
+  <div class="card">
+    <span class="lbl">Текстовый разговор с BRO (как в продукте, плюс трассировка)</span>
+    <div id="c-log"></div>
+    <div class="row" style="margin-top:10px">
+      <input type="text" id="c-in" placeholder="спроси BRO…" style="flex:1;min-width:200px"
+             onkeydown="if(event.key==='Enter')sendChat()" />
+      <button class="go" id="c-send" onclick="sendChat()">→</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Пульт Claude ═══ -->
+<section id="s-pult">
+  <div class="card">
+    <span class="lbl">Новая команда ветке разработки</span>
+    <textarea id="p-text" placeholder="что сделать в ветке claude/gtr-bro-dev-n9cl8l…"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="go" onclick="pultAdd()">Поставить в очередь</button>
+      <button class="sm" onclick="pultClear()">Убрать выполненные</button>
+    </div>
+  </div>
+  <div class="card">
+    <span class="lbl">Очередь</span>
+    <div id="p-queue">—</div>
+  </div>
+  <div class="card">
+    <span class="lbl">Подключение Claude</span>
+    <div class="hint">Команды ложатся в KV. Claude Code в ветке
+      <span class="mono">claude/gtr-bro-dev-n9cl8l</span> читает очередь по ключу пульта и отмечает
+      исполнение. Быстрее всего — написать прямо в
+      <a href="https://claude.ai/code/session_01YTxWJMWbnWuidX1jWqc7j7" style="color:var(--red)">сессию</a>;
+      очередь Claude проверяет по своему расписанию.</div>
+    <div class="row" style="margin-top:8px">
+      <button class="sm" id="p-keybtn" onclick="showKey()">Показать ключ пульта</button>
+      <span class="mono" id="p-key"></span>
+    </div>
+  </div>
+</section>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+let S = null; // снимок GET /api/bro-dev
+let chatHistory = [];
+const ROLES = ["gtr","organizer","artist","visitor","pr","owner","sales"];
+
+// ---------- вкладки ----------
+$("tabs").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x === b));
+  document.querySelectorAll("section").forEach((s) => s.classList.toggle("on", s.id === "s-" + b.dataset.t));
+});
+
+// ---------- API ----------
+async function api(method, body) {
+  const r = await fetch("/api/bro-dev", {
+    method,
+    headers: body ? { "content-type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  let j = null; try { j = await r.json(); } catch {}
+  return { status: r.status, j };
+}
+
+function gate(msg) {
+  const g = $("gate");
+  g.style.display = "block";
+  g.innerHTML = msg;
+  document.querySelectorAll("section").forEach((s) => (s.style.display = "none"));
+  $("tabs").style.display = "none";
+}
+
+// ---------- загрузка снимка ----------
+async function load() {
+  const { status, j } = await api("GET");
+  if (status === 401) return gate('Нужен вход в GTR.<br><br><a href="/gtr">Войти</a> и вернуться сюда.');
+  if (status === 403) return gate("Стенд доступен только BOSS.");
+  if (!j?.ok) return gate("KV недоступен: " + (j?.error ?? status));
+  S = j;
+  renderSettings(); renderLearn(); renderPult();
+}
+
+// ---------- Соединения ----------
+const CHECKS = [
+  { name: "Воркер жив (/api/version)", run: async () => {
+      const r = await fetch("/api/version"); const j = await r.json();
+      return { ok: r.ok, note: "build " + j.build };
+  }},
+  { name: "Хранилище KV", run: async () => {
+      const d = await diag(); return { ok: !!d.kv, note: d.kv ? "GTR_KV на месте" : "НЕТ БИНДИНГА — вход и BRO лежат" };
+  }},
+  { name: "Фича BRO включена", run: async () => {
+      const d = await diag(); return { ok: !!d.enabled, warn: !d.enabled, note: d.enabled ? ("роли: " + (d.roles?.join(", ") || "все")) : "выключена флагом" };
+  }},
+  { name: "Ключ OpenAI (голос)", run: async () => {
+      const d = await diag(); return { ok: !!d.keyReady, note: d.keyReady ? "секрет на месте" : "503 no-key" };
+  }},
+  { name: "Ключ Gemini (текст)", run: async () => {
+      const d = await diag(); return { ok: !!d.geminiKey, warn: !d.geminiKey, note: d.geminiKey ? "секрет на месте" : "текст пойдёт в Qwen" };
+  }},
+  { name: "Мозг BOSS (Qwen)", run: async () => {
+      const d = await diag();
+      if (!d.brain) return { ok: false, warn: true, note: "не настроен" };
+      const h = String(d.brainProbe?.health ?? "");
+      return { ok: h.startsWith("200"), note: (h || "нет ответа").slice(0, 60) };
+  }},
+  { name: "Стенд (BOSS-доступ)", run: async () => {
+      const { status } = await api("GET"); return { ok: status === 200, note: "HTTP " + status };
+  }},
+];
+let diagCache = null;
+async function diag() {
+  if (!diagCache) diagCache = fetch("/api/gtr-bro-session").then((r) => r.json()).catch(() => ({}));
+  return diagCache;
+}
+async function runChecks() {
+  diagCache = null;
+  const t = $("checks");
+  t.innerHTML = CHECKS.map((c, i) => `<tr><td><span class="dot" id="d${i}"></span>${c.name}</td><td id="n${i}" class="spin">…</td></tr>`).join("");
+  await Promise.all(CHECKS.map(async (c, i) => {
+    try {
+      const r = await c.run();
+      $("d" + i).className = "dot " + (r.ok ? "ok" : r.warn ? "warn" : "bad");
+      $("n" + i).textContent = r.note ?? "";
+    } catch (e) {
+      $("d" + i).className = "dot bad"; $("n" + i).textContent = String(e).slice(0, 60);
+    }
+    $("n" + i).classList.remove("spin");
+  }));
+}
+async function probeVoice() {
+  $("probe-out").textContent = "создаю Realtime-сессию…";
+  const t0 = Date.now();
+  const r = await fetch("/api/gtr-bro-session", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
+  const j = await r.json().catch(() => ({}));
+  $("probe-out").textContent = r.ok && j.clientSecret
+    ? `✓ эфемерный секрет выдан за ${Date.now() - t0} мс — голосовой контур до OpenAI работает`
+    : `✗ HTTP ${r.status}: ${j.error ?? ""} ${j.reason ?? ""}`;
+}
+async function probeText() {
+  $("probe-out").textContent = "спрашиваю BRO…";
+  const t0 = Date.now();
+  const r = await fetch("/api/gtr-bro-text", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "что сегодня происходит?" }) });
+  const j = await r.json().catch(() => ({}));
+  $("probe-out").textContent = j.ok
+    ? `✓ ответил ${j.engine ?? "?"} за ${Date.now() - t0} мс, инструментов: ${(j.trace ?? []).length}\n«${String(j.reply).slice(0, 140)}…»`
+    : `✗ HTTP ${r.status}: ${j.error ?? ""}`;
+}
+
+// ---------- Настройки ----------
+function renderSettings() {
+  const f = S.flags ?? {};
+  $("f-enabled").textContent = f.broEnabled ? "ВКЛ" : "выкл";
+  $("f-enabled").classList.toggle("on", !!f.broEnabled);
+  $("f-kill").textContent = f.broKill ? "АКТИВЕН" : "спит";
+  $("f-kill").classList.toggle("on", !!f.broKill);
+  $("f-roles").innerHTML = ROLES.map((r) =>
+    `<span class="chip ${f.broRoles?.includes(r) ? "on" : ""}" onclick="toggleRole('${r}')">${r}</span>`).join("");
+  $("g-model").value = S.gemini?.textModel ?? "";
+  $("g-hint").textContent = S.env?.geminiKey ? "ключ GEMINI_API_KEY на месте" : "ключа GEMINI_API_KEY нет — Gemini выключен";
+  $("b-url").value = S.brain?.configured ? "http://" + S.brain.host : "";
+  $("b-model").value = S.brain?.model ?? "";
+}
+async function toggleFlag(name) {
+  const cur = !!(S.flags ?? {})[name];
+  if (name === "broKill" && !cur && !confirm("Включить рубильник? BRO погаснет для всех.")) return;
+  const { j } = await api("POST", { action: "flags", patch: { [name]: !cur } });
+  if (j?.ok) { S.flags = j.flags; renderSettings(); }
+}
+async function toggleRole(role) {
+  const cur = S.flags?.broRoles ?? [];
+  const next = cur.includes(role) ? cur.filter((r) => r !== role) : [...cur, role];
+  const { j } = await api("POST", { action: "flags", patch: { broRoles: next } });
+  if (j?.ok) { S.flags = j.flags; renderSettings(); }
+}
+async function saveGemini() {
+  const { j } = await api("POST", { action: "gemini", textModel: $("g-model").value.trim() });
+  $("g-hint").textContent = j?.ok ? "сохранено" : "ошибка: " + (j?.error ?? "");
+}
+async function saveBrain() {
+  const { j } = await api("POST", { action: "brain", url: $("b-url").value.trim(), token: $("b-token").value, model: $("b-model").value.trim() });
+  alert(j?.ok ? (j.cleared ? "Мозг отключён" : "Сохранено") : "Ошибка: " + (j?.error ?? ""));
+}
+
+// ---------- Обучение ----------
+function renderLearn() {
+  const L = S.learn;
+  $("l-progress").textContent =
+    `выучено тем: ${L.total} · в бэклоге: ${L.left}` + (L.at ? ` · последнее обучение: ${L.at}` : "") +
+    (L.latest.length ? `\n\nпоследние: ` + L.latest.map((l) => `${l.title} (${l.tag})`).join(" · ") : "") +
+    (L.next.length ? `\nследующие: ` + L.next.map((l) => `${l.title} (${l.tag})`).join(" · ") : "\nбэклог пуст — пора писать новые темы");
+  $("l-dialogs").innerHTML = (S.dialogs ?? []).length
+    ? S.dialogs.map((d) =>
+        `<div style="margin-bottom:8px"><span class="warn">${new Date(d.t).toLocaleTimeString("ru")} · ${esc(d.u)} · ${esc(d.e ?? "")}</span>\nQ: ${esc(d.q)}\nA: ${esc(d.a)}</div>`).join("")
+    : "сегодня диалогов ещё не было";
+  const st = S.stats?.[Object.keys(S.stats)[0]] ?? {};
+  const y = S.stats?.[Object.keys(S.stats)[1]] ?? {};
+  const fmt = (o) => Object.keys(o).length ? Object.entries(o).sort().map(([k, v]) => `${k}: ${v}`).join("\n") : "пусто";
+  $("l-stats").textContent = `── сегодня ──\n${fmt(st)}\n\n── вчера ──\n${fmt(y)}`;
+}
+async function learnNow() {
+  $("l-out").textContent = "учу…";
+  const { j } = await api("POST", { action: "learn" });
+  $("l-out").textContent = j?.ok
+    ? (j.learned.length ? `✓ выучено: ${j.titles.join(", ")} · всего ${j.total}, осталось ${j.left}` : "бэклог пуст")
+    : "ошибка: " + (j?.error ?? "");
+  const { j: fresh } = await api("GET"); if (fresh?.ok) { S = fresh; renderLearn(); }
+}
+
+// ---------- Разговор ----------
+function esc(s) { const d = document.createElement("div"); d.textContent = String(s ?? ""); return d.innerHTML; }
+function pushMsg(who, text, extra) {
+  const el = document.createElement("div");
+  el.className = "msg " + who;
+  el.innerHTML = `<div class="who">${who === "bro" ? "BRO" : "ты"}</div><div class="txt">${esc(text)}</div>` +
+    (extra ? `<div class="mono">${esc(extra)}</div>` : "");
+  $("c-log").appendChild(el);
+  el.scrollIntoView({ block: "end" });
+}
+async function sendChat() {
+  const text = $("c-in").value.trim(); if (!text) return;
+  $("c-in").value = ""; $("c-send").disabled = true;
+  pushMsg("me", text);
+  const t0 = Date.now();
+  try {
+    const r = await fetch("/api/gtr-bro-text", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, history: chatHistory.slice(-6) }) });
+    const j = await r.json().catch(() => ({}));
+    if (j.ok) {
+      chatHistory.push({ who: "me", text }, { who: "bro", text: j.reply });
+      const cards = (j.cards ?? []).map((c) => c.kind).join(", ");
+      const trace = (j.trace ?? []).map((t) => t.tool + " " + JSON.stringify(t.args)).join("\n");
+      pushMsg("bro", j.reply, `${j.engine ?? "?"} · ${Date.now() - t0} мс` + (cards ? ` · карточки: ${cards}` : "") + (trace ? `\n${trace}` : ""));
+    } else pushMsg("bro", `⚠ ${j.error ?? r.status}`, `HTTP ${r.status} · ${Date.now() - t0} мс`);
+  } catch (e) { pushMsg("bro", "⚠ сеть: " + e); }
+  $("c-send").disabled = false; $("c-in").focus();
+}
+
+// ---------- Пульт ----------
+function renderPult() {
+  const q = S.pult?.queue ?? [];
+  $("p-queue").innerHTML = q.length
+    ? q.slice().reverse().map((c) => `
+      <div class="qitem">
+        <span class="st ${c.status}">${c.status}</span>
+        <span class="mono"> · ${new Date(c.t).toLocaleString("ru")} · ${esc(c.by)}</span>
+        <div class="txt" style="margin:4px 0">${esc(c.text)}</div>
+        ${c.note ? `<div class="mono">Claude: ${esc(c.note)}</div>` : ""}
+        <button class="sm" onclick="pultDel('${c.id}')">убрать</button>
+      </div>`).join("")
+    : "<div class='mono'>очередь пуста</div>";
+}
+async function pultAdd() {
+  const text = $("p-text").value.trim(); if (!text) return;
+  const { j } = await api("POST", { action: "pult.add", text });
+  if (j?.ok) { $("p-text").value = ""; S.pult.queue = j.queue; renderPult(); }
+}
+async function pultDel(id) {
+  const { j } = await api("POST", { action: "pult.del", id });
+  if (j?.ok) { S.pult.queue = j.queue; renderPult(); }
+}
+async function pultClear() {
+  const { j } = await api("POST", { action: "pult.clear" });
+  if (j?.ok) { S.pult.queue = j.queue; renderPult(); }
+}
+function showKey() {
+  $("p-key").textContent = S.pult?.key ?? "";
+  navigator.clipboard?.writeText(S.pult?.key ?? "").catch(() => {});
+  $("p-keybtn").textContent = "скопирован";
+}
+
+// ---------- старт ----------
+load().then(runChecks);
+</script>
+</body>
+</html>

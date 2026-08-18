@@ -21,6 +21,9 @@ export function GtrPlayerBar() {
   const dataRef = useRef<Uint8Array | null>(null);
   const rafRef = useRef(0);
   const levelRef = useRef(0);
+  // состояние детектора ударов: огибающие, время последнего удара,
+  // интервалы и текущий темп
+  const beatRef = useRef({ fast: 0, slow: 0, last: 0, gaps: [] as number[], bpm: 0 });
   const barsRef = useRef<(HTMLSpanElement | null)[]>([]);
   const progressRef = useRef<HTMLDivElement | null>(null);
   const wantPlayRef = useRef(false);
@@ -76,6 +79,39 @@ export function GtrPlayerBar() {
       levelRef.current += (bass - levelRef.current) * 0.3;
       const lvl = Math.max(0, Math.min(1, (levelRef.current - 0.28) * 1.9));
       document.documentElement.style.setProperty("--gtr-pulse", lvl.toFixed(3));
+
+      // Темп трека из тех же данных, что и пульс. Удар — момент, когда
+      // быстрая огибающая баса пробивает медленную с запасом; между
+      // ударами держим рефрактерный зазор, иначе один бас-бочок
+      // насчитает три удара. Из последних интервалов берём медиану —
+      // одиночный сбивчивый брейк не должен дёргать танец.
+      const b = beatRef.current;
+      b.fast += (bass - b.fast) * 0.5;
+      b.slow += (bass - b.slow) * 0.05;
+      const now = performance.now();
+      if (b.fast > b.slow * 1.32 && b.fast > 0.12 && now - b.last > 240) {
+        if (b.last > 0) {
+          const iv = now - b.last;
+          if (iv < 2000) {
+            b.gaps.push(iv);
+            if (b.gaps.length > 12) b.gaps.shift();
+          }
+        }
+        b.last = now;
+        if (b.gaps.length >= 4) {
+          const sorted = [...b.gaps].sort((x, y) => x - y);
+          let bpm = 60000 / sorted[Math.floor(sorted.length / 2)];
+          // приводим в танцевальный диапазон: половинные и двойные доли
+          // одного темпа — это один темп
+          while (bpm < 70) bpm *= 2;
+          while (bpm > 180) bpm /= 2;
+          if (Math.abs(bpm - b.bpm) > 3) {
+            b.bpm = bpm;
+            document.documentElement.style.setProperty("--gtr-bpm", String(Math.round(bpm)));
+            window.dispatchEvent(new CustomEvent("gtr:bpm", { detail: Math.round(bpm) }));
+          }
+        }
+      }
       // 4 полосы эквалайзера — низ / низ-середина / середина / верх
       const bands = [
         [1, 6],

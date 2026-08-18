@@ -4624,3 +4624,13 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-bro-bbtn.on img { filter: drop-shadow(0 0 12px rgba(255, 52, 39, 0.55)); }
 .gtr-bro-bbtn:disabled { cursor: default; }
 .gtr-bro-bbtn:disabled img { filter: grayscale(0.7) brightness(0.5); }
+
+/* видео-танцовщица: канвас с кеингом вместо картинки. Внутреннее
+   разрешение выше экранного (176×294 при показе ~96px) — кеинг режет
+   край чисто, без лесенки. */
+canvas.gtr-dancer-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: auto;
+}

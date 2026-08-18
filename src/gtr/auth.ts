@@ -250,6 +250,10 @@ export const loginFn = createServerFn({ method: "POST" })
     const { demoUsers } = await import("./auth-users");
     const user = demoUsers(DEMO_PASS_HASH).find((u) => u.email === email);
     if (!user || (await expectedHash()) !== (await sha256(data.password))) {
+      // Сюда попадает и опечатка в почте: личной записи в KV нет, демо
+      // не совпало. Без счётчика этот случай неотличим от «запрос не
+      // долетел» — а лечатся они по-разному.
+      await countLogin(user ? "badpass-demo" : "nouser");
       return { ok: false as const, error: "Неверный email или пароль" };
     }
     const { passHash: _ph, ...sessionUser } = user;

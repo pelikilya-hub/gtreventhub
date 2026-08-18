@@ -20,6 +20,9 @@ export default defineConfig({
     // кэшируются вечно (_headers), а сам HTML — никогда.
     nitro({
       config: {
+        // Периметр (боты, заголовки) и обработчик кронов — внутри
+        // приложения: любой путь деплоя несёт их с собой.
+        plugins: ["./src/server/perimeter.ts"],
         routeRules: {
           "/**": { headers: { "cache-control": "no-cache" } },
         },

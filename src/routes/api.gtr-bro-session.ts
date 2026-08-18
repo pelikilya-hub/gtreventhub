@@ -64,8 +64,13 @@ export const Route = createFileRoute("/api/gtr-bro-session")({
         const oai = Boolean(typeof process !== "undefined" && process.env?.OPENAI_API_KEY);
         const gem = Boolean(typeof process !== "undefined" && process.env?.GEMINI_API_KEY);
         // Диагностика мозга: что на самом деле отвечает сервер BOSS.
+        // ns может отсутствовать (нет биндинга KV) — ручка обязана честно
+        // ответить kv:false, а не упасть пятисоткой: именно по ней смотрят,
+        // почему продукт молчит.
         let brainProbe: unknown = null;
-        const brainCfg = await kvGetJson<{ url?: string; token?: string }>(ns!, "setting:brain");
+        const brainCfg = ns
+          ? await kvGetJson<{ url?: string; token?: string }>(ns, "setting:brain")
+          : null;
         if (brainCfg?.url) {
           const probe = async (path: string, auth: boolean) => {
             try {
@@ -90,7 +95,7 @@ export const Route = createFileRoute("/api/gtr-bro-session")({
           roles: flags.broRoles ?? [],
           keyReady: oai,
           geminiKey: gem,
-          brain: Boolean(await kvGetJson(ns!, "setting:brain")),
+          brain: Boolean(brainCfg),
         });
       },
 

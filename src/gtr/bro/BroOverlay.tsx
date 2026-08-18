@@ -90,7 +90,10 @@ const VOICE_SETS: Record<VoiceProvider, [string, string][]> = {
 // Быстрые команды разведены по контурам. Гость пришёл за движем, музыкой
 // и артистами; команда за столом — за цифрами. Один и тот же ряд кнопок
 // для обоих был бы враньём в обе стороны.
-type Quick = { icon: StkName; t: string; q: string };
+// tile — фирменный арт плитки от BOSS: подпись и рамка уже в картинке,
+// поэтому такой плитке не рисуем ни скобок, ни текста. Команды без арта
+// живут на стикерах, пока не приедет их картинка.
+type Quick = { icon: StkName; t: string; q: string; tile?: string };
 
 const QUICK_GUEST: Quick[] = [
   { icon: "champagne", t: "Пожрать", q: "столы в кафе дель мар" },
@@ -104,12 +107,12 @@ const QUICK_GUEST: Quick[] = [
 ];
 
 const QUICK_TEAM: Quick[] = [
-  { icon: "hundred", t: "Прогноз явки", q: "прогноз illuzion" },
-  { icon: "equalizer", t: "Тяга артиста", q: "тяга lutang" },
-  { icon: "calendar", t: "Афиша", q: "что сегодня" },
-  { icon: "map", t: "База площадок", q: "какие клубы в патонге" },
-  { icon: "fader", t: "Экономика", q: "как считать юнит-экономику вечера" },
-  { icon: "rocket", t: "Промо", q: "какие каналы промо работают на пхукете" },
+  { icon: "hundred", t: "Прогноз явки", q: "прогноз illuzion", tile: "/bro/forecast.webp" },
+  { icon: "equalizer", t: "Тяга артиста", q: "тяга lutang", tile: "/bro/pull.webp" },
+  { icon: "calendar", t: "Афиша", q: "что сегодня", tile: "/bro/afisha.webp" },
+  { icon: "map", t: "База площадок", q: "какие клубы в патонге", tile: "/bro/venues.webp" },
+  { icon: "fader", t: "Экономика", q: "как считать юнит-экономику вечера", tile: "/bro/econ.webp" },
+  { icon: "rocket", t: "Промо", q: "какие каналы промо работают на пхукете", tile: "/bro/promo.webp" },
   { icon: "mic", t: "Артисты", q: "открой артисты" },
   { icon: "star", t: "Что умею", q: "что ты умеешь" },
 ];
@@ -750,12 +753,23 @@ export function GtrBroOverlay({
         {/* Тапы вместо набора: человек в клубе не печатает «что сегодня
             в патонге» одной рукой с коктейлем в другой. */}
         <div className="gtr-bro-quick">
-          {(isTeam(role) ? QUICK_TEAM : QUICK_GUEST).map((q) => (
-            <button key={q.t} className="gtr-bro-q" onClick={() => void runText(q.q)}>
-              <Stk name={q.icon} size={30} x2 />
-              <span>{q.t}</span>
-            </button>
-          ))}
+          {(isTeam(role) ? QUICK_TEAM : QUICK_GUEST).map((q) =>
+            q.tile ? (
+              <button
+                key={q.t}
+                className="gtr-bro-q art"
+                onClick={() => void runText(q.q)}
+                aria-label={q.t}
+              >
+                <img src={q.tile} alt="" loading="lazy" draggable={false} />
+              </button>
+            ) : (
+              <button key={q.t} className="gtr-bro-q" onClick={() => void runText(q.q)}>
+                <Stk name={q.icon} size={30} x2 />
+                <span>{q.t}</span>
+              </button>
+            ),
+          )}
         </div>
 
         {/* Визуализатор: единственная деталь, которая честно показывает,
@@ -772,9 +786,14 @@ export function GtrBroOverlay({
             onClick={ptt ? undefined : () => (live ? stop() : void begin(voice, mode))}
             aria-label={ptt ? "Зажми и говори" : live ? "Остановить" : "Начать разговор"}
           >
-            <img src="/raw-pulse/handle-logo.webp" alt="" aria-hidden draggable={false} />
+            <img src="/bro/ptt.webp" alt="" aria-hidden draggable={false} />
           </button>
-          <div className="gtr-bro-hint">
+          <div
+            className="gtr-bro-hint"
+            style={
+              (ptt && !live && !busy) ? { visibility: "hidden" } : undefined
+            }
+          >
             {ptt
               ? live
                 ? holding

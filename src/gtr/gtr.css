@@ -4477,3 +4477,52 @@ html { -webkit-tap-highlight-color: transparent; }
   .gtr-bro-msg { animation: none; }
   .gtr-bro-state::before { animation: none; }
 }
+
+/* ---- плитки с фирменным артом: рамка и подпись уже в картинке ---- */
+.gtr-bro-q.art {
+  background-image: none;
+  border: 0;
+  background-color: transparent;
+  padding: 0;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+.gtr-bro-q.art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.14s cubic-bezier(0.32, 0.72, 0, 1), filter 0.2s;
+}
+.gtr-bro-q.art:active { background-color: transparent; border: 0; }
+.gtr-bro-q.art:active img {
+  transform: scale(0.94);
+  filter: drop-shadow(0 0 14px rgba(229, 35, 27, 0.5));
+}
+
+/* центр: значок «зажми и говори» — главный орган управления. Прежний
+   орб был 118px с лазерным кольцом в синеве; фирменный прицел BOSS сам
+   несёт и кольцо, и надпись — гасим старые слои и даём ему размер. */
+.gtr-bro-orb {
+  width: 196px;
+  height: 196px;
+}
+.gtr-bro-orb::before {
+  background: none;
+  animation: none;
+  filter: none;
+}
+.gtr-bro-orb::after {
+  /* пульс голоса: красное дыхание под прицелом вместо фиолетового */
+  inset: 22px;
+  background: radial-gradient(circle, rgba(229, 35, 27, 0.38), transparent 68%);
+}
+.gtr-bro-orb img {
+  width: 100%;
+  height: 100%;
+  filter: none;
+}
+.gtr-bro-orb.on img,
+.gtr-bro-orb.hold img {
+  filter: drop-shadow(0 0 30px rgba(255, 52, 39, 0.6));
+}

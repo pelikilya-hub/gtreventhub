@@ -4526,3 +4526,74 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-bro-orb.hold img {
   filter: drop-shadow(0 0 30px rgba(255, 52, 39, 0.6));
 }
+
+/* =====================================================================
+   BRO SYSTEM v1.1 — правки BOSS после запуска.
+   1) Синий слой погашен: сине-фиолетовое свечение листа, лазурь чипов
+      и кнопок — всё уходит в фирменный красно-графитовый.
+   2) BRO — весь экран: лист занимает 100 dvh, приложение сзади не
+      просвечивает, атмосфера продукта не подмешивает свою синеву.
+   3) Разговор дышит свободно: рамка и панель сняты, текст крупнее и
+      воздушнее, реплики плывут прямо по дыму.
+   Табло (терминал) сознательно не тронуто — BOSS доволен как есть.
+   ===================================================================== */
+
+.gtr-bro { align-items: stretch; }
+.gtr-bro-sheet {
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  padding-top: calc(14px + env(safe-area-inset-top));
+  box-shadow: none; /* было фиолетовое зарево на 120px вверх */
+  animation-name: gtr-bro-fullin;
+}
+@keyframes gtr-bro-fullin {
+  from { opacity: 0; transform: scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+/* приложение сзади не видно — скрим больше не размывает, только гасит */
+.gtr-bro-scrim {
+  background: #050607;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+/* на широком экране лист остаётся колонной чтения, но во всю высоту */
+@media (min-width: 861px) {
+  .gtr-bro-sheet { max-width: 720px; }
+}
+
+/* ---- разговор без клетки: текст свободно поверх дыма ---- */
+.gtr-bro-chat {
+  background-image: none;
+  border: 0;
+  background-color: transparent;
+  padding: 10px 4px;
+  gap: 16px;
+}
+.gtr-bro-msg {
+  font-size: 17px;
+  line-height: 1.62;
+}
+.gtr-bro-msg.bro { max-width: 100%; }
+
+/* ---- остатки лазури и фиолета в BRO ---- */
+.gtr-bro-state.s-speaking { color: #ffd9d6; }
+.gtr-bro-state.s-speaking::before {
+  background: var(--gtr-red-hot);
+  box-shadow: 0 0 8px rgba(255, 52, 39, 0.8);
+}
+.gtr-bro-btn.on {
+  background: rgba(229, 35, 27, 0.28);
+  border-color: rgba(229, 35, 27, 0.5);
+}
+.gtr-bro-chip.on { background: rgba(229, 35, 27, 0.34); color: #fff; }
+.gtr-bro-pill {
+  background: linear-gradient(180deg, rgba(26, 14, 13, 0.96), rgba(12, 8, 8, 0.97));
+  box-shadow: 0 0 0 1px rgba(229, 35, 27, 0.45), 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+.gtr-bro-pill-dot.on { background: var(--gtr-red-hot); box-shadow: 0 0 10px rgba(255, 52, 39, 0.8); }
+
+/* зажатие прицела: синяя вспышка удержания — в красную */
+.gtr-bro-orb.hold::before {
+  background: radial-gradient(circle, rgba(255, 52, 39, 0.5), rgba(229, 35, 27, 0.3) 60%, transparent 75%);
+}

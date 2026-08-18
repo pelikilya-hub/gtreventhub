@@ -63,6 +63,19 @@ export const Route = createFileRoute("/api/bro-dev")({
         if (pultKey) {
           if (pultKey !== (await pultAccessKey())) return json({ ok: false, error: "key" }, 401);
           if (!ns) return json({ ok: false, error: "no-kv" }, 503);
+          // &debug=1 — срез для разбора «BRO молчит»: метрики за два дня и
+          // хвост диалогов. Тот же ключ, что и очередь: это канал владельца.
+          if (url.searchParams.get("debug")) {
+            return json({
+              ok: true,
+              queue: await readQueue(ns),
+              stats: {
+                [day()]: (await kvGetJson<Record<string, number>>(ns, `brostat:${day()}`)) ?? {},
+                [day(1)]: (await kvGetJson<Record<string, number>>(ns, `brostat:${day(1)}`)) ?? {},
+              },
+              dialogs: await dialogTail(ns, 10),
+            });
+          }
           return json({ ok: true, queue: await readQueue(ns) });
         }
 

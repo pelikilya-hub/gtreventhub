@@ -46,6 +46,7 @@ import {
 } from "./screens/Platform";
 import { TonightScreen } from "./screens/Tonight";
 import { ScreenErrorBoundary } from "./error-boundary";
+import { UpdateGate } from "./update-gate";
 import { useDeviceTilt } from "./motion";
 import { GtrDancer } from "./dancer";
 import { GtrPlayerBar } from "./player";
@@ -222,7 +223,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
         ? [...NAV_NET, ...NAV_PLATFORM_VENUE.filter(([id]) => !["artists", "vendors"].includes(id))]
         : [
             ...NAV_PLATFORM_VENUE,
-            ...NAV_NET.filter(([id]) => !["admin", "artists", "vendors", "drafts"].includes(id)),
+            ...NAV_NET.filter(([id]) => !["admin", "artists", "vendors"].includes(id)),
           ]
   ).filter(([id]) => id !== "afishagen" || canAfishaGen);
 
@@ -451,6 +452,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
           {/* Падение раздела больше не превращается в пустую страницу:
               человек видит, что упало, и может перезапустить, а команда
               видит текст ошибки прямо на экране. */}
+          <UpdateGate />
           <ScreenErrorBoundary key={screen} where={screen} detailed={!["visitor", "artist"].includes(user.role)}>
             <ScreenSwitch screen={screen} search={search} />
           </ScreenErrorBoundary>

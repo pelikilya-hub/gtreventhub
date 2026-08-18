@@ -4075,3 +4075,49 @@ html { -webkit-tap-highlight-color: transparent; }
     animation-duration: 52s;
   }
 }
+
+/* ---------------------------------------------------------------------
+   Полоса обновления. Появляется, когда вкладка живёт на устаревшей
+   сборке и человек занят формой — молча перезагружать в этот момент
+   нельзя. Держится над контентом, но ниже модалок.
+   --------------------------------------------------------------------- */
+.gtr-upd {
+  position: sticky;
+  top: 0;
+  z-index: var(--gtr-z-panel);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 14px;
+  background: var(--gtr-graphite);
+  border-bottom: 1px solid var(--gtr-border2);
+  animation: gtr-upd-in 260ms ease-out both;
+}
+@keyframes gtr-upd-in {
+  from { opacity: 0; transform: translateY(-100%); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-upd { animation: none; }
+}
+.gtr-upd-t {
+  font-size: 13px;
+  color: var(--gtr-t1);
+  letter-spacing: 0.01em;
+}
+.gtr-upd-b {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  background: var(--gtr-red);
+  color: #fff;
+  border: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.gtr-upd-b:hover { background: var(--gtr-red-hot); }
+.gtr-upd-b:focus-visible { outline: 2px solid var(--gtr-t1); outline-offset: 2px; }

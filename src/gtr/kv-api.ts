@@ -2952,3 +2952,144 @@ export const threadsPostFn = createServerFn({ method: "POST" })
     const r = await threadsPost(cfg, data.text, data.imageUrl);
     return r.ok ? { ok: true as const, id: r.id } : { ok: false as const, reason: r.reason };
   });
+
+// ---------- черновики приёмника афиш ----------
+//
+// Приёмник разбирает чужие посты и складывает всё, чего нет в базе:
+// незнакомые площадки с обогащением по OpenStreetMap и незнакомые имена
+// из лайнапов. Решение принимает человек — автомат заводит карточки
+// только в черновики.
+
+export type VenueDraftRow = {
+  slug: string;
+  name: string;
+  seenAt: number;
+  seenIn: string[];
+  lat?: number;
+  lon?: number;
+  kind?: string;
+  address?: string;
+  hours?: string;
+  website?: string;
+  status: string;
+  /** События, которые ждут эту площадку: без карточки их некуда класть. */
+  waiting: { dateIso: string; title: string }[];
+};
+
+export type ArtistDraftRow = {
+  slug: string;
+  name: string;
+  seen: number;
+  at: number;
+  source?: string;
+  status: string;
+};
+
+export const draftsFn = createServerFn({ method: "GET" }).handler(async () => {
+  const me = await currentUser();
+  const ns = await getKvNs();
+  if (!me || !TEAM.includes(me.role) || !ns)
+    return { venues: [] as VenueDraftRow[], artists: [] as ArtistDraftRow[] };
+
+  const vKeys = await kvListAll(ns, "venuedraft:");
+  const wKeys = await kvListAll(ns, "intakewait:");
+  const venues: VenueDraftRow[] = [];
+  for (const k of vKeys) {
+    const d = await kvGetJson<Omit<VenueDraftRow, "waiting">>(ns, k);
+    if (!d || d.status === "skip") continue;
+    const slug = k.slice("venuedraft:".length);
+    // События этой площадки ждут своей карточки — показываем их рядом,
+    // иначе решение принимается вслепую: одно дело новая точка, другое —
+    // точка, за которой уже стоят три вечера.
+    const waiting: { dateIso: string; title: string }[] = [];
+    for (const wk of wKeys.filter((x) => x.startsWith(`intakewait:${slug}:`))) {
+      const w = await kvGetJson<{ dateIso: string; title: string }>(ns, wk);
+      if (w) waiting.push({ dateIso: w.dateIso, title: w.title });
+    }
+    venues.push({ ...d, slug, waiting: waiting.sort((a, b) => a.dateIso.localeCompare(b.dateIso)) });
+  }
+
+  const aKeys = await kvListAll(ns, "artistdraft:");
+  const artists: ArtistDraftRow[] = [];
+  for (const k of aKeys) {
+    const d = await kvGetJson<Omit<ArtistDraftRow, "slug">>(ns, k);
+    if (!d || d.status === "skip") continue;
+    artists.push({ ...d, slug: k.slice("artistdraft:".length) });
+  }
+
+  return {
+    // Сначала то, за чем стоят события, потом остальное по свежести.
+    venues: venues.sort((a, b) => b.waiting.length - a.waiting.length || b.seenAt - a.seenAt),
+    artists: artists.sort((a, b) => b.seen - a.seen || b.at - a.at),
+  };
+});
+
+/** Решение по черновику. Одобрение площадки сразу переносит ждущие
+ *  события в её календарь: ради них черновик и заводился. */
+export const draftDecideFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { kind: "venue" | "artist"; slug: string; approve: boolean }) => d)
+  .handler(async ({ data }) => {
+    const me = await currentUser();
+    const ns = await getKvNs();
+    if (!me || !TEAM.includes(me.role) || !ns) return { ok: false as const, note: "только команда GTR" };
+    const key = `${data.kind === "venue" ? "venuedraft" : "artistdraft"}:${data.slug}`;
+    const draft = await kvGetJson<Record<string, unknown>>(ns, key);
+    if (!draft) return { ok: false as const, note: "черновик не найден" };
+
+    if (!data.approve) {
+      await ns.put(key, JSON.stringify({ ...draft, status: "skip", by: me.email }), {
+        expirationTtl: 180 * 24 * 3600,
+      });
+      return { ok: true as const, note: "Отклонено" };
+    }
+
+    if (data.kind === "artist") {
+      await ns.put(`artistadd:${data.slug}`, JSON.stringify({ ...draft, approvedBy: me.email, at: Date.now() }));
+      await ns.delete(key);
+      return { ok: true as const, note: "Артист принят в базу" };
+    }
+
+    // Площадке нужен идентификатор. Диапазон 9xxx отделяет принятые из
+    // приёмника от исходных ста десяти: по id сразу видно происхождение.
+    const existing = await kvListAll(ns, "venueadd:");
+    const id = `VEN-9${String(existing.length + 1).padStart(3, "0")}`;
+    await ns.put(
+      `venueadd:${id}`,
+      JSON.stringify({ ...draft, id, approvedBy: me.email, at: Date.now() }),
+    );
+
+    // Ждущие события переезжают в календарь новой площадки.
+    const wKeys = (await kvListAll(ns, "intakewait:")).filter((k) =>
+      k.startsWith(`intakewait:${data.slug}:`),
+    );
+    const events = [];
+    for (const wk of wKeys) {
+      const w = await kvGetJson<{ dateIso: string; title: string }>(ns, wk);
+      if (!w) continue;
+      events.push({
+        id: `intake-${w.dateIso}-${data.slug.slice(0, 16)}`,
+        title: w.title,
+        dateIso: w.dateIso,
+        url: "",
+        artistIds: [] as string[],
+        source: "intake",
+      });
+      await ns.delete(wk);
+    }
+    if (events.length) {
+      await ns.put(
+        `venueevents:${id}`,
+        JSON.stringify({ events, syncedAt: Date.now(), source: "intake" }),
+      );
+      await ns.put(
+        `venuebusy:${id}`,
+        JSON.stringify({ dates: [...new Set(events.map((e) => e.dateIso))].sort(), updatedAt: Date.now() }),
+      );
+    }
+    await ns.delete(key);
+    return {
+      ok: true as const,
+      id,
+      note: `Площадка принята как ${id}${events.length ? `, событий перенесено: ${events.length}` : ""}`,
+    };
+  });

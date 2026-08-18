@@ -66,6 +66,9 @@ const ArtistsScreen = lazy(() =>
 const OutreachScreen = lazy(() =>
   import("./screens/Outreach").then((m) => ({ default: m.OutreachScreen })),
 );
+const DraftsScreen = lazy(() =>
+  import("./screens/Drafts").then((m) => ({ default: m.DraftsScreen })),
+);
 const VendorsScreen = lazy(() =>
   import("./screens/Vendors").then((m) => ({ default: m.VendorsScreen })),
 );
@@ -219,7 +222,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
         ? [...NAV_NET, ...NAV_PLATFORM_VENUE.filter(([id]) => !["artists", "vendors"].includes(id))]
         : [
             ...NAV_PLATFORM_VENUE,
-            ...NAV_NET.filter(([id]) => !["admin", "artists", "vendors"].includes(id)),
+            ...NAV_NET.filter(([id]) => !["admin", "artists", "vendors", "drafts"].includes(id)),
           ]
   ).filter(([id]) => id !== "afishagen" || canAfishaGen);
 
@@ -598,6 +601,8 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
       return <PromoScreen />;
     case "outreach":
       return <OutreachScreen />;
+    case "drafts":
+      return <DraftsScreen />;
     case "myshows":
       return <MyShowsScreen />;
     case "admin":

@@ -15,10 +15,27 @@ export const UI_LANGS: [UiLang, string][] = [
   ["th", "ไทย"],
 ];
 
+// Первый визит — язык телефона решает: тайцу тайский, русскому русский,
+// остальному миру английский. Явный выбор в настройках весит больше и
+// живёт в localStorage; определение срабатывает только пока выбора нет.
+const detect = (): UiLang => {
+  if (typeof navigator === "undefined") return "ru";
+  const langs = [navigator.language, ...(navigator.languages ?? [])].map((l) =>
+    String(l || "").toLowerCase(),
+  );
+  for (const l of langs) {
+    if (l.startsWith("ru") || l.startsWith("be") || l.startsWith("uk") || l.startsWith("kk"))
+      return "ru";
+    if (l.startsWith("th")) return "th";
+    if (l) return "en";
+  }
+  return "en";
+};
+
 const stored = (): UiLang => {
   if (typeof localStorage === "undefined") return "ru";
   const v = localStorage.getItem("gtr-lang");
-  return v === "en" || v === "th" ? v : "ru";
+  return v === "en" || v === "th" || v === "ru" ? v : detect();
 };
 
 if (!i18n.isInitialized) {

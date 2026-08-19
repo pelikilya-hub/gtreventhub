@@ -40,7 +40,7 @@ const nightVenues = () =>
     });
 
 export function TonightScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useGtr();
   const navigate = useNavigate();
   const [items, setItems] = useState<FeedItem[]>([]);
@@ -111,7 +111,10 @@ export function TonightScreen() {
     }
   };
 
-  const dayLabel = new Date().toLocaleDateString("ru-RU", {
+  // Дата говорит на языке интерфейса: русская «среда, 19 августа» в
+  // английской версии читалась как недоделка.
+  const dayLocale = { ru: "ru-RU", en: "en-GB", th: "th-TH" }[i18n.language] ?? "en-GB";
+  const dayLabel = new Date().toLocaleDateString(dayLocale, {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -308,7 +311,7 @@ export function TonightScreen() {
               marginBottom: 7,
             }}
           >
-            {[n.music, n.entry].filter(Boolean).join(" · ") || `${v.type} · ${v.area}`}
+            {[n.music, n.entry].filter(Boolean).map((s) => t(String(s))).join(" · ") || `${v.type} · ${v.area}`}
           </div>
           {n.best ? (
             <div
@@ -318,7 +321,7 @@ export function TonightScreen() {
                 marginBottom: 8,
               }}
             >
-              ★ {n.best}
+              ★ {t(n.best)}
             </div>
           ) : null}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>

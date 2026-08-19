@@ -115,67 +115,67 @@ export function DashScreen() {
     const high = PH.venues.filter((x) => x.confidence === "High").length;
     const pct = Math.round((high / Math.max(1, PH.venues.length)) * 100);
     d = {
-      kicker: "СЕТЬ GTR · ПХУКЕТ",
-      name: "Сеть площадок Пхукета",
-      type: "97 объектов · 30 залов",
-      area: "Патонг · Банг Тао · Камала · Карон · Май Кхао · Старый город",
-      capacity: "Обновлено 06.08.2026",
-      state: "ОПЕРАЦИОННАЯ БАЗА v3",
+      kicker: t("СЕТЬ GTR · ПХУКЕТ"),
+      name: t("Сеть площадок Пхукета"),
+      type: t("97 объектов · 30 залов"),
+      area: t("Патонг · Банг Тао · Камала · Карон · Май Кхао · Старый город"),
+      capacity: t("Обновлено 06.08.2026"),
+      state: t("ОПЕРАЦИОННАЯ БАЗА v3"),
       stateColor: GREEN,
-      verified: "ИСТОЧНИКИ: ОФИЦИАЛЬНЫЕ САЙТЫ",
-      ringLabel: "ПОКРЫТИЕ БАЗЫ",
+      verified: t("ИСТОЧНИКИ: ОФИЦИАЛЬНЫЕ САЙТЫ"),
+      ringLabel: t("ПОКРЫТИЕ БАЗЫ"),
       ringValue: pct,
-      ringNote: `${high} площадок с высокой достоверностью источника из ${PH.venues.length}`,
-      ringCta: "Открыть реестр",
+      ringNote: `${high} ${t("площадок с высокой достоверностью источника из")} ${PH.venues.length}`,
+      ringCta: t("Открыть реестр"),
       ringGo: "base",
       ringItems: [
-        ["Кабинеты активированы: 2", GREEN],
-        ["Приглашения отправлены: 2", AMBER],
-        [`Карантин источников: ${quar.length}`, RED],
-        [`Контакты P0/P1: ${PH.meta.contacts}`, AMBER],
+        [t("Кабинеты активированы: 2"), GREEN],
+        [t("Приглашения отправлены: 2"), AMBER],
+        [`${t("Карантин источников")}: ${quar.length}`, RED],
+        [`${t("Контакты P0/P1")}: ${PH.meta.contacts}`, AMBER],
       ],
       kpis: [
-        ["ПЛОЩАДОК В БАЗЕ", PH.meta.total, "", "#fff", "97 сущностей, включая группы"],
-        ["НОРМАЛИЗОВАННЫХ ЗАЛОВ", PH.meta.spaces, "", "#fff", "Отдельно бронируемые зоны"],
-        ["ГОТОВЫ К КАТАЛОГУ", "1", "/10", GREEN, "Place Coworking · готовность 85"],
-        ["КАРАНТИН", quar.length, "", RED, "Скрыты из каталога организаторов"],
+        [t("ПЛОЩАДОК В БАЗЕ"), PH.meta.total, "", "#fff", t("97 сущностей, включая группы")],
+        [t("НОРМАЛИЗОВАННЫХ ЗАЛОВ"), PH.meta.spaces, "", "#fff", t("Отдельно бронируемые зоны")],
+        [t("ГОТОВЫ К КАТАЛОГУ"), "1", "/10", GREEN, t("Place Coworking · готовность 85")],
+        [t("КАРАНТИН"), quar.length, "", RED, t("Скрыты из каталога организаторов")],
       ],
       actions: [
         [
-          "Illuzion Group — коммерческое партнёрство",
-          "Нет презентации приватной аренды, комиссии, правил промоутеров и тех-райдера",
-          "Открыть карточку",
+          t("Illuzion Group — коммерческое партнёрство"),
+          t("Нет презентации приватной аренды, комиссии, правил промоутеров и тех-райдера"),
+          t("Открыть карточку"),
           "venueCard",
           "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z",
           RED,
         ],
         [
-          "Отельные площадки — импорт всех залов",
-          "Нужны названия комнат, м², сетапы, пакеты и AV от команд продаж",
-          "Залы и прайс",
+          t("Отельные площадки — импорт всех залов"),
+          t("Нужны названия комнат, м², сетапы, пакеты и AV от команд продаж"),
+          t("Залы и прайс"),
           "spaces",
           "M3 21V8l9-5 9 5v13",
           RED,
         ],
         [
-          "Марины — выездные обследования",
-          "Зоны, электричество, парковка, разрешения, шум, морские ограничения",
-          "База Пхукета",
+          t("Марины — выездные обследования"),
+          t("Зоны, электричество, парковка, разрешения, шум, морские ограничения"),
+          t("База Пхукета"),
           "base",
           "M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z",
           AMBER,
         ],
         [
-          "Place Coworking — быстрый пилот bookable",
-          "Живой календарь, депозит, отмена, комиссия",
-          "Доступы",
+          t("Place Coworking — быстрый пилот bookable"),
+          t("Живой календарь, депозит, отмена, комиссия"),
+          t("Доступы"),
           "access",
           "M7 11V7a5 5 0 0 1 10 0v4 M5 11h14v10H5z",
           AMBER,
         ],
       ],
-      mainTitle: "Готовность площадок",
-      mainCta: "Весь реестр",
+      mainTitle: t("Готовность площадок"),
+      mainCta: t("Весь реестр"),
       mainGo: "base",
       mainRows: PH.venues
         .filter((x) => x.readiness)
@@ -194,7 +194,7 @@ export function DashScreen() {
                 : "rgba(255,255,255,.45)",
           vid: x.id,
         })),
-      sideTitle: "ОЧЕРЕДЬ ИССЛЕДОВАНИЙ · P0 / P1",
+      sideTitle: t("ОЧЕРЕДЬ ИССЛЕДОВАНИЙ · P0 / P1"),
       sideRows: PH.research.slice(0, 6).map((r) => ({
         title: `${r.cluster} — ${r.task}`,
         desc: r.missing,
@@ -204,122 +204,122 @@ export function DashScreen() {
     };
   } else if (user.role === "owner") {
     d = {
-      kicker: "КАБИНЕТ ВЛАДЕЛЬЦА",
+      kicker: t("КАБИНЕТ ВЛАДЕЛЬЦА"),
       name: v.name,
       type: v.type,
       area: `${v.area} · ${v.district}`,
-      capacity: "1 645 м² · 3 event-пространства",
-      state: "БРОНИРУЕМАЯ",
+      capacity: t("1 645 м² · 3 event-пространства"),
+      state: t("БРОНИРУЕМАЯ"),
       stateColor: GREEN,
-      verified: `ПРОВЕРЕНО ${v.verified || ""}`,
+      verified: `${t("ПРОВЕРЕНО")} ${v.verified || ""}`,
       heroImg: rich.hero,
       heroCredit: rich.credit,
-      ringLabel: "ГОТОВНОСТЬ К КАТАЛОГУ",
+      ringLabel: t("ГОТОВНОСТЬ К КАТАЛОГУ"),
       ringValue: R?.score ?? 85,
-      ringNote: "Единственная площадка базы со статусом «Бронируемая»",
-      ringCta: "Открыть паспорт",
+      ringNote: t("Единственная площадка базы со статусом «Бронируемая»"),
+      ringCta: t("Открыть паспорт"),
       ringGo: "venue",
       ringItems: [
-        ["Опубликован прайс THB/час", GREEN],
-        ["Контакт подтверждён", GREEN],
-        ["Живой календарь — подключить", AMBER],
-        ["Комиссия и депозит — согласовать", AMBER],
+        [t("Опубликован прайс THB/час"), GREEN],
+        [t("Контакт подтверждён"), GREEN],
+        [t("Живой календарь — подключить"), AMBER],
+        [t("Комиссия и депозит — согласовать"), AMBER],
       ],
       kpis: [
-        ["EVENT-ПРОСТРАНСТВ", sp.length || 3, "", "#fff", "1-й, 4-й и 6-й этажи"],
+        [t("EVENT-ПРОСТРАНСТВ"), sp.length || 3, "", "#fff", t("1-й, 4-й и 6-й этажи")],
         [
-          "ЗАНЯТО В АВГУСТЕ",
+          t("ЗАНЯТО В АВГУСТЕ"),
           shared.events.filter((e) => e.venueId === vid).length,
           "/31",
           "#fff",
-          "По текущей программе",
+          t("По текущей программе"),
         ],
-        ["ОТКРЫТЫХ ЗАЯВОК", "3", "", AMBER, "2 требуют ответа сегодня"],
-        ["ГОТОВНОСТЬ", R?.score ?? 85, "/100", GREEN, "Бронируемая"],
+        [t("ОТКРЫТЫХ ЗАЯВОК"), "3", "", AMBER, t("2 требуют ответа сегодня")],
+        [t("ГОТОВНОСТЬ"), R?.score ?? 85, "/100", GREEN, t("Бронируемая")],
       ],
       actions: [
         [
-          "Подключить живой календарь",
-          "Сейчас доступность подтверждается вручную — организаторы ждут ответ",
-          "Календарь",
+          t("Подключить живой календарь"),
+          t("Сейчас доступность подтверждается вручную — организаторы ждут ответ"),
+          t("Календарь"),
           "calendar",
           "M3 6h18v15H3z M8 3v5 M16 3v5",
           AMBER,
         ],
         [
-          "Согласовать комиссию и депозит",
-          "В «Готовности к бронированию» договор и условия оплаты — нет",
-          "Финансы",
+          t("Согласовать комиссию и депозит"),
+          t("В «Готовности к бронированию» договор и условия оплаты — нет"),
+          t("Финансы"),
           "finance",
           "M3 7h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
           RED,
         ],
         [
-          "Загрузить фото с правами",
-          "Права на фото: только официальная галерея — нужны материалы с разрешением",
-          "Паспорт",
+          t("Загрузить фото с правами"),
+          t("Права на фото: только официальная галерея — нужны материалы с разрешением"),
+          t("Паспорт"),
           "venue",
           "M4 7h4l2-2h4l2 2h4v13H4z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
           AMBER,
         ],
         [
-          "Ответить на 3 заявки",
-          "Средний ответ по площадке влияет на позицию в каталоге",
-          "Заявки",
+          t("Ответить на 3 заявки"),
+          t("Средний ответ по площадке влияет на позицию в каталоге"),
+          t("Заявки"),
           "inquiries",
           "M4 4h16v12H9l-5 4z",
           RED,
         ],
       ],
-      mainTitle: "Event-пространства",
-      mainCta: "Прайс и сетапы",
+      mainTitle: t("Event-пространства"),
+      mainCta: t("Прайс и сетапы"),
       mainGo: "spaces",
       mainRows: sp.map((x) => ({
         title: x.name,
         desc: [x.type, x.notes].filter(Boolean).join(" · "),
-        value: (x.currency as string) || "THB / час",
+        value: (x.currency as string) || t("THB / час"),
         status: String(x.bookable || "").toUpperCase(),
         color: GREEN,
       })),
-      sideTitle: "ЧЕК-ЛИСТ ГОТОВНОСТИ",
+      sideTitle: t("ЧЕК-ЛИСТ ГОТОВНОСТИ"),
       sideRows: [
-        ["Прайс-лист", "Опубликованная ставка THB/час, пакеты — уточнить", "ЕСТЬ", GREEN],
-        ["Доступность", "Метод: ручной запрос → перевести на календарь", "СДЕЛАТЬ", AMBER],
-        ["Договор и комиссия", "Нет в «Готовности к бронированию»", "СДЕЛАТЬ", RED],
-        ["Права на фото", "Только официальная галерея", "СДЕЛАТЬ", AMBER],
-        ["Тех-райдер", "Не опубликован", "СДЕЛАТЬ", AMBER],
+        [t("Прайс-лист"), t("Опубликованная ставка THB/час, пакеты — уточнить"), t("ЕСТЬ"), GREEN],
+        [t("Доступность"), t("Метод: ручной запрос → перевести на календарь"), t("СДЕЛАТЬ"), AMBER],
+        [t("Договор и комиссия"), t("Нет в «Готовности к бронированию»"), t("СДЕЛАТЬ"), RED],
+        [t("Права на фото"), t("Только официальная галерея"), t("СДЕЛАТЬ"), AMBER],
+        [t("Тех-райдер"), t("Не опубликован"), t("СДЕЛАТЬ"), AMBER],
       ].map(([title, desc, meta, color]) => ({ title, desc, meta, color })),
     };
   } else {
     const vEvCount = shared.events.filter((e) => e.venueId === vid).length;
     d = {
-      kicker: "КАБИНЕТ PR-ДИРЕКТОРА",
+      kicker: t("КАБИНЕТ PR-ДИРЕКТОРА"),
       name: v.name,
       type: v.type,
       area: v.area,
       capacity: v.capacity,
-      state: "БРОНЬ ПО ЗАПРОСУ",
+      state: t("БРОНЬ ПО ЗАПРОСУ"),
       stateColor: AMBER,
-      verified: `ПРОВЕРЕНО ${v.verified || ""}`,
+      verified: `${t("ПРОВЕРЕНО")} ${v.verified || ""}`,
       heroImg: rich.hero,
       heroCredit: rich.credit,
       heroBadge: rich.badge,
-      ringLabel: "ГОТОВНОСТЬ К КАТАЛОГУ",
+      ringLabel: t("ГОТОВНОСТЬ К КАТАЛОГУ"),
       ringValue: R?.score ?? 58,
-      ringNote: [v.type, v.area, v.capacity ? `до ${v.capacity} гостей`.replace("до до", "до") : ""]
+      ringNote: [v.type, v.area, v.capacity ? `${t("до")} ${v.capacity} ${t("гостей")}`.replace(`${t("до")} ${t("до")}`, t("до")) : ""]
         .filter(Boolean)
         .join(" · "),
-      ringCta: "Открыть паспорт",
+      ringCta: t("Открыть паспорт"),
       ringGo: "venue",
       ringItems: [
-        ["Площадка и контакт верифицированы", v.verified ? GREEN : AMBER],
-        ["Залы нормализованы частично", sp.length ? AMBER : RED],
-        ["Прайс-лист отсутствует", RED],
-        ["Договор и комиссия отсутствуют", RED],
+        [t("Площадка и контакт верифицированы"), v.verified ? GREEN : AMBER],
+        [t("Залы нормализованы частично"), sp.length ? AMBER : RED],
+        [t("Прайс-лист отсутствует"), RED],
+        [t("Договор и комиссия отсутствуют"), RED],
       ],
       kpis: [
         [
-          "ЗАЛОВ В БАЗЕ",
+          t("ЗАЛОВ В БАЗЕ"),
           sp.length || "—",
           "",
           "#fff",
@@ -328,75 +328,75 @@ export function DashScreen() {
                 .map((x) => x.name)
                 .slice(0, 3)
                 .join(" · ")
-            : "Залы не нормализованы",
+            : t("Залы не нормализованы"),
         ],
         [
-          "СОБЫТИЙ В КАЛЕНДАРЕ",
+          t("СОБЫТИЙ В КАЛЕНДАРЕ"),
           vEvCount || "—",
           "",
           "#fff",
-          vEvCount ? "По программе площадки" : "Пока не запланировано",
+          vEvCount ? t("По программе площадки") : t("Пока не запланировано"),
         ],
-        ["ЗАЯВОК ОТ ОРГАНИЗАТОРОВ", "5", "", AMBER, "3 в статусе SLA"],
-        ["ГОТОВНОСТЬ", R?.score ?? 58, "/100", AMBER, "Бронь по запросу"],
+        [t("ЗАЯВОК ОТ ОРГАНИЗАТОРОВ"), "5", "", AMBER, t("3 в статусе SLA")],
+        [t("ГОТОВНОСТЬ"), R?.score ?? 58, "/100", AMBER, t("Бронь по запросу")],
       ],
       actions: [
         [
-          "Прислать матрицу вместимости и net-ставки",
-          "Прайс-листа в «Готовности к бронированию» нет; без него нет расчёта для организатора",
-          "Залы и прайс",
+          t("Прислать матрицу вместимости и net-ставки"),
+          t("Прайс-листа в «Готовности к бронированию» нет; без него нет расчёта для организатора"),
+          t("Залы и прайс"),
           "spaces",
           "M3 7h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
           RED,
         ],
         [
-          "Загрузить презентацию приватной аренды и комиссию",
-          "Нет презентации, комиссии, правил промоутеров и тех-райдера в очереди исследований",
-          "Финансы",
+          t("Загрузить презентацию приватной аренды и комиссию"),
+          t("Нет презентации, комиссии, правил промоутеров и тех-райдера в очереди исследований"),
+          t("Финансы"),
           "finance",
           "M13 3H7v18h11V8z M13 3v5h5",
           RED,
         ],
         [
-          "Нормализовать залы и вместимость",
-          "Данные по залам не подтверждены публично — нужны цифры от площадки",
-          "Залы и прайс",
+          t("Нормализовать залы и вместимость"),
+          t("Данные по залам не подтверждены публично — нужны цифры от площадки"),
+          t("Залы и прайс"),
           "spaces",
           "M3 21V8l9-5 9 5v13",
           AMBER,
         ],
         [
-          "Собрать программу в конструкторе",
-          "Начните с площадки и добавьте артистов, подрядчиков и промо",
-          "Конструктор",
+          t("Собрать программу в конструкторе"),
+          t("Начните с площадки и добавьте артистов, подрядчиков и промо"),
+          t("Конструктор"),
           "constructor",
           "M5 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z M19 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z M7 8h6a3 3 0 0 1 3 3v3",
           AMBER,
         ],
       ],
-      mainTitle: "Залы и техника площадки",
-      mainCta: "Открыть залы",
+      mainTitle: t("Залы и техника площадки"),
+      mainCta: t("Открыть залы"),
       mainGo: "spaces",
       mainRows: sp.map((x) => ({
         title: x.name,
         desc: [
           x.type,
-          x.sqm && `${x.sqm} м²`,
-          x.capTheatre && `${x.capTheatre} театр`,
-          x.capCocktail && `${x.capCocktail} коктейль`,
+          x.sqm && `${x.sqm} ${t("м²")}`,
+          x.capTheatre && `${x.capTheatre} ${t("театр")}`,
+          x.capCocktail && `${x.capCocktail} ${t("коктейль")}`,
         ]
           .filter(Boolean)
           .join(" · "),
-        value: x.sqm ? `${x.sqm} м²` : "—",
+        value: x.sqm ? `${x.sqm} ${t("м²")}` : "—",
         status: String(x.bookable || "").toUpperCase(),
         color: AMBER,
       })),
-      sideTitle: "ЧТО ЗАПРОШЕНО GTR",
+      sideTitle: t("ЧТО ЗАПРОШЕНО GTR"),
       sideRows: [
-        ["Матрица вместимости", "Полная матрица сетапов по каждому залу", "P0", RED],
-        ["Net-ставки", "Нетто-ставки и партнёрские пакеты", "P0", RED],
-        ["Права на фото", "Official gallery only — нужны материалы с разрешением", "P1", AMBER],
-        ["AV и тех-райдер", "Свет, звук, экраны, схема подключения", "P1", AMBER],
+        [t("Матрица вместимости"), t("Полная матрица сетапов по каждому залу"), "P0", RED],
+        [t("Net-ставки"), t("Нетто-ставки и партнёрские пакеты"), "P0", RED],
+        [t("Права на фото"), t("Official gallery only — нужны материалы с разрешением"), "P1", AMBER],
+        [t("AV и тех-райдер"), t("Свет, звук, экраны, схема подключения"), "P1", AMBER],
       ].map(([title, desc, meta, color]) => ({ title, desc, meta, color })),
     };
   }
@@ -489,7 +489,7 @@ export function DashScreen() {
           >
             {d.capacity}
             {contact?.phone ? ` · ${contact.phone}` : ""}
-            {d.heroCredit ? ` · фото: ${d.heroCredit}` : ""}
+            {d.heroCredit ? ` · ${t("фото")}: ${d.heroCredit}` : ""}
           </div>
         </div>
       </div>
@@ -718,10 +718,10 @@ export function DashScreen() {
             ? d.mainRows
             : [
                 {
-                  title: "Залы не нормализованы",
-                  desc: "Импорт залов в очереди исследований",
+                  title: t("Залы не нормализованы"),
+                  desc: t("Импорт залов в очереди исследований"),
                   value: "—",
-                  status: "ТРЕБУЕТ ДАННЫХ",
+                  status: t("ТРЕБУЕТ ДАННЫХ"),
                   color: RED,
                 },
               ]
@@ -753,7 +753,7 @@ export function DashScreen() {
               >
                 {r.desc}
               </div>
-              {r.status ? <Chip color={r.color}>{r.status}</Chip> : null}
+              {r.status ? <Chip color={r.color}>{t(r.status)}</Chip> : null}
             </Card>
           ))}
         </div>
@@ -814,7 +814,7 @@ function SalesCabinet() {
     for (let i = 0; i < 6; i++) {
       const dt = new Date(now.getFullYear(), now.getMonth() + i, 1);
       const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
-      out.push({ key, label: MONTHS_S[dt.getMonth()], sum: 0, count: 0 });
+      out.push({ key, label: t(MONTHS_S[dt.getMonth()]), sum: 0, count: 0 });
     }
     for (const r of rows) {
       const key = (r.d.dateIso || "").slice(0, 7);
@@ -840,10 +840,10 @@ function SalesCabinet() {
     .slice(0, 4);
 
   const kpis: [string, string, string, string][] = [
-    ["В РАБОТЕ", String(inWork), inWork ? t("черновики и отправленные") : t("создайте первое событие"), "#fff"],
-    ["СОГЛАСОВАНО", String(approved), approved ? t("подтверждённые события") : t("пока нет"), approved ? GREEN : "#fff"],
-    ["ПАЙПЛАЙН", pipeline ? fmtThb(pipeline) : "—", t("сумма смет кабинета"), "#fff"],
-    ["КОМИССИЯ GTR", commission ? fmtThb(commission) : "—", t("с текущего пайплайна"), commission ? GREEN : "#fff"],
+    [t("В РАБОТЕ"), String(inWork), inWork ? t("черновики и отправленные") : t("создайте первое событие"), "#fff"],
+    [t("СОГЛАСОВАНО"), String(approved), approved ? t("подтверждённые события") : t("пока нет"), approved ? GREEN : "#fff"],
+    [t("ПАЙПЛАЙН"), pipeline ? fmtThb(pipeline) : "—", t("сумма смет кабинета"), "#fff"],
+    [t("КОМИССИЯ GTR"), commission ? fmtThb(commission) : "—", t("с текущего пайплайна"), commission ? GREEN : "#fff"],
   ];
 
   return (
@@ -881,7 +881,7 @@ function SalesCabinet() {
             {user.initials}
           </span>
           <div style={{ minWidth: 0 }}>
-            <Eyebrow>{user.role === "organizer" ? "КАБИНЕТ ОРГАНИЗАТОРА" : t("КАБИНЕТ EVENT SALES")}</Eyebrow>
+            <Eyebrow>{user.role === "organizer" ? t("КАБИНЕТ ОРГАНИЗАТОРА") : t("КАБИНЕТ EVENT SALES")}</Eyebrow>
             <h1
               className="gtr-oswald"
               style={{ font: "700 28px/1.05 Oswald,sans-serif", letterSpacing: ".02em", margin: "8px 0 0" }}
@@ -1059,7 +1059,7 @@ function SalesCabinet() {
                       : "rgba(255,255,255,.07)",
                     clipPath: "polygon(0 4px, calc(100% - 4px) 0, 100% 100%, 0 100%)",
                   }}
-                  title={m.count ? `${m.count} соб. · ${fmtThb(m.sum)}` : t("нет событий")}
+                  title={m.count ? `${m.count} ${t("соб.")} · ${fmtThb(m.sum)}` : t("нет событий")}
                 />
                 <span
                   className="gtr-mono"
@@ -1121,14 +1121,14 @@ function SalesCabinet() {
               >
                 <span style={{ flex: 1, minWidth: 160 }}>
                   <span style={{ display: "block", font: "600 11.5px/1.3 'Golos Text',sans-serif" }}>
-                    {r.title || "Заявка"}
+                    {r.title || t("Заявка")}
                   </span>
                   <span
                     className="gtr-mono"
                     style={{ display: "block", marginTop: 2, font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
-                    {r.venueName} · {r.date || "дата не указана"} · {r.guests || "—"} {t("гостей ·")}{" "}
-                    {r.organizerName || "организатор"}
+                    {r.venueName} · {r.date || t("дата не указана")} · {r.guests || "—"} {t("гостей ·")}{" "}
+                    {r.organizerName || t("организатор")}
                   </span>
                 </span>
                 <span
@@ -1138,15 +1138,15 @@ function SalesCabinet() {
                   {fmtThb(r.quoteTotal)}
                 </span>
                 <Chip color={r.status === "accepted" ? GREEN : AMBER}>
-                  {r.status === "accepted" ? "ПРИНЯТА" : "В РАБОТЕ"}
+                  {r.status === "accepted" ? t("ПРИНЯТА") : t("В РАБОТЕ")}
                 </Chip>
               </div>
             ))
           ) : (
             <span style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {user.role === "organizer"
-                ? "Заявок пока нет. Соберите событие в конструкторе и отправьте запрос площадке — статус будет виден здесь."
-                : "Назначенных заявок нет. Возьмите заявку на себя в разделе «Заявки организаторов» — она появится здесь, а в Telegram-канал GTR уйдёт уведомление."}
+                ? t("Заявок пока нет. Соберите событие в конструкторе и отправьте запрос площадке — статус будет виден здесь.")
+                : t("Назначенных заявок нет. Возьмите заявку на себя в разделе «Заявки организаторов» — она появится здесь, а в Telegram-канал GTR уйдёт уведомление.")}
             </span>
           )}
         </Card>
@@ -1201,7 +1201,7 @@ function SalesCabinet() {
                   >
                     {V(d.venueId).name ?? d.venueId}
                     {d.date?.includes("·") ? ` · ${d.date.split(" · ")[1]}` : ""}
-                    {d.guests ? ` · ${d.guests} гостей` : ""}
+                    {d.guests ? ` · ${d.guests} ${t("гостей")}` : ""}
                   </span>
                 </span>
               </button>
@@ -1305,8 +1305,8 @@ function CabinetMonth({
   const [ym, setYm] = useState<[number, number]>([now.getFullYear(), now.getMonth()]);
   const [y, m] = ym;
   const monthNames = [
-    "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
+    t("Январь"), t("Февраль"), t("Март"), t("Апрель"), t("Май"), t("Июнь"),
+    t("Июль"), t("Август"), t("Сентябрь"), t("Октябрь"), t("Ноябрь"), t("Декабрь"),
   ];
   const shift = (new Date(y, m, 1).getDay() + 6) % 7;
   const days = new Date(y, m + 1, 0).getDate();
@@ -1340,7 +1340,7 @@ function CabinetMonth({
         </button>
       </div>
       <div className="gtr-cal-grid gtr-cal-week">
-        {["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"].map((w) => (
+        {[t("ПН"), t("ВТ"), t("СР"), t("ЧТ"), t("ПТ"), t("СБ"), t("ВС")].map((w) => (
           <span key={w}>{w}</span>
         ))}
       </div>
@@ -1420,9 +1420,9 @@ function ArtistCabinet() {
     try {
       const r = await tgLinkFn();
       if (r.ok) setTgLink(r.link);
-      else setTgMsg(r.error ?? "Не получилось");
+      else setTgMsg(r.error ?? t("Не получилось"));
     } catch {
-      setTgMsg("Сервер недоступен");
+      setTgMsg(t("Сервер недоступен"));
     }
   };
 
@@ -1492,7 +1492,7 @@ function ArtistCabinet() {
             onChange={(e) => setAirUrl(e.target.value)}
           />
           <button className={`gtr-btn ${onAir ? "" : "gtr-btn-red"}`} onClick={toggleAir}>
-            {onAir ? "Завершить эфир" : "Я в эфире"}
+            {onAir ? t("Завершить эфир") : t("Я в эфире")}
           </button>
         </div>
         <span style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
@@ -1569,7 +1569,7 @@ function ArtistCabinet() {
                   className="gtr-mono"
                   style={{ font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                 >
-                  {o.fee ? `условия: ${o.fee}` : "условия обсуждаются"}
+                  {o.fee ? `${t("условия")}: ${o.fee}` : t("условия обсуждаются")}
                   {o.note ? ` · ${o.note}` : ""} {t("· от")} {o.fromName}
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
@@ -1585,7 +1585,7 @@ function ArtistCabinet() {
           ) : (
             <span style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {t("Новых предложений нет. Когда площадка позовёт вас в событие, оно появится здесь")}
-              {tg?.linked ? " и в Telegram" : ""}.
+              {tg?.linked ? t(" и в Telegram") : ""}.
             </span>
           )}
         </Card>
@@ -1614,7 +1614,7 @@ function ArtistCabinet() {
                     className="gtr-mono"
                     style={{ display: "block", marginTop: 2, font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
-                    {o.date || "дата уточняется"}
+                    {o.date || t("дата уточняется")}
                     {o.fee ? ` · ${o.fee}` : ""}
                   </span>
                 </span>
@@ -1658,13 +1658,13 @@ function InviteLinkButton() {
         setLink(full);
         try {
           await navigator.clipboard.writeText(full);
-          setMsg("Ссылка скопирована — отправьте её человеку");
+          setMsg(t("Ссылка скопирована — отправьте её человеку"));
         } catch {
-          setMsg("Скопируйте ссылку ниже");
+          setMsg(t("Скопируйте ссылку ниже"));
         }
-      } else setMsg(r.ok === false ? (r.error ?? "Не получилось") : "Не получилось");
+      } else setMsg(r.ok === false ? (r.error ?? t("Не получилось")) : t("Не получилось"));
     } catch {
-      setMsg("Сервер недоступен (локальный режим)");
+      setMsg(t("Сервер недоступен (локальный режим)"));
     } finally {
       setBusy(false);
     }

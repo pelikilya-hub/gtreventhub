@@ -496,9 +496,9 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               >
                 {(
                   [
-                    ["ЧАСЫ", night.hours || "уточняем"],
-                    ["ВХОД", night.entry || "по ситуации"],
-                    ["ЛУЧШИЕ ВЕЧЕРА", night.best || "смотри афишу"],
+                    ["ЧАСЫ", night.hours || t("уточняем")],
+                    ["ВХОД", night.entry || t("по ситуации")],
+                    ["ЛУЧШИЕ ВЕЧЕРА", night.best || t("смотри афишу")],
                     ["ЗВУК", v.music],
                   ] as [string, string | undefined][]
                 )
@@ -516,7 +516,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                         {t(k)}
                       </div>
                       <div style={{ marginTop: 5, font: "600 11.5px/1.45 'Golos Text',sans-serif" }}>
-                        {String(val)}
+                        {t(String(val))}
                       </div>
                     </div>
                   ))}
@@ -601,7 +601,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               )
                 .filter(([, val]) => val)
                 .map(([k, val]) => (
-                  <Field key={k} k={t(k)} v={String(val)} />
+                  <Field key={k} k={t(k)} v={t(String(val))} />
                 ))}
               {night.fact ? (
                 <div
@@ -611,7 +611,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     color: "var(--gtr-t2)",
                   }}
                 >
-                  {night.fact}
+                  {t(night.fact)}
                 </div>
               ) : null}
               {night.src ? (

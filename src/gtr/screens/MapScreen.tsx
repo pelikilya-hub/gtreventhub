@@ -194,7 +194,7 @@ export function MapScreen() {
                 ${hero ? `<img src="${hero}" style="width:100%;height:92px;object-fit:cover;display:block;margin-bottom:7px" />` : ""}
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
                   <span style="width:7px;height:7px;background:${cat.color};display:block"></span>
-                  <span style="font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:${cat.color};text-transform:uppercase">${cat.ru}</span>
+                  <span style="font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:${cat.color};text-transform:uppercase">${t(cat.ru)}</span>
                 </div>
                 <div style="font:600 12.5px/1.3 'Golos Text',sans-serif;color:#fff">${v.name}</div>
                 <div style="font:500 9.5px/1.4 monospace;color:rgba(255,255,255,.55);margin:3px 0 8px">${v.area}${exact ? "" : ` · ${t("примерно")}`}</div>

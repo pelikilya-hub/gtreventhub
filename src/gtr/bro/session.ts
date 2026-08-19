@@ -75,6 +75,36 @@ export type BroStart = {
   ptt?: boolean;
 };
 
+// Результат инструмента голосовая модель читает как текст, и пауза перед
+// первым словом растёт с каждым лишним килобайтом. Карточки на табло
+// строятся из полного результата ДО этой обрезки — модели же нужны только
+// названия и факты для одной-двух фраз. Постеры, служебные статусы и
+// идентификаторы площадок из речи всё равно не звучат — вырезаем.
+export const toolOutputForVoice = (name: string, result: unknown): string => {
+  const r = result as { ok?: boolean; data?: Record<string, unknown> };
+  if (r?.ok && r.data && name === "search_events") {
+    const d = r.data;
+    const slim = (e: Record<string, unknown>) => ({
+      event_id: e.event_id,
+      title: e.title,
+      venue: e.venue,
+      start_at: e.start_at,
+      genre: e.genre,
+      distance_km: e.distance_km,
+    });
+    return JSON.stringify({
+      ok: true,
+      data: {
+        events: Array.isArray(d.events) ? (d.events as Record<string, unknown>[]).map(slim) : [],
+        total: d.total,
+        nearest: d.nearest,
+        note: d.note,
+      },
+    }).slice(0, 2500);
+  }
+  return JSON.stringify(result).slice(0, 2500);
+};
+
 const SESSION_URL = "/api/gtr-bro-session";
 const TOOL_URL = "/api/gtr-bro-tool";
 // Сессия не должна жить вечно: Realtime тарифицируется по времени, а
@@ -445,7 +475,7 @@ export class BroSession {
 
     this.send({
       type: "conversation.item.create",
-      item: { type: "function_call_output", call_id: callId, output: JSON.stringify(result).slice(0, 6000) },
+      item: { type: "function_call_output", call_id: callId, output: toolOutputForVoice(name, result) },
     });
     this.send({ type: "response.create" });
     this.set("thinking");

@@ -211,6 +211,13 @@ export function GtrBroOverlay({
   // Визитка — один раз на открытие оверлея: на табло текстом, голосом — репликой.
   const hello = useRef(false);
   const greeted = useRef(false);
+  // Куски расшифровки прилетают десятки раз в секунду, и рендер всего
+  // оверлея на каждую букву дерётся за телефон с WebRTC-звуком — голос
+  // начинает заикаться и запаздывать. Копим буквы в буфере и печатаем
+  // на доску пачками, несколько раз в секунду: глазу разницы нет,
+  // процессору — есть.
+  const partBuf = useRef<{ user: string; bro: string }>({ user: "", bro: "" });
+  const partTimer = useRef(0);
   const metric = useMetrics();
 
   // Новое значение уходит в живой разговор сразу, без перезапуска.
@@ -222,6 +229,9 @@ export function GtrBroOverlay({
     setCards([]);
     setLevel(0);
     setDetail(undefined);
+    clearTimeout(partTimer.current);
+    partTimer.current = 0;
+    partBuf.current = { user: "", bro: "" };
   };
 
   const stop = useCallback(() => {
@@ -261,13 +271,27 @@ export function GtrBroOverlay({
         onLevel: setLevel,
         onLog: (t) =>
           setRows((p) => [...p.slice(-60), { who: "sys" as const, text: t, done: true }]),
-        onPartial: (who, delta) =>
-          setRows((p) => {
-            const last = p[p.length - 1];
-            if (last && last.who === who && !last.done)
-              return [...p.slice(0, -1), { ...last, text: last.text + delta }];
-            return [...p.slice(-60), { who, text: delta, done: false }];
-          }),
+        onPartial: (who, delta) => {
+          partBuf.current[who] += delta;
+          if (partTimer.current) return;
+          partTimer.current = window.setTimeout(() => {
+            partTimer.current = 0;
+            const buf = partBuf.current;
+            partBuf.current = { user: "", bro: "" };
+            setRows((p) => {
+              let next = p;
+              for (const w of ["user", "bro"] as const) {
+                const chunk = buf[w];
+                if (!chunk) continue;
+                const last = next[next.length - 1];
+                if (last && last.who === w && !last.done)
+                  next = [...next.slice(0, -1), { ...last, text: last.text + chunk }];
+                else next = [...next.slice(-60), { who: w, text: chunk, done: false }];
+              }
+              return next;
+            });
+          }, 130);
+        },
         onLine: (l) =>
           setRows((p) => {
             // Финал заменяет НЕДОПЕЧАТАННУЮ строку того же автора, где бы

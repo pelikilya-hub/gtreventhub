@@ -1,0 +1,338 @@
+{
+ "meta": {
+  "venueId": "VEN-0110",
+  "venueName": "SHAMAN Lounge Cafe Bar",
+  "source": "Официальные PDF-меню shamanphuket.com (europe_ru, asia_ru, bar, caviar_ru, tea_ru), сверка по рендерам страниц",
+  "verified": "2026-08-19",
+  "currency": "THB",
+  "note": "Сервисный сбор 10% и НДС 7% НЕ включены в цены"
+ },
+ "sections": [
+  {
+   "id": "food",
+   "name": "Европейская кухня",
+   "groups": [
+    {
+     "id": "cold-salads",
+     "name": "Холодные закуски и салаты",
+     "items": [
+      { "id": "sh-antipasti", "name": "Антипасти", "price": 950, "desc": "Парма, салями, мортаделла, бри, горгонзола, вяленые томаты, мёд, руккола, гриссини" },
+      { "id": "sh-crab-eclairs", "name": "Мини эклеры с крабом", "price": 500, "desc": "Со сливочным сыром и икрой тобико" },
+      { "id": "sh-duck-pate", "name": "Паштет из утиной печени", "price": 370, "desc": "Луковый джем, бородинский хлеб, руккола" },
+      { "id": "sh-greek", "name": "Салат Греческий", "price": 470, "desc": "Узбекские томаты, огурцы, болгарский перец, микс салата, оливково-бальзамический соус, оливки, фета" },
+      { "id": "sh-stracciatella", "name": "Салат со страчателлой", "price": 470, "desc": "С соусом из грецкого ореха" },
+      { "id": "sh-crab-salad", "name": "Салат с камчатским крабом", "price": 690, "desc": "Узбекские томаты, авокадо, сельдерей" },
+      { "id": "sh-octopus-salad", "name": "Салат с осьминогом гриль", "price": 790, "desc": "Томаты, сельдерей, авокадо, соево-цитрусовая заправка" },
+      { "id": "sh-caesar", "name": "Салат Цезарь", "price": 470, "desc": "Романо, цыплёнок, бекон, соус цезарь, черри, пармезан" },
+      { "id": "sh-seafood-salad", "name": "Салат из морепродуктов", "price": 570, "desc": "Креветки, кальмары, осьминоги, мидии, цитрусы, соево-медовая заправка, сельдерей" },
+      { "id": "sh-steak-salad", "name": "Стейк салат с телятиной", "price": 580, "desc": "Печёные овощи, медово-горчичная заправка, микс салата" }
+     ]
+    },
+    {
+     "id": "hot-starters",
+     "name": "Горячие закуски",
+     "items": [
+      { "id": "sh-mussels", "name": "Мидии в сливочно-винном соусе", "price": 440, "desc": "С багетом гриль" },
+      { "id": "sh-octopus-grill", "name": "Осьминог гриль", "price": 1300, "desc": "Молодой картофель, оливки, вяленые томаты" },
+      { "id": "sh-cheburek", "name": "Гигантский чебурек", "price": 430, "desc": "С говядиной и томатным соусом" }
+     ]
+    },
+    {
+     "id": "soups-eu",
+     "name": "Первые блюда",
+     "items": [
+      { "id": "sh-chicken-soup", "name": "Куриный суп", "price": 240, "desc": "Домашняя лапша, цыплёнок, зелень" },
+      { "id": "sh-borsch", "name": "Борщ с телятиной", "price": 490, "desc": "С салом, чесноком, горчицей и пампушками" },
+      { "id": "sh-ukha", "name": "Уха из осетрины", "price": 670, "desc": "Насыщенный рыбный бульон с двумя видами рыб" }
+     ]
+    },
+    {
+     "id": "mains",
+     "name": "Основные блюда",
+     "items": [
+      { "id": "sh-beef-stroganoff", "name": "Бефстроганов из телятины", "price": 750, "desc": "Картофельное пюре, малосольные огурцы" },
+      { "id": "sh-beef-cheek", "name": "Говяжья щека", "price": 870, "desc": "Печёный картофель, соус глейз" },
+      { "id": "sh-bavarian", "name": "Баварские колбаски", "price": 540, "desc": "С жареным картофелем по-домашнему" }
+     ]
+    },
+    {
+     "id": "fish",
+     "name": "Рыба и морепродукты",
+     "items": [
+      { "id": "sh-seabass", "name": "Дикий сибас запечённый в печи", "price": 680, "desc": "Пак чой гриль, соус из вяленых томатов" },
+      { "id": "sh-scallops", "name": "Морские гребешки", "price": 1050, "desc": "Орзо, спаржа, соус биск" },
+      { "id": "sh-sturgeon-steak", "name": "Стейк из осетрины", "price": 1600, "desc": "Брокколи, бок чой, соус с красной икрой" },
+      { "id": "sh-salmon-steak", "name": "Стейк из лосося", "price": 950, "desc": "Табуле, соус дзадзики" }
+     ]
+    },
+    {
+     "id": "grill",
+     "name": "В огне: гриль и шашлыки",
+     "items": [
+      { "id": "sh-sturgeon-kebab", "name": "Шашлык из осетрины", "price": 1300, "desc": "Печёный картофель, овощи, икорный соус" },
+      { "id": "sh-veal-medallions", "name": "Медальоны из телятины", "price": 880, "desc": "Чёрный трюфель, пармезан, руккола" },
+      { "id": "sh-lamb-rack", "name": "Каре ягнёнка", "price": 1100, "desc": "Новозеландский ягнёнок в травах, капоната из баклажан, соус кинза" },
+      { "id": "sh-pork-kebab", "name": "Шашлык из свинины", "price": 420, "desc": "Лаваш, зелень, соус сальса" },
+      { "id": "sh-veal-kebab", "name": "Шашлык из телёнка", "price": 1200, "desc": "Лаваш, зелень, соус сальса" },
+      { "id": "sh-chicken-kebab", "name": "Шашлык из цыплёнка", "price": 350, "desc": "Лаваш, зелень, соус сальса" },
+      { "id": "sh-ribeye", "name": "Рибай стейк", "price": 2400, "desc": "С мини овощами" }
+     ]
+    },
+    {
+     "id": "burgers",
+     "name": "Бургеры",
+     "items": [
+      { "id": "sh-burger-bangkok", "name": "Бургер Бангкокский парень", "price": 480, "desc": "Говяжья котлета, соус 1000 островов, салат, томаты, огурцы, чеддер, бриошь" },
+      { "id": "sh-burger-cheeks", "name": "Бургер с рваными щеками", "price": 850, "desc": "Телячьи щёки, фирменный соус, салат, томаты, лук фри, бекон" },
+      { "id": "sh-burger-huahin", "name": "Бургер Тётя из Хуахина", "price": 390, "desc": "Цыплёнок гриль, соус цезарь, салат, томаты, бекон, чеддер" }
+     ]
+    },
+    {
+     "id": "pasta",
+     "name": "Паста и ризотто",
+     "items": [
+      { "id": "sh-carbonara", "name": "Спагетти карбонара", "price": 370, "desc": "Панчетта, пармезан, желток" },
+      { "id": "sh-salmon-pasta", "name": "Спагетти с лососем гриль", "price": 530, "desc": "Сливки, пармезан" },
+      { "id": "sh-shrimp-pasta", "name": "Паста с креветками", "price": 490, "desc": "С соусом биск" },
+      { "id": "sh-porcini-risotto", "name": "Ризотто с белыми грибами", "price": 550, "desc": "И чёрным трюфелем" },
+      { "id": "sh-tomyum-risotto", "name": "Ризотто Том ям", "price": 590, "desc": "С морепродуктами" }
+     ]
+    },
+    {
+     "id": "sides",
+     "name": "Гарниры",
+     "items": [
+      { "id": "sh-mash", "name": "Картофельное пюре", "price": 210, "desc": "Со сливочным маслом" },
+      { "id": "sh-grill-veg", "name": "Овощи на гриле", "price": 210, "desc": "Спаржа, болгарский перец, кукуруза" },
+      { "id": "sh-baby-potato", "name": "Молодой картофель", "price": 250, "desc": "С деревенским маслом и зеленью" },
+      { "id": "sh-asparagus", "name": "Спаржа на гриле", "price": 250, "desc": "С трюфелем и пармезаном" },
+      { "id": "sh-fries", "name": "Картофель фри", "price": 210, "desc": "С пармезаном" }
+     ]
+    },
+    {
+     "id": "desserts",
+     "name": "Десерты",
+     "items": [
+      { "id": "sh-fruit-plate", "name": "Фруктовое плато", "price": 650, "desc": "Сезонные фрукты" },
+      { "id": "sh-eclair-chef", "name": "Эклер «У шефа 22»", "price": 350, "desc": "Ванильный крем, шоколад" },
+      { "id": "sh-pavlova", "name": "Анна Павлова", "price": 300, "desc": "Хрустящее безе с кремом и фруктами" },
+      { "id": "sh-coppa", "name": "Коппа", "price": 300, "desc": "С ягодами и ванильным сиропом" },
+      { "id": "sh-esterhazy", "name": "Эстерхази", "price": 350, "desc": "Белково-ореховый торт с джемом и миндалём" },
+      { "id": "sh-capybara", "name": "Капибара", "price": 350, "desc": "Пудинг с песочным печеньем и ягодами" },
+      { "id": "sh-pistachio-roll", "name": "Рулет фисташковый с малиной", "price": 350, "desc": "И фруктовой сальсой" }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "asia",
+   "name": "Азиатское меню",
+   "groups": [
+    {
+     "id": "sashimi",
+     "name": "Сашими",
+     "items": [
+      { "id": "sh-sashimi-mix", "name": "Сашими микс", "price": 1300, "desc": "Гребешок, хамачи, креветки, лосось, тунец" }
+     ]
+    },
+    {
+     "id": "gunkan",
+     "name": "Гункан-суши",
+     "items": [
+      { "id": "sh-gunkan-scallop", "name": "Гункан Гребешок", "price": 250, "desc": "Гребешок, острый соус" },
+      { "id": "sh-gunkan-unagi", "name": "Гункан Унаги", "price": 200, "desc": "Унаги, острый соус" },
+      { "id": "sh-gunkan-shrimp", "name": "Гункан Креветка", "price": 200, "desc": "Креветки, острый соус" },
+      { "id": "sh-gunkan-salmon", "name": "Гункан Лосось", "price": 200, "desc": "Лосось, острый соус" }
+     ]
+    },
+    {
+     "id": "rolls",
+     "name": "Роллы",
+     "items": [
+      { "id": "sh-roll-philadelphia-vip", "name": "Филадельфия VIP", "price": 1050, "desc": "Лосось, сливочный сыр, авокадо, камчатская икра" },
+      { "id": "sh-roll-gold", "name": "Золото", "price": 850, "desc": "Креветки, лосось, авокадо, зелёный лук, сливочный сыр, шрирача" },
+      { "id": "sh-roll-mango-crab", "name": "Манго-краб", "price": 550, "desc": "Краб, манго, сливочный сыр, лосось, авокадо, соус манго" },
+      { "id": "sh-roll-mango-salmon", "name": "Манго лосось", "price": 680, "desc": "Лосось, краб, манго, тобико, сливочный сыр, соус унаги" },
+      { "id": "sh-roll-philadelphia", "name": "Филадельфия", "price": 550, "desc": "Лосось, сливочный сыр, огурец и красная икра" },
+      { "id": "sh-roll-canada", "name": "Канада", "price": 820, "desc": "Унаги, лосось, сливочный сыр, зелёный лук, соус унаги" },
+      { "id": "sh-roll-california", "name": "Калифорния", "price": 590, "desc": "Камчатский краб, икра тобико, майонез, авокадо" },
+      { "id": "sh-roll-shaman", "name": "Шаман", "price": 730, "desc": "Лосось, унаги, тунец, кунжут, соус унаги, красная икра, зелёный лук" }
+     ]
+    },
+    {
+     "id": "baked-rolls",
+     "name": "Запечённые роллы",
+     "items": [
+      { "id": "sh-baked-unagi", "name": "Унаги запечённый", "price": 500, "desc": "Унаги, сливочный сыр, моцарелла, огурец, тобико" },
+      { "id": "sh-baked-syake", "name": "Сякэ запечённый", "price": 450, "desc": "Лосось, сливочный сыр, моцарелла, огурец, тобико" }
+     ]
+    },
+    {
+     "id": "fried-rolls",
+     "name": "Жареные роллы",
+     "items": [
+      { "id": "sh-fried-fuji", "name": "Фудзи с крабом", "price": 630, "desc": "Камчатский краб, сливочный сыр, огурец, соус унаги, темпура, панко" },
+      { "id": "sh-fried-tuna", "name": "Тунец и авокадо", "price": 520, "desc": "Тунец, авокадо, тобико, острый соус, темпура, панко, соус унаги" },
+      { "id": "sh-fried-shrimp", "name": "Острые креветки", "price": 570, "desc": "Королевские креветки, сливочный сыр, острый соус, темпура, панко" }
+     ]
+    },
+    {
+     "id": "soups-asia",
+     "name": "Супы",
+     "items": [
+      { "id": "sh-tom-yum", "name": "Том ям с морепродуктами", "price": 400, "desc": "Наваристый не острый бульон, кокосовое молоко, креветки, кальмары, осьминоги, мидии, рис, кинза, помидоры, грибы" },
+      { "id": "sh-miso", "name": "Мисо суп", "price": 70, "desc": "Мисо-паста, вакаме, тофу, зелёный лук" }
+     ]
+    },
+    {
+     "id": "asia-snacks",
+     "name": "Горячие закуски и салаты",
+     "items": [
+      { "id": "sh-dynamite-shrimp", "name": "Креветки-динамит", "price": 520, "desc": "Соус динамит, лук сибулет" },
+      { "id": "sh-chuka", "name": "Чука", "price": 280, "desc": "Водоросли чука в кунжутно-арахисовом соусе с лимоном" }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "caviar",
+   "name": "Икорное меню Frosista Caviar",
+   "groups": [
+    {
+     "id": "caviar-items",
+     "name": "Икра и краб",
+     "items": [
+      { "id": "sh-cav-oscietra", "name": "Чёрная икра осетровая", "price": 2000, "unit": "30 г", "opts": [ { "l": "30 г", "p": 2000 }, { "l": "50 г", "p": 3500 }, { "l": "100 г", "p": 7000 } ] },
+      { "id": "sh-cav-beluga", "name": "Чёрная икра белужья", "price": 3000, "unit": "30 г", "opts": [ { "l": "30 г", "p": 3000 }, { "l": "50 г", "p": 5000 }, { "l": "100 г", "p": 12000 } ] },
+      { "id": "sh-cav-coho", "name": "Икра кижуча", "price": 3000, "unit": "300 г" },
+      { "id": "sh-cav-pike", "name": "Икра щуки", "price": 1200, "unit": "112 г" },
+      { "id": "sh-crab-meat", "name": "Крабовое мясо", "price": 3500, "unit": "350 г", "opts": [ { "l": "350 г", "p": 3500 }, { "l": "500 г", "p": 4000 } ] }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bar",
+   "name": "Бар",
+   "groups": [
+    {
+     "id": "cocktails-classic",
+     "name": "Коктейли классические",
+     "items": [
+      { "id": "sh-aperol", "name": "Aperol Spritz", "price": 450 },
+      { "id": "sh-cuba-libre", "name": "Cuba Libre", "price": 350 },
+      { "id": "sh-whiskey-cola", "name": "Whiskey Cola", "price": 350 },
+      { "id": "sh-gin-tonic", "name": "Gin Tonic", "price": 350 },
+      { "id": "sh-negroni", "name": "Negroni", "price": 450 }
+     ]
+    },
+    {
+     "id": "soft",
+     "name": "Безалкогольное",
+     "items": [
+      { "id": "sh-soda", "name": "Cola / Fanta / Tonic / Sprite", "price": 100 },
+      { "id": "sh-redbull", "name": "RedBull", "price": 200 },
+      { "id": "sh-coconut", "name": "Кокос", "price": 200 },
+      { "id": "sh-water-still", "name": "Вода Shaman Still", "price": 80, "unit": "350 мл" },
+      { "id": "sh-water-mineral", "name": "Минеральная вода Still/Sparkling", "price": 150, "unit": "650 мл" }
+     ]
+    },
+    {
+     "id": "coffee-tea",
+     "name": "Кофе и чай",
+     "items": [
+      { "id": "sh-espresso", "name": "Эспрессо", "price": 100 },
+      { "id": "sh-americano", "name": "Американо", "price": 100 },
+      { "id": "sh-cappuccino", "name": "Капучино", "price": 150 },
+      { "id": "sh-latte", "name": "Латте", "price": 150 },
+      { "id": "sh-tea-classic-bar", "name": "Чай Black / Green / Jasmine / Botanik", "price": 250 }
+     ]
+    },
+    {
+     "id": "beer",
+     "name": "Пиво",
+     "items": [
+      { "id": "sh-heineken-zero", "name": "Heineken Zero", "price": 150, "unit": "300 мл" },
+      { "id": "sh-local-bottle", "name": "Местное бутылочное", "price": 150 },
+      { "id": "sh-asahi", "name": "Asahi", "price": 180 },
+      { "id": "sh-corona", "name": "Corona Extra", "price": 200 },
+      { "id": "sh-white-claw", "name": "White Claw (персик, манго, лайм)", "price": 150 },
+      { "id": "sh-draft", "name": "Местное разливное", "price": 150, "opts": [ { "l": "300 мл", "p": 150 }, { "l": "500 мл", "p": 250 } ] }
+     ]
+    },
+    {
+     "id": "wine",
+     "name": "Вино и шампанское",
+     "items": [
+      { "id": "sh-prosecco", "name": "Prosecco", "price": 400, "opts": [ { "l": "бокал 125 мл", "p": 400 }, { "l": "бутылка 750 мл", "p": 2400 } ] },
+      { "id": "sh-cava", "name": "Cava Brut", "price": 450, "opts": [ { "l": "бокал 125 мл", "p": 450 }, { "l": "бутылка 750 мл", "p": 2700 } ] },
+      { "id": "sh-pinot-grigio", "name": "Pinot Grigio (Tenuta Sant Anna)", "price": 400, "opts": [ { "l": "бокал 125 мл", "p": 400 }, { "l": "бутылка 750 мл", "p": 2400 } ] },
+      { "id": "sh-chardonnay", "name": "Chardonnay (Oak Vineyards)", "price": 400, "opts": [ { "l": "бокал 125 мл", "p": 400 }, { "l": "бутылка 750 мл", "p": 2400 } ] },
+      { "id": "sh-sauvignon", "name": "NZ Sauvignon Blanc", "price": 500, "opts": [ { "l": "бокал 125 мл", "p": 500 }, { "l": "бутылка 750 мл", "p": 3000 } ] },
+      { "id": "sh-malbec", "name": "Malbec", "price": 400, "opts": [ { "l": "бокал 125 мл", "p": 400 }, { "l": "бутылка 750 мл", "p": 2400 } ] },
+      { "id": "sh-pinot-noir", "name": "Pinot Noir", "price": 450, "opts": [ { "l": "бокал 125 мл", "p": 450 }, { "l": "бутылка 750 мл", "p": 2700 } ] },
+      { "id": "sh-moet", "name": "Moet & Chandon Brut Imperial", "price": 10500, "unit": "750 мл" },
+      { "id": "sh-cristal", "name": "Louis Roederer Cristal", "price": 30000, "unit": "750 мл" },
+      { "id": "sh-dom-brut", "name": "Dom Pérignon Brut", "price": 25000, "unit": "750 мл" },
+      { "id": "sh-dom-rose", "name": "Dom Pérignon Rosé", "price": 30000, "unit": "750 мл" },
+      { "id": "sh-moet-magnum", "name": "Moet & Chandon Brut Magnum", "price": 22000, "unit": "1500 мл" }
+     ]
+    },
+    {
+     "id": "spirits",
+     "name": "Крепкий алкоголь",
+     "items": [
+      { "id": "sh-captain-white", "name": "Captain Morgan White", "price": 200, "opts": [ { "l": "40 мл", "p": 200 }, { "l": "бутылка 700 мл", "p": 3000 } ] },
+      { "id": "sh-kraken", "name": "Kraken Black Spiced", "price": 450, "opts": [ { "l": "40 мл", "p": 450 }, { "l": "бутылка 700 мл", "p": 7800 } ] },
+      { "id": "sh-bombay", "name": "Bombay Sapphire", "price": 400, "opts": [ { "l": "40 мл", "p": 400 }, { "l": "бутылка 700 мл", "p": 7000 } ] },
+      { "id": "sh-tanqueray", "name": "Tanqueray", "price": 350, "opts": [ { "l": "40 мл", "p": 350 }, { "l": "бутылка 750 мл", "p": 6500 } ] },
+      { "id": "sh-hendricks", "name": "Hendrick's", "price": 650, "opts": [ { "l": "40 мл", "p": 650 }, { "l": "бутылка 700 мл", "p": 11000 } ] },
+      { "id": "sh-hennessy", "name": "Hennessy VS", "price": 450, "opts": [ { "l": "40 мл", "p": 450 }, { "l": "бутылка 700 мл", "p": 7800 } ] },
+      { "id": "sh-donjulio-blanco", "name": "Don Julio Blanco", "price": 600, "opts": [ { "l": "40 мл", "p": 600 }, { "l": "бутылка 750 мл", "p": 11250 } ] },
+      { "id": "sh-donjulio-repo", "name": "Don Julio Reposado", "price": 800, "opts": [ { "l": "40 мл", "p": 800 }, { "l": "бутылка 750 мл", "p": 15000 } ] },
+      { "id": "sh-azul", "name": "Azul Reposado", "price": 3100, "opts": [ { "l": "40 мл", "p": 3100 }, { "l": "бутылка 750 мл", "p": 58000 } ] },
+      { "id": "sh-jw-black", "name": "Johnnie Walker Black Label", "price": 400, "opts": [ { "l": "40 мл", "p": 400 }, { "l": "бутылка 700 мл", "p": 7000 } ] },
+      { "id": "sh-jameson", "name": "Jameson", "price": 300, "opts": [ { "l": "40 мл", "p": 300 }, { "l": "бутылка 700 мл", "p": 5250 } ] },
+      { "id": "sh-jack", "name": "Jack Daniel's", "price": 350, "opts": [ { "l": "40 мл", "p": 350 }, { "l": "бутылка 700 мл", "p": 6100 } ] },
+      { "id": "sh-jim-beam", "name": "Jim Beam White Label", "price": 250, "opts": [ { "l": "40 мл", "p": 250 }, { "l": "бутылка 700 мл", "p": 4300 } ] },
+      { "id": "sh-glenfiddich", "name": "Glenfiddich 12", "price": 700, "opts": [ { "l": "40 мл", "p": 700 }, { "l": "бутылка 700 мл", "p": 12250 } ] },
+      { "id": "sh-macallan", "name": "Macallan Double Cask 12", "price": 1200, "opts": [ { "l": "40 мл", "p": 1200 }, { "l": "бутылка 700 мл", "p": 21000 } ] },
+      { "id": "sh-smirnoff", "name": "Smirnoff", "price": 200, "opts": [ { "l": "40 мл", "p": 200 }, { "l": "бутылка 1000 мл", "p": 5000 } ] },
+      { "id": "sh-beluga-vodka", "name": "Beluga", "price": 500, "opts": [ { "l": "40 мл", "p": 500 }, { "l": "бутылка 700 мл", "p": 8500 } ] },
+      { "id": "sh-grey-goose", "name": "Grey Goose", "price": 500, "opts": [ { "l": "40 мл", "p": 500 }, { "l": "бутылка 750 мл", "p": 8500 } ] }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tea",
+   "name": "Чайное меню (чайники 1 литр)",
+   "groups": [
+    {
+     "id": "tea-warm",
+     "name": "Чаи «Тепло и гармония»",
+     "items": [
+      { "id": "sh-tea-exotic", "name": "Экзотический фрукт", "price": 600, "desc": "Жасминовый чай, малиновое пюре, пюре маракуйи, сок лайма, лайм, мёд, лаймовый лист" },
+      { "id": "sh-tea-citrus", "name": "Цитрусовое сияние", "price": 600, "desc": "Зелёный чай, цитрусовый микс, медовый сироп, апельсиновый сок, розмарин" },
+      { "id": "sh-tea-berry", "name": "Ягодный", "price": 600, "desc": "Чёрный чай, мята, лемонграсс, ягодный микс, сироп чёрной смородины" }
+     ]
+    },
+    {
+     "id": "tea-cold",
+     "name": "Освежающие чаи",
+     "items": [
+      { "id": "sh-tea-banana", "name": "Бананово-ананасовое наслаждение", "price": 600, "desc": "Холодный чёрный чай, банановое пюре, ананасовый сок, семена базилика, вяленый банан" },
+      { "id": "sh-tea-ruby", "name": "Рубиновый яблочный всплеск", "price": 600, "desc": "Холодный чёрный чай, кордиал из гибискуса и имбиря, яблочный сок, имбирь, лемонграсс, шисо" }
+     ]
+    },
+    {
+     "id": "tea-classic",
+     "name": "Классический чай",
+     "items": [
+      { "id": "sh-tea-plain", "name": "Классический чай (зелёный / чёрный / жасмин / травяной)", "price": 250 }
+     ]
+    }
+   ]
+  }
+ ]
+}

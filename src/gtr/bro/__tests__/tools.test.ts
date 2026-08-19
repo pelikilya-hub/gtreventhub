@@ -233,6 +233,42 @@ describe("рассадка Café del Mar", () => {
     expect(items[0].price_thb).toBe(2350);
   });
 
+  it("меню SHAMAN: борщ находится с точной ценой и пометкой про сервис", async () => {
+    const r = await handlers.get_menu({ query: "борщ" }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { items: { item: string; price_thb: number; venue?: string }[]; note: string };
+    const borsch = d.items.find((i) => i.item === "Борщ с телятиной")!;
+    expect(borsch.price_thb).toBe(490);
+    expect(borsch.venue).toBe("SHAMAN Lounge Cafe Bar");
+    expect(d.note).toContain("не включены");
+  });
+
+  it("меню SHAMAN: фильтр по площадке сужает поиск и убирает чужие позиции", async () => {
+    const r = await handlers.get_menu({ query: "филадельфия", venue: "шаман" }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { venue: string; items: { item: string; price_thb: number }[] };
+    expect(d.venue).toBe("SHAMAN Lounge Cafe Bar");
+    expect(d.items.some((i) => i.item === "Филадельфия VIP" && i.price_thb === 1050)).toBe(true);
+  });
+
+  it("меню SHAMAN: чайная карта и икра доступны по секциям", async () => {
+    const tea = await handlers.get_menu({ section: "tea" }, ctx);
+    expect(tea.ok).toBe(true);
+    if (tea.ok)
+      expect(
+        (tea.data as { items: { price_thb: number }[] }).items.every((i) => i.price_thb >= 250),
+      ).toBe(true);
+    const cav = await handlers.get_menu({ section: "caviar", query: "белужья" }, ctx);
+    expect(cav.ok).toBe(true);
+    if (cav.ok) {
+      const it = (cav.data as { items: { item: string; options?: string }[] }).items[0];
+      expect(it.item).toBe("Чёрная икра белужья");
+      expect(it.options).toContain("100 г 12000");
+    }
+  });
+
   it("бронь резолвит стол и предзаказ по каталогу, цену модели не верит", async () => {
     let got: Record<string, unknown> = {};
     const book = async (b: Record<string, unknown>) => {

@@ -306,7 +306,7 @@ export function DashScreen() {
       heroBadge: rich.badge,
       ringLabel: t("ГОТОВНОСТЬ К КАТАЛОГУ"),
       ringValue: R?.score ?? 58,
-      ringNote: [v.type, v.area, v.capacity ? `${t("до")} ${v.capacity} ${t("гостей")}`.replace(`${t("до")} ${t("до")}`, t("до")) : ""]
+      ringNote: [v.type, v.area, v.capacity ? `${t("до")} ${t(String(v.capacity))} ${t("гостей")}`.replace(`${t("до")} ${t("до")}`, t("до")) : ""]
         .filter(Boolean)
         .join(" · "),
       ringCta: t("Открыть паспорт"),
@@ -468,7 +468,7 @@ export function DashScreen() {
             </h1>
             <Chip color={d.stateColor}>{d.state}</Chip>
             <Chip color="rgba(255,255,255,.5)">{d.verified}</Chip>
-            {d.heroBadge ? <Chip color="#FFD166">{d.heroBadge}</Chip> : null}
+            {d.heroBadge ? <Chip color="#FFD166">{t(d.heroBadge)}</Chip> : null}
           </div>
           <div
             style={{
@@ -487,9 +487,9 @@ export function DashScreen() {
               color: "var(--gtr-t3)",
             }}
           >
-            {d.capacity}
+            {t(d.capacity)}
             {contact?.phone ? ` · ${contact.phone}` : ""}
-            {d.heroCredit ? ` · ${t("фото")}: ${d.heroCredit}` : ""}
+            {d.heroCredit ? ` · ${t("фото")}: ${t(d.heroCredit)}` : ""}
           </div>
         </div>
       </div>
@@ -889,7 +889,7 @@ function SalesCabinet() {
               {user.name}
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginTop: 9 }}>
-              <Chip color={AMBER}>{user.roleLabel.toUpperCase()}</Chip>
+              <Chip color={AMBER}>{t(user.roleLabel).toUpperCase()}</Chip>
               {v.name ? <Chip color="rgba(255,255,255,.5)">{v.name.toUpperCase()}</Chip> : null}
               <span
                 className="gtr-mono"
@@ -983,7 +983,7 @@ function SalesCabinet() {
             <div key={st} style={{ display: "grid", gap: 5 }}>
               <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                 <Dot color={STAGE_COLOR[st]} />
-                <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>{STAGE_LABEL[st]}</span>
+                <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>{t(STAGE_LABEL[st])}</span>
                 <span
                   className="gtr-mono"
                   style={{ font: "700 12px/1 'JetBrains Mono',monospace", color: "#fff" }}
@@ -1189,7 +1189,7 @@ function SalesCabinet() {
                 </span>
                 <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                   <span style={{ display: "block", fontWeight: 600, fontSize: 11.5 }}>
-                    {draftTitle(d)}
+                    {t(draftTitle(d))}
                   </span>
                   <span
                     style={{
@@ -1246,7 +1246,7 @@ function SalesCabinet() {
                 </span>
                 <span style={{ flex: 1, minWidth: 0, textAlign: "left", paddingLeft: 10 }}>
                   <span style={{ display: "block", fontWeight: 600, fontSize: 12 }}>
-                    {draftTitle(d)}
+                    {t(draftTitle(d))}
                   </span>
                   <span
                     style={{
@@ -1270,7 +1270,7 @@ function SalesCabinet() {
                     padding: "4px 7px",
                   }}
                 >
-                  {STAGE_LABEL[stage].toUpperCase()}
+                  {t(STAGE_LABEL[stage]).toUpperCase()}
                 </span>
                 <span
                   className="gtr-mono"
@@ -1460,7 +1460,7 @@ function ArtistCabinet() {
               {user.name}
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginTop: 9 }}>
-              <Chip color="#7B4DFF">{user.roleLabel.toUpperCase()}</Chip>
+              <Chip color="#7B4DFF">{t(user.roleLabel).toUpperCase()}</Chip>
               {user.artistId ? <Chip color="rgba(255,255,255,.5)">{user.artistId}</Chip> : null}
               <span
                 className="gtr-mono"
@@ -1618,7 +1618,7 @@ function ArtistCabinet() {
                     {o.fee ? ` · ${o.fee}` : ""}
                   </span>
                 </span>
-                <Chip color={GREEN}>{OFFER_LABEL.accepted.toUpperCase()}</Chip>
+                <Chip color={GREEN}>{t(OFFER_LABEL.accepted).toUpperCase()}</Chip>
               </div>
             ))
           ) : (

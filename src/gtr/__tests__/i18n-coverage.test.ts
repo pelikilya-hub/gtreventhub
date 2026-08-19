@@ -72,6 +72,39 @@ function extractKeys(): Set<string> {
     }
   }
 
+  // Таблицы, которые показываются через t(переменная): категории карты,
+  // короткие месяцы кабинета продаж — литералы до t() не доходят,
+  // достаём прицельно, как и навигацию.
+  for (const [file, names] of [
+    ["src/gtr/map-style.ts", /^MAP_CATS$/],
+    ["src/gtr/screens/Dash.tsx", /^MONTHS_S$/],
+    ["src/routes/gtr/signup.tsx", /^KINDS$/],
+  ] as const) {
+    const src = readFileSync(join(ROOT, file), "utf8");
+    const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const walkTables = (n: ts.Node) => {
+      if (ts.isVariableDeclaration(n) && names.test(n.name.getText()) && n.initializer) {
+        const grab = (m: ts.Node) => {
+          if (ts.isStringLiteral(m) && CYR.test(m.text)) keys.add(m.text);
+          ts.forEachChild(m, grab);
+        };
+        grab(n.initializer);
+      }
+      ts.forEachChild(n, walkTables);
+    };
+    walkTables(sf);
+  }
+
+  // Данные ночной жизни показываются гостю как есть — значит, обязаны
+  // иметь перевод. Новая площадка без перевода уронит сборку, а не
+  // покажет русский текст тайцу.
+  const night = JSON.parse(readFileSync(join(ROOT, "src/gtr/data/venue-night.json"), "utf8")) as Record<
+    string,
+    Record<string, string>
+  >;
+  for (const rec of Object.values(night))
+    for (const val of Object.values(rec)) if (typeof val === "string" && CYR.test(val)) keys.add(val);
+
   return keys;
 }
 

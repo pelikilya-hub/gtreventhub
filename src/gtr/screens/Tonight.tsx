@@ -297,7 +297,7 @@ export function TonightScreen() {
                   className="gtr-mono"
                   style={{ font: "600 9.5px/1 'JetBrains Mono',monospace", color: GREEN, whiteSpace: "nowrap" }}
                 >
-                  {n.hours.split("·")[0].trim()}
+                  {t(String(n.hours)).split("·")[0].trim()}
                 </span>
               </span>
             ) : null}

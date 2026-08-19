@@ -36,7 +36,7 @@ for (const st of navSf.statements) {
     walk2(d.initializer);
   }
 }
-for (const [file, re] of [["src/gtr/map-style.ts", /^MAP_CATS$/], ["src/gtr/screens/Dash.tsx", /^MONTHS_S$/]]) {
+for (const [file, re] of [["src/gtr/map-style.ts", /^MAP_CATS$/], ["src/gtr/screens/Dash.tsx", /^MONTHS_S$/], ["src/routes/gtr/signup.tsx", /^KINDS$/]]) {
   const src = readFileSync(join(ROOT, file), "utf8");
   const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const w = (n) => {

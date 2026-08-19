@@ -1,5 +1,6 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { accessModeFn, formLogin, loginFn, sessionFn } from "@/gtr/auth";
 import { V } from "@/gtr/data/app-data";
@@ -45,6 +46,7 @@ type DemoHint = { email: string; label: string; ini: string; venue: string };
 
 
 function LoginPage() {
+  const { t } = useTranslation();
   const { demo, hints } = Route.useLoaderData() as { demo: boolean; hints: DemoHint[] };
   const navigate = useNavigate();
   // Пригласительная ссылка: /gtr/login?invite=email — поле входа уже заполнено
@@ -93,7 +95,7 @@ function LoginPage() {
       }
     } catch (e) {
       report("login-network", String(e).slice(0, 200));
-      setError("Не удалось выполнить вход. Попробуйте ещё раз.");
+      setError(t("Не удалось выполнить вход. Попробуйте ещё раз."));
     } finally {
       setBusy(false);
     }
@@ -129,17 +131,13 @@ function LoginPage() {
             alt="GTR — Global Transformation Reality"
             style={{ width: "min(340px, 82%)", display: "block", margin: "0 auto" }}
           />
-          <Eyebrow style={{ marginTop: 10 }}>
-            ОПЕРАЦИОННАЯ ПЛАТФОРМА · ПХУКЕТ
-          </Eyebrow>
+          <Eyebrow style={{ marginTop: 10 }}>{t("ОПЕРАЦИОННАЯ ПЛАТФОРМА · ПХУКЕТ")}</Eyebrow>
         </div>
 
         <div className="gtr-card" style={{ padding: 24 }}>
           {!demo ? null : (
             <>
-              <Eyebrow style={{ marginBottom: 12 }}>
-                БЫСТРЫЙ ВХОД · ДЕМО-РОЛИ
-              </Eyebrow>
+              <Eyebrow style={{ marginBottom: 12 }}>{t("БЫСТРЫЙ ВХОД · ДЕМО-РОЛИ")}</Eyebrow>
               <div
                 className="gtr-md-stack"
                 style={{
@@ -180,7 +178,7 @@ function LoginPage() {
                     </span>
                     <span style={{ minWidth: 0 }}>
                       <span style={{ display: "block", fontWeight: 600 }}>
-                        {d.label}
+                        {t(d.label)}
                       </span>
                       <span
                         style={{
@@ -193,7 +191,7 @@ function LoginPage() {
                           textOverflow: "ellipsis",
                         }}
                       >
-                        {d.venue ? V(d.venue).name : "Сеть · 110 площадок"}
+                        {d.venue ? V(d.venue).name : t("Сеть · 110 площадок")}
                       </span>
                     </span>
                   </button>
@@ -203,7 +201,7 @@ function LoginPage() {
           )}
 
           <Eyebrow style={{ marginBottom: 10 }}>
-            {demo ? "ИЛИ ПО EMAIL И ПАРОЛЮ" : "ВХОД ПО EMAIL И ПАРОЛЮ"}
+            {demo ? t("ИЛИ ПО EMAIL И ПАРОЛЮ") : t("ВХОД ПО EMAIL И ПАРОЛЮ")}
           </Eyebrow>
           {/* method/action — запасной ход для браузера без скрипта:
               с живым скриптом preventDefault оставляет вход современным */}
@@ -230,7 +228,7 @@ function LoginPage() {
               type="password"
               name="password"
               autoComplete="current-password"
-              placeholder={demo ? "Пароль (демо: gtr2026)" : "Пароль"}
+              placeholder={demo ? t("Пароль (демо: gtr2026)") : t("Пароль")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -245,7 +243,7 @@ function LoginPage() {
                   padding: "8px 11px",
                 }}
               >
-                {error}
+                {t(error)}
               </div>
             ) : null}
             <button
@@ -254,7 +252,7 @@ function LoginPage() {
               disabled={busy}
               style={{ padding: "11px 13px" }}
             >
-              {busy ? "Входим…" : "Войти в кабинет"}
+              {busy ? t("Входим…") : t("Войти в кабинет")}
             </button>
           </form>
 
@@ -277,7 +275,7 @@ function LoginPage() {
                 letterSpacing: ".1em",
               }}
             >
-              ВЫ ОРГАНИЗАТОР?
+              {t("ВЫ ОРГАНИЗАТОР?")}
             </span>
             <span
               style={{ flex: 1, height: 1, background: "rgba(255,255,255,.1)" }}
@@ -288,14 +286,14 @@ function LoginPage() {
             style={{ width: "100%", padding: "11px 13px" }}
             onClick={() => navigate({ to: "/gtr/organizer" })}
           >
-            Открыть витрину организатора · без входа →
+            {t("Открыть витрину организатора · без входа")} →
           </button>
           <button
             className="gtr-btn"
             style={{ width: "100%", padding: "11px 13px", marginTop: 8 }}
             onClick={() => navigate({ to: "/gtr/signup" })}
           >
-            Я посетитель · создать аккаунт →
+            {t("Я посетитель · создать аккаунт")} →
           </button>
         </div>
 
@@ -307,8 +305,7 @@ function LoginPage() {
             color: "rgba(255,255,255,.35)",
           }}
         >
-          Сессия — httpOnly cookie, подпись HMAC-SHA256 · роли и права — на
-          сервере
+          {t("Сессия — httpOnly cookie, подпись HMAC-SHA256 · роли и права — на сервере")}
         </div>
       </div>
     </div>

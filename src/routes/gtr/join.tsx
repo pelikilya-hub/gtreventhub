@@ -2,6 +2,7 @@
 // Человек сам заводит аккаунт (имя, email, пароль) и сразу попадает в кабинет.
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { sessionFn } from "@/gtr/auth";
 import { inviteInfoFn, joinFn } from "@/gtr/kv-api";
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/gtr/join")({
 });
 
 function JoinPage() {
+  const { t } = useTranslation();
   const info = Route.useLoaderData();
   const { code } = Route.useSearch();
   const navigate = useNavigate();
@@ -34,9 +36,9 @@ function JoinPage() {
     try {
       const r = await joinFn({ data: { code, name, email, password } });
       if (r.ok) navigate({ to: "/gtr/$screen", params: { screen: "dash" } });
-      else setErr(r.error ?? "Не получилось");
+      else setErr(r.error ?? t("Не получилось"));
     } catch {
-      setErr("Сервер недоступен");
+      setErr(t("Сервер недоступен"));
     } finally {
       setBusy(false);
     }
@@ -78,17 +80,16 @@ function JoinPage() {
         ) : (
           <>
             <div style={{ font: "600 15px/1.45 'Golos Text',sans-serif" }}>
-              {info.inviterName} приглашает вас
-              {info.team ? " в свою команду" : ""} — роль «{info.roleLabel}».
+              {info.inviterName} {t("приглашает вас")}
+              {info.team ? " " + t("в свою команду") : ""} — {t("роль")} «{t(info.roleLabel)}».
             </div>
             <div style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-              Создайте аккаунт — событие, площадки, артисты и подрядчики Пхукета будут в
-              вашем кабинете.
+              {t("Создайте аккаунт — событие, площадки, артисты и подрядчики Пхукета будут в вашем кабинете.")}
             </div>
             <input
               className="gtr-input"
               style={{ padding: "10px 12px" }}
-              placeholder="Имя и фамилия"
+              placeholder={t("Имя и фамилия")}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -103,7 +104,7 @@ function JoinPage() {
             <input
               className="gtr-input"
               style={{ padding: "10px 12px" }}
-              placeholder="Пароль (от 6 символов)"
+              placeholder={t("Пароль (от 6 символов)")}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

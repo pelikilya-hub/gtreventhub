@@ -117,6 +117,56 @@ describe("build_night_route", () => {
     const t = (r as { data: { transport: { booked: boolean } | null } }).data.transport;
     expect(t?.booked).toBe(false);
   });
+
+  type Leg = {
+    arrive_hour: number;
+    arrive_time: string;
+    distance_km: number | null;
+    travel_min: number | null;
+  };
+
+  it("первая точка без стартовых координат — без выдуманного перегона", async () => {
+    const r = await handlers.build_night_route({ stops: ["VEN-0001"] }, ctx);
+    expect(r.ok).toBe(true);
+    const legs = (r as { data: { legs: Leg[] } }).data.legs;
+    expect(legs[0].distance_km).toBeNull();
+    expect(legs[0].travel_min).toBeNull();
+    expect(legs[0].arrive_time).toMatch(/^\d{2}:\d{2}$/);
+  });
+
+  it("между близкими площадками — настоящее небольшое расстояние, не плюс два часа", async () => {
+    // VEN-0001 и VEN-0002 в паре километров друг от друга.
+    const r = await handlers.build_night_route({ stops: ["VEN-0001", "VEN-0002"], startHour: 20 }, ctx);
+    expect(r.ok).toBe(true);
+    const legs = (r as { data: { legs: Leg[]; note: string | null } }).data.legs;
+    const hop = legs[1];
+    expect(hop.distance_km).not.toBeNull();
+    expect(hop.distance_km!).toBeLessThan(10);
+    expect(hop.travel_min!).toBeGreaterThanOrEqual(8);
+    // Раньше вторая точка всегда получала ровно +2 часа — теперь это
+    // реальное время в пути плюс dwell на первой площадке.
+    expect(hop.arrive_hour).not.toBe(22);
+  });
+
+  it("далёкий перегон помечается предупреждением, а не тонет в тишине", async () => {
+    // VEN-0077 и VEN-0001 в ~19 км по прямой.
+    const r = await handlers.build_night_route({ stops: ["VEN-0077", "VEN-0001"], startHour: 20 }, ctx);
+    expect(r.ok).toBe(true);
+    const d = (r as { data: { legs: Leg[]; note: string | null } }).data;
+    expect(d.legs[1].distance_km!).toBeGreaterThan(15);
+    expect(d.note).toContain("км");
+  });
+
+  it("координаты гостя делают реальным даже первый перегон", async () => {
+    const r = await handlers.build_night_route(
+      { stops: ["VEN-0001"], startLat: 7.9, startLon: 98.3 },
+      ctx,
+    );
+    expect(r.ok).toBe(true);
+    const legs = (r as { data: { legs: Leg[] } }).data.legs;
+    expect(legs[0].distance_km).not.toBeNull();
+    expect(legs[0].travel_min).not.toBeNull();
+  });
 });
 
 describe("платформенные инструменты", () => {

@@ -319,6 +319,25 @@ describe("рассадка Café del Mar", () => {
     }
   });
 
+  it("меню CLC: авторский коктейль находится с точной ценой и площадкой", async () => {
+    const r = await handlers.get_menu({ query: "shutter secret" }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { items: { item: string; price_thb: number; venue?: string }[] };
+    const hit = d.items.find((i) => i.item === "Shutter Secret")!;
+    expect(hit.price_thb).toBe(500);
+    expect(hit.venue).toBe("CLC Restaurant (Come Leo Come)");
+  });
+
+  it("меню CLC: фильтр по площадке сужает поиск до вагю-гриля", async () => {
+    const r = await handlers.get_menu({ query: "wagyu ribeye", venue: "CLC" }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { venue: string; items: { item: string; price_thb: number }[] };
+    expect(d.venue).toBe("CLC Restaurant (Come Leo Come)");
+    expect(d.items.some((i) => i.item === "Wagyu Ribeye" && i.price_thb === 3890)).toBe(true);
+  });
+
   it("бронь резолвит стол и предзаказ по каталогу, цену модели не верит", async () => {
     let got: Record<string, unknown> = {};
     const book = async (b: Record<string, unknown>) => {

@@ -240,29 +240,12 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
               break;
             }
             if (res.status === 429) {
-              // Свободный тариф Gemini считает запросы поминутно, и пачка
-              // вопросов подряд упирается в лимит на секунды. Один короткий
-              // повтор вытаскивает такой случай дешевле, чем весь откат.
-              await new Promise((r) => setTimeout(r, 1200));
-              const retry = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/${gmodel}:generateContent?key=${gemKey}`,
-                {
-                  method: "POST",
-                  headers: { "content-type": "application/json" },
-                  body: JSON.stringify({
-                    systemInstruction: { parts: [{ text: buildTextPrompt(ctx) }] },
-                    contents,
-                    tools: [{ functionDeclarations: gemTools(user.role) }],
-                    generationConfig: { temperature: 0.7, maxOutputTokens: 600 },
-                  }),
-                  signal: AbortSignal.timeout(Math.min(12_000, Math.max(2_000, timeLeft()))),
-                },
-              ).catch(() => null);
-              if (!retry || !retry.ok) {
-                gemFail = "429";
-                break;
-              }
-              res = retry;
+              // Свободный тариф Gemini считает запросы по минуте или по дню:
+              // за 1.2 секунды такой счётчик не отпускает, а быстрый мозг
+              // на GPU BOSS уже ждёт и отвечает надёжнее — не жжём секунды
+              // на заведомо бесполезный повтор, сразу уходим в запасной путь.
+              gemFail = "429";
+              break;
             } else if (res.status === 503 || res.status === 500) {
               // Перегруз на стороне Google — мимолётный. Один повтор
               // дешевле, чем 30 секунд запасного мозга.

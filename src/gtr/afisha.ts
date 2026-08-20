@@ -354,7 +354,7 @@ async function syncResidentAdvisor(raId: number): Promise<VenueAfishaEvent[]> {
 // Движок сам обходит базу, находит рабочую ручку, запоминает её в KV и
 // дальше ходит только туда.
 
-type SrcKind = "tribe" | "wp-events" | "wp-tribe" | "none";
+type SrcKind = "tribe" | "wp-events" | "wp-tribe" | "jsonld" | "none";
 type SrcRec = { kind: SrcKind; url?: string; checkedAt: string; found: number };
 const srcKey = (vid: string) => `afishasrc:${vid}`;
 
@@ -514,8 +514,93 @@ async function fromWpCpt(
   return out;
 }
 
+// ---------- JSON-LD: разметка schema.org Event в HTML ----------
+// Wix, Tilda, Squarespace и самописные сайты мимо WordPress-разведки, но
+// многие из них размечают события для Google — <script type="application/
+// ld+json"> с @type Event. Читаем её: это машинные данные от самой
+// площадки, а не скрейпинг вёрстки, и они переживают любой редизайн.
+
+const LD_EVENT_TYPES = new Set([
+  "event", "musicevent", "danceevent", "socialevent", "festival",
+  "foodevent", "theaterevent", "comedyevent", "screeningevent",
+]);
+
+type LdNode = {
+  "@type"?: string | string[];
+  "@graph"?: LdNode[];
+  name?: string;
+  startDate?: string;
+  url?: string;
+  image?: string | string[] | { url?: string } | { url?: string }[];
+};
+
+const ldImage = (img: LdNode["image"]): string | undefined => {
+  const one = Array.isArray(img) ? img[0] : img;
+  if (!one) return undefined;
+  return typeof one === "string" ? one : one.url || undefined;
+};
+
+/** Вытащить будущие события из ld+json блоков страницы. Экспорт — для
+ *  тестов: сеть в них не ходит, разбирается готовый HTML. */
+export function eventsFromJsonLd(html: string, host: string): VenueAfishaEvent[] {
+  const today = new Date().toISOString().slice(0, 10);
+  const nodes: LdNode[] = [];
+  const re = /<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi;
+  for (let m = re.exec(html); m; m = re.exec(html)) {
+    try {
+      const parsed = JSON.parse(m[1]) as LdNode | LdNode[];
+      nodes.push(...(Array.isArray(parsed) ? parsed : [parsed]));
+    } catch {
+      // битый блок разметки — не наша ошибка, идём к следующему
+    }
+  }
+  const flat: LdNode[] = [];
+  for (const n of nodes) flat.push(n, ...(n["@graph"] ?? []));
+  const out: VenueAfishaEvent[] = [];
+  for (const n of flat) {
+    const types = (Array.isArray(n["@type"]) ? n["@type"] : [n["@type"] ?? ""]).map((t) =>
+      String(t).toLowerCase(),
+    );
+    if (!types.some((t) => LD_EVENT_TYPES.has(t))) continue;
+    const dateIso = String(n.startDate ?? "").slice(0, 10);
+    const title = decodeEntities(String(n.name ?? "")).replace(/\s+/g, " ").trim().slice(0, 90);
+    if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(dateIso) || dateIso < today) continue;
+    const img = ldImage(n.image);
+    out.push({
+      id: `ld-${dateIso}-${title.toLowerCase().replace(/[^a-zа-яё0-9]+/gi, "-").slice(0, 40)}`,
+      title,
+      dateIso,
+      poster: img,
+      posterSrc: img,
+      url: n.url || `https://${host}`,
+      artistIds: matchArtists(title),
+      source: host,
+    });
+  }
+  return dedupe(out).slice(0, 12);
+}
+
+// Где искать разметку: корень и типовые адреса афиш. Больше трёх страниц
+// на площадку не смотрим — бюджет подзапросов воркера не резиновый.
+const LD_PATHS = ["", "/events", "/afisha"];
+
+async function probeJsonLd(site: string, host: string): Promise<SrcRec | null> {
+  for (const path of LD_PATHS) {
+    try {
+      const url = `${site}${path}`;
+      const ev = eventsFromJsonLd(await fetchText(url), host);
+      if (ev.length)
+        return { kind: "jsonld", url, checkedAt: new Date().toISOString().slice(0, 10), found: ev.length };
+    } catch {
+      // страницы нет или сайт лёг — пробуем следующий адрес
+    }
+  }
+  return null;
+}
+
 async function readSource(site: string, rec: SrcRec): Promise<VenueAfishaEvent[]> {
   const host = new URL(site).host;
+  if (rec.kind === "jsonld") return eventsFromJsonLd(await fetchText(rec.url!), host);
   if (rec.kind === "tribe") {
     const j = (await jsonOrNull(rec.url!)) as { events?: TribeEvent[] } | null;
     return j?.events ? fromTribe(j.events, host) : [];
@@ -556,6 +641,10 @@ async function probeSite(site: string): Promise<SrcRec> {
         };
     }
   }
+  // Не WordPress или ручки закрыты — последняя надежда на разметку
+  // schema.org, которую сайты держат ради Google.
+  const ld = await probeJsonLd(site, new URL(site).host);
+  if (ld) return ld;
   return { kind: "none", checkedAt, found: 0 };
 }
 

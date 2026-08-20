@@ -1,0 +1,73 @@
+{
+ "meta": {
+  "venueId": "VEN-0109",
+  "venueName": "CLC Restaurant (Come Leo Come)",
+  "source": "https://clcphuket.com/private-events/ + venues.json (сверка август 2026)",
+  "verified": "2026-08-20",
+  "currency": "THB",
+  "notes": "Онлайн опубликована цена только на Private Lounge (10 000 THB/час до 22:00, 15 000 THB/час после, минимум 3 часа, старт с 18:00 — прайс с официального сайта). Main Hall и Karaoke Hall фиксированной цены не публикуют — расчёт индивидуальный по звонку."
+ },
+ "zones": [
+  {
+   "id": "main-hall",
+   "name": "CLC Main Hall",
+   "ru": "Главный зал",
+   "spaceId": "VEN-0109-SP-01",
+   "hours": "с 18:00",
+   "desc": "Главный зал ресторана-шоу: гала-ужины, свадьбы, крупные приватные события. LED-экран 18 м², звук L-Acoustics, полный свет и сцена.",
+   "best": "Большие компании и события под ключ, до 120 гостей"
+  },
+  {
+   "id": "karaoke",
+   "name": "CLC Karaoke Hall",
+   "ru": "Караоке-зал",
+   "spaceId": "VEN-0109-SP-02",
+   "hours": "с 21:00",
+   "desc": "Открытая сцена-караоке: 15+ кВт L-Acoustics, экран 5 м, до 6 радиомикрофонов одновременно, библиотека 50 000 песен.",
+   "best": "Афтепати и шумные компании, до 50 гостей"
+  },
+  {
+   "id": "private-lounge",
+   "name": "CLC Private Lounge",
+   "ru": "Приватный лаундж",
+   "spaceId": "VEN-0109-SP-03",
+   "hours": "с 18:00, минимум 3 часа",
+   "desc": "Закрытый лаундж на 10-20 гостей с отдельным баром и санузлом — дни рождения, переговоры, небольшие приватные события.",
+   "best": "Камерные приватные события, 10-20 гостей"
+  }
+ ],
+ "tables": [
+  {
+   "id": "private-lounge-hire",
+   "zone": "private-lounge",
+   "name": "CLC Private Lounge",
+   "ru": "Аренда Private Lounge",
+   "pax": 20,
+   "minPax": 10,
+   "bookable": true,
+   "minHours": 3,
+   "from": "18:00",
+   "rateBefore22": 10000,
+   "rateAfter22": 15000,
+   "includes": ["Закрытый лаундж на 10-20 гостей", "Отдельный бар и санузел", "Минимум 3 часа аренды", "10 000 THB/час до 22:00, 15 000 THB/час после 22:00"]
+  },
+  {
+   "id": "main-hall-hire",
+   "zone": "main-hall",
+   "name": "CLC Main Hall",
+   "ru": "Главный зал",
+   "pax": 120,
+   "bookable": false,
+   "requestNote": "Цена по запросу — только по звонку +66 63 205 1000 или в WhatsApp"
+  },
+  {
+   "id": "karaoke-hire",
+   "zone": "karaoke",
+   "name": "CLC Karaoke Hall",
+   "ru": "Караоке-зал",
+   "pax": 50,
+   "bookable": false,
+   "requestNote": "Цена по запросу — звоните +66 81 148 5967 (караоке-линия) или в WhatsApp, зал работает с 21:00"
+  }
+ ]
+}

@@ -369,6 +369,90 @@ describe("рассадка Café del Mar", () => {
   });
 });
 
+describe("рассадка CLC (Come Leo Come)", () => {
+  const guest = { email: "v@v", name: "Гость", role: "visitor" };
+
+  it("зоны CLC находятся по названию и по аббревиатуре, Private Lounge несёт почасовую ставку", async () => {
+    const r = await handlers.get_venue_zones({ venue: "CLC" }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as {
+      zones: { zone: string; tables: { table: string; bookable: boolean; rate_before_22_thb: number | null }[] }[];
+    };
+    expect(d.zones.length).toBe(3);
+    const lounge = d.zones.find((z) => z.zone === "CLC Private Lounge")!;
+    expect(lounge.tables[0].bookable).toBe(true);
+    expect(lounge.tables[0].rate_before_22_thb).toBe(10000);
+    const mainHall = d.zones.find((z) => z.zone === "CLC Main Hall")!;
+    expect(mainHall.tables[0].bookable).toBe(false);
+  });
+
+  it("аренда Private Lounge с 18:00 на минимум часов считается по дневному тарифу", async () => {
+    let got: Record<string, unknown> = {};
+    const book = async (b: Record<string, unknown>) => {
+      got = b;
+      return { ok: true, id: "BK-CLC-1" };
+    };
+    const r = await handlers.book_table(
+      {
+        venue: "CLC",
+        table: "CLC Private Lounge",
+        dateIso: "2026-08-22",
+        slot: "18:00",
+        hours: 3,
+        guests: 12,
+        phone: "+66 93 000 0000",
+      },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(true);
+    expect(got.deposit).toBe(30000);
+    expect(got.vid).toBe("VEN-0109");
+  });
+
+  it("аренда, захватывающая 22:00, считается по двум ставкам", async () => {
+    let got: Record<string, unknown> = {};
+    const book = async (b: Record<string, unknown>) => {
+      got = b;
+      return { ok: true, id: "BK-CLC-2" };
+    };
+    const r = await handlers.book_table(
+      {
+        venue: "CLC",
+        table: "Private Lounge",
+        dateIso: "2026-08-22",
+        slot: "21:00",
+        hours: 3,
+        guests: 10,
+        phone: "+66 93 000 0000",
+      },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(true);
+    // 21:00 по дневной ставке, 22:00 и 23:00 — по вечерней: 10000 + 15000×2
+    expect(got.deposit).toBe(40000);
+  });
+
+  it("меньше минимума гостей в Private Lounge — честный отказ", async () => {
+    const book = async () => ({ ok: true, id: "BK-CLC-3" });
+    const r = await handlers.book_table(
+      { venue: "CLC", table: "CLC Private Lounge", dateIso: "2026-08-22", guests: 2, phone: "1" },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(false);
+  });
+
+  it("Main Hall без цены не бронируется — модель не выдумывает ставку", async () => {
+    const book = async () => ({ ok: true, id: "BK-CLC-4" });
+    const r = await handlers.book_table(
+      { venue: "CLC", table: "CLC Main Hall", dateIso: "2026-08-22", guests: 80, phone: "1" },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain("запросу");
+  });
+});
+
 describe("границы роли гостя", () => {
   const guest = { email: "v@v", name: "Гость", role: "visitor" };
   const team = { email: "boss@gtr", name: "BOSS", role: "gtr", boss: true };

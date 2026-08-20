@@ -1,0 +1,220 @@
+{
+ "meta": {
+  "venueId": "VEN-0001",
+  "venueName": "Catch Beach Club",
+  "source": "https://www.catchbeachclub.com/menus + SevenRooms",
+  "verified": "2026-08-20",
+  "currency": "THB",
+  "note": "Все цены в батах, включая налоги и сервисный сбор. Меню изменяется в зависимости от сезона и доступности ингредиентов."
+ },
+ "sections": [
+  {
+   "id": "breakfast",
+   "name": "Breakfast Menu",
+   "ru": "Завтрак",
+   "hours": "08:00 – 12:00",
+   "groups": [
+    {
+     "id": "breakfast-main",
+     "name": "Breakfast Mains",
+     "ru": "Основные блюда",
+     "items": [
+      {
+       "id": "eggs-benedict",
+       "name": "Eggs Benedict",
+       "price": 450,
+       "desc": "Poached eggs, English muffin, smoked salmon, hollandaise sauce"
+      },
+      {
+       "id": "pancakes",
+       "name": "Catch Pancakes",
+       "price": 380,
+       "desc": "Buttermilk pancakes, caramelized banana, maple syrup, whipped cream"
+      },
+      {
+       "id": "acai-bowl",
+       "name": "Açai Bowl",
+       "price": 320,
+       "desc": "Acai, granola, coconut, berries, honey drizzle"
+      }
+     ]
+    },
+    {
+     "id": "breakfast-drinks",
+     "name": "Beverages",
+     "ru": "Напитки",
+     "items": [
+      {
+       "id": "fresh-juice",
+       "name": "Fresh Juices",
+       "price": 180,
+       "opts": [
+        {"l": "Orange", "p": 180},
+        {"l": "Mango", "p": 180},
+        {"l": "Pineapple", "p": 180}
+       ]
+      },
+      {
+       "id": "smoothie",
+       "name": "Smoothies",
+       "price": 220,
+       "opts": [
+        {"l": "Tropical", "p": 220},
+        {"l": "Berry Blast", "p": 220}
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "lunch",
+   "name": "Lunch Menu",
+   "ru": "Обед",
+   "hours": "12:00 – 18:00",
+   "groups": [
+    {
+     "id": "salads",
+     "name": "Salads",
+     "ru": "Салаты",
+     "items": [
+      {
+       "id": "caesar-salad",
+       "name": "Caesar Salad",
+       "price": 520,
+       "desc": "Romaine, parmesan, croutons, house-made caesar dressing"
+      },
+      {
+       "id": "catch-seafood",
+       "name": "Catch Seafood Salad",
+       "price": 950,
+       "desc": "Mixed seafood, greens, citrus vinaigrette, wonton crisps"
+      },
+      {
+       "id": "thai-green",
+       "name": "Thai Green Mango Salad",
+       "price": 480,
+       "desc": "Green mango, shallots, chili, lime, fish sauce dressing"
+      }
+     ]
+    },
+    {
+     "id": "mains",
+     "name": "Main Courses",
+     "ru": "Основные блюда",
+     "items": [
+      {
+       "id": "grilled-fish",
+       "name": "Grilled Fish of the Day",
+       "price": 890,
+       "desc": "Market catch, lemongrass, ginger, thai basil, steamed vegetables"
+      },
+      {
+       "id": "catch-burger",
+       "name": "Catch Burger",
+       "price": 620,
+       "desc": "8oz beef patty, aged cheddar, caramelized onions, truffle mayo, fries"
+      },
+      {
+       "id": "pad-thai",
+       "name": "Pad Thai Seafood",
+       "price": 750,
+       "desc": "Shrimp, scallops, noodles, tamarind, crushed peanuts, lime"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "dinner",
+   "name": "Dinner Menu",
+   "ru": "Ужин",
+   "hours": "18:00 – 23:00",
+   "groups": [
+    {
+     "id": "appetizers",
+     "name": "Appetizers",
+     "ru": "Закуски",
+     "items": [
+      {
+       "id": "tuna-tartare",
+       "name": "Tuna Tartare",
+       "price": 680,
+       "desc": "Sushi-grade tuna, avocado, yuzu, sesame seeds, crispy wonton"
+      },
+      {
+       "id": "jumbo-shrimp",
+       "name": "Jumbo Shrimp Tempura",
+       "price": 720,
+       "desc": "Tiger prawns, tempura batter, sweet chili sauce"
+      },
+      {
+       "id": "foie-gras",
+       "name": "Pan-Seared Foie Gras",
+       "price": 1200,
+       "desc": "Brioche, fig reduction, fleur de sel"
+      }
+     ]
+    },
+    {
+     "id": "mains-dinner",
+     "name": "Main Courses",
+     "ru": "Основные блюда",
+     "items": [
+      {
+       "id": "wagyu-ribeye",
+       "name": "A5 Wagyu Ribeye",
+       "price": 2800,
+       "opts": [{"l": "200g", "p": 2800}, {"l": "300g", "p": 3800}],
+       "desc": "Japanese A5 wagyu, beurre blanc, seasonal vegetables"
+      },
+      {
+       "id": "lobster-tail",
+       "name": "Lobster Tail",
+       "price": 1650,
+       "desc": "Canadian lobster, garlic butter, lemon, market vegetables"
+      },
+      {
+       "id": "duck-breast",
+       "name": "Duck Breast",
+       "price": 1250,
+       "desc": "Orange glaze, parsnip puree, crispy skin"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cocktails",
+   "name": "Signature Cocktails",
+   "ru": "Коктейли",
+   "groups": [
+    {
+     "id": "catch-signature",
+     "name": "Catch Signatures",
+     "ru": "Фирменные коктейли",
+     "items": [
+      {
+       "id": "catch-sunrise",
+       "name": "Catch Sunrise",
+       "price": 390,
+       "desc": "Vodka, passion fruit, coconut rum, fresh lime juice"
+      },
+      {
+       "id": "beach-club-negroni",
+       "name": "Beach Club Negroni",
+       "price": 420,
+       "desc": "Campari, gin, sweet vermouth, orange twist"
+      },
+      {
+       "id": "thai-basil-mojito",
+       "name": "Thai Basil Mojito",
+       "price": 380,
+       "desc": "Rum, thai basil, lime, soda, brown sugar"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

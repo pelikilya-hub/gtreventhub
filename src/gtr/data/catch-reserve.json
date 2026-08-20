@@ -1,0 +1,181 @@
+{
+  "meta": {
+    "venueId": "VEN-0001",
+    "venueName": "Catch Beach Club",
+    "source": "https://www.catchbeachclub.com/reserve + SevenRooms (venue catchbeachclub)",
+    "verified": "2026-08-20",
+    "currency": "THB",
+    "notes": "Депозит на брони полностью или частично зачитывается как кредит на еду и напитки. Брони невозвратные при отмене менее чем за 24 часа. Минимум напитков на VIP-столах."
+  },
+  "zones": [
+    {
+      "id": "beachfront",
+      "name": "Beachfront",
+      "ru": "Пляж",
+      "spaceId": "VEN-0001-SP-01",
+      "photo": "/catch/zones/beachfront.jpg",
+      "hours": "08:00 – 20:00",
+      "arrival": "заезд 10:00–15:00, поздний заезд — отмена без возврата",
+      "desc": "Белый песок и прямой доступ к морю. Дневная программа с DJ, лежаки, солнце и коктейли.",
+      "best": "День на пляже, закуски и напитки, знакомства"
+    },
+    {
+      "id": "pool",
+      "name": "Pool Deck",
+      "ru": "Бассейн",
+      "spaceId": "VEN-0001-SP-01",
+      "photo": "/catch/zones/pool.jpg",
+      "hours": "08:00 – 18:00",
+      "arrival": "заезд 10:00–15:00, поздний заезд — отмена без возврата",
+      "desc": "Дэйбеды вокруг 150-метрового бассейна. Центр дневной активности: музыка, еда, напитки.",
+      "best": "All-day клубинг, компании, фотосессии"
+    },
+    {
+      "id": "restaurant",
+      "name": "Restaurant",
+      "ru": "Ресторан",
+      "spaceId": "VEN-0001-SP-02",
+      "photo": "/catch/zones/restaurant.jpg",
+      "hours": "08:00 – 23:00",
+      "arrival": "стол держат 20 минут, посадка до 2.5 часов",
+      "desc": "Открытое помещение на берегу. Авторская кухня, вид на закаты, перспектива для ужинов и праздников.",
+      "best": "Ужины, свидания, юбилеи, семейные праздники"
+    },
+    {
+      "id": "bar",
+      "name": "Indoor Bar",
+      "ru": "Закрытый бар",
+      "spaceId": "VEN-0001-SP-03",
+      "photo": "/catch/zones/bar.jpg",
+      "hours": "16:00 – поздно",
+      "arrival": "walk-in приветствуется, резервирование приватных столиков",
+      "desc": "Климатизированный бар с премиальным выбором спиртного и коктейльной программой. Закуски и снеки.",
+      "best": "Вечерние коктейли, DJ-сеты, приватные посиделки"
+    }
+  ],
+  "tables": [
+    {
+      "id": "beach-daybed",
+      "zone": "beachfront",
+      "name": "Beach Daybed",
+      "ru": "Дэйбед на пляже",
+      "pax": 6,
+      "deposit": 8000,
+      "credit": 5000,
+      "extraPax": 2,
+      "extraPrice": 1500,
+      "photo": "/catch/tables/beach-daybed.jpg",
+      "slots": ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00"],
+      "desc": "Топ место на пляже: мягкая кровать, низкие столики, зонтик от солнца"
+    },
+    {
+      "id": "beach-table",
+      "zone": "beachfront",
+      "name": "Beach Cocktail Table",
+      "ru": "Коктейльный стол на пляже",
+      "pax": 4,
+      "deposit": 4000,
+      "credit": 2500,
+      "extraPax": 1,
+      "extraPrice": 800,
+      "photo": "/catch/tables/beach-table.jpg",
+      "slots": ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00"],
+      "desc": "Компактный стол прямо на песке с видом на море"
+    },
+    {
+      "id": "pool-daybed",
+      "zone": "pool",
+      "name": "Pool Daybed",
+      "ru": "Дэйбед у бассейна",
+      "pax": 8,
+      "deposit": 12000,
+      "credit": 8000,
+      "extraPax": 2,
+      "extraPrice": 2000,
+      "photo": "/catch/tables/pool-daybed.jpg",
+      "slots": ["10:00", "11:00", "12:00", "13:00", "14:00"],
+      "desc": "VIP место с видом на весь бассейн и DJбудку. Подушки, прохладные полотенца, приоритет в меню"
+    },
+    {
+      "id": "pool-cabana",
+      "zone": "pool",
+      "name": "Pool Cabana",
+      "ru": "Кабана у бассейна",
+      "pax": 10,
+      "deposit": 18000,
+      "credit": 12000,
+      "extraPax": 2,
+      "extraPrice": 2500,
+      "photo": "/catch/tables/pool-cabana.jpg",
+      "slots": ["10:00", "11:00", "12:00", "13:00"],
+      "desc": "Приватная кабана с шторками, AC, мини-холодильник, вид на весь клуб, личный staff"
+    },
+    {
+      "id": "rest-table-2",
+      "zone": "restaurant",
+      "name": "Table for Two",
+      "ru": "Столик на двоих",
+      "pax": 2,
+      "deposit": 2000,
+      "credit": 1500,
+      "extraPax": null,
+      "photo": "/catch/tables/rest-table-2.jpg",
+      "slots": ["18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00"],
+      "desc": "Интимный столик на веранде с видом на море, идеален для свиданий"
+    },
+    {
+      "id": "rest-table-6",
+      "zone": "restaurant",
+      "name": "Table for 6",
+      "ru": "Столик на 6 человек",
+      "pax": 6,
+      "deposit": 6000,
+      "credit": 4000,
+      "extraPax": 2,
+      "extraPrice": 1200,
+      "photo": "/catch/tables/rest-table-6.jpg",
+      "slots": ["18:00", "18:30", "19:00", "19:30", "20:00"],
+      "desc": "Классический стол для компании, веранда, вид на закат"
+    },
+    {
+      "id": "rest-table-10",
+      "zone": "restaurant",
+      "name": "Table for 10",
+      "ru": "Столик на 10 человек",
+      "pax": 10,
+      "deposit": 12000,
+      "credit": 8000,
+      "extraPax": 2,
+      "extraPrice": 1500,
+      "photo": "/catch/tables/rest-table-10.jpg",
+      "slots": ["18:00", "18:30", "19:00"],
+      "desc": "Большой стол для компании или корпоратива, отличная атмосфера, приоритет персонала"
+    },
+    {
+      "id": "bar-cocktail",
+      "zone": "bar",
+      "name": "Bar Counter",
+      "ru": "Барная стойка",
+      "pax": null,
+      "deposit": null,
+      "credit": null,
+      "photo": "/catch/tables/bar-counter.jpg",
+      "slots": null,
+      "desc": "Walk-in, без резервирования. Идеален для одиночек и пар для коктейльной программы"
+    },
+    {
+      "id": "bar-vip",
+      "zone": "bar",
+      "name": "VIP Lounge Booth",
+      "ru": "VIP кабина в баре",
+      "pax": 6,
+      "deposit": 8000,
+      "credit": 5000,
+      "extraPax": 2,
+      "extraPrice": 1800,
+      "photo": "/catch/tables/bar-vip.jpg",
+      "slots": ["18:00", "19:00", "20:00", "21:00", "22:00"],
+      "desc": "Приватная кабина в баре с лучшим видом на диджейскую кабину и танцпол, персональное обслуживание"
+    }
+  ]
+}

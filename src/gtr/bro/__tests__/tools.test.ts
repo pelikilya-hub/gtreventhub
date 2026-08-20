@@ -725,3 +725,73 @@ describe("витрина без рабочих данных", () => {
     for (const v of d.venues) for (const k of ["phone", "email", "telegram", "notes"]) expect(v[k]).toBeUndefined();
   });
 });
+
+// 20 новых тем от 20.08: гости с телефона по умолчанию говорят на своём
+// языке (первый визит определяет язык по стране), и ask_gtr обязан найти
+// тему что по-русски, что по-английски — иначе половина аудитории получит
+// «спроси иначе» на ровном месте.
+describe("новые темы бэклога: RU/EN матчинг и факты", () => {
+  const guest = { email: "nb@v", name: "Гость", role: "visitor" };
+  const NEW_IDS = [
+    "les-hospital", "les-insurance", "les-pharmacy", "les-ferry", "les-diving",
+    "les-muaythai", "les-temple-etiquette", "les-nightmarket", "les-elephants",
+    "les-wildlife", "les-power", "les-timezone", "les-tattoo", "les-smoking",
+    "les-massage-scam", "les-kohphangan", "les-carrental", "les-vpn",
+    "les-currency-fees", "les-lgbt",
+  ];
+  const mem = new Map<string, string>();
+  mem.set("broqa:learned", JSON.stringify({ ids: NEW_IDS }));
+  const kv = {
+    put: async (k: string, v: string) => {
+      mem.set(k, v);
+    },
+    get: async (k: string) => mem.get(k) ?? null,
+  };
+
+  it("бэклог содержит ровно эти 20 новых тем, все со своими ключами и ответами", async () => {
+    const lessons = (await import("../../data/bro-lessons.json")) as unknown as {
+      lessons: { id: string; keys: string[]; answers: string[]; tag: string }[];
+    };
+    const byId = new Map(lessons.lessons.map((l) => [l.id, l]));
+    for (const id of NEW_IDS) {
+      const l = byId.get(id);
+      expect(l, id).toBeTruthy();
+      expect(l!.keys.length, id).toBeGreaterThan(0);
+      expect(l!.answers.length, id).toBeGreaterThan(0);
+      for (const a of l!.answers) expect(a.length, id).toBeGreaterThan(10);
+    }
+  });
+
+  const CASES: [string, string, string][] = [
+    ["les-hospital", "где ближайшая больница на пхукете", "where is the nearest hospital"],
+    ["les-insurance", "нужна ли туристическая страховка", "do i need travel insurance"],
+    ["les-pharmacy", "где купить лекарство", "where can i buy medicine"],
+    ["les-ferry", "как доехать на остров пхи пхи", "how to get to phi phi island"],
+    ["les-diving", "нужен сертификат для дайвинга", "do i need a diving certificate"],
+    ["les-muaythai", "где посмотреть муай тай", "where to watch muay thai"],
+    ["les-temple-etiquette", "как одеться в храм ват чалонг", "temple etiquette wat chalong"],
+    ["les-nightmarket", "можно ли торговаться на рынке", "can i bargain at the night market"],
+    ["les-elephants", "как этично покататься на слонах", "elephant sanctuary no riding"],
+    ["les-wildlife", "укусила уличная собака", "street dogs bite rabies"],
+    ["les-power", "какие розетки на пхукете", "power outlet voltage thailand"],
+    ["les-timezone", "какой часовой пояс в таиланде", "time zone thailand jetlag"],
+    ["les-tattoo", "что такое сак янт", "sak yant tattoo thailand"],
+    ["les-smoking", "можно ли курить на пляже", "smoking ban beach"],
+    ["les-massage-scam", "как выбрать нормальный массаж", "massage scam how to choose"],
+    ["les-kohphangan", "как попасть на фулл мун пати", "full moon party koh phangan"],
+    ["les-carrental", "нужны ли международные права на аренду машины", "international driving permit car rental"],
+    ["les-vpn", "нужен ли vpn в таиланде", "vpn thailand internet censorship"],
+    ["les-currency-fees", "какая комиссия банкомата", "atm fee currency exchange"],
+    ["les-lgbt", "дружелюбен ли пхукет к лгбт", "is phuket gay friendly lgbt"],
+  ];
+
+  it.each(CASES)("%s: находится и по-русски, и по-английски", async (id, ru, en) => {
+    const rRu = await handlers.ask_gtr({ question: ru }, { ...ctx, user: guest, kv });
+    expect(rRu.ok, `ru: ${ru}`).toBe(true);
+    if (rRu.ok) expect((rRu.data as { topic: string }).topic, ru).toBe(id);
+
+    const rEn = await handlers.ask_gtr({ question: en }, { ...ctx, user: guest, kv });
+    expect(rEn.ok, `en: ${en}`).toBe(true);
+    if (rEn.ok) expect((rEn.data as { topic: string }).topic, en).toBe(id);
+  });
+});

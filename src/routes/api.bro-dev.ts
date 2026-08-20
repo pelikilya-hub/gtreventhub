@@ -21,7 +21,7 @@ import {
   type PultStatus,
 } from "../gtr/bro/pult";
 
-type Flags = { broEnabled?: boolean; broKill?: boolean; broRoles?: string[] };
+type Flags = { broEnabled?: boolean; broKill?: boolean; broRoles?: string[]; geminiOff?: boolean };
 type Brain = { url?: string; token?: string; model?: string };
 type Gemini = { textModel?: string };
 
@@ -163,6 +163,30 @@ export const Route = createFileRoute("/api/bro-dev")({
           );
           await writeQueue(ns, queue);
           return json({ ok: true, queue });
+        }
+
+        // Выучить весь бэклог разом — по ключу пульта. Обычный крон отдаёт
+        // 1-2 темы в день умышленно медленно; когда BOSS просит подтянуть
+        // весь бэклог сразу (например, только что добавленные темы), ждать
+        // неделю смысла нет — учим всё за один вызов.
+        if (action === "pult.learnAll") {
+          if (String(body.key ?? "") !== (await pultAccessKey()))
+            return json({ ok: false, error: "key" }, 401);
+          const res = await learnNext(ns, 10_000);
+          return json(res);
+        }
+
+        // Пауза быстрого мозга (Gemini) — по ключу пульта. Нужна, чтобы
+        // проверить локальный мозг BOSS в чистом виде, не гадая, кто из
+        // двух движков ответил. Флаг общий с BOSS-панелью (setting:flags),
+        // так что выключатель виден и там.
+        if (action === "pult.gemini") {
+          if (String(body.key ?? "") !== (await pultAccessKey()))
+            return json({ ok: false, error: "key" }, 401);
+          const cur = (await kvGetJson<Flags>(ns, "setting:flags")) ?? {};
+          const next: Flags = { ...cur, geminiOff: Boolean(body.off) };
+          await ns.put("setting:flags", JSON.stringify(next));
+          return json({ ok: true, flags: next });
         }
 
         const user = await currentUser();

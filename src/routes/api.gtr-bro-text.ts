@@ -17,7 +17,7 @@ import { kvProvider } from "../gtr/bro/provider";
 import { looksInvented } from "../gtr/bro/guard";
 import { handlers, toolsForRole, WRITE_TOOLS, type ToolCtx, type ToolName } from "../gtr/bro/tools";
 
-type Flags = { broEnabled?: boolean; broKill?: boolean };
+type Flags = { broEnabled?: boolean; broKill?: boolean; geminiOff?: boolean };
 type Brain = { url?: string; token?: string; model?: string };
 
 // Схемы инструментов для Gemini REST: без additionalProperties.
@@ -199,8 +199,11 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         // На CPU-сервере честные 20-45 секунд — для разговора это вечность.
         // Gemini отвечает за секунды и бесплатен в рамках дневного лимита;
         // Qwen на нашем железе остаётся запасным и полем для обучения.
-        const gemKey =
-          (typeof process !== "undefined" ? process.env?.GEMINI_API_KEY : undefined) ?? "";
+        // Флаг-пауза: BOSS временно отключает Gemini, чтобы говорить
+        // напрямую с локальным мозгом — без гадания, кто из двух ответил.
+        const gemKey = flags.geminiOff
+          ? ""
+          : ((typeof process !== "undefined" ? process.env?.GEMINI_API_KEY : undefined) ?? "");
         if (gemKey) {
           const gcfg = (await kvGetJson<{ textModel?: string }>(ns, "setting:gemini")) ?? {};
           const gmodel = gcfg.textModel ?? "gemini-flash-latest";

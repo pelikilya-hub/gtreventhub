@@ -107,7 +107,7 @@ function IntakeWizard({
       <TopBar>
         <span
           className="gtr-mono"
-          style={{ font: "500 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+          style={{ font: "500 13px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
         >
           {v.name}
         </span>
@@ -171,7 +171,7 @@ function IntakeWizard({
             >
               <span style={{ color: "#F5A623", flex: "none", fontWeight: 700 }}>!</span>
               <span
-                style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}
+                style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}
               >
                 {hint}
               </span>
@@ -221,7 +221,7 @@ function IntakeWizard({
               style={{
                 marginTop: 8,
                 textAlign: "center",
-                font: "500 10px/1.4 'Golos Text',sans-serif",
+                font: "500 12px/1.5 'Golos Text',sans-serif",
                 color: "var(--gtr-t3)",
               }}
             >
@@ -400,11 +400,11 @@ function VenueTile({ v, onPick }: { v: Venue; onPick: () => void }) {
         </div>
       </div>
       <div style={{ padding: "13px 15px" }}>
-        <div style={{ font: "600 13.5px/1.3 'Golos Text',sans-serif" }}>{v.name}</div>
+        <div style={{ font: "600 13.5px/1.45 'Golos Text',sans-serif" }}>{v.name}</div>
         <div
           style={{
             margin: "5px 0 9px",
-            font: "500 10.5px/1.45 'Golos Text',sans-serif",
+            font: "500 12px/1.45 'Golos Text',sans-serif",
             color: "var(--gtr-t2)",
           }}
         >
@@ -413,13 +413,13 @@ function VenueTile({ v, onPick }: { v: Venue; onPick: () => void }) {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span
             className="gtr-mono"
-            style={{ font: "600 9.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+            style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
           >
             {rate
               ? `${firm ? "аренда от" : "ориентир"} ${fmtThb(rate.amount)}`
               : "аренда по запросу"}
           </span>
-          <span className="gtr-btn gtr-btn-red" style={{ padding: "6px 11px", fontSize: 10.5 }}>
+          <span className="gtr-btn gtr-btn-red" style={{ padding: "6px 11px", fontSize: 12 }}>
             {t("Собрать →")}
           </span>
         </div>
@@ -444,7 +444,7 @@ function BuildFrame({
       <TopBar>
         <span
           className="gtr-mono"
-          style={{ font: "500 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+          style={{ font: "500 13px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
         >
           {v.name}
         </span>
@@ -512,7 +512,7 @@ function DoneScreen({ vid, reqId, onAgain }: { vid: string; reqId: string; onAga
               className="gtr-mono"
               style={{
                 marginTop: 12,
-                font: "500 10px/1 'JetBrains Mono',monospace",
+                font: "500 12px/1 'JetBrains Mono',monospace",
                 color: "var(--gtr-t3)",
               }}
             >

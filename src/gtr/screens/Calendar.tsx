@@ -210,7 +210,7 @@ export function CalendarScreen() {
               <span
                 className="gtr-mono"
                 style={{
-                  font: "600 11px/1 'JetBrains Mono',monospace",
+                  font: "600 13px/1 'JetBrains Mono',monospace",
                   color: "rgba(255,255,255,.45)",
                 }}
               >
@@ -274,7 +274,7 @@ export function CalendarScreen() {
                   <span
                     className="gtr-mono"
                     style={{
-                      font: "600 8.5px/1 'JetBrains Mono',monospace",
+                      font: "600 10px/1 'JetBrains Mono',monospace",
                       color: "rgba(255,255,255,.4)",
                     }}
                   >
@@ -305,7 +305,7 @@ export function CalendarScreen() {
                           borderBottom: "1px solid rgba(255,255,255,.04)",
                           color: "rgba(255,255,255,.85)",
                           cursor: "pointer",
-                          font: "500 11.5px/1.25 'Golos Text',sans-serif",
+                          font: "500 13px/1.25 'Golos Text',sans-serif",
                           textAlign: "left",
                         }}
                       >
@@ -322,7 +322,7 @@ export function CalendarScreen() {
                           <span
                             className="gtr-mono"
                             style={{
-                              font: "600 8.5px/1 'JetBrains Mono',monospace",
+                              font: "600 10px/1 'JetBrains Mono',monospace",
                               color: "#2ECC71",
                             }}
                           >
@@ -395,7 +395,7 @@ export function CalendarScreen() {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  font: "600 9.5px/1 'JetBrains Mono',monospace",
+                  font: "600 11px/1 'JetBrains Mono',monospace",
                   color: "rgba(255,255,255,.55)",
                 }}
               >
@@ -504,7 +504,7 @@ export function CalendarScreen() {
                         <span
                           className="gtr-mono"
                           style={{
-                            font: "600 8.5px/1 'JetBrains Mono',monospace",
+                            font: "600 10px/1 'JetBrains Mono',monospace",
                             color: "rgba(255,255,255,.45)",
                             background: "rgba(255,255,255,.08)",
                             borderRadius: 0,
@@ -528,7 +528,7 @@ export function CalendarScreen() {
                             padding: "4px 5px",
                             borderRadius: 0,
                             cursor: c.dragId ? "grab" : "pointer",
-                            font: "500 9.5px/1.2 'Golos Text',sans-serif",
+                            font: "500 11px/1.2 'Golos Text',sans-serif",
                             background: c.bg,
                           }}
                         >
@@ -556,7 +556,7 @@ export function CalendarScreen() {
                         <div
                           className="gtr-mono"
                           style={{
-                            font: "500 8.5px/1 'JetBrains Mono',monospace",
+                            font: "500 10px/1 'JetBrains Mono',monospace",
                             color: "rgba(255,255,255,.35)",
                           }}
                         >
@@ -608,7 +608,7 @@ export function CalendarScreen() {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                    <span style={{ flex: 1, font: "600 12px/1.3 'Golos Text',sans-serif" }}>
+                    <span style={{ flex: 1, font: "600 12px/1.45 'Golos Text',sans-serif" }}>
                       {e.title}
                     </span>
                     <Chip color="#E5231B">{t("НАШЕ")}</Chip>
@@ -617,7 +617,7 @@ export function CalendarScreen() {
                     className="gtr-mono"
                     style={{
                       margin: "7px 0 8px",
-                      font: "500 10.5px/1 'JetBrains Mono',monospace",
+                      font: "500 12px/1 'JetBrains Mono',monospace",
                       color: "var(--gtr-t2)",
                     }}
                   >
@@ -625,7 +625,7 @@ export function CalendarScreen() {
                   </div>
                   <button
                     className="gtr-btn"
-                    style={{ padding: "5px 9px", fontSize: 10 }}
+                    style={{ padding: "5px 9px", fontSize: 12 }}
                     onClick={() =>
                       navigate({
                         to: "/gtr/$screen",
@@ -640,7 +640,7 @@ export function CalendarScreen() {
               ))}
               {dayList.length === 0 && oursDay.length === 0 && afishaDay.length === 0 ? (
                 <div
-                  style={{ font: "500 11.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
+                  style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
                 >
                   {vid
                     ? t("Свободный день — добавьте формат из палитры ниже.")
@@ -667,7 +667,7 @@ export function CalendarScreen() {
                           flex: "none",
                         }}
                       />
-                      <span style={{ flex: 1, font: "600 12px/1.3 'Golos Text',sans-serif" }}>
+                      <span style={{ flex: 1, font: "600 12px/1.45 'Golos Text',sans-serif" }}>
                         {e.title}
                       </span>
                       <Chip
@@ -690,7 +690,7 @@ export function CalendarScreen() {
                       className="gtr-mono"
                       style={{
                         margin: "7px 0 8px",
-                        font: "500 10.5px/1 'JetBrains Mono',monospace",
+                        font: "500 12px/1 'JetBrains Mono',monospace",
                         color: "var(--gtr-t2)",
                       }}
                     >
@@ -699,14 +699,14 @@ export function CalendarScreen() {
                     <div style={{ display: "flex", gap: 6 }}>
                       <button
                         className="gtr-btn"
-                        style={{ padding: "5px 9px", fontSize: 10 }}
+                        style={{ padding: "5px 9px", fontSize: 12 }}
                         onClick={() => shift(e.id, -30)}
                       >
                         {t("−30 мин")}
                       </button>
                       <button
                         className="gtr-btn"
-                        style={{ padding: "5px 9px", fontSize: 10 }}
+                        style={{ padding: "5px 9px", fontSize: 12 }}
                         onClick={() => shift(e.id, 30)}
                       >
                         {t("+30 мин")}
@@ -715,7 +715,7 @@ export function CalendarScreen() {
                         className="gtr-btn"
                         style={{
                           padding: "5px 9px",
-                          fontSize: 10,
+                          fontSize: 12,
                           marginLeft: "auto",
                           color: "#E5231B",
                           borderColor: "rgba(229,35,27,.4)",
@@ -739,7 +739,7 @@ export function CalendarScreen() {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                    <span style={{ flex: 1, font: "600 12px/1.3 'Golos Text',sans-serif" }}>
+                    <span style={{ flex: 1, font: "600 12px/1.45 'Golos Text',sans-serif" }}>
                       {e.title}
                     </span>
                     <Chip color="#2ECC71">{t("АФИША")}</Chip>
@@ -750,7 +750,7 @@ export function CalendarScreen() {
                         className="gtr-btn"
                         style={{
                           padding: "5px 9px",
-                          fontSize: 10,
+                          fontSize: 12,
                           color: "#2ECC71",
                           borderColor: "rgba(46,204,113,.5)",
                         }}
@@ -771,7 +771,7 @@ export function CalendarScreen() {
                       target="_blank"
                       rel="noreferrer"
                       style={{
-                        font: "600 10px/1 'JetBrains Mono',monospace",
+                        font: "600 12px/1 'JetBrains Mono',monospace",
                         color: "rgba(255,255,255,.55)",
                         textDecoration: "none",
                         marginLeft: "auto",
@@ -811,7 +811,7 @@ export function CalendarScreen() {
                         style={{
                           display: "block",
                           marginTop: 3,
-                          font: "500 9.5px/1.3 'JetBrains Mono',monospace",
+                          font: "500 11px/1.45 'JetBrains Mono',monospace",
                           color: "rgba(255,255,255,.4)",
                         }}
                       >
@@ -843,7 +843,7 @@ export function CalendarScreen() {
                       style={{
                         display: "block",
                         marginTop: 3,
-                        font: "500 9.5px/1.3 'JetBrains Mono',monospace",
+                        font: "500 11px/1.45 'JetBrains Mono',monospace",
                         color: "rgba(255,255,255,.4)",
                       }}
                     >

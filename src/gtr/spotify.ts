@@ -5,7 +5,10 @@ export const SPOTIFY_REDIRECT =
   "https://gtr-event-hub.gtr-event.workers.dev/api/spotify-callback";
 
 export type MusicProfile = {
-  source: "spotify";
+  // "manual" — профиль собран руками из списка жанров, когда ключи Spotify
+  // не подключены. Тип обязан знать оба источника: иначе ветка «мой выбор»
+  // в кабинете считается недостижимой и молча вырезается.
+  source: "spotify" | "manual";
   displayName?: string;
   genres: [string, number][]; // семейство → вес 0..1 (см. match.ts)
   rawGenres: [string, number][]; // сырые жанры Spotify для статистики

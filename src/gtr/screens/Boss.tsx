@@ -949,7 +949,7 @@ function CommunityCard() {
       </div>
       <div
         className="gtr-mono"
-        style={{ font: "500 9.5px/1.6 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 10 }}
+        style={{ font: "500 11px/1.6 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 10 }}
       >
         {t("1) создай публичный канал (новости) и группу (чат) · 2) добавь бота @Gtrcom1_bot админом в оба · 3) вставь ссылки t.me и привяжи. Дайджест вечера уходит в канал сам — каждый день в 17:00.")}
       </div>
@@ -972,7 +972,7 @@ function CommunityCard() {
       </div>
       <div
         className="gtr-mono"
-        style={{ font: "600 9px/1 'JetBrains Mono',monospace", letterSpacing: "0.09em", color: "var(--gtr-t3)", marginBottom: 6 }}
+        style={{ font: "600 11px/1 'JetBrains Mono',monospace", letterSpacing: "0.09em", color: "var(--gtr-t3)", marginBottom: 6 }}
       >
         {t("ПУБЛИКАЦИЯ")}
       </div>
@@ -992,7 +992,7 @@ function CommunityCard() {
       </div>
       <div
         className="gtr-mono"
-        style={{ font: "600 9px/1 'JetBrains Mono',monospace", letterSpacing: "0.09em", color: "var(--gtr-t3)", marginBottom: 6 }}
+        style={{ font: "600 11px/1 'JetBrains Mono',monospace", letterSpacing: "0.09em", color: "var(--gtr-t3)", marginBottom: 6 }}
       >
         {t("ИНСТРУМЕНТЫ")}
       </div>
@@ -1009,7 +1009,7 @@ function CommunityCard() {
       {state ? (
         <div
           className="gtr-mono"
-          style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+          style={{ marginTop: 8, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
         >
           {state}
         </div>
@@ -1019,7 +1019,7 @@ function CommunityCard() {
           className="gtr-input"
           readOnly
           value={inviteText}
-          style={{ marginTop: 8, width: "100%", minHeight: 120, font: "500 11px/1.5 'Golos Text',sans-serif" }}
+          style={{ marginTop: 8, width: "100%", minHeight: 120, font: "500 13px/1.5 'Golos Text',sans-serif" }}
         />
       ) : null}
     </Card>
@@ -1104,7 +1104,7 @@ function ThreadsCard() {
       </div>
       <div
         className="gtr-mono"
-        style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+        style={{ marginTop: 8, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
       >
         {state ||
           "Вечерний дайджест уходит в Threads вместе с Telegram. Лимит поста — 500 знаков, разметки нет: текст режется по строкам, а не по буквам. Токен живёт 60 дней."}
@@ -1217,7 +1217,7 @@ function MetaCard() {
       ) : null}
       <div
         className="gtr-mono"
-        style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+        style={{ marginTop: 8, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
       >
         {state ||
           "Токен проверяется живым запросом к Meta: подхватываем страницу, её IG Business и последние публикации. Инструкция по выдаче токена — в Telegram."}
@@ -1243,13 +1243,13 @@ function MetaCard() {
             >
               <span
                 className="gtr-mono"
-                style={{ font: "600 9px/1.3 'JetBrains Mono',monospace", color: "var(--gtr-t3)", flex: "none" }}
+                style={{ font: "600 11px/1.45 'JetBrains Mono',monospace", color: "var(--gtr-t3)", flex: "none" }}
               >
                 {f.kind.toUpperCase()} · {(f.ts ?? "").slice(0, 10)}
               </span>
               <span
                 style={{
-                  font: "500 11px/1.4 'Golos Text',sans-serif",
+                  font: "500 13px/1.5 'Golos Text',sans-serif",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -1321,7 +1321,7 @@ function PromptpayCard() {
       </div>
       <div
         className="gtr-mono"
-        style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+        style={{ marginTop: 8, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
       >
         {state ||
           "Гость сканирует QR в своём банке — деньги приходят напрямую на этот реквизит. Кнопка оплаты появляется в брони раздела «Сегодня» сразу после сохранения."}

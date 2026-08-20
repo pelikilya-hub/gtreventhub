@@ -202,7 +202,7 @@ export function InquiriesScreen() {
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     <span style={{ flex: 1, minWidth: 0 }}>
                       <span
-                        style={{ display: "block", font: "600 13px/1.3 'Golos Text',sans-serif" }}
+                        style={{ display: "block", font: "600 13px/1.45 'Golos Text',sans-serif" }}
                       >
                         {r.title}
                       </span>
@@ -210,7 +210,7 @@ export function InquiriesScreen() {
                         style={{
                           display: "block",
                           marginTop: 4,
-                          font: "500 10.5px/1.4 'Golos Text',sans-serif",
+                          font: "500 12px/1.5 'Golos Text',sans-serif",
                           color: "var(--gtr-t2)",
                         }}
                       >
@@ -228,7 +228,7 @@ export function InquiriesScreen() {
                       >
                         {fmtThb(r.quoteTotal)}
                       </span>
-                      <span className="gtr-eyebrow" style={{ fontSize: 8 }}>
+                      <span className="gtr-eyebrow" style={{ fontSize: 10 }}>
                         {t("КОМ. GTR")} {fmtThb(r.quoteCommission)}
                       </span>
                     </span>
@@ -272,7 +272,7 @@ export function InquiriesScreen() {
                         <>
                           <button
                             className="gtr-btn gtr-btn-red"
-                            style={{ padding: "5px 10px", fontSize: 10 }}
+                            style={{ padding: "5px 10px", fontSize: 12 }}
                             disabled={!can(user.role, "inquiries.reply")}
                             onClick={() => acceptRequest(r.id, r.title)}
                           >
@@ -280,7 +280,7 @@ export function InquiriesScreen() {
                           </button>
                           <button
                             className="gtr-btn"
-                            style={{ padding: "5px 10px", fontSize: 10 }}
+                            style={{ padding: "5px 10px", fontSize: 12 }}
                             disabled={!can(user.role, "inquiries.reply")}
                             onClick={() => updateRequest(r.id, { status: "declined" })}
                           >
@@ -331,13 +331,13 @@ export function InquiriesScreen() {
                   >
                     {day}
                   </span>
-                  <span className="gtr-eyebrow" style={{ fontSize: 8.5 }}>
+                  <span className="gtr-eyebrow" style={{ fontSize: 10 }}>
                     {mon}
                   </span>
                 </span>
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span
-                    style={{ display: "block", font: "600 12.5px/1.3 'Golos Text',sans-serif" }}
+                    style={{ display: "block", font: "600 12.5px/1.45 'Golos Text',sans-serif" }}
                   >
                     {title}
                   </span>
@@ -345,7 +345,7 @@ export function InquiriesScreen() {
                     style={{
                       display: "block",
                       marginTop: 4,
-                      font: "500 10.5px/1.4 'Golos Text',sans-serif",
+                      font: "500 12px/1.5 'Golos Text',sans-serif",
                       color: "var(--gtr-t2)",
                     }}
                   >
@@ -356,7 +356,7 @@ export function InquiriesScreen() {
                     style={{
                       display: "block",
                       marginTop: 4,
-                      font: "500 9.5px/1.3 'JetBrains Mono',monospace",
+                      font: "500 11px/1.45 'JetBrains Mono',monospace",
                       color: "var(--gtr-t3)",
                     }}
                   >
@@ -384,11 +384,11 @@ export function InquiriesScreen() {
               <div key={String(t)} style={{ display: "flex", gap: 9 }}>
                 <Dot color={String(c)} />
                 <div>
-                  <div style={{ font: "600 11.5px/1.3 'Golos Text',sans-serif" }}>{t}</div>
+                  <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>{t}</div>
                   <div
                     style={{
                       marginTop: 3,
-                      font: "500 10.5px/1.45 'Golos Text',sans-serif",
+                      font: "500 12px/1.45 'Golos Text',sans-serif",
                       color: "var(--gtr-t3)",
                     }}
                   >
@@ -432,7 +432,7 @@ function InviteLinks() {
   };
   return (
     <div style={{ display: "grid", gap: 8, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,.07)" }}>
-      <Eyebrow style={{ fontSize: 8.5 }}>{t("ССЫЛКА-ПРИГЛАШЕНИЕ (АККАУНТ ЗАВОДИТ САМ ЧЕЛОВЕК)")}</Eyebrow>
+      <Eyebrow style={{ fontSize: 10 }}>{t("ССЫЛКА-ПРИГЛАШЕНИЕ (АККАУНТ ЗАВОДИТ САМ ЧЕЛОВЕК)")}</Eyebrow>
       <div style={{ display: "flex", gap: 7, flexWrap: "wrap", alignItems: "center" }}>
         {(
           [
@@ -460,7 +460,7 @@ function InviteLinks() {
         <button className="gtr-btn" style={{ padding: "8px 12px" }} onClick={make}>
           {t("Создать ссылку")}
         </button>
-        {msg ? <span style={{ font: "500 10px/1.3 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>{msg}</span> : null}
+        {msg ? <span style={{ font: "500 12px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>{msg}</span> : null}
       </div>
       {link ? (
         <input
@@ -468,7 +468,7 @@ function InviteLinks() {
           readOnly
           value={link}
           onFocus={(e) => e.currentTarget.select()}
-          style={{ padding: "7px 9px", fontSize: 10.5, maxWidth: 460 }}
+          style={{ padding: "7px 9px", fontSize: 12, maxWidth: 460 }}
         />
       ) : null}
     </div>
@@ -565,7 +565,7 @@ function RequestsKanban({
               </span>
               <span
                 className="gtr-mono"
-                style={{ marginLeft: "auto", font: "700 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                style={{ marginLeft: "auto", font: "700 13px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
               >
                 {cards.length}
               </span>
@@ -639,10 +639,10 @@ function KanbanCard({
         clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)",
       }}
     >
-      <div style={{ font: "600 12px/1.35 'Golos Text',sans-serif" }}>{r.title || "Заявка"}</div>
+      <div style={{ font: "600 12px/1.45 'Golos Text',sans-serif" }}>{r.title || "Заявка"}</div>
       <div
         className="gtr-mono"
-        style={{ font: "500 9px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+        style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
       >
         {isAdmin ? `${r.venueName} · ` : ""}
         {r.organizerName || "организатор"}
@@ -658,7 +658,7 @@ function KanbanCard({
         </span>
         <span
           className="gtr-mono"
-          style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+          style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
           {t("ком.")} {fmtThb(r.quoteCommission)}
         </span>
@@ -667,7 +667,7 @@ function KanbanCard({
             className="gtr-mono"
             style={{
               marginLeft: "auto",
-              font: "600 8.5px/1 'JetBrains Mono',monospace",
+              font: "600 10px/1 'JetBrains Mono',monospace",
               color: "#7B9EFF",
               border: "1px solid rgba(123,158,255,.4)",
               padding: "3px 6px",
@@ -681,7 +681,7 @@ function KanbanCard({
         {prev ? (
           <button
             className="gtr-btn"
-            style={{ padding: "4px 9px", fontSize: 11 }}
+            style={{ padding: "4px 9px", fontSize: 13 }}
             title={`В «${KANBAN_COLS[idx - 1][1]}»`}
             onClick={() => onMove(r, prev)}
           >
@@ -691,7 +691,7 @@ function KanbanCard({
         {next ? (
           <button
             className="gtr-btn"
-            style={{ padding: "4px 9px", fontSize: 11 }}
+            style={{ padding: "4px 9px", fontSize: 13 }}
             title={`В «${KANBAN_COLS[idx + 1][1]}»`}
             onClick={() => onMove(r, next)}
           >
@@ -741,7 +741,7 @@ function AssignControl({ r }: { r: import("../data/app-data").OrgRequest }) {
     <span style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
       <button
         className="gtr-btn"
-        style={{ padding: "5px 10px", fontSize: 10 }}
+        style={{ padding: "5px 10px", fontSize: 12 }}
         onClick={() => assign(user.email, user.name)}
       >
         {t("Взять на себя")}
@@ -749,7 +749,7 @@ function AssignControl({ r }: { r: import("../data/app-data").OrgRequest }) {
       {user.role === "gtr" ? (
         <button
           className="gtr-btn"
-          style={{ padding: "5px 10px", fontSize: 10 }}
+          style={{ padding: "5px 10px", fontSize: 12 }}
           onClick={() => {
             setPick((x) => !x);
             if (!managers.length)
@@ -764,7 +764,7 @@ function AssignControl({ r }: { r: import("../data/app-data").OrgRequest }) {
             <button
               key={m.email}
               className="gtr-btn"
-              style={{ padding: "5px 10px", fontSize: 10, color: "#7B9EFF" }}
+              style={{ padding: "5px 10px", fontSize: 12, color: "#7B9EFF" }}
               onClick={() => assign(m.email, m.name)}
             >
               {m.name}
@@ -772,7 +772,7 @@ function AssignControl({ r }: { r: import("../data/app-data").OrgRequest }) {
           ))
         : null}
       {pick && !managers.length ? (
-        <span style={{ font: "500 10px/1.3 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+        <span style={{ font: "500 12px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
           {t("приглашённых пока нет")}
         </span>
       ) : null}
@@ -833,14 +833,14 @@ export function SpacesScreen() {
             }}
           >
             <span>
-              <span style={{ display: "block", font: "600 12.5px/1.3 'Golos Text',sans-serif" }}>
+              <span style={{ display: "block", font: "600 12.5px/1.45 'Golos Text',sans-serif" }}>
                 {x.name}
               </span>
               <span
                 style={{
                   display: "block",
                   marginTop: 3,
-                  font: "500 10px/1.4 'Golos Text',sans-serif",
+                  font: "500 12px/1.5 'Golos Text',sans-serif",
                   color: "var(--gtr-t3)",
                 }}
               >
@@ -852,7 +852,7 @@ export function SpacesScreen() {
             </span>
             <span
               className="gtr-mono"
-              style={{ font: "500 10.5px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+              style={{ font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
             >
               {x.capCocktail
                 ? `${x.capCocktail} коктейль`
@@ -996,7 +996,7 @@ export function VenueScreen() {
                 </span>
                 <span
                   style={{
-                    font: "500 11.5px/1.55 'Golos Text',sans-serif",
+                    font: "500 13px/1.55 'Golos Text',sans-serif",
                     color: "var(--gtr-t2)",
                   }}
                 >
@@ -1051,7 +1051,7 @@ export function VenueScreen() {
               </span>
               <span
                 style={{
-                  font: "500 10.5px/1.5 'Golos Text',sans-serif",
+                  font: "500 12px/1.5 'Golos Text',sans-serif",
                   color: "var(--gtr-t2)",
                   wordBreak: "break-all",
                 }}
@@ -1077,7 +1077,7 @@ export function VenueScreen() {
                     style={{ width: 7, height: 7, borderRadius: 0, background: String(c) }}
                   />
                   <span
-                    style={{ font: "500 11px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}
+                    style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}
                   >
                     {k}
                   </span>
@@ -1139,18 +1139,18 @@ export function VenueScreen() {
                   <div
                     className="gtr-mono"
                     style={{
-                      font: "700 9.5px/1 'JetBrains Mono',monospace",
+                      font: "700 11px/1 'JetBrains Mono',monospace",
                       color: "#E5231B",
                       marginBottom: 5,
                     }}
                   >
                     {date}
                   </div>
-                  <div style={{ font: "600 12px/1.3 'Golos Text',sans-serif" }}>{title}</div>
+                  <div style={{ font: "600 12px/1.45 'Golos Text',sans-serif" }}>{title}</div>
                   <div
                     style={{
                       margin: "4px 0 6px",
-                      font: "500 9.5px/1.4 'JetBrains Mono',monospace",
+                      font: "500 11px/1.5 'JetBrains Mono',monospace",
                       color: "var(--gtr-t3)",
                     }}
                   >
@@ -1165,7 +1165,7 @@ export function VenueScreen() {
             <div
               style={{
                 marginTop: 12,
-                font: "500 11px/1.6 'Golos Text',sans-serif",
+                font: "500 13px/1.6 'Golos Text',sans-serif",
                 color: "var(--gtr-t2)",
               }}
             >
@@ -1272,7 +1272,7 @@ export function FinanceScreen() {
             >
               {value}
             </div>
-            <div style={{ font: "500 10.5px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <div style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {note}
             </div>
           </Card>
@@ -1303,14 +1303,14 @@ export function FinanceScreen() {
           >
             <Dot color={c} top={0} />
             <span
-              style={{ flex: "none", width: 190, font: "600 12px/1.3 'Golos Text',sans-serif" }}
+              style={{ flex: "none", width: 190, font: "600 12px/1.45 'Golos Text',sans-serif" }}
             >
               {label}
             </span>
             <span
               style={{
                 flex: 1,
-                font: "500 11px/1.4 'Golos Text',sans-serif",
+                font: "500 13px/1.5 'Golos Text',sans-serif",
                 color: "var(--gtr-t2)",
               }}
             >
@@ -1373,7 +1373,7 @@ export function AccessScreen() {
               minWidth: 640,
             }}
           >
-            <span style={{ font: "500 11.5px/1.4 'Golos Text',sans-serif" }}>{p.label}</span>
+            <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif" }}>{p.label}</span>
             {ROLES.map(([id]) => (
               <span key={id} style={{ textAlign: "center" }}>
                 <span
@@ -1384,7 +1384,7 @@ export function AccessScreen() {
                     borderRadius: 0,
                     alignItems: "center",
                     justifyContent: "center",
-                    font: "700 10px/1 'JetBrains Mono',monospace",
+                    font: "700 12px/1 'JetBrains Mono',monospace",
                     background: p.roles[id] ? "rgba(46,204,113,.14)" : "rgba(255,255,255,.05)",
                     color: p.roles[id] ? GREEN : "rgba(255,255,255,.25)",
                     border: `1px solid ${p.roles[id] ? "rgba(46,204,113,.4)" : "rgba(255,255,255,.08)"}`,
@@ -1403,7 +1403,7 @@ export function AccessScreen() {
         className="gtr-mono"
         style={{
           marginTop: 12,
-          font: "500 10.5px/1.6 'JetBrains Mono',monospace",
+          font: "500 12px/1.6 'JetBrains Mono',monospace",
           color: "var(--gtr-t3)",
         }}
       >
@@ -1441,7 +1441,7 @@ function TgPanel() {
         <Chip color={GREEN}>{t("ПРИВЯЗАН · УВЕДОМЛЕНИЯ ИДУТ В ЧАТ")}</Chip>
       ) : tg?.bot ? (
         <>
-          <span style={{ font: "500 11.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+          <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
             {t("Бот @")}{tg.bot}{t(": предложения, заявки и команда /guest — в личном чате.")}
           </span>
           {link ? (
@@ -1465,11 +1465,11 @@ function TgPanel() {
           )}
         </>
       ) : (
-        <span style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+        <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
           {tg ? "Бот не активирован." : "Проверяем статус…"}
         </span>
       )}
-      {msg ? <span style={{ font: "500 10.5px/1.4 'Golos Text',sans-serif", color: "#FF5B4D" }}>{msg}</span> : null}
+      {msg ? <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "#FF5B4D" }}>{msg}</span> : null}
     </Card>
   );
 }
@@ -1613,10 +1613,10 @@ function TeamPanel() {
           {artistId ? (
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Chip color="#7B4DFF">{artistId}</Chip>
-              <span style={{ font: "500 11.5px/1.3 'Golos Text',sans-serif" }}>{artistName}</span>
+              <span style={{ font: "500 13px/1.45 'Golos Text',sans-serif" }}>{artistName}</span>
               <button
                 className="gtr-btn"
-                style={{ padding: "4px 9px", fontSize: 10 }}
+                style={{ padding: "4px 9px", fontSize: 12 }}
                 onClick={() => {
                   setArtistId("");
                   setArtistName("");
@@ -1645,11 +1645,11 @@ function TeamPanel() {
                     setArtQ("");
                   }}
                 >
-                  <span style={{ flex: 1, textAlign: "left", fontSize: 11.5 }}>
+                  <span style={{ flex: 1, textAlign: "left", fontSize: 13 }}>
                     {a.name}
                     <span
                       className="gtr-mono"
-                      style={{ marginLeft: 8, fontSize: 9, color: "rgba(255,255,255,.4)" }}
+                      style={{ marginLeft: 8, fontSize: 11, color: "rgba(255,255,255,.4)" }}
                     >
                       {a.id}
                     </span>
@@ -1687,7 +1687,7 @@ function TeamPanel() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button className="gtr-btn" style={{ padding: "8px 10px", fontSize: 10.5 }} onClick={genPassword}>
+          <button className="gtr-btn" style={{ padding: "8px 10px", fontSize: 12 }} onClick={genPassword}>
             {t("Сгенерировать")}
           </button>
         </div>
@@ -1697,10 +1697,10 @@ function TeamPanel() {
         {role === "artist" ? null : pickedVenue ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Chip color="#E5231B">{pickedVenue.id}</Chip>
-            <span style={{ font: "500 11.5px/1.3 'Golos Text',sans-serif" }}>{pickedVenue.name}</span>
+            <span style={{ font: "500 13px/1.45 'Golos Text',sans-serif" }}>{pickedVenue.name}</span>
             <button
               className="gtr-btn"
-              style={{ padding: "4px 9px", fontSize: 10 }}
+              style={{ padding: "4px 9px", fontSize: 12 }}
               onClick={() => setVenueId("")}
             >
               {t("Убрать")}
@@ -1725,9 +1725,9 @@ function TeamPanel() {
                   setVenueQ("");
                 }}
               >
-                <span style={{ flex: 1, textAlign: "left", fontSize: 11.5 }}>
+                <span style={{ flex: 1, textAlign: "left", fontSize: 13 }}>
                   {v.name}
-                  <span className="gtr-mono" style={{ marginLeft: 8, fontSize: 9, color: "rgba(255,255,255,.4)" }}>
+                  <span className="gtr-mono" style={{ marginLeft: 8, fontSize: 11, color: "rgba(255,255,255,.4)" }}>
                     {v.id}
                   </span>
                 </span>
@@ -1762,7 +1762,7 @@ function TeamPanel() {
         {msg ? (
           <span
             style={{
-              font: "500 11px/1.4 'Golos Text',sans-serif",
+              font: "500 13px/1.5 'Golos Text',sans-serif",
               color: msg.ok ? GREEN : "#FF5B4D",
             }}
           >
@@ -1775,7 +1775,7 @@ function TeamPanel() {
 
       {users?.length ? (
         <div style={{ display: "grid", gap: 6, marginTop: 4 }}>
-          <Eyebrow style={{ fontSize: 8.5 }}>{t("ПРИГЛАШЁННЫЕ ·")} {users.length}</Eyebrow>
+          <Eyebrow style={{ fontSize: 10 }}>{t("ПРИГЛАШЁННЫЕ ·")} {users.length}</Eyebrow>
           {users.map((u) => (
             <div
               key={u.email}
@@ -1792,12 +1792,12 @@ function TeamPanel() {
                 {u.initials}
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: "block", font: "600 11.5px/1.3 'Golos Text',sans-serif" }}>
+                <span style={{ display: "block", font: "600 13px/1.45 'Golos Text',sans-serif" }}>
                   {u.name}
                 </span>
                 <span
                   className="gtr-mono"
-                  style={{ display: "block", font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                  style={{ display: "block", font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                 >
                   {u.email} · {u.roleLabel}
                   {u.artistId ? (
@@ -1816,7 +1816,7 @@ function TeamPanel() {
               </span>
               <button
                 className="gtr-btn"
-                style={{ padding: "5px 9px", fontSize: 10, color: "#E5231B" }}
+                style={{ padding: "5px 9px", fontSize: 12, color: "#E5231B" }}
                 onClick={() => {
                   if (confirm(`Удалить доступ ${u.email}?`))
                     deleteUserFn({ data: { email: u.email } }).then(refresh);
@@ -1917,14 +1917,14 @@ export function AdminScreen() {
                 {x.readiness?.score}
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: "block", font: "600 12px/1.3 'Golos Text',sans-serif" }}>
+                <span style={{ display: "block", font: "600 12px/1.45 'Golos Text',sans-serif" }}>
                   {x.name}
                 </span>
                 <span
                   style={{
                     display: "block",
                     marginTop: 2,
-                    font: "500 9.5px/1.3 'JetBrains Mono',monospace",
+                    font: "500 11px/1.45 'JetBrains Mono',monospace",
                     color: "var(--gtr-t3)",
                   }}
                 >
@@ -1962,14 +1962,14 @@ export function AdminScreen() {
             >
               <Dot color={RED} top={0} />
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: "block", font: "600 12px/1.3 'Golos Text',sans-serif" }}>
+                <span style={{ display: "block", font: "600 12px/1.45 'Golos Text',sans-serif" }}>
                   {x.name}
                 </span>
                 <span
                   style={{
                     display: "block",
                     marginTop: 2,
-                    font: "500 9.5px/1.3 'JetBrains Mono',monospace",
+                    font: "500 11px/1.45 'JetBrains Mono',monospace",
                     color: "var(--gtr-t3)",
                   }}
                 >
@@ -1986,7 +1986,7 @@ export function AdminScreen() {
                 <span
                   style={{
                     flex: 1,
-                    font: "500 10.5px/1.5 'Golos Text',sans-serif",
+                    font: "500 12px/1.5 'Golos Text',sans-serif",
                     color: "var(--gtr-t2)",
                   }}
                 >
@@ -1995,7 +1995,7 @@ export function AdminScreen() {
                 <span
                   className="gtr-mono"
                   style={{
-                    font: "600 9.5px/1 'JetBrains Mono',monospace",
+                    font: "600 11px/1 'JetBrains Mono',monospace",
                     color: r.priority === "P0" ? RED : AMBER,
                   }}
                 >

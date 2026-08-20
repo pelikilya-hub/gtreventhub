@@ -74,7 +74,7 @@ export function PromptpayModal({
             ✕
           </button>
         </div>
-        <div style={{ font: "600 13px/1.4 'Golos Text',sans-serif", marginBottom: 10 }}>{title}</div>
+        <div style={{ font: "600 13px/1.5 'Golos Text',sans-serif", marginBottom: 10 }}>{title}</div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
           <input
             className="gtr-input"
@@ -100,7 +100,7 @@ export function PromptpayModal({
         <div
           style={{
             marginTop: 10,
-            font: "500 11px/1.5 'Golos Text',sans-serif",
+            font: "500 13px/1.5 'Golos Text',sans-serif",
             color: "var(--gtr-t2)",
           }}
         >
@@ -110,7 +110,7 @@ export function PromptpayModal({
           className="gtr-mono"
           style={{
             marginTop: 6,
-            font: "500 9.5px/1.5 'JetBrains Mono',monospace",
+            font: "500 11px/1.5 'JetBrains Mono',monospace",
             color: "var(--gtr-t3)",
           }}
         >

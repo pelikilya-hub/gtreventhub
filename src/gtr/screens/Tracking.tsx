@@ -154,24 +154,31 @@ export function TrackingScreen() {
         });
 
         const marker = L.marker([g.lat, g.lon], { icon: checkInIcon })
-          .bindPopup(`<div style="font-family:sans-serif;width:180px">
-            <div style="font-weight:600;margin-bottom:8px">${V(vid).name}</div>
+          .bindPopup(
+            // Разметка строкой — значит t() внутри не сработает: подписи
+            // переводим здесь и передаём готовыми.
+            `<div style="font-family:'Golos Text',sans-serif;width:190px">
+            <div style="font:600 13px/1.45 'Golos Text',sans-serif;margin-bottom:8px">${V(vid).name}</div>
             ${
               visited
-                ? `<div style="font-size:12px;color:#666;margin-bottom:6px">✓ Посещено</div>`
+                ? `<div style="font:500 11px/1.5 'JetBrains Mono',monospace;color:rgba(255,255,255,.72);margin-bottom:6px">✓ ${t("Посещено")}</div>`
                 : ""
             }
             <button data-check-in="${vid}" style="
-              background:#7B4DFF;color:#fff;border:none;padding:6px 10px;
-              width:100%;cursor:pointer;font-size:12px;border-radius:3px
-            ">${visited ? "Чек-аут" : "Чек-ин"}</button>
-          </div>`)
+              background:#7B4DFF;color:#fff;border:none;padding:8px 10px;
+              width:100%;cursor:pointer;font:600 12px/1 'Golos Text',sans-serif
+            ">${visited ? t("Чек-аут") : t("Чек-ин")}</button>
+          </div>`,
+            { className: "gtr-popup" },
+          )
           .addTo(L4.current!.map);
 
         L4.current!.checkInMarkers.set(vid, marker);
       }
     })();
-  }, [track]);
+    // t в зависимостях: подписи внутри попапа собираются строкой один раз,
+    // без этого смена языка не доедет до уже нарисованных маркеров.
+  }, [track, t]);
 
   // Обновляем трек в реальном времени
   useEffect(() => {
@@ -204,7 +211,7 @@ export function TrackingScreen() {
           </div>
           <div
             style={{
-              font: "500 11px/1.5 'Golos Text',sans-serif",
+              font: "500 13px/1.5 'Golos Text',sans-serif",
               color: "var(--gtr-t3)",
               marginTop: 8,
             }}
@@ -224,10 +231,13 @@ export function TrackingScreen() {
   const isCheckedIn = checkIn?.arrivedAt && !checkIn?.leftAt;
 
   return (
-    <div style={{ maxWidth: 1180, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 320px", gap: 14 }}>
+    <div
+      className="gtr-md-stack"
+      style={{ maxWidth: 1180, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 320px", gap: 14 }}
+    >
       {/* Карта */}
       <div>
-        <div ref={mapRef} style={{ height: "calc(100vh - 80px)", borderRadius: 8, overflow: "hidden" }} />
+        <div ref={mapRef} className="gtr-track-canvas" />
       </div>
 
       {/* Панель справа */}
@@ -240,7 +250,7 @@ export function TrackingScreen() {
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
               gap: 8,
-              font: "500 10.5px/1.5 'Golos Text',sans-serif",
+              font: "500 12px/1.5 'Golos Text',sans-serif",
             }}
           >
             <div>
@@ -269,19 +279,21 @@ export function TrackingScreen() {
             </div>
           </div>
           {gpsError && (
-            <div style={{ marginTop: 10, color: "#E5231B", fontSize: 10, lineHeight: 1.4 }}>
+            <div style={{ marginTop: 10, color: "#E5231B", fontSize: 12, lineHeight: 1.4 }}>
               {t("Ошибка GPS")}: {gpsError}
             </div>
           )}
           {currentLocation && (
-            <div style={{ marginTop: 10, color: "#7B4DFF", fontSize: 9, fontFamily: "monospace" }}>
+            <div style={{ marginTop: 10, color: "#7B4DFF", fontSize: 11, fontFamily: "monospace" }}>
               Точность: ±{Math.round(currentLocation.accuracy)}м
             </div>
           )}
         </Card>
 
         {/* Маршрут */}
-        <Card style={{ padding: 14, flex: 1, overflow: "auto", maxHeight: "50vh" }}>
+        {/* Потолок высоты нужен только в колонке рядом с картой. В столбике на
+            телефоне список маршрута идёт следом за картой и режется зря. */}
+        <Card className="gtr-track-list" style={{ padding: 14, flex: 1, overflow: "auto" }}>
           <Eyebrow style={{ marginBottom: 10 }}>{t("МАРШРУТ")}</Eyebrow>
           <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
             {track.routeIds.map((vid, i) => {
@@ -301,7 +313,7 @@ export function TrackingScreen() {
                     borderRadius: 4,
                     cursor: "pointer",
                     textAlign: "left",
-                    font: "500 10px/1.3 'Golos Text',sans-serif",
+                    font: "500 12px/1.45 'Golos Text',sans-serif",
                     transition: "all .2s",
                   }}
                 >
@@ -311,21 +323,34 @@ export function TrackingScreen() {
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        width: 20,
-                        height: 20,
+                        width: 22,
+                        height: 22,
+                        // Маршрут бывает длиннее девяти точек: двузначный
+                        // номер обязан помещаться, а кружок — не сжиматься
+                        // под длинным названием площадки рядом.
+                        flex: "0 0 auto",
                         borderRadius: "50%",
                         background: visited ? "#E5231B" : "#7B4DFF",
                         color: "#fff",
-                        fontSize: 10,
+                        fontSize: 12,
                         fontWeight: 700,
                       }}
                     >
                       {visited ? "✓" : i + 1}
                     </span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, truncate: true }}>{V(vid).name}</div>
+                      <div
+                        style={{
+                          fontWeight: 600,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {V(vid).name}
+                      </div>
                       {arrivalTime && (
-                        <div style={{ font: "500 9px/1 monospace", opacity: 0.7 }}>в {arrivalTime}</div>
+                        <div style={{ font: "500 11px/1 monospace", opacity: 0.7 }}>в {arrivalTime}</div>
                       )}
                     </div>
                   </div>
@@ -346,7 +371,7 @@ export function TrackingScreen() {
                   padding: "8px 12px",
                   background: isCheckedIn ? "#E5231B" : "#7B4DFF",
                   color: "#fff",
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: 600,
                 }}
                 onClick={() => {
@@ -365,7 +390,7 @@ export function TrackingScreen() {
               {checkIn?.arrivedAt && (
                 <>
                   <div>
-                    <label style={{ display: "block", fontSize: 10, marginBottom: 4, color: "var(--gtr-t2)" }}>
+                    <label style={{ display: "block", fontSize: 12, marginBottom: 4, color: "var(--gtr-t2)" }}>
                       {t("Оценка")}
                     </label>
                     <div style={{ display: "flex", gap: 4 }}>
@@ -397,7 +422,7 @@ export function TrackingScreen() {
                       color: "inherit",
                       padding: "6px 8px",
                       borderRadius: 3,
-                      font: "500 10px/1.4 'Golos Text',sans-serif",
+                      font: "500 12px/1.5 'Golos Text',sans-serif",
                       resize: "none",
                       height: 60,
                     }}
@@ -407,7 +432,7 @@ export function TrackingScreen() {
                     className="gtr-btn"
                     style={{
                       padding: "6px 10px",
-                      fontSize: 10,
+                      fontSize: 12,
                     }}
                     onClick={() => {
                       gpsTracker.rateVenue(selectedVid, ratingScore, ratingText);

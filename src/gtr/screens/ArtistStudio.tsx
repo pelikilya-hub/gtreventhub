@@ -211,7 +211,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
       style={{
         display: "block",
         margin: "0 0 4px",
-        font: "600 8.5px/1 'JetBrains Mono',monospace",
+        font: "600 10px/1 'JetBrains Mono',monospace",
         color: "rgba(255,255,255,.45)",
         letterSpacing: ".1em",
       }}
@@ -322,7 +322,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
                       border: "none",
                       background: "#E5231B",
                       color: "#fff",
-                      font: "700 10px/1 monospace",
+                      font: "700 12px/1 monospace",
                       cursor: "pointer",
                     }}
                   >
@@ -357,12 +357,12 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
           <Eyebrow>{t("МОИ СЕТЫ ·")} {sets.length}/12</Eyebrow>
           {sets.map((sSet, i) => (
             <div key={`${sSet.url}-${i}`} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <span style={{ flex: 1, minWidth: 0, font: "500 11.5px/1.3 'Golos Text',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <span style={{ flex: 1, minWidth: 0, font: "500 13px/1.45 'Golos Text',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 ▶ {sSet.title}
               </span>
               <button
                 className="gtr-btn"
-                style={{ padding: "3px 8px", fontSize: 10, color: "#E5231B" }}
+                style={{ padding: "3px 8px", fontSize: 12, color: "#E5231B" }}
                 onClick={() => {
                   const next = sets.filter((_, j) => j !== i);
                   setSets(next);
@@ -418,7 +418,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
               {t("Отправить команде")}
             </button>
             {teamState ? (
-              <span className="gtr-mono" style={{ font: "500 9.5px/1.3 'JetBrains Mono',monospace", color: teamState.startsWith("Доставлено") ? GREEN : "var(--gtr-t3)" }}>
+              <span className="gtr-mono" style={{ font: "500 11px/1.45 'JetBrains Mono',monospace", color: teamState.startsWith("Доставлено") ? GREEN : "var(--gtr-t3)" }}>
                 {teamState}
               </span>
             ) : null}

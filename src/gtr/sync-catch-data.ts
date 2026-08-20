@@ -112,7 +112,7 @@ async function findCatchPhotos(): Promise<CatchPhoto[]> {
     const gallery = await fetchText("https://www.catchbeachclub.com/gallery/");
 
     // Фото зон: beach, pool, restaurant, bar
-    const beachPhotos = gallery.match(/(?:beach|beachfront)[^<]*?(?:src=["']([^"']+\.(?:jpg|png|webp))/gi);
+    const beachPhotos = gallery.match(/(?:beach|beachfront)[^<]*?src=["']([^"']+\.(?:jpg|png|webp))/gi);
     if (beachPhotos) {
       beachPhotos.slice(0, 3).forEach((url, i) => {
         const cleanUrl = url.match(/src=["']([^"']+)/)?.[1];
@@ -127,7 +127,7 @@ async function findCatchPhotos(): Promise<CatchPhoto[]> {
       });
     }
 
-    const poolPhotos = gallery.match(/(?:pool|daybed)[^<]*?(?:src=["']([^"']+\.(?:jpg|png|webp))/gi);
+    const poolPhotos = gallery.match(/(?:pool|daybed)[^<]*?src=["']([^"']+\.(?:jpg|png|webp))/gi);
     if (poolPhotos) {
       poolPhotos.slice(0, 3).forEach((url, i) => {
         const cleanUrl = url.match(/src=["']([^"']+)/)?.[1];
@@ -142,7 +142,7 @@ async function findCatchPhotos(): Promise<CatchPhoto[]> {
       });
     }
 
-    const restaurantPhotos = gallery.match(/(?:restaurant|dining)[^<]*?(?:src=["']([^"']+\.(?:jpg|png|webp))/gi);
+    const restaurantPhotos = gallery.match(/(?:restaurant|dining)[^<]*?src=["']([^"']+\.(?:jpg|png|webp))/gi);
     if (restaurantPhotos) {
       restaurantPhotos.slice(0, 2).forEach((url, i) => {
         const cleanUrl = url.match(/src=["']([^"']+)/)?.[1];

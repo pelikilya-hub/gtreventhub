@@ -260,7 +260,7 @@ export const Ring = ({ value, size = 118 }: { value: number; size?: number }) =>
         >
           {value}
         </div>
-        <div className="gtr-eyebrow" style={{ fontSize: 8.5, marginTop: 5 }}>
+        <div className="gtr-eyebrow" style={{ fontSize: 10, marginTop: 5 }}>
           / 100
         </div>
       </div>

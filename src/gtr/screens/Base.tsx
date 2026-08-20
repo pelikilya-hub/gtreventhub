@@ -201,7 +201,7 @@ export function BaseScreen() {
                     position: "absolute",
                     left: 14,
                     bottom: 10,
-                    font: "600 8.5px/1 'JetBrains Mono',monospace",
+                    font: "600 10px/1 'JetBrains Mono',monospace",
                     color: "rgba(255,255,255,.3)",
                     letterSpacing: ".14em",
                     textTransform: "uppercase",
@@ -254,7 +254,7 @@ export function BaseScreen() {
                     position: "absolute",
                     top: 9,
                     right: 9,
-                    font: "700 11px/1 'JetBrains Mono',monospace",
+                    font: "700 13px/1 'JetBrains Mono',monospace",
                     padding: "4px 7px",
                     background: "rgba(10,11,13,.72)",
                     backdropFilter: "blur(3px)",
@@ -272,14 +272,14 @@ export function BaseScreen() {
             </div>
             <div style={{ padding: "11px 15px 14px" }}>
               <div
-                style={{ font: "600 13.5px/1.3 'Golos Text',sans-serif" }}
+                style={{ font: "600 13.5px/1.45 'Golos Text',sans-serif" }}
               >
                 {x.name}
               </div>
               <div
                 style={{
                   margin: "5px 0 8px",
-                  font: "500 10.5px/1.45 'Golos Text',sans-serif",
+                  font: "500 12px/1.45 'Golos Text',sans-serif",
                   color: "var(--gtr-t2)",
                 }}
               >
@@ -462,7 +462,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               className="gtr-mono"
               style={{
                 marginTop: 6,
-                font: "500 9.5px/1.3 'JetBrains Mono',monospace",
+                font: "500 11px/1.45 'JetBrains Mono',monospace",
                 color: "var(--gtr-t3)",
               }}
             >
@@ -508,14 +508,14 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                       <div
                         className="gtr-mono"
                         style={{
-                          font: "600 8.5px/1 'JetBrains Mono',monospace",
+                          font: "600 10px/1 'JetBrains Mono',monospace",
                           letterSpacing: ".12em",
                           color: "var(--gtr-t3)",
                         }}
                       >
                         {t(k)}
                       </div>
-                      <div style={{ marginTop: 5, font: "600 11.5px/1.45 'Golos Text',sans-serif" }}>
+                      <div style={{ marginTop: 5, font: "600 13px/1.45 'Golos Text',sans-serif" }}>
                         {t(String(val))}
                       </div>
                     </div>
@@ -557,7 +557,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 className="gtr-mono"
                 style={{
                   marginTop: 10,
-                  font: "500 9.5px/1.5 'JetBrains Mono',monospace",
+                  font: "500 11px/1.5 'JetBrains Mono',monospace",
                   color: "var(--gtr-t3)",
                 }}
               >
@@ -607,7 +607,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 <div
                   style={{
                     marginTop: 8,
-                    font: "500 11.5px/1.6 'Golos Text',sans-serif",
+                    font: "500 13px/1.6 'Golos Text',sans-serif",
                     color: "var(--gtr-t2)",
                   }}
                 >
@@ -619,7 +619,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                   className="gtr-mono"
                   style={{
                     marginTop: 7,
-                    font: "500 9px/1.4 'JetBrains Mono',monospace",
+                    font: "500 11px/1.5 'JetBrains Mono',monospace",
                     color: "var(--gtr-t3)",
                     textTransform: "uppercase",
                   }}
@@ -641,13 +641,13 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     style={{ padding: "7px 0", borderBottom: "1px solid rgba(255,255,255,.05)" }}
                   >
                     <div style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
-                      <span style={{ flex: 1, font: "600 12px/1.3 'Golos Text',sans-serif" }}>
+                      <span style={{ flex: 1, font: "600 12px/1.45 'Golos Text',sans-serif" }}>
                         {s.name}
                       </span>
                       <span
                         className="gtr-mono"
                         style={{
-                          font: "500 10px/1.3 'JetBrains Mono',monospace",
+                          font: "500 12px/1.45 'JetBrains Mono',monospace",
                           color: "var(--gtr-t3)",
                         }}
                       >
@@ -680,7 +680,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                               className="gtr-mono"
                               style={{
                                 marginTop: 3,
-                                font: "500 8.5px/1.3 'JetBrains Mono',monospace",
+                                font: "500 10px/1.45 'JetBrains Mono',monospace",
                                 color: "var(--gtr-t3)",
                                 textTransform: "uppercase",
                                 letterSpacing: ".08em",
@@ -706,7 +706,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               <div
                 style={{
                   margin: "0 0 12px",
-                  font: "500 11px/1.6 'Golos Text',sans-serif",
+                  font: "500 13px/1.6 'Golos Text',sans-serif",
                   color: "var(--gtr-t2)",
                 }}
               >
@@ -821,7 +821,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                   className="gtr-mono"
                   style={{
                     marginTop: 6,
-                    font: "600 9px/1.4 'JetBrains Mono',monospace",
+                    font: "600 11px/1.5 'JetBrains Mono',monospace",
                     color: cRate ? GREEN : RATE_COLOR[rate!.kind],
                     letterSpacing: ".08em",
                     textTransform: "uppercase",
@@ -839,7 +839,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                   <div
                     style={{
                       marginTop: 5,
-                      font: "500 10.5px/1.5 'Golos Text',sans-serif",
+                      font: "500 12px/1.5 'Golos Text',sans-serif",
                       color: "var(--gtr-t2)",
                     }}
                   >
@@ -851,7 +851,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     className="gtr-mono"
                     style={{
                       marginTop: 7,
-                      font: "500 10px/1.5 'JetBrains Mono',monospace",
+                      font: "500 12px/1.5 'JetBrains Mono',monospace",
                       color: "var(--gtr-t2)",
                     }}
                   >
@@ -970,13 +970,13 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                       boxShadow: `0 0 6px -1px ${String(c)}`,
                     }}
                   />
-                  <span style={{ flex: 1, font: "500 11.5px/1.4 'Golos Text',sans-serif" }}>
+                  <span style={{ flex: 1, font: "500 13px/1.5 'Golos Text',sans-serif" }}>
                     {k}
                   </span>
                   <span
                     className="gtr-mono"
                     style={{
-                      font: "600 10px/1.4 'JetBrains Mono',monospace",
+                      font: "600 12px/1.5 'JetBrains Mono',monospace",
                       color: String(c),
                       textAlign: "right",
                       maxWidth: "46%",
@@ -1002,7 +1002,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     <span
                       className="gtr-mono"
                       style={{
-                        font: "700 10px/1.3 'JetBrains Mono',monospace",
+                        font: "700 12px/1.45 'JetBrains Mono',monospace",
                         color: "#E5231B",
                         width: 46,
                         flex: "none",
@@ -1012,14 +1012,14 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     </span>
                     <span style={{ flex: 1 }}>
                       <span
-                        style={{ display: "block", font: "600 11.5px/1.3 'Golos Text',sans-serif" }}
+                        style={{ display: "block", font: "600 13px/1.45 'Golos Text',sans-serif" }}
                       >
                         {title}
                       </span>
                       <span
                         style={{
                           display: "block",
-                          font: "500 9.5px/1.4 'JetBrains Mono',monospace",
+                          font: "500 11px/1.5 'JetBrains Mono',monospace",
                           color: "var(--gtr-t3)",
                         }}
                       >
@@ -1085,7 +1085,7 @@ function AfishaBlock({ vid }: { vid: string }) {
         {data?.syncedAt ? (
           <span
             className="gtr-mono"
-            style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+            style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
           >
             {t("обновлено")} {new Date(data.syncedAt).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
           </span>
@@ -1150,7 +1150,7 @@ function AfishaBlock({ vid }: { vid: string }) {
             {t("+ Добавить")}
           </button>
           {mNote ? (
-            <span className="gtr-mono" style={{ font: "500 9px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+            <span className="gtr-mono" style={{ font: "500 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
               {mNote}
             </span>
           ) : null}
@@ -1185,12 +1185,12 @@ function AfishaBlock({ vid }: { vid: string }) {
               <span style={{ padding: "8px 10px", display: "grid", gap: 3 }}>
                 <span
                   className="gtr-mono"
-                  style={{ font: "700 9.5px/1 'JetBrains Mono',monospace", color: "#FF3427" }}
+                  style={{ font: "700 11px/1 'JetBrains Mono',monospace", color: "#FF3427" }}
                 >
                   {e.dateIso.slice(5).split("-").reverse().join(".")}
                   {e.room ? ` · ${e.room.toUpperCase()}` : ""}
                 </span>
-                <span style={{ font: "600 11.5px/1.35 'Golos Text',sans-serif", color: "#fff" }}>
+                <span style={{ font: "600 13px/1.45 'Golos Text',sans-serif", color: "#fff" }}>
                   {e.title}
                 </span>
                 {e.artistIds.length ? (
@@ -1200,7 +1200,7 @@ function AfishaBlock({ vid }: { vid: string }) {
                         key={id}
                         className="gtr-mono"
                         style={{
-                          font: "600 8.5px/1 'JetBrains Mono',monospace",
+                          font: "600 10px/1 'JetBrains Mono',monospace",
                           color: "#2ECC71",
                           border: "1px solid rgba(46,204,113,.4)",
                           background: "transparent",
@@ -1222,7 +1222,7 @@ function AfishaBlock({ vid }: { vid: string }) {
           ))}
         </div>
       ) : (
-        <span style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+        <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
           {t("Источник этой площадки ещё не подключён — собираем Café del Mar и Illuzion, дальше расширяем.")}
         </span>
       )}
@@ -1277,7 +1277,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
       </div>
       <div
         style={{
-          font: "500 11px/1.55 'Golos Text',sans-serif",
+          font: "500 13px/1.55 'Golos Text',sans-serif",
           color: "var(--gtr-t2)",
           marginBottom: 10,
         }}
@@ -1293,7 +1293,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
             className="gtr-mono"
             style={{
               margin: "10px 0 8px",
-              font: "500 10px/1.5 'JetBrains Mono',monospace",
+              font: "500 12px/1.5 'JetBrains Mono',monospace",
               color: copied ? GREEN : "var(--gtr-t2)",
               wordBreak: "break-all",
             }}

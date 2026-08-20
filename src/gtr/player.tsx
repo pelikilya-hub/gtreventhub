@@ -18,7 +18,7 @@ export function GtrPlayerBar() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const dataRef = useRef<Uint8Array | null>(null);
+  const dataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const rafRef = useRef(0);
   const levelRef = useRef(0);
   // состояние детектора ударов: огибающие, время последнего удара,

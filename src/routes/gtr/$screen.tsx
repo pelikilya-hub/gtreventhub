@@ -24,6 +24,8 @@ const SCREENS: ScreenId[] = [
   "feed",
   "tonight",
   "tracking",
+  "drafts",
+  "outreach",
   "aimatch",
   "community",
   "visas",

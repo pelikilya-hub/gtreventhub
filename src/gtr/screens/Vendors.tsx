@@ -135,7 +135,7 @@ export function VendorsScreen() {
                 </span>
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span
-                    style={{ display: "block", font: "600 13.5px/1.3 'Golos Text',sans-serif" }}
+                    style={{ display: "block", font: "600 13.5px/1.45 'Golos Text',sans-serif" }}
                   >
                     {v.name}
                   </span>
@@ -146,7 +146,7 @@ export function VendorsScreen() {
               </div>
               <div
                 style={{
-                  font: "500 11px/1.5 'Golos Text',sans-serif",
+                  font: "500 13px/1.5 'Golos Text',sans-serif",
                   color: "var(--gtr-t2)",
                   minHeight: 33,
                 }}
@@ -165,7 +165,7 @@ export function VendorsScreen() {
               >
                 <span
                   className="gtr-mono"
-                  style={{ font: "600 9.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                  style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                 >
                   {v.packages.length ? `${v.packages.length} позиций` : "прайс по запросу"}
                 </span>
@@ -207,7 +207,7 @@ function EquipCard({ e, kind }: { e: EquipItem; kind: "gear" | "interactive" }) 
           <Icon d={K[3]} size={15} />
         </span>
         <span style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ display: "block", font: "600 13.5px/1.3 'Golos Text',sans-serif" }}>
+          <span style={{ display: "block", font: "600 13.5px/1.45 'Golos Text',sans-serif" }}>
             {e.name}
           </span>
           <Chip color={K[1]} style={{ marginTop: 4 }}>
@@ -217,7 +217,7 @@ function EquipCard({ e, kind }: { e: EquipItem; kind: "gear" | "interactive" }) 
       </div>
       <div
         style={{
-          font: "500 11px/1.5 'Golos Text',sans-serif",
+          font: "500 13px/1.5 'Golos Text',sans-serif",
           color: "var(--gtr-t2)",
           minHeight: 33,
         }}
@@ -237,14 +237,14 @@ function EquipCard({ e, kind }: { e: EquipItem; kind: "gear" | "interactive" }) 
       >
         <span
           className="gtr-mono"
-          style={{ font: "600 9px/1.3 'JetBrains Mono',monospace", color: RATE_COLOR[e.kind] }}
+          style={{ font: "600 11px/1.45 'JetBrains Mono',monospace", color: RATE_COLOR[e.kind] }}
         >
           {RATE_LABEL[e.kind].toUpperCase()}
         </span>
         <span
           className="gtr-mono"
           style={{
-            font: "700 11.5px/1 'JetBrains Mono',monospace",
+            font: "700 13px/1 'JetBrains Mono',monospace",
             color: e.price ? "#fff" : "var(--gtr-t3)",
             textAlign: "right",
           }}
@@ -254,7 +254,7 @@ function EquipCard({ e, kind }: { e: EquipItem; kind: "gear" | "interactive" }) 
       </div>
       <div
         className="gtr-mono"
-        style={{ marginTop: 7, font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+        style={{ marginTop: 7, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
       >
         {e.vendor ? `${e.vendor} · ${e.contact}` : "подрядчик не назначен"}
       </div>
@@ -361,7 +361,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
                 <span
                   className="gtr-mono"
                   style={{
-                    font: "600 9px/1 'JetBrains Mono',monospace",
+                    font: "600 11px/1 'JetBrains Mono',monospace",
                     color: K[1],
                     padding: "11px 0",
                     borderBottom: "1px solid rgba(255,255,255,.04)",
@@ -372,7 +372,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
                 </span>
                 <span
                   style={{
-                    font: "500 11.5px/1.4 'Golos Text',sans-serif",
+                    font: "500 13px/1.5 'Golos Text',sans-serif",
                     padding: "11px 0",
                     borderBottom: "1px solid rgba(255,255,255,.04)",
                     alignSelf: "center",
@@ -383,7 +383,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
                 <span
                   className="gtr-mono"
                   style={{
-                    font: "700 11.5px/1 'JetBrains Mono',monospace",
+                    font: "700 13px/1 'JetBrains Mono',monospace",
                     padding: "11px 0",
                     borderBottom: "1px solid rgba(255,255,255,.04)",
                     alignSelf: "center",
@@ -411,7 +411,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
         className="gtr-mono"
         style={{
           marginTop: 12,
-          font: "500 10px/1.5 'JetBrains Mono',monospace",
+          font: "500 12px/1.5 'JetBrains Mono',monospace",
           color: "var(--gtr-t3)",
         }}
       >

@@ -157,7 +157,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
             >
               <span style={{ width: 7, height: 7, borderRadius: 0, background: color }} />
               {s === "all" ? "Все" : STAGE_LABEL[s]}
-              <span className="gtr-mono" style={{ fontSize: 9.5, opacity: 0.6 }}>
+              <span className="gtr-mono" style={{ fontSize: 11, opacity: 0.6 }}>
                 {counts[s] ?? 0}
               </span>
             </button>
@@ -223,7 +223,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                 <div
                   style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}
                 >
-                  <span style={{ font: "600 14px/1.3 'Golos Text',sans-serif" }}>
+                  <span style={{ font: "600 14px/1.45 'Golos Text',sans-serif" }}>
                     {draftTitle(d)}
                   </span>
                   <Chip color={STAGE_COLOR[st]}>{STAGE_LABEL[st].toUpperCase()}</Chip>
@@ -236,7 +236,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                         gap: 5,
                         borderRadius: 0,
                         padding: "4px 9px",
-                        font: "600 9px/1 'JetBrains Mono',monospace",
+                        font: "600 11px/1 'JetBrains Mono',monospace",
                         letterSpacing: ".05em",
                         color: "#fff",
                         border: "1px solid rgba(255,255,255,.12)",
@@ -269,7 +269,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                 <div
                   className="gtr-mono"
                   style={{
-                    font: "500 10px/1.5 'JetBrains Mono',monospace",
+                    font: "500 12px/1.5 'JetBrains Mono',monospace",
                     color: "var(--gtr-t3)",
                     display: "flex",
                     gap: 14,
@@ -297,7 +297,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                 >
                   <span
                     className="gtr-mono"
-                    style={{ font: "500 9.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                    style={{ font: "500 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
                     {d.author || "GTR"}
                     {isAdmin && d.owner ? ` (${d.owner})` : ""}
@@ -305,7 +305,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                   </span>
                   <button
                     className="gtr-btn"
-                    style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10.5 }}
+                    style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 12 }}
                     onClick={(e) => {
                       e.stopPropagation();
                       createDraft({
@@ -322,7 +322,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                   </button>
                   <button
                     className="gtr-btn"
-                    style={{ padding: "5px 10px", fontSize: 10.5, color: "#E5231B" }}
+                    style={{ padding: "5px 10px", fontSize: 12, color: "#E5231B" }}
                     onClick={(e) => {
                       e.stopPropagation();
                       if (confirm(`Удалить событие «${draftTitle(d)}»? Отменить будет нельзя.`))
@@ -442,16 +442,16 @@ function Step({ n, title, note }: { n: number; title: string; note?: string }) {
       <span
         className="gtr-mono"
         style={{
-          font: "700 10px/1 'JetBrains Mono',monospace",
+          font: "700 12px/1 'JetBrains Mono',monospace",
           color: "var(--gtr-red)",
           letterSpacing: ".08em",
         }}
       >
         {String(n).padStart(2, "0")}
       </span>
-      <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>{title}</span>
+      <span style={{ font: "600 13px/1 'Golos Text',sans-serif" }}>{title}</span>
       {note ? (
-        <span style={{ font: "500 10.5px/1.3 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+        <span style={{ font: "500 12px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
           — {note}
         </span>
       ) : null}
@@ -622,21 +622,21 @@ function NewEvent({
               >
                 <span
                   style={{
-                    font: "600 12px/1.3 'Golos Text',sans-serif",
+                    font: "600 12px/1.45 'Golos Text',sans-serif",
                     color: on ? "#fff" : "rgba(255,255,255,.85)",
                   }}
                 >
                   {p.title}
                 </span>
                 <span
-                  style={{ font: "500 10px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
+                  style={{ font: "500 12px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
                 >
                   {p.desc}
                 </span>
                 <span
                   className="gtr-mono"
                   style={{
-                    font: "600 9px/1 'JetBrains Mono',monospace",
+                    font: "600 11px/1 'JetBrains Mono',monospace",
                     color: on ? "#2ECC71" : "rgba(255,255,255,.35)",
                   }}
                 >
@@ -663,11 +663,11 @@ function NewEvent({
             }}
           >
             <span
-              style={{ font: "600 12px/1.3 'Golos Text',sans-serif", color: "rgba(255,255,255,.75)" }}
+              style={{ font: "600 12px/1.45 'Golos Text',sans-serif", color: "rgba(255,255,255,.75)" }}
             >
               {t("Пустое событие")}
             </span>
-            <span style={{ font: "500 10px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <span style={{ font: "500 12px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {t("Только площадка, залы и слот — состав собираете сами")}
             </span>
           </button>
@@ -745,10 +745,10 @@ function NewEvent({
         {picked ? (
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <Chip color="#E5231B">{picked.id}</Chip>
-            <span style={{ font: "500 12.5px/1.3 'Golos Text',sans-serif" }}>{picked.name}</span>
+            <span style={{ font: "500 12.5px/1.45 'Golos Text',sans-serif" }}>{picked.name}</span>
             <span
               className="gtr-mono"
-              style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+              style={{ font: "500 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
             >
               {picked.type} · {picked.area}
               {picked.capacity ? ` · до ${capOf(picked.capacity)} гостей` : ""}
@@ -759,7 +759,7 @@ function NewEvent({
             {canChoose ? (
               <button
                 className="gtr-btn"
-                style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10.5 }}
+                style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 12 }}
                 onClick={() => setVenueId("")}
               >
                 {t("Изменить")}
@@ -793,7 +793,7 @@ function NewEvent({
                     }}
                   >
                     {c}
-                    <span className="gtr-mono" style={{ marginLeft: 6, fontSize: 9, opacity: 0.6 }}>
+                    <span className="gtr-mono" style={{ marginLeft: 6, fontSize: 11, opacity: 0.6 }}>
                       {cnt}
                     </span>
                   </button>
@@ -824,14 +824,14 @@ function NewEvent({
                     onClick={() => setVenueId(v.id)}
                   >
                     <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                      <span style={{ display: "block", fontWeight: 600, fontSize: 11.5 }}>
+                      <span style={{ display: "block", fontWeight: 600, fontSize: 13 }}>
                         {v.name}
                       </span>
                       <span
                         style={{
                           display: "block",
                           marginTop: 2,
-                          font: "500 9px/1.3 'JetBrains Mono',monospace",
+                          font: "500 11px/1.45 'JetBrains Mono',monospace",
                           color: "rgba(255,255,255,.4)",
                         }}
                       >
@@ -843,7 +843,7 @@ function NewEvent({
                           style={{
                             display: "block",
                             marginTop: 2,
-                            font: "600 9px/1.3 'JetBrains Mono',monospace",
+                            font: "600 11px/1.45 'JetBrains Mono',monospace",
                             color: "#2ECC71",
                           }}
                         >
@@ -855,7 +855,7 @@ function NewEvent({
                           style={{
                             display: "block",
                             marginTop: 2,
-                            font: "600 9px/1.3 'JetBrains Mono',monospace",
+                            font: "600 11px/1.45 'JetBrains Mono',monospace",
                             color: RATE_COLOR[rate.kind],
                           }}
                         >
@@ -870,7 +870,7 @@ function NewEvent({
                         className="gtr-mono"
                         style={{
                           flex: "none",
-                          font: "700 8.5px/1 'JetBrains Mono',monospace",
+                          font: "700 10px/1 'JetBrains Mono',monospace",
                           color: "#2ECC71",
                           border: "1px solid rgba(46,204,113,.4)",
                           padding: "3px 6px",
@@ -883,7 +883,7 @@ function NewEvent({
                         className="gtr-mono"
                         style={{
                           flex: "none",
-                          font: "600 8.5px/1 'JetBrains Mono',monospace",
+                          font: "600 10px/1 'JetBrains Mono',monospace",
                           color: "rgba(255,255,255,.35)",
                         }}
                       >
@@ -896,7 +896,7 @@ function NewEvent({
               {!venues.length ? (
                 <span
                   style={{
-                    font: "500 11px/1.5 'Golos Text',sans-serif",
+                    font: "500 13px/1.5 'Golos Text',sans-serif",
                     color: "var(--gtr-t3)",
                     padding: "8px 2px",
                   }}
@@ -946,11 +946,11 @@ function NewEvent({
                       background: on ? "rgba(229,35,27,.12)" : "var(--gtr-card2)",
                     }}
                   >
-                    <span style={{ font: "600 12px/1.3 'Golos Text',sans-serif", color: on ? "#fff" : "rgba(255,255,255,.8)" }}>
+                    <span style={{ font: "600 12px/1.45 'Golos Text',sans-serif", color: on ? "#fff" : "rgba(255,255,255,.8)" }}>
                       {on ? "✓ " : ""}
                       {r.name}
                     </span>
-                    <span className="gtr-mono" style={{ font: "500 9px/1.3 'JetBrains Mono',monospace", color: "rgba(255,255,255,.4)" }}>
+                    <span className="gtr-mono" style={{ font: "500 11px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.4)" }}>
                       {r.sub}
                     </span>
                   </button>
@@ -958,7 +958,7 @@ function NewEvent({
               })}
             </div>
           ) : (
-            <span style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {t("Залы этой площадки ещё не нормализованы в базе — событие соберётся по площадке целиком, зоны можно включить ниже.")}
             </span>
           )}
@@ -1031,7 +1031,7 @@ function NewEvent({
                       style={{
                         display: "block",
                         marginTop: 2,
-                        font: "500 8.5px/1.2 'JetBrains Mono',monospace",
+                        font: "500 10px/1.2 'JetBrains Mono',monospace",
                         color: on ? "rgba(255,255,255,.75)" : "rgba(255,255,255,.35)",
                       }}
                     >
@@ -1076,7 +1076,7 @@ function NewEvent({
           {t("Отмена")}
         </button>
         {!ready ? (
-          <span style={{ font: "500 10.5px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+          <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
             {!venueId
               ? "Выберите площадку"
               : preset && vibeQ && !vibeId

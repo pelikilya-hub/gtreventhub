@@ -146,7 +146,7 @@ export function TonightScreen() {
                   position: "absolute",
                   top: 9,
                   left: 9,
-                  font: "700 9px/1 'JetBrains Mono',monospace",
+                  font: "700 11px/1 'JetBrains Mono',monospace",
                   padding: "4px 7px",
                   background: "rgba(229,35,27,.85)",
                   color: "#fff",
@@ -159,23 +159,23 @@ export function TonightScreen() {
           </div>
         ) : null}
         <div style={{ padding: "11px 14px 13px" }}>
-          <div style={{ font: "600 13px/1.35 'Golos Text',sans-serif" }}>{e.title}</div>
+          <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>{e.title}</div>
           <div
             style={{
               margin: "5px 0 8px",
-              font: "500 10.5px/1.45 'Golos Text',sans-serif",
+              font: "500 12px/1.45 'Golos Text',sans-serif",
               color: "var(--gtr-t2)",
             }}
           >
             {v.name} · {v.area}
           </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            <button className="gtr-btn" style={{ padding: "6px 10px", fontSize: 10.5 }} onClick={() => setBookVid(bookVid === e.vid ? "" : e.vid)}>
+            <button className="gtr-btn" style={{ padding: "6px 10px", fontSize: 12 }} onClick={() => setBookVid(bookVid === e.vid ? "" : e.vid)}>
               {t("Стол")}
             </button>
             <button
               className="gtr-btn"
-              style={{ padding: "6px 10px", fontSize: 10.5 }}
+              style={{ padding: "6px 10px", fontSize: 12 }}
               onClick={() =>
                 navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid: e.vid } })
               }
@@ -186,7 +186,7 @@ export function TonightScreen() {
               className="gtr-btn"
               style={{
                 padding: "6px 10px",
-                fontSize: 10.5,
+                fontSize: 12,
                 borderColor: route.includes(e.vid) ? GREEN : undefined,
                 color: route.includes(e.vid) ? GREEN : undefined,
               }}
@@ -234,7 +234,7 @@ export function TonightScreen() {
         </button>
       ) : null}
       {bkState ? (
-        <div className="gtr-mono" style={{ font: "500 10px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
+        <div className="gtr-mono" style={{ font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
           {bkState}
         </div>
       ) : null}
@@ -299,7 +299,7 @@ export function TonightScreen() {
                 </span>
                 <span
                   className="gtr-mono"
-                  style={{ font: "600 9.5px/1 'JetBrains Mono',monospace", color: GREEN, whiteSpace: "nowrap" }}
+                  style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: GREEN, whiteSpace: "nowrap" }}
                 >
                   {t(String(n.hours)).split("·")[0].trim()}
                 </span>
@@ -310,7 +310,7 @@ export function TonightScreen() {
         <div style={{ padding: "10px 14px 13px" }}>
           <div
             style={{
-              font: "500 10.5px/1.5 'Golos Text',sans-serif",
+              font: "500 12px/1.5 'Golos Text',sans-serif",
               color: "var(--gtr-t2)",
               marginBottom: 7,
             }}
@@ -320,7 +320,7 @@ export function TonightScreen() {
           {n.best ? (
             <div
               style={{
-                font: "500 10.5px/1.5 'Golos Text',sans-serif",
+                font: "500 12px/1.5 'Golos Text',sans-serif",
                 color: tint("#F5A623", 0.9),
                 marginBottom: 8,
               }}
@@ -331,7 +331,7 @@ export function TonightScreen() {
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             <button
               className="gtr-btn"
-              style={{ padding: "6px 10px", fontSize: 10.5 }}
+              style={{ padding: "6px 10px", fontSize: 12 }}
               onClick={() => setBookVid(bookVid === v.id ? "" : v.id)}
             >
               {t("Стол")}
@@ -339,7 +339,7 @@ export function TonightScreen() {
             {v.phone ? (
               <a
                 className="gtr-btn"
-                style={{ padding: "6px 10px", fontSize: 10.5, textDecoration: "none" }}
+                style={{ padding: "6px 10px", fontSize: 12, textDecoration: "none" }}
                 href={`tel:${String(v.phone).replace(/[^+\d]/g, "")}`}
               >
                 {t("Позвонить")}
@@ -348,7 +348,7 @@ export function TonightScreen() {
             {v.social ? (
               <a
                 className="gtr-btn"
-                style={{ padding: "6px 10px", fontSize: 10.5, textDecoration: "none" }}
+                style={{ padding: "6px 10px", fontSize: 12, textDecoration: "none" }}
                 href={String(v.social)}
                 target="_blank"
                 rel="noreferrer"
@@ -363,7 +363,7 @@ export function TonightScreen() {
             {g ? (
               <a
                 className="gtr-btn"
-                style={{ padding: "6px 10px", fontSize: 10.5, textDecoration: "none" }}
+                style={{ padding: "6px 10px", fontSize: 12, textDecoration: "none" }}
                 href={`https://www.google.com/maps/search/?api=1&query=${g.lat},${g.lon}`}
                 target="_blank"
                 rel="noreferrer"
@@ -375,7 +375,7 @@ export function TonightScreen() {
               className="gtr-btn"
               style={{
                 padding: "6px 10px",
-                fontSize: 10.5,
+                fontSize: 12,
                 borderColor: inRoute ? GREEN : undefined,
                 color: inRoute ? GREEN : undefined,
               }}
@@ -396,14 +396,14 @@ export function TonightScreen() {
         <h1 className="gtr-oswald gtr-h1">{t("Сегодня на Пхукете")}</h1>
         <span
           className="gtr-mono"
-          style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+          style={{ font: "600 13px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
           {dayLabel}
         </span>
       </div>
       <div
         style={{
-          font: "500 11.5px/1.5 'Golos Text',sans-serif",
+          font: "500 13px/1.5 'Golos Text',sans-serif",
           color: "var(--gtr-t2)",
           marginBottom: 14,
         }}
@@ -425,7 +425,7 @@ export function TonightScreen() {
               {routeUrl() ? (
                 <a
                   className="gtr-btn"
-                  style={{ padding: "6px 10px", fontSize: 10.5, textDecoration: "none" }}
+                  style={{ padding: "6px 10px", fontSize: 12, textDecoration: "none" }}
                   href={routeUrl()}
                   target="_blank"
                   rel="noreferrer"
@@ -438,7 +438,7 @@ export function TonightScreen() {
                   <span
                     className="gtr-mono"
                     style={{
-                      font: "600 9px/1 'JetBrains Mono',monospace",
+                      font: "600 11px/1 'JetBrains Mono',monospace",
                       color: "#E5231B",
                       display: "inline-flex",
                       alignItems: "center",
@@ -458,14 +458,14 @@ export function TonightScreen() {
                   </span>
                   <button
                     className="gtr-btn"
-                    style={{ padding: "6px 10px", fontSize: 10.5 }}
+                    style={{ padding: "6px 10px", fontSize: 12 }}
                     onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "tracking" } })}
                   >
                     {t("Карта")} →
                   </button>
                   <button
                     className="gtr-btn"
-                    style={{ padding: "6px 10px", fontSize: 10.5, color: "#E5231B", borderColor: "#E5231B" }}
+                    style={{ padding: "6px 10px", fontSize: 12, color: "#E5231B", borderColor: "#E5231B" }}
                     onClick={() => {
                       setIsTrackingEnabled(false);
                       gpsTracker.endTrack();
@@ -477,7 +477,7 @@ export function TonightScreen() {
               ) : (
                 <button
                   className="gtr-btn"
-                  style={{ padding: "6px 10px", fontSize: 10.5 }}
+                  style={{ padding: "6px 10px", fontSize: 12 }}
                   onClick={() => {
                     gpsTracker.startTrack(route);
                     setIsTrackingEnabled(true);
@@ -488,7 +488,7 @@ export function TonightScreen() {
               )}
               <button
                 className="gtr-btn"
-                style={{ padding: "6px 10px", fontSize: 10.5 }}
+                style={{ padding: "6px 10px", fontSize: 12 }}
                 onClick={() => {
                   setRoute([]);
                   localStorage.setItem(ROUTE_KEY, "[]");
@@ -503,7 +503,7 @@ export function TonightScreen() {
             <div
               className="gtr-mono"
               style={{
-                font: "500 9px/1.3 'JetBrains Mono',monospace",
+                font: "500 11px/1.45 'JetBrains Mono',monospace",
                 color: "#E5231B",
                 marginTop: 8,
               }}
@@ -515,7 +515,7 @@ export function TonightScreen() {
             <div
               className="gtr-mono"
               style={{
-                font: "500 9px/1.3 'JetBrains Mono',monospace",
+                font: "500 11px/1.45 'JetBrains Mono',monospace",
                 color: GREEN,
                 marginTop: 8,
               }}
@@ -544,7 +544,7 @@ export function TonightScreen() {
       ) : (
         <div
           style={{
-            font: "500 11px/1.5 'Golos Text',sans-serif",
+            font: "500 13px/1.5 'Golos Text',sans-serif",
             color: "var(--gtr-t3)",
             margin: "0 0 18px",
           }}
@@ -588,7 +588,7 @@ export function TonightScreen() {
         className="gtr-mono"
         style={{
           marginTop: 14,
-          font: "500 9.5px/1.6 'JetBrains Mono',monospace",
+          font: "500 11px/1.6 'JetBrains Mono',monospace",
           color: "var(--gtr-t3)",
         }}
       >

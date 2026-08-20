@@ -98,7 +98,7 @@ function LangSwitch({ style }: { style?: import("react").CSSProperties }) {
           style={{
             padding: "6px 9px",
             cursor: "pointer",
-            font: "700 9.5px/1 'JetBrains Mono',monospace",
+            font: "700 11px/1 'JetBrains Mono',monospace",
             letterSpacing: ".08em",
             border: "none",
             background: cur === code ? "#E5231B" : "transparent",
@@ -248,7 +248,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                   className="gtr-mono gtr-presence"
                   title={`${problemCount} требует внимания`}
                   style={{
-                    font: "700 9px/1 'JetBrains Mono',monospace",
+                    font: "700 11px/1 'JetBrains Mono',monospace",
                     color: "#fff",
                     background: "#E5231B",
                     borderRadius: 0,
@@ -261,7 +261,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                 <span
                   className="gtr-mono"
                   style={{
-                    font: "600 9px/1 'JetBrains Mono',monospace",
+                    font: "600 11px/1 'JetBrains Mono',monospace",
                     color: "rgba(255,255,255,.45)",
                     background: "rgba(255,255,255,.09)",
                     borderRadius: 0,
@@ -341,21 +341,21 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              font: "700 9.5px/1 Oswald,sans-serif",
+              font: "700 11px/1 Oswald,sans-serif",
               background: "#E5231B",
             }}
           >
             {user.initials}
           </span>
           <span style={{ minWidth: 0, flex: 1 }}>
-            <span style={{ display: "block", font: "600 11.5px/1.2 'Golos Text',sans-serif" }}>
+            <span style={{ display: "block", font: "600 13px/1.2 'Golos Text',sans-serif" }}>
               {t(user.roleLabel)}
             </span>
             <span
               style={{
                 display: "block",
                 marginTop: 3,
-                font: "500 9px/1.2 'JetBrains Mono',monospace",
+                font: "500 11px/1.2 'JetBrains Mono',monospace",
                 color: "rgba(255,255,255,.45)",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
@@ -387,7 +387,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      font: "700 8.5px/1 Oswald,sans-serif",
+                      font: "700 10px/1 Oswald,sans-serif",
                       background: "rgba(46,204,113,.18)",
                       border: "1px solid rgba(46,204,113,.5)",
                       color: "#2ECC71",
@@ -417,7 +417,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
             <span
               className="gtr-mono"
               style={{
-                font: "700 8px/1 'JetBrains Mono',monospace",
+                font: "700 10px/1 'JetBrains Mono',monospace",
                 color: editMode ? "#E5231B" : "rgba(255,255,255,.4)",
               }}
             >
@@ -440,7 +440,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
               <span
                 className="gtr-mono"
                 style={{
-                  font: "500 9px/1.2 'JetBrains Mono',monospace",
+                  font: "500 11px/1.2 'JetBrains Mono',monospace",
                   color: "var(--gtr-t3)",
                   overflow: "hidden",
                   textOverflow: "ellipsis",

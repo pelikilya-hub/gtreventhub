@@ -46,7 +46,7 @@ const label = (s: string) => (
     style={{
       display: "block",
       margin: "0 0 4px",
-      font: "600 8.5px/1 'JetBrains Mono',monospace",
+      font: "600 10px/1 'JetBrains Mono',monospace",
       color: "rgba(255,255,255,.45)",
       letterSpacing: ".1em",
       textTransform: "uppercase",
@@ -89,7 +89,7 @@ export function FeedScreen() {
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 14 }}>
         <h1 className="gtr-oswald gtr-h1">{t("События Пхукета")}</h1>
-        <span className="gtr-mono" style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+        <span className="gtr-mono" style={{ font: "600 13px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
           {items.length}
         </span>
       </div>
@@ -146,10 +146,10 @@ export function FeedScreen() {
                       </span>
                     ) : null}
                     <div style={{ position: "absolute", left: 10, right: 10, bottom: 10 }}>
-                      <div style={{ font: "600 12.5px/1.3 'Golos Text',sans-serif" }}>{e.title}</div>
+                      <div style={{ font: "600 12.5px/1.45 'Golos Text',sans-serif" }}>{e.title}</div>
                       <div
                         className="gtr-mono"
-                        style={{ marginTop: 4, font: "500 9px/1.3 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)" }}
+                        style={{ marginTop: 4, font: "500 11px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)" }}
                       >
                         {V(e.vid)?.name ?? e.vid}
                       </div>
@@ -226,7 +226,7 @@ export function AiMatchScreen() {
   const scoreChip = (score: number) => (
     <span
       className="gtr-mono"
-      style={{ font: "700 11px/1 'JetBrains Mono',monospace", color: GREEN }}
+      style={{ font: "700 13px/1 'JetBrains Mono',monospace", color: GREEN }}
     >
       {Math.min(99, Math.max(5, Math.round(score * 100)))}%
     </span>
@@ -249,7 +249,7 @@ export function AiMatchScreen() {
             ))}
           </select>
         </div>
-        <div className="gtr-mono" style={{ font: "500 10px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 12 }}>
+        <div className="gtr-mono" style={{ font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 12 }}>
           {t("Вектор площадки: музыка, концепция и корпус её афиш. Верифицированные артисты и артисты с медиа — выше.")}
         </div>
         <div style={{ display: "grid", gap: 8 }}>
@@ -266,7 +266,7 @@ export function AiMatchScreen() {
                 {String(i + 1).padStart(2, "0")}
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ font: "600 13px/1.3 'Golos Text',sans-serif" }}>{a.name}</span>
+                <span style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>{a.name}</span>
                 <span style={{ display: "flex", gap: 5, marginTop: 4, flexWrap: "wrap" }}>
                   {a.reasons.map((r) => (
                     <Chip key={r} color="rgba(255,255,255,.5)">{FAMILY_LABEL[r] ?? r}</Chip>
@@ -279,7 +279,7 @@ export function AiMatchScreen() {
           ))}
           {!res.artists?.length ? (
             <Card style={{ padding: 20 }}>
-              <div style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+              <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
                 {t("Для этой площадки пока мало жанровых данных — заполните «музыку» в паспорте или дождитесь афиш.")}
               </div>
             </Card>
@@ -302,7 +302,7 @@ export function AiMatchScreen() {
               <span key={c} style={{ width: 22, height: 6, background: c }} />
             ))}
           </div>
-          <div style={{ font: "700 16px/1.35 Oswald,sans-serif", textTransform: "uppercase" }}>
+          <div style={{ font: "700 16px/1.45 Oswald,sans-serif", textTransform: "uppercase" }}>
             {t("Подбор событий под ваш музыкальный вкус")}
           </div>
           <div style={{ font: "500 12px/1.65 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
@@ -355,7 +355,7 @@ export function AiMatchScreen() {
               {t("Spotify-анализ · в лист ожидания")}
             </button>
             {state ? (
-              <span className="gtr-mono" style={{ font: "500 10px/1.3 'JetBrains Mono',monospace", color: GREEN }}>
+              <span className="gtr-mono" style={{ font: "500 12px/1.45 'JetBrains Mono',monospace", color: GREEN }}>
                 {state}
               </span>
             ) : null}
@@ -375,14 +375,14 @@ export function AiMatchScreen() {
               </span>
               <Eyebrow>{t("ВАШ МУЗЫКАЛЬНЫЙ ПРОФИЛЬ")}</Eyebrow>
               {profile.displayName ? (
-                <span className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+                <span className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
                   {profile.source === "manual" ? t("мой выбор") : "Spotify"} · {profile.displayName}
                 </span>
               ) : null}
               {profile.source === "manual" ? (
                 <button
                   className="gtr-btn"
-                  style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10 }}
+                  style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 12 }}
                   onClick={() => {
                     setPicks(profile.genres.map(([f]) => f).slice(0, 6));
                     setProfile(null);
@@ -393,7 +393,7 @@ export function AiMatchScreen() {
               ) : (
                 <a
                   className="gtr-btn"
-                  style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10, textDecoration: "none" }}
+                  style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 12, textDecoration: "none" }}
                   href="/api/spotify-login"
                 >
                   {t("Обновить")}
@@ -403,7 +403,7 @@ export function AiMatchScreen() {
             <div style={{ display: "grid", gap: 6 }}>
               {profile.genres.slice(0, 7).map(([fam, w], i) => (
                 <div key={fam} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ width: 110, flex: "none", font: "600 10.5px/1 'Golos Text',sans-serif" }}>
+                  <span style={{ width: 110, flex: "none", font: "600 12px/1 'Golos Text',sans-serif" }}>
                     {FAMILY_LABEL[fam] ?? fam}
                   </span>
                   <span style={{ flex: 1, height: 8, background: "rgba(255,255,255,.07)" }}>
@@ -431,7 +431,7 @@ export function AiMatchScreen() {
                     {a.image ? (
                       <img src={a.image} alt="" style={{ width: 22, height: 22, objectFit: "cover" }} />
                     ) : null}
-                    <span style={{ font: "500 10.5px/1 'Golos Text',sans-serif" }}>{a.name}</span>
+                    <span style={{ font: "500 12px/1 'Golos Text',sans-serif" }}>{a.name}</span>
                   </span>
                 ))}
               </div>
@@ -453,7 +453,7 @@ export function AiMatchScreen() {
                   }
                 >
                   <div style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
-                    <span style={{ flex: 1, font: "600 12.5px/1.3 'Golos Text',sans-serif" }}>{v?.name ?? m.vid}</span>
+                    <span style={{ flex: 1, font: "600 12.5px/1.45 'Golos Text',sans-serif" }}>{v?.name ?? m.vid}</span>
                     {scoreChip(m.score)}
                   </div>
                   <div style={{ display: "flex", gap: 5, marginTop: 7, flexWrap: "wrap" }}>
@@ -466,7 +466,7 @@ export function AiMatchScreen() {
             })}
             {!res?.venues?.length ? (
               <Card style={{ padding: 16 }}>
-                <div style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+                <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
                   {t("Считаем совпадения…")}
                 </div>
               </Card>
@@ -487,8 +487,8 @@ export function AiMatchScreen() {
                     }
                   >
                     <span style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{ font: "600 12.5px/1.3 'Golos Text',sans-serif" }}>{e.title}</span>
-                      <span className="gtr-mono" style={{ display: "block", marginTop: 4, font: "500 9.5px/1.3 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
+                      <span style={{ font: "600 12.5px/1.45 'Golos Text',sans-serif" }}>{e.title}</span>
+                      <span className="gtr-mono" style={{ display: "block", marginTop: 4, font: "500 11px/1.45 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
                         {V(e.vid)?.name ?? e.vid} · {e.dateIso}
                       </span>
                     </span>
@@ -527,7 +527,7 @@ export function CommunityScreen() {
         {user.role === "visitor" ? " · PRO" : ""}
       </h1>
       <Card style={{ padding: "24px 26px", display: "grid", gap: 12 }}>
-        <div style={{ font: "700 16px/1.35 Oswald,sans-serif", textTransform: "uppercase" }}>
+        <div style={{ font: "700 16px/1.45 Oswald,sans-serif", textTransform: "uppercase" }}>
           {user.role === "artist" ? t("Локальная сцена Пхукета") : t("Закрытые афтерпати и своя тусовка")}
         </div>
         <div style={{ font: "500 12px/1.65 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
@@ -540,7 +540,7 @@ export function CommunityScreen() {
             {t("Подать заявку")}
           </button>
           {state ? (
-            <span className="gtr-mono" style={{ font: "500 10px/1.3 'JetBrains Mono',monospace", color: GREEN }}>
+            <span className="gtr-mono" style={{ font: "500 12px/1.45 'JetBrains Mono',monospace", color: GREEN }}>
               {state}
             </span>
           ) : null}
@@ -600,8 +600,8 @@ export function VisasScreen() {
               {String(i + 1).padStart(2, "0")}
             </span>
             <span style={{ minWidth: 0 }}>
-              <span style={{ display: "block", font: "600 12.5px/1.3 'Golos Text',sans-serif" }}>{h}</span>
-              <span style={{ display: "block", marginTop: 4, font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+              <span style={{ display: "block", font: "600 12.5px/1.45 'Golos Text',sans-serif" }}>{h}</span>
+              <span style={{ display: "block", marginTop: 4, font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
                 {d}
               </span>
             </span>
@@ -613,7 +613,7 @@ export function VisasScreen() {
           {t("Запросить помощь команды")}
         </button>
         {state ? (
-          <span className="gtr-mono" style={{ font: "500 10px/1.3 'JetBrains Mono',monospace", color: GREEN }}>
+          <span className="gtr-mono" style={{ font: "500 12px/1.45 'JetBrains Mono',monospace", color: GREEN }}>
             {state}
           </span>
         ) : null}
@@ -660,7 +660,7 @@ export function PromoScreen() {
   return (
     <div style={{ maxWidth: hasCdmReserve(vid) ? 1080 : 860, margin: "0 auto" }}>
       <h1 className="gtr-oswald gtr-h1" style={{ marginBottom: 6 }}>{t("Промо и бронь столов")}</h1>
-      <div className="gtr-mono" style={{ font: "500 10px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 14 }}>
+      <div className="gtr-mono" style={{ font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 14 }}>
         {t("Билеты и промоакции площадок — следующая фаза; бронь работает уже сейчас.")}
       </div>
       <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: hasCdmReserve(vid) ? "1.6fr 1fr" : "1fr 1fr", gap: 14 }}>
@@ -720,7 +720,7 @@ export function PromoScreen() {
                   {t("Отправить заявку")}
                 </button>
                 {state ? (
-                  <span className="gtr-mono" style={{ font: "500 9.5px/1.4 'JetBrains Mono',monospace", color: GREEN }}>
+                  <span className="gtr-mono" style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: GREEN }}>
                     {state}
                   </span>
                 ) : null}
@@ -731,7 +731,7 @@ export function PromoScreen() {
         <Card style={{ padding: "18px 20px", display: "grid", gap: 8, alignContent: "start" }}>
           <Eyebrow>{t("МОИ БРОНИ")} · {bookings.length}</Eyebrow>
           {!bookings.length ? (
-            <div style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {t("Пока пусто — первая бронь появится здесь со статусом.")}
             </div>
           ) : (
@@ -741,23 +741,23 @@ export function PromoScreen() {
                 style={{ border: "1px solid rgba(255,255,255,.08)", padding: "9px 11px", display: "grid", gap: 4 }}
               >
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <span style={{ flex: 1, font: "600 11.5px/1.3 'Golos Text',sans-serif" }}>
+                  <span style={{ flex: 1, font: "600 13px/1.45 'Golos Text',sans-serif" }}>
                     {V(b.vid)?.name ?? b.vid}
                   </span>
                   <Chip color={ST[b.status][1]}>{ST[b.status][0]}</Chip>
                 </div>
-                <span className="gtr-mono" style={{ font: "500 9.5px/1.3 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
+                <span className="gtr-mono" style={{ font: "500 11px/1.45 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
                   {b.dateIso}
                   {b.slot ? ` · ${b.slot}` : ""} · {b.guests} {t("чел.")} · {b.id}
                 </span>
                 {b.zone || b.tableType ? (
-                  <span className="gtr-mono" style={{ font: "500 9.5px/1.3 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+                  <span className="gtr-mono" style={{ font: "500 11px/1.45 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
                     {[b.zone, b.tableType].filter(Boolean).join(" · ")}
                     {b.deposit ? ` · депозит ${b.deposit.toLocaleString("ru-RU")} THB` : ""}
                   </span>
                 ) : null}
                 {b.preorder?.length ? (
-                  <span className="gtr-mono" style={{ font: "500 9.5px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+                  <span className="gtr-mono" style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
                     {t("предзаказ")}: {b.preorder.map((l) => `${l.name}${l.opt ? ` (${l.opt})` : ""}×${l.qty}`).join(", ")} ·{" "}
                     <b style={{ color: GREEN }}>{(b.preorderTotal ?? 0).toLocaleString("ru-RU")} THB</b>
                   </span>
@@ -813,14 +813,14 @@ export function MyShowsScreen() {
         <Card style={{ padding: "18px 20px", display: "grid", gap: 8, alignContent: "start" }}>
           <Eyebrow>{t("ПОДТВЕРЖДЁННЫЕ ЧЕРЕЗ GTR")} · {accepted.length}</Eyebrow>
           {!accepted.length ? (
-            <div style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {t("Когда вы примете предложение площадки, оно появится здесь.")}
             </div>
           ) : (
             accepted.map((o) => (
               <div key={o.id} style={{ border: "1px solid rgba(46,204,113,.35)", padding: "10px 12px" }}>
-                <div style={{ font: "600 12px/1.3 'Golos Text',sans-serif" }}>{o.venueName}</div>
-                <div className="gtr-mono" style={{ marginTop: 4, font: "500 9.5px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
+                <div style={{ font: "600 12px/1.45 'Golos Text',sans-serif" }}>{o.venueName}</div>
+                <div className="gtr-mono" style={{ marginTop: 4, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
                   {o.date}{o.fee ? ` · ${o.fee}` : ""}
                 </div>
               </div>
@@ -830,7 +830,7 @@ export function MyShowsScreen() {
         <Card style={{ padding: "18px 20px", display: "grid", gap: 8, alignContent: "start" }}>
           <Eyebrow>{t("ЗАМЕЧЕНЫ В АФИШАХ")} · {spotted.length}</Eyebrow>
           {!spotted.length ? (
-            <div style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {me
                 ? t("Агент афиш сканирует сайты площадок каждые 6 часов — как только ваше имя появится в анонсе, оно отобразится тут.")
                 : t("Профиль не привязан к каталогу артистов — напишите команде.")}
@@ -838,8 +838,8 @@ export function MyShowsScreen() {
           ) : (
             spotted.map((e) => (
               <div key={`${e.vid}-${e.id}`} style={{ border: "1px solid rgba(255,255,255,.08)", padding: "10px 12px" }}>
-                <div style={{ font: "600 12px/1.3 'Golos Text',sans-serif" }}>{e.title}</div>
-                <div className="gtr-mono" style={{ marginTop: 4, font: "500 9.5px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
+                <div style={{ font: "600 12px/1.45 'Golos Text',sans-serif" }}>{e.title}</div>
+                <div className="gtr-mono" style={{ marginTop: 4, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
                   {V(e.vid)?.name ?? e.vid} · {e.dateIso}
                 </div>
               </div>

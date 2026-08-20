@@ -7,6 +7,9 @@ import type { EventDraft, Offer, OrgRequest, RoleId } from "./data/app-data";
 import { getKvNs, kvGetJson, kvListAll, type KvNs } from "./kv-ns";
 import { tgApi, tgConfigured, tgEsc, tgWebhookSecret } from "./tg";
 import type { VenueAfisha } from "./afisha";
+// Афиша площадки возвращается наружу серверными функциями этого модуля,
+// поэтому тип обязан уезжать вместе с ними — экраны импортируют его отсюда.
+export type { VenueAfisha };
 import {
   gtrFrom,
   priceKey,

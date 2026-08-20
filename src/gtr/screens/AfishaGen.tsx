@@ -386,7 +386,7 @@ export function AfishaGenScreen() {
       style={{
         display: "block",
         margin: "0 0 5px",
-        font: "600 9.5px/1 'JetBrains Mono',monospace",
+        font: "600 11px/1 'JetBrains Mono',monospace",
         color: "rgba(255,255,255,.5)",
         letterSpacing: ".08em",
         textTransform: "uppercase",
@@ -473,7 +473,7 @@ export function AfishaGenScreen() {
                         borderBottom: "1px solid rgba(255,255,255,.05)",
                         color: "#fff",
                         cursor: "pointer",
-                        font: "500 11.5px/1.2 'Golos Text',sans-serif",
+                        font: "500 13px/1.2 'Golos Text',sans-serif",
                         textAlign: "left",
                       }}
                     >
@@ -481,7 +481,7 @@ export function AfishaGenScreen() {
                       {MEDIA[a.id]?.heroPoster ? (
                         <span
                           className="gtr-mono"
-                          style={{ font: "600 8.5px/1 'JetBrains Mono',monospace", color: "#2ECC71" }}
+                          style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "#2ECC71" }}
                         >
                           {t("МЕДИА")}
                         </span>
@@ -493,7 +493,7 @@ export function AfishaGenScreen() {
               {artist ? (
                 <button
                   className="gtr-btn"
-                  style={{ marginTop: 6, padding: "4px 8px", fontSize: 10 }}
+                  style={{ marginTop: 6, padding: "4px 8px", fontSize: 12 }}
                   onClick={() => {
                     setArtistId("");
                     setBg("");
@@ -615,7 +615,7 @@ export function AfishaGenScreen() {
                 <div
                   style={{
                     marginTop: 6,
-                    font: "500 10px/1.5 'Golos Text',sans-serif",
+                    font: "500 12px/1.5 'Golos Text',sans-serif",
                     color: "var(--gtr-t3)",
                   }}
                 >

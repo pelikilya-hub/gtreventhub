@@ -90,7 +90,10 @@ const RU_DATE = (iso: string) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}`;
 // (RU·EN-метки, контент — названия и площадки — языконезависим).
 export type TgLang = "ru" | "en" | "th" | "dual";
 
-export const tgLangOf = (code?: string): TgLang => {
+// Язык конкретного человека — всегда один. "dual" бывает только у настройки
+// канала (пост сразу на двух языках), поэтому сюда он не попадает никогда:
+// сужаем тип, иначе каждая словарная таблица требует несуществующей ветки.
+export const tgLangOf = (code?: string): Exclude<TgLang, "dual"> => {
   const c = (code || "").toLowerCase();
   if (c.startsWith("ru") || c.startsWith("uk") || c.startsWith("be") || c.startsWith("kk")) return "ru";
   if (c.startsWith("th")) return "th";

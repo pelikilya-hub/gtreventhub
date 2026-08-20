@@ -262,7 +262,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
               {label}
               <span
                 className="gtr-mono"
-                style={{ fontSize: 10, opacity: 0.65 }}
+                style={{ fontSize: 12, opacity: 0.65 }}
               >
                 {n}
               </span>
@@ -344,7 +344,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                 borderRadius: 0,
                 padding: "6px 10px",
                 cursor: "pointer",
-                font: "500 10.5px/1 'Golos Text',sans-serif",
+                font: "500 12px/1 'Golos Text',sans-serif",
               }}
             >
               {s === "all" ? t("Все стили") : `${s} · ${n}`}
@@ -419,7 +419,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                       position: "absolute",
                       left: 14,
                       bottom: 10,
-                      font: "600 8.5px/1 'JetBrains Mono',monospace",
+                      font: "600 10px/1 'JetBrains Mono',monospace",
                       color: "rgba(255,255,255,.3)",
                       letterSpacing: ".14em",
                       textTransform: "uppercase",
@@ -465,7 +465,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                     position: "absolute",
                     top: 9,
                     right: 9,
-                    font: "700 11px/1 'JetBrains Mono',monospace",
+                    font: "700 13px/1 'JetBrains Mono',monospace",
                     padding: "4px 7px",
                     background: "rgba(10,11,13,.72)",
                     backdropFilter: "blur(3px)",
@@ -493,7 +493,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span
                     style={{
-                      font: "600 13.5px/1.3 'Golos Text',sans-serif",
+                      font: "600 13.5px/1.45 'Golos Text',sans-serif",
                       flex: 1,
                       minWidth: 0,
                     }}
@@ -505,7 +505,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                 <div
                   style={{
                     margin: "5px 0 8px",
-                    font: "500 10.5px/1.45 'Golos Text',sans-serif",
+                    font: "500 12px/1.45 'Golos Text',sans-serif",
                     color: "var(--gtr-t2)",
                     whiteSpace: "nowrap",
                     overflow: "hidden",
@@ -517,7 +517,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                 <div
                   className="gtr-mono"
                   style={{
-                    font: "500 9.5px/1.4 'JetBrains Mono',monospace",
+                    font: "500 11px/1.5 'JetBrains Mono',monospace",
                     color: "var(--gtr-t3)",
                   }}
                 >
@@ -535,7 +535,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
             marginTop: 14,
             textAlign: "center",
             color: "var(--gtr-t3)",
-            fontSize: 11,
+            fontSize: 13,
           }}
         >
           {t("Показаны первые 90 — уточните фильтры")}
@@ -828,7 +828,7 @@ function ArtistCard({
                 className="gtr-mono"
                 style={{
                   marginTop: 6,
-                  font: "500 10.5px/1.4 'JetBrains Mono',monospace",
+                  font: "500 12px/1.5 'JetBrains Mono',monospace",
                   color: "var(--gtr-t3)",
                 }}
               >
@@ -958,7 +958,7 @@ function ArtistCard({
                 className="gtr-mono"
                 style={{
                   marginTop: 10,
-                  font: "500 8.5px/1 'JetBrains Mono',monospace",
+                  font: "500 10px/1 'JetBrains Mono',monospace",
                   color: "var(--gtr-t3)",
                 }}
               >
@@ -1004,7 +1004,7 @@ function ArtistCard({
                 className="gtr-mono"
                 style={{
                   marginLeft: "auto",
-                  font: "500 8.5px/1 'JetBrains Mono',monospace",
+                  font: "500 10px/1 'JetBrains Mono',monospace",
                   color: "var(--gtr-t3)",
                 }}
               >
@@ -1075,7 +1075,7 @@ function ArtistCard({
             <div
               style={{
                 marginTop: 10,
-                font: "500 10.5px/1.5 'Golos Text',sans-serif",
+                font: "500 12px/1.5 'Golos Text',sans-serif",
                 color: "var(--gtr-t3)",
               }}
             >
@@ -1110,7 +1110,7 @@ function ArtistCard({
           ) : (
             <div
               style={{
-                font: "500 11px/1.5 'Golos Text',sans-serif",
+                font: "500 13px/1.5 'Golos Text',sans-serif",
                 color: "var(--gtr-t3)",
               }}
             >
@@ -1138,7 +1138,7 @@ function ArtistCard({
                     {V(vid).area ? (
                       <span
                         className="gtr-mono"
-                        style={{ marginLeft: 8, font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                        style={{ marginLeft: 8, font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                       >
                         {t(String(V(vid).area))}
                       </span>
@@ -1174,7 +1174,7 @@ function ArtistCard({
                   </div>
                 ))
               ) : (
-                <div style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+                <div style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
                   {t("Стили уточняются")}
                 </div>
               )}
@@ -1218,10 +1218,10 @@ function ArtistCard({
                       ) : null}
                       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 55%, rgba(10,11,13,.94))" }} />
                       <div style={{ position: "absolute", left: 8, right: 8, bottom: 7 }}>
-                        <div style={{ font: "700 11px/1.2 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".03em" }}>
+                        <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".03em" }}>
                           {x.name}
                         </div>
-                        <div className="gtr-mono" style={{ marginTop: 2, font: "500 7.5px/1.3 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        <div className="gtr-mono" style={{ marginTop: 2, font: "500 7.5px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                           {(x.styles || []).slice(0, 2).join(" · ")}
                         </div>
                       </div>

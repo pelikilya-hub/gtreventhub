@@ -397,7 +397,10 @@ export const Route = createFileRoute("/api/tg")({
         // ---------- /ops в закрытом канале: привязка служебного контура ----------
         if (up.channel_post?.text) {
           const cp = up.channel_post;
-          const cmd0 = cp.text.trim().split(/[\s@]/)[0].toLowerCase();
+          // Текст уже проверен условием выше, но сужение не переносится на
+          // отдельную привязку — забираем строку явно.
+          const cpText = cp.text ?? "";
+          const cmd0 = cpText.trim().split(/[\s@]/)[0].toLowerCase();
           if (cmd0 === "/ops") {
             const { COMMUNITY_KEY, OPS_KEY } = await import("../gtr/community");
             const ccfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);

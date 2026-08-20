@@ -194,11 +194,11 @@ export function MapScreen() {
                 ${hero ? `<img src="${hero}" style="width:100%;height:92px;object-fit:cover;display:block;margin-bottom:7px" />` : ""}
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
                   <span style="width:7px;height:7px;background:${cat.color};display:block"></span>
-                  <span style="font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:${cat.color};text-transform:uppercase">${t(cat.ru)}</span>
+                  <span style="font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.07em;color:${cat.color};text-transform:uppercase">${t(cat.ru)}</span>
                 </div>
-                <div style="font:600 12.5px/1.3 'Golos Text',sans-serif;color:#fff">${v.name}</div>
-                <div style="font:500 9.5px/1.4 monospace;color:rgba(255,255,255,.55);margin:3px 0 8px">${v.area}${exact ? "" : ` · ${t("примерно")}`}</div>
-                <button data-vid="${v.id}" class="gtr-map-open" style="font:600 10px/1 'Golos Text',sans-serif;background:#E5231B;color:#fff;border:none;padding:7px 11px;cursor:pointer;width:100%">${t("Открыть заведение")} →</button>
+                <div style="font:600 13px/1.45 'Golos Text',sans-serif;color:#fff">${v.name}</div>
+                <div style="font:500 11px/1.5 monospace;color:rgba(255,255,255,.72);margin:3px 0 8px">${v.area}${exact ? "" : ` · ${t("примерно")}`}</div>
+                <button data-vid="${v.id}" class="gtr-map-open" style="font:600 12px/1 'Golos Text',sans-serif;background:#E5231B;color:#fff;border:none;padding:8px 11px;cursor:pointer;width:100%">${t("Открыть заведение")} →</button>
               </div>`;
             L.marker([g.lat, g.lon], { icon, zIndexOffset: dim ? 0 : 400 })
               .addTo(pins)
@@ -261,7 +261,7 @@ export function MapScreen() {
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
         <h1 className="gtr-oswald gtr-h1">{t("Карта")}</h1>
-        <span className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)", letterSpacing: ".12em" }}>
+        <span className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)", letterSpacing: ".12em" }}>
           {shown} / {onMap.length}
         </span>
       </div>

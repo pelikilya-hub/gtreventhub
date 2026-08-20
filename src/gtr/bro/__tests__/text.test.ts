@@ -82,7 +82,9 @@ describe("визитка BRO", () => {
     // фамилия в обращении — это уже не приятель, а повестка
     expect(g[0]).not.toContain("Пелихосов");
     const body = g.join(" ");
-    expect(body).toContain("Café del Mar");
+    // визитка не рекламирует одну конкретную площадку — в базе их несколько
+    expect(body).not.toContain("Café del Mar");
+    expect(body).toContain("стол");
     expect(body).toContain("маршрут");
     // гостю не обещаем инструменты команды
     expect(body).not.toContain("подрядчик");

@@ -624,6 +624,9 @@ describe("слои базы знаний", () => {
     const team = await handlers.ask_gtr(q, { ...ctx, user: boss, kv });
     const vis = await handlers.ask_gtr(q, { ...ctx, user: guest, kv });
     expect(team.ok).toBe(true);
+    // Не просто «нашлось хоть что-то»: важна именно та тема, а не случайное
+    // совпадение по короткому ключу другого пункта базы.
+    if (team.ok) expect((team.data as { topic: string }).topic).toBe("pro-unit");
     expect(vis.ok).toBe(false);
   });
 
@@ -793,5 +796,58 @@ describe("новые темы бэклога: RU/EN матчинг и факты
     const rEn = await handlers.ask_gtr({ question: en }, { ...ctx, user: guest, kv });
     expect(rEn.ok, `en: ${en}`).toBe(true);
     if (rEn.ok) expect((rEn.data as { topic: string }).topic, en).toBe(id);
+  });
+});
+
+// Конструктор — рабочий инструмент команды: гость про него не спрашивает,
+// но GTR должен получить точный ответ, а не общие слова про «граф».
+describe("рабочий слой: знания про конструктор событий", () => {
+  const boss = { email: "cb@v", name: "BOSS", role: "gtr", boss: true };
+  const guest = { email: "cg@v", name: "Гость", role: "visitor" };
+  const mem = new Map<string, string>();
+  const kv = {
+    put: async (k: string, v: string) => {
+      mem.set(k, v);
+    },
+    get: async (k: string) => mem.get(k) ?? null,
+  };
+
+  it("файл бэклога команды валиден: у каждой темы есть ключи и ответы", async () => {
+    const pro = (await import("../../data/bro-qa-pro.json")) as unknown as {
+      items: { id: string; keys: string[]; answers: string[] }[];
+    };
+    const ids = new Set(pro.items.map((i) => i.id));
+    expect(ids.size).toBe(pro.items.length);
+    for (const it of pro.items) {
+      expect(it.keys.length, it.id).toBeGreaterThan(0);
+      expect(it.answers.length, it.id).toBeGreaterThan(0);
+      for (const a of it.answers) expect(a.length, it.id).toBeGreaterThan(10);
+    }
+  });
+
+  const CASES: [string, string][] = [
+    ["pro-constructor-what", "что такое конструктор событий"],
+    ["pro-constructor-stage", "какие стадии у события в конструкторе"],
+    ["pro-constructor-quote", "как считается смета эконом оптимум премиум"],
+    ["pro-constructor-brief", "что за вопросы в брифе события"],
+    ["pro-constructor-offer", "статус оффера — принял или отклонил артист"],
+    ["pro-constructor-open", "как создать черновик события"],
+  ];
+
+  it.each(CASES)("%s: команда находит именно эту тему", async (id, q) => {
+    const forBoss = await handlers.ask_gtr({ question: q }, { ...ctx, user: boss, kv });
+    expect(forBoss.ok, q).toBe(true);
+    if (forBoss.ok) expect((forBoss.data as { topic: string }).topic, q).toBe(id);
+  });
+
+  // Изоляция гость/команда — общее правило движка (проверено выше, в
+  // «слои базы знаний»); здесь достаточно одного прямого запроса про
+  // конструктор без слов, которые сами по себе цепляют гостевые темы.
+  it("гость не получает рабочую тему про конструктор, даже прямо попросив", async () => {
+    const r = await handlers.ask_gtr(
+      { question: "открой конструктор событий, хочу собрать смету по площадке" },
+      { ...ctx, user: guest, kv },
+    );
+    expect(r.ok).toBe(false);
   });
 });

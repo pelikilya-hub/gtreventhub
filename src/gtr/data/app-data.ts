@@ -169,6 +169,7 @@ export type ScreenId =
   | "map"
   | "feed"
   | "tonight"
+  | "tracking"
   | "aimatch"
   | "community"
   | "visas"

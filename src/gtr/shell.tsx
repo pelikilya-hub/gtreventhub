@@ -45,6 +45,7 @@ import {
   FeedScreen,
 } from "./screens/Platform";
 import { TonightScreen } from "./screens/Tonight";
+import { TrackingScreen } from "./screens/Tracking";
 import { ScreenErrorBoundary } from "./error-boundary";
 import { UpdateGate } from "./update-gate";
 import { useDeviceTilt } from "./motion";
@@ -608,6 +609,8 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
       return <FeedScreen />;
     case "tonight":
       return <TonightScreen />;
+    case "tracking":
+      return <TrackingScreen />;
     case "aimatch":
       return <AiMatchScreen />;
     case "private":

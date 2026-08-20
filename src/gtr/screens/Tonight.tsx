@@ -13,6 +13,7 @@ import { allAfishaFn, bookTableFn, promptpayCfgFn, type PromptpayCfg, type Venue
 import { openAppLink } from "../applink";
 import { PromptpayModal } from "../promptpay-ui";
 import { SwipeToBook } from "../raw-pulse";
+import { gpsTracker, useGpsTracking } from "../gps-track";
 
 const GEO = geoRaw as Record<string, { lat: number; lon: number; src: string }>;
 type FeedItem = VenueAfisha["events"][number] & { vid: string };
@@ -53,6 +54,9 @@ export function TonightScreen() {
 
   const [ppCfg, setPpCfg] = useState<PromptpayCfg | null>(null);
   const [ppFor, setPpFor] = useState<string>(""); // vid открытого QR-модала
+  const [isTrackingEnabled, setIsTrackingEnabled] = useState(false);
+  const { location: currentLocation, error: gpsError, isTracking } = useGpsTracking(isTrackingEnabled);
+  const active = gpsTracker.getActiveTrack();
 
   useEffect(() => {
     allAfishaFn().then((r) => setItems(r.items)).catch(() => {});
@@ -417,7 +421,7 @@ export function TonightScreen() {
                 {i + 1}. {V(vid).name}
               </Chip>
             ))}
-            <span style={{ marginLeft: "auto", display: "flex", gap: 7 }}>
+            <span style={{ marginLeft: "auto", display: "flex", gap: 7, alignItems: "center" }}>
               {routeUrl() ? (
                 <a
                   className="gtr-btn"
@@ -429,18 +433,96 @@ export function TonightScreen() {
                   {t("Открыть в Google Maps")} ↗
                 </a>
               ) : null}
+              {isTracking ? (
+                <>
+                  <span
+                    className="gtr-mono"
+                    style={{
+                      font: "600 9px/1 'JetBrains Mono',monospace",
+                      color: "#E5231B",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 5,
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: "#E5231B",
+                        animation: "pulse 1s infinite",
+                      }}
+                    />
+                    {t("GPS ВКЛ")}
+                  </span>
+                  <button
+                    className="gtr-btn"
+                    style={{ padding: "6px 10px", fontSize: 10.5 }}
+                    onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "tracking" } })}
+                  >
+                    {t("Карта")} →
+                  </button>
+                  <button
+                    className="gtr-btn"
+                    style={{ padding: "6px 10px", fontSize: 10.5, color: "#E5231B", borderColor: "#E5231B" }}
+                    onClick={() => {
+                      setIsTrackingEnabled(false);
+                      gpsTracker.endTrack();
+                    }}
+                  >
+                    {t("Завершить")}
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="gtr-btn"
+                  style={{ padding: "6px 10px", fontSize: 10.5 }}
+                  onClick={() => {
+                    gpsTracker.startTrack(route);
+                    setIsTrackingEnabled(true);
+                  }}
+                >
+                  {t("GPS трекер")} 📍
+                </button>
+              )}
               <button
                 className="gtr-btn"
                 style={{ padding: "6px 10px", fontSize: 10.5 }}
                 onClick={() => {
                   setRoute([]);
                   localStorage.setItem(ROUTE_KEY, "[]");
+                  if (isTracking) setIsTrackingEnabled(false);
                 }}
               >
                 {t("Очистить")}
               </button>
             </span>
           </div>
+          {gpsError && (
+            <div
+              className="gtr-mono"
+              style={{
+                font: "500 9px/1.3 'JetBrains Mono',monospace",
+                color: "#E5231B",
+                marginTop: 8,
+              }}
+            >
+              {t("Ошибка GPS")}: {gpsError}
+            </div>
+          )}
+          {currentLocation && (
+            <div
+              className="gtr-mono"
+              style={{
+                font: "500 9px/1.3 'JetBrains Mono',monospace",
+                color: GREEN,
+                marginTop: 8,
+              }}
+            >
+              Точность: ±{Math.round(currentLocation.accuracy)}м
+            </div>
+          )}
         </Card>
       ) : null}
 

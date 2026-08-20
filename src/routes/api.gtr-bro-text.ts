@@ -343,32 +343,51 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         // больше — уже зацикливание, режем.
         if (!hasBrain || !brain.url) return json({ ok: false, error: "no-brain" }, 503);
         const brainUrl = brain.url.replace(/\/$/, "");
+        const brainBody = JSON.stringify({
+          model: brain.model ?? "qwen3-8b",
+          messages,
+          tools: openaiTools(user.role),
+          tool_choice: "auto",
+          temperature: 0.7,
+          max_tokens: 400,
+          // Первый запрос прогревает кэш промпта — дальше быстрее.
+          cache_prompt: true,
+        });
+        // Домашний туннель до ПК BOSS иногда моргает на секунду — это не
+        // повод класть весь ответ. Один быстрый повтор ловит ровно такой
+        // случай, как уже сделано для Gemini выше.
+        const fetchBrain = () =>
+          fetch(`${brainUrl}/v1/chat/completions`, {
+            method: "POST",
+            headers: {
+              authorization: `Bearer ${brain.token}`,
+              "content-type": "application/json",
+            },
+            body: brainBody,
+            // CPU-модель думает небыстро, но ждать её дольше общего
+            // срока бессмысленно: правила на клиенте ответят раньше.
+            signal: AbortSignal.timeout(Math.max(3_000, timeLeft())),
+          });
         for (let round = 0; round < 3; round++) {
           if (timeLeft() < 3_000) return json({ ok: false, error: "deadline" }, 504);
           let res: Response;
           try {
-            res = await fetch(`${brainUrl}/v1/chat/completions`, {
-              method: "POST",
-              headers: {
-                authorization: `Bearer ${brain.token}`,
-                "content-type": "application/json",
-              },
-              body: JSON.stringify({
-                model: brain.model ?? "qwen3-8b",
-                messages,
-                tools: openaiTools(user.role),
-                tool_choice: "auto",
-                temperature: 0.7,
-                max_tokens: 400,
-                // Первый запрос прогревает кэш промпта — дальше быстрее.
-                cache_prompt: true,
-              }),
-              // CPU-модель думает небыстро, но ждать её дольше общего
-              // срока бессмысленно: правила на клиенте ответят раньше.
-              signal: AbortSignal.timeout(Math.max(3_000, timeLeft())),
-            });
+            res = await fetchBrain();
+            if (!res.ok && [502, 503, 504].includes(res.status) && timeLeft() > 5_000) {
+              await new Promise((r) => setTimeout(r, 1000));
+              res = await fetchBrain();
+            }
           } catch {
-            return json({ ok: false, error: "brain-network" }, 502);
+            if (timeLeft() > 5_000) {
+              await new Promise((r) => setTimeout(r, 1000));
+              try {
+                res = await fetchBrain();
+              } catch {
+                return json({ ok: false, error: "brain-network" }, 502);
+              }
+            } else {
+              return json({ ok: false, error: "brain-network" }, 502);
+            }
           }
           if (!res.ok) return json({ ok: false, error: "brain-http", status: res.status }, 502);
 

@@ -873,9 +873,25 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
       if (!byVid.has(vid)) counts[vid] = counts[vid] ?? -1;
     }
   }
+  // Находки прогона: события, которых в KV ещё не было. Уходят ссылками
+  // в служебный телеграм — команда смотрит первоисточник и правит афишу
+  // раньше, чем гость заметит ошибку. Сравнение с прошлым KV даёт
+  // дедупликацию между прогонами бесплатно: что уже присылали — не в счёт.
+  const today = new Date().toISOString().slice(0, 10);
+  const finds: { vid: string; e: VenueAfishaEvent }[] = [];
   for (const [vid, events] of byVid) {
     // события, добавленные командой вручную, переживают пересборку
     const prev = await kvGetJson<VenueAfisha>(ns, `venueevents:${vid}`);
+    const known = new Set(
+      (prev?.events ?? []).map((e) => e.id || `${e.dateIso}|${e.title.toLowerCase()}`),
+    );
+    for (const e of events)
+      if (
+        e.source !== "manual" &&
+        e.dateIso >= today &&
+        !known.has(e.id || `${e.dateIso}|${e.title.toLowerCase()}`)
+      )
+        finds.push({ vid, e });
     const manual = (prev?.events ?? []).filter(
       (e) =>
         e.source === "manual" &&
@@ -898,7 +914,81 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
       } satisfies VenueBusy),
     );
   }
+  await sendFindsDigest(ns, finds).catch(() => {
+    // телеграм прилёг — афиша всё равно собрана, дайджест догонит в
+    // следующий прогон только новыми находками, старые уже в KV
+  });
   return counts;
+}
+
+// ---------- дайджест находок в служебный телеграм ----------
+// Каждая строка — прямая ссылка на первоисточник: команда открывает
+// афишу площадки одним тапом и решает, что поправить. В публичные чаты
+// комьюнити это не уходит никогда — только админы и ops-канал.
+const SRC_MARK: Record<string, string> = {
+  site: "сайт",
+  discovered: "сайт",
+  ra: "RA",
+  facebook: "FB",
+  instagram: "IG",
+};
+
+async function sendFindsDigest(ns: KvNs, finds: { vid: string; e: VenueAfishaEvent }[]) {
+  if (!finds.length) return;
+  const { tgApi, tgConfigured, tgEsc } = await import("./tg");
+  if (!tgConfigured()) return;
+  const { guardInternalChatId, OPS_KEY } = await import("./community");
+
+  const nameOf = new Map(
+    ((venuesRaw as { venues?: { id: string; name?: string }[] }).venues ?? []).map((v) => [
+      v.id,
+      v.name ?? v.id,
+    ]),
+  );
+  const dd = (iso: string) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}`;
+  const rows = finds
+    .sort((a, b) => a.e.dateIso.localeCompare(b.e.dateIso))
+    .slice(0, 20)
+    .map(
+      ({ vid, e }) =>
+        `• ${dd(e.dateIso)} — <a href="${tgEsc(e.url)}">${tgEsc(e.title.slice(0, 60))}</a> — ${tgEsc(
+          String(nameOf.get(vid) ?? vid),
+        )} <i>(${SRC_MARK[e.source] ?? tgEsc(e.source)})</i>`,
+    );
+  const more = finds.length > 20 ? `\n…и ещё ${finds.length - 20}` : "";
+  const text =
+    `🕵️ <b>Афиша-разведчик: ${finds.length} нов.</b>\n` +
+    rows.join("\n") +
+    more +
+    `\n\nПравки: приложение → Черновики/Афиша`;
+
+  // адресаты: BOSS и GTR-админы с привязанным TG + закрытый ops-канал
+  const sent = new Set<string>();
+  const push = async (raw: string | number | null | undefined) => {
+    const chat = await guardInternalChatId(ns, raw);
+    if (!chat || sent.has(chat)) return;
+    sent.add(chat);
+    await tgApi("sendMessage", {
+      chat_id: chat,
+      text,
+      parse_mode: "HTML",
+      link_preview_options: { is_disabled: true },
+    });
+  };
+  for (const key of await kvListAllLocal(ns, "user:")) {
+    const u = await kvGetJson<{ email?: string; role?: string; boss?: boolean }>(ns, key);
+    if (u?.role === "gtr" && u.email) await push(await ns.get(`tg:${u.email}`));
+  }
+  const ops = await kvGetJson<{ chatId?: number }>(ns, OPS_KEY);
+  await push(ops?.chatId);
+  await push(typeof process !== "undefined" ? process.env?.TELEGRAM_CHAT_ID : undefined);
+
+  // след прогона — для «почему не пришло» без чтения логов
+  await ns.put(
+    `afishafinds:${new Date().toISOString().slice(0, 10)}`,
+    JSON.stringify({ at: Date.now(), count: finds.length, chats: sent.size }),
+    { expirationTtl: 60 * 60 * 24 * 14 },
+  );
 }
 
 // Ключ ручного/кронового запуска — производная от секрета сессий

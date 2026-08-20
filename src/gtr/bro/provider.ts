@@ -13,7 +13,10 @@ export const kvProvider = (ns: KvNs): EventsProvider => ({
     const out: { vid: string; events: { id?: string; title: string; dateIso: string; poster?: string }[] }[] = [];
     // Ограничение сверху: результат уходит в модель, и раздутый ответ
     // и стоит дороже, и топит полезное в шуме.
-    for (const key of keys.slice(0, 60)) {
+    // Вся база (110 площадок) должна помещаться: срез на 60 отрезал бы
+    // хвост алфавита, и BRO «не знал» бы про часть заведений. В ответ
+    // всё равно попадают только площадки с событиями в окне дат.
+    for (const key of keys.slice(0, 160)) {
       const rec = await kvGetJson<{ events?: { id?: string; title: string; dateIso: string; poster?: string }[] }>(
         ns,
         key,

@@ -10,32 +10,53 @@
 // доступа сверх честного назначения кнопки.
 import { useEffect, useRef, useState } from "react";
 
+import genreBpmRaw from "../data/genre-bpm.json";
+
 const LISTEN_MS = 5000;
 
 export type Vibe = { key: string; ru: string };
 export type VibeResult = { bpm: number | null; vibe: Vibe };
 
-// Коарс-бакеты по темпу и доле баса в спектре — не жанр (в базе жанров
-// сотни узких поджанров, которые 5 секунд мика честно не различат), а
-// «на что это похоже по темпу и весу низов». bpm === null — ритм не
-// нащупали (шум, разговор, тихо) — так и говорим, а не подставляем цифру.
-export function classifyVibe(bpm: number | null, bassRatio: number): Vibe {
+type Band = { dir: string; ru: string; min: number; max: number };
+const BANDS = genreBpmRaw.bands as Band[];
+
+// Стиль — по тому же словарю dir/ru, что и вся остальная база жанров
+// (genre-bpm.json), а не придуманные ярлыки: диапазоны — общепринятые
+// темповые конвенции клубной музыки, не выгрузка с PromoDJ (там нет
+// открытого API для аудио-отпечатков, а на живом диджей-миксе точное
+// распознавание трека промахивается почти всегда). Диапазоны House и
+// Techno, Hard Dance и Drum & Bass честно пересекаются в реальной
+// музыке — при пересечении решает: бас/треб для Techno-vs-Trance
+// (техно держит вес на бас-барабане, транс — на мелодических верхах),
+// ровность бита для Hard Dance-vs-DnB (Hard Dance — прямая четверть,
+// DnB — синкопированный брейк, разброс интервалов между ударами выше).
+export function classifyVibe(
+  bpm: number | null,
+  bassRatio: number,
+  regularity = 1,
+): Vibe {
   if (bpm === null)
     return bassRatio > 0.5
       ? { key: "ambient-bass", ru: "фоновый бас без чёткого ритма" }
       : { key: "unclear", ru: "не расслышал чёткий ритм — подойди ближе к колонкам" };
-  if (bpm < 95) return { key: "chill", ru: "чилл / лаундж" };
-  if (bpm < 112) return { key: "deep-groove", ru: "дип-хаус / грув" };
-  if (bpm < 128)
-    return bassRatio > 0.45
-      ? { key: "bass-house", ru: "бас-хаус / коммерческий данс" }
-      : { key: "house", ru: "хаус" };
-  if (bpm < 142)
-    return bassRatio > 0.48
-      ? { key: "techno", ru: "техно" }
-      : { key: "progressive", ru: "прогрессив / мелодик-техно" };
-  if (bpm < 158) return { key: "trance", ru: "транс / хай-энерджи" };
-  return { key: "hardstyle", ru: "хардстайл / жёсткий бит" };
+  if (bpm < BANDS[0].min) return { key: "chill", ru: "чилл / лаундж" };
+
+  const hits = BANDS.filter((b) => bpm >= b.min && bpm <= b.max);
+  if (!hits.length) return { key: "energetic", ru: "бодрый ритм — стиль не читается однозначно" };
+
+  let pick = hits[0];
+  if (hits.length > 1) {
+    const dirs = hits.map((h) => h.dir);
+    if (dirs.includes("Techno") && dirs.includes("Trance"))
+      pick = hits.find((h) => h.dir === (bassRatio > 0.48 ? "Techno" : "Trance"))!;
+    else if (dirs.includes("Hard Dance") && dirs.includes("Drum & Bass"))
+      pick = hits.find((h) => h.dir === (regularity > 0.72 ? "Hard Dance" : "Drum & Bass"))!;
+  }
+
+  let ru = pick.ru;
+  if (pick.dir === "House" && bassRatio > 0.45) ru += " (бас-хаус)";
+  else if (pick.dir === "Techno" && bassRatio > 0.55) ru += " (жёсткий, индастриал)";
+  return { key: pick.dir.toLowerCase().replace(/[^a-z]+/g, "-"), ru };
 }
 
 type Phase = "idle" | "listening" | "result" | "error";
@@ -109,15 +130,25 @@ export function VibeCheck({ open, onClose }: { open: boolean; onClose: () => voi
       ctxRef.current = null;
 
       let bpm: number | null = null;
+      // Ровность интервалов между ударами — второй сигнал вдобавок к
+      // темпу: считаем только при достаточной выборке (4+ интервала),
+      // иначе разброс на двух-трёх ударах ничего не значит.
+      let regularity = 1;
       if (beat.gaps.length >= 3) {
         const sorted = [...beat.gaps].sort((a, b) => a - b);
         let v = 60000 / sorted[Math.floor(sorted.length / 2)];
         while (v < 70) v *= 2;
         while (v > 180) v /= 2;
         bpm = Math.round(v);
+        if (beat.gaps.length >= 4) {
+          const mean = beat.gaps.reduce((s, g) => s + g, 0) / beat.gaps.length;
+          const variance = beat.gaps.reduce((s, g) => s + (g - mean) ** 2, 0) / beat.gaps.length;
+          const cv = mean > 0 ? Math.sqrt(variance) / mean : 0;
+          regularity = Math.max(0, Math.min(1, 1 - cv));
+        }
       }
       const total = bassSum + midSum + trebleSum || 1;
-      setResult({ bpm, vibe: classifyVibe(bpm, bassSum / total) });
+      setResult({ bpm, vibe: classifyVibe(bpm, bassSum / total, regularity) });
       setPhase("result");
     };
 

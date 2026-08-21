@@ -3818,6 +3818,11 @@ html { -webkit-tap-highlight-color: transparent; }
   font: 500 13px/1.3 "Golos Text", sans-serif;
   color: var(--gtr-t2);
 }
+.gtr-vibe-src {
+  font: 500 9.5px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+}
 /* пульсирующее кольцо на время прослушивания — честный индикатор,
    что мик открыт, тот же принцип, что и у оверлея голоса */
 .gtr-vibe-ring {

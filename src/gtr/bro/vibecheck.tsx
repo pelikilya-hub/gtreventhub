@@ -60,13 +60,43 @@ export function classifyVibe(
 }
 
 type Phase = "idle" | "listening" | "result" | "error";
+type Refined = { ru: string; group: string; bpm: number | null };
+
+// Те же 5 секунд уходят и на сервер: Gemini слушает запись и называет
+// жанр из нашего словаря точнее, чем прикидка по темпу. Локальный ответ
+// показывается мгновенно и остаётся, если сервер не ответил — уточнение
+// приходит вторым тактом, а не держит человека у пустого экрана.
+async function refineByEar(blob: Blob, mime: string): Promise<Refined | null> {
+  if (blob.size < 4_000 || blob.size > 1_000_000) return null;
+  const b64 = await new Promise<string>((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(String(fr.result).split(",")[1] ?? "");
+    fr.onerror = () => reject(new Error("read"));
+    fr.readAsDataURL(blob);
+  });
+  const r = await fetch("/api/gtr-vibe", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ mime, data: b64 }),
+  });
+  if (!r.ok) return null;
+  const d = (await r.json()) as { ok: boolean; ru?: string; group?: string; bpm?: number | null };
+  if (!d.ok || !d.ru) return null;
+  return { ru: d.ru, group: d.group ?? "", bpm: d.bpm ?? null };
+}
+
+const REC_MIMES = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
 
 export function VibeCheck({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [result, setResult] = useState<VibeResult | null>(null);
+  const [refined, setRefined] = useState<Refined | null>(null);
+  const [refining, setRefining] = useState(false);
   const [errMsg, setErrMsg] = useState("");
   const streamRef = useRef<MediaStream | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
+  const recRef = useRef<MediaRecorder | null>(null);
+  const runRef = useRef(0);
   const rafRef = useRef(0);
 
   // Закрыли карточку — гасим микрофон немедленно, даже если 5 секунд
@@ -74,18 +104,30 @@ export function VibeCheck({ open, onClose }: { open: boolean; onClose: () => voi
   // оставить висеть.
   useEffect(() => {
     if (open) return;
+    runRef.current += 1; // ответы уже запущенных прослушиваний — в мусор
     cancelAnimationFrame(rafRef.current);
+    try {
+      recRef.current?.stop();
+    } catch {
+      /* уже остановлен */
+    }
+    recRef.current = null;
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     void ctxRef.current?.close().catch(() => {});
     ctxRef.current = null;
     setPhase("idle");
     setResult(null);
+    setRefined(null);
+    setRefining(false);
   }, [open]);
 
   const listen = async () => {
+    const run = ++runRef.current;
     setPhase("listening");
     setErrMsg("");
+    setRefined(null);
+    setRefining(false);
 
     const Ctx =
       window.AudioContext ||
@@ -110,6 +152,36 @@ export function VibeCheck({ open, onClose }: { open: boolean; onClose: () => voi
     streamRef.current = stream;
     void ctx.resume();
 
+    // Параллельно с анализом пишем те же 5 секунд в файл — для уточнения
+    // жанра на сервере. Записи нет (старый WebView) — фича тихо живёт
+    // одной локальной прикидкой, без ошибок на экране.
+    let recMime = "";
+    if (typeof MediaRecorder !== "undefined") {
+      recMime = REC_MIMES.find((m) => MediaRecorder.isTypeSupported(m)) ?? "";
+      if (recMime) {
+        const rec = new MediaRecorder(stream, { mimeType: recMime, audioBitsPerSecond: 64_000 });
+        const chunks: Blob[] = [];
+        rec.ondataavailable = (e) => {
+          if (e.data.size) chunks.push(e.data);
+        };
+        rec.onstop = () => {
+          if (run !== runRef.current) return;
+          setRefining(true);
+          void refineByEar(new Blob(chunks, { type: recMime }), recMime)
+            .then((g) => {
+              if (run !== runRef.current) return;
+              if (g) setRefined(g);
+            })
+            .catch(() => {})
+            .finally(() => {
+              if (run === runRef.current) setRefining(false);
+            });
+        };
+        recRef.current = rec;
+        rec.start();
+      }
+    }
+
     const src = ctx.createMediaStreamSource(stream);
     const an = ctx.createAnalyser();
     an.fftSize = 1024;
@@ -124,6 +196,13 @@ export function VibeCheck({ open, onClose }: { open: boolean; onClose: () => voi
     const started = performance.now();
 
     const finish = () => {
+      // Сначала стоп записи (флашит хвост в ondataavailable), потом дорожки.
+      try {
+        recRef.current?.stop();
+      } catch {
+        /* запись не шла */
+      }
+      recRef.current = null;
       stream.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
       void ctx.close().catch(() => {});
@@ -221,9 +300,18 @@ export function VibeCheck({ open, onClose }: { open: boolean; onClose: () => voi
         )}
         {phase === "result" && result && (
           <>
-            <div className="gtr-vibe-bpm">{result.bpm ?? "—"}</div>
-            {result.bpm ? <div className="gtr-vibe-bpm-label">BPM</div> : null}
-            <div className="gtr-vibe-tag">{result.vibe.ru}</div>
+            <div className="gtr-vibe-bpm">{refined?.bpm ?? result.bpm ?? "—"}</div>
+            {(refined?.bpm ?? result.bpm) ? <div className="gtr-vibe-bpm-label">BPM</div> : null}
+            <div className="gtr-vibe-tag">
+              {refined ? `${refined.ru}${refined.group ? ` · ${refined.group}` : ""}` : result.vibe.ru}
+            </div>
+            <div className="gtr-vibe-src">
+              {refined
+                ? "распознано по звуку"
+                : refining
+                  ? "уточняю жанр по звуку…"
+                  : "прикидка по темпу"}
+            </div>
             <button className="gtr-vibe-btn ghost" onClick={() => void listen()}>
               Ещё раз
             </button>

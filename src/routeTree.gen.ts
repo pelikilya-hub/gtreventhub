@@ -26,6 +26,7 @@ import { Route as ApiGtrBroSdpRouteImport } from './routes/api.gtr-bro-sdp'
 import { Route as ApiGtrBroSessionRouteImport } from './routes/api.gtr-bro-session'
 import { Route as ApiGtrBroTextRouteImport } from './routes/api.gtr-bro-text'
 import { Route as ApiGtrBroToolRouteImport } from './routes/api.gtr-bro-tool'
+import { Route as ApiGtrVibeRouteImport } from './routes/api.gtr-vibe'
 import { Route as ApiPosterRouteImport } from './routes/api.poster'
 import { Route as ApiPushRouteImport } from './routes/api.push'
 import { Route as ApiSpotifyCallbackRouteImport } from './routes/api.spotify-callback'
@@ -128,6 +129,11 @@ const ApiGtrBroToolRoute = ApiGtrBroToolRouteImport.update({
   path: '/api/gtr-bro-tool',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGtrVibeRoute = ApiGtrVibeRouteImport.update({
+  id: '/api/gtr-vibe',
+  path: '/api/gtr-vibe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPosterRoute = ApiPosterRouteImport.update({
   id: '/api/poster',
   path: '/api/poster',
@@ -227,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
+  '/api/gtr-vibe': typeof ApiGtrVibeRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
@@ -261,6 +268,7 @@ export interface FileRoutesByTo {
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
+  '/api/gtr-vibe': typeof ApiGtrVibeRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
@@ -297,6 +305,7 @@ export interface FileRoutesById {
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
+  '/api/gtr-vibe': typeof ApiGtrVibeRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
@@ -334,6 +343,7 @@ export interface FileRouteTypes {
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
+    | '/api/gtr-vibe'
     | '/api/poster'
     | '/api/push'
     | '/api/spotify-callback'
@@ -368,6 +378,7 @@ export interface FileRouteTypes {
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
+    | '/api/gtr-vibe'
     | '/api/poster'
     | '/api/push'
     | '/api/spotify-callback'
@@ -403,6 +414,7 @@ export interface FileRouteTypes {
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
+    | '/api/gtr-vibe'
     | '/api/poster'
     | '/api/push'
     | '/api/spotify-callback'
@@ -439,6 +451,7 @@ export interface RootRouteChildren {
   ApiGtrBroSessionRoute: typeof ApiGtrBroSessionRoute
   ApiGtrBroTextRoute: typeof ApiGtrBroTextRoute
   ApiGtrBroToolRoute: typeof ApiGtrBroToolRoute
+  ApiGtrVibeRoute: typeof ApiGtrVibeRoute
   ApiPosterRoute: typeof ApiPosterRoute
   ApiPushRoute: typeof ApiPushRoute
   ApiSpotifyCallbackRoute: typeof ApiSpotifyCallbackRoute
@@ -569,6 +582,13 @@ declare module '@tanstack/react-router' {
       path: '/api/gtr-bro-tool'
       fullPath: '/api/gtr-bro-tool'
       preLoaderRoute: typeof ApiGtrBroToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gtr-vibe': {
+      id: '/api/gtr-vibe'
+      path: '/api/gtr-vibe'
+      fullPath: '/api/gtr-vibe'
+      preLoaderRoute: typeof ApiGtrVibeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/poster': {
@@ -728,6 +748,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGtrBroSessionRoute: ApiGtrBroSessionRoute,
   ApiGtrBroTextRoute: ApiGtrBroTextRoute,
   ApiGtrBroToolRoute: ApiGtrBroToolRoute,
+  ApiGtrVibeRoute: ApiGtrVibeRoute,
   ApiPosterRoute: ApiPosterRoute,
   ApiPushRoute: ApiPushRoute,
   ApiSpotifyCallbackRoute: ApiSpotifyCallbackRoute,

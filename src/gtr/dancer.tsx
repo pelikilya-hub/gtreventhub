@@ -22,6 +22,12 @@ const W = 176;
 const H = 294; // пропорция исходника 368×616
 const BASE_BPM = 120;
 
+// Репертуар: базовый грув плюс четыре сменных движения. Каждые 16 битов
+// танцовщица меняет фигуру случайно — живой танец, а не заевший гиф.
+// Сами кадры остаются из видео BOSS; движения — работа корпуса поверх
+// (проходка, шимми, волна, подскок, разворот), темп — от --gtr-beat.
+const MOVES = ["groove", "shimmy", "wave", "hop", "spin"] as const;
+
 export function GtrDancer() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -30,6 +36,33 @@ export function GtrDancer() {
   const dragRef = useRef<{ id: number; ox: number; oy: number } | null>(null);
   const rafRef = useRef(0);
   const drawRef = useRef(0);
+
+  // Утащили за край экрана — возвращаем в видимую зону. Без этого одно
+  // неудачное перетаскивание прятало танцовщицу навсегда: позиция
+  // запоминается, а границ у неё не было («верни танцора» — отсюда).
+  const ensureVisible = () => {
+    const el = rootRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (!r.width) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let dx = 0;
+    let dy = 0;
+    if (r.right < 28) dx = 28 - r.right;
+    if (r.left > vw - 28) dx = vw - 28 - r.left;
+    if (r.bottom < 28) dy = 28 - r.bottom;
+    if (r.top > vh - 28) dy = vh - 28 - r.top;
+    if (dx || dy) {
+      posRef.current = { x: posRef.current.x + dx, y: posRef.current.y + dy };
+      paint();
+      try {
+        localStorage.setItem(SPOT, JSON.stringify(posRef.current));
+      } catch {
+        /* приватный режим */
+      }
+    }
+  };
 
   // где стояла в прошлый раз
   useEffect(() => {
@@ -40,6 +73,8 @@ export function GtrDancer() {
       /* место не вспомнилось — встанет по умолчанию */
     }
     paint();
+    ensureVisible();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // жизнь видео: play/pause от атрибута data-gtr-playing на корне,
@@ -91,6 +126,21 @@ export function GtrDancer() {
     };
     v.addEventListener("error", fallback);
 
+    // Смена фигуры каждые 16 битов: длительность шага считается от
+    // текущего темпа, сама фигура — случайная из репертуара (кроме той,
+    // что танцуется сейчас — заметная смена, а не «может повторюсь»).
+    let beatMs = 60000 / BASE_BPM;
+    let moveTimer = 0;
+    const nextMove = () => {
+      const el = rootRef.current;
+      if (el) {
+        const cur = el.dataset.move ?? "groove";
+        const pool = MOVES.filter((m) => m !== cur);
+        el.dataset.move = pool[Math.floor(Math.random() * pool.length)];
+      }
+      moveTimer = window.setTimeout(nextMove, beatMs * 16);
+    };
+
     const start = () => {
       if (still) return; // системное «меньше движения» — стоим смирно
       if (!v.src) v.src = SRC; // первый запуск музыки — первый байт видео
@@ -98,11 +148,14 @@ export function GtrDancer() {
       running = true;
       cancelAnimationFrame(drawRef.current);
       drawRef.current = requestAnimationFrame(draw);
+      clearTimeout(moveTimer);
+      moveTimer = window.setTimeout(nextMove, beatMs * 16);
     };
     const halt = () => {
       running = false;
       v.pause();
       cancelAnimationFrame(drawRef.current);
+      clearTimeout(moveTimer);
     };
 
     const sync = () => {
@@ -117,6 +170,9 @@ export function GtrDancer() {
     const onBpm = (e: Event) => {
       const bpm = Number((e as CustomEvent).detail) || BASE_BPM;
       v.playbackRate = Math.max(0.6, Math.min(1.6, bpm / BASE_BPM));
+      // темп ведёт и CSS-движения корпуса: длительность шага в переменной
+      beatMs = 60000 / Math.max(70, Math.min(180, bpm));
+      rootRef.current?.style.setProperty("--gtr-beat", `${Math.round(beatMs)}ms`);
     };
     window.addEventListener("gtr:bpm", onBpm);
 
@@ -134,6 +190,7 @@ export function GtrDancer() {
       window.removeEventListener("gtr:bpm", onBpm);
       document.removeEventListener("visibilitychange", onVis);
       cancelAnimationFrame(drawRef.current);
+      clearTimeout(moveTimer);
     };
   }, []);
 
@@ -173,6 +230,8 @@ export function GtrDancer() {
     } catch {
       /* приватный режим — просто не запомним */
     }
+    // за край можно спрятать почти всю — но угол остаётся, чтобы вернуть
+    ensureVisible();
   };
 
   return (

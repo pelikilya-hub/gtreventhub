@@ -19,7 +19,14 @@ export type BrainWatch = {
   since: number;
   /** Последняя удачная проба, epoch ms. 0 — удачных ещё не было. */
   lastOk: number;
+  /** Чем именно болен мозг. Пусто — здоров. */
+  reason?: BrainFail;
 };
+
+/** Вид отказа. Разные болезни лечатся разным, и сторож обязан их
+ *  различать: «не доходит» — это сеть или упавший контейнер, «не пускает»
+ *  — расхождение токенов, которое само не рассосётся никогда. */
+export type BrainFail = "unreachable" | "auth" | "error";
 
 /** Сколько неудачных проб подряд считаем падением.
  *
@@ -27,6 +34,13 @@ export type BrainWatch = {
  *  а холодный инференс после простоя отвечает не мгновенно. Две подряд
  *  при шаге крона в 15 минут — это полчаса молчания, тут уже не помеха. */
 export const FAILS_TO_ALARM = 2;
+
+/** Отказы, которые не имеет смысла перепроверять: они не транзиентные.
+ *
+ *  401 — это не моргнувшая сеть, а разошедшаяся настройка. Ждать второй
+ *  пробы значит тратить пятнадцать минут на подтверждение того, что и так
+ *  однозначно. */
+export const isHardFail = (reason: BrainFail): boolean => reason === "auth";
 
 /** Что произошло на этом шаге: «упал», «поднялся» или ничего нового. */
 export type Alarm = "down" | "up" | null;
@@ -41,10 +55,10 @@ export type WatchStep = { next: BrainWatch; alarm: Alarm };
  *  пятнадцать минут, обучает не чинить, а не читать. */
 export function stepWatch(
   prev: BrainWatch | null,
-  probeOk: boolean,
+  reason: BrainFail | null,
   now: number,
 ): WatchStep {
-  if (probeOk) {
+  if (!reason) {
     const recovered = Boolean(prev?.down);
     return {
       next: {
@@ -57,13 +71,15 @@ export function stepWatch(
     };
   }
   const fails = (prev?.fails ?? 0) + 1;
-  const alarm: Alarm = !prev?.down && fails >= FAILS_TO_ALARM ? "down" : null;
+  const need = isHardFail(reason) ? 1 : FAILS_TO_ALARM;
+  const alarm: Alarm = !prev?.down && fails >= need ? "down" : null;
   return {
     next: {
-      down: prev?.down || fails >= FAILS_TO_ALARM,
+      down: prev?.down || fails >= need,
       fails,
       since: alarm ? now : (prev?.since ?? now),
       lastOk: prev?.lastOk ?? 0,
+      reason,
     },
     alarm,
   };
@@ -74,11 +90,18 @@ export function stepWatch(
  *  Пишем длительность, а не голый факт: «лежит 40 минут» и «лежит сутки» —
  *  разные задачи, и решать это должен читающий, а не сторож. */
 export function alarmText(alarm: Exclude<Alarm, null>, w: BrainWatch, now: number): string {
-  if (alarm === "down") {
-    const seen = w.lastOk ? `последний удачный ответ ${ago(now - w.lastOk)} назад` : "удачных ответов ещё не было";
-    return `Мозг BOSS не отвечает: ${w.fails} пробы подряд мимо, ${seen}. Проверь VPS: контейнер brain, адрес в setting:brain.`;
-  }
-  return `Мозг BOSS снова отвечает. Лежал ${ago(now - w.since)}.`;
+  if (alarm === "up") return `Мозг BOSS снова отвечает. Лежал ${ago(now - w.since)}.`;
+  const seen = w.lastOk
+    ? `последний удачный ответ ${ago(now - w.lastOk)} назад`
+    : "удачных ответов ещё не было";
+  // Токен — отдельный текст: снаружи такой отказ выглядит как здоровый
+  // сервер, потому что /health и /v1/models у llama.cpp открыты без
+  // авторизации. Если не сказать прямо, чинить пойдут не туда.
+  if (w.reason === "auth")
+    return `Мозг BOSS не пускает: 401, токен в setting:brain разошёлся с токеном сервера. Сверь с /opt/bro-brain/.env. Сам сервер жив — /health отвечает, поэтому снаружи поломка не видна.`;
+  if (w.reason === "unreachable")
+    return `Мозг BOSS не отвечает: ${w.fails} пробы подряд мимо, ${seen}. Проверь VPS: контейнер brain и адрес в setting:brain.`;
+  return `Мозг BOSS отвечает ошибкой: ${w.fails} пробы подряд мимо, ${seen}. Смотри логи контейнера brain.`;
 }
 
 /** Грубая длительность по-русски: сторожу хватает порядка величины. */

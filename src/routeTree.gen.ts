@@ -16,6 +16,7 @@ import { Route as ApiAfishaSendRouteImport } from './routes/api.afisha-send'
 import { Route as ApiAphotoRouteImport } from './routes/api.aphoto'
 import { Route as ApiAvideoRouteImport } from './routes/api.avideo'
 import { Route as ApiBossHeadRouteImport } from './routes/api.boss-head'
+import { Route as ApiBrainWatchRouteImport } from './routes/api.brain-watch'
 import { Route as ApiBroDevRouteImport } from './routes/api.bro-dev'
 import { Route as ApiBroLearnRouteImport } from './routes/api.bro-learn'
 import { Route as ApiClientLogRouteImport } from './routes/api.client-log'
@@ -77,6 +78,11 @@ const ApiAvideoRoute = ApiAvideoRouteImport.update({
 const ApiBossHeadRoute = ApiBossHeadRouteImport.update({
   id: '/api/boss-head',
   path: '/api/boss-head',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBrainWatchRoute = ApiBrainWatchRouteImport.update({
+  id: '/api/brain-watch',
+  path: '/api/brain-watch',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBroDevRoute = ApiBroDevRouteImport.update({
@@ -223,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/boss-head': typeof ApiBossHeadRoute
+  '/api/brain-watch': typeof ApiBrainWatchRoute
   '/api/bro-dev': typeof ApiBroDevRoute
   '/api/bro-learn': typeof ApiBroLearnRoute
   '/api/client-log': typeof ApiClientLogRoute
@@ -258,6 +265,7 @@ export interface FileRoutesByTo {
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/boss-head': typeof ApiBossHeadRoute
+  '/api/brain-watch': typeof ApiBrainWatchRoute
   '/api/bro-dev': typeof ApiBroDevRoute
   '/api/bro-learn': typeof ApiBroLearnRoute
   '/api/client-log': typeof ApiClientLogRoute
@@ -295,6 +303,7 @@ export interface FileRoutesById {
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/boss-head': typeof ApiBossHeadRoute
+  '/api/brain-watch': typeof ApiBrainWatchRoute
   '/api/bro-dev': typeof ApiBroDevRoute
   '/api/bro-learn': typeof ApiBroLearnRoute
   '/api/client-log': typeof ApiClientLogRoute
@@ -333,6 +342,7 @@ export interface FileRouteTypes {
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/boss-head'
+    | '/api/brain-watch'
     | '/api/bro-dev'
     | '/api/bro-learn'
     | '/api/client-log'
@@ -368,6 +378,7 @@ export interface FileRouteTypes {
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/boss-head'
+    | '/api/brain-watch'
     | '/api/bro-dev'
     | '/api/bro-learn'
     | '/api/client-log'
@@ -404,6 +415,7 @@ export interface FileRouteTypes {
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/boss-head'
+    | '/api/brain-watch'
     | '/api/bro-dev'
     | '/api/bro-learn'
     | '/api/client-log'
@@ -441,6 +453,7 @@ export interface RootRouteChildren {
   ApiAphotoRoute: typeof ApiAphotoRoute
   ApiAvideoRoute: typeof ApiAvideoRoute
   ApiBossHeadRoute: typeof ApiBossHeadRoute
+  ApiBrainWatchRoute: typeof ApiBrainWatchRoute
   ApiBroDevRoute: typeof ApiBroDevRoute
   ApiBroLearnRoute: typeof ApiBroLearnRoute
   ApiClientLogRoute: typeof ApiClientLogRoute
@@ -512,6 +525,13 @@ declare module '@tanstack/react-router' {
       path: '/api/boss-head'
       fullPath: '/api/boss-head'
       preLoaderRoute: typeof ApiBossHeadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/brain-watch': {
+      id: '/api/brain-watch'
+      path: '/api/brain-watch'
+      fullPath: '/api/brain-watch'
+      preLoaderRoute: typeof ApiBrainWatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/bro-dev': {
@@ -738,6 +758,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAphotoRoute: ApiAphotoRoute,
   ApiAvideoRoute: ApiAvideoRoute,
   ApiBossHeadRoute: ApiBossHeadRoute,
+  ApiBrainWatchRoute: ApiBrainWatchRoute,
   ApiBroDevRoute: ApiBroDevRoute,
   ApiBroLearnRoute: ApiBroLearnRoute,
   ApiClientLogRoute: ApiClientLogRoute,

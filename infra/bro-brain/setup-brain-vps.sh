@@ -80,6 +80,20 @@ services:
       - ./cache:/root/.cache
     environment:
       - LLAMA_ARG_HF_REPO=Qwen/Qwen3-8B-GGUF:Q4_K_M
+    # Проба живости. restart: unless-stopped спасает от падения процесса и
+    # от перезагрузки сервера, но зависший llama-server для Docker всё ещё
+    # «работает» — вылечить его может только healthcheck плюс autoheal.
+    #
+    # Образ несёт свой healthcheck на том же /health (потому curl внутри и
+    # есть). Перекрываем ради start_period: без него контейнер помечен
+    # unhealthy всё время загрузки модели, и autoheal убивал бы его ровно
+    # во время старта. Первый запуск ещё и качает ~5 ГБ — запас с избытком.
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 15m
     # --parallel 3: три слота вместо одного. Без этого флага сервер держит
     # ОДИН запрос за раз, и второй одновременный гость встаёт в очередь,
     # не успевая в 26-секундный дедлайн воркера. -c делится между слотами
@@ -109,6 +123,23 @@ services:
       - caddy_config:/config
     depends_on:
       - brain
+
+  # Сторож контейнеров: раз в минуту смотрит на healthcheck и
+  # перезапускает помеченное unhealthy. Docker сам состояние здоровья
+  # только показывает, но не лечит — отсюда отдельный процесс.
+  #
+  # Доступ к docker.sock — это право управлять контейнерами хоста. Цена
+  # автолечения; поэтому образ узкий и портов наружу у него нет.
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: bro-brain-autoheal
+    restart: unless-stopped
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+      - AUTOHEAL_INTERVAL=60
+      - AUTOHEAL_START_PERIOD=900
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   caddy_data:

@@ -47,6 +47,7 @@ const CRON_ROUTES: Record<string, string> = {
   "0 2 * * *": "/api/villa-check", // 09:00 Пхукета — сверка цен вилл Private
   "0 10 * * *": "/api/community-digest", // 17:00 Пхукета — дайджест вечера
   "0 4 * * *": "/api/bro-learn", // 11:00 Пхукета — BRO учит новые темы
+  "*/15 * * * *": "/api/brain-watch", // сторож мозга BOSS: тихий отказ не должен жить сутками
 };
 
 type ScheduledPayload = {

@@ -377,6 +377,52 @@ describe("рассадка Café del Mar", () => {
     expect(lines[0].price).toBe(390);
   });
 
+  it("площадка без схемы столов принимает заявку, а не отказ", async () => {
+    let got: Record<string, unknown> = {};
+    const book = async (b: Record<string, unknown>) => {
+      got = b;
+      return { ok: true, id: "BK-REQ" };
+    };
+    const r = await handlers.book_table(
+      { venue: "Illuzion", dateIso: "2026-08-22", guests: 6, phone: "+66 93 000 0000", table: "VIP у сцены" },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { status: string; note: string; venue: string };
+    // Главное в этом пути: гостю нельзя пообещать готовый стол.
+    expect(d.status).toContain("НЕ забронирован");
+    expect(d.note).toContain("не обещай");
+    // Пожелание по залу теряться не должно — менеджеру оно и нужно.
+    expect(String(got.note)).toContain("VIP у сцены");
+    // Стол и депозит не выдумываем: схемы нет.
+    expect(got.tableType).toBeUndefined();
+    expect(got.deposit).toBeUndefined();
+  });
+
+  it("заявка без телефона и без даты не уходит", async () => {
+    const book = async () => ({ ok: true, id: "BK-X" });
+    const noPhone = await handlers.book_table(
+      { venue: "Illuzion", dateIso: "2026-08-22", guests: 4 },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(noPhone.ok).toBe(false);
+    const noDate = await handlers.book_table(
+      { venue: "Illuzion", guests: 4, phone: "+66 93 000 0000" },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(noDate.ok).toBe(false);
+  });
+
+  it("несуществующая площадка по-прежнему отказ, а не пустая заявка", async () => {
+    const book = async () => ({ ok: true, id: "BK-X" });
+    const r = await handlers.book_table(
+      { venue: "Клуб которого нет 12345", dateIso: "2026-08-22", phone: "1" },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(false);
+  });
+
   it("клубная ночь в понедельник не бронируется", async () => {
     const book = async () => ({ ok: true, id: "BK-X" });
     // 2026-08-17 — понедельник, Club Room работает ср–сб

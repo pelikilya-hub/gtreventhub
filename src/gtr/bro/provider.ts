@@ -2,28 +2,31 @@
 // Вынесен отдельно, потому что им пользуются оба входа — голосовой
 // маршрутизатор инструментов и текстовый мозг.
 import type { EventsProvider } from "./tools";
-import { kvGetJson, kvListAll, type KvNs } from "../kv-ns";
+import { collectCleanAfisha } from "../community";
+import type { KvNs } from "../kv-ns";
 
 /** Демо-источника нет намеренно — за выдуманный вечер поедет живой
  *  человек. Пусто в KV — пусто в ответе. */
 export const kvProvider = (ns: KvNs): EventsProvider => ({
   id: "gtr-afisha",
   async search({ dateFrom, dateTo }) {
-    const keys = await kvListAll(ns, "venueevents:");
-    const out: { vid: string; events: { id?: string; title: string; dateIso: string; poster?: string }[] }[] = [];
-    // Ограничение сверху: результат уходит в модель, и раздутый ответ
-    // и стоит дороже, и топит полезное в шуме.
-    // Вся база (110 площадок) должна помещаться: срез на 60 отрезал бы
-    // хвост алфавита, и BRO «не знал» бы про часть заведений. В ответ
-    // всё равно попадают только площадки с событиями в окне дат.
-    for (const key of keys.slice(0, 160)) {
-      const rec = await kvGetJson<{ events?: { id?: string; title: string; dateIso: string; poster?: string }[] }>(
-        ns,
-        key,
-      );
-      const events = (rec?.events ?? []).filter((e) => e.dateIso >= dateFrom && e.dateIso <= dateTo);
-      if (events.length) out.push({ vid: key.slice("venueevents:".length), events: events.slice(0, 6) });
+    // Тот же сборщик, что кормит экран «Сегодня» и дайджест в Telegram.
+    // Раньше здесь читались сырые ключи venueevents:* — без отсева мусорных
+    // заголовков, без чистки названия от имени площадки, без дедупа и без
+    // отсечения прошедших дат. Гость видел на экране одну программу, а BRO
+    // называл другую: то же событие под сырым именем, плюс дубли. Два ответа
+    // про один вечер в одном продукте недопустимы, поэтому источник один.
+    const items = await collectCleanAfisha(ns);
+    const byVenue = new Map<string, { id?: string; title: string; dateIso: string; poster?: string }[]>();
+    for (const e of items) {
+      if (e.dateIso < dateFrom || e.dateIso > dateTo) continue;
+      const list = byVenue.get(e.vid) ?? [];
+      // Ограничение сверху: результат уходит в модель, и раздутый ответ
+      // и стоит дороже, и топит полезное в шуме.
+      if (list.length >= 6) continue;
+      list.push({ id: e.id, title: e.title, dateIso: e.dateIso, poster: e.poster });
+      byVenue.set(e.vid, list);
     }
-    return out;
+    return [...byVenue].map(([vid, events]) => ({ vid, events }));
   },
 });

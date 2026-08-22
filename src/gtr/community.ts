@@ -59,8 +59,12 @@ export async function resolveTgChat(url: string): Promise<
 // Чистая афиша целиком — общая для ленты, дайджеста и /tonight
 export async function collectCleanAfisha(ns: KvNs) {
   const { V } = await import("./data/app-data");
+  const { bkkToday } = await import("./afisha-parse");
   const keys = await kvListAll(ns, "venueevents:");
-  const today = new Date().toISOString().slice(0, 10);
+  // День острова, а не UTC. Воркер живёт по Гринвичу, Пхукет — на семь часов
+  // впереди: до 07:00 по местному UTC-дата ещё вчерашняя, и сегодняшняя
+  // программа отсекалась как прошедшая ровно в часы, когда её и смотрят.
+  const today = bkkToday();
   const items: (VenueAfisha["events"][number] & { vid: string; venueName: string })[] = [];
   const seen = new Set<string>();
   for (const k of keys) {

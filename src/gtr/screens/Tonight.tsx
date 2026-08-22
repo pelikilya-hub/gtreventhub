@@ -5,8 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
-import { GREEN, nightOf, richOf, V, PH } from "../data/app-data";
+import { GREEN, isNightVenue, nightOf, richOf, V, PH } from "../data/app-data";
 import geoRaw from "../data/venue-geo.json";
+import { bkkToday } from "../afisha-parse";
 import { Card, Chip, Eyebrow, tint, VenueLogo } from "../ui";
 import { useGtr } from "../store";
 import { allAfishaFn, bookTableFn, promptpayCfgFn, type PromptpayCfg, type VenueAfisha } from "../kv-api";
@@ -27,12 +28,15 @@ const loadRoute = (): string[] => {
   }
 };
 
-// Ночные площадки: есть часы/вход из свипа гайдов — их и предлагаем вечером
+// Ночные площадки отбираем по сути места, а не по тому, дошли ли до него
+// руки разведки. Прежний фильтр требовал часов или цены входа — и прятал
+// вечером клуб, лайв-бар и полдюжины руфтопов только потому, что свип
+// гайдов их ещё не закрыл. Места с разведанными часами идут первыми.
 const nightVenues = () =>
   PH.venues
     .filter((v) => {
       const n = nightOf(v.id);
-      return n.hours || n.entry || n.best;
+      return n.hours || n.entry || n.best || isNightVenue(v);
     })
     .sort((a, b) => {
       const rank = (t: string) =>
@@ -69,8 +73,12 @@ export function TonightScreen() {
     if (!bkName && user.name) setBkName(user.name);
   }, [user.name]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const todayIso = new Date().toISOString().slice(0, 10);
-  const tomorrowIso = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  // Дата острова, а не телефона и не UTC. toISOString() отдаёт гринвичскую
+  // дату: в Патонге с полуночи до семи утра — самые часы этого экрана — она
+  // ещё вчерашняя, и «Сегодня» показывало вчерашнюю программу, пока шапка
+  // рядом рисовала правильное число местной датой.
+  const todayIso = bkkToday();
+  const tomorrowIso = bkkToday(1);
   const todayEvents = items.filter((e) => e.dateIso === todayIso);
   const tomorrowEvents = items.filter((e) => e.dateIso === tomorrowIso);
   const venues = useMemo(nightVenues, []);
@@ -118,10 +126,13 @@ export function TonightScreen() {
   // Дата говорит на языке интерфейса: русская «среда, 19 августа» в
   // английской версии читалась как недоделка.
   const dayLocale = { ru: "ru-RU", en: "en-GB", th: "th-TH" }[i18n.language] ?? "en-GB";
-  const dayLabel = new Date().toLocaleDateString(dayLocale, {
+  // Число берём то же, по которому отобран список, — день острова. Иначе у
+  // гостя из другого пояса шапка и программа под ней расходятся на сутки.
+  const dayLabel = new Date(`${todayIso}T12:00:00Z`).toLocaleDateString(dayLocale, {
     weekday: "long",
     day: "numeric",
     month: "long",
+    timeZone: "UTC",
   });
 
   const eventCard = (e: FeedItem) => {

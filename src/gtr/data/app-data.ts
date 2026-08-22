@@ -1688,7 +1688,31 @@ export const ILZ_RICH: RichVenue = {
 };
 
 const NIGHT_ALL = nightRaw as Record<string, NightInfo>;
-export const nightOf = (vid: string): NightInfo => NIGHT_ALL[vid] ?? {};
+
+/** Теги, за которыми стоит вечернее место, а не переговорная с банкетом.
+ *  Курортные MICE-залы, виллы и «прочее» гостю вечером не предлагаем —
+ *  они живут в базе для организаторов, а не в афише ночи. Марины сюда тоже
+ *  не входят: под этим тегом лежат яхт-клубы и площадки под boat show —
+ *  бизнес-события, а не ответ на вопрос «куда пойти сегодня». */
+const NIGHT_TAGS = /nightclub|beach club|rooftop|bar|lounge|live|show/i;
+export const isNightVenue = (v: { tag?: string; type?: string }): boolean =>
+  NIGHT_TAGS.test(`${v.tag ?? ""} ${v.type ?? ""}`);
+
+/** Ночная карточка площадки. Свипы гайдов закрыли 42 места из 110 — у
+ *  остальных карточка была пустой, а сама площадка выпадала из вечернего
+ *  списка. Часы и цену входа не выдумываем: чего не разведали, того нет.
+ *  Но собственные поля площадки — концепт и музыкальную политику — гостю
+ *  показать честно можем, и клуб перестаёт быть невидимым из-за того, что
+ *  до него не дошли руки. */
+export const nightOf = (vid: string): NightInfo => {
+  const known = NIGHT_ALL[vid];
+  if (known) return known;
+  const v = V(vid);
+  if (!v.id) return {};
+  const fact = (v.concept ?? "").trim();
+  const music = (v.music ?? "").trim();
+  return fact || music ? { fact: fact || undefined, music: music || undefined } : {};
+};
 
 export const richOf = (vid: string): RichVenue =>
   vid === "VEN-0013" ? ILZ_RICH : (RICH_ALL[vid] ?? {});

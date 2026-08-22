@@ -147,6 +147,48 @@ export const Route = createFileRoute("/api/bro-dev")({
           return json({ ok: true });
         }
 
+        // Живая проверка мозга BOSS — по ключу пульта.
+        //
+        // Зачем отдельно от brainProbe в ручке сессии: llama.cpp отдаёт
+        // /health и /v1/models без токена, поэтому оба зелёных ответа не
+        // доказывают, что токен в KV совпадает с токеном на сервере. Это
+        // видно только на настоящем запросе с Authorization. Спрашиваем
+        // одно слово (max_tokens: 8), чтобы не занимать слот инференса
+        // дольше необходимого.
+        if (action === "pult.brainTest") {
+          if (String(body.key ?? "") !== (await pultAccessKey()))
+            return json({ ok: false, error: "key" }, 401);
+          const cfg = await kvGetJson<{ url?: string; token?: string; model?: string }>(
+            ns,
+            "setting:brain",
+          );
+          if (!cfg?.url) return json({ ok: false, error: "no-brain" }, 400);
+          try {
+            const r = await fetch(`${cfg.url.replace(/\/$/, "")}/v1/chat/completions`, {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+                ...(cfg.token ? { authorization: `Bearer ${cfg.token}` } : {}),
+              },
+              body: JSON.stringify({
+                model: cfg.model ?? "qwen3-8b",
+                messages: [{ role: "user", content: "Ответь одним словом: эфир" }],
+                max_tokens: 8,
+                stream: false,
+              }),
+              // Холодный старт после простоя долгий: прогрев кэша промпта
+              // на CPU занимает десятки секунд. Дедлайн диагностики выше
+              // боевого, иначе проверка соврёт «мозг мёртв» на живом.
+              signal: AbortSignal.timeout(60_000),
+            });
+            const text = (await r.text()).slice(0, 400);
+            // 401 здесь — единственный однозначный ответ «токен не тот».
+            return json({ ok: r.ok, status: r.status, body: text });
+          } catch (e) {
+            return json({ ok: false, error: String(e).slice(0, 200) });
+          }
+        }
+
         // Отметка исполнения от Claude — по ключу пульта, без cookie.
         if (action === "pult.ack") {
           if (String(body.key ?? "") !== (await pultAccessKey()))

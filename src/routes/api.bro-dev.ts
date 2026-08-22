@@ -79,6 +79,10 @@ export const Route = createFileRoute("/api/bro-dev")({
               // работе которого узнаёшь только по тревоге, а её отсутствие
               // одинаково означает и «всё хорошо», и «крон не запускается».
               brainWatch: await kvGetJson(ns, "brain:watch"),
+              // Прогон афиш пишет сюда время и исход. Здесь он нужен как
+              // отметка жизни планировщика: если и этот ключ старый, то
+              // молчит не сторож, а кроны целиком — и чинить надо не там.
+              cronLastRun: await kvGetJson(ns, "afisha:lastrun"),
             });
           }
           return json({ ok: true, queue: await readQueue(ns) });

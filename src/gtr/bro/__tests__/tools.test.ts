@@ -377,6 +377,39 @@ describe("рассадка Café del Mar", () => {
     expect(lines[0].price).toBe(390);
   });
 
+  it("вопрос без ответа копится в очередь на обучение, а не теряется", async () => {
+    const store = new Map<string, string>();
+    const kv = {
+      get: async (k: string) => store.get(k) ?? null,
+      put: async (k: string, v: string) => void store.set(k, v),
+    };
+    const c = { ...ctx, kv: kv as never };
+    const r = await handlers.ask_gtr({ question: "есть ли у вас вертолётный трансфер" }, c);
+    expect(r.ok).toBe(false);
+    const keys = [...store.keys()];
+    expect(keys.length).toBe(1);
+    const rec = JSON.parse(store.get(keys[0])!) as { q: string; n: number };
+    expect(rec.n).toBe(1);
+    expect(rec.q).toContain("вертол");
+
+    // Тот же вопрос в другом написании обязан попасть в тот же счётчик,
+    // иначе спрос размажется по вариантам и ни один не наберёт веса.
+    await handlers.ask_gtr({ question: "Есть ли у вас вертолётный трансфер?" }, c);
+    expect([...store.keys()].length).toBe(1);
+    expect((JSON.parse(store.get(keys[0])!) as { n: number }).n).toBe(2);
+  });
+
+  it("вопрос, на который база знаний ответила, в очередь не попадает", async () => {
+    const store = new Map<string, string>();
+    const kv = {
+      get: async (k: string) => store.get(k) ?? null,
+      put: async (k: string, v: string) => void store.set(k, v),
+    };
+    const r = await handlers.ask_gtr({ question: "что такое GTR" }, { ...ctx, kv: kv as never });
+    expect(r.ok).toBe(true);
+    expect(store.size).toBe(0);
+  });
+
   it("площадка без схемы столов принимает заявку, а не отказ", async () => {
     let got: Record<string, unknown> = {};
     const book = async (b: Record<string, unknown>) => {

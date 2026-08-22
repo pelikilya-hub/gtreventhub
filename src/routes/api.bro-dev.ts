@@ -86,6 +86,22 @@ const afishaView = async (ns: KvNs) => {
   };
 };
 
+/** Вопросы без ответа, самые частые сверху.
+ *
+ *  Одиночные промахи намеренно не отсекаем: тема, спрошенная один раз,
+ *  тоже может оказаться дырой — решает человек, глядя на формулировку,
+ *  а не порог. Отсекаем только длину списка. */
+const topMisses = async (ns: KvNs) => {
+  const keys = await kvListAll(ns, "broask:");
+  const rows: { q: string; n: number; last: number }[] = [];
+  for (const key of keys.slice(0, 200)) {
+    const rec = await kvGetJson<{ q?: string; n?: number; last?: number }>(ns, key);
+    if (rec?.q) rows.push({ q: rec.q, n: rec.n ?? 1, last: rec.last ?? 0 });
+  }
+  rows.sort((a, b) => b.n - a.n || b.last - a.last);
+  return { total: keys.length, top: rows.slice(0, 15) };
+};
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -151,6 +167,10 @@ export const Route = createFileRoute("/api/bro-dev")({
               // Расхождение между «синхронизация прошла» и «BRO не знает
               // про вечер» видно только так.
               afisha: await afishaView(ns),
+              // Чего гости спрашивали, а база знаний не знала. Это и есть
+              // очередь на обучение: не придуманная за столом, а взятая
+              // из реального спроса. Сверху — самые частые.
+              misses: await topMisses(ns),
             });
           }
           return json({ ok: true, queue: await readQueue(ns) });

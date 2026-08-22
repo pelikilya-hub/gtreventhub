@@ -10,7 +10,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { currentUser } from "../gtr/auth";
-import { getKvNs, kvGetJson, type KvNs } from "../gtr/kv-ns";
+import { getKvNs, kvGetJson, kvListAll, type KvNs } from "../gtr/kv-ns";
 import { learnNext, learnProgress } from "../gtr/bro/learn";
 import {
   addCmd,
@@ -30,6 +30,45 @@ type Flags = {
 };
 type Brain = { url?: string; token?: string; model?: string };
 type Gemini = { textModel?: string };
+
+/** Что видит инструмент поиска афиши. Повторяет чтение kvProvider —
+ *  включая срез на 160 площадок: если база перерастёт его, хвост
+ *  алфавита пропадёт из ответов BRO, и увидеть это надо здесь, а не по
+ *  жалобе «он не знает про заведение». */
+const afishaView = async (ns: KvNs) => {
+  const keys = await kvListAll(ns, "venueevents:");
+  const today = new Date().toISOString().slice(0, 10);
+  let withEvents = 0;
+  let total = 0;
+  let upcoming = 0;
+  let freshest = "";
+  const sample: string[] = [];
+  for (const key of keys.slice(0, 160)) {
+    const rec = await kvGetJson<{ events?: { title: string; dateIso: string }[] }>(ns, key);
+    const events = rec?.events ?? [];
+    if (!events.length) continue;
+    withEvents++;
+    total += events.length;
+    for (const e of events) {
+      const d = String(e.dateIso ?? "").slice(0, 10);
+      if (d >= today) upcoming++;
+      if (d > freshest) freshest = d;
+    }
+    if (sample.length < 4)
+      sample.push(`${key.slice("venueevents:".length)}: ${events[0].dateIso} ${events[0].title.slice(0, 40)}`);
+  }
+  return {
+    venues: keys.length,
+    // Срез kvProvider. Равенство с venues — знак, что пора его поднимать.
+    scanned: Math.min(keys.length, 160),
+    withEvents,
+    events: total,
+    upcoming,
+    lastDate: freshest,
+    today,
+    sample,
+  };
+};
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -89,6 +128,13 @@ export const Route = createFileRoute("/api/bro-dev")({
               // отметка жизни планировщика: если и этот ключ старый, то
               // молчит не сторож, а кроны целиком — и чинить надо не там.
               cronLastRun: await kvGetJson(ns, "afisha:lastrun"),
+              // Афиша глазами самого BRO. Отчёт прогона (cronLastRun) —
+              // это слова синхронизации о себе, и воркер режет его тело.
+              // Здесь читается ровно то, что читает инструмент поиска:
+              // те же ключи venueevents:, тот же срез на 160 площадок.
+              // Расхождение между «синхронизация прошла» и «BRO не знает
+              // про вечер» видно только так.
+              afisha: await afishaView(ns),
             });
           }
           return json({ ok: true, queue: await readQueue(ns) });

@@ -57,6 +57,17 @@ const afishaView = async (ns: KvNs) => {
     if (sample.length < 4)
       sample.push(`${key.slice("venueevents:".length)}: ${events[0].dateIso} ${events[0].title.slice(0, 40)}`);
   }
+  // Состояние разведки источников. venueevents:<vid> появляется только у
+  // площадок, где события НАШЛИСЬ, поэтому по одному их числу нельзя
+  // отличить «разведка не дошла» от «дошла и источника нет». Отличает
+  // afishasrc:<vid> — отметка о проверке, она пишется в обоих случаях.
+  const src = await kvListAll(ns, "afishasrc:");
+  const byKind: Record<string, number> = {};
+  for (const key of src) {
+    const rec = await kvGetJson<{ kind?: string }>(ns, key);
+    const k = String(rec?.kind ?? "?");
+    byKind[k] = (byKind[k] ?? 0) + 1;
+  }
   return {
     venues: keys.length,
     // Срез kvProvider. Равенство с venues — знак, что пора его поднимать.
@@ -67,6 +78,11 @@ const afishaView = async (ns: KvNs) => {
     lastDate: freshest,
     today,
     sample,
+    // Сколько площадок разведка уже трогала и что нашла. probed сильно
+    // меньше базы — значит круг ещё не пройден: за прогон проверяется
+    // всего дюжина сайтов, это упирается в лимит подзапросов воркера.
+    probed: src.length,
+    byKind,
   };
 };
 

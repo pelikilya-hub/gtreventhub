@@ -74,6 +74,11 @@ export const Route = createFileRoute("/api/bro-dev")({
                 [day(1)]: (await kvGetJson<Record<string, number>>(ns, `brostat:${day(1)}`)) ?? {},
               },
               dialogs: await dialogTail(ns, 10),
+              // Состояние сторожа мозга: видно, что крон вообще ходит и
+              // что он там застал. Без этого сторож — чёрный ящик, о
+              // работе которого узнаёшь только по тревоге, а её отсутствие
+              // одинаково означает и «всё хорошо», и «крон не запускается».
+              brainWatch: await kvGetJson(ns, "brain:watch"),
             });
           }
           return json({ ok: true, queue: await readQueue(ns) });

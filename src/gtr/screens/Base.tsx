@@ -15,7 +15,7 @@ import {
   SPACES,
   V,
 } from "../data/app-data";
-import { CdmReserve, cdmZonesOfSpace, hasCdmReserve } from "../cdm-booking";
+import { CdmReserve, zonesOfSpace, hasReserve } from "../cdm-booking";
 import { EditableImage } from "../EditableImage";
 import { Card, Chip, Eyebrow, Field, tint, TrashTitle, VenueLogo } from "../ui";
 import { GtrLightbox } from "../lightbox";
@@ -525,7 +525,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 <button
                   className="gtr-btn gtr-btn-red"
                   onClick={() =>
-                    hasCdmReserve(v.id)
+                    hasReserve(v.id)
                       ? document
                           .getElementById("gtr-reserve")
                           ?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -534,7 +534,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 >
                   {t("Забронировать стол")}
                 </button>
-                {hasCdmReserve(v.id) ? (
+                {hasReserve(v.id) ? (
                   <button
                     className="gtr-btn"
                     onClick={() =>
@@ -634,7 +634,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             <Card style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>{t("НОРМАЛИЗОВАННЫЕ ЗАЛЫ ·")} {sp.length}</Eyebrow>
               {sp.map((s) => {
-                const zs = cdmZonesOfSpace(v.id, s.id);
+                const zs = zonesOfSpace(v.id, s.id);
                 return (
                   <div
                     key={s.id}
@@ -698,7 +698,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             </Card>
           ) : null}
 
-          {hasCdmReserve(v.id) ? (
+          {hasReserve(v.id) ? (
             <Card id="gtr-reserve" style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 4 }}>
                 {t("РАССАДКА И БРОНЬ")} {t("· SEVENROOMS-ПАРИТЕТ")}

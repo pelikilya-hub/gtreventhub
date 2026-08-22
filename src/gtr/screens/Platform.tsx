@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { loadArtists, PH, V, type Artist } from "../data/app-data";
-import { CdmReserve, hasCdmReserve } from "../cdm-booking";
+import { CdmReserve, hasReserve } from "../cdm-booking";
 import {
   aiMatchFn,
   allAfishaFn,
@@ -658,12 +658,12 @@ export function PromoScreen() {
     declined: [t("ОТКЛОНЕНА"), "#E5231B"],
   };
   return (
-    <div style={{ maxWidth: hasCdmReserve(vid) ? 1080 : 860, margin: "0 auto" }}>
+    <div style={{ maxWidth: hasReserve(vid) ? 1080 : 860, margin: "0 auto" }}>
       <h1 className="gtr-oswald gtr-h1" style={{ marginBottom: 6 }}>{t("Промо и бронь столов")}</h1>
       <div className="gtr-mono" style={{ font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 14 }}>
         {t("Билеты и промоакции площадок — следующая фаза; бронь работает уже сейчас.")}
       </div>
-      <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: hasCdmReserve(vid) ? "1.6fr 1fr" : "1fr 1fr", gap: 14 }}>
+      <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: hasReserve(vid) ? "1.6fr 1fr" : "1fr 1fr", gap: 14 }}>
         <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
           <Eyebrow>{t("НОВАЯ БРОНЬ")}</Eyebrow>
           <div>
@@ -676,7 +676,7 @@ export function PromoScreen() {
                 ))}
             </select>
           </div>
-          {hasCdmReserve(vid) ? (
+          {hasReserve(vid) ? (
             <CdmReserve vid={vid} compact />
           ) : (
             <>

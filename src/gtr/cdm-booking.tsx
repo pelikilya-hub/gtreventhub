@@ -1,6 +1,6 @@
-// Бронь рассадки Café del Mar: зона → стол → дата/время/гости →
-// предзаказ по меню → заявка. Источник правды — cdm-reserve.json и
-// cdm-menu.json (сняты с официального виджета SevenRooms и флипбука меню).
+// Бронь рассадки: зона → стол → дата/время/гости → предзаказ по меню →
+// заявка. Данные конкретной площадки берутся из реестра venue-commerce,
+// а не импортируются напрямую: форма одна на все заведения с рассадкой.
 //
 // Депозит стола — это не наша цена, а условия площадки: часть или весь
 // депозит возвращается гостю кредитом на еду и напитки. Предзаказ ни к
@@ -8,31 +8,27 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import cdmMenu from "./data/cdm-menu.json";
-import cdmReserve from "./data/cdm-reserve.json";
 import { bookTableFn, type PreorderLine } from "./kv-api";
 import { useGtr } from "./store";
 import { Card, Chip, Eyebrow } from "./ui";
+import {
+  hasReserve,
+  menuOf,
+  reserveOf,
+  zonesOfSpace,
+  type MenuItem,
+  type ReserveTable,
+  type ReserveZone,
+} from "./venue-commerce";
 
 const GREEN = "#2ECC71";
 const RED = "#E5231B";
 const AMBER = "#F5A623";
 
-type Zone = (typeof cdmReserve.zones)[number] & { days?: number[] };
-type CdmTable = (typeof cdmReserve.tables)[number] & {
-  perPerson?: boolean;
-  extraPax?: number;
-  extraPrice?: number;
-};
-type MenuItem = {
-  id: string;
-  name: string;
-  desc?: string;
-  price: number;
-  unit?: string;
-  photo?: string;
-  opts?: { l: string; p: number }[];
-};
+// Формы данных живут в реестре: там они общие для всех площадок,
+// а не выведены из одного JSON-файла через typeof.
+type Zone = ReserveZone;
+type CdmTable = ReserveTable;
 
 const thb = (n: number) => `${n.toLocaleString("ru-RU")} THB`;
 
@@ -164,8 +160,12 @@ function DishModal({
 export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean }) {
   const { t } = useTranslation();
   const { user } = useGtr();
-  const zones = cdmReserve.zones as Zone[];
-  const tables = cdmReserve.tables as CdmTable[];
+  // Рассадка и меню — этой площадки, а не жёстко Café del Mar.
+  const reserve = reserveOf(vid);
+  const menu = menuOf(vid);
+  const zones: Zone[] = reserve?.zones ?? [];
+  const tables: CdmTable[] = reserve?.tables ?? [];
+  const sections = menu?.sections ?? [];
 
   const [zoneId, setZoneId] = useState<string | null>(null);
   const [tableId, setTableId] = useState<string | null>(null);
@@ -173,7 +173,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
   const [slot, setSlot] = useState("");
   const [guests, setGuests] = useState(2);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [secId, setSecId] = useState(cdmMenu.sections[0].id);
+  const [secId, setSecId] = useState(sections[0]?.id ?? "");
   const [cart, setCart] = useState<Record<string, PreorderLine>>({});
   const [dish, setDish] = useState<MenuItem | null>(null);
   const [name, setName] = useState(user?.name ?? "");
@@ -231,7 +231,9 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
           tableType: table.name,
           slot,
           deposit: table.perPerson ? table.deposit * guests : table.deposit,
-          credit: table.perPerson ? table.credit * guests : table.credit,
+          // Кредит на еду и напитки есть не у каждого стола — без него в
+          // заявку уходит ноль, а не NaN в письме менеджеру.
+          credit: table.perPerson ? (table.credit ?? 0) * guests : table.credit,
           preorder: cartLines,
         },
       });
@@ -402,9 +404,11 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                         </span>
                       ) : null}
                     </div>
-                    {on ? (
+                    {/* Что входит в стол: у одних площадок список, у других
+                        связный текст. Показываем то, что есть. */}
+                    {on && (tb.includes?.length || tb.desc) ? (
                       <div className="gtr-fade" style={{ marginTop: 6, font: "500 12px/1.55 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-                        {tb.includes.join(" · ")}
+                        {tb.includes?.length ? tb.includes.join(" · ") : tb.desc}
                       </div>
                     ) : null}
                   </div>
@@ -521,7 +525,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
           {menuOpen ? (
             <Card className="gtr-fade" style={{ padding: 14 }}>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-                {cdmMenu.sections.map((s) => (
+                {sections.map((s) => (
                   <button
                     key={s.id}
                     className="gtr-btn"
@@ -533,9 +537,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                 ))}
               </div>
               <div style={{ maxHeight: 430, overflowY: "auto", display: "grid", gap: 12, paddingRight: 4 }}>
-                {cdmMenu.sections
-                  .find((s) => s.id === secId)!
-                  .groups.map((g) => (
+                {(sections.find((s) => s.id === secId) ?? sections[0])?.groups.map((g) => (
                     <div key={g.id}>
                       <div
                         className="gtr-mono"
@@ -676,12 +678,6 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
   );
 }
 
-/** Есть ли для площадки полная схема рассадки (пока только Café del Mar). */
-export const hasCdmReserve = (vid: string) => vid === cdmReserve.meta.venueId;
-
-/** Зоны рассадки по id зала из venues.json — паспорт подтягивает фото
- *  и часы прямо в список «Нормализованные залы». */
-export const cdmZonesOfSpace = (vid: string, spaceId: string) =>
-  hasCdmReserve(vid)
-    ? (cdmReserve.zones as Zone[]).filter((z) => z.spaceId === spaceId)
-    : [];
+// Проверка «есть ли рассадка» и зоны зала живут в реестре — экраны
+// импортируют их отсюда по привычке, чтобы не переписывать call-site'ы.
+export { hasReserve, zonesOfSpace } from "./venue-commerce";

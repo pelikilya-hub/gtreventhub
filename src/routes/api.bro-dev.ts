@@ -21,7 +21,13 @@ import {
   type PultStatus,
 } from "../gtr/bro/pult";
 
-type Flags = { broEnabled?: boolean; broKill?: boolean; broRoles?: string[]; geminiOff?: boolean };
+type Flags = {
+  broEnabled?: boolean;
+  broKill?: boolean;
+  broRoles?: string[];
+  geminiOff?: boolean;
+  voiceProvider?: "openai" | "gemini";
+};
 type Brain = { url?: string; token?: string; model?: string };
 type Gemini = { textModel?: string };
 
@@ -196,6 +202,24 @@ export const Route = createFileRoute("/api/bro-dev")({
           } catch (e) {
             return json({ ok: false, error: String(e).slice(0, 200) });
           }
+        }
+
+        // Выбор голосового движка — по ключу пульта.
+        //
+        // Без этого флага код берёт Gemini Live просто потому, что ключ
+        // Gemini есть. Realtime от OpenAI звучит заметно лучше, но стоит
+        // денег на балансе, поэтому выбор явный и остаётся за BOSS, а не
+        // выводится из того, какие ключи оказались настроены.
+        if (action === "pult.voice") {
+          if (String(body.key ?? "") !== (await pultAccessKey()))
+            return json({ ok: false, error: "key" }, 401);
+          const p = String(body.provider ?? "");
+          if (p !== "openai" && p !== "gemini")
+            return json({ ok: false, error: "bad-provider" }, 400);
+          const cur = (await kvGetJson<Flags>(ns, "setting:flags")) ?? {};
+          const next: Flags = { ...cur, voiceProvider: p };
+          await ns.put("setting:flags", JSON.stringify(next));
+          return json({ ok: true, flags: next });
         }
 
         // Отметка исполнения от Claude — по ключу пульта, без cookie.

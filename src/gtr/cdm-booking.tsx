@@ -238,7 +238,10 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
       if (r.ok) {
         setSentId(r.id);
         setState("");
-      } else setState(r.reason ?? "…");
+        // Причина отказа приходит с сервера по-русски: прогоняем через
+        // словарь, иначе гость с английским интерфейсом упирается в
+        // русскую строку ровно в тот момент, когда что-то пошло не так.
+      } else setState(t(r.reason ?? "…"));
     } catch {
       setState(t("Сервер недоступен"));
     }

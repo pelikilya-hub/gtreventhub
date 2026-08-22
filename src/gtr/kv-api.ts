@@ -1992,7 +1992,15 @@ export const bookTableFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const u = await currentUser();
     const ns = await getKvNs();
-    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    // Две разные беды — два разных ответа. Слитые в «нужен вход» они врут
+    // залогиненному гостю: 18.08.2026 прод уехал без биндинга KV, и человек
+    // с живой сессией видел предложение войти, выходил и заходил снова.
+    if (!u) return { ok: false as const, reason: "нужен вход" };
+    if (!ns)
+      return {
+        ok: false as const,
+        reason: "Хранилище недоступно — бронь не сохранить. Напишите площадке напрямую.",
+      };
     return bookTableCore(ns, u, data);
   });
 

@@ -121,11 +121,16 @@ async function askBrain(brain: Brain, prompt: string): Promise<string> {
       signal: AbortSignal.timeout(60_000),
     });
     if (!r.ok) return "";
-    const data = (await r.json()) as { choices?: { message?: { content?: string } }[] };
-    return String(data.choices?.[0]?.message?.content ?? "").replace(
-      /<think>[\s\S]*?<\/think>/g,
-      "",
-    );
+    const data = (await r.json()) as {
+      choices?: { message?: { content?: string; reasoning_content?: string } }[];
+    };
+    const msg = data.choices?.[0]?.message;
+    // Подстраховка на случай, если /no_think не сработал: ответ мог
+    // целиком уехать в reasoning_content. Брать оттуда безопасно —
+    // разбор всё равно принимает только валидный JSON с датой и
+    // названием, размышления через эту решётку не пройдут.
+    const text = String(msg?.content || msg?.reasoning_content || "");
+    return text.replace(/<think>[\s\S]*?<\/think>/g, "");
   } catch {
     return "";
   }

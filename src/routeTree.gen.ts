@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GtrRouteRouteImport } from './routes/gtr/route'
 import { Route as ApiAfishaRouteImport } from './routes/api.afisha'
+import { Route as ApiAfishaLlmRouteImport } from './routes/api.afisha-llm'
 import { Route as ApiAfishaSendRouteImport } from './routes/api.afisha-send'
 import { Route as ApiAphotoRouteImport } from './routes/api.aphoto'
 import { Route as ApiAvideoRouteImport } from './routes/api.avideo'
@@ -59,6 +60,11 @@ const GtrRouteRoute = GtrRouteRouteImport.update({
 const ApiAfishaRoute = ApiAfishaRouteImport.update({
   id: '/api/afisha',
   path: '/api/afisha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAfishaLlmRoute = ApiAfishaLlmRouteImport.update({
+  id: '/api/afisha-llm',
+  path: '/api/afisha-llm',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAfishaSendRoute = ApiAfishaSendRouteImport.update({
@@ -231,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
   '/api/afisha': typeof ApiAfishaRoute
+  '/api/afisha-llm': typeof ApiAfishaLlmRoute
   '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
@@ -268,6 +275,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/afisha': typeof ApiAfishaRoute
+  '/api/afisha-llm': typeof ApiAfishaLlmRoute
   '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
@@ -307,6 +315,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
   '/api/afisha': typeof ApiAfishaRoute
+  '/api/afisha-llm': typeof ApiAfishaLlmRoute
   '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
@@ -347,6 +356,7 @@ export interface FileRouteTypes {
     | '/'
     | '/gtr'
     | '/api/afisha'
+    | '/api/afisha-llm'
     | '/api/afisha-send'
     | '/api/aphoto'
     | '/api/avideo'
@@ -384,6 +394,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/api/afisha'
+    | '/api/afisha-llm'
     | '/api/afisha-send'
     | '/api/aphoto'
     | '/api/avideo'
@@ -422,6 +433,7 @@ export interface FileRouteTypes {
     | '/'
     | '/gtr'
     | '/api/afisha'
+    | '/api/afisha-llm'
     | '/api/afisha-send'
     | '/api/aphoto'
     | '/api/avideo'
@@ -461,6 +473,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GtrRouteRoute: typeof GtrRouteRouteWithChildren
   ApiAfishaRoute: typeof ApiAfishaRoute
+  ApiAfishaLlmRoute: typeof ApiAfishaLlmRoute
   ApiAfishaSendRoute: typeof ApiAfishaSendRoute
   ApiAphotoRoute: typeof ApiAphotoRoute
   ApiAvideoRoute: typeof ApiAvideoRoute
@@ -510,6 +523,13 @@ declare module '@tanstack/react-router' {
       path: '/api/afisha'
       fullPath: '/api/afisha'
       preLoaderRoute: typeof ApiAfishaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/afisha-llm': {
+      id: '/api/afisha-llm'
+      path: '/api/afisha-llm'
+      fullPath: '/api/afisha-llm'
+      preLoaderRoute: typeof ApiAfishaLlmRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/afisha-send': {
@@ -774,6 +794,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GtrRouteRoute: GtrRouteRouteWithChildren,
   ApiAfishaRoute: ApiAfishaRoute,
+  ApiAfishaLlmRoute: ApiAfishaLlmRoute,
   ApiAfishaSendRoute: ApiAfishaSendRoute,
   ApiAphotoRoute: ApiAphotoRoute,
   ApiAvideoRoute: ApiAvideoRoute,

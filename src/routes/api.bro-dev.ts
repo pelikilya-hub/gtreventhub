@@ -365,6 +365,17 @@ export const Route = createFileRoute("/api/bro-dev")({
           }
         }
 
+        // Разбор афиши моделью по требованию — по ключу пульта.
+        // Ждать два часа, чтобы увидеть, что вычитала модель, значит
+        // отлаживать вслепую.
+        if (action === "pult.afishaLlm") {
+          if (String(body.key ?? "") !== (await pultAccessKey()))
+            return json({ ok: false, error: "key" }, 401);
+          const { runAfishaLlm } = await import("../gtr/afisha-llm-run");
+          const limit = Math.max(1, Math.min(6, Math.round(Number(body.limit ?? 2)) || 2));
+          return json(await runAfishaLlm(ns, limit));
+        }
+
         // Дымовая проверка по требованию — по ключу пульта.
         //
         // Своё расписание её и так дёргает, но ждать два часа, чтобы

@@ -274,7 +274,11 @@ export const Route = createFileRoute("/api/bro-dev")({
               body: JSON.stringify({
                 model: cfg.model ?? "qwen3-8b",
                 messages: [{ role: "user", content: "Ответь одним словом: эфир" }],
-                max_tokens: 8,
+                // Длину ответа задаём снаружи: по восьми токенам нельзя
+                // судить о скорости генерации — в них тонет время
+                // разбора промпта. Для решения «потянет ли этот сервер
+                // живой голос» нужен настоящий ответ, а не отклик.
+                max_tokens: Math.max(1, Math.min(300, Math.round(Number(body.tokens ?? 8)) || 8)),
                 stream: false,
               }),
               // Холодный старт после простоя долгий: прогрев кэша промпта
@@ -282,9 +286,16 @@ export const Route = createFileRoute("/api/bro-dev")({
               // боевого, иначе проверка соврёт «мозг мёртв» на живом.
               signal: AbortSignal.timeout(60_000),
             });
-            const text = (await r.text()).slice(0, 400);
-            // 401 здесь — единственный однозначный ответ «токен не тот».
-            return json({ ok: r.ok, status: r.status, body: text });
+            const raw = await r.text();
+            // Отдаём и usage: по нему считается скорость генерации, а
+            // это единственный честный ответ на вопрос про своё железо.
+            let usage: unknown = null;
+            try {
+              usage = (JSON.parse(raw) as { usage?: unknown }).usage ?? null;
+            } catch {
+              /* не JSON — вернём как есть */
+            }
+            return json({ ok: r.ok, status: r.status, usage, body: raw.slice(0, 300) });
           } catch (e) {
             return json({ ok: false, error: String(e).slice(0, 200) });
           }

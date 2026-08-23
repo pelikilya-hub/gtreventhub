@@ -315,13 +315,39 @@ export const Route = createFileRoute("/api/bro-dev")({
               signal: AbortSignal.timeout(15_000),
             });
             const text = await r.text();
+            if (!r.ok)
+              return json({ ok: false, status: r.status, model, body: text.slice(0, 300) });
+
+            // Секрет выдают бесплатно и не глядя на баланс — на этом
+            // проверка однажды соврала зелёным, а живой разговор упал с
+            // 429 «exceeded your current quota». Поэтому второй шаг:
+            // самый дешёвый настоящий вызов, который квоту всё-таки
+            // трогает. Ответ нам не нужен, нужен только его статус.
+            let quota: Response;
+            try {
+              quota = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: { authorization: `Bearer ${oai}`, "content-type": "application/json" },
+                body: JSON.stringify({
+                  model: "gpt-4o-mini",
+                  messages: [{ role: "user", content: "ok" }],
+                  max_tokens: 1,
+                }),
+                signal: AbortSignal.timeout(15_000),
+              });
+            } catch (e) {
+              return json({ ok: false, model, error: String(e).slice(0, 200) });
+            }
+            const qText = await quota.text();
             // Секрет наружу не отдаём даже в канал владельца: в теле
             // успеха лежит рабочий ключ на десять минут.
             return json({
-              ok: r.ok,
-              status: r.status,
+              ok: quota.ok,
+              status: quota.status,
               model,
-              body: r.ok ? "секрет получен" : text.slice(0, 300),
+              body: quota.ok
+                ? "секрет выдан, баланс есть"
+                : `секрет выдан, но баланс: ${qText.slice(0, 220)}`,
             });
           } catch (e) {
             return json({ ok: false, error: String(e).slice(0, 200) });

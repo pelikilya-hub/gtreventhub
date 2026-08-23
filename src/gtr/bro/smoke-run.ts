@@ -41,10 +41,16 @@ export async function runSmoke(ns: KvNs): Promise<{ ok: boolean; checks: Check[]
   //    бессмысленно: молчит тот, чей ключ отсутствует, а не «какой-то».
   const voice = flags.voiceProvider ?? (env?.GEMINI_API_KEY ? "gemini" : "openai");
   const voiceKey = voice === "gemini" ? env?.GEMINI_API_KEY : env?.OPENAI_API_KEY;
+  // Наличие ключа — не то же самое, что рабочий голос: у OpenAI ключ
+  // остаётся валидным и при нулевом балансе, и живой разговор падает с
+  // 429. Здесь баланс не проверяем намеренно — это платный вызов, а
+  // проверка идёт по расписанию. Формулировка честная, чтобы зелёное
+  // здесь не читалось как «голос работает»: настоящую проверку делает
+  // pult.voiceTest по требованию.
   checks.push({
     id: "voice",
     ok: Boolean(voiceKey),
-    note: voiceKey ? `${voice}: ключ на месте` : `${voice}: КЛЮЧА НЕТ`,
+    note: voiceKey ? `${voice}: ключ есть (баланс не проверяется)` : `${voice}: КЛЮЧА НЕТ`,
   });
 
   // 3. Текстовый мозг: основной движок и запасной.

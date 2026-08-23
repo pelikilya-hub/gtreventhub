@@ -143,7 +143,7 @@ export function okDate(date: unknown, today: string): date is string {
  *  приняла за афишу что-то другое. */
 export function parseExtracted(
   raw: string,
-  opts: { today: string; url: string; host: string },
+  opts: { today: string; url: string; host: string; page?: string },
 ): VenueAfishaEvent[] {
   // Модель любит обрамлять ответ пояснениями и ```json — берём первый
   // массив, а не весь текст.
@@ -166,6 +166,9 @@ export function parseExtracted(
     if (!okDate(date, opts.today)) continue;
     const name = cleanTitle(title);
     if (!name) continue;
+    // Сверка с источником. Без текста страницы (в тестах разбора) не
+    // проверяем — но в бою он есть всегда.
+    if (opts.page && !(dateOnPage(opts.page, date) && titleOnPage(opts.page, name))) continue;
     const key = `${date}|${name.toLowerCase()}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -203,4 +206,75 @@ export function billLikely(type?: string, tag?: string): boolean {
   return /nightclub|beach club|beach bar|live music|jazz|bar|lounge|cabaret|theatre|concert|festival|club|rooftop/.test(
     t,
   );
+}
+
+// ---------------------------------------------------------------------
+// Заслон от выдумки: событие обязано быть на странице
+// ---------------------------------------------------------------------
+//
+// Первый же живой прогон вытащил с сайта курорта «HEAVEN OF ALL HEAVENS»
+// на сегодня — это слоган в шапке, а не вечеринка. Модель не врала
+// намеренно: её попросили найти события, и она нашла что-то, похожее на
+// название. Запретами в инструкции это не лечится, потому что проверять
+// инструкцию некому.
+//
+// Лечится сверкой с источником. Гость по нашей афише едет в реальное
+// место в реальный вечер, и цена ошибки — испорченный вечер живого
+// человека. Поэтому здесь предпочитаем потерять настоящее событие, чем
+// пропустить выдуманное.
+
+const MONTHS_EN = [
+  "january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december",
+];
+const MONTHS_RU = [
+  "январ", "феврал", "март", "апрел", "ма", "июн",
+  "июл", "август", "сентябр", "октябр", "ноябр", "декабр",
+];
+
+/** Как эта дата могла быть написана на странице.
+ *
+ *  Год намеренно не требуем: на афишах его почти никогда не пишут, и
+ *  требование года отсекло бы почти всё настоящее. */
+export function dateForms(iso: string): string[] {
+  const [y, m, d] = iso.split("-");
+  const mi = Number(m) - 1;
+  const dn = String(Number(d));
+  const mn = String(Number(m));
+  const en = MONTHS_EN[mi] ?? "";
+  const ru = MONTHS_RU[mi] ?? "";
+  return [
+    iso,
+    `${d}.${m}`,
+    `${dn}.${mn}`,
+    `${d}/${m}`,
+    `${dn}/${mn}`,
+    `${m}/${d}/${y}`,
+    `${dn} ${en}`,
+    `${en} ${dn}`,
+    `${dn} ${en.slice(0, 3)}`,
+    `${en.slice(0, 3)} ${dn}`,
+    `${dn} ${ru}`,
+  ].filter((f) => f.trim().length > 2);
+}
+
+/** Сравнение по сути, а не по символам: регистр, пунктуация и лишние
+ *  пробелы на странице и в ответе модели различаются всегда. */
+const flat = (s: string) => s.toLowerCase().replace(/[^a-zа-яё0-9]+/gi, " ").trim();
+
+/** Есть ли дата на странице хоть в каком-то виде. */
+export function dateOnPage(text: string, iso: string): boolean {
+  const hay = flat(text);
+  return dateForms(iso).some((f) => hay.includes(flat(f)));
+}
+
+/** Есть ли название на странице.
+ *
+ *  Требуем дословного вхождения. Модель, пересказавшая название своими
+ *  словами, для нас неотличима от модели, придумавшей его: и та и другая
+ *  вернули текст, которого на странице нет. */
+export function titleOnPage(text: string, title: string): boolean {
+  const hay = flat(text);
+  const needle = flat(title);
+  return needle.length >= 3 && hay.includes(needle);
 }

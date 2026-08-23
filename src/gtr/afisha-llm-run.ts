@@ -208,7 +208,9 @@ export async function runAfishaLlm(
       brain,
       buildExtractPrompt(page.text.slice(0, TEXT_MAX), today),
     );
-    const fresh = parseExtracted(raw, { today, url: page.url, host });
+    // Текст страницы передаём в разбор: без него нечем отличить
+    // вычитанное событие от выдуманного.
+    const fresh = parseExtracted(raw, { today, url: page.url, host, page: page.text });
     await ns.put(
       llmKey(vid),
       JSON.stringify({ checkedAt: today, found: fresh.length } satisfies LlmRec),

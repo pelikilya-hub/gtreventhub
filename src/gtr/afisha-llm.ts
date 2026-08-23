@@ -168,7 +168,7 @@ export function parseExtracted(
     if (!name) continue;
     // Сверка с источником. Без текста страницы (в тестах разбора) не
     // проверяем — но в бою он есть всегда.
-    if (opts.page && !(dateOnPage(opts.page, date) && titleOnPage(opts.page, name))) continue;
+    if (opts.page && lineGap(opts.page, name, date) > NEAR_LINES) continue;
     const key = `${date}|${name.toLowerCase()}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -267,6 +267,44 @@ export function dateOnPage(text: string, iso: string): boolean {
   const hay = flat(text);
   return dateForms(iso).some((f) => hay.includes(flat(f)));
 }
+
+/** Через сколько строк от названия встречается дата. Infinity — не
+ *  встретились рядом вовсе.
+ *
+ *  Считаем строками, а не символами, и это выяснилось на живом примере.
+ *  На сайте курорта слоган «HEAVEN OF ALL HEAVENS» висит в шапке, а
+ *  сегодняшняя дата — в форме бронирования, подставленная по умолчанию.
+ *  По символам между ними оказалось 262 — меньше любого разумного порога,
+ *  потому что почти всё между ними пустые строки и одиночные цифры
+ *  выпадающих списков. По строкам — восемьдесят.
+ *
+ *  Строки здесь не случайность: htmlToText режет по блочным тегам,
+ *  поэтому строка — это примерно то, что человек видит отдельным
+ *  элементом. В карточке события заголовок и дата стоят рядом, потому
+ *  что это один блок. */
+export function lineGap(text: string, title: string, iso: string): number {
+  const lines = text.split("\n").map(flat);
+  const needle = flat(title);
+  if (needle.length < 3) return Infinity;
+  const forms = dateForms(iso).map(flat);
+  const titleAt: number[] = [];
+  const dateAt: number[] = [];
+  lines.forEach((l, i) => {
+    if (l.includes(needle)) titleAt.push(i);
+    if (forms.some((f) => l.includes(f))) dateAt.push(i);
+  });
+  let best = Infinity;
+  for (const t of titleAt)
+    for (const d of dateAt) best = Math.min(best, Math.abs(t - d));
+  return best;
+}
+
+/** Сколько строк между названием и датой ещё считаем одной карточкой.
+ *
+ *  Ноль — дата в той же строке, что и название: «31 December — New Year
+ *  Party». Три покрывают карточку, где между ними затесались время,
+ *  цена или кнопка, и не дотягиваются до соседнего блока страницы. */
+export const NEAR_LINES = 3;
 
 /** Есть ли название на странице.
  *

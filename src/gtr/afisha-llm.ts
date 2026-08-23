@@ -184,3 +184,23 @@ export function parseExtracted(
   }
   return out;
 }
+
+/** Держит ли площадка публичную афишу — по её типу.
+ *
+ *  База GTR на три четверти состоит из курортов, бальных залов и
+ *  площадок под мероприятия: они не публикуют программу, потому что
+ *  программы у них нет — есть аренда под чужое событие. Гонять по ним
+ *  модель значит жечь слоты на страницах, где афиши не будет никогда.
+ *
+ *  Это порядок очереди, а не запрет: курорт тоже иногда делает открытую
+ *  вечеринку, просто ждать своей очереди он будет дольше клуба. */
+export function billLikely(type?: string, tag?: string): boolean {
+  const t = `${type ?? ""} ${tag ?? ""}`.toLowerCase();
+  // Сначала отсекаем то, что почти наверняка сдаётся под чужое:
+  // свадьбы, конференции, коворкинг, частные виллы.
+  if (/wedding|conference|meeting|coworking|coliving|private villa|exhibition|buyout|private[- ]event/.test(t))
+    return false;
+  return /nightclub|beach club|beach bar|live music|jazz|bar|lounge|cabaret|theatre|concert|festival|club|rooftop/.test(
+    t,
+  );
+}

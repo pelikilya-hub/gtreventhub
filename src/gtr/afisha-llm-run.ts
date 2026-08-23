@@ -5,6 +5,7 @@
 // событием, и это закрыто тестами; здесь — сеть, KV и бюджет, которые
 // тестами не закроешь.
 import {
+  billLikely,
   buildExtractPrompt,
   dateDensity,
   htmlToText,
@@ -44,11 +45,12 @@ const TEXT_MAX = 5000;
 export const llmKey = (vid: string) => `afishallm:${vid}`;
 export type LlmRec = { checkedAt: string; found: number };
 
-type VenueLite = { id: string; website?: string };
-const VENUES: VenueLite[] = ((venuesRaw as { venues?: VenueLite[] }).venues ?? []).map((v) => ({
-  id: v.id,
-  website: v.website,
-}));
+type VenueLite = { id: string; website?: string; type?: string; tag?: string };
+/** Порядок важен: вперёд идут те, у кого афиша вообще бывает. Иначе
+ *  бюджет прогона уходит на курорты и коворкинги, а клубы ждут неделю. */
+const VENUES: VenueLite[] = ((venuesRaw as { venues?: VenueLite[] }).venues ?? [])
+  .map((v) => ({ id: v.id, website: v.website, type: v.type, tag: v.tag }))
+  .sort((a, b) => Number(billLikely(b.type, b.tag)) - Number(billLikely(a.type, a.tag)));
 
 /** Хосты, где читать нечего: соцсети отдают анониму пустую оболочку. */
 const SKIP = ["facebook.", "instagram.", "linktr.ee", "wa.me", "t.me", "goo.gl"];

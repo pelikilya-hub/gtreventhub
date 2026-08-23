@@ -93,6 +93,10 @@ export class GemSession {
     return this.state;
   }
 
+  /** Сейчас маршрут переведён на громкий динамик. Держим, чтобы не
+   *  дёргать системный вызов на каждом куске звука. */
+  private spoken = false;
+
   get isPtt(): boolean {
     return this.ptt;
   }
@@ -365,15 +369,23 @@ export class GemSession {
       const turn = sc.modelTurn as { parts?: { inlineData?: { data?: string } }[] } | undefined;
       if (turn?.parts) {
         for (const p of turn.parts) if (p.inlineData?.data) this.playChunk(p.inlineData.data);
+        // Говорит BRO — звук должен идти в громкий динамик. В режиме
+        // рации это делает holdEnd, а в режиме свободных рук палец не
+        // отпускают никогда: маршрут так и оставался «play-and-record»,
+        // и на iPhone голос уходил в разговорный динамик у уха. Снаружи
+        // это выглядит как «BRO отвечает, а голоса нет».
+        this.speak(true);
         this.set("speaking");
       }
       if (sc.interrupted) {
         this.silence();
+        this.speak(false);
         this.ev.onMetric?.("bro.bargein");
         this.finalize();
         this.set("listening");
       }
       if (sc.turnComplete) {
+        this.speak(false);
         this.finalize();
         this.set("listening");
       }
@@ -470,6 +482,20 @@ export class GemSession {
   mute(on: boolean) {
     if (!this.ptt) this.sending = !on;
     for (const t of this.mic?.getAudioTracks() ?? []) t.enabled = this.ptt ? true : !on;
+  }
+
+  /** Куда вести звук прямо сейчас: в громкий динамик или обратно на
+   *  запись. Нужен только в режиме свободных рук — в рации маршрут
+   *  переключают holdStart и holdEnd по пальцу.
+   *
+   *  Микрофон при этом не трогаем: он остаётся живым, чтобы перебить
+   *  BRO можно было в любой момент. Мы лишь просим систему не считать
+   *  происходящее телефонным разговором, пока говорит он. */
+  private speak(on: boolean): void {
+    if (this.ptt) return;
+    if (this.spoken === on) return;
+    this.spoken = on;
+    routeAudio(on ? "playback" : "play-and-record");
   }
 
   holdStart() {

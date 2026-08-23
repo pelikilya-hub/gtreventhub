@@ -467,6 +467,32 @@ describe("рассадка Café del Mar", () => {
   });
 });
 
+describe("паспорт площадки отдаёт часы работы", () => {
+  // Данные по 42 площадкам лежали в репозитории, но до BRO не доходили
+  // вовсе: на «во сколько открывается» он не мог ответить даже там, где
+  // мы знаем ответ.
+  it("часы и условия входа приходят в ответе", async () => {
+    const r = await handlers.get_venue_profile({ venue: "Illuzion" }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { hours: string | null; entry: string | null };
+    expect(d.hours).toBeTruthy();
+    expect(d.entry).toBeTruthy();
+  });
+
+  it("где часов нет — null, а не пустая строка", async () => {
+    // Разница существенная: null модель обязана прочитать как «не знаем»
+    // и сказать это вслух, а не промолчать и не выдумать расписание.
+    const { PH } = await import("../../data/app-data");
+    const { nightOf } = await import("../../data/app-data");
+    const blank = PH.venues.find((v) => !nightOf(v.id).hours);
+    expect(blank, "все площадки с часами — тест бессмыслен").toBeTruthy();
+    const r = await handlers.get_venue_profile({ venue: blank!.name }, ctx);
+    if (!r.ok) return;
+    expect((r.data as { hours: string | null }).hours).toBeNull();
+  });
+});
+
 describe("рассадка CLC (Come Leo Come)", () => {
   const guest = { email: "v@v", name: "Гость", role: "visitor" };
 

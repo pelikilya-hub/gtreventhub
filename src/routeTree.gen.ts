@@ -30,6 +30,7 @@ import { Route as ApiGtrBroToolRouteImport } from './routes/api.gtr-bro-tool'
 import { Route as ApiGtrVibeRouteImport } from './routes/api.gtr-vibe'
 import { Route as ApiPosterRouteImport } from './routes/api.poster'
 import { Route as ApiPushRouteImport } from './routes/api.push'
+import { Route as ApiSmokeRouteImport } from './routes/api.smoke'
 import { Route as ApiSpotifyCallbackRouteImport } from './routes/api.spotify-callback'
 import { Route as ApiSpotifyLoginRouteImport } from './routes/api.spotify-login'
 import { Route as ApiSprintReportRouteImport } from './routes/api.sprint-report'
@@ -150,6 +151,11 @@ const ApiPushRoute = ApiPushRouteImport.update({
   path: '/api/push',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSmokeRoute = ApiSmokeRouteImport.update({
+  id: '/api/smoke',
+  path: '/api/smoke',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSpotifyCallbackRoute = ApiSpotifyCallbackRouteImport.update({
   id: '/api/spotify-callback',
   path: '/api/spotify-callback',
@@ -243,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/api/gtr-vibe': typeof ApiGtrVibeRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
+  '/api/smoke': typeof ApiSmokeRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
   '/api/spotify-login': typeof ApiSpotifyLoginRoute
   '/api/sprint-report': typeof ApiSprintReportRoute
@@ -279,6 +286,7 @@ export interface FileRoutesByTo {
   '/api/gtr-vibe': typeof ApiGtrVibeRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
+  '/api/smoke': typeof ApiSmokeRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
   '/api/spotify-login': typeof ApiSpotifyLoginRoute
   '/api/sprint-report': typeof ApiSprintReportRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/api/gtr-vibe': typeof ApiGtrVibeRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
+  '/api/smoke': typeof ApiSmokeRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
   '/api/spotify-login': typeof ApiSpotifyLoginRoute
   '/api/sprint-report': typeof ApiSprintReportRoute
@@ -356,6 +365,7 @@ export interface FileRouteTypes {
     | '/api/gtr-vibe'
     | '/api/poster'
     | '/api/push'
+    | '/api/smoke'
     | '/api/spotify-callback'
     | '/api/spotify-login'
     | '/api/sprint-report'
@@ -392,6 +402,7 @@ export interface FileRouteTypes {
     | '/api/gtr-vibe'
     | '/api/poster'
     | '/api/push'
+    | '/api/smoke'
     | '/api/spotify-callback'
     | '/api/spotify-login'
     | '/api/sprint-report'
@@ -429,6 +440,7 @@ export interface FileRouteTypes {
     | '/api/gtr-vibe'
     | '/api/poster'
     | '/api/push'
+    | '/api/smoke'
     | '/api/spotify-callback'
     | '/api/spotify-login'
     | '/api/sprint-report'
@@ -467,6 +479,7 @@ export interface RootRouteChildren {
   ApiGtrVibeRoute: typeof ApiGtrVibeRoute
   ApiPosterRoute: typeof ApiPosterRoute
   ApiPushRoute: typeof ApiPushRoute
+  ApiSmokeRoute: typeof ApiSmokeRoute
   ApiSpotifyCallbackRoute: typeof ApiSpotifyCallbackRoute
   ApiSpotifyLoginRoute: typeof ApiSpotifyLoginRoute
   ApiSprintReportRoute: typeof ApiSprintReportRoute
@@ -625,6 +638,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPushRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/smoke': {
+      id: '/api/smoke'
+      path: '/api/smoke'
+      fullPath: '/api/smoke'
+      preLoaderRoute: typeof ApiSmokeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/spotify-callback': {
       id: '/api/spotify-callback'
       path: '/api/spotify-callback'
@@ -772,6 +792,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGtrVibeRoute: ApiGtrVibeRoute,
   ApiPosterRoute: ApiPosterRoute,
   ApiPushRoute: ApiPushRoute,
+  ApiSmokeRoute: ApiSmokeRoute,
   ApiSpotifyCallbackRoute: ApiSpotifyCallbackRoute,
   ApiSpotifyLoginRoute: ApiSpotifyLoginRoute,
   ApiSprintReportRoute: ApiSprintReportRoute,

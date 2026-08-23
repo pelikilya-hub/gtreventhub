@@ -171,6 +171,10 @@ export const Route = createFileRoute("/api/bro-dev")({
               // очередь на обучение: не придуманная за столом, а взятая
               // из реального спроса. Сверху — самые частые.
               misses: await topMisses(ns),
+              // Исход последней дымовой проверки. Пустой список bad —
+              // прод отвечает тем, чем должен; иначе видно, чем именно
+              // не отвечает.
+              smoke: await kvGetJson(ns, "smoke:last"),
             });
           }
           return json({ ok: true, queue: await readQueue(ns) });

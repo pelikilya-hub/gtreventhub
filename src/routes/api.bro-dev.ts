@@ -290,6 +290,44 @@ export const Route = createFileRoute("/api/bro-dev")({
           }
         }
 
+        // Проверка голосового движка OpenAI — по ключу пульта.
+        //
+        // Realtime однажды не поднялся вовсе: метрика показала ноль
+        // сессий openai при живом ключе, и выяснилось это на живом
+        // разговоре. Ручка спрашивает у OpenAI эфемерный секрет ровно
+        // тем же телом, что и боевая ручка, и возвращает статус: если
+        // модель недоступна на аккаунте, это видно за секунду и до того,
+        // как человек нажал кнопку.
+        if (action === "pult.voiceTest") {
+          if (String(body.key ?? "") !== (await pultAccessKey()))
+            return json({ ok: false, error: "key" }, 401);
+          const oai = typeof process !== "undefined" ? process.env?.OPENAI_API_KEY : undefined;
+          if (!oai) return json({ ok: false, error: "no-key" }, 503);
+          const model = String(body.model ?? "gpt-realtime-2.1").slice(0, 60);
+          try {
+            const r = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
+              method: "POST",
+              headers: { authorization: `Bearer ${oai}`, "content-type": "application/json" },
+              body: JSON.stringify({
+                expires_after: { anchor: "created_at", seconds: 600 },
+                session: { type: "realtime", model, audio: { output: { voice: "cedar" } } },
+              }),
+              signal: AbortSignal.timeout(15_000),
+            });
+            const text = await r.text();
+            // Секрет наружу не отдаём даже в канал владельца: в теле
+            // успеха лежит рабочий ключ на десять минут.
+            return json({
+              ok: r.ok,
+              status: r.status,
+              model,
+              body: r.ok ? "секрет получен" : text.slice(0, 300),
+            });
+          } catch (e) {
+            return json({ ok: false, error: String(e).slice(0, 200) });
+          }
+        }
+
         // Дымовая проверка по требованию — по ключу пульта.
         //
         // Своё расписание её и так дёргает, но ждать два часа, чтобы

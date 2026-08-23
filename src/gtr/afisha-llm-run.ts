@@ -147,11 +147,25 @@ export function mergeLlm(prev: VenueAfishaEvent[], fresh: VenueAfishaEvent[]): V
 export type LlmRunResult = {
   ok: boolean;
   reason?: string;
-  venues: { vid: string; url?: string; found: number }[];
+  venues: {
+    vid: string;
+    url?: string;
+    found: number;
+    /** Разбор вслепую отлаживать нельзя: нулевой улов бывает и потому,
+     *  что событий нет, и потому, что модель ответила не тем. По этим
+     *  трём числам видно, какой это случай. */
+    chars?: number;
+    density?: number;
+    raw?: string;
+  }[];
 };
 
 /** Один прогон: взять очередь, разобрать, записать. */
-export async function runAfishaLlm(ns: KvNs, limit = PER_RUN): Promise<LlmRunResult> {
+export async function runAfishaLlm(
+  ns: KvNs,
+  limit = PER_RUN,
+  debug = false,
+): Promise<LlmRunResult> {
   const brain = await kvGetJson<Brain>(ns, "setting:brain");
   // Своего мозга нет — задача не делается вовсе. Уходить на чужой API
   // здесь нельзя: 110 сайтов съедят дневную квоту к обеду, и молчать
@@ -192,7 +206,14 @@ export async function runAfishaLlm(ns: KvNs, limit = PER_RUN): Promise<LlmRunRes
       llmKey(vid),
       JSON.stringify({ checkedAt: today, found: fresh.length } satisfies LlmRec),
     );
-    venues.push({ vid, url: page.url, found: fresh.length });
+    venues.push({
+      vid,
+      url: page.url,
+      found: fresh.length,
+      ...(debug
+        ? { chars: page.text.length, density: dateDensity(page.text), raw: raw.slice(0, 400) }
+        : {}),
+    });
     if (!fresh.length) continue;
 
     const prevRec = await kvGetJson<VenueAfisha>(ns, `venueevents:${vid}`);

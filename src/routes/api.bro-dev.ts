@@ -373,7 +373,7 @@ export const Route = createFileRoute("/api/bro-dev")({
             return json({ ok: false, error: "key" }, 401);
           const { runAfishaLlm } = await import("../gtr/afisha-llm-run");
           const limit = Math.max(1, Math.min(6, Math.round(Number(body.limit ?? 2)) || 2));
-          return json(await runAfishaLlm(ns, limit));
+          return json(await runAfishaLlm(ns, limit, Boolean(body.debug)));
         }
 
         // Дымовая проверка по требованию — по ключу пульта.

@@ -290,6 +290,18 @@ export const Route = createFileRoute("/api/bro-dev")({
           }
         }
 
+        // Дымовая проверка по требованию — по ключу пульта.
+        //
+        // Своё расписание её и так дёргает, но ждать два часа, чтобы
+        // увидеть исход собственной правки, — это ровно та петля
+        // обратной связи, из-за которой тихие поломки живут неделями.
+        if (action === "pult.smoke") {
+          if (String(body.key ?? "") !== (await pultAccessKey()))
+            return json({ ok: false, error: "key" }, 401);
+          const { runSmoke } = await import("../gtr/bro/smoke-run");
+          return json(await runSmoke(ns));
+        }
+
         // Выбор голосового движка — по ключу пульта.
         //
         // Без этого флага код берёт Gemini Live просто потому, что ключ

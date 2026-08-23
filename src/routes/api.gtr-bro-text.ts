@@ -11,12 +11,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { currentUser } from "../gtr/auth";
-import { getKvNs, kvGetJson } from "../gtr/kv-ns";
+import { getKvNs, kvGetJson, type KvNs } from "../gtr/kv-ns";
 import { buildTextPrompt, type BroContext } from "../gtr/bro/prompt.ru";
 import { kvProvider } from "../gtr/bro/provider";
 import { looksInvented } from "../gtr/bro/guard";
 import {
   handlers,
+  qaNorm,
   toolsForRole,
   WRITE_TOOLS,
   type ToolCtx,
@@ -86,6 +87,28 @@ const openaiTools = (role?: string) =>
     },
   }));
 
+/** Запомнить вопрос, на который база знаний не ответила.
+ *
+ *  Повторяет noteMiss из инструмента намеренно, ключ в ключ: очередь
+ *  обучения должна быть одна, независимо от того, пришёл вопрос через
+ *  инструмент или через подсказку в промпт. Разные ключи дали бы два
+ *  списка, и оба неполные. */
+const noteQaMiss = async (ns: KvNs, raw: string): Promise<void> => {
+  const key = qaNorm(raw).slice(0, 80);
+  if (!key) return;
+  try {
+    const k = `broask:${key}`;
+    const prev = JSON.parse((await ns.get(k)) ?? "null") as { n?: number } | null;
+    await ns.put(
+      k,
+      JSON.stringify({ q: raw.slice(0, 120), n: (prev?.n ?? 0) + 1, last: Date.now() }),
+      { expirationTtl: 60 * 60 * 24 * 90 },
+    );
+  } catch {
+    /* журнал промахов не важнее ответа */
+  }
+};
+
 export const Route = createFileRoute("/api/gtr-bro-text")({
   server: {
     handlers: {
@@ -153,11 +176,53 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
           currentTime: new Date().toISOString(),
         };
 
+        // ---- База знаний в промпт, а не в надежду на инструмент -------
+        //
+        // ask_gtr остаётся, но полагаться на него одного нельзя: это
+        // инструмент, и модель сама решает, звать его или ответить из
+        // головы. Решает она неохотно — 119 выученных тем лежали мёртвым
+        // грузом, а гость получал общие слова вместо нашего ответа.
+        //
+        // Поэтому подбор темы делает воркер, до обращения к модели, тем
+        // же матчером, что и сам инструмент. Совпало — кладём наш ответ
+        // в промпт как факт. Не совпало — промах уходит в очередь
+        // обучения, ровно как из инструмента: вопрос гостя не теряется,
+        // с какой бы стороны он ни пришёл.
+        const { qaItems, qaMatch } = await import("../gtr/bro/tools");
+        let qaHint = "";
+        try {
+          const items = await qaItems(
+            ["gtr", "organizer", "owner", "pr", "sales"].includes(user.role ?? ""),
+            (k) => ns.get(k),
+          );
+          const hit = qaMatch(text, items);
+          if (hit) {
+            // Вариантов у темы несколько — берём первый: чередование
+            // «чтобы не повторяться» живёт в ask_gtr и требует записи в
+            // KV на каждый вопрос, а здесь это лишняя запись на каждый
+            // разговор. Модель всё равно перескажет своими словами.
+            qaHint = hit.item.answers[0] ?? "";
+          } else {
+            await noteQaMiss(ns, text);
+          }
+        } catch {
+          // База знаний — усиление, а не условие ответа: её отказ не
+          // должен превращаться в молчание продукта.
+        }
+
         // История — хвост табло. Префикс сообщений стабилен, поэтому
         // llama.cpp прокэширует его и повторные ответы будут быстрыми.
         const messages: Msg[] = [
           { role: "system", content: buildTextPrompt(ctx) },
         ];
+        if (qaHint)
+          messages.push({
+            role: "system",
+            content:
+              `Ответ базы знаний GTR на этот вопрос: ${qaHint}\n` +
+              "Это наш факт — перескажи своими словами и не противоречь ему. " +
+              "Своего сверх него не добавляй и ask_gtr по этой теме уже не зови.",
+          });
         for (const h of (body.history ?? []).slice(-6))
           messages.push({
             role: h.who === "bro" ? "assistant" : "user",

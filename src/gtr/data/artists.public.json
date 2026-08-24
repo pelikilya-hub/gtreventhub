@@ -1,6 +1,6 @@
 {
   "meta": {
-    "updated": "2026-08-06",
+    "updated": "2026-08-24",
     "total": 312,
     "byKind": {
       "community": 1,
@@ -333,7 +333,8 @@
       "sc": "https://soundcloud.com/search?q=DJ%20Meet",
       "yt": "https://www.youtube.com/watch?v=FR35SmzwXNM",
       "bp": "https://www.beatport.com/search?q=DJ%20Meet",
-      "verified": "2026-08-06",
+      "bio": "Начинал диджейскую карьеру в Мумбаи (Индия) в 2006 году, затем переехал на Пхукет.",
+      "verified": "2026-08-24",
       "quality": "A",
       "rel": "Phuket-based since 2006",
       "relRu": "На Пхукете с 2006 года"
@@ -440,8 +441,8 @@
       "sc": "https://soundcloud.com/search?q=MK.Santo",
       "yt": "https://www.youtube.com/watch?v=1FUWsqXuUgw",
       "bp": "https://www.beatport.com/search?q=MK.Santo",
-      "bio": "Испанский диджей с Ибицы, живёт на Пхукете; органичный мелодичный beach-house. Международные гиги с 2010 года, экс-резидент Savannah Ibiza; регулярно играет Club Room в Café del Mar.",
-      "verified": "2026-08-06",
+      "bio": "Греческий диджей (наст. имя Макис Котрокоис), за пультом с начала 1990-х; летний резидент Санторини в 2000–2015 гг., затем резидент Savannah Ibiza и Highlander Bar на Ибице; живёт на Пхукете. Международные гиги в Таиланде, Австралии, Катаре и Японии с 2010 года; регулярно играет Club Room в Café del Mar.",
+      "verified": "2026-08-24",
       "quality": "A",
       "rel": "Café del Mar Phuket resident",
       "relRu": "Резидент Café del Mar Phuket"
@@ -478,8 +479,8 @@
       "sc": "https://soundcloud.com/search?q=LION",
       "yt": "https://www.youtube.com/watch?v=rHCapDOzJ9c",
       "bp": "https://www.beatport.com/search?q=LION",
-      "bio": "DJ и продюсер с резиденциями в Illuzion и Shelter; 20+ млн стримов, релизы на Spinnin»/Hysteria, Sony, HEXAGON и Smash The House; энергичный клубный саунд.",
-      "verified": "2026-08-06",
+      "bio": "DJ и продюсер, резидент Illuzion и техно-зала Shelter (Illuzion входит в топ-100 клубов мира по версии DJ Mag); совместный трек «Told You» с Jewelz & Sparks вышел на лейбле SKINK (2021). Энергичный клубный саунд.",
+      "verified": "2026-08-24",
       "quality": "A",
       "rel": "Illuzion / Shelter Phuket circuit",
       "relRu": "Круг Illuzion / Shelter"
@@ -590,8 +591,8 @@
       "sc": "https://soundcloud.com/search?q=Vadim%20Almazov",
       "yt": "https://www.youtube.com/watch?v=_Qpy_T3oPAY",
       "bp": "https://www.beatport.com/search?q=Vadim%20Almazov",
-      "bio": "Minimal и deep tech; резиденции FUGA и M Beach Club, эфиры на Radio Red Phuket; сооснователь Underground Sound Of Phuket.",
-      "verified": "2026-08-06",
+      "bio": "Minimal и deep tech; на Пхукете с 2013 года. Резиденции FUGA и M Beach Club, эфиры на Radio Red Phuket; сооснователь комьюнити Underground Sound Of Phuket (с 2017) и — совместно с Beycan Kemec — проекта Farangi, релиз «Journey» на No Comments Records. Играл в Illuzion Phuket, на вечеринках Bermudos «Blast Pool» и в клубе Cocoon Pattaya.",
+      "verified": "2026-08-24",
       "quality": "A",
       "rel": "Phuket-based",
       "relRu": "База на Пхукете"
@@ -699,8 +700,8 @@
       "sc": "https://soundcloud.com/search?q=TISSANAI",
       "yt": "https://www.youtube.com/watch?v=SqFbNBENuFQ",
       "bp": "https://www.beatport.com/search?q=TISSANAI",
-      "bio": "DJ и продюсер, коллектив Rec N Cue; музыкальный директор MuMu Clubhouse; играл на Wonderfruit, в Babaloop и Café del Mar.",
-      "verified": "2026-08-06",
+      "bio": "DJ и продюсер, один из трёх участников коллектива Rec.'N Cue (с 2020 года); музыкальный директор MuMu Clubhouse; играл на фестивалях Wonderfruit (2023) и TAN TAB LAB (куратор, 2022), в Babaloop и Café del Mar. Аффилирован с лейблом Nomind Records.",
+      "verified": "2026-08-24",
       "quality": "A",
       "rel": "Phuket circuit and official Enthusiast network",
       "relRu": "Круг Пхукета и сеть Enthusiast"
@@ -738,8 +739,8 @@
       "sc": "https://soundcloud.com/search?q=Rory%20Spencer",
       "yt": "https://www.youtube.com/results?search_query=Rory%20Spencer%20live%20set",
       "bp": "https://www.beatport.com/search?q=Rory%20Spencer",
-      "bio": "Андеграундный house и techno с фанк- и соул-влиянием; часть бангкокской сцены и Supermodified Agency.",
-      "verified": "2026-08-06",
+      "bio": "Андеграундный house и techno с фанк- и соул-влиянием (наст. имя Рори Киркхэм). С 2013 года — половина бангкокского дуэта Soi Dogs и проекта Dark White (с Валттери Аларик Маттсоном); играл, в частности, в клубе Como (Куала-Лумпур, 2017) и Sing Sing Theater (Бангкок). Букинг-агент в Submodified Agency, соорганизатор промо-группы Late Night Bangkok.",
+      "verified": "2026-08-24",
       "quality": "A",
       "rel": "Illuzion / Shelter / SABAI circuit",
       "relRu": "Круг Illuzion / Shelter / SABAI"
@@ -777,8 +778,8 @@
       "sc": "https://soundcloud.com/search?q=Sami%20Galetto",
       "yt": "https://www.youtube.com/watch?v=VhJcAAPdXaU",
       "bp": "https://www.beatport.com/search?q=Sami%20Galetto",
-      "bio": "Андеграундный DJ и продюсер; играл CIRCOLOCO Phuket 2023; релизы на Beatport; комьюнити Enthusiast Place.",
-      "verified": "2026-08-06",
+      "bio": "Андеграундный DJ и продюсер; играл CircoLoco Thailand 2023 в Baba Beach Club и клубе BOA (Патонг); трек «A Drive to Seven» вышел на бангкокском лейбле Pissawong Records (2022); комьюнити Enthusiast Place.",
+      "verified": "2026-08-24",
       "quality": "A",
       "rel": "Enthusiast / Shelter circuit",
       "relRu": "Круг Enthusiast / Shelter"
@@ -851,8 +852,8 @@
       "sc": "https://soundcloud.com/search?q=Hebdonis",
       "yt": "https://www.youtube.com/watch?v=zFYD0M2mcgU",
       "bp": "https://www.beatport.com/search?q=Hebdonis",
-      "bio": "Более 20 лет за пультом (с 1999); резидент Café del Mar; house, techno, latin и диско-грувы; играл в Британии, на Ибице и в Сиднее; основатель лейбла Knights of Frequency.",
-      "verified": "2026-08-06",
+      "bio": "Более 20 лет за пультом (с 1999, наст. имя Джон Хебден); резидент Café del Mar; house, techno, latin и диско-грувы; играл в клубах Британии, Ибицы и Сиднея рядом с Юсефом, Ральфом Лоусоном, Inland Knights, Полом Вулфордом и Маршаллом Джефферсоном. Релизы на Robsoul Recordings; в 2017 основал собственный лейбл Knights of Frequency.",
+      "verified": "2026-08-24",
       "quality": "A",
       "rel": "Café del Mar Phuket resident",
       "relRu": "Резидент Café del Mar Phuket"
@@ -925,10 +926,11 @@
       "sc": "https://soundcloud.com/search?q=Tuslay",
       "yt": "https://www.youtube.com/watch?v=Vhl0cap4CeA",
       "bp": "",
-      "verified": "2026-08-06",
+      "bio": "Французский диджей (наст. имя Пьер-Антуан Сарджент) из региона Вар; учился на скрипке в консерватории с 11 лет, за диджейский пульт встал в 15. До резидентства в Illuzion Phuket играл в клубах Лазурного берега — VIP Room (Канны), La Gioia, Le Café (Сен-Тропе); в 2023 году выступил на фестивале Printemps de Bourges как победитель конкурса RIFFX Party.",
+      "verified": "2026-08-24",
       "quality": "A",
       "rel": "Illuzion Phuket resident",
-      "relRu": "Резидент Illuzion Phuket"
+      "relRu": "Резидент Illuzion Phuket; ранее играл на Лазурном берегу Франции"
     },
     {
       "id": "MC-0019",
@@ -1036,11 +1038,11 @@
       "sc": "https://soundcloud.com/search?q=Inna%20Ra",
       "yt": "https://www.youtube.com/watch?v=5r6mYVyvUFQ",
       "bp": "https://www.beatport.com/search?q=Inna%20Ra",
-      "bio": "Deep house, indie dance и deep tech; экс-профессиональная танцовщица, за пультом с 2019; играла в Amnesia Ibiza; на Пхукете — Yuuhi, Café del Mar и Enthusiast Place.",
-      "verified": "2026-08-06",
+      "bio": "Deep house, indie dance и deep tech; экс-профессиональная танцовщица (гастролировала до 25 лет), за диджейский пульт встала в 2019 году. В 2022–2023 выиграла Web3-конкурс DJenerates «Global DJ Search» и сыграла в Amnesia (Ибица) на одной афише с Chemical Brothers и Ниной Кравиц; играла Armani Privé (Дубай) и яхт-вечеринки в Таиланде, Пакистане и Индонезии. Релизы на Big Bells Digital (EP «Emotional Alchemy») и Pianity. На Пхукете — Yuuhi, Café del Mar и Enthusiast Place.",
+      "verified": "2026-08-24",
       "quality": "A",
       "rel": "Café del Mar / Enthusiast circuit",
-      "relRu": "Круг Café del Mar / Enthusiast"
+      "relRu": "Играла Amnesia Ibiza после победы в DJenerates; круг Café del Mar / Enthusiast"
     },
     {
       "id": "MC-0022",
@@ -1113,11 +1115,11 @@
       "sc": "https://soundcloud.com/search?q=DJ%20Adamantine%20%2F%20Dawn%20Razor",
       "yt": "https://www.youtube.com/results?search_query=DJ%20Adamantine%20%2F%20Dawn%20Razor%20live%20set",
       "bp": "https://www.beatport.com/search?q=DJ%20Adamantine%20%2F%20Dawn%20Razor",
-      "bio": "Продюсер и диджей (aka Dawn Razor); релизы на R&S, ARTS, Suara, We Are The Brave и Planet Rhythm.",
-      "verified": "2026-08-06",
+      "bio": "Продюсер и диджей (aka Dawn Razor); продюсирует с 2015 года, выпустил более 50 треков на лейблах R&S Records, A R T S, Planet Rhythm, Holding Hands, Suara, We Are The Brave и других; треки поддерживали Ричи Хоутин и Крис Либинг. Играл в Courage Phuket (декабрь 2025).",
+      "verified": "2026-08-24",
       "quality": "A",
       "rel": "Official Phuket community network",
-      "relRu": "Официальная сеть комьюнити Пхукета"
+      "relRu": "50+ релизов с 2015 года; играл в Courage Phuket"
     },
     {
       "id": "MC-0024",

@@ -1052,7 +1052,10 @@
         "organic-house",
         "melodic-house"
       ],
-      "ytSearch": "https://www.youtube.com/results?search_query=Taz%20Mutcha%20live%20set"
+      "ytSearch": "https://www.youtube.com/results?search_query=Taz%20Mutcha%20live%20set",
+      "labels": [
+        "piston-recordings"
+      ]
     },
     {
       "id": "MC-0016",
@@ -1478,6 +1481,9 @@
         "minimal-techno",
         "dub-techno",
         "melodic-techno"
+      ],
+      "labels": [
+        "suara"
       ]
     },
     {

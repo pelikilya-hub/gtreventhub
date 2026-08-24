@@ -25,7 +25,7 @@ const ARTIST_PUBLIC = [
   "id", "name", "cat", "catRu", "kind", "role", "roleRu", "base", "baseRu",
   "status", "statusRu", "prio", "tier", "group", "styles", "styleIds", "genre",
   "venue", "web", "ig", "fb", "sp", "sc", "yt", "bp", "twitch", "bio",
-  "verified", "quality", "rel", "relRu",
+  "verified", "quality", "rel", "relRu", "labels",
 ];
 
 /** Поля площадки, которые видит браузер. Телефон и почта площадки —

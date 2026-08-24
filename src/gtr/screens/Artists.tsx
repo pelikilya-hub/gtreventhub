@@ -16,6 +16,7 @@ import {
 import photosRaw from "../data/artist-photos.json";
 import mediaRaw from "../data/artist-media.json";
 import playersRaw from "../data/artist-players.json";
+import labelLogosRaw from "../data/label-logos.json";
 import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
 import { Card, Chip, Eyebrow, Field, LetterMark, Li, SubHead, tint, TrashTitle } from "../ui";
@@ -44,6 +45,11 @@ const MEDIA = (mediaRaw as unknown as { media: Record<string, ArtistMedia> }).me
 // подобраны офлайн-пайплайном по точному совпадению имени, ключей не требуют
 type ArtistPlayer = { kind: "deezer" | "spotify" | "sc" | "mixcloud"; ref: string };
 const PLAYERS = playersRaw as Record<string, ArtistPlayer>;
+
+// Лейблы: значок рисуем только там, где нашёлся настоящий логотип
+// с прозрачным фоном на официальном сайте лейбла — угадывать нельзя.
+type LabelLogo = { name: string; file: string; w: number; h: number; onDark: boolean; site: string };
+const LABEL_LOGOS = labelLogosRaw as Record<string, LabelLogo>;
 
 // Встроенные плееры сняты (виджеты сервисов разнобойные) — вместо них
 // прямая ссылка на музыку. Spotify — основной инструмент: прямой профиль,
@@ -833,6 +839,36 @@ function ArtistCard({
                 }}
               >
                 {String(a.relRu || a.rel)}
+              </div>
+            ) : null}
+            {a.labels?.length ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: 8 }}>
+                {a.labels.map((lid) => {
+                  const logo = LABEL_LOGOS[lid];
+                  if (!logo) return null;
+                  return (
+                    <a
+                      key={lid}
+                      href={logo.site}
+                      target="_blank"
+                      rel="noreferrer"
+                      title={logo.name}
+                      style={{ display: "inline-flex", alignItems: "center", opacity: 0.85 }}
+                    >
+                      <img
+                        src={logo.file}
+                        alt={logo.name}
+                        style={{
+                          height: 16,
+                          width: "auto",
+                          maxWidth: 96,
+                          objectFit: "contain",
+                          filter: logo.onDark ? "none" : "invert(1)",
+                        }}
+                      />
+                    </a>
+                  );
+                })}
               </div>
             ) : null}
             <div

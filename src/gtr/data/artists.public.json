@@ -819,7 +819,10 @@
       "verified": "2026-08-06",
       "quality": "A",
       "rel": "Long-running Phuket circuit; Café del Mar event",
-      "relRu": "Многолетний круг Пхукета; событие Café del Mar"
+      "relRu": "Многолетний круг Пхукета; событие Café del Mar",
+      "labels": [
+        "piston-recordings"
+      ]
     },
     {
       "id": "MC-0016",
@@ -1119,7 +1122,10 @@
       "verified": "2026-08-24",
       "quality": "A",
       "rel": "Official Phuket community network",
-      "relRu": "50+ релизов с 2015 года; играл в Courage Phuket"
+      "relRu": "50+ релизов с 2015 года; играл в Courage Phuket",
+      "labels": [
+        "suara"
+      ]
     },
     {
       "id": "MC-0024",

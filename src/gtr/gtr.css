@@ -3545,6 +3545,15 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-bro-state.s-listening { color: #9effc2; }
 .gtr-bro-state.s-speaking { color: #7de2ff; }
 .gtr-bro-state.s-error { color: #ff8fa3; }
+/* Метка резервной голосовой полосы: разговор жив, но идёт через
+   браузерный слух и системную озвучку. */
+.gtr-bro-lane {
+  font: 500 10px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.1em;
+  color: #ffd98a;
+  padding: 4px 8px;
+  background: rgba(255, 217, 138, 0.12);
+}
 .gtr-bro-x {
   margin-left: auto;
   border: 0;

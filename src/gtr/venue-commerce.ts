@@ -11,12 +11,14 @@
 // возвращается гостю кредитом на еду и напитки. Оговорки про сервисный сбор
 // и НДС у каждого заведения свои, поэтому живут рядом с меню, а не в общем
 // тексте: назвать сумму, которой не окажется в счёте, — хуже, чем молчать.
+import casabohoMenuRaw from "./data/casaboho-menu.json";
 import catchMenuRaw from "./data/catch-menu.json";
 import catchReserveRaw from "./data/catch-reserve.json";
 import cdmMenuRaw from "./data/cdm-menu.json";
 import cdmReserveRaw from "./data/cdm-reserve.json";
 import clcMenuRaw from "./data/clc-menu.json";
 import placeReserveRaw from "./data/place-reserve.json";
+import ravaMenuRaw from "./data/rava-menu.json";
 import shamanMenuRaw from "./data/shaman-menu.json";
 
 export type ReserveZone = {
@@ -127,6 +129,19 @@ export const COMMERCE: Record<string, VenueCommerce> = {
     venueName: shamanMenuRaw.meta.venueName,
     menu: shamanMenuRaw as unknown as MenuFile,
     menuNote: "Сервис 10% и НДС 7% не включены в цены.",
+  },
+  // Цены собраны через веб-поиск (прямой доступ к сайтам заблокирован
+  // сетевой политикой сессии) — не первичный прайс-лист площадки, только
+  // меню, без брони: депозиты и условия столов не подтверждены.
+  [ravaMenuRaw.meta.venueId]: {
+    venueName: ravaMenuRaw.meta.venueName,
+    menu: ravaMenuRaw as unknown as MenuFile,
+    menuNote: "Цены собраны через веб-поиск, не первичный прайс-лист — сверить перед стартом продаж.",
+  },
+  [casabohoMenuRaw.meta.venueId]: {
+    venueName: casabohoMenuRaw.meta.venueName,
+    menu: casabohoMenuRaw as unknown as MenuFile,
+    menuNote: "Сервис 10% и НДС 7% включены в цены (по PDF-меню Hyatt).",
   },
   // Только меню: рассадка CLC — почасовая аренда зала (rateBefore22/After22,
   // minHours), а не депозит+слоты, — общей ReserveTable не описывается и

@@ -14,6 +14,7 @@
 // голосового промпта.
 
 import type { BroCard, BroEvents, BroPersona, BroState } from "./session";
+import { callBroTool, rulesReply } from "./voice-rules";
 
 export type LocalStart = {
   voice: string;
@@ -275,6 +276,18 @@ export class LocalVoiceSession {
       this.ev.onMetric?.("bro.local.fail.timeout");
     }
     if (this.closed) return;
+    // Каскад молчит — не капитулируем: афиша и база площадок лежат в
+    // нашем KV и достаются инструментами без всякой модели. Отвечаем
+    // правилами, и только если и они пусты — признаёмся честно.
+    if (!reply) {
+      const byRules = await rulesReply(text, callBroTool, this.lang).catch(() => null);
+      if (this.closed) return;
+      if (byRules) {
+        this.ev.onMetric?.("bro.local.rules");
+        reply = byRules.say;
+        cards = byRules.cards;
+      }
+    }
     if (!reply)
       reply = this.lang.startsWith("ru")
         ? "Мозг сейчас не отвечает — дай минуту и спроси ещё раз."

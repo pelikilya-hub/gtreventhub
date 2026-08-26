@@ -187,6 +187,25 @@ async function syncCarpeDiem(): Promise<VenueAfishaEvent[]> {
   return out;
 }
 
+// Catch Beach Club: события в /events/, структура как CDM
+async function syncCatch(): Promise<VenueAfishaEvent[]> {
+  const html = await fetchText("https://www.catchbeachclub.com/events/");
+  const slugs = [...new Set(html.match(/\/events\/[a-z0-9-]+(?:\/)?/g) ?? [])]
+    .map((s) => s.replace(/^\/events\//, "").replace(/\/$/, ""))
+    .filter((s) => s && s !== "events" && !/^(contact|booking|menu|reservations)/.test(s))
+    .slice(0, 12);
+  const out: VenueAfishaEvent[] = [];
+  for (const slug of slugs) {
+    const ev = await eventFromPage(
+      `https://www.catchbeachclub.com/events/${slug}`,
+      slug,
+      "catchbeachclub.com",
+    );
+    if (ev) out.push(ev);
+  }
+  return out;
+}
+
 // Заголовок из слуга приходит строчными («zoo del mar»), а из og:title —
 // как повезёт. Приводим к виду, пригодному для витрины: каждое слово с
 // заглавной, но аббревиатуры и цифры не трогаем.
@@ -782,6 +801,7 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
   const jobs: [string, () => Promise<VenueAfishaEvent[]>][] = [
     ["VEN-0002", syncCafeDelMar],
     ["VEN-0003", syncCarpeDiem],
+    ["VEN-0001", syncCatch],
   ];
   const counts: Record<string, number> = {};
   const posterBudget = { left: POSTERS_PER_RUN };

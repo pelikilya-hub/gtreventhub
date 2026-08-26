@@ -37,6 +37,7 @@ import { safetyOf } from "./safety";
 import { BroSmoke } from "./smoke";
 import { GemSession } from "./gem";
 import { BroSession, type BroCard, type BroState } from "./session";
+import { VibeCheck } from "./vibecheck";
 
 type VoiceSession = BroSession | GemSession;
 type VoiceProvider = "openai" | "gemini";
@@ -94,7 +95,7 @@ const VOICE_SETS: Record<VoiceProvider, [string, string][]> = {
 // tile — фирменный арт плитки от BOSS: подпись и рамка уже в картинке,
 // поэтому такой плитке не рисуем ни скобок, ни текста. Команды без арта
 // живут на стикерах, пока не приедет их картинка.
-type Quick = { icon: StkName; t: string; q: string; tile?: string };
+type Quick = { icon: StkName; t: string; q?: string; tile?: string; action?: "vibecheck" };
 
 const QUICK_GUEST: Quick[] = [
   { icon: "champagne", t: "Пожрать", q: "столы в кафе дель мар" },
@@ -103,6 +104,9 @@ const QUICK_GUEST: Quick[] = [
   { icon: "pin", t: "Маршрут", q: "маршрут" },
   { icon: "headphones", t: "Артисты", q: "открой артисты" },
   { icon: "vinyl", t: "Про стили", q: "что такое техно" },
+  // Мик слушает 5 секунд и прикидывает темп+вайб живого звука в зале —
+  // не текстовый вопрос модели, а отдельная локальная функция.
+  { icon: "equalizer", t: "Вайб-чек", action: "vibecheck" },
   { icon: "door", t: "Такси", q: "вызови такси" },
   { icon: "star", t: "Что умею", q: "что ты умеешь" },
 ];
@@ -201,6 +205,7 @@ export function GtrBroOverlay({
   const [holding, setHolding] = useState(false);
   const held = useRef(false);
   const [lab, setLab] = useState(false);
+  const [vibeOpen, setVibeOpen] = useState(false);
   const [ask, setAsk] = useState<{ tool: string; summary: string; resolve: (v: boolean) => void } | null>(
     null,
   );
@@ -758,24 +763,22 @@ export function GtrBroOverlay({
         {/* Тапы вместо набора: человек в клубе не печатает «что сегодня
             в патонге» одной рукой с коктейлем в другой. */}
         <div className="gtr-bro-quick">
-          {(isTeam(role) ? QUICK_TEAM : QUICK_GUEST).map((q) =>
-            q.tile ? (
-              <button
-                key={q.t}
-                className="gtr-bro-q art"
-                onClick={() => void runText(q.q)}
-                aria-label={q.t}
-              >
+          {(isTeam(role) ? QUICK_TEAM : QUICK_GUEST).map((q) => {
+            const onClick = () => (q.action === "vibecheck" ? setVibeOpen(true) : void runText(q.q ?? ""));
+            return q.tile ? (
+              <button key={q.t} className="gtr-bro-q art" onClick={onClick} aria-label={q.t}>
                 <img src={q.tile} alt="" loading="lazy" draggable={false} />
               </button>
             ) : (
-              <button key={q.t} className="gtr-bro-q" onClick={() => void runText(q.q)}>
+              <button key={q.t} className="gtr-bro-q" onClick={onClick}>
                 <Stk name={q.icon} size={30} x2 />
                 <span>{q.t}</span>
               </button>
-            ),
-          )}
+            );
+          })}
         </div>
+
+        <VibeCheck open={vibeOpen} onClose={() => setVibeOpen(false)} />
 
         {/* Визуализатор: единственная деталь, которая честно показывает,
             что микрофон открыт. Пока он живой — тебя слышат. */}

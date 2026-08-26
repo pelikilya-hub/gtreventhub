@@ -186,7 +186,50 @@ export function GtrPlayerBar() {
     };
   }, []);
 
+  // Сворачивание приложения усыпляет AudioContext — браузер экономит
+  // батарею и глушит анализатор, даже если сам трек продолжает играть.
+  // Без явного resume() при возврате визуализатор так и остаётся
+  // замороженным на последнем кадре — то самое «глючит».
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === "visible" && ctxRef.current?.state === "suspended") {
+        void ctxRef.current.resume().catch(() => {});
+      }
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+
   const tr = TRACKS[idx];
+
+  // Media Session — заявка мобильному браузеру, что это настоящий
+  // плеер, а не фоновый шум вкладки: даёт трек пережить сворачивание
+  // и блокировку экрана, а не просто ставит его на паузу вместе с UI.
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: tr.title,
+      artist: "GTR SOUND",
+    });
+    navigator.mediaSession.setActionHandler("play", () => {
+      if (audioRef.current?.paused) toggle();
+    });
+    navigator.mediaSession.setActionHandler("pause", () => {
+      if (audioRef.current && !audioRef.current.paused) toggle();
+    });
+    navigator.mediaSession.setActionHandler("nexttrack", next);
+    return () => {
+      navigator.mediaSession.setActionHandler("play", null);
+      navigator.mediaSession.setActionHandler("pause", null);
+      navigator.mediaSession.setActionHandler("nexttrack", null);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tr.title]);
+
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && "mediaSession" in navigator)
+      navigator.mediaSession.playbackState = playing ? "playing" : "paused";
+  }, [playing]);
 
   return (
     <div className={`gtr-playbar ${playing ? "playing" : ""}`}>

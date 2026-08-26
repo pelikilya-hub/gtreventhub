@@ -15,6 +15,7 @@ import catchMenuRaw from "./data/catch-menu.json";
 import catchReserveRaw from "./data/catch-reserve.json";
 import cdmMenuRaw from "./data/cdm-menu.json";
 import cdmReserveRaw from "./data/cdm-reserve.json";
+import clcMenuRaw from "./data/clc-menu.json";
 import shamanMenuRaw from "./data/shaman-menu.json";
 
 export type ReserveZone = {
@@ -117,6 +118,14 @@ export const COMMERCE: Record<string, VenueCommerce> = {
     venueName: shamanMenuRaw.meta.venueName,
     menu: shamanMenuRaw as unknown as MenuFile,
     menuNote: "Сервис 10% и НДС 7% не включены в цены.",
+  },
+  // Только меню: рассадка CLC — почасовая аренда зала (rateBefore22/After22,
+  // minHours), а не депозит+слоты, — общей ReserveTable не описывается и
+  // остаётся на своей отдельной ветке в book_table/get_venue_zones.
+  [clcMenuRaw.meta.venueId]: {
+    venueName: clcMenuRaw.meta.venueName,
+    menu: clcMenuRaw as unknown as MenuFile,
+    menuNote: "Кухня: сервис 10% и НДС 7% не включены в цены. Коктейли: сервис/НДС в прайсе не отмечены — уточняйте на месте.",
   },
 };
 

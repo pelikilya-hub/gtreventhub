@@ -117,6 +117,56 @@ describe("build_night_route", () => {
     const t = (r as { data: { transport: { booked: boolean } | null } }).data.transport;
     expect(t?.booked).toBe(false);
   });
+
+  type Leg = {
+    arrive_hour: number;
+    arrive_time: string;
+    distance_km: number | null;
+    travel_min: number | null;
+  };
+
+  it("первая точка без стартовых координат — без выдуманного перегона", async () => {
+    const r = await handlers.build_night_route({ stops: ["VEN-0001"] }, ctx);
+    expect(r.ok).toBe(true);
+    const legs = (r as { data: { legs: Leg[] } }).data.legs;
+    expect(legs[0].distance_km).toBeNull();
+    expect(legs[0].travel_min).toBeNull();
+    expect(legs[0].arrive_time).toMatch(/^\d{2}:\d{2}$/);
+  });
+
+  it("между близкими площадками — настоящее небольшое расстояние, не плюс два часа", async () => {
+    // VEN-0001 и VEN-0002 в паре километров друг от друга.
+    const r = await handlers.build_night_route({ stops: ["VEN-0001", "VEN-0002"], startHour: 20 }, ctx);
+    expect(r.ok).toBe(true);
+    const legs = (r as { data: { legs: Leg[]; note: string | null } }).data.legs;
+    const hop = legs[1];
+    expect(hop.distance_km).not.toBeNull();
+    expect(hop.distance_km!).toBeLessThan(10);
+    expect(hop.travel_min!).toBeGreaterThanOrEqual(8);
+    // Раньше вторая точка всегда получала ровно +2 часа — теперь это
+    // реальное время в пути плюс dwell на первой площадке.
+    expect(hop.arrive_hour).not.toBe(22);
+  });
+
+  it("далёкий перегон помечается предупреждением, а не тонет в тишине", async () => {
+    // VEN-0077 и VEN-0001 в ~19 км по прямой.
+    const r = await handlers.build_night_route({ stops: ["VEN-0077", "VEN-0001"], startHour: 20 }, ctx);
+    expect(r.ok).toBe(true);
+    const d = (r as { data: { legs: Leg[]; note: string | null } }).data;
+    expect(d.legs[1].distance_km!).toBeGreaterThan(15);
+    expect(d.note).toContain("км");
+  });
+
+  it("координаты гостя делают реальным даже первый перегон", async () => {
+    const r = await handlers.build_night_route(
+      { stops: ["VEN-0001"], startLat: 7.9, startLon: 98.3 },
+      ctx,
+    );
+    expect(r.ok).toBe(true);
+    const legs = (r as { data: { legs: Leg[] } }).data.legs;
+    expect(legs[0].distance_km).not.toBeNull();
+    expect(legs[0].travel_min).not.toBeNull();
+  });
 });
 
 describe("платформенные инструменты", () => {
@@ -269,6 +319,25 @@ describe("рассадка Café del Mar", () => {
     }
   });
 
+  it("меню CLC: авторский коктейль находится с точной ценой и площадкой", async () => {
+    const r = await handlers.get_menu({ query: "shutter secret" }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { items: { item: string; price_thb: number; venue?: string }[] };
+    const hit = d.items.find((i) => i.item === "Shutter Secret")!;
+    expect(hit.price_thb).toBe(500);
+    expect(hit.venue).toBe("CLC Restaurant (Come Leo Come)");
+  });
+
+  it("меню CLC: фильтр по площадке сужает поиск до вагю-гриля", async () => {
+    const r = await handlers.get_menu({ query: "wagyu ribeye", venue: "CLC" }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { venue: string; items: { item: string; price_thb: number }[] };
+    expect(d.venue).toBe("CLC Restaurant (Come Leo Come)");
+    expect(d.items.some((i) => i.item === "Wagyu Ribeye" && i.price_thb === 3890)).toBe(true);
+  });
+
   it("бронь резолвит стол и предзаказ по каталогу, цену модели не верит", async () => {
     let got: Record<string, unknown> = {};
     const book = async (b: Record<string, unknown>) => {
@@ -308,6 +377,85 @@ describe("рассадка Café del Mar", () => {
     expect(lines[0].price).toBe(390);
   });
 
+  it("вопрос без ответа копится в очередь на обучение, а не теряется", async () => {
+    const store = new Map<string, string>();
+    const kv = {
+      get: async (k: string) => store.get(k) ?? null,
+      put: async (k: string, v: string) => void store.set(k, v),
+    };
+    const c = { ...ctx, kv: kv as never };
+    const r = await handlers.ask_gtr({ question: "есть ли у вас вертолётный трансфер" }, c);
+    expect(r.ok).toBe(false);
+    const keys = [...store.keys()];
+    expect(keys.length).toBe(1);
+    const rec = JSON.parse(store.get(keys[0])!) as { q: string; n: number };
+    expect(rec.n).toBe(1);
+    expect(rec.q).toContain("вертол");
+
+    // Тот же вопрос в другом написании обязан попасть в тот же счётчик,
+    // иначе спрос размажется по вариантам и ни один не наберёт веса.
+    await handlers.ask_gtr({ question: "Есть ли у вас вертолётный трансфер?" }, c);
+    expect([...store.keys()].length).toBe(1);
+    expect((JSON.parse(store.get(keys[0])!) as { n: number }).n).toBe(2);
+  });
+
+  it("вопрос, на который база знаний ответила, в очередь не попадает", async () => {
+    const store = new Map<string, string>();
+    const kv = {
+      get: async (k: string) => store.get(k) ?? null,
+      put: async (k: string, v: string) => void store.set(k, v),
+    };
+    const r = await handlers.ask_gtr({ question: "что такое GTR" }, { ...ctx, kv: kv as never });
+    expect(r.ok).toBe(true);
+    expect(store.size).toBe(0);
+  });
+
+  it("площадка без схемы столов принимает заявку, а не отказ", async () => {
+    let got: Record<string, unknown> = {};
+    const book = async (b: Record<string, unknown>) => {
+      got = b;
+      return { ok: true, id: "BK-REQ" };
+    };
+    const r = await handlers.book_table(
+      { venue: "Illuzion", dateIso: "2026-08-22", guests: 6, phone: "+66 93 000 0000", table: "VIP у сцены" },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { status: string; note: string; venue: string };
+    // Главное в этом пути: гостю нельзя пообещать готовый стол.
+    expect(d.status).toContain("НЕ забронирован");
+    expect(d.note).toContain("не обещай");
+    // Пожелание по залу теряться не должно — менеджеру оно и нужно.
+    expect(String(got.note)).toContain("VIP у сцены");
+    // Стол и депозит не выдумываем: схемы нет.
+    expect(got.tableType).toBeUndefined();
+    expect(got.deposit).toBeUndefined();
+  });
+
+  it("заявка без телефона и без даты не уходит", async () => {
+    const book = async () => ({ ok: true, id: "BK-X" });
+    const noPhone = await handlers.book_table(
+      { venue: "Illuzion", dateIso: "2026-08-22", guests: 4 },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(noPhone.ok).toBe(false);
+    const noDate = await handlers.book_table(
+      { venue: "Illuzion", guests: 4, phone: "+66 93 000 0000" },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(noDate.ok).toBe(false);
+  });
+
+  it("несуществующая площадка по-прежнему отказ, а не пустая заявка", async () => {
+    const book = async () => ({ ok: true, id: "BK-X" });
+    const r = await handlers.book_table(
+      { venue: "Клуб которого нет 12345", dateIso: "2026-08-22", phone: "1" },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(false);
+  });
+
   it("клубная ночь в понедельник не бронируется", async () => {
     const book = async () => ({ ok: true, id: "BK-X" });
     // 2026-08-17 — понедельник, Club Room работает ср–сб
@@ -316,6 +464,116 @@ describe("рассадка Café del Mar", () => {
       { ...ctx, user: guest, book: book as never },
     );
     expect(r.ok).toBe(false);
+  });
+});
+
+describe("паспорт площадки отдаёт часы работы", () => {
+  // Данные по 42 площадкам лежали в репозитории, но до BRO не доходили
+  // вовсе: на «во сколько открывается» он не мог ответить даже там, где
+  // мы знаем ответ.
+  it("часы и условия входа приходят в ответе", async () => {
+    const r = await handlers.get_venue_profile({ venue: "Illuzion" }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { hours: string | null; entry: string | null };
+    expect(d.hours).toBeTruthy();
+    expect(d.entry).toBeTruthy();
+  });
+
+  it("где часов нет — null, а не пустая строка", async () => {
+    // Разница существенная: null модель обязана прочитать как «не знаем»
+    // и сказать это вслух, а не промолчать и не выдумать расписание.
+    const { PH } = await import("../../data/app-data");
+    const { nightOf } = await import("../../data/app-data");
+    const blank = PH.venues.find((v) => !nightOf(v.id).hours);
+    expect(blank, "все площадки с часами — тест бессмыслен").toBeTruthy();
+    const r = await handlers.get_venue_profile({ venue: blank!.name }, ctx);
+    if (!r.ok) return;
+    expect((r.data as { hours: string | null }).hours).toBeNull();
+  });
+});
+
+describe("рассадка CLC (Come Leo Come)", () => {
+  const guest = { email: "v@v", name: "Гость", role: "visitor" };
+
+  it("зоны CLC находятся по названию и по аббревиатуре, Private Lounge несёт почасовую ставку", async () => {
+    const r = await handlers.get_venue_zones({ venue: "CLC" }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as {
+      zones: { zone: string; tables: { table: string; bookable: boolean; rate_before_22_thb: number | null }[] }[];
+    };
+    expect(d.zones.length).toBe(3);
+    const lounge = d.zones.find((z) => z.zone === "CLC Private Lounge")!;
+    expect(lounge.tables[0].bookable).toBe(true);
+    expect(lounge.tables[0].rate_before_22_thb).toBe(10000);
+    const mainHall = d.zones.find((z) => z.zone === "CLC Main Hall")!;
+    expect(mainHall.tables[0].bookable).toBe(false);
+  });
+
+  it("аренда Private Lounge с 18:00 на минимум часов считается по дневному тарифу", async () => {
+    let got: Record<string, unknown> = {};
+    const book = async (b: Record<string, unknown>) => {
+      got = b;
+      return { ok: true, id: "BK-CLC-1" };
+    };
+    const r = await handlers.book_table(
+      {
+        venue: "CLC",
+        table: "CLC Private Lounge",
+        dateIso: "2026-08-22",
+        slot: "18:00",
+        hours: 3,
+        guests: 12,
+        phone: "+66 93 000 0000",
+      },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(true);
+    expect(got.deposit).toBe(30000);
+    expect(got.vid).toBe("VEN-0109");
+  });
+
+  it("аренда, захватывающая 22:00, считается по двум ставкам", async () => {
+    let got: Record<string, unknown> = {};
+    const book = async (b: Record<string, unknown>) => {
+      got = b;
+      return { ok: true, id: "BK-CLC-2" };
+    };
+    const r = await handlers.book_table(
+      {
+        venue: "CLC",
+        table: "Private Lounge",
+        dateIso: "2026-08-22",
+        slot: "21:00",
+        hours: 3,
+        guests: 10,
+        phone: "+66 93 000 0000",
+      },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(true);
+    // 21:00 по дневной ставке, 22:00 и 23:00 — по вечерней: 10000 + 15000×2
+    expect(got.deposit).toBe(40000);
+  });
+
+  it("меньше минимума гостей в Private Lounge — честный отказ", async () => {
+    const book = async () => ({ ok: true, id: "BK-CLC-3" });
+    const r = await handlers.book_table(
+      { venue: "CLC", table: "CLC Private Lounge", dateIso: "2026-08-22", guests: 2, phone: "1" },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(false);
+  });
+
+  it("Main Hall без цены не бронируется — модель не выдумывает ставку", async () => {
+    const book = async () => ({ ok: true, id: "BK-CLC-4" });
+    const r = await handlers.book_table(
+      { venue: "CLC", table: "CLC Main Hall", dateIso: "2026-08-22", guests: 80, phone: "1" },
+      { ...ctx, user: guest, book: book as never },
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain("запросу");
   });
 });
 

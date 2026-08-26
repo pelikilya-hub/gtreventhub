@@ -1,0 +1,316 @@
+{
+ "meta": {
+  "venueId": "VEN-0109",
+  "venueName": "CLC Restaurant (Come Leo Come)",
+  "source": "Официальные PDF-меню площадки: основное меню (июль 2026) и карта коктейлей, присланы BOSS",
+  "verified": "2026-08-20",
+  "currency": "THB",
+  "note": "Кухня: сервис 10% и НДС 7% не включены в цены (указано в PDF). Коктейли: сервис/НДС в присланном прайсе не отмечены — уточняйте на месте."
+ },
+ "sections": [
+  {
+   "id": "bar",
+   "name": "Бар — коктейли",
+   "groups": [
+    {
+     "id": "signature-cocktails",
+     "name": "Авторские коктейли",
+     "items": [
+      { "id": "clc-champagne-crimes", "name": "Champagne Crimes", "price": 500, "desc": "Игристое, Gin Bulldog, клубника, тонка бобы" },
+      { "id": "clc-fizzy-deal", "name": "Fizzy Deal", "price": 500, "desc": "Kraken Rum, Amaro Montenegro, содовая с какао" },
+      { "id": "clc-catch-the-peach", "name": "Catch the Peach!", "price": 500, "desc": "Игристое, красная шисо, пюре красного персика и граната" },
+      { "id": "clc-salt-sun", "name": "Salt & Sun", "price": 500, "desc": "Jose Cuervo Tradicional, зелёная гуава, ананас" },
+      { "id": "clc-cloud-9", "name": "Cloud 9", "price": 500, "desc": "Gin Bulldog, саке, лаванда" },
+      { "id": "clc-blood-bourbon", "name": "Blood and Bourbon", "price": 500, "desc": "Ezra Brooks 99 Bourbon, клюквенное вино, имбирь" },
+      { "id": "clc-shutter-secret", "name": "Shutter Secret", "price": 500, "desc": "Vodka Tito's, сухой вермут, рассол оливок" }
+     ]
+    },
+    {
+     "id": "classic-cocktails",
+     "name": "Классические коктейли",
+     "items": [
+      { "id": "clc-aperol-spritz", "name": "Aperol Spritz", "price": 500, "desc": "Aperol, игристое, содовая" },
+      { "id": "clc-french-75", "name": "French 75", "price": 500, "desc": "Gin Bulldog, игристое, лимон, содовая" },
+      { "id": "clc-paloma", "name": "Paloma", "price": 500, "desc": "Текила Jose Cuervo Tradicional, цитрусовая содовая" },
+      { "id": "clc-negroni", "name": "Negroni", "price": 500, "desc": "Gin Bulldog, сладкий вермут, Campari" },
+      { "id": "clc-porto-ronco", "name": "Porto Ronco", "price": 500, "desc": "Kraken Dark Rum, тони порто, биттер" },
+      { "id": "clc-long-island", "name": "Long Island Ice Tea", "price": 500, "desc": "Gin Bulldog, Vodka Tito's, чайный кордиал" },
+      { "id": "clc-hanky-panky", "name": "Hanky Panky", "price": 500, "desc": "Gin Bulldog, сладкий вермут, Fernet Branca" }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "starters",
+   "name": "Стартеры и подача к вину",
+   "groups": [
+    {
+     "id": "cheese-selection",
+     "name": "Сырная тарелка",
+     "items": [
+      { "id": "clc-cheese-selection", "name": "Cheese Selection", "price": 1100, "desc": "Parmigiano Reggiano 24 Months, Gorgonzola Dolce, Truffle Manchego, Pecorino Romano, Brie" }
+     ]
+    },
+    {
+     "id": "cold-cuts",
+     "name": "Мясная тарелка",
+     "items": [
+      { "id": "clc-cold-cuts", "name": "Cold Cuts", "price": 950, "desc": "Пармская ветчина, ростбиф из телятины, коппа, салями Felino, фисташковая мортаделла" }
+     ]
+    },
+    {
+     "id": "caviar-selection",
+     "name": "Икра",
+     "items": [
+      { "id": "clc-caviar-kaluga", "name": "Kaluga Caviar", "price": 2900, "unit": "30 г" },
+      { "id": "clc-caviar-oscietra", "name": "Oscietra Caviar", "price": 2500, "unit": "30 г" },
+      { "id": "clc-caviar-salmon-roe", "name": "Salmon Roe", "price": 800, "unit": "50 г" }
+     ]
+    },
+    {
+     "id": "oysters",
+     "name": "Устрицы Fine de Claire",
+     "items": [
+      { "id": "clc-oysters-classic", "name": "Classic / Signature", "price": 250 },
+      { "id": "clc-oysters-granita", "name": "Устрицы с гранитой", "price": 350, "desc": "Гранита из яблока и шампанского, икра осетра, масло шисо" }
+     ]
+    },
+    {
+     "id": "seasonal-fruit",
+     "name": "Сезонные фрукты",
+     "items": [
+      { "id": "clc-fruit-individual", "name": "Seasonal Fruit Selection · порция", "price": 450 },
+      { "id": "clc-fruit-share", "name": "Seasonal Fruit Selection · на компанию", "price": 750 }
+     ]
+    },
+    {
+     "id": "appetizers",
+     "name": "Закуски",
+     "items": [
+      { "id": "clc-truffle-potato-stones", "name": "Truffle Baked Potato Stones", "price": 350, "desc": "Эмульсия васаби, итамеши сальса верде, порошок водорослей, свежий чёрный трюфель" },
+      { "id": "clc-burrata-tomato", "name": "Burrata and stracciatella with Three Tomato Textures", "price": 630, "desc": "Конфи из черри, томатная эмульсия, мармелад из томатов" },
+      { "id": "clc-hamachi-crudo", "name": "Hamachi Crudo", "price": 650, "desc": "Кокосово-лаймовый соус, икура, масло шисо, цедра лайма, маринованный имбирь" },
+      { "id": "clc-tuna-watermelon", "name": "Tuna / Watermelon sashimi", "price": 520, "desc": "Соус из чёрного кунжута, страчателла, хрустящий чёрный рис, шисо и базилик фри" },
+      { "id": "clc-chicken-liver-pate", "name": "Chicken liver pate", "price": 550, "desc": "В клубнично-шампанском рассоле, фисташка, клубничный понзу" },
+      { "id": "clc-scallop-cauliflower", "name": "Hokkaido Scallop & Cauliflower", "price": 720, "desc": "Пюре цветной капусты, соус брен-баттер с лимоном, крошка фундука" },
+      { "id": "clc-wagyu-carpaccio", "name": "Wagyu Beef Carpaccio", "price": 670, "desc": "Джем из вяленого желтка, соус понзу с жжёным луком, пармезан, хрустящие каперсы" },
+      { "id": "clc-wagyu-tartare", "name": "Wagyu Beef Tartare", "price": 620, "desc": "Соевая заправка с трюфелем, крем фета и чёрный чеснок, чипсы нори, свежий чёрный трюфель" },
+      { "id": "clc-shrimp-carpaccio", "name": "Red Shrimp Carpaccio", "price": 980, "desc": "Тофу-крем, клубничный понзу, лобстеровое масло" },
+      { "id": "clc-salmon-tartare", "name": "Salmon Tartare", "price": 560, "desc": "Крем авокадо, юзу-кунжутная заправка, чипсы нори, икура" }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "salads-soups",
+   "name": "Салаты и супы",
+   "groups": [
+    {
+     "id": "salads",
+     "name": "Салаты",
+     "items": [
+      { "id": "clc-seafood-salad", "name": "Seafood Salad", "price": 830, "desc": "Цитрусовый крем, татаки тунца, креветки, мидии, кальмар, овощи, киноа, боттарга, икура" },
+      { "id": "clc-beef-romaine", "name": "Beef & Grilled Romaine", "price": 770, "desc": "Гриль-романо, хрустящие грибы, соус нори-цезарь, пармезан" },
+      { "id": "clc-scallop-feta", "name": "Hokkaido Scallop & Lime Feta Cream", "price": 850, "desc": "Сезонные овощи, маринованный шалот, боттарга" },
+      { "id": "clc-shrimp-pear-miso", "name": "Shrimp & Pear Miso", "price": 880, "desc": "Мисо-винегрет, груша, авокадо, зелень, крошка пекана" }
+     ]
+    },
+    {
+     "id": "soups",
+     "name": "Супы",
+     "items": [
+      { "id": "clc-gazpacho-crab", "name": "Watermelon Gazpacho with King Crab", "price": 480, "desc": "Свежий арбуз, королевский краб, страчателла, масло шисо" },
+      { "id": "clc-corn-soup-prawn", "name": "Corn Crème Soup with Imperial Prawn", "price": 850, "desc": "Икра эбико, креветочное масло, юзу-карамельный попкорн, масло шисо" }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pasta-risotto",
+   "name": "Паста и ризотто",
+   "groups": [
+    {
+     "id": "pasta",
+     "name": "Паста",
+     "items": [
+      { "id": "clc-pasta-caviar-scallop", "name": "Oscietra Caviar & Scallop", "price": 1400, "desc": "Юзу-масляная эмульсия, цедра лимона, масло шисо" },
+      { "id": "clc-pasta-foiegras-duck", "name": "Foie Gras & Duck", "price": 750, "desc": "Утиный жю с мисо и соей, жжёная цедра апельсина, крошка фундука" },
+      { "id": "clc-pasta-prawn", "name": "Imperial Prawn Pasta", "price": 1200, "desc": "Лимонный соус биск, черри, креветочное масло" },
+      { "id": "clc-pasta-king-crab", "name": "King Crab Pasta", "price": 1100, "desc": "Сливочно-соевый соус с травами, мисо бёр-блан, карамелизированные грибы" }
+     ]
+    },
+    {
+     "id": "risotto",
+     "name": "Ризотто",
+     "items": [
+      { "id": "clc-risotto-uni", "name": "Uni Risotto", "price": 980, "desc": "Цитрусово-даси масляная эмульсия, боттарга" },
+      { "id": "clc-risotto-scallop", "name": "Hokkaido Scallop Risotto", "price": 950, "desc": "Эмульсия умешу, ягоды годжи, желе юзу" },
+      { "id": "clc-risotto-shrimp", "name": "Red Shrimp Risotto", "price": 1300, "desc": "Юзу бёр-блан, желе из клубничного понзу, соль матча, чипсы чёрного риса" },
+      { "id": "clc-risotto-beef-terrine", "name": "Beef Terrine Risotto", "price": 720, "desc": "Свекольное ризотто, соус понзу демиглас, желе годжи" },
+      { "id": "clc-risotto-porcini-truffle", "name": "Porcini & Truffle Risotto", "price": 650, "desc": "Свежий чёрный трюфель, трюфельное масло с маскарпоне" }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mains",
+   "name": "Основные блюда и гриль",
+   "groups": [
+    {
+     "id": "main-courses",
+     "name": "Основные блюда",
+     "items": [
+      { "id": "clc-tagliata", "name": "Tagliata Tenderloin", "price": 980, "desc": "Луковый демиглас, трюфельный картофель пaве, васаби сальса верде, гриль-грибы" },
+      { "id": "clc-octopus-roll", "name": "Octopus Tentacle Roll", "price": 980, "desc": "Томатная эмульсия, хрустящий картофель, масло чёрного чеснока и водорослей, эмульсия васаби" },
+      { "id": "clc-seabass", "name": "Seabass", "price": 780, "desc": "Юзу-мисо бёр-блан, салат фенхель-сельдерей, соус понзу с луком, масло шисо" },
+      { "id": "clc-beef-rossini", "name": "Beef Rossini", "price": 1850, "desc": "Вырезка, свежий чёрный трюфель, фуа-гра, икра осетра, трюфельный жю" },
+      { "id": "clc-duck-confit", "name": "Duck Leg Confit", "price": 680, "desc": "Пюре пастернака, вишнёвый демиглас, соус портвейн-вишня" },
+      { "id": "clc-beef-cheek", "name": "Braised Beef Cheek", "price": 680, "desc": "Пюре сладкого картофеля с кокосом, тамариндовый демиглас, красное вино" },
+      { "id": "clc-spring-chicken", "name": "Spring Chicken", "price": 680, "desc": "Пюре кукурузы гриль, эдамаме, грибы, трюфельный масляный соус" }
+     ]
+    },
+    {
+     "id": "grill",
+     "name": "Гриль — подаётся с овощами гриль, чимичурри, трюфельным маслом",
+     "items": [
+      { "id": "clc-wagyu-ribeye", "name": "Wagyu Ribeye", "price": 3890 },
+      { "id": "clc-wagyu-striploin", "name": "Wagyu Striploin", "price": 3890 },
+      { "id": "clc-wagyu-tomahawk", "name": "Wagyu Tomahawk", "price": 600, "unit": "100 г", "desc": "Средний вес 1800 г — цена за 100 г" }
+     ]
+    },
+    {
+     "id": "sides",
+     "name": "Гарниры",
+     "items": [
+      { "id": "clc-side-cauliflower", "name": "Cauliflower steak", "price": 320, "desc": "Крем-соус из цветной капусты и трюфель-порчини, свежий чёрный трюфель" },
+      { "id": "clc-side-truffle-mash", "name": "Truffle Mashed Potatoes", "price": 250, "desc": "Со свежим чёрным трюфелем" },
+      { "id": "clc-side-broccolini", "name": "Broccolini, Pistachio & Feta Cream", "price": 370, "desc": "Травяная эмульсия умешу" },
+      { "id": "clc-side-grilled-veg", "name": "Grilled Vegetables", "price": 300, "desc": "Итамеши сальса верде" },
+      { "id": "clc-side-fries", "name": "French Fries", "price": 250, "desc": "С трюфельным майонезом" }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "desserts",
+   "name": "Десерты",
+   "groups": [
+    {
+     "id": "desserts",
+     "name": "Десерты",
+     "items": [
+      { "id": "clc-dessert-fruit", "name": "Seasonal Fruit Signature", "price": 580, "desc": "Белый шоколад, крем маскарпоне, фруктовый соус, крамбл" },
+      { "id": "clc-dessert-lava", "name": "Chocolate Lava Cake", "price": 800, "desc": "Вишнёвый соус на красном вине, бренди, сезонный сорбет" },
+      { "id": "clc-dessert-millefeuille", "name": "Crispy Mille-Feuille", "price": 450, "desc": "Ванильный крем, ягодный сорбет, малиновый соус" },
+      { "id": "clc-dessert-choux", "name": "Miso Caramel Choux", "price": 850, "desc": "Сезонные ягоды, тёмный шоколад" }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "japanese",
+   "name": "Японская кухня CLC",
+   "groups": [
+    {
+     "id": "sashimi",
+     "name": "Сашими (сет)",
+     "items": [
+      { "id": "clc-sashimi-salmon", "name": "Salmon Sashimi", "price": 330 },
+      { "id": "clc-sashimi-akami", "name": "Akami Bluefin Tuna Sashimi", "price": 980 },
+      { "id": "clc-sashimi-chutoro", "name": "Chutoro Bluefin Tuna Sashimi", "price": 980 },
+      { "id": "clc-sashimi-otoro", "name": "Otoro Bluefin Tuna Sashimi", "price": 1100 },
+      { "id": "clc-sashimi-hamachi", "name": "Hamachi Sashimi", "price": 470 },
+      { "id": "clc-sashimi-scallop", "name": "Hokkaido Scallop Sashimi", "price": 750 },
+      { "id": "clc-sashimi-amaebi", "name": "Amaebi Sashimi", "price": 420 }
+     ]
+    },
+    {
+     "id": "sashimi-sets",
+     "name": "Сеты сашими",
+     "items": [
+      { "id": "clc-sashimi-mini", "name": "Mini Sashimi", "price": 1500, "desc": "Лосось, тунец, хамачи, гребешок, амаэби" },
+      { "id": "clc-sashimi-jumbo", "name": "Jumbo Sashimi", "price": 4500, "desc": "Лосось, акaми тунец, отoро тунец, хамачи, гребешок, амаэби, икура" }
+     ]
+    },
+    {
+     "id": "gunkan",
+     "name": "Гункан на огурце",
+     "items": [
+      { "id": "clc-gunkan-salmon-roe", "name": "Salmon Roe Gunkan", "price": 200 },
+      { "id": "clc-gunkan-uni", "name": "Uni Gunkan", "price": 520 },
+      { "id": "clc-gunkan-uni-roe", "name": "Uni & Salmon Roe Gunkan", "price": 440 },
+      { "id": "clc-gunkan-uni-caviar", "name": "Uni & Black Caviar Gunkan", "price": 950 },
+      { "id": "clc-gunkan-scallop-amaebi", "name": "Scallop & Amaebi Gunkan", "price": 320 },
+      { "id": "clc-gunkan-spicy-salmon", "name": "Spicy Salmon Gunkan", "price": 200 },
+      { "id": "clc-gunkan-spicy-tuna", "name": "Spicy Tuna Gunkan", "price": 250 }
+     ]
+    },
+    {
+     "id": "hand-rolls",
+     "name": "Хэнд-роллы",
+     "items": [
+      { "id": "clc-handroll-salmon", "name": "Salmon Hand Roll", "price": 250 },
+      { "id": "clc-handroll-tuna", "name": "Tuna Hand Roll", "price": 470 },
+      { "id": "clc-handroll-hamachi", "name": "Hamachi Hand Roll", "price": 280 },
+      { "id": "clc-handroll-unagi", "name": "Unagi Hand Roll", "price": 250 },
+      { "id": "clc-handroll-scallop", "name": "Scallop Hand Roll", "price": 470 },
+      { "id": "clc-handroll-amaebi", "name": "Amaebi Hand Roll", "price": 350 },
+      { "id": "clc-handroll-wagyu", "name": "Wagyu Hand Roll", "price": 470, "desc": "Трюфельный майонез, свежий трюфель, чёрная икра" },
+      { "id": "clc-handroll-uni", "name": "Uni Hand Roll", "price": 820, "desc": "Мусс фуа-гра" }
+     ]
+    },
+    {
+     "id": "nigiri",
+     "name": "Нигири",
+     "items": [
+      { "id": "clc-nigiri-salmon", "name": "Salmon Nigiri", "price": 150 },
+      { "id": "clc-nigiri-akami", "name": "Bluefin Akami Nigiri", "price": 330, "desc": "Трюфельный айоли, свежий трюфель" },
+      { "id": "clc-nigiri-chutoro", "name": "Bluefin Chutoro Nigiri", "price": 380, "desc": "Мусс фуа-гра, свежий трюфель" },
+      { "id": "clc-nigiri-otoro", "name": "Bluefin Otoro Nigiri", "price": 480, "desc": "Мусс фуа-гра, чёрная икра" },
+      { "id": "clc-nigiri-hamachi", "name": "Hamachi Nigiri", "price": 150 },
+      { "id": "clc-nigiri-unagi", "name": "Unagi Nigiri", "price": 150 },
+      { "id": "clc-nigiri-scallop", "name": "Scallop Nigiri", "price": 180 },
+      { "id": "clc-nigiri-amaebi", "name": "Amaebi Nigiri", "price": 200 },
+      { "id": "clc-nigiri-uni", "name": "Uni Nigiri (Sea Urchin)", "price": 550, "desc": "Чёрная икра, золотой лист, мусс фуа-гра" },
+      { "id": "clc-nigiri-avocado", "name": "Avocado Nigiri", "price": 100 }
+     ]
+    },
+    {
+     "id": "nigiri-sets",
+     "name": "Сеты нигири",
+     "items": [
+      { "id": "clc-nigiri-mini", "name": "Mini Set · 8 Pieces", "price": 950, "desc": "Лосось, тунец акaми, тунец чуторо, хамачи, гребешок, амаэби, унаги, гункан икура" },
+      { "id": "clc-nigiri-jumbo", "name": "Jumbo Set · 16 Pieces", "price": 1900, "desc": "Лосось, тунец акaми, тунец чуторо, хамачи, гребешок, амаэби, унаги, гункан икура" }
+     ]
+    },
+    {
+     "id": "donburi",
+     "name": "Донбури (подаётся с мисо-супом)",
+     "items": [
+      { "id": "clc-don-salmon", "name": "Salmon Don", "price": 720 },
+      { "id": "clc-don-tuna", "name": "Bluefin Tuna Don", "price": 1490 },
+      { "id": "clc-don-unagi", "name": "Unagi Don", "price": 950 },
+      { "id": "clc-don-seafood", "name": "Seafood Don", "price": 1300, "desc": "Лосось, тунец, хамачи, унаги, амаэби, икура" },
+      { "id": "clc-don-hotate", "name": "Grilled Hotate Don", "price": 1490, "desc": "Гребешки Hokkaido, амаэби, икура, морской ёж" },
+      { "id": "clc-don-wagyu", "name": "Wagyu Don", "price": 750, "desc": "Вагю вырезка гриль, соус унаги, кимчи" },
+      { "id": "clc-miso-soup", "name": "Miso Soup", "price": 100 }
+     ]
+    },
+    {
+     "id": "sushi-rolls",
+     "name": "Роллы CLC",
+     "items": [
+      { "id": "clc-roll-royal-salmon", "name": "Royal Salmon Roll", "price": 720, "desc": "Королевский лосось, Philadelphia, авокадо, икура" },
+      { "id": "clc-roll-king-ocean", "name": "King of Ocean Roll", "price": 950, "desc": "Королевский лосось, тунец, хамачи, амаэби, васаби айоли, икра водорослей" },
+      { "id": "clc-roll-king-crab", "name": "King Crab Roll", "price": 780, "desc": "Королевский краб, манго, трюфельный айоли, свежий трюфель, чипсы чёрного риса, чернила кальмара" },
+      { "id": "clc-roll-saitama-wagyu", "name": "Saitama Wagyu Roll", "price": 1200, "desc": "A5 вагю стриплойн гриль с фуа-гра, авокадо, спаржа" },
+      { "id": "clc-roll-tuna", "name": "Bluefin Tuna Roll", "price": 1100, "desc": "Тунец, авокадо, тамаго яки, маринованный халапеньо, васаби айоли" },
+      { "id": "clc-roll-black-ink", "name": "Black Ink Tempura Roll", "price": 720, "desc": "Тигровые креветки темпура, авокадо, чипсы рисовой бумаги, джем из желтка" },
+      { "id": "clc-roll-dragon-lobster", "name": "Dragon Phuket Lobster Roll", "price": 720, "desc": "Креветка темпура, авокадо, гриль-унаги, соус унаги" },
+      { "id": "clc-roll-salmon-flame", "name": "Salmon Flame Roll", "price": 750, "desc": "Лосось, авокадо, сливочный сыр, спайси майо, чили унаги, жареный шалот" }
+     ]
+    }
+   ]
+  }
+ ]
+}

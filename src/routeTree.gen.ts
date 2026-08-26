@@ -12,10 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GtrRouteRouteImport } from './routes/gtr/route'
 import { Route as ApiAfishaRouteImport } from './routes/api.afisha'
+import { Route as ApiAfishaLlmRouteImport } from './routes/api.afisha-llm'
 import { Route as ApiAfishaSendRouteImport } from './routes/api.afisha-send'
 import { Route as ApiAphotoRouteImport } from './routes/api.aphoto'
 import { Route as ApiAvideoRouteImport } from './routes/api.avideo'
 import { Route as ApiBossHeadRouteImport } from './routes/api.boss-head'
+import { Route as ApiBrainWatchRouteImport } from './routes/api.brain-watch'
 import { Route as ApiBroDevRouteImport } from './routes/api.bro-dev'
 import { Route as ApiBroLearnRouteImport } from './routes/api.bro-learn'
 import { Route as ApiClientLogRouteImport } from './routes/api.client-log'
@@ -26,8 +28,10 @@ import { Route as ApiGtrBroSdpRouteImport } from './routes/api.gtr-bro-sdp'
 import { Route as ApiGtrBroSessionRouteImport } from './routes/api.gtr-bro-session'
 import { Route as ApiGtrBroTextRouteImport } from './routes/api.gtr-bro-text'
 import { Route as ApiGtrBroToolRouteImport } from './routes/api.gtr-bro-tool'
+import { Route as ApiGtrVibeRouteImport } from './routes/api.gtr-vibe'
 import { Route as ApiPosterRouteImport } from './routes/api.poster'
 import { Route as ApiPushRouteImport } from './routes/api.push'
+import { Route as ApiSmokeRouteImport } from './routes/api.smoke'
 import { Route as ApiSpotifyCallbackRouteImport } from './routes/api.spotify-callback'
 import { Route as ApiSpotifyLoginRouteImport } from './routes/api.spotify-login'
 import { Route as ApiSprintReportRouteImport } from './routes/api.sprint-report'
@@ -58,6 +62,11 @@ const ApiAfishaRoute = ApiAfishaRouteImport.update({
   path: '/api/afisha',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAfishaLlmRoute = ApiAfishaLlmRouteImport.update({
+  id: '/api/afisha-llm',
+  path: '/api/afisha-llm',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAfishaSendRoute = ApiAfishaSendRouteImport.update({
   id: '/api/afisha-send',
   path: '/api/afisha-send',
@@ -76,6 +85,11 @@ const ApiAvideoRoute = ApiAvideoRouteImport.update({
 const ApiBossHeadRoute = ApiBossHeadRouteImport.update({
   id: '/api/boss-head',
   path: '/api/boss-head',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBrainWatchRoute = ApiBrainWatchRouteImport.update({
+  id: '/api/brain-watch',
+  path: '/api/brain-watch',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBroDevRoute = ApiBroDevRouteImport.update({
@@ -128,6 +142,11 @@ const ApiGtrBroToolRoute = ApiGtrBroToolRouteImport.update({
   path: '/api/gtr-bro-tool',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGtrVibeRoute = ApiGtrVibeRouteImport.update({
+  id: '/api/gtr-vibe',
+  path: '/api/gtr-vibe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPosterRoute = ApiPosterRouteImport.update({
   id: '/api/poster',
   path: '/api/poster',
@@ -136,6 +155,11 @@ const ApiPosterRoute = ApiPosterRouteImport.update({
 const ApiPushRoute = ApiPushRouteImport.update({
   id: '/api/push',
   path: '/api/push',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSmokeRoute = ApiSmokeRouteImport.update({
+  id: '/api/smoke',
+  path: '/api/smoke',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSpotifyCallbackRoute = ApiSpotifyCallbackRouteImport.update({
@@ -213,10 +237,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
   '/api/afisha': typeof ApiAfishaRoute
+  '/api/afisha-llm': typeof ApiAfishaLlmRoute
   '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/boss-head': typeof ApiBossHeadRoute
+  '/api/brain-watch': typeof ApiBrainWatchRoute
   '/api/bro-dev': typeof ApiBroDevRoute
   '/api/bro-learn': typeof ApiBroLearnRoute
   '/api/client-log': typeof ApiClientLogRoute
@@ -227,8 +253,10 @@ export interface FileRoutesByFullPath {
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
+  '/api/gtr-vibe': typeof ApiGtrVibeRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
+  '/api/smoke': typeof ApiSmokeRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
   '/api/spotify-login': typeof ApiSpotifyLoginRoute
   '/api/sprint-report': typeof ApiSprintReportRoute
@@ -247,10 +275,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/afisha': typeof ApiAfishaRoute
+  '/api/afisha-llm': typeof ApiAfishaLlmRoute
   '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/boss-head': typeof ApiBossHeadRoute
+  '/api/brain-watch': typeof ApiBrainWatchRoute
   '/api/bro-dev': typeof ApiBroDevRoute
   '/api/bro-learn': typeof ApiBroLearnRoute
   '/api/client-log': typeof ApiClientLogRoute
@@ -261,8 +291,10 @@ export interface FileRoutesByTo {
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
+  '/api/gtr-vibe': typeof ApiGtrVibeRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
+  '/api/smoke': typeof ApiSmokeRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
   '/api/spotify-login': typeof ApiSpotifyLoginRoute
   '/api/sprint-report': typeof ApiSprintReportRoute
@@ -283,10 +315,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
   '/api/afisha': typeof ApiAfishaRoute
+  '/api/afisha-llm': typeof ApiAfishaLlmRoute
   '/api/afisha-send': typeof ApiAfishaSendRoute
   '/api/aphoto': typeof ApiAphotoRoute
   '/api/avideo': typeof ApiAvideoRoute
   '/api/boss-head': typeof ApiBossHeadRoute
+  '/api/brain-watch': typeof ApiBrainWatchRoute
   '/api/bro-dev': typeof ApiBroDevRoute
   '/api/bro-learn': typeof ApiBroLearnRoute
   '/api/client-log': typeof ApiClientLogRoute
@@ -297,8 +331,10 @@ export interface FileRoutesById {
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
+  '/api/gtr-vibe': typeof ApiGtrVibeRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
+  '/api/smoke': typeof ApiSmokeRoute
   '/api/spotify-callback': typeof ApiSpotifyCallbackRoute
   '/api/spotify-login': typeof ApiSpotifyLoginRoute
   '/api/sprint-report': typeof ApiSprintReportRoute
@@ -320,10 +356,12 @@ export interface FileRouteTypes {
     | '/'
     | '/gtr'
     | '/api/afisha'
+    | '/api/afisha-llm'
     | '/api/afisha-send'
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/boss-head'
+    | '/api/brain-watch'
     | '/api/bro-dev'
     | '/api/bro-learn'
     | '/api/client-log'
@@ -334,8 +372,10 @@ export interface FileRouteTypes {
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
+    | '/api/gtr-vibe'
     | '/api/poster'
     | '/api/push'
+    | '/api/smoke'
     | '/api/spotify-callback'
     | '/api/spotify-login'
     | '/api/sprint-report'
@@ -354,10 +394,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/api/afisha'
+    | '/api/afisha-llm'
     | '/api/afisha-send'
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/boss-head'
+    | '/api/brain-watch'
     | '/api/bro-dev'
     | '/api/bro-learn'
     | '/api/client-log'
@@ -368,8 +410,10 @@ export interface FileRouteTypes {
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
+    | '/api/gtr-vibe'
     | '/api/poster'
     | '/api/push'
+    | '/api/smoke'
     | '/api/spotify-callback'
     | '/api/spotify-login'
     | '/api/sprint-report'
@@ -389,10 +433,12 @@ export interface FileRouteTypes {
     | '/'
     | '/gtr'
     | '/api/afisha'
+    | '/api/afisha-llm'
     | '/api/afisha-send'
     | '/api/aphoto'
     | '/api/avideo'
     | '/api/boss-head'
+    | '/api/brain-watch'
     | '/api/bro-dev'
     | '/api/bro-learn'
     | '/api/client-log'
@@ -403,8 +449,10 @@ export interface FileRouteTypes {
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
+    | '/api/gtr-vibe'
     | '/api/poster'
     | '/api/push'
+    | '/api/smoke'
     | '/api/spotify-callback'
     | '/api/spotify-login'
     | '/api/sprint-report'
@@ -425,10 +473,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GtrRouteRoute: typeof GtrRouteRouteWithChildren
   ApiAfishaRoute: typeof ApiAfishaRoute
+  ApiAfishaLlmRoute: typeof ApiAfishaLlmRoute
   ApiAfishaSendRoute: typeof ApiAfishaSendRoute
   ApiAphotoRoute: typeof ApiAphotoRoute
   ApiAvideoRoute: typeof ApiAvideoRoute
   ApiBossHeadRoute: typeof ApiBossHeadRoute
+  ApiBrainWatchRoute: typeof ApiBrainWatchRoute
   ApiBroDevRoute: typeof ApiBroDevRoute
   ApiBroLearnRoute: typeof ApiBroLearnRoute
   ApiClientLogRoute: typeof ApiClientLogRoute
@@ -439,8 +489,10 @@ export interface RootRouteChildren {
   ApiGtrBroSessionRoute: typeof ApiGtrBroSessionRoute
   ApiGtrBroTextRoute: typeof ApiGtrBroTextRoute
   ApiGtrBroToolRoute: typeof ApiGtrBroToolRoute
+  ApiGtrVibeRoute: typeof ApiGtrVibeRoute
   ApiPosterRoute: typeof ApiPosterRoute
   ApiPushRoute: typeof ApiPushRoute
+  ApiSmokeRoute: typeof ApiSmokeRoute
   ApiSpotifyCallbackRoute: typeof ApiSpotifyCallbackRoute
   ApiSpotifyLoginRoute: typeof ApiSpotifyLoginRoute
   ApiSprintReportRoute: typeof ApiSprintReportRoute
@@ -473,6 +525,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAfishaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/afisha-llm': {
+      id: '/api/afisha-llm'
+      path: '/api/afisha-llm'
+      fullPath: '/api/afisha-llm'
+      preLoaderRoute: typeof ApiAfishaLlmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/afisha-send': {
       id: '/api/afisha-send'
       path: '/api/afisha-send'
@@ -499,6 +558,13 @@ declare module '@tanstack/react-router' {
       path: '/api/boss-head'
       fullPath: '/api/boss-head'
       preLoaderRoute: typeof ApiBossHeadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/brain-watch': {
+      id: '/api/brain-watch'
+      path: '/api/brain-watch'
+      fullPath: '/api/brain-watch'
+      preLoaderRoute: typeof ApiBrainWatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/bro-dev': {
@@ -571,6 +637,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiGtrBroToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/gtr-vibe': {
+      id: '/api/gtr-vibe'
+      path: '/api/gtr-vibe'
+      fullPath: '/api/gtr-vibe'
+      preLoaderRoute: typeof ApiGtrVibeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/poster': {
       id: '/api/poster'
       path: '/api/poster'
@@ -583,6 +656,13 @@ declare module '@tanstack/react-router' {
       path: '/api/push'
       fullPath: '/api/push'
       preLoaderRoute: typeof ApiPushRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/smoke': {
+      id: '/api/smoke'
+      path: '/api/smoke'
+      fullPath: '/api/smoke'
+      preLoaderRoute: typeof ApiSmokeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/spotify-callback': {
@@ -714,10 +794,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GtrRouteRoute: GtrRouteRouteWithChildren,
   ApiAfishaRoute: ApiAfishaRoute,
+  ApiAfishaLlmRoute: ApiAfishaLlmRoute,
   ApiAfishaSendRoute: ApiAfishaSendRoute,
   ApiAphotoRoute: ApiAphotoRoute,
   ApiAvideoRoute: ApiAvideoRoute,
   ApiBossHeadRoute: ApiBossHeadRoute,
+  ApiBrainWatchRoute: ApiBrainWatchRoute,
   ApiBroDevRoute: ApiBroDevRoute,
   ApiBroLearnRoute: ApiBroLearnRoute,
   ApiClientLogRoute: ApiClientLogRoute,
@@ -728,8 +810,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGtrBroSessionRoute: ApiGtrBroSessionRoute,
   ApiGtrBroTextRoute: ApiGtrBroTextRoute,
   ApiGtrBroToolRoute: ApiGtrBroToolRoute,
+  ApiGtrVibeRoute: ApiGtrVibeRoute,
   ApiPosterRoute: ApiPosterRoute,
   ApiPushRoute: ApiPushRoute,
+  ApiSmokeRoute: ApiSmokeRoute,
   ApiSpotifyCallbackRoute: ApiSpotifyCallbackRoute,
   ApiSpotifyLoginRoute: ApiSpotifyLoginRoute,
   ApiSprintReportRoute: ApiSprintReportRoute,

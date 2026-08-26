@@ -2,6 +2,12 @@
 #
 # Модель скачивается сама при первом старте (флаг -hf) в ./cache.
 # Токен обязателен: без него ручка модели торчит в интернет голой.
+#
+# --parallel 3: без него сервер держит ОДИН запрос за раз — если два
+# гостя пишут одновременно, второй встаёт в очередь и упирается в
+# дедлайн воркера (26 сек). Три слота на 8 vCPU — по потоку на слот
+# плюс запас; -c делится между слотами поровну (12288 / 3 = 4096 —
+# хватает на системный промпт с инструментами и пару кругов вызовов).
 services:
   brain:
     image: ghcr.io/ggml-org/llama.cpp:server
@@ -10,13 +16,46 @@ services:
       - "8080:8080"
     volumes:
       - ./cache:/root/.cache
+    # Проба живости. restart: unless-stopped спасает только от падения
+    # процесса и от перезагрузки сервера — зависший llama-server для
+    # Docker всё ещё «работает». Healthcheck отличает живого от молчащего,
+    # а autoheal ниже превращает это в перезапуск.
+    #
+    # Образ уже несёт свой healthcheck на том же /health (потому и curl
+    # внутри есть). Перекрываем ради одной строки — start_period: без неё
+    # контейнер помечен unhealthy всё время загрузки модели, и autoheal
+    # убивал бы его ровно во время старта, снова и снова. Первый запуск
+    # ещё и качает ~5 ГБ, поэтому запас взят с большим избытком.
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 15m
     environment:
       - LLAMA_ARG_HF_REPO=Qwen/Qwen3-8B-GGUF:Q4_K_M
     command: >
       --host 0.0.0.0 --port 8080
-      -c 8192 -t 8 --jinja
+      -c 12288 -t 8 --parallel 3 --jinja
       --api-key ${BRAIN_TOKEN:?задай BRAIN_TOKEN в .env}
     deploy:
       resources:
         limits:
-          memory: 12g
+          memory: 13g
+
+  # Сторож контейнера: раз в минуту смотрит на healthcheck и перезапускает
+  # то, что помечено unhealthy. Нужен именно отдельный процесс — Docker
+  # сам по себе состояние здоровья только показывает, но не лечит.
+  #
+  # AUTOHEAL_CONTAINER_LABEL=all — лечим всё в этом compose, здесь один
+  # сервис. Доступ к сокету даёт право управлять контейнерами хоста:
+  # это цена автолечения, поэтому образ выбран узкий и без портов наружу.
+  autoheal:
+    image: willfarrell/autoheal:latest
+    restart: unless-stopped
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+      - AUTOHEAL_INTERVAL=60
+      - AUTOHEAL_START_PERIOD=900
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

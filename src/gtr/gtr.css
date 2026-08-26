@@ -3111,25 +3111,68 @@ html { -webkit-tap-highlight-color: transparent; }
   transform-origin: 50% 100%;
 }
 
+/* --gtr-beat — длительность одного бита, её пишет dancer.tsx из темпа
+   трека: все фигуры машут корпусом в такт музыке, а не по секундомеру */
+.gtr-dancer { --gtr-beat: 500ms; }
+
 .gtr-dancer-img {
   display: block;
   width: 100%;
   height: auto;
   transform-origin: 50% 97%;
-  animation: gtr-dance 820ms ease-in-out infinite;
+  animation: gtr-dance calc(var(--gtr-beat) * 2) ease-in-out infinite;
   filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.55))
     drop-shadow(0 0 26px rgba(229, 35, 27, 0.22));
   user-select: none;
   -webkit-user-drag: none;
 }
 
-/* корпус ходит с ноги на ногу и слегка разворачивается — не маятник */
+/* базовый грув: корпус ходит с ноги на ногу и слегка разворачивается */
 @keyframes gtr-dance {
   0%   { transform: rotate(-3.2deg) translateY(0) skewX(1.1deg); }
   25%  { transform: rotate(-0.6deg) translateY(-4px) skewX(0deg); }
   50%  { transform: rotate(3.2deg) translateY(0) skewX(-1.1deg); }
   75%  { transform: rotate(0.6deg) translateY(-4px) skewX(0deg); }
   100% { transform: rotate(-3.2deg) translateY(0) skewX(1.1deg); }
+}
+
+/* --- репертуар: фигуру выбирает dancer.tsx раз в 16 битов ------------ */
+/* шимми: быстрая мелкая тряска плечами на полубите */
+.gtr-dancer[data-move="shimmy"] .gtr-dancer-img {
+  animation: gtr-dance-shimmy calc(var(--gtr-beat) / 2) ease-in-out infinite;
+}
+@keyframes gtr-dance-shimmy {
+  0%, 100% { transform: translateX(-2.5px) skewX(2.2deg) rotate(-1deg); }
+  50%      { transform: translateX(2.5px) skewX(-2.2deg) rotate(1deg); }
+}
+/* волна: медленный широкий свинг всем корпусом на четыре бита */
+.gtr-dancer[data-move="wave"] .gtr-dancer-img {
+  animation: gtr-dance-wave calc(var(--gtr-beat) * 4) ease-in-out infinite;
+}
+@keyframes gtr-dance-wave {
+  0%, 100% { transform: rotate(-5deg) translateX(-5px) translateY(0); }
+  25%      { transform: rotate(0deg) translateX(0) translateY(-3px) skewX(2deg); }
+  50%      { transform: rotate(5deg) translateX(5px) translateY(0); }
+  75%      { transform: rotate(0deg) translateX(0) translateY(-3px) skewX(-2deg); }
+}
+/* подскок: прыжок на каждый бит со сжатием на приземлении */
+.gtr-dancer[data-move="hop"] .gtr-dancer-img {
+  animation: gtr-dance-hop var(--gtr-beat) cubic-bezier(0.34, 1.4, 0.64, 1) infinite;
+}
+@keyframes gtr-dance-hop {
+  0%, 100% { transform: translateY(0) scaleY(0.97) scaleX(1.02); }
+  35%      { transform: translateY(-8px) scaleY(1.04) scaleX(0.98); }
+  70%      { transform: translateY(0) scaleY(0.97) scaleX(1.02); }
+}
+/* разворот: проходка с полным поворотом корпуса за восемь битов */
+.gtr-dancer[data-move="spin"] .gtr-dancer-img {
+  animation: gtr-dance-spin calc(var(--gtr-beat) * 8) ease-in-out infinite;
+}
+@keyframes gtr-dance-spin {
+  0%, 100% { transform: scaleX(1) rotate(-2deg); }
+  40%      { transform: scaleX(1) rotate(2deg) translateY(-3px); }
+  50%      { transform: scaleX(-1) rotate(-2deg); }
+  90%      { transform: scaleX(-1) rotate(2deg) translateY(-3px); }
 }
 
 /* пока тащат — не дёргается под пальцем */
@@ -3140,7 +3183,7 @@ html { -webkit-tap-highlight-color: transparent; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gtr-dancer-img { animation: none; }
+  .gtr-dancer .gtr-dancer-img { animation: none !important; }
   .gtr-dancer-slide { transition: opacity 0.3s ease; transform: none; }
 }
 
@@ -3784,6 +3827,111 @@ html { -webkit-tap-highlight-color: transparent; }
   font: 500 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.06em;
   opacity: 0.7;
+}
+
+/* ---------- Вайб-чек: 5 секунд мика — темп и вайб зала ---------- */
+.gtr-vibe {
+  position: fixed;
+  inset: 0;
+  z-index: var(--gtr-z-modal, 500);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(6, 7, 8, 0.6);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.gtr-vibe-card {
+  position: relative;
+  width: min(320px, 100%);
+  padding: 32px 24px 26px;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+  background: rgba(14, 15, 18, 0.92);
+  border: 1px solid var(--gtr-border2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+.gtr-vibe-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.gtr-vibe-close:active { color: #fff; }
+.gtr-vibe-title {
+  font: 600 16px/1.2 Oswald, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.gtr-vibe-sub {
+  font: 500 12.5px/1.4 "Golos Text", sans-serif;
+  color: var(--gtr-t2);
+  max-width: 240px;
+}
+.gtr-vibe-btn {
+  margin-top: 6px;
+  padding: 11px 22px;
+  border: 0;
+  background: linear-gradient(135deg, #e5231b, #ff3427);
+  color: #fff;
+  font: 600 12.5px/1 "Golos Text", sans-serif;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+.gtr-vibe-btn:active { transform: scale(0.96); }
+.gtr-vibe-btn.ghost {
+  background: transparent;
+  border: 1px solid var(--gtr-border2);
+  clip-path: none;
+}
+.gtr-vibe-bpm {
+  font: 700 46px/1 Oswald, sans-serif;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.gtr-vibe-bpm-label {
+  margin-top: -8px;
+  font: 600 10px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.14em;
+  color: rgba(255, 82, 72, 0.85);
+}
+.gtr-vibe-tag {
+  font: 500 13px/1.3 "Golos Text", sans-serif;
+  color: var(--gtr-t2);
+}
+.gtr-vibe-src {
+  font: 500 9.5px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+}
+/* пульсирующее кольцо на время прослушивания — честный индикатор,
+   что мик открыт, тот же принцип, что и у оверлея голоса */
+.gtr-vibe-ring {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 3px solid rgba(229, 35, 27, 0.35);
+  border-top-color: #ff3427;
+  animation: gtr-vibe-spin 0.9s linear infinite;
+}
+@keyframes gtr-vibe-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-vibe-ring { animation: none; }
 }
 
 .gtr-bro-confirm {

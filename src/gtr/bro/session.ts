@@ -292,6 +292,23 @@ export class BroSession {
     for (const t of this.mic?.getAudioTracks() ?? []) t.enabled = !on;
   }
 
+  /** Сейчас маршрут переведён на громкий динамик. Держим, чтобы не
+   *  дёргать системный вызов на каждом куске звука. */
+  private spoken = false;
+
+  /** Куда вести звук прямо сейчас. Нужен только в режиме свободных рук —
+   *  в рации маршрут переключают holdStart и holdEnd по пальцу.
+   *
+   *  Микрофон не трогаем: он остаётся живым, чтобы перебить BRO можно
+   *  было в любой момент. Мы лишь просим систему не считать
+   *  происходящее телефонным разговором, пока говорит он. */
+  private speak(on: boolean): void {
+    if (this.ptt) return;
+    if (this.spoken === on) return;
+    this.spoken = on;
+    routeAudio(on ? "playback" : "play-and-record");
+  }
+
   /** Нажал кнопку: если BRO говорит — он замолкает, микрофон открывается. */
   holdStart() {
     if (this.dc?.readyState !== "open") return;
@@ -388,10 +405,24 @@ export class BroSession {
       this.ev.onPartial?.("user", String(e.delta ?? ""));
     else if (type === "response.output_audio_transcript.delta")
       this.ev.onPartial?.("bro", String(e.delta ?? ""));
-    else if (type === "input_audio_buffer.speech_started") this.bargeIn();
-    else if (type === "response.created") this.set("thinking");
-    else if (type === "response.output_audio.delta") this.set("speaking");
-    else if (type === "response.done") this.set("listening");
+    else if (type === "input_audio_buffer.speech_started") {
+      // Гость заговорил поверх ответа — снова слушаем, и маршрут обратно
+      // на запись.
+      this.speak(false);
+      this.bargeIn();
+    } else if (type === "response.created") this.set("thinking");
+    else if (type === "response.output_audio.delta") {
+      // Говорит BRO — звук в громкий динамик. В рации это делает
+      // holdEnd, а в режиме свободных рук палец не отпускают никогда:
+      // маршрут так и оставался «play-and-record», и на iPhone голос
+      // уходил в разговорный динамик у уха. Снаружи это выглядит как
+      // «BRO отвечает, а голоса нет».
+      this.speak(true);
+      this.set("speaking");
+    } else if (type === "response.done") {
+      this.speak(false);
+      this.set("listening");
+    }
     else if (type === "conversation.item.input_audio_transcription.completed")
       this.ev.onLine?.({ who: "user", text: String(e.transcript ?? ""), at: Date.now() });
     else if (type === "response.output_audio_transcript.done")

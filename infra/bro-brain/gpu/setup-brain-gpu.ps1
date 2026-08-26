@@ -8,12 +8,17 @@
 # Запуск: правый клик по файлу -> "Выполнить с помощью PowerShell",
 # либо в PowerShell:  powershell -ExecutionPolicy Bypass -File .\setup-brain-gpu.ps1
 #
-# На выходе печатает URL туннеля и токен — их вписать на стенде
-# /bro-dev -> Настройки -> "Запасной мозг" (или отдать Claude).
+# ---- Про адрес --------------------------------------------------------
 #
-# ВАЖНО: quick-туннель trycloudflare.com меняет адрес при каждом
-# перезапуске — после рестарта обновите URL на стенде. Для постоянного
-# адреса нужен именованный туннель на своём домене в Cloudflare.
+# Скрипт предпочитает ИМЕНОВАННЫЙ туннель на своём домене: адрес вида
+# brain.gtr.events живёт вечно и переживает перезагрузку компьютера.
+# Для него нужна разовая авторизация в браузере — скрипт её попросит.
+#
+# Если авторизации нет, поднимается quick-туннель trycloudflare.com. Он
+# работает, но выдаёт НОВЫЙ адрес при каждом запуске, а старый перестаёт
+# резолвиться. Именно на этом мозг однажды молча пропал из продукта на
+# пять дней: адрес истёк, продукт откатился на Gemini, и снаружи всё
+# выглядело исправным. Поэтому quick — только как временная мера.
 
 $ErrorActionPreference = "Stop"
 # Windows PowerShell 5.1 по умолчанию может ходить по старому TLS — тогда
@@ -59,6 +64,24 @@ try {
     Read-Host "Enter — закрыть"
     exit 1
 }
+
+# Сколько видеопамяти — от этого зависит, сколько гостей мозг обслужит
+# разом. Слоты не бесплатны: контекст делится между ними, и каждый слот
+# держит свой кэш внимания в той же памяти, где лежит сама модель.
+$vram = 0
+if ("$gpu" -match "(\d+)\s*MiB") { $vram = [int]$Matches[1] }
+if ($vram -ge 16000) {
+    $slots = 3; $ctx = 12288      # 4096 на слот
+} elseif ($vram -ge 11000) {
+    $slots = 3; $ctx = 9216       # 3072 на слот
+} elseif ($vram -ge 8000) {
+    $slots = 2; $ctx = 6144       # 3072 на слот
+} else {
+    $slots = 1; $ctx = 4096
+    Write-Host "!! Видеопамяти меньше 8 ГБ — один слот. Второй одновременный"
+    Write-Host "   гость встанет в очередь и не успеет за 26 секунд."
+}
+Write-Host ">> Видеопамять: $vram МБ -> слотов $slots, контекст $ctx
 
 # ---- 2. llama.cpp (CUDA) ---------------------------------------------
 # Ничего не перемещаем: находим llama-server.exe где бы он ни лежал в
@@ -115,31 +138,120 @@ if (-not (Test-Path $cf)) {
     Get-GithubAsset "cloudflare/cloudflared" "windows-amd64\.exe$" $cf
 }
 
+# Именованный туннель возможен, только если пользователь один раз вошёл в
+# Cloudflare: вход кладёт сертификат в %USERPROFILE%\.cloudflared\cert.pem.
+# Его наличие — единственный честный признак; спрашивать человека
+# «вы авторизовались?» бессмысленно, он не обязан помнить.
+$TUNNEL = "gtr-brain"
+$HOSTNAME = "brain.gtr.events"
+$cert = "$env:USERPROFILE\.cloudflared\cert.pem"
+
+if (-not (Test-Path $cert)) {
+    Write-Host ""
+    Write-Host "==============================================================="
+    Write-Host " ПОСТОЯННЫЙ АДРЕС — разовая настройка, дальше никогда"
+    Write-Host ""
+    Write-Host " Сейчас откроется браузер. Выберите домен gtr.events и"
+    Write-Host " подтвердите. После этого запустите скрипт ещё раз — адрес"
+    Write-Host " станет https://$HOSTNAME и больше меняться не будет."
+    Write-Host ""
+    Write-Host " Не хотите сейчас — закройте браузер, скрипт поднимет"
+    Write-Host " временный адрес и продолжит работать."
+    Write-Host "==============================================================="
+    Write-Host ""
+    & $cf tunnel login
+}
+
+$named = $false
+if (Test-Path $cert) {
+    # Создание туннеля и маршрута идемпотентно по сути, но не по коду
+    # возврата: повторный вызов ругается «уже существует». Это не ошибка,
+    # поэтому глушим вывод и смотрим только на итог — есть ли туннель.
+    & $cf tunnel create $TUNNEL 2>&1 | Out-Null
+    & $cf tunnel route dns --overwrite-dns $TUNNEL $HOSTNAME 2>&1 | Out-Null
+    $list = (& $cf tunnel list 2>&1) -join "`n"
+    if ($list -match [regex]::Escape($TUNNEL)) { $named = $true }
+    if (-not $named) {
+        Write-Host "!! Именованный туннель не поднялся. Вывод cloudflared:"
+        Write-Host $list
+        Write-Host "   Продолжаю на временном адресе."
+    }
+}
+
 # ---- 6. Запуск сервера модели ----------------------------------------
-# -ngl 99: вся модель на GPU; -c 8192: контекст; --api-key: без токена
-# сервер не отвечает — публичный туннель не станет бесплатным API для всех.
-Write-Host ">> Запускаю llama-server (порт 8080, вся модель на GPU)..."
+# -ngl 99: все слои на GPU — ради этого видеокарта и нужна.
+# --jinja: без него шаблон Qwen3 для вызова инструментов не
+#   разворачивается, и мозг не сможет ни искать афишу, ни бронировать
+#   стол — он будет просто болтать. Флаг обязателен, а не украшение.
+# --parallel: сколько гостей обслуживаются одновременно. Без него
+#   сервер держит ОДИН запрос за раз, и второй встаёт в очередь.
+# --api-key: без токена открытый туннель станет бесплатным API для всех.
+Write-Host ">> Запускаю llama-server (порт 8080, слотов $slots)..."
+Get-Process llama-server -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Process -FilePath $serverExe.FullName -ArgumentList @(
-    "-m", $model, "-ngl", "99", "-c", "6144",
+    "-m", $model, "-ngl", "99", "-c", "$ctx",
+    "--parallel", "$slots", "--jinja",
     "--host", "127.0.0.1", "--port", "8080", "--api-key", $token
 ) -WindowStyle Minimized
 
-Start-Sleep -Seconds 5
+# Ждём, пока модель разложится по видеопамяти. Туннель, поднятый раньше
+# сервера, отдаёт 502 и путает диагностику: адрес есть, мозга нет.
+Write-Host ">> Жду готовности модели..."
+$ready = $false
+foreach ($i in 1..60) {
+    Start-Sleep -Seconds 2
+    try {
+        $h = Invoke-RestMethod "http://127.0.0.1:8080/health" -TimeoutSec 3
+        if ($h.status -eq "ok") { $ready = $true; break }
+    } catch { }
+}
+if (-not $ready) {
+    Write-Host "!! Модель не поднялась за две минуты. Окно llama-server свёрнуто —"
+    Write-Host "   разверните его и пришлите Claude последние строки."
+    Read-Host "Enter — закрыть"
+    exit 1
+}
+Write-Host ">> Модель готова."
 
-# ---- 7. Туннель наружу ------------------------------------------------
-Write-Host ">> Поднимаю Cloudflare Tunnel (адрес появится ниже)..."
+# ---- 7. Автозапуск при перезагрузке -----------------------------------
+# Домашний компьютер перезагружают. Без этой задачи мозг после каждой
+# перезагрузки офлайн, и узнаём мы об этом от гостя, а не от техники.
+$taskName = "GTR BRO brain"
+try {
+    if (-not (Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue)) {
+        $act = New-ScheduledTaskAction -Execute "powershell.exe" `
+            -Argument "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$PSCommandPath`""
+        $trg = New-ScheduledTaskTrigger -AtLogOn
+        Register-ScheduledTask -TaskName $taskName -Action $act -Trigger $trg `
+            -Description "Мозг GTR BRO: llama-server и туннель" | Out-Null
+        Write-Host ">> Автозапуск при входе в систему настроен."
+    }
+} catch {
+    Write-Host "!! Автозапуск настроить не вышло ($_). Не критично: после"
+    Write-Host "   перезагрузки запустите скрипт руками."
+}
+
+# ---- 8. Туннель наружу ------------------------------------------------
 Write-Host ""
 Write-Host "==============================================================="
-Write-Host " КОГДА НИЖЕ ПОЯВИТСЯ АДРЕС https://…trycloudflare.com :"
+if ($named) {
+    Write-Host " АДРЕС МОЗГА (постоянный):  https://$HOSTNAME"
+} else {
+    Write-Host " ВРЕМЕННЫЙ адрес появится ниже строкой trycloudflare.com."
+    Write-Host " Он умрёт при следующем запуске — это не поломка, а свойство."
+}
+Write-Host " ТОКЕН:   $token"
+Write-Host " МОДЕЛЬ:  qwen3-8b"
 Write-Host ""
-Write-Host " 1. Открой стенд /bro-dev -> Настройки -> 'Запасной мозг'"
-Write-Host "    URL:    (адрес туннеля из строки ниже)"
-Write-Host "    токен:  $token"
-Write-Host "    модель: qwen3-8b"
-Write-Host " 2. Или пришли адрес Claude — он впишет сам."
+Write-Host " Впишите на стенде /bro-dev -> Настройки -> 'Запасной мозг',"
+Write-Host " либо отдайте эти три строки Claude — он впишет сам."
 Write-Host ""
-Write-Host " Окно не закрывать: закроешь — мозг офлайн (BRO откатится на"
-Write-Host " Gemini). Адрес меняется при каждом перезапуске туннеля."
+Write-Host " Окно не закрывать: закроете — мозг офлайн, BRO уйдёт на Gemini."
 Write-Host "==============================================================="
 Write-Host ""
-& $cf tunnel --url http://127.0.0.1:8080
+
+if ($named) {
+    & $cf tunnel run --url http://127.0.0.1:8080 $TUNNEL
+} else {
+    & $cf tunnel --url http://127.0.0.1:8080
+}

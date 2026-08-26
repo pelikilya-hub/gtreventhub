@@ -13,11 +13,15 @@
 // какой провайдер под ним.
 
 import { LoudOut, routeAudio } from "./audio-out";
+import { speechLocale, type BroLang } from "./lang";
 import type { BroCard, BroEvents, BroPersona, BroState } from "./session";
 import { NEEDS_CONFIRM } from "./session";
 
 export type GemStart = {
   voice: string;
+  /** Язык разговора. Уходит на сервер: он им выбирает и голосовую
+   *  локаль, и языковое правило в конце промпта. */
+  lang?: BroLang;
   personaMode: BroPersona;
   district?: string;
   screen?: string;
@@ -127,6 +131,7 @@ export class GemSession {
     let token = "";
     let model = "";
     let instructions = "";
+    let locale = speechLocale(opts.lang ?? "ru");
     let tools: unknown[] = [];
     try {
       const r = await fetch(SESSION_URL, {
@@ -139,6 +144,7 @@ export class GemSession {
       const data = (await r.json()) as {
         token?: string;
         model?: string;
+        speechLocale?: string;
         instructions?: string;
         tools?: unknown[];
         error?: string;
@@ -153,9 +159,10 @@ export class GemSession {
       }
       token = data.token;
       model = data.model ?? "";
+      if (data.speechLocale) locale = data.speechLocale;
       instructions = data.instructions ?? "";
       tools = data.tools ?? [];
-      this.log(`сеанс создан · ${model} · голос ${opts.voice} · ${this.ptt ? "рация" : "свободный"}`);
+      this.log(`сеанс создан · ${model} · голос ${opts.voice} · ${locale} · ${this.ptt ? "рация" : "свободный"}`);
     } catch {
       this.log("сеанс: сеть не ответила");
       this.set("error", "network");
@@ -165,10 +172,10 @@ export class GemSession {
 
     // Эфемерный токен Google принимает как access_token; на всякий случай
     // второй попыткой пробуем как key — обе видно на табло.
-    const connected = await this.connect(`${WS_BASE}?access_token=${encodeURIComponent(token)}`, opts, model, instructions, tools);
+    const connected = await this.connect(`${WS_BASE}?access_token=${encodeURIComponent(token)}`, opts, model, instructions, tools, locale);
     if (!connected) {
       this.log("повтор через параметр key");
-      const ok2 = await this.connect(`${WS_BASE}?key=${encodeURIComponent(token)}`, opts, model, instructions, tools);
+      const ok2 = await this.connect(`${WS_BASE}?key=${encodeURIComponent(token)}`, opts, model, instructions, tools, locale);
       if (!ok2) {
         this.set("error", "ws");
         this.stop("error");
@@ -182,7 +189,7 @@ export class GemSession {
     this.maxTimer = window.setTimeout(() => this.stop("max-duration"), MAX_MS);
   }
 
-  private connect(url: string, opts: GemStart, model: string, instructions: string, tools: unknown[]): Promise<boolean> {
+  private connect(url: string, opts: GemStart, model: string, instructions: string, tools: unknown[], locale: string): Promise<boolean> {
     return new Promise((resolve) => {
       let settled = false;
       const done = (ok: boolean) => {
@@ -220,7 +227,7 @@ export class GemSession {
                 // выдуманным баром.
                 temperature: 0.6,
                 speechConfig: {
-                  languageCode: "ru-RU",
+                  languageCode: locale,
                   voiceConfig: { prebuiltVoiceConfig: { voiceName: opts.voice } },
                 },
               },

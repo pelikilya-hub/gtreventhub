@@ -10,6 +10,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { currentUser } from "../gtr/auth";
 import { getKvNs, kvGetJson } from "../gtr/kv-ns";
 import { buildPrompt, type BroContext, type PersonaMode } from "../gtr/bro/prompt.ru";
+import { isBroLang, langDirective, speechLocale } from "../gtr/bro/lang";
 import { toolsForRole } from "../gtr/bro/tools";
 
 const DEFAULT_MODEL = "gemini-2.5-flash-native-audio-preview-09-2025";
@@ -96,11 +97,15 @@ export const Route = createFileRoute("/api/gtr-bro-gem")({
           ? String(body.voice)
           : "Charon";
 
+        // Язык разговора выбирает телефон: премиальная полоса просит
+        // им же голосовую локаль, поэтому решение обязано быть одним.
+        const lang = isBroLang(body.lang) ? body.lang : "ru";
+
         const ctx: BroContext = {
           userId: user.email,
           displayName: user.name,
           role: user.role,
-          language: "ru",
+          language: lang,
           personaMode: pickMode(body.personaMode),
           timezone: "Asia/Bangkok",
           currentTime: new Date().toISOString(),
@@ -149,13 +154,20 @@ export const Route = createFileRoute("/api/gtr-bro-gem")({
           token,
           model,
           voice,
+          // Локаль распознавания речи для setup: без неё Live слышит
+          // английскую фразу как исковерканную русскую.
+          speechLocale: speechLocale(lang),
           instructions:
             buildPrompt(ctx) +
             // Живой прогон показал: эта модель охотно тащит «знания о
             // мире» в ответы про сегодняшний вечер. Дожимаем отдельным
             // железным правилом в конце — последняя инструкция весит
             // больше всего.
-            "\n\n---\n\n# Железное правило фактов\n\nБез вызова search_events в ТЕКУЩЕМ ходу тебе запрещено называть: события, вечеринки, бары, клубы, время работы, лайнапы, диджеев. Твои знания о Пхукете устарели и считаются ложью. Нет результата инструмента — говори «сейчас гляну» и вызывай search_events, либо честно скажи, что данных нет. Это правило сильнее всех остальных.",
+            "\n\n---\n\n# Железное правило фактов\n\nБез вызова search_events в ТЕКУЩЕМ ходу тебе запрещено называть: события, вечеринки, бары, клубы, время работы, лайнапы, диджеев. Твои знания о Пхукете устарели и считаются ложью. Нет результата инструмента — говори «сейчас гляну» и вызывай search_events, либо честно скажи, что данных нет. Это правило сильнее всех остальных." +
+            // Язык — самой последней строкой: правило о фактах спорит с
+            // содержанием ответа, а это с его языком, и мешать друг другу
+            // им нечем.
+            langDirective(lang),
           tools: geminiTools(user.role),
         });
       },

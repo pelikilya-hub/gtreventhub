@@ -14,10 +14,13 @@
 // голосового промпта.
 
 import type { BroCard, BroEvents, BroPersona, BroState } from "./session";
+import { loadLang, speechLocale, type BroLang } from "./lang";
 import { callBroTool, rulesReply } from "./voice-rules";
 
 export type LocalStart = {
   voice: string;
+  /** Язык разговора: им же слушаем и им же отвечаем. */
+  lang?: BroLang;
   personaMode: BroPersona;
   district?: string;
   screen?: string;
@@ -27,20 +30,6 @@ export type LocalStart = {
 const TEXT_URL = "/api/gtr-bro-text";
 const IDLE_MS = 90_000;
 const MAX_MS = 8 * 60_000;
-
-// Разговор с BRO сейчас идёт по-английски — распознавание по умолчанию
-// настроено на en-US. Вернуть русский можно, положив "ru-RU" в этот ключ.
-const KEY_LANG = "gtr.bro.stt-lang";
-
-export const sttLang = (): string => {
-  try {
-    const v = localStorage.getItem(KEY_LANG);
-    if (v) return v;
-  } catch {
-    /* приватный режим */
-  }
-  return "en-US";
-};
 
 /** Длинный ответ режем по предложениям: одна огромная реплика в Chrome
  *  замолкает на полуслове (старый баг таймера озвучки), а мелкие куски
@@ -97,7 +86,8 @@ export class LocalVoiceSession {
   private startedAt = 0;
   private idleTimer = 0;
   private maxTimer = 0;
-  private lang = "en-US";
+  private lang: BroLang = "ru";
+  private locale = "ru-RU";
   // История для мозга — только завершённые реплики, как в текстовом чате.
   private hist: { who: "user" | "bro"; text: string }[] = [];
   // Сколько символов текущей расшифровки уже напечатано на табло.
@@ -138,7 +128,8 @@ export class LocalVoiceSession {
     if (this.startedAt) return;
     this.closed = false;
     this.ptt = Boolean(opts.ptt);
-    this.lang = sttLang();
+    this.lang = opts.lang ?? loadLang();
+    this.locale = speechLocale(this.lang);
 
     if (!recCtor()) {
       // Firefox: распознавания нет. Озвучка ответов на набранный текст
@@ -164,7 +155,7 @@ export class LocalVoiceSession {
     this.ev.onMetric?.("bro.session.start");
     this.ev.onMetric?.("bro.provider.local");
     this.startedAt = Date.now();
-    this.log(`стабильная полоса · слух ${this.lang} · ${this.ptt ? "рация" : "свободный"}`);
+    this.log(`стабильная полоса · слух ${this.locale} · ${this.ptt ? "рация" : "свободный"}`);
     this.set("listening");
     this.touch();
     this.maxTimer = window.setTimeout(() => this.stop("max-duration"), MAX_MS);
@@ -179,7 +170,7 @@ export class LocalVoiceSession {
     if (!C || this.closed) return;
     const rec = new C();
     this.rec = rec;
-    rec.lang = this.lang;
+    rec.lang = this.locale;
     rec.continuous = !this.ptt;
     rec.interimResults = true;
     this.shown = 0;
@@ -289,7 +280,7 @@ export class LocalVoiceSession {
       }
     }
     if (!reply)
-      reply = this.lang.startsWith("ru")
+      reply = this.lang === "ru"
         ? "Мозг сейчас не отвечает — дай минуту и спроси ещё раз."
         : "My brain is not answering right now — give it a minute and ask again.";
     this.hist.push({ who: "bro", text: reply });
@@ -306,7 +297,7 @@ export class LocalVoiceSession {
       this.afterSpeech();
       return;
     }
-    const langPrefix = /[а-яё]/i.test(text) ? "ru" : this.lang.slice(0, 2).toLowerCase();
+    const langPrefix = /[а-яё]/i.test(text) ? "ru" : this.lang;
     const voices = speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith(langPrefix));
     const voice = voices.find((v) => v.localService) ?? voices[0] ?? null;
     this.set("speaking");
@@ -314,7 +305,7 @@ export class LocalVoiceSession {
     for (const chunk of chunks) {
       const u = new SpeechSynthesisUtterance(chunk);
       if (voice) u.voice = voice;
-      u.lang = voice?.lang ?? (langPrefix === "ru" ? "ru-RU" : this.lang);
+      u.lang = voice?.lang ?? (langPrefix === "ru" ? "ru-RU" : this.locale);
       u.rate = 1.04;
       const doneOne = () => {
         this.speakingN--;

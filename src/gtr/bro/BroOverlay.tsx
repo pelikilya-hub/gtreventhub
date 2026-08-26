@@ -37,6 +37,7 @@ import { BroSmoke } from "./smoke";
 import { GemSession } from "./gem";
 import { LocalVoiceSession } from "./local-voice";
 import { LaneGuard } from "./voice-lane";
+import { loadLang, saveLang, type BroLang } from "./lang";
 import { BroSession, type BroCard, type BroState } from "./session";
 import { VibeCheck } from "./vibecheck";
 
@@ -204,6 +205,11 @@ export function GtrBroOverlay({
   // Рация по умолчанию: в клубе авто-детектор речи слышит толпу, а не
   // человека. Свободный разговор остаётся выбором в настройках.
   const [hands, setHands] = useState(false);
+  // Язык разговора. Один на обе полосы и на текст: человек не должен
+  // слышать смену языка при пересадке на резерв.
+  const [lang, setLang] = useState<BroLang>(() => loadLang());
+  const langRef = useRef(lang);
+  langRef.current = lang;
   const [holding, setHolding] = useState(false);
   const held = useRef(false);
   const [lab, setLab] = useState(false);
@@ -368,7 +374,7 @@ export function GtrBroOverlay({
       });
       ses.current = s;
       try {
-        await s.start({ voice: v, personaMode: m, screen, district, ptt: !handsRef.current });
+        await s.start({ voice: v, personaMode: m, screen, district, lang: langRef.current, ptt: !handsRef.current });
         s.setGain(gainRef.current);
       } finally {
         starting.current = false;
@@ -586,7 +592,7 @@ export function GtrBroOverlay({
           method: "POST",
           headers: { "content-type": "application/json" },
           credentials: "same-origin",
-          body: JSON.stringify({ text: q, history }),
+          body: JSON.stringify({ text: q, history, lang: langRef.current }),
           signal: AbortSignal.timeout(30_000),
         });
         const data = (await r.json()) as { ok?: boolean; reply?: string; cards?: BroCard[]; error?: string };
@@ -1000,6 +1006,33 @@ export function GtrBroOverlay({
                 >
                   {name as string}
                   <i>{note as string}</i>
+                </button>
+              ))}
+            </div>
+
+            <div className="gtr-bro-tune-t">Язык</div>
+            <div className="gtr-bro-chips">
+              {([
+                ["ru", "Русский", "как писали"],
+                ["en", "English", "for guests"],
+              ] as [BroLang, string, string][]).map(([id, name, note]) => (
+                <button
+                  key={id}
+                  className={`gtr-bro-chip${lang === id ? " on" : ""}`}
+                  onClick={() => {
+                    setLang(id);
+                    saveLang(id);
+                    metric(`bro.lang.${id}`);
+                    // Язык уходит в setup сессии — живой разговор
+                    // переподнимаем, иначе слух останется на прежнем.
+                    if (live) {
+                      langRef.current = id;
+                      void begin(voice, mode);
+                    }
+                  }}
+                >
+                  {name}
+                  <i>{note}</i>
                 </button>
               ))}
             </div>

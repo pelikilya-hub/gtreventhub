@@ -16,6 +16,7 @@ import catchReserveRaw from "./data/catch-reserve.json";
 import cdmMenuRaw from "./data/cdm-menu.json";
 import cdmReserveRaw from "./data/cdm-reserve.json";
 import clcMenuRaw from "./data/clc-menu.json";
+import placeReserveRaw from "./data/place-reserve.json";
 import shamanMenuRaw from "./data/shaman-menu.json";
 
 export type ReserveZone = {
@@ -113,6 +114,14 @@ export const COMMERCE: Record<string, VenueCommerce> = {
     menu: catchMenuRaw as unknown as MenuFile,
     menuNote: "Цены включают налоги и сервисный сбор 10%.",
     reserve: catchReserveRaw as unknown as ReserveFile,
+  },
+  // Коворкинг без кухни — меню нет, только переговорная с флэт-рейтом.
+  // Три событийных зала (1-й/4-й/6-й этаж) в эту схему не входят: их цена
+  // "от ฿1000/час" зависит от рассадки, поэтому бронируются заявкой через
+  // паспорт площадки, а не мгновенным подтверждением, как здесь.
+  [placeReserveRaw.meta.venueId]: {
+    venueName: placeReserveRaw.meta.venueName,
+    reserve: placeReserveRaw as unknown as ReserveFile,
   },
   [shamanMenuRaw.meta.venueId]: {
     venueName: shamanMenuRaw.meta.venueName,

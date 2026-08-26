@@ -259,7 +259,7 @@ export function TonightScreen() {
     const g = GEO[v.id];
     return (
       <Card key={v.id} style={{ padding: 0, overflow: "hidden" }}>
-        <div style={{ position: "relative", aspectRatio: "16/7", overflow: "hidden" }}>
+        <div className="gtr-venue-shot">
           <div
             style={{
               position: "absolute",
@@ -283,7 +283,8 @@ export function TonightScreen() {
             style={{
               position: "absolute",
               inset: 0,
-              background: "linear-gradient(180deg, rgba(10,11,13,.04) 40%, rgba(10,11,13,.92) 100%)",
+              background:
+                "linear-gradient(180deg, rgba(10,11,13,.5) 0%, rgba(10,11,13,.1) 20%, rgba(10,11,13,0) 42%, rgba(10,11,13,.6) 72%, rgba(10,11,13,.95) 100%)",
             }}
           />
           {/* Знак в верхнем углу снимка: гость листает афишу быстро и
@@ -300,7 +301,17 @@ export function TonightScreen() {
               gap: 8,
             }}
           >
-            <span style={{ font: "600 13.5px/1.25 'Golos Text',sans-serif", flex: 1, minWidth: 0 }}>
+            <span
+              className="gtr-oswald"
+              style={{
+                font: "700 18px/1.1 Oswald,sans-serif",
+                letterSpacing: ".005em",
+                textTransform: "uppercase",
+                textShadow: "0 1px 12px rgba(0,0,0,.55)",
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
               {v.name}
             </span>
             {n.hours ? (

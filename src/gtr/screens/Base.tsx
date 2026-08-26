@@ -133,8 +133,8 @@ export function BaseScreen() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))",
-          gap: 12,
+          gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))",
+          gap: 14,
         }}
       >
         {rows.map((x) => {
@@ -161,7 +161,7 @@ export function BaseScreen() {
           >
             {/* фото заведения; фолбэк-плашка всегда под ним — если фото нет
                 или не загрузилось, карточка остаётся фирменной, не «битой» */}
-            <div style={{ position: "relative", aspectRatio: "16/7", overflow: "hidden" }}>
+            <div className="gtr-venue-shot">
               <div
                 style={{
                   position: "absolute",
@@ -170,14 +170,17 @@ export function BaseScreen() {
                     "repeating-linear-gradient(135deg, rgba(255,255,255,.028) 0 2px, transparent 2px 9px), linear-gradient(160deg, #17181C 0%, #0C0D10 100%)",
                 }}
               >
+                {/* Инициалы — водяной знак кадра, а не подпись: на высокой
+                    карточке они держат центр, где у соседей стоит фото. */}
                 <span
                   className="gtr-oswald"
                   style={{
                     position: "absolute",
-                    right: 14,
-                    bottom: 2,
-                    font: "700 52px/1 Oswald,sans-serif",
-                    color: "rgba(255,255,255,.07)",
+                    right: 16,
+                    top: "50%",
+                    transform: "translateY(-62%)",
+                    font: "700 76px/1 Oswald,sans-serif",
+                    color: "rgba(255,255,255,.06)",
                     letterSpacing: ".04em",
                     userSelect: "none",
                   }}
@@ -195,51 +198,77 @@ export function BaseScreen() {
                     opacity: 0.7,
                   }}
                 />
+              </div>
+              {hero ? (
+                <img
+                  src={hero}
+                  alt=""
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                  }}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                    filter: "saturate(.9) contrast(1.02)",
+                  }}
+                />
+              ) : null}
+              {/* Затемнение и подпись — общие для снимка и фолбэка: имя
+                  площадки на кадре читается одинаково в обоих случаях. */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(180deg, rgba(10,11,13,.5) 0%, rgba(10,11,13,.1) 20%, rgba(10,11,13,0) 42%, rgba(10,11,13,.6) 72%, rgba(10,11,13,.95) 100%)",
+                  pointerEvents: "none",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  left: 14,
+                  right: 14,
+                  bottom: 12,
+                  zIndex: 2,
+                  pointerEvents: "none",
+                }}
+              >
                 <span
                   className="gtr-mono"
                   style={{
-                    position: "absolute",
-                    left: 14,
-                    bottom: 10,
+                    display: "block",
+                    marginBottom: 5,
                     font: "600 10px/1 'JetBrains Mono',monospace",
-                    color: "rgba(255,255,255,.3)",
+                    color: "rgba(255,255,255,.6)",
                     letterSpacing: ".14em",
                     textTransform: "uppercase",
                   }}
                 >
                   {x.tag}
                 </span>
+                <span
+                  className="gtr-oswald"
+                  style={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    font: "700 19px/1.08 Oswald,sans-serif",
+                    letterSpacing: ".005em",
+                    textTransform: "uppercase",
+                    color: "#fff",
+                    textShadow: "0 1px 12px rgba(0,0,0,.55)",
+                  }}
+                >
+                  {x.name}
+                </span>
               </div>
-              {hero ? (
-                <>
-                  <img
-                    src={hero}
-                    alt=""
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = "none";
-                    }}
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      display: "block",
-                      filter: "saturate(.9) contrast(1.02)",
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background:
-                        "linear-gradient(180deg, rgba(10,11,13,.05) 45%, rgba(10,11,13,.9) 100%)",
-                      pointerEvents: "none",
-                    }}
-                  />
-                </>
-              ) : null}
               {/* Настоящий знак заведения поверх снимка — карточка сразу
                   читается как его карточка, а не как наша плашка. */}
               <VenueLogo
@@ -270,16 +299,11 @@ export function BaseScreen() {
                 </span>
               ) : null}
             </div>
-            <div style={{ padding: "11px 15px 14px" }}>
-              <div
-                style={{ font: "600 13.5px/1.45 'Golos Text',sans-serif" }}
-              >
-                {x.name}
-              </div>
+            <div style={{ padding: "12px 15px 14px" }}>
               <div
                 style={{
-                  margin: "5px 0 8px",
-                  font: "500 12px/1.45 'Golos Text',sans-serif",
+                  marginBottom: 10,
+                  font: "500 12.5px/1.45 'Golos Text',sans-serif",
                   color: "var(--gtr-t2)",
                 }}
               >

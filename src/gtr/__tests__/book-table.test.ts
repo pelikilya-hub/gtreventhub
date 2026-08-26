@@ -104,10 +104,10 @@ describe("бронь стола гостем", () => {
       GUEST,
       input({
         preorder: [
-          { id: "m1", name: "Tuna Tartare", qty: 2, price: 780 },
-          { id: "m2", name: "Pad Thai Seafood", qty: 1, price: 850 },
+          { id: "platter-mezze", name: "Mezze", qty: 2, price: 1450 },
+          { id: "platter-royal-thai", name: "Royal Thai Selection", qty: 1, price: 2250 },
           // мусорные строки не должны доехать до менеджера
-          { id: "m3", name: "Ноль штук", qty: 0, price: 500 },
+          { id: "platter-japanese", name: "Ноль штук", qty: 0, price: 4500 },
         ],
       }),
     );
@@ -115,7 +115,63 @@ describe("бронь стола гостем", () => {
     expect(res.ok).toBe(true);
     const b = await readBooking(store);
     expect(b.preorder).toHaveLength(2);
-    expect(b.preorderTotal).toBe(780 * 2 + 850);
+    expect(b.preorderTotal).toBe(1450 * 2 + 2250);
+  });
+
+  // Регрессия: форма брони — один живой компонент на все площадки, и при
+  // смене заведения её корзина уезжала в заявку соседнего ресторана.
+  // Клиент починен сбросом состояния, но граница обязана держать это сама:
+  // заявка уходит живому менеджеру, и заказ блюд, которых у него нет, —
+  // не «косметика», а сорванный вечер гостя.
+  it("блюда чужой площадки в предзаказ не проходят", async () => {
+    const { ns, store } = memKv();
+    const res = await bookTableCore(
+      ns,
+      GUEST,
+      input({
+        preorder: [
+          { id: "platter-mezze", name: "Mezze", qty: 1, price: 1450 },
+          // позиция из меню Catch Beach Club — в Café del Mar её нет
+          { id: "eggs-benedict", name: "Eggs Benedict", qty: 2, price: 520 },
+          // и просто выдуманный id
+          { id: "нет-такого-блюда", name: "Фантом", qty: 1, price: 100 },
+        ],
+      }),
+    );
+
+    expect(res.ok).toBe(true);
+    const b = await readBooking(store);
+    expect(b.preorder).toHaveLength(1);
+    expect(b.preorder[0].id).toBe("platter-mezze");
+    expect(b.preorderTotal).toBe(1450);
+  });
+
+  it("цену предзаказа диктует меню, а не заявка", async () => {
+    const { ns, store } = memKv();
+    await bookTableCore(
+      ns,
+      GUEST,
+      // клиент прислал единицу вместо реальных 1450 — берём цену из меню
+      input({ preorder: [{ id: "platter-mezze", name: "Mezze", qty: 1, price: 1 }] }),
+    );
+    const b = await readBooking(store);
+    expect(b.preorder[0].price).toBe(1450);
+    expect(b.preorderTotal).toBe(1450);
+  });
+
+  it("у площадки без меню предзаказ отбрасывается целиком", async () => {
+    const { ns, store } = memKv();
+    // VEN-0061 — Place Coworking: бронь переговорной есть, кухни нет
+    await bookTableCore(
+      ns,
+      GUEST,
+      input({
+        vid: "VEN-0061",
+        preorder: [{ id: "platter-mezze", name: "Mezze", qty: 1, price: 1450 }],
+      }),
+    );
+    const b = await readBooking(store);
+    expect(b.preorder ?? []).toHaveLength(0);
   });
 
   it("число гостей загоняется в разумные границы", async () => {

@@ -182,6 +182,33 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
   const [state, setState] = useState("");
   const [sentId, setSentId] = useState("");
 
+  // Смена площадки обязана обнулить всё, что принадлежало прошлой.
+  //
+  // Данные-то берутся по vid (reserveOf/menuOf выше), но React держит один
+  // и тот же экземпляр формы, пока она стоит на том же месте дерева: и на
+  // экране «Промо и бронь» селектор заведения, и переход между паспортами
+  // площадок меняют только пропс. Без сброса корзина Café del Mar уезжала
+  // в заявку соседнего ресторана, а раздел меню оставался с чужим id —
+  // менеджеру приходил заказ блюд, которых у него нет.
+  //
+  // Сброс живёт здесь, а не в key у вызывающих: точек вызова три, и
+  // четвёртая ключ забудет. Дату, число гостей и контакты не трогаем —
+  // они принадлежат гостю, а не заведению, и стирать их значит заставить
+  // человека набирать телефон заново.
+  const [prevVid, setPrevVid] = useState(vid);
+  if (prevVid !== vid) {
+    setPrevVid(vid);
+    setZoneId(null);
+    setTableId(null);
+    setSlot("");
+    setCart({});
+    setMenuOpen(false);
+    setSecId(sections[0]?.id ?? "");
+    setDish(null);
+    setState("");
+    setSentId("");
+  }
+
   const zone = zones.find((z) => z.id === zoneId) ?? null;
   const table = tables.find((tb) => tb.id === tableId) ?? null;
   const zoneTables = useMemo(() => tables.filter((tb) => tb.zone === zoneId), [tables, zoneId]);
@@ -480,8 +507,10 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
         </div>
       ) : null}
 
-      {/* ШАГ 4 · предзаказ */}
-      {table ? (
+      {/* ШАГ 4 · предзаказ. Только там, где у площадки есть своё меню:
+          у коворкинга и других залов без кухни шаг рисовался пустым, и
+          кнопка «Открыть меню» разворачивала ничто. */}
+      {table && sections.length ? (
         <div className="gtr-fade">
           <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 8 }}>
             <Eyebrow>

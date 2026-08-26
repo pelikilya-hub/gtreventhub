@@ -928,7 +928,7 @@
       "area": "Kata Noi",
       "cluster": "Karon / Kata",
       "district": "Mueang Phuket",
-      "concept": "Трёхуровневый hilltop destination: pool club FIRA, KIPO Steakhouse, DOXA Skybar и VVIP-комнаты с plunge pool.",
+      "concept": "Трёхуровневый hilltop destination: pool club FIRA (Party Zone + Chill Zone), KIPO Steakhouse, DOXA Skybar и VVIP-комнаты с plunge pool.",
       "events": "DJ events; sunset parties; private celebrations; brand events",
       "facilities": "Hilltop terraces; panoramic sea view; dining; DJ production",
       "capacity": "≈400",
@@ -936,7 +936,7 @@
       "music": "House; electronic; international DJs",
       "website": "https://firaphuket.com/",
       "social": "https://www.instagram.com/firaphuket/",
-      "address": "Kata Noi hillside, Phuket",
+      "address": "228/6-7 Khok Tanod Road, Karon, Mueang Phuket District, Phuket",
       "readiness": {
         "score": 75,
         "state": "Request to book",
@@ -949,9 +949,9 @@
         "contactVerified": "Yes"
       },
       "status": "Active",
-      "verified": "2026-08-06",
+      "verified": "2026-08-26",
       "confidence": "High",
-      "source": "https://www.phuket101.net/phuket-beach-clubs/",
+      "source": "https://firaphuket.com/ + веб-поиск (прямой доступ к сайту и к SevenRooms заблокирован сетевой политикой сессии)",
       "sourceType": "Official",
       "capacityKind": "gtr-estimate",
       "capacityOriginal": "Not publicly stated",
@@ -3886,9 +3886,9 @@
       "capBanquet": "",
       "price": "",
       "currency": "",
-      "bookable": "Inquiry / request to book",
+      "bookable": "SevenRooms (заявка через GTR — точный депозит по типу лежака подтверждает площадка)",
       "verification": "Officially verified",
-      "notes": "Pool; DJ booth; daybeds; cabanas; terraces · Capacity and power missing."
+      "notes": "Бассейн, DJ-бут, дэйбеды и кабаны на 2–8 гостей — VIP Sofa, Cabana, Luxe Day Bed по названиям SevenRooms. Часы 11:00–22:00, бассейн до 19:30. Для дневных пляжных компаний и вечеринок у бассейна · Capacity and power missing."
     },
     {
       "id": "VEN-0050-SP-02",
@@ -3903,9 +3903,9 @@
       "capBanquet": "",
       "price": "",
       "currency": "",
-      "bookable": "Inquiry / request to book",
+      "bookable": "SevenRooms (заявка через GTR)",
       "verification": "Officially verified",
-      "notes": "Shaded loungers; sea-view cabanas"
+      "notes": "Shaded loungers; sea-view cabanas. Тише и без DJ-зоны — для спокойного дня у бассейна и пар/небольших компаний, а не для вечеринки."
     },
     {
       "id": "VEN-0050-SP-03",
@@ -3918,11 +3918,11 @@
       "capTheatre": "",
       "capCocktail": "",
       "capBanquet": "",
-      "price": "",
-      "currency": "",
-      "bookable": "Inquiry / request to book",
+      "price": "700–1500 / чел (категория «Special Treat»)",
+      "currency": "THB",
+      "bookable": "SevenRooms (заявка через GTR)",
       "verification": "Officially verified",
-      "notes": "Indoor/outdoor dining; live-fire grill · Capacity missing."
+      "notes": "Шеф Ramon Verano, средиземноморская/испанская кухня: паэлья, стейки на гриле, тапас. Sunday Roast 600฿, Sunday Brunch 1500฿. Зал с кондиционером, балкон и Sunset Terrace. Часы 16:00–22:00, последний заказ 21:30. Для ужина с видом и воскресного бранча · Capacity missing."
     },
     {
       "id": "VEN-0050-SP-04",
@@ -3937,9 +3937,9 @@
       "capBanquet": "",
       "price": "",
       "currency": "",
-      "bookable": "Inquiry / request to book",
+      "bookable": "SevenRooms (заявка через GTR)",
       "verification": "Officially verified",
-      "notes": "Sky sofas; overlook sofas; bar counter · Capacity missing."
+      "notes": "Sky sofas; overlook sofas; bar counter. 2-й этаж, отдельный скайуок от KIPO. Часы 16:00–22:00, последний заказ 21:30. Лучшая точка заката на площадке — для коктейлей и небольших компаний, не для банкета · Capacity missing."
     },
     {
       "id": "VEN-0050-SP-05",

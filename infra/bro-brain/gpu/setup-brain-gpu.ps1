@@ -414,18 +414,71 @@ if (Test-Path $cert) {
 # --parallel: сколько гостей обслуживаются одновременно. Без него
 #   сервер держит ОДИН запрос за раз, и второй встаёт в очередь.
 # --api-key: без токена открытый туннель станет бесплатным API для всех.
+function Test-Brain {
+    try { return (Invoke-RestMethod "http://127.0.0.1:8080/health" -TimeoutSec 5).status -eq "ok" }
+    catch { return $false }
+}
+
+# Настоящая проверка токена — рабочим запросом. /health и /v1/models у
+# llama.cpp открыты без авторизации, поэтому два зелёных ответа не
+# доказывают, что наш токен подходит: ровно так и выглядел 401 в продукте
+# над «живым» мозгом.
+function Test-BrainToken {
+    $body = @{
+        model = "qwen3-8b"
+        messages = @(@{ role = "user"; content = "ping" })
+        max_tokens = 1
+    } | ConvertTo-Json -Depth 5 -Compress
+    try {
+        Invoke-RestMethod "http://127.0.0.1:8080/v1/chat/completions" -Method Post `
+            -Headers @{ authorization = "Bearer $token" } -ContentType "application/json" `
+            -Body $body -TimeoutSec 90 | Out-Null
+        return $true
+    } catch {
+        return $false
+    }
+}
+
+# Останавливаем свои процессы, но не падаем на чужих: llama-server,
+# запущенный из-под другой учётной записи (или с правами администратора),
+# не убивается — «Отказано в доступе», и раньше на этом падал весь скрипт.
+function Stop-Brain {
+    $left = @()
+    foreach ($p in @(Get-Process llama-server -ErrorAction SilentlyContinue)) {
+        try { Stop-Process -Id $p.Id -Force -ErrorAction Stop }
+        catch { $left += $p.Id }
+    }
+    if ($left) { Start-Sleep -Seconds 1 }
+    return $left
+}
+
 function Start-Brain {
-    Get-Process llama-server -ErrorAction SilentlyContinue | Stop-Process -Force
+    $stuck = Stop-Brain
+    if ($stuck -and (Test-Brain)) {
+        # Порт занят чужим сервером, погасить который мы не вправе.
+        if (Test-BrainToken) {
+            Write-Host ">> На 8080 уже работает llama-server (PID $($stuck -join ', ')) и принимает"
+            Write-Host "   наш токен — беру его как есть, второй не запускаю."
+            return
+        }
+        Write-Host ""
+        Write-Host "!! На порту 8080 работает ЧУЖОЙ llama-server (PID $($stuck -join ', '))." -ForegroundColor Yellow
+        Write-Host "   Остановить его не вышло — он запущен от другой учётной записи"
+        Write-Host "   или с правами администратора. И токен у него другой: именно"
+        Write-Host "   поэтому продукт получает 401 над живым с виду мозгом."
+        Write-Host ""
+        Write-Host "   Что сделать: открыть PowerShell ОТ ИМЕНИ АДМИНИСТРАТОРА и"
+        Write-Host "   выполнить одну строку, потом запустить скрипт заново:"
+        Write-Host ""
+        Write-Host "       Stop-Process -Name llama-server -Force"
+        Write-Host ""
+        throw "Порт 8080 занят чужим llama-server — см. инструкцию выше."
+    }
     Start-Process -FilePath $serverExe.FullName -ArgumentList @(
         "-m", $model, "-ngl", "99", "-c", "$ctx",
         "--parallel", "$slots", "--jinja",
         "--host", "127.0.0.1", "--port", "8080", "--api-key", $token
     ) -WindowStyle Minimized
-}
-
-function Test-Brain {
-    try { return (Invoke-RestMethod "http://127.0.0.1:8080/health" -TimeoutSec 5).status -eq "ok" }
-    catch { return $false }
 }
 
 # Ждём, пока модель разложится по видеопамяти. Туннель, поднятый раньше
@@ -616,5 +669,7 @@ try {
     if ($tunnel -and -not $tunnel.HasExited) {
         Stop-Process -Id $tunnel.Id -Force -ErrorAction SilentlyContinue
     }
-    Get-Process llama-server -ErrorAction SilentlyContinue | Stop-Process -Force
+    # Через Stop-Brain: на чужом процессе прямой Stop-Process бросает
+    # «Отказано в доступе», и выход из скрипта превращается в ошибку.
+    Stop-Brain | Out-Null
 }

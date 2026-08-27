@@ -153,6 +153,20 @@ describe("скрипт мозга на домашнем GPU", () => {
     expect(raw.charCodeAt(0)).toBe(0xfeff);
   });
 
+  // llama-server, запущенный из-под другой учётной записи, не убивается:
+  // прямой Stop-Process бросает «Отказано в доступе», и при
+  // $ErrorActionPreference = "Stop" на этом падал весь скрипт.
+  it("чужой процесс не роняет скрипт", () => {
+    const raw = src.split("\n").filter((l) => /Stop-Process\s+-(?:Name|Id)/.test(l));
+    for (const line of raw) {
+      const safe =
+        /-ErrorAction (?:Stop|SilentlyContinue)/.test(line) || line.includes("Write-Host");
+      expect(`${line} :: защищён=${safe}`).toContain("защищён=true");
+    }
+    // Остановка своих процессов идёт одной функцией, которая переживает отказ.
+    expect(src).toContain("function Stop-Brain");
+  });
+
   it("параметры объявлены до первой команды", () => {
     const code = src
       .split("\n")

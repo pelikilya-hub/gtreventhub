@@ -19,6 +19,7 @@ import type { StoredUser } from "../gtr/auth";
 import { decideOfferCore } from "../gtr/kv-api";
 import { getKvNs, kvGetJson, kvListAll, type KvNs } from "../gtr/kv-ns";
 import { tgApi, tgEsc, tgWebhookSecret } from "../gtr/tg";
+import { APP_URL } from "../gtr/app-url";
 
 const sha256hex = async (t: string) => {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
@@ -252,7 +253,7 @@ const HELP_STAFF = [
   "/status — кто я",
 ].join("\n");
 
-const APP_HOST = "https://gtr-event-hub.gtr-event.workers.dev";
+const APP_HOST = APP_URL;
 const POSTER_URL = `${APP_HOST}/brand/invite-poster.jpg`;
 
 // Анкета приглашения в чате: шаг 1 — имя, шаг 2 — @ник
@@ -893,7 +894,7 @@ export const Route = createFileRoute("/api/tg")({
                 [
                   {
                     text: "🌐 Открыть кабинет",
-                    url: `https://gtr-event-hub.gtr-event.workers.dev/gtr/login?invite=${encodeURIComponent(su.email)}`,
+                    url: `${APP_URL}/gtr/login?invite=${encodeURIComponent(su.email)}`,
                   },
                 ],
               ],

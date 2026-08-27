@@ -7,7 +7,8 @@ import type { VenueAfisha } from "./afisha";
 import { kvGetJson, kvListAll, type KvNs } from "./kv-ns";
 import { tgApi, tgEsc } from "./tg";
 
-export const APP_URL = "https://gtr-event-hub.gtr-event.workers.dev";
+import { APP_URL } from "./app-url";
+export { APP_URL };
 // Контакт основателя для связи и сотрудничества — показывается в постах
 export const OWNER_TG = "https://t.me/bangtaostyle";
 

@@ -25,5 +25,9 @@ if (cfg.compatibility_date !== root.compatibility_date)
     `compatibility_date "${cfg.compatibility_date}" ≠ "${root.compatibility_date}" из wrangler.jsonc — дата должна быть зафиксирована, а не плыть с датой сборки`,
   );
 if (!cfg.compatibility_flags?.includes("nodejs_compat")) fail("нет nodejs_compat");
+// Домен. Без этой записи деплой пройдёт молча, а gtrevent.com перестанет
+// отвечать: Custom Domain живёт ровно до тех пор, пока он в конфиге.
+if (!cfg.routes?.some((r) => r.pattern === "gtrevent.com" && r.custom_domain))
+  fail("нет привязки домена gtrevent.com — прод уедет на технический адрес");
 
 console.log("check-wrangler: конфиг воркера боевой (KV, кроны, имя, дата совместимости)");

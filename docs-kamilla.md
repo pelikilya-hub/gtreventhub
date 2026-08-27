@@ -5,7 +5,7 @@
 Ссылка на регистрацию (отправить ей):
 
 ```
-https://gtr-event-hub.gtr-event.workers.dev/gtr/signup
+https://gtrevent.com/gtr/signup
 ```
 
 Порядок:

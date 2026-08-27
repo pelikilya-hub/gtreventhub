@@ -15,7 +15,7 @@ import {
   SPACES,
   V,
 } from "../data/app-data";
-import { CdmReserve, cdmZonesOfSpace, hasCdmReserve } from "../cdm-booking";
+import { CdmReserve, zonesOfSpace, hasReserve } from "../cdm-booking";
 import { EditableImage } from "../EditableImage";
 import { Card, Chip, Eyebrow, Field, tint, TrashTitle, VenueLogo } from "../ui";
 import { GtrLightbox } from "../lightbox";
@@ -41,6 +41,12 @@ const isQuar = (x: { confidence: string; status?: string }) =>
 export function BaseScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useGtr();
+  // Балл готовности и достоверность источника — внутренние ops-метрики
+  // КОМАНДЫ GTR. Организатор — платящий клиент, а не команда: коды площадок
+  // и наши оценки ему не показываем. Поэтому гейт по isTeam, а не по
+  // «не гость»: разница ровно в организаторе.
+  const isTeam = ["gtr", "sales", "owner", "pr"].includes(user.role);
   const [cluster, setCluster] = useState(t("Все"));
   const [tag, setTag] = useState(t("Все"));
   const [q, setQ] = useState("");
@@ -133,8 +139,8 @@ export function BaseScreen() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))",
-          gap: 12,
+          gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))",
+          gap: 14,
         }}
       >
         {rows.map((x) => {
@@ -161,7 +167,7 @@ export function BaseScreen() {
           >
             {/* фото заведения; фолбэк-плашка всегда под ним — если фото нет
                 или не загрузилось, карточка остаётся фирменной, не «битой» */}
-            <div style={{ position: "relative", aspectRatio: "16/7", overflow: "hidden" }}>
+            <div className="gtr-venue-shot">
               <div
                 style={{
                   position: "absolute",
@@ -170,14 +176,17 @@ export function BaseScreen() {
                     "repeating-linear-gradient(135deg, rgba(255,255,255,.028) 0 2px, transparent 2px 9px), linear-gradient(160deg, #17181C 0%, #0C0D10 100%)",
                 }}
               >
+                {/* Инициалы — водяной знак кадра, а не подпись: на высокой
+                    карточке они держат центр, где у соседей стоит фото. */}
                 <span
                   className="gtr-oswald"
                   style={{
                     position: "absolute",
-                    right: 14,
-                    bottom: 2,
-                    font: "700 52px/1 Oswald,sans-serif",
-                    color: "rgba(255,255,255,.07)",
+                    right: 16,
+                    top: "50%",
+                    transform: "translateY(-62%)",
+                    font: "700 76px/1 Oswald,sans-serif",
+                    color: "rgba(255,255,255,.06)",
                     letterSpacing: ".04em",
                     userSelect: "none",
                   }}
@@ -195,51 +204,77 @@ export function BaseScreen() {
                     opacity: 0.7,
                   }}
                 />
+              </div>
+              {hero ? (
+                <img
+                  src={hero}
+                  alt=""
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                  }}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                    filter: "saturate(.9) contrast(1.02)",
+                  }}
+                />
+              ) : null}
+              {/* Затемнение и подпись — общие для снимка и фолбэка: имя
+                  площадки на кадре читается одинаково в обоих случаях. */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(180deg, rgba(10,11,13,.5) 0%, rgba(10,11,13,.1) 20%, rgba(10,11,13,0) 42%, rgba(10,11,13,.6) 72%, rgba(10,11,13,.95) 100%)",
+                  pointerEvents: "none",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  left: 14,
+                  right: 14,
+                  bottom: 12,
+                  zIndex: 2,
+                  pointerEvents: "none",
+                }}
+              >
                 <span
                   className="gtr-mono"
                   style={{
-                    position: "absolute",
-                    left: 14,
-                    bottom: 10,
-                    font: "600 8.5px/1 'JetBrains Mono',monospace",
-                    color: "rgba(255,255,255,.3)",
+                    display: "block",
+                    marginBottom: 5,
+                    font: "600 10px/1 'JetBrains Mono',monospace",
+                    color: "rgba(255,255,255,.6)",
                     letterSpacing: ".14em",
                     textTransform: "uppercase",
                   }}
                 >
                   {x.tag}
                 </span>
+                <span
+                  className="gtr-oswald"
+                  style={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    font: "700 19px/1.08 Oswald,sans-serif",
+                    letterSpacing: ".005em",
+                    textTransform: "uppercase",
+                    color: "#fff",
+                    textShadow: "0 1px 12px rgba(0,0,0,.55)",
+                  }}
+                >
+                  {x.name}
+                </span>
               </div>
-              {hero ? (
-                <>
-                  <img
-                    src={hero}
-                    alt=""
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = "none";
-                    }}
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      display: "block",
-                      filter: "saturate(.9) contrast(1.02)",
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background:
-                        "linear-gradient(180deg, rgba(10,11,13,.05) 45%, rgba(10,11,13,.9) 100%)",
-                      pointerEvents: "none",
-                    }}
-                  />
-                </>
-              ) : null}
               {/* Настоящий знак заведения поверх снимка — карточка сразу
                   читается как его карточка, а не как наша плашка. */}
               <VenueLogo
@@ -247,14 +282,14 @@ export function BaseScreen() {
                 h={22}
                 style={{ position: "absolute", left: 12, top: 10, zIndex: 2 }}
               />
-              {x.readiness ? (
+              {isTeam && x.readiness ? (
                 <span
                   className="gtr-mono"
                   style={{
                     position: "absolute",
                     top: 9,
                     right: 9,
-                    font: "700 11px/1 'JetBrains Mono',monospace",
+                    font: "700 13px/1 'JetBrains Mono',monospace",
                     padding: "4px 7px",
                     background: "rgba(10,11,13,.72)",
                     backdropFilter: "blur(3px)",
@@ -270,23 +305,24 @@ export function BaseScreen() {
                 </span>
               ) : null}
             </div>
-            <div style={{ padding: "11px 15px 14px" }}>
-              <div
-                style={{ font: "600 13.5px/1.3 'Golos Text',sans-serif" }}
-              >
-                {x.name}
-              </div>
+            <div style={{ padding: "12px 15px 14px" }}>
               <div
                 style={{
-                  margin: "5px 0 8px",
-                  font: "500 10.5px/1.45 'Golos Text',sans-serif",
+                  marginBottom: 10,
+                  font: "500 12.5px/1.45 'Golos Text',sans-serif",
                   color: "var(--gtr-t2)",
                 }}
               >
                 {x.type} · {x.area}
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                <Chip color={confColor(x.confidence)}>{(x.confidence ?? "—").toUpperCase()}</Chip>
+                {/* Достоверность источника — только команде GTR. Клиенту
+                    (организатор) и гостю на карточке остаётся «бронируемая»
+                    и «прайс подтверждён» — это про них, а не про нашу
+                    кухню оценки площадок. */}
+                {isTeam ? (
+                  <Chip color={confColor(x.confidence)}>{(x.confidence ?? "—").toUpperCase()}</Chip>
+                ) : null}
                 {x.readiness?.state === "Бронируемая" ? (
                   <Chip color={GREEN}>{t("БРОНИРУЕМАЯ")}</Chip>
                 ) : null}
@@ -345,8 +381,12 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
   const ct = venueContact(v.id);
   const R = v.readiness;
   // Публичной аудитории (артисты, посетители) — витрина без коммерции:
-  // прайсы, контакты площадки и внутренние статусы видит только команда
+  // прайсы и «собрать событие здесь» им не нужны. Организатор — клиент:
+  // цену аренды и конструктор события видит, а вот наши ops-метрики,
+  // коды площадок и провенанс исследования — нет. Для этого два уровня:
+  // commercial (не гость) и isTeam (только команда GTR).
   const commercial = !["artist", "visitor"].includes(user.role);
+  const isTeam = ["gtr", "sales", "owner", "pr"].includes(user.role);
   // Подтверждённые площадкой значения важнее наших оценок
   const cRate = confirm?.status === "confirmed" ? (confirm.rate ?? null) : null;
 
@@ -378,7 +418,10 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
         <div className="gtr-beam" />
         <div style={{ position: "relative" }}>
           <Eyebrow>
-            {v.id} · {(v.cluster ?? "").toUpperCase()}
+            {/* Внутренний id площадки — только команде. Гостю показываем
+                район, а не «VEN-0061»: это наш служебный код, не его дело. */}
+            {isTeam ? `${v.id} · ` : ""}
+            {(v.cluster ?? v.area ?? "").toUpperCase()}
           </Eyebrow>
           <div
             style={{
@@ -393,9 +436,18 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 площадку узнают, а набранное имя — уже подпись под ним. */}
             <VenueLogo vid={v.id} h={34} />
             <TrashTitle text={v.name} size={29} />
-            <Chip color={confColor(v.confidence)}>{t("ДОСТОВЕРНОСТЬ:")} {(v.confidence ?? "—").toUpperCase()}</Chip>
-            {R ? (
-              <Chip color={R.state === "Бронируемая" ? GREEN : AMBER}>{R.state.toUpperCase()}</Chip>
+            {/* «Достоверность источника» и «готовность к бронированию» —
+                наши внутренние ops-метрики: по ним видно, что мы скрейпим
+                и оцениваем площадки. Ни гостю, ни клиенту-организатору это
+                знать незачем. Им остаётся «подтверждено площадкой» — знак
+                доверия, а не кухня. Только команде GTR. */}
+            {isTeam ? (
+              <>
+                <Chip color={confColor(v.confidence)}>{t("ДОСТОВЕРНОСТЬ:")} {(v.confidence ?? "—").toUpperCase()}</Chip>
+                {R ? (
+                  <Chip color={R.state === "Бронируемая" ? GREEN : AMBER}>{R.state.toUpperCase()}</Chip>
+                ) : null}
+              </>
             ) : null}
             {confirm?.status === "confirmed" ? (
               <Chip color={GREEN}>{t("✓ ПОДТВЕРЖДЕНО ПЛОЩАДКОЙ")}</Chip>
@@ -430,7 +482,11 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               <button
                 className="gtr-btn gtr-btn-red"
                 onClick={() =>
-                  navigate({ to: "/gtr/$screen", params: { screen: "promo" } })
+                  navigate({
+                    to: "/gtr/$screen",
+                    params: { screen: "promo" },
+                    search: { vid: v.id },
+                  })
                 }
               >
                 {t("Забронировать стол →")}
@@ -462,7 +518,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               className="gtr-mono"
               style={{
                 marginTop: 6,
-                font: "500 9.5px/1.3 'JetBrains Mono',monospace",
+                font: "500 11px/1.45 'JetBrains Mono',monospace",
                 color: "var(--gtr-t3)",
               }}
             >
@@ -508,14 +564,14 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                       <div
                         className="gtr-mono"
                         style={{
-                          font: "600 8.5px/1 'JetBrains Mono',monospace",
+                          font: "600 10px/1 'JetBrains Mono',monospace",
                           letterSpacing: ".12em",
                           color: "var(--gtr-t3)",
                         }}
                       >
                         {t(k)}
                       </div>
-                      <div style={{ marginTop: 5, font: "600 11.5px/1.45 'Golos Text',sans-serif" }}>
+                      <div style={{ marginTop: 5, font: "600 13px/1.45 'Golos Text',sans-serif" }}>
                         {t(String(val))}
                       </div>
                     </div>
@@ -525,16 +581,23 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 <button
                   className="gtr-btn gtr-btn-red"
                   onClick={() =>
-                    hasCdmReserve(v.id)
+                    hasReserve(v.id)
                       ? document
                           .getElementById("gtr-reserve")
                           ?.scrollIntoView({ behavior: "smooth", block: "start" })
-                      : navigate({ to: "/gtr/$screen", params: { screen: "promo" } })
+                      : // Площадку передаём с собой: без vid форма брони
+                        // открывалась на своей стартовой, а не на той, из
+                        // которой гость нажал «Забронировать стол».
+                        navigate({
+                          to: "/gtr/$screen",
+                          params: { screen: "promo" },
+                          search: { vid: v.id },
+                        })
                   }
                 >
                   {t("Забронировать стол")}
                 </button>
-                {hasCdmReserve(v.id) ? (
+                {hasReserve(v.id) ? (
                   <button
                     className="gtr-btn"
                     onClick={() =>
@@ -548,7 +611,13 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 ) : null}
                 <button
                   className="gtr-btn"
-                  onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "tonight" } })}
+                  onClick={() =>
+                    navigate({
+                      to: "/gtr/$screen",
+                      params: { screen: "tonight" },
+                      search: { vid: v.id },
+                    })
+                  }
                 >
                   {t("Что здесь сегодня")}
                 </button>
@@ -557,7 +626,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 className="gtr-mono"
                 style={{
                   marginTop: 10,
-                  font: "500 9.5px/1.5 'JetBrains Mono',monospace",
+                  font: "500 11px/1.5 'JetBrains Mono',monospace",
                   color: "var(--gtr-t3)",
                 }}
               >
@@ -607,7 +676,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 <div
                   style={{
                     marginTop: 8,
-                    font: "500 11.5px/1.6 'Golos Text',sans-serif",
+                    font: "500 13px/1.6 'Golos Text',sans-serif",
                     color: "var(--gtr-t2)",
                   }}
                 >
@@ -619,7 +688,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                   className="gtr-mono"
                   style={{
                     marginTop: 7,
-                    font: "500 9px/1.4 'JetBrains Mono',monospace",
+                    font: "500 11px/1.5 'JetBrains Mono',monospace",
                     color: "var(--gtr-t3)",
                     textTransform: "uppercase",
                   }}
@@ -634,20 +703,20 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             <Card style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>{t("НОРМАЛИЗОВАННЫЕ ЗАЛЫ ·")} {sp.length}</Eyebrow>
               {sp.map((s) => {
-                const zs = cdmZonesOfSpace(v.id, s.id);
+                const zs = zonesOfSpace(v.id, s.id);
                 return (
                   <div
                     key={s.id}
                     style={{ padding: "7px 0", borderBottom: "1px solid rgba(255,255,255,.05)" }}
                   >
                     <div style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
-                      <span style={{ flex: 1, font: "600 12px/1.3 'Golos Text',sans-serif" }}>
+                      <span style={{ flex: 1, font: "600 12px/1.45 'Golos Text',sans-serif" }}>
                         {s.name}
                       </span>
                       <span
                         className="gtr-mono"
                         style={{
-                          font: "500 10px/1.3 'JetBrains Mono',monospace",
+                          font: "500 12px/1.45 'JetBrains Mono',monospace",
                           color: "var(--gtr-t3)",
                         }}
                       >
@@ -680,7 +749,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                               className="gtr-mono"
                               style={{
                                 marginTop: 3,
-                                font: "500 8.5px/1.3 'JetBrains Mono',monospace",
+                                font: "500 10px/1.45 'JetBrains Mono',monospace",
                                 color: "var(--gtr-t3)",
                                 textTransform: "uppercase",
                                 letterSpacing: ".08em",
@@ -698,19 +767,24 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             </Card>
           ) : null}
 
-          {hasCdmReserve(v.id) ? (
+          {hasReserve(v.id) ? (
             <Card id="gtr-reserve" style={{ padding: 18 }}>
-              <Eyebrow style={{ marginBottom: 4 }}>
-                {t("РАССАДКА И БРОНЬ")} {t("· SEVENROOMS-ПАРИТЕТ")}
-              </Eyebrow>
+              {/* «SEVENROOMS-паритет» — наша внутренняя формулировка про то,
+                  что схема брони не хуже, чем у сервиса рассадки. Гостю это
+                  ничего не говорит; ему — «Рассадка и бронь». Как именно
+                  заявка доходит до площадки (наш Telegram-контур) — тоже
+                  кухня, гостю важно «площадка свяжется и подтвердит». */}
+              <Eyebrow style={{ marginBottom: 4 }}>{t("РАССАДКА И БРОНЬ")}</Eyebrow>
               <div
                 style={{
                   margin: "0 0 12px",
-                  font: "500 11px/1.6 'Golos Text',sans-serif",
+                  font: "500 13px/1.6 'Golos Text',sans-serif",
                   color: "var(--gtr-t2)",
                 }}
               >
-                {t("Живая схема зон и столов площадки: депозиты, кредит на еду и напитки, предзаказ по официальному меню. Заявка уходит менеджеру в Telegram, подтверждение — одной кнопкой.")}
+                {isTeam
+                  ? t("Живая схема зон и столов площадки: депозиты, кредит на еду и напитки, предзаказ по официальному меню. Заявка уходит менеджеру в Telegram, подтверждение — одной кнопкой.")
+                  : t("Выберите зону и стол, дату и гостей, при желании — предзаказ по меню. Площадка свяжется с вами и подтвердит бронь.")}
               </div>
               <CdmReserve vid={v.id} />
             </Card>
@@ -821,7 +895,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                   className="gtr-mono"
                   style={{
                     marginTop: 6,
-                    font: "600 9px/1.4 'JetBrains Mono',monospace",
+                    font: "600 11px/1.5 'JetBrains Mono',monospace",
                     color: cRate ? GREEN : RATE_COLOR[rate!.kind],
                     letterSpacing: ".08em",
                     textTransform: "uppercase",
@@ -839,7 +913,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                   <div
                     style={{
                       marginTop: 5,
-                      font: "500 10.5px/1.5 'Golos Text',sans-serif",
+                      font: "500 12px/1.5 'Golos Text',sans-serif",
                       color: "var(--gtr-t2)",
                     }}
                   >
@@ -851,7 +925,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     className="gtr-mono"
                     style={{
                       marginTop: 7,
-                      font: "500 10px/1.5 'JetBrains Mono',monospace",
+                      font: "500 12px/1.5 'JetBrains Mono',monospace",
                       color: "var(--gtr-t2)",
                     }}
                   >
@@ -862,7 +936,11 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 ) : null}
               </div>
             ) : null}
-            {commercial ? (<>
+            {/* Источники, провенанс и рабочие контакты площадки — только
+                команде GTR. Организатору эта карточка ни к чему: сырой
+                URL исследования, тип источника и «верифицировано» — наша
+                кухня. Официальный сайт площадки он видит в блоке ссылок выше. */}
+            {isTeam ? (<>
             <Eyebrow style={{ marginBottom: 10 }}>{t("ИСТОЧНИКИ И КОНТАКТ")}</Eyebrow>
             {[
               [
@@ -933,7 +1011,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             </>) : null}
           </Card>
 
-          {commercial && R ? (
+          {isTeam && R ? (
             <Card style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>
                 {t("ГОТОВНОСТЬ К БРОНИРОВАНИЮ ·")} {R.score}/100
@@ -970,13 +1048,13 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                       boxShadow: `0 0 6px -1px ${String(c)}`,
                     }}
                   />
-                  <span style={{ flex: 1, font: "500 11.5px/1.4 'Golos Text',sans-serif" }}>
+                  <span style={{ flex: 1, font: "500 13px/1.5 'Golos Text',sans-serif" }}>
                     {k}
                   </span>
                   <span
                     className="gtr-mono"
                     style={{
-                      font: "600 10px/1.4 'JetBrains Mono',monospace",
+                      font: "600 12px/1.5 'JetBrains Mono',monospace",
                       color: String(c),
                       textAlign: "right",
                       maxWidth: "46%",
@@ -1002,7 +1080,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     <span
                       className="gtr-mono"
                       style={{
-                        font: "700 10px/1.3 'JetBrains Mono',monospace",
+                        font: "700 12px/1.45 'JetBrains Mono',monospace",
                         color: "#E5231B",
                         width: 46,
                         flex: "none",
@@ -1012,14 +1090,14 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     </span>
                     <span style={{ flex: 1 }}>
                       <span
-                        style={{ display: "block", font: "600 11.5px/1.3 'Golos Text',sans-serif" }}
+                        style={{ display: "block", font: "600 13px/1.45 'Golos Text',sans-serif" }}
                       >
                         {title}
                       </span>
                       <span
                         style={{
                           display: "block",
-                          font: "500 9.5px/1.4 'JetBrains Mono',monospace",
+                          font: "500 11px/1.5 'JetBrains Mono',monospace",
                           color: "var(--gtr-t3)",
                         }}
                       >
@@ -1085,7 +1163,7 @@ function AfishaBlock({ vid }: { vid: string }) {
         {data?.syncedAt ? (
           <span
             className="gtr-mono"
-            style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+            style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
           >
             {t("обновлено")} {new Date(data.syncedAt).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
           </span>
@@ -1150,7 +1228,7 @@ function AfishaBlock({ vid }: { vid: string }) {
             {t("+ Добавить")}
           </button>
           {mNote ? (
-            <span className="gtr-mono" style={{ font: "500 9px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+            <span className="gtr-mono" style={{ font: "500 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
               {mNote}
             </span>
           ) : null}
@@ -1185,12 +1263,12 @@ function AfishaBlock({ vid }: { vid: string }) {
               <span style={{ padding: "8px 10px", display: "grid", gap: 3 }}>
                 <span
                   className="gtr-mono"
-                  style={{ font: "700 9.5px/1 'JetBrains Mono',monospace", color: "#FF3427" }}
+                  style={{ font: "700 11px/1 'JetBrains Mono',monospace", color: "#FF3427" }}
                 >
                   {e.dateIso.slice(5).split("-").reverse().join(".")}
                   {e.room ? ` · ${e.room.toUpperCase()}` : ""}
                 </span>
-                <span style={{ font: "600 11.5px/1.35 'Golos Text',sans-serif", color: "#fff" }}>
+                <span style={{ font: "600 13px/1.45 'Golos Text',sans-serif", color: "#fff" }}>
                   {e.title}
                 </span>
                 {e.artistIds.length ? (
@@ -1200,7 +1278,7 @@ function AfishaBlock({ vid }: { vid: string }) {
                         key={id}
                         className="gtr-mono"
                         style={{
-                          font: "600 8.5px/1 'JetBrains Mono',monospace",
+                          font: "600 10px/1 'JetBrains Mono',monospace",
                           color: "#2ECC71",
                           border: "1px solid rgba(46,204,113,.4)",
                           background: "transparent",
@@ -1222,7 +1300,7 @@ function AfishaBlock({ vid }: { vid: string }) {
           ))}
         </div>
       ) : (
-        <span style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+        <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
           {t("Источник этой площадки ещё не подключён — собираем Café del Mar и Illuzion, дальше расширяем.")}
         </span>
       )}
@@ -1277,7 +1355,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
       </div>
       <div
         style={{
-          font: "500 11px/1.55 'Golos Text',sans-serif",
+          font: "500 13px/1.55 'Golos Text',sans-serif",
           color: "var(--gtr-t2)",
           marginBottom: 10,
         }}
@@ -1293,7 +1371,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
             className="gtr-mono"
             style={{
               margin: "10px 0 8px",
-              font: "500 10px/1.5 'JetBrains Mono',monospace",
+              font: "500 12px/1.5 'JetBrains Mono',monospace",
               color: copied ? GREEN : "var(--gtr-t2)",
               wordBreak: "break-all",
             }}

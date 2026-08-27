@@ -7,6 +7,10 @@ import type { EventDraft, Offer, OrgRequest, RoleId } from "./data/app-data";
 import { getKvNs, kvGetJson, kvListAll, type KvNs } from "./kv-ns";
 import { tgApi, tgConfigured, tgEsc, tgWebhookSecret } from "./tg";
 import type { VenueAfisha } from "./afisha";
+// Афиша площадки возвращается наружу серверными функциями этого модуля,
+// поэтому тип обязан уезжать вместе с ними — экраны импортируют его отсюда.
+export type { VenueAfisha };
+import { menuOf } from "./venue-commerce";
 import {
   gtrFrom,
   priceKey,
@@ -1928,16 +1932,32 @@ export async function bookTableCore(
     if (await ns.get(`bklimit:${u.email}`))
       return { ok: false as const, reason: "не чаще одной заявки в минуту" };
     await ns.put(`bklimit:${u.email}`, "1", { expirationTtl: 60 });
+    // Предзаказ обязан состоять из блюд ЭТОЙ площадки. Раньше сюда
+    // проходило что угодно: форма брони — один живой компонент на все
+    // заведения, и при смене площадки её корзина уезжала в заявку
+    // соседнего ресторана. Менеджеру приходил заказ блюд, которых у него
+    // нет, с суммой из чужого прайса. Клиент починен, но проверка нужна
+    // здесь: заявка уходит живому человеку, и граница — последнее место,
+    // где ошибку ещё можно остановить.
+    const venueMenu = menuOf(data.vid);
+    const onMenu = new Map<string, { name: string; price: number; opts?: { l: string; p: number }[] }>();
+    for (const sec of venueMenu?.sections ?? [])
+      for (const g of sec.groups) for (const it of g.items) onMenu.set(it.id, it);
     const preorder = (data.preorder ?? [])
-      .filter((l) => l && l.qty > 0 && l.price >= 0)
+      .filter((l) => l && l.qty > 0 && l.price >= 0 && onMenu.has(String(l.id)))
       .slice(0, 40)
-      .map((l) => ({
-        id: String(l.id).slice(0, 60),
-        name: String(l.name).slice(0, 90),
-        opt: l.opt ? String(l.opt).slice(0, 40) : undefined,
-        qty: Math.max(1, Math.min(99, Math.round(l.qty))),
-        price: Math.max(0, Math.round(l.price)),
-      }));
+      .map((l) => {
+        const it = onMenu.get(String(l.id))!;
+        // Цену берём из меню, а не из заявки: клиент её не назначает.
+        const opt = l.opt ? it.opts?.find((o) => o.l === l.opt) : undefined;
+        return {
+          id: String(l.id).slice(0, 60),
+          name: it.name.slice(0, 90),
+          opt: opt?.l,
+          qty: Math.max(1, Math.min(99, Math.round(l.qty))),
+          price: Math.max(0, Math.round(opt ? opt.p : it.price)),
+        };
+      });
     const booking: TableBooking = {
       id: `BK-${Date.now().toString(36)}`,
       vid: data.vid,
@@ -1989,7 +2009,15 @@ export const bookTableFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const u = await currentUser();
     const ns = await getKvNs();
-    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    // Две разные беды — два разных ответа. Слитые в «нужен вход» они врут
+    // залогиненному гостю: 18.08.2026 прод уехал без биндинга KV, и человек
+    // с живой сессией видел предложение войти, выходил и заходил снова.
+    if (!u) return { ok: false as const, reason: "нужен вход" };
+    if (!ns)
+      return {
+        ok: false as const,
+        reason: "Хранилище недоступно — бронь не сохранить. Напишите площадке напрямую.",
+      };
     return bookTableCore(ns, u, data);
   });
 

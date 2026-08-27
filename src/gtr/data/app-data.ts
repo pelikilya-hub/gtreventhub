@@ -169,7 +169,9 @@ export type ScreenId =
   | "map"
   | "feed"
   | "tonight"
+  | "tracking"
   | "aimatch"
+  | "phrases"
   | "community"
   | "visas"
   | "promo"
@@ -259,6 +261,7 @@ export const NAV_ARTIST: [ScreenId, string, string, string][] = [
   ["feed", "События", "M4 4h16v16H4z M4 9h16 M9 13h6", ""],
   ["base", "Заведения", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "110"],
   ["aimatch", "ИИ подбор", "M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6l-6-4.4h7.6z", ""],
+  ["phrases", "Разговорник", "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z M8 9h8 M8 13h5", ""],
   ["community", "Комьюнити", "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75", ""],
   ["visas", "Визы", "M4 3h16v18H4z M8 7h8 M8 11h8 M8 15h5", ""],
   ["myshows", "Мои выступления", "M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z", ""],
@@ -270,6 +273,7 @@ export const NAV_VISITOR: [ScreenId, string, string, string][] = [
   ["feed", "События", "M4 4h16v16H4z M4 9h16 M9 13h6", ""],
   ["base", "Заведения", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "104"],
   ["aimatch", "ИИ подбор", "M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6l-6-4.4h7.6z", ""],
+  ["phrases", "Разговорник", "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z M8 9h8 M8 13h5", ""],
   ["promo", "Промо и бронь", "M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-7 M22 7H2v5h20z M12 22V7 M12 7a3 3 0 1 1 3-3c0 2-3 3-3 3z M12 7a3 3 0 1 0-3-3c0 2 3 3 3 3z", ""],
   ["community", "Комьюнити · PRO", "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75", ""],
   ["map", "Карта", "M1 6v16l7-4 8 4 7-4V2l-7 4-8-4z M8 2v16 M16 6v16", ""],
@@ -1687,7 +1691,31 @@ export const ILZ_RICH: RichVenue = {
 };
 
 const NIGHT_ALL = nightRaw as Record<string, NightInfo>;
-export const nightOf = (vid: string): NightInfo => NIGHT_ALL[vid] ?? {};
+
+/** Теги, за которыми стоит вечернее место, а не переговорная с банкетом.
+ *  Курортные MICE-залы, виллы и «прочее» гостю вечером не предлагаем —
+ *  они живут в базе для организаторов, а не в афише ночи. Марины сюда тоже
+ *  не входят: под этим тегом лежат яхт-клубы и площадки под boat show —
+ *  бизнес-события, а не ответ на вопрос «куда пойти сегодня». */
+const NIGHT_TAGS = /nightclub|beach club|rooftop|bar|lounge|live|show/i;
+export const isNightVenue = (v: { tag?: string; type?: string }): boolean =>
+  NIGHT_TAGS.test(`${v.tag ?? ""} ${v.type ?? ""}`);
+
+/** Ночная карточка площадки. Свипы гайдов закрыли 42 места из 110 — у
+ *  остальных карточка была пустой, а сама площадка выпадала из вечернего
+ *  списка. Часы и цену входа не выдумываем: чего не разведали, того нет.
+ *  Но собственные поля площадки — концепт и музыкальную политику — гостю
+ *  показать честно можем, и клуб перестаёт быть невидимым из-за того, что
+ *  до него не дошли руки. */
+export const nightOf = (vid: string): NightInfo => {
+  const known = NIGHT_ALL[vid];
+  if (known) return known;
+  const v = V(vid);
+  if (!v.id) return {};
+  const fact = (v.concept ?? "").trim();
+  const music = (v.music ?? "").trim();
+  return fact || music ? { fact: fact || undefined, music: music || undefined } : {};
+};
 
 export const richOf = (vid: string): RichVenue =>
   vid === "VEN-0013" ? ILZ_RICH : (RICH_ALL[vid] ?? {});
@@ -1903,6 +1931,9 @@ export type Artist = {
       её видит менеджер, — а машина работает с этими идентификаторами. */
   styleIds?: string[];
   bio?: string; // короткое описание для профиля (RU)
+  /** Лейблы из label-logos.json, для которых есть настоящий логотип
+      с прозрачным фоном — карточка рисует значок, а не гадает по bio. */
+  labels?: string[];
   twitch?: string; // логин канала Twitch — для индикатора «в эфире»
   tier: string;
   rider: string;

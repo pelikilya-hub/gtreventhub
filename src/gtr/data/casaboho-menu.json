@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "venueId": "VEN-0078",
+    "venueName": "Casa Boho Phuket",
+    "note": "Собрано через веб-поиск по PDF-меню hyatt.com (прямой доступ к сайту заблокирован сетевой политикой сессии). Цены включают 10% сервисный сбор и 7% НДС согласно меню."
+  },
+  "sections": [
+    {
+      "id": "food",
+      "name": "Latin American",
+      "ru": "Латиноамериканская кухня",
+      "groups": [
+        {
+          "id": "starters",
+          "name": "Starters",
+          "ru": "Закуски",
+          "items": [
+            { "id": "casaboho-croquette", "name": "Croquette de Carne Asada", "price": 350 },
+            { "id": "casaboho-empanadas", "name": "Empanadas de Carne", "price": 395 },
+            { "id": "casaboho-calamari", "name": "Calamari", "price": 225 }
+          ]
+        },
+        {
+          "id": "seafood",
+          "name": "Seafood",
+          "ru": "Морепродукты",
+          "items": [
+            { "id": "casaboho-gambas", "name": "Gambas al Pil Pil", "price": 575 },
+            { "id": "casaboho-ceviche", "name": "Casa Boho Ceviche", "desc": "сибас", "price": 430 }
+          ]
+        },
+        {
+          "id": "mains",
+          "name": "Mains",
+          "ru": "Основные блюда",
+          "items": [
+            { "id": "casaboho-carneasada", "name": "Carne Asada", "desc": "Angus ribeye на гриле", "price": 950 }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -148,7 +148,7 @@ export function GtrCapacity({
         >
           {value || "—"}
         </span>
-        <span style={{ font: "500 11px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+        <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
           {value ? "гостей — под это число подберутся площадки и залы" : "гостей: сдвиньте регулятор"}
         </span>
       </div>

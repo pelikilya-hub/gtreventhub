@@ -208,9 +208,14 @@
   /* ---- линии: волосяные, видимые, без мягкости ---- */
   --gtr-border: rgba(255, 255, 255, 0.09);
   --gtr-border2: rgba(255, 255, 255, 0.17);
+  /* ---- текст: три ступени, каждая проходит контраст AA ----
+     Было .55 и .33 — второстепенный текст давал 5.3:1, а служебный 2.5:1
+     при норме 4.5:1, то есть подписи и эйлброу физически не читались на
+     солнце и на плохих экранах. Ступени подняты и разведены заново:
+     15.7:1 / 8.5:1 / 5.3:1 — иерархия та же, но дно теперь выше нормы. */
   --gtr-t1: #eaeaea;
-  --gtr-t2: rgba(234, 234, 234, 0.55);
-  --gtr-t3: rgba(234, 234, 234, 0.33);
+  --gtr-t2: rgba(234, 234, 234, 0.72);
+  --gtr-t3: rgba(234, 234, 234, 0.55);
 
   /* ---- геометрия: 90 градусов, никаких скруглений ---- */
   --gtr-r: 0px;
@@ -238,7 +243,7 @@
   inset: 0;
   z-index: var(--gtr-z-grain);
   pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.035;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -250,11 +255,15 @@
   inset: 0;
   z-index: var(--gtr-z-grain);
   pointer-events: none;
-  opacity: 0.4;
+  /* Развёртка ЭЛТ — фирменная фактура, но на кегле 10–13px тёмная полоса
+     каждый третий пиксель садилась поперёк строчных букв и давала эффект
+     гребёнки: текст выглядел грязным, а не стилизованным. Фактура осталась,
+     вес снят более чем вдвое — на крупном она видна, мелкий больше не ест. */
+  opacity: 0.16;
   background: repeating-linear-gradient(
     0deg,
     transparent 0 2px,
-    rgba(0, 0, 0, 0.16) 2px 3px
+    rgba(0, 0, 0, 0.13) 2px 3px
   );
 }
 
@@ -312,7 +321,7 @@
 /* штамп-метка */
 .gtr-stamp {
   display: inline-block;
-  font: 700 8.5px/1 "JetBrains Mono", monospace;
+  font: 700 10px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--gtr-red);
@@ -725,18 +734,87 @@
 }
 .gtr-card-hover:active { transform: translate(0, 0); }
 
+/* ---------- я и мой вечер на карте ---------- */
+/* Синий — единственный чужой цвет на нашей карте, и это намеренно: точка
+   гостя не должна путаться ни с красным продуктом, ни с фиолетовым
+   маршрутом. Пульс — не украшение: он отличает живой сигнал датчика от
+   статичной метки площадки. */
+.gtr-map-me {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #4a90e2;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.55);
+  animation: gtr-me-pulse 2.4s ease-out infinite;
+}
+@keyframes gtr-me-pulse {
+  70% { box-shadow: 0 0 0 16px rgba(74, 144, 226, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(74, 144, 226, 0); }
+}
+/* Номер остановки: тот же фиолетовый, что у линии маршрута, — цепочка
+   читается как одно целое, а не как набор точек. */
+.gtr-map-stop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #7b4dff;
+  border: 2px solid #fff;
+  color: #fff;
+  font: 700 14px/1 "JetBrains Mono", monospace;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-map-me { animation: none; }
+}
+
+/* ---------- карточка площадки: снимок держит карточку ---------- */
+/* Снимок был полосой 16/7 — от фотографии заведения оставалась горизонталь
+   без неба и без зала, по ней невозможно понять, куда идёшь. 4/3 отдаёт
+   кадру три четверти карточки: на витрине гость выбирает глазами, а
+   подписи читает вторым шагом. Название переехало на сам снимок — тёмный
+   градиент внизу и так был нарисован, но ничего не держал. */
+.gtr-venue-shot {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+/* Медленный наезд кадра на наведение: карточка отзывается, но снимок не
+   «прыгает» — 0.45s с затуханием читается как движение камеры, а не как
+   анимация интерфейса. */
+.gtr-venue-shot img {
+  transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.gtr-card-hover:hover .gtr-venue-shot img {
+  transform: scale(1.045);
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-venue-shot img,
+  .gtr-card-hover:hover .gtr-venue-shot img {
+    transition: none;
+    transform: none;
+  }
+}
+
 .gtr-eyebrow {
-  font: 600 10px/1 "JetBrains Mono", monospace;
-  letter-spacing: 0.16em;
+  /* Самый частый служебный стиль продукта — 178 применений. На 10px с
+     трекингом .16em кириллица рассыпается на отдельные буквы: глаз читает
+     не слово, а частокол. Кегль поднят, трекинг ослаблен, строке дан воздух. */
+  font: 600 11px/1.3 "JetBrains Mono", monospace;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--gtr-t3);
 }
 .gtr-chip {
-  font: 600 8.5px/1 "JetBrains Mono", monospace;
-  letter-spacing: 0.08em;
+  /* 8.5px — ниже любого разумного порога: статусы площадок читались лупой */
+  font: 600 11px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   border-radius: 0;
-  padding: 4px 6px;
+  padding: 5px 7px;
   white-space: nowrap;
   display: inline-block;
 }
@@ -772,6 +850,12 @@
 
 .gtr-input {
   width: 100%;
+  /* Без border-box ширина 100% складывается с паддингами и рамкой: поле
+     вылезает за колонку на 26px и тянет за собой страницу вбок. На вебе
+     это незаметно, на телефоне даёт горизонтальный скролл всей формы —
+     ловилось на брони столика при 390px. Класс общий для всех форм
+     продукта, поэтому чинится один раз здесь. */
+  box-sizing: border-box;
   background: var(--gtr-card2);
   border: var(--gtr-hair) solid var(--gtr-border2);
   border-radius: 0;
@@ -901,6 +985,26 @@
   /* фаску здесь не режем: по углам сидят порты связей */
 }
 .gtr-node:active { cursor: grabbing; }
+
+/* Площадка-папка: несёт весь граф внутри, поэтому весит больше обычного
+   блока — плотнее фон, тёплая кромка и лёгкий «язычок» сверху, как у папки. */
+.gtr-node-folder {
+  background: linear-gradient(180deg, #1a1414, #100d0e);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(229, 35, 27, 0.12);
+}
+.gtr-node-folder::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 14px;
+  width: 46px;
+  height: 7px;
+  background: linear-gradient(180deg, #1a1414, #100d0e);
+  border-top: 1px solid rgba(229, 35, 27, 0.3);
+  clip-path: polygon(0 100%, 10% 0, 90% 0, 100% 100%);
+}
+.gtr-folder-open { transition: background 0.16s ease, border-color 0.16s ease; }
+.gtr-folder-open:active { transform: scale(0.98); }
 
 /* ---------- бриф ---------- */
 @keyframes gtrBriefIn {
@@ -1141,8 +1245,8 @@
   flex: 1;
   min-width: 0;
   overflow-wrap: anywhere;
-  font: 500 12px/1.55 "Golos Text", sans-serif;
-  color: rgba(234, 234, 234, 0.78);
+  font: 500 13px/1.6 "Golos Text", sans-serif;
+  color: rgba(234, 234, 234, 0.88);
 }
 .gtr-field-v.mono {
   font: 500 11.5px/1.55 "JetBrains Mono", monospace;
@@ -1170,7 +1274,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font: 700 10px/1 "JetBrains Mono", monospace;
+  font: 700 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--gtr-t1);
@@ -1273,7 +1377,7 @@
 }
 .gtr-cal-week span {
   text-align: center;
-  font: 600 8.5px/1 "JetBrains Mono", monospace;
+  font: 600 10px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.12em;
   color: rgba(255, 255, 255, 0.35);
   padding: 3px 0;
@@ -1377,7 +1481,7 @@
 }
 
 /* ---------- BOSS: дашборд контроля ---------- */
-.gtr-btn-sm { padding: 6px 11px; font-size: 10px; }
+.gtr-btn-sm { padding: 6px 11px; font-size: 11px; }
 
 .gtr-boss-hero {
   display: flex;
@@ -1630,7 +1734,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font: 700 8.5px/1 "JetBrains Mono", monospace;
+  font: 700 10px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.1em;
   color: #2ecc71;
   border: 1px solid rgba(46, 204, 113, 0.5);
@@ -1852,6 +1956,23 @@
 .gtr-screenin { animation: gtrscreenin 0.5s cubic-bezier(0.32, 0.72, 0, 1) both; }
 html { -webkit-tap-highlight-color: transparent; }
 .gtr-app { touch-action: manipulation; }
+
+/* ---------- поворот телефона: перекомпоновка как смена сцены ----------
+   Переход портрет↔ландшафт менял раскладку скачком. Класс gtr-rotating
+   вешается на полсекунды из шелла на смене ориентации — контент проявляется
+   тем же языком, что и переход между экранами, а не рвётся на глазах.
+   Фон, шапка и навигация не трогаются: анимируется только полотно. */
+@keyframes gtrrotatein {
+  from { opacity: 0.45; transform: scale(0.986); filter: blur(5px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.gtr-shell.gtr-rotating .gtr-main {
+  animation: gtrrotatein 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
+  will-change: transform, filter, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-shell.gtr-rotating .gtr-main { animation: none; }
+}
 
 /* ---------- мобильная игровая графика (тест: iPhone 12 Pro Max) ---------- */
 @media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
@@ -2095,7 +2216,7 @@ html { -webkit-tap-highlight-color: transparent; }
     text-overflow: ellipsis;
   }
   .gtr-playbar-sub {
-    font: 500 8.5px/1 'JetBrains Mono', monospace;
+    font: 500 10px/1 'JetBrains Mono', monospace;
     letter-spacing: 0.08em;
     color: rgba(255, 255, 255, 0.45);
   }
@@ -2669,13 +2790,18 @@ html { -webkit-tap-highlight-color: transparent; }
     transition: color 0.18s;
   }
   .gtr-tab-label {
-    font: 600 9px/1 "JetBrains Mono", monospace;
+    font: 600 11px/1 "JetBrains Mono", monospace;
     /* разрядка ужата: «ПРОФИЛЬ» — самое длинное слово, при 0.06em оно
        не помещалось в свою пятую часть и срезалось у грани */
     letter-spacing: 0.01em;
     text-transform: uppercase;
     white-space: nowrap;
     max-width: 100%;
+    /* Кегль подписи поднят с 9px — на 360px «ПРОФИЛЬ» занимает ~47px из
+       68px вкладки и помещается. Но история этой строки — про срез у грани,
+       поэтому предел страхуем многоточием, а не обрезкой на живую. */
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .gtr-tab { padding-inline: 2px; }
   .gtr-tab.on { color: #fff; }
@@ -2767,7 +2893,7 @@ html { -webkit-tap-highlight-color: transparent; }
     .gtr-tab-core { width: 48px; height: 48px; bottom: 13px; margin-left: -24px; }
     .gtr-tab-core img { width: 37px; }
     .gtr-tab-center::after { width: 60px; height: 60px; margin-left: -30px; }
-    .gtr-tab-label { font-size: 8.5px; }
+    .gtr-tab-label { font-size: 10px; }
   }
 
   /* ландшафт: панель ещё ниже, подписи прячем — по высоте её почти нет.
@@ -3286,7 +3412,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-comm-label {
   position: relative;
   z-index: 1;
-  font: 600 10px/1.15 "JetBrains Mono", monospace;
+  font: 600 11px/1.15 "JetBrains Mono", monospace;
   letter-spacing: 0.01em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -3314,13 +3440,29 @@ html { -webkit-tap-highlight-color: transparent; }
    КАРТА: РАЙОНЫ КОНТУРОМ, ТОЧКИ ЗНАКАМИ
    ===================================================================== */
 
-/* Тайлы Carto приходят синевато-серыми и рядом с нашим чёрно-красным
-   выглядят чужой картинкой. Фильтр уводит их в нашу температуру: чуть
-   темнее, чуть контрастнее, с уходом от синевы. Менять сами тайлы мы не
-   можем — они чужие, — но покрасить их в свой свет можем. */
+/* Тайлы OpenStreetMap приходят светлыми — CARTO закрыл бесплатный доступ
+   к готовым тёмным тайлам API-ключом, а OSM бесплатен всегда и без
+   регистрации. Invert + компенсирующий hue-rotate(180) — стандартный
+   приём: переворачивает яркость (светлое становится тёмным), но
+   возвращает исходные цвета суши/воды/дорог на место. Остальное —
+   лёгкая подстройка под нашу чёрно-красную температуру. */
 .gtr-map-tiles {
-  filter: brightness(0.82) contrast(1.18) saturate(0.55) hue-rotate(-12deg);
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.6);
 }
+
+/* Карта трекера вечера. Живёт рядом с панелью статистики, поэтому запас
+   сверху меньше, чем у обзорной карты острова. dvh, а не vh: на iOS
+   адресная строка съедает низ, и на vh карта уезжает под нижнюю панель. */
+.gtr-track-canvas {
+  height: calc(100dvh - 150px);
+  min-height: 340px;
+  background: #0a0b0d;
+  position: relative;
+  overflow: hidden;
+}
+/* В колонке рядом с картой список маршрута не должен выдавливать чек-ин
+   за нижний край экрана — отсюда потолок. На телефоне он снимается. */
+.gtr-track-list { max-height: 50dvh; }
 
 .gtr-map-canvas {
   height: calc(100dvh - 260px);
@@ -3412,7 +3554,7 @@ html { -webkit-tap-highlight-color: transparent; }
   background: rgba(10, 11, 13, 0.92);
   border: none;
   color: #fff;
-  font: 600 10px/1 "JetBrains Mono", monospace;
+  font: 600 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 5px 8px;
@@ -3421,6 +3563,19 @@ html { -webkit-tap-highlight-color: transparent; }
 .leaflet-tooltip.gtr-area-tip::before { display: none; }
 
 @media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
+  /* Трекер в столбик: карта сверху занимает пол-экрана, под ней статистика
+     и список маршрута обычной прокруткой страницы. Полноэкранная карта тут
+     не нужна — в трекере человек смотрит не остров, а свою точку и список. */
+  .gtr-track-canvas {
+    height: 46dvh;
+    min-height: 260px;
+    width: 100vw;
+    max-width: 100vw;
+    margin-inline: calc(50% - 50vw);
+  }
+  /* Потолок высоты списка снят: в столбике он режет маршрут без нужды */
+  .gtr-track-list { max-height: none; }
+
   /* На телефоне карта занимает экран целиком между строками выбора и
      нижней панелью: карта — это и есть содержимое экрана. */
   .gtr-map-canvas {
@@ -3441,7 +3596,7 @@ html { -webkit-tap-highlight-color: transparent; }
     padding-inline: var(--gtr-pad, 14px);
     scroll-padding-inline: var(--gtr-pad, 14px);
   }
-  .gtr-map-chip { padding: 5px 8px; font-size: 10px; }
+  .gtr-map-chip { padding: 5px 8px; font-size: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3475,7 +3630,7 @@ html { -webkit-tap-highlight-color: transparent; }
   padding: 0 3px;
   background: var(--c);
   color: #0a0b0d;
-  font: 700 9.5px/16px "JetBrains Mono", monospace;
+  font: 700 11px/16px "JetBrains Mono", monospace;
   text-align: center;
 }
 .gtr-map-cluster:hover { transform: scale(1.14); }
@@ -3531,12 +3686,12 @@ html { -webkit-tap-highlight-color: transparent; }
   margin-bottom: 14px;
 }
 .gtr-bro-eyebrow {
-  font: 700 10px/1 "JetBrains Mono", monospace;
+  font: 700 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.22em;
   color: #fff;
 }
 .gtr-bro-state {
-  font: 500 10px/1 "JetBrains Mono", monospace;
+  font: 500 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.1em;
   color: var(--gtr-t2);
   padding: 4px 8px;
@@ -3635,7 +3790,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-bro-card.act { cursor: pointer; }
 .gtr-bro-card.act:active { background: rgba(255, 255, 255, 0.11); }
 .gtr-bro-card-k {
-  font: 700 10px/1 "JetBrains Mono", monospace;
+  font: 700 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #fff;
@@ -3692,7 +3847,7 @@ html { -webkit-tap-highlight-color: transparent; }
 
 .gtr-bro-tune { margin-top: 14px; display: grid; gap: 8px; }
 .gtr-bro-tune-t {
-  font: 700 10px/1 "JetBrains Mono", monospace;
+  font: 700 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.18em;
   color: var(--gtr-t2);
   margin-top: 4px;
@@ -3773,7 +3928,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-bro-chip.on { background: rgba(123, 77, 255, 0.3); color: #fff; }
 .gtr-bro-chip i {
   font-style: normal;
-  font: 500 10px/1 "JetBrains Mono", monospace;
+  font: 500 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.06em;
   opacity: 0.7;
 }
@@ -3902,7 +4057,7 @@ html { -webkit-tap-highlight-color: transparent; }
   gap: 10px;
 }
 .gtr-bro-confirm-t {
-  font: 700 10px/1 "JetBrains Mono", monospace;
+  font: 700 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.2em;
   color: #fff;
 }
@@ -3957,7 +4112,7 @@ html { -webkit-tap-highlight-color: transparent; }
   transition: transform 0.18s cubic-bezier(0.32, 0.72, 0, 1), filter 0.2s ease;
 }
 .gtr-bro-dock span {
-  font: 700 9px/1 "JetBrains Mono", monospace;
+  font: 700 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.2em;
   color: var(--gtr-t2);
   text-transform: uppercase;
@@ -4011,7 +4166,7 @@ html { -webkit-tap-highlight-color: transparent; }
   overscroll-behavior: contain;
 }
 .gtr-bro-dos-h {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   color: #9dffb0;
   border-bottom: 1px dashed rgba(51, 255, 51, 0.35);
@@ -4605,7 +4760,7 @@ html { -webkit-tap-highlight-color: transparent; }
   align-items: center;
   gap: 12px;
   padding-top: 4px;
-  font: 500 9px/1 "JetBrains Mono", monospace;
+  font: 500 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.42em;
   color: var(--gtr-t3);
   white-space: nowrap;

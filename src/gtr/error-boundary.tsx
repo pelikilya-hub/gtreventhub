@@ -37,7 +37,7 @@ export class ScreenErrorBoundary extends Component<Props, State> {
       <div style={{ maxWidth: 720, margin: "40px auto", padding: 24 }}>
         <div
           style={{
-            font: "700 11px/1 'JetBrains Mono',monospace",
+            font: "700 13px/1 'JetBrains Mono',monospace",
             letterSpacing: "0.18em",
             color: "#E5231B",
             marginBottom: 12,
@@ -52,7 +52,7 @@ export class ScreenErrorBoundary extends Component<Props, State> {
         {this.props.detailed ? (
           <pre
             style={{
-              font: "500 11px/1.5 'JetBrains Mono',monospace",
+              font: "500 13px/1.5 'JetBrains Mono',monospace",
               color: "var(--gtr-t2)",
               background: "rgba(229,35,27,.08)",
               padding: 12,

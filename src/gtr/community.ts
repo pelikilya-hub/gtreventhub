@@ -59,8 +59,12 @@ export async function resolveTgChat(url: string): Promise<
 // Чистая афиша целиком — общая для ленты, дайджеста и /tonight
 export async function collectCleanAfisha(ns: KvNs) {
   const { V } = await import("./data/app-data");
+  const { bkkToday } = await import("./afisha-parse");
   const keys = await kvListAll(ns, "venueevents:");
-  const today = new Date().toISOString().slice(0, 10);
+  // День острова, а не UTC. Воркер живёт по Гринвичу, Пхукет — на семь часов
+  // впереди: до 07:00 по местному UTC-дата ещё вчерашняя, и сегодняшняя
+  // программа отсекалась как прошедшая ровно в часы, когда её и смотрят.
+  const today = bkkToday();
   const items: (VenueAfisha["events"][number] & { vid: string; venueName: string })[] = [];
   const seen = new Set<string>();
   for (const k of keys) {
@@ -90,7 +94,10 @@ const RU_DATE = (iso: string) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}`;
 // (RU·EN-метки, контент — названия и площадки — языконезависим).
 export type TgLang = "ru" | "en" | "th" | "dual";
 
-export const tgLangOf = (code?: string): TgLang => {
+// Язык конкретного человека — всегда один. "dual" бывает только у настройки
+// канала (пост сразу на двух языках), поэтому сюда он не попадает никогда:
+// сужаем тип, иначе каждая словарная таблица требует несуществующей ветки.
+export const tgLangOf = (code?: string): Exclude<TgLang, "dual"> => {
   const c = (code || "").toLowerCase();
   if (c.startsWith("ru") || c.startsWith("uk") || c.startsWith("be") || c.startsWith("kk")) return "ru";
   if (c.startsWith("th")) return "th";

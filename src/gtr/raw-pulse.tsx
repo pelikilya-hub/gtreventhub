@@ -297,7 +297,7 @@ export function SwipeToBook({
       {error ? (
         <div
           className="gtr-mono"
-          style={{ marginTop: 8, font: "500 10px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-red-hot)" }}
+          style={{ marginTop: 8, font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-red-hot)" }}
         >
           {error}
         </div>

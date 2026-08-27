@@ -397,7 +397,10 @@ export const Route = createFileRoute("/api/tg")({
         // ---------- /ops в закрытом канале: привязка служебного контура ----------
         if (up.channel_post?.text) {
           const cp = up.channel_post;
-          const cmd0 = cp.text.trim().split(/[\s@]/)[0].toLowerCase();
+          // Текст уже проверен условием выше, но сужение не переносится на
+          // отдельную привязку — забираем строку явно.
+          const cpText = cp.text ?? "";
+          const cmd0 = cpText.trim().split(/[\s@]/)[0].toLowerCase();
           if (cmd0 === "/ops") {
             const { COMMUNITY_KEY, OPS_KEY } = await import("../gtr/community");
             const ccfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
@@ -547,7 +550,11 @@ export const Route = createFileRoute("/api/tg")({
             if (inGroup || (staff && isStaff(staff as { role?: string }))) {
               const { intakePost, intakeReport } = await import("../gtr/intake");
               const src = fromChannel || m.chat.title || (inGroup ? `chat:${m.chat.id}` : "личка");
-              const r = await intakePost(ns, body, String(src).slice(0, 60));
+              // Тот же источник — как подсказка о площадке: пост из канала
+              // «Illuzion Phuket» или из группы площадки часто не называет
+              // её в тексте, но её знает канал. «личка» подсказкой не станет
+              // — matchVenue такого слова не найдёт, и это правильно.
+              const r = await intakePost(ns, body, String(src).slice(0, 60), String(src).slice(0, 60));
               if (r.ok) {
                 const { notifyBossTg } = await import("../gtr/kv-api");
                 const report = intakeReport(r);

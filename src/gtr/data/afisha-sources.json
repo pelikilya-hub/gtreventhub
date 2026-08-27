@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "about": "Карта источников афиши Пхукета: где реально живут события площадок. Основа для следующего шага автосбора — не скрести 110 инстаграмов вслепую, а бить по структурированным агрегаторам, которые покрывают десятки площадок сразу.",
+    "researched": "2026-08-27",
+    "method": "Разведка через веб-поиск (haiku-агенты). Прямой доступ к самим страницам из песочницы заблокирован сетевой политикой — URL и ID собраны из поисковой выдачи и требуют одной проверки живой загрузкой из воркера перед подключением адаптера.",
+    "principle": "Агрегатор с датами и доступом анониму бьёт Instagram: IG анониму отдаёт пустую оболочку, а ra.co/phuket.net/megatix — читаемый HTML с датами."
+  },
+  "aggregators": [
+    {
+      "id": "phuket-net",
+      "name": "Phuket.Net Events Calendar",
+      "url": "https://www.phuket.net/events-calendar/",
+      "kind": "city-guide",
+      "coverage": "самый широкий: 100+ событий всех типов, фильтры по району и категории (Music & Nightlife, Dining, Festivals)",
+      "access": "публичный HTML без авторизации",
+      "structured": "средне — HTML-разметка, поддаётся парсингу; API нет",
+      "priority": 1,
+      "note": "Лучшее соотношение охват/простота. Первый кандидат на адаптер."
+    },
+    {
+      "id": "resident-advisor",
+      "name": "Resident Advisor",
+      "url": "https://ra.co/events/th/all",
+      "kind": "electronic-music",
+      "coverage": "клубные/электронные события; страницы клубов с календарём",
+      "access": "публичный, без авторизации; есть неофициальный GraphQL и готовые парсеры (github.com/djb-gt/resident-advisor-events-scraper)",
+      "structured": "высоко — идеальная структура: дата, лайнап, цена",
+      "priority": 2,
+      "note": "Один адаптер по страницам клубов закрывает 5+ площадок разом.",
+      "venueClubs": {
+        "VEN-0002": { "name": "Café del Mar", "raId": "137028" },
+        "VEN-0001": { "name": "Catch Beach Club", "raId": "127444" },
+        "VEN-0004": { "name": "XANA Beach Club", "raId": "104496" },
+        "VEN-0013": { "name": "Illuzion Phuket", "raId": "162517" },
+        "VEN-0050": { "name": "Fira Beach Club", "raId": "281864" }
+      }
+    },
+    {
+      "id": "megatix",
+      "name": "Megatix Thailand",
+      "url": "https://megatix.in.th",
+      "kind": "ticketing",
+      "coverage": "тикеты пляжных клубов: RAVA, NORA, Café del Mar появляются регулярно",
+      "access": "публичный",
+      "structured": "средне — страницы событий с датами и ценами",
+      "priority": 3,
+      "note": "Точка консолидации билетных событий. Проверить, есть ли устойчивый URL-паттерн по площадке."
+    },
+    {
+      "id": "phuket-101",
+      "name": "Phuket 101 Event Directory",
+      "url": "https://www.phuket101.net/event-directory/",
+      "kind": "city-guide",
+      "coverage": "фестивали, концерты, dining events; сообщество добавляет события",
+      "access": "публичный",
+      "structured": "средне",
+      "priority": 4
+    },
+    {
+      "id": "eventbrite",
+      "name": "Eventbrite Phuket",
+      "url": "https://www.eventbrite.com/d/thailand--phuket/events/",
+      "kind": "international",
+      "coverage": "конференции, фестивали, часть вечеринок",
+      "access": "публичный + официальный OAuth API (eventbrite.com/platform/api)",
+      "structured": "высоко — единственный источник с официальным API",
+      "priority": 5,
+      "note": "Требует регистрации приложения. Медленнее старт, но самый надёжный формат."
+    }
+  ],
+  "telegramChannels": [
+    {
+      "handle": "@phuketnightlife",
+      "url": "https://t.me/phuketnightlife",
+      "audience": "~15K",
+      "lang": "en/ru",
+      "note": "Крупнейший nightlife-канал. Реальное время. Подключение — через пересылку постов боту (канал→площадка теперь резолвится приёмником)."
+    },
+    {
+      "handle": "@events_phuket",
+      "url": "https://t.me/events_phuket",
+      "audience": "~2.5K",
+      "lang": "ru",
+      "note": "События, мастер-классы, встречи."
+    },
+    {
+      "handle": "@phuketparties",
+      "url": "https://t.me/phuketparties",
+      "audience": "~1.5K",
+      "lang": "ru",
+      "note": "Гайд вечеринок."
+    }
+  ],
+  "venueDirect": {
+    "note": "Прямые источники площадок — где у них есть свой сайт с афишей или Meta-доступ. IG анониму закрыт, поэтому в приоритете сайт и Megatix.",
+    "VEN-0013": { "name": "Illuzion Phuket", "site": "https://www.illuzionphuket.com/events/", "ticketmelon": "https://www.ticketmelon.com/928", "postsAfisha": "регулярно" },
+    "VEN-0050": { "name": "Fira Beach Club", "site": "https://firaphuket.com/events/", "postsAfisha": "регулярно" },
+    "VEN-0051": { "name": "NORA Beach Club", "site": "https://www.norabeachclub.com/whats-on/", "megatix": true, "postsAfisha": "регулярно" },
+    "VEN-0046": { "name": "RAVA Beach Club", "site": "https://booking.ravabeachclub.com/events", "megatix": true, "postsAfisha": "регулярно" }
+  },
+  "skip": [
+    { "name": "White Room Phuket", "why": "источники указывают на закрытие" },
+    { "name": "Moonshine Phuket", "why": "изредка постит, живая музыка вместо клубных событий — приоритет низкий" }
+  ]
+}

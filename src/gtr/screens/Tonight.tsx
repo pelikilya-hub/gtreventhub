@@ -5,33 +5,34 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
-import { GREEN, nightOf, richOf, V, PH } from "../data/app-data";
+import { GREEN, isNightVenue, nightOf, richOf, V, PH } from "../data/app-data";
 import geoRaw from "../data/venue-geo.json";
+import { bkkToday } from "../afisha-parse";
 import { Card, Chip, Eyebrow, tint, VenueLogo } from "../ui";
 import { useGtr } from "../store";
 import { allAfishaFn, bookTableFn, promptpayCfgFn, type PromptpayCfg, type VenueAfisha } from "../kv-api";
 import { openAppLink } from "../applink";
 import { PromptpayModal } from "../promptpay-ui";
 import { SwipeToBook } from "../raw-pulse";
+import { gpsTracker, useGpsTracking } from "../gps-track";
+import { loadRoute, saveRoute } from "../evening-route";
 
 const GEO = geoRaw as Record<string, { lat: number; lon: number; src: string }>;
 type FeedItem = VenueAfisha["events"][number] & { vid: string };
 
-const ROUTE_KEY = "gtr-evening-route";
-const loadRoute = (): string[] => {
-  try {
-    return JSON.parse(localStorage.getItem(ROUTE_KEY) ?? "[]") as string[];
-  } catch {
-    return [];
-  }
-};
+/** Сколько дней вперёд предлагаем лентой. Две недели — горизонт, на котором
+ *  у площадок реально есть анонсы; дальше выбор идёт через поле даты. */
+const STRIP_DAYS = 14;
 
-// Ночные площадки: есть часы/вход из свипа гайдов — их и предлагаем вечером
+// Ночные площадки отбираем по сути места, а не по тому, дошли ли до него
+// руки разведки. Прежний фильтр требовал часов или цены входа — и прятал
+// вечером клуб, лайв-бар и полдюжины руфтопов только потому, что свип
+// гайдов их ещё не закрыл. Места с разведанными часами идут первыми.
 const nightVenues = () =>
   PH.venues
     .filter((v) => {
       const n = nightOf(v.id);
-      return n.hours || n.entry || n.best;
+      return n.hours || n.entry || n.best || isNightVenue(v);
     })
     .sort((a, b) => {
       const rank = (t: string) =>
@@ -39,7 +40,7 @@ const nightVenues = () =>
       return rank(a.type) - rank(b.type) || a.name.localeCompare(b.name);
     });
 
-export function TonightScreen() {
+export function TonightScreen({ vid: fromVenue }: { vid?: string } = {}) {
   const { t, i18n } = useTranslation();
   const { user } = useGtr();
   const navigate = useNavigate();
@@ -53,6 +54,9 @@ export function TonightScreen() {
 
   const [ppCfg, setPpCfg] = useState<PromptpayCfg | null>(null);
   const [ppFor, setPpFor] = useState<string>(""); // vid открытого QR-модала
+  const [isTrackingEnabled, setIsTrackingEnabled] = useState(false);
+  const { location: currentLocation, error: gpsError, isTracking } = useGpsTracking(isTrackingEnabled);
+  const active = gpsTracker.getActiveTrack();
 
   useEffect(() => {
     allAfishaFn().then((r) => setItems(r.items)).catch(() => {});
@@ -65,16 +69,48 @@ export function TonightScreen() {
     if (!bkName && user.name) setBkName(user.name);
   }, [user.name]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const todayIso = new Date().toISOString().slice(0, 10);
-  const tomorrowIso = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-  const todayEvents = items.filter((e) => e.dateIso === todayIso);
-  const tomorrowEvents = items.filter((e) => e.dateIso === tomorrowIso);
-  const venues = useMemo(nightVenues, []);
+  // Дата острова, а не телефона и не UTC. toISOString() отдаёт гринвичскую
+  // дату: в Патонге с полуночи до семи утра — самые часы этого экрана — она
+  // ещё вчерашняя, и «Сегодня» показывало вчерашнюю программу, пока шапка
+  // рядом рисовала правильное число местной датой.
+  const todayIso = bkkToday();
+  const tomorrowIso = bkkToday(1);
+
+  // Выбранный вечер. Раньше экран жёстко показывал два блока — сегодня и
+  // завтра, — и события пятницы посмотреть было нечем: гость видел всю
+  // ленту без возможности выбрать день. Теперь день один и выбирается.
+  const [dayIso, setDayIso] = useState(todayIso);
+
+  // Площадка, с которой пришли по кнопке «Что здесь сегодня». Раньше vid
+  // терялся, и гость из карточки заведения попадал на программу всего
+  // острова — искать своё место в ленте из ста десяти.
+  const [onlyVid, setOnlyVid] = useState(fromVenue ?? "");
+  const only = onlyVid && V(onlyVid) ? onlyVid : "";
+
+  const dayEvents = items.filter((e) => e.dateIso === dayIso && (!only || e.vid === only));
+  const allVenues = useMemo(nightVenues, []);
+  const venues = only ? allVenues.filter((v) => v.id === only) : allVenues;
+
+  // Сколько событий на каждый день ленты — число едет прямо на плашку,
+  // чтобы было видно, где вечер живой, ещё до нажатия.
+  const byDay = useMemo(() => {
+    const c: Record<string, number> = {};
+    // Считаем в том же разрезе, в котором показываем: если открыта одна
+    // площадка, число на плашке должно быть её, а не всего острова.
+    for (const e of items) if (!only || e.vid === only) c[e.dateIso] = (c[e.dateIso] ?? 0) + 1;
+    return c;
+  }, [items, only]);
+
+  const strip = useMemo(
+    () => Array.from({ length: STRIP_DAYS }, (_, i) => bkkToday(i)),
+    // bkkToday читает часы: пересчитываем на смене суток, а не раз навсегда.
+    [todayIso],
+  );
 
   const toggleRoute = (vid: string) => {
     const next = route.includes(vid) ? route.filter((x) => x !== vid) : [...route, vid];
     setRoute(next);
-    localStorage.setItem(ROUTE_KEY, JSON.stringify(next));
+    saveRoute(next);
   };
 
   const routeUrl = () => {
@@ -93,7 +129,10 @@ export function TonightScreen() {
       const r = await bookTableFn({
         data: {
           vid,
-          dateIso: todayIso,
+          // Дата выбранного вечера, а не сегодняшняя. Раньше сюда жёстко
+          // уезжал todayIso: гость бронировал стол из блока «Завтра», а
+          // площадка ждала его сегодня.
+          dateIso: dayIso,
           guests: bkGuests,
           name: bkName,
           phone: bkPhone,
@@ -114,11 +153,25 @@ export function TonightScreen() {
   // Дата говорит на языке интерфейса: русская «среда, 19 августа» в
   // английской версии читалась как недоделка.
   const dayLocale = { ru: "ru-RU", en: "en-GB", th: "th-TH" }[i18n.language] ?? "en-GB";
-  const dayLabel = new Date().toLocaleDateString(dayLocale, {
+  // Число берём то же, по которому отобран список, — день острова. Иначе у
+  // гостя из другого пояса шапка и программа под ней расходятся на сутки.
+  const dayLabel = new Date(`${dayIso}T12:00:00Z`).toLocaleDateString(dayLocale, {
     weekday: "long",
     day: "numeric",
     month: "long",
+    timeZone: "UTC",
   });
+  // Короткая подпись на плашке ленты: «пт 29». Полное название дня в ряд
+  // из четырнадцати кнопок не помещается ни на одном телефоне.
+  const chipLabel = (iso: string) => {
+    if (iso === todayIso) return t("Сегодня");
+    if (iso === tomorrowIso) return t("Завтра");
+    return new Date(`${iso}T12:00:00Z`).toLocaleDateString(dayLocale, {
+      weekday: "short",
+      day: "numeric",
+      timeZone: "UTC",
+    });
+  };
 
   const eventCard = (e: FeedItem) => {
     const v = V(e.vid);
@@ -142,7 +195,7 @@ export function TonightScreen() {
                   position: "absolute",
                   top: 9,
                   left: 9,
-                  font: "700 9px/1 'JetBrains Mono',monospace",
+                  font: "700 11px/1 'JetBrains Mono',monospace",
                   padding: "4px 7px",
                   background: "rgba(229,35,27,.85)",
                   color: "#fff",
@@ -155,23 +208,23 @@ export function TonightScreen() {
           </div>
         ) : null}
         <div style={{ padding: "11px 14px 13px" }}>
-          <div style={{ font: "600 13px/1.35 'Golos Text',sans-serif" }}>{e.title}</div>
+          <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>{e.title}</div>
           <div
             style={{
               margin: "5px 0 8px",
-              font: "500 10.5px/1.45 'Golos Text',sans-serif",
+              font: "500 12px/1.45 'Golos Text',sans-serif",
               color: "var(--gtr-t2)",
             }}
           >
             {v.name} · {v.area}
           </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            <button className="gtr-btn" style={{ padding: "6px 10px", fontSize: 10.5 }} onClick={() => setBookVid(bookVid === e.vid ? "" : e.vid)}>
+            <button className="gtr-btn" style={{ padding: "6px 10px", fontSize: 12 }} onClick={() => setBookVid(bookVid === e.vid ? "" : e.vid)}>
               {t("Стол")}
             </button>
             <button
               className="gtr-btn"
-              style={{ padding: "6px 10px", fontSize: 10.5 }}
+              style={{ padding: "6px 10px", fontSize: 12 }}
               onClick={() =>
                 navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid: e.vid } })
               }
@@ -182,7 +235,7 @@ export function TonightScreen() {
               className="gtr-btn"
               style={{
                 padding: "6px 10px",
-                fontSize: 10.5,
+                fontSize: 12,
                 borderColor: route.includes(e.vid) ? GREEN : undefined,
                 color: route.includes(e.vid) ? GREEN : undefined,
               }}
@@ -230,7 +283,7 @@ export function TonightScreen() {
         </button>
       ) : null}
       {bkState ? (
-        <div className="gtr-mono" style={{ font: "500 10px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
+        <div className="gtr-mono" style={{ font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
           {bkState}
         </div>
       ) : null}
@@ -244,7 +297,7 @@ export function TonightScreen() {
     const g = GEO[v.id];
     return (
       <Card key={v.id} style={{ padding: 0, overflow: "hidden" }}>
-        <div style={{ position: "relative", aspectRatio: "16/7", overflow: "hidden" }}>
+        <div className="gtr-venue-shot">
           <div
             style={{
               position: "absolute",
@@ -268,7 +321,8 @@ export function TonightScreen() {
             style={{
               position: "absolute",
               inset: 0,
-              background: "linear-gradient(180deg, rgba(10,11,13,.04) 40%, rgba(10,11,13,.92) 100%)",
+              background:
+                "linear-gradient(180deg, rgba(10,11,13,.5) 0%, rgba(10,11,13,.1) 20%, rgba(10,11,13,0) 42%, rgba(10,11,13,.6) 72%, rgba(10,11,13,.95) 100%)",
             }}
           />
           {/* Знак в верхнем углу снимка: гость листает афишу быстро и
@@ -285,7 +339,17 @@ export function TonightScreen() {
               gap: 8,
             }}
           >
-            <span style={{ font: "600 13.5px/1.25 'Golos Text',sans-serif", flex: 1, minWidth: 0 }}>
+            <span
+              className="gtr-oswald"
+              style={{
+                font: "700 18px/1.1 Oswald,sans-serif",
+                letterSpacing: ".005em",
+                textTransform: "uppercase",
+                textShadow: "0 1px 12px rgba(0,0,0,.55)",
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
               {v.name}
             </span>
             {n.hours ? (
@@ -295,7 +359,7 @@ export function TonightScreen() {
                 </span>
                 <span
                   className="gtr-mono"
-                  style={{ font: "600 9.5px/1 'JetBrains Mono',monospace", color: GREEN, whiteSpace: "nowrap" }}
+                  style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: GREEN, whiteSpace: "nowrap" }}
                 >
                   {t(String(n.hours)).split("·")[0].trim()}
                 </span>
@@ -306,7 +370,7 @@ export function TonightScreen() {
         <div style={{ padding: "10px 14px 13px" }}>
           <div
             style={{
-              font: "500 10.5px/1.5 'Golos Text',sans-serif",
+              font: "500 12px/1.5 'Golos Text',sans-serif",
               color: "var(--gtr-t2)",
               marginBottom: 7,
             }}
@@ -316,7 +380,7 @@ export function TonightScreen() {
           {n.best ? (
             <div
               style={{
-                font: "500 10.5px/1.5 'Golos Text',sans-serif",
+                font: "500 12px/1.5 'Golos Text',sans-serif",
                 color: tint("#F5A623", 0.9),
                 marginBottom: 8,
               }}
@@ -327,7 +391,7 @@ export function TonightScreen() {
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             <button
               className="gtr-btn"
-              style={{ padding: "6px 10px", fontSize: 10.5 }}
+              style={{ padding: "6px 10px", fontSize: 12 }}
               onClick={() => setBookVid(bookVid === v.id ? "" : v.id)}
             >
               {t("Стол")}
@@ -335,7 +399,7 @@ export function TonightScreen() {
             {v.phone ? (
               <a
                 className="gtr-btn"
-                style={{ padding: "6px 10px", fontSize: 10.5, textDecoration: "none" }}
+                style={{ padding: "6px 10px", fontSize: 12, textDecoration: "none" }}
                 href={`tel:${String(v.phone).replace(/[^+\d]/g, "")}`}
               >
                 {t("Позвонить")}
@@ -344,7 +408,7 @@ export function TonightScreen() {
             {v.social ? (
               <a
                 className="gtr-btn"
-                style={{ padding: "6px 10px", fontSize: 10.5, textDecoration: "none" }}
+                style={{ padding: "6px 10px", fontSize: 12, textDecoration: "none" }}
                 href={String(v.social)}
                 target="_blank"
                 rel="noreferrer"
@@ -359,7 +423,7 @@ export function TonightScreen() {
             {g ? (
               <a
                 className="gtr-btn"
-                style={{ padding: "6px 10px", fontSize: 10.5, textDecoration: "none" }}
+                style={{ padding: "6px 10px", fontSize: 12, textDecoration: "none" }}
                 href={`https://www.google.com/maps/search/?api=1&query=${g.lat},${g.lon}`}
                 target="_blank"
                 rel="noreferrer"
@@ -371,7 +435,7 @@ export function TonightScreen() {
               className="gtr-btn"
               style={{
                 padding: "6px 10px",
-                fontSize: 10.5,
+                fontSize: 12,
                 borderColor: inRoute ? GREEN : undefined,
                 color: inRoute ? GREEN : undefined,
               }}
@@ -392,19 +456,80 @@ export function TonightScreen() {
         <h1 className="gtr-oswald gtr-h1">{t("Сегодня на Пхукете")}</h1>
         <span
           className="gtr-mono"
-          style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+          style={{ font: "600 13px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
           {dayLabel}
         </span>
       </div>
       <div
         style={{
-          font: "500 11.5px/1.5 'Golos Text',sans-serif",
+          font: "500 13px/1.5 'Golos Text',sans-serif",
           color: "var(--gtr-t2)",
           marginBottom: 14,
         }}
       >
         {t("Выберите вечер: события дня, открытые площадки, бронь стола и маршрут по нескольким местам.")}
+      </div>
+
+      {/* Открыта одна площадка — говорим об этом прямо и даём выход на
+          весь остров: иначе пустой день читается как «на Пхукете ничего
+          не происходит», хотя это программа одного бара. */}
+      {only ? (
+        <Card style={{ padding: "10px 14px", marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <VenueLogo vid={only} h={20} />
+            <span style={{ font: "600 14px/1.3 'Golos Text',sans-serif" }}>{V(only).name}</span>
+            <span style={{ font: "500 12.5px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+              {V(only).area}
+            </span>
+            <button
+              className="gtr-btn"
+              style={{ marginLeft: "auto", padding: "6px 10px", fontSize: 12 }}
+              onClick={() => setOnlyVid("")}
+            >
+              {t("Показать весь остров")}
+            </button>
+          </div>
+        </Card>
+      ) : null}
+
+      {/* Выбор вечера. Лента на две недели вперёд плюс поле даты для всего,
+          что дальше: у площадок бывают анонсы за месяц, и упираться в
+          горизонт ленты гость не должен. */}
+      <div className="gtr-map-row" style={{ marginBottom: 8 }}>
+        {strip.map((iso) => {
+          const on = iso === dayIso;
+          const n = byDay[iso] ?? 0;
+          return (
+            <button
+              key={iso}
+              className={`gtr-map-chip${on ? " on" : ""}`}
+              onClick={() => setDayIso(iso)}
+              aria-pressed={on}
+            >
+              {chipLabel(iso)}
+              {/* Ноль не рисуем: пустая плашка и так читается как пустой
+                  день, а «· 0» превращает ленту в частокол нулей. */}
+              {n ? <span style={{ opacity: 0.55 }}> · {n}</span> : null}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+        <input
+          className="gtr-input"
+          type="date"
+          value={dayIso}
+          min={todayIso}
+          onChange={(e) => setDayIso(e.target.value || todayIso)}
+          style={{ maxWidth: 190 }}
+          aria-label={t("Дата")}
+        />
+        {dayIso !== todayIso ? (
+          <button className="gtr-btn" onClick={() => setDayIso(todayIso)}>
+            {t("Вернуться к сегодня")}
+          </button>
+        ) : null}
       </div>
 
       {/* Маршрут вечера — бар-хоппинг */}
@@ -417,11 +542,11 @@ export function TonightScreen() {
                 {i + 1}. {V(vid).name}
               </Chip>
             ))}
-            <span style={{ marginLeft: "auto", display: "flex", gap: 7 }}>
+            <span style={{ marginLeft: "auto", display: "flex", gap: 7, alignItems: "center" }}>
               {routeUrl() ? (
                 <a
                   className="gtr-btn"
-                  style={{ padding: "6px 10px", fontSize: 10.5, textDecoration: "none" }}
+                  style={{ padding: "6px 10px", fontSize: 12, textDecoration: "none" }}
                   href={routeUrl()}
                   target="_blank"
                   rel="noreferrer"
@@ -429,26 +554,104 @@ export function TonightScreen() {
                   {t("Открыть в Google Maps")} ↗
                 </a>
               ) : null}
+              {isTracking ? (
+                <>
+                  <span
+                    className="gtr-mono"
+                    style={{
+                      font: "600 11px/1 'JetBrains Mono',monospace",
+                      color: "#E5231B",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 5,
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: "#E5231B",
+                        animation: "pulse 1s infinite",
+                      }}
+                    />
+                    {t("GPS ВКЛ")}
+                  </span>
+                  <button
+                    className="gtr-btn"
+                    style={{ padding: "6px 10px", fontSize: 12 }}
+                    onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "tracking" } })}
+                  >
+                    {t("Карта")} →
+                  </button>
+                  <button
+                    className="gtr-btn"
+                    style={{ padding: "6px 10px", fontSize: 12, color: "#E5231B", borderColor: "#E5231B" }}
+                    onClick={() => {
+                      setIsTrackingEnabled(false);
+                      gpsTracker.endTrack();
+                    }}
+                  >
+                    {t("Завершить")}
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="gtr-btn"
+                  style={{ padding: "6px 10px", fontSize: 12 }}
+                  onClick={() => {
+                    gpsTracker.startTrack(route);
+                    setIsTrackingEnabled(true);
+                  }}
+                >
+                  {t("GPS трекер")} 📍
+                </button>
+              )}
               <button
                 className="gtr-btn"
-                style={{ padding: "6px 10px", fontSize: 10.5 }}
+                style={{ padding: "6px 10px", fontSize: 12 }}
                 onClick={() => {
                   setRoute([]);
-                  localStorage.setItem(ROUTE_KEY, "[]");
+                  saveRoute([]);
+                  if (isTracking) setIsTrackingEnabled(false);
                 }}
               >
                 {t("Очистить")}
               </button>
             </span>
           </div>
+          {gpsError && (
+            <div
+              className="gtr-mono"
+              style={{
+                font: "500 11px/1.45 'JetBrains Mono',monospace",
+                color: "#E5231B",
+                marginTop: 8,
+              }}
+            >
+              {t("Ошибка GPS")}: {gpsError}
+            </div>
+          )}
+          {currentLocation && (
+            <div
+              className="gtr-mono"
+              style={{
+                font: "500 11px/1.45 'JetBrains Mono',monospace",
+                color: GREEN,
+                marginTop: 8,
+              }}
+            >
+              Точность: ±{Math.round(currentLocation.accuracy)}м
+            </div>
+          )}
         </Card>
       ) : null}
 
-      {/* События сегодня из афиш площадок */}
+      {/* События выбранного вечера из афиш площадок */}
       <Eyebrow style={{ marginBottom: 10 }}>
-        {t("СОБЫТИЯ СЕГОДНЯ")} · {todayEvents.length}
+        {dayIso === todayIso ? t("СОБЫТИЯ СЕГОДНЯ") : dayLabel.toUpperCase()} · {dayEvents.length}
       </Eyebrow>
-      {todayEvents.length ? (
+      {dayEvents.length ? (
         <div
           style={{
             display: "grid",
@@ -457,37 +660,23 @@ export function TonightScreen() {
             marginBottom: 18,
           }}
         >
-          {todayEvents.map(eventCard)}
+          {dayEvents.map(eventCard)}
         </div>
       ) : (
         <div
           style={{
-            font: "500 11px/1.5 'Golos Text',sans-serif",
+            font: "500 13px/1.5 'Golos Text',sans-serif",
             color: "var(--gtr-t3)",
             margin: "0 0 18px",
           }}
         >
-          {t("В афишах пока нет событий на сегодня — ниже площадки, открытые вечером.")}
+          {only
+            ? t("У этой площадки на выбранный день анонсов нет. Часы и вход — в карточке ниже.")
+            : dayIso === todayIso
+              ? t("В афишах пока нет событий на сегодня — ниже площадки, открытые вечером.")
+              : t("На этот день в афишах пока пусто — выберите другую дату или смотрите площадки ниже.")}
         </div>
       )}
-
-      {tomorrowEvents.length ? (
-        <>
-          <Eyebrow style={{ marginBottom: 10 }}>
-            {t("ЗАВТРА")} · {tomorrowEvents.length}
-          </Eyebrow>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill,minmax(210px,1fr))",
-              gap: 11,
-              marginBottom: 18,
-            }}
-          >
-            {tomorrowEvents.map(eventCard)}
-          </div>
-        </>
-      ) : null}
 
       {/* Ночные площадки: часы, вход, фирменные ночи */}
       <Eyebrow style={{ marginBottom: 10 }}>
@@ -506,7 +695,7 @@ export function TonightScreen() {
         className="gtr-mono"
         style={{
           marginTop: 14,
-          font: "500 9.5px/1.6 'JetBrains Mono',monospace",
+          font: "500 11px/1.6 'JetBrains Mono',monospace",
           color: "var(--gtr-t3)",
         }}
       >

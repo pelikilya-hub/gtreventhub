@@ -139,7 +139,7 @@ export function PrivateScreen() {
         </div>
         <div
           className="gtr-mono"
-          style={{ font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginTop: 8 }}
+          style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginTop: 8 }}
         >
           {t("Занятость и итоговую цену показывает trip.com — открываем объект сразу на эти даты.")}
         </div>
@@ -195,7 +195,7 @@ export function PrivateScreen() {
                   className="gtr-mono"
                   style={{
                     position: "absolute", left: 12, top: 10,
-                    font: "700 8.5px/1 'JetBrains Mono',monospace",
+                    font: "700 10px/1 'JetBrains Mono',monospace",
                     letterSpacing: ".14em", padding: "4px 7px",
                     background: "rgba(229,35,27,.85)", color: "#fff",
                   }}
@@ -203,12 +203,12 @@ export function PrivateScreen() {
                   PRIVATE
                 </span>
                 <div style={{ position: "absolute", left: 12, right: 12, bottom: 9 }}>
-                  <div style={{ font: "600 14px/1.3 'Golos Text',sans-serif", color: "#fff" }}>
+                  <div style={{ font: "600 14px/1.45 'Golos Text',sans-serif", color: "#fff" }}>
                     {v.name}
                   </div>
                   <div
                     className="gtr-mono"
-                    style={{ font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "rgba(255,255,255,.7)", marginTop: 3 }}
+                    style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "rgba(255,255,255,.7)", marginTop: 3 }}
                   >
                     {venue.area}
                     {v.rating ? ` · ★ ${v.rating}/${v.ratingOf} (${v.reviews})` : ""}
@@ -229,14 +229,14 @@ export function PrivateScreen() {
                       </span>
                       <span
                         className="gtr-mono"
-                        style={{ font: "500 9.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+                        style={{ font: "500 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
                       >
                         {t("за ночь")} · GTR +{Math.round((VILLA_MARKUP - 1) * 100)}%
                       </span>
                       <span
                         className="gtr-mono"
                         style={{
-                          font: "700 8.5px/1 'JetBrains Mono',monospace",
+                          font: "700 10px/1 'JetBrains Mono',monospace",
                           letterSpacing: ".1em",
                           padding: "3px 6px",
                           color: fresh ? "#7BE38A" : "var(--gtr-amber)",
@@ -250,7 +250,7 @@ export function PrivateScreen() {
                         чего сложилась наша цена, и не считает в уме */}
                     <div
                       className="gtr-mono"
-                      style={{ font: "500 9px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginTop: 3 }}
+                      style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginTop: 3 }}
                     >
                       trip.com ฿{base?.toLocaleString("ru-RU")}/{t("ночь")}
                       {checked ? ` · ${t("сверено")} ${checked}` : ""}
@@ -261,7 +261,7 @@ export function PrivateScreen() {
                   <div
                     className="gtr-mono"
                     style={{
-                      font: "500 9.5px/1.5 'JetBrains Mono',monospace",
+                      font: "500 11px/1.5 'JetBrains Mono',monospace",
                       color: "var(--gtr-amber)",
                       marginBottom: 8,
                       border: "1px solid rgba(245,166,35,.35)",

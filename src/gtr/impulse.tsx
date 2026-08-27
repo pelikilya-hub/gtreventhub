@@ -206,28 +206,45 @@ export function ImpulseArt({
   useEffect(() => {
     const cv = ref.current;
     if (!cv) return;
-    const rect = cv.getBoundingClientRect();
-    const w = Math.max(64, Math.round(rect.width));
-    const h = Math.max(64, Math.round(rect.height));
-    const key = `${seed}|${w}x${h}|${density ?? 1}`;
-    cv.width = w * 2; // ретина
-    cv.height = h * 2;
-    const ctx = cv.getContext("2d");
-    if (!ctx) return;
-    ctx.scale(2, 2);
-    const cached = cache.get(key);
-    if (cached) {
-      const img = new Image();
-      img.onload = () => ctx.drawImage(img, 0, 0, w, h);
-      img.src = cached;
-      return;
-    }
-    drawImpulse(ctx, w, h, seed, { density });
-    try {
-      cache.set(key, cv.toDataURL("image/png"));
-    } catch {
-      /* приватный режим — рисуем без кэша */
-    }
+    // Кадр рисуется под фактический размер canvas. Раньше замер был
+    // однократным — при повороте телефона контейнер менял ширину/высоту, а
+    // растр оставался прежним, и CSS растягивал его в косую кашу. Теперь
+    // ResizeObserver перерисовывает кадр, когда целочисленный размер
+    // действительно изменился (не на каждый суб-пиксель ретины).
+    let lastW = 0;
+    let lastH = 0;
+    const paint = () => {
+      const rect = cv.getBoundingClientRect();
+      const w = Math.max(64, Math.round(rect.width));
+      const h = Math.max(64, Math.round(rect.height));
+      if (w === lastW && h === lastH) return;
+      lastW = w;
+      lastH = h;
+      const key = `${seed}|${w}x${h}|${density ?? 1}`;
+      cv.width = w * 2; // ретина
+      cv.height = h * 2;
+      const ctx = cv.getContext("2d");
+      if (!ctx) return;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(2, 2);
+      const cached = cache.get(key);
+      if (cached) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0, w, h);
+        img.src = cached;
+        return;
+      }
+      drawImpulse(ctx, w, h, seed, { density });
+      try {
+        cache.set(key, cv.toDataURL("image/png"));
+      } catch {
+        /* приватный режим — рисуем без кэша */
+      }
+    };
+    paint();
+    const ro = new ResizeObserver(paint);
+    ro.observe(cv);
+    return () => ro.disconnect();
   }, [seed, density]);
 
   return (

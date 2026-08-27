@@ -1,0 +1,24 @@
+{
+  "piston-recordings": {
+    "name": "Piston Recordings",
+    "file": "/labels/logos/piston-recordings-logo.png",
+    "w": 512,
+    "h": 142,
+    "tone": "light",
+    "onDark": true,
+    "site": "https://www.pistonrecordings.com/",
+    "src": "https://www.pistonrecordings.com/wp-content/uploads/2020/09/PistonRecordingsLogo.png",
+    "bytes": 27506
+  },
+  "suara": {
+    "name": "Suara",
+    "file": "/labels/logos/suara-logo.png",
+    "w": 89,
+    "h": 42,
+    "tone": "light",
+    "onDark": true,
+    "site": "https://www.suara-music.com/",
+    "src": "https://www.suara-music.com/img/logo.png",
+    "bytes": 1259
+  }
+}

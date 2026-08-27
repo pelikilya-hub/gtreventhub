@@ -131,6 +131,10 @@ export function ConstructorScreen({
   // Панель взаимодействия: граф ничем не перекрыт, панель выезжает только
   // по длительному нажатию на блок (или кнопкой в шапке)
   const [panelOpen, setPanelOpen] = useState(false);
+  // Граф-папка: по умолчанию всё, что поставлено на площадку, свёрнуто
+  // внутрь её блока — канвас чист. Двойной клик или долгое нажатие на
+  // площадку «открывает папку»: показывается вложенный граф модулей.
+  const [openFolder, setOpenFolder] = useState(false);
   const holdRef = useRef<{ t: number; x: number; y: number } | null>(null);
   // «Куда ставим?» — блок не добавляется, пока не выбран зал/зона
   const [placing, setPlacing] = useState<{
@@ -413,7 +417,7 @@ export function ConstructorScreen({
                       style={{
                         display: "block",
                         marginTop: 3,
-                        font: "500 9.5px/1.3 'JetBrains Mono',monospace",
+                        font: "500 11px/1.45 'JetBrains Mono',monospace",
                         color: "rgba(255,255,255,.4)",
                       }}
                     >
@@ -475,13 +479,15 @@ export function ConstructorScreen({
     dragRef.current = { id: n.id, dx: e.clientX - r.left - n.x, dy: e.clientY - r.top - n.y };
     setSel(n.id);
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    // длительное нажатие (~0.5с) без движения → панель взаимодействия
+    // длительное нажатие (~0.5с) без движения: на площадке — «войти в папку»
+    // (раскрыть вложенный граф), на остальных блоках — панель взаимодействия.
     cancelHold();
     holdRef.current = {
       t: window.setTimeout(() => {
         holdRef.current = null;
         dragRef.current = null;
-        setPanelOpen(true);
+        if (n.kind === "venue") setOpenFolder((o) => !o);
+        else setPanelOpen(true);
       }, 500),
       x: e.clientX,
       y: e.clientY,
@@ -526,7 +532,17 @@ export function ConstructorScreen({
     0,
   );
 
-  const canvasH = Math.max(560, ...g.nodes.map((n) => n.y + NODE_H + 60));
+  // Папка площадки: блок venue — «папка», всё остальное живёт внутри неё.
+  const venueNode = g.nodes.find((n) => n.kind === "venue");
+  const insideNodes = g.nodes.filter((n) => n.kind !== "venue");
+  const insideCount = insideNodes.length;
+  // Свёрнуто — на канвасе только площадка; развёрнуто — весь граф.
+  const visibleNodes = openFolder || !venueNode ? g.nodes : g.nodes.filter((n) => n.kind === "venue");
+  const showLinks = openFolder || !venueNode;
+
+  const canvasH = openFolder
+    ? Math.max(560, ...g.nodes.map((n) => n.y + NODE_H + 60))
+    : 420;
 
   // Смета события из графа: площадка + артисты + подрядчики + комиссия GTR
   const quote = computeQuote(g, vid);
@@ -599,7 +615,7 @@ export function ConstructorScreen({
     if (!win) {
       const body = [
         `GTR EVENT · Предложение по событию № ${no}`,
-        `Площадка: ${v.name} (${vid})`,
+        `Площадка: ${v.name}`,
         `Залы: ${rooms}`,
         `Когда: ${when}`,
         ``,
@@ -725,7 +741,7 @@ export function ConstructorScreen({
             }}
           >
             <Eyebrow>{t("КУДА СТАВИМ")}</Eyebrow>
-            <div style={{ font: "600 14px/1.35 'Golos Text',sans-serif" }}>
+            <div style={{ font: "600 14px/1.45 'Golos Text',sans-serif" }}>
               «{placing.title}{t("» — в какой зал или зону?")}
             </div>
             <div style={{ display: "grid", gap: 6 }}>
@@ -757,7 +773,7 @@ export function ConstructorScreen({
                         style={{
                           display: "block",
                           marginTop: 2,
-                          font: "500 9px/1.3 'JetBrains Mono',monospace",
+                          font: "500 11px/1.45 'JetBrains Mono',monospace",
                           color: "rgba(255,255,255,.4)",
                         }}
                       >
@@ -768,7 +784,7 @@ export function ConstructorScreen({
                       className="gtr-mono"
                       style={{
                         flex: "none",
-                        font: "700 9px/1 'JetBrains Mono',monospace",
+                        font: "700 11px/1 'JetBrains Mono',monospace",
                         color: r.badge === "ЗОНА" ? "#7B9EFF" : "#E5231B",
                       }}
                     >
@@ -791,7 +807,7 @@ export function ConstructorScreen({
                   setPlacing(null);
                 }}
               >
-                <span style={{ flex: 1, textAlign: "left", fontSize: 11.5 }}>
+                <span style={{ flex: 1, textAlign: "left", fontSize: 13 }}>
                   {t("Вся площадка — без привязки к залу")}
                 </span>
               </button>
@@ -826,7 +842,7 @@ export function ConstructorScreen({
               gap: 6,
               borderRadius: 0,
               padding: "5px 10px",
-              font: "600 9.5px/1 'JetBrains Mono',monospace",
+              font: "600 11px/1 'JetBrains Mono',monospace",
               letterSpacing: ".06em",
               color: "#fff",
               border: "1px solid rgba(255,255,255,.14)",
@@ -855,15 +871,23 @@ export function ConstructorScreen({
         {linkFrom ? <Chip color={GREEN}>{t("СВЯЗЬ: выберите левый порт целевого блока")}</Chip> : null}
         <button
           className={briefOpen ? "gtr-btn gtr-btn-red" : "gtr-btn"}
-          style={{ padding: "6px 12px", fontSize: 11 }}
+          style={{ padding: "6px 12px", fontSize: 13 }}
           onClick={() => setBriefOpen((x) => !x)}
         >
           {t("Бриф ·")} {briefProgress(briefFormat, briefAnswers).done}/
           {briefProgress(briefFormat, briefAnswers).total}
         </button>
         <button
+          className={openFolder ? "gtr-btn gtr-btn-red" : "gtr-btn"}
+          style={{ padding: "6px 12px", fontSize: 13 }}
+          title={t("Двойной клик или удержание на площадке — то же самое")}
+          onClick={() => setOpenFolder((x) => !x)}
+        >
+          {openFolder ? t("Свернуть площадку ▲") : `${t("Открыть площадку ▾")}${insideCount ? ` · ${insideCount}` : ""}`}
+        </button>
+        <button
           className={panelOpen ? "gtr-btn gtr-btn-red" : "gtr-btn"}
-          style={{ padding: "6px 12px", fontSize: 11 }}
+          style={{ padding: "6px 12px", fontSize: 13 }}
           title={t("Смета, контроль, история. Или удержите блок на графе")}
           onClick={() => setPanelOpen((x) => !x)}
         >
@@ -881,7 +905,7 @@ export function ConstructorScreen({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                font: "700 8px/1 Oswald,sans-serif",
+                font: "700 10px/1 Oswald,sans-serif",
                 background: "rgba(229,35,27,.2)",
                 border: "1px solid rgba(229,35,27,.6)",
               }}
@@ -900,7 +924,7 @@ export function ConstructorScreen({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  font: "700 8px/1 Oswald,sans-serif",
+                  font: "700 10px/1 Oswald,sans-serif",
                   background: "rgba(46,204,113,.16)",
                   border: "1px solid rgba(46,204,113,.5)",
                   color: "#2ECC71",
@@ -938,42 +962,42 @@ export function ConstructorScreen({
           >
             <input
               className="gtr-input"
-              style={{ fontSize: 11 }}
+              style={{ fontSize: 13 }}
               placeholder={t("Формат события *")}
               value={org.title}
               onChange={(e) => setOrg({ ...org, title: e.target.value })}
             />
             <input
               className="gtr-input"
-              style={{ fontSize: 11 }}
+              style={{ fontSize: 13 }}
               placeholder={t("Дата / слот")}
               value={org.date}
               onChange={(e) => setOrg({ ...org, date: e.target.value })}
             />
             <input
               className="gtr-input"
-              style={{ fontSize: 11 }}
+              style={{ fontSize: 13 }}
               placeholder={t("Гостей")}
               value={org.guests}
               onChange={(e) => setOrg({ ...org, guests: e.target.value })}
             />
             <input
               className="gtr-input"
-              style={{ fontSize: 11 }}
+              style={{ fontSize: 13 }}
               placeholder={t("Бюджет, ฿")}
               value={org.budget}
               onChange={(e) => setOrg({ ...org, budget: e.target.value })}
             />
             <input
               className="gtr-input"
-              style={{ fontSize: 11 }}
+              style={{ fontSize: 13 }}
               placeholder={t("Ваше имя / компания *")}
               value={org.name}
               onChange={(e) => setOrg({ ...org, name: e.target.value })}
             />
             <input
               className="gtr-input"
-              style={{ fontSize: 11 }}
+              style={{ fontSize: 13 }}
               placeholder={t("Контакт (email / телефон) *")}
               value={org.contact}
               onChange={(e) => setOrg({ ...org, contact: e.target.value })}
@@ -1087,7 +1111,7 @@ export function ConstructorScreen({
                     <div style={{ display: "grid", gap: 6, padding: "6px 0 4px 10px" }}>
                       <input
                         className="gtr-input"
-                        style={{ padding: "7px 9px", fontSize: 11 }}
+                        style={{ padding: "7px 9px", fontSize: 13 }}
                         placeholder={artBase ? "Поиск по 312 артистам…" : "Загрузка базы…"}
                         value={artQ}
                         onChange={(e) => setArtQ(e.target.value)}
@@ -1095,7 +1119,7 @@ export function ConstructorScreen({
                       {vibeMatches.length ? (
                         <div
                           className="gtr-eyebrow"
-                          style={{ fontSize: 8.5, marginTop: 2, color: eventVibe?.colors?.[0] }}
+                          style={{ fontSize: 10, marginTop: 2, color: eventVibe?.colors?.[0] }}
                           title={(eventVibe?.styles ?? []).join(" · ")}
                         >
                           {t("ПОД ВАЙБ ·")} {(eventVibe?.styles ?? []).slice(0, 2).join(", ")}
@@ -1110,7 +1134,7 @@ export function ConstructorScreen({
                         />
                       ))}
                       {lineupArtists.length ? (
-                        <div className="gtr-eyebrow" style={{ fontSize: 8.5, marginTop: 2 }}>
+                        <div className="gtr-eyebrow" style={{ fontSize: 10, marginTop: 2 }}>
                           {t("ИЗ ЛАЙНАПА ·")} {lineupArtists.length}
                         </div>
                       ) : null}
@@ -1118,7 +1142,7 @@ export function ConstructorScreen({
                         <ArtistPick key={a.id} a={a} color={K[1]} onAdd={() => addArtistNode(a)} />
                       ))}
                       {artQ.trim() ? (
-                        <div className="gtr-eyebrow" style={{ fontSize: 8.5, marginTop: 2 }}>
+                        <div className="gtr-eyebrow" style={{ fontSize: 10, marginTop: 2 }}>
                           {t("НАЙДЕНО ·")} {artSearch.length}
                         </div>
                       ) : null}
@@ -1128,7 +1152,7 @@ export function ConstructorScreen({
                       {!lineupArtists.length && !artQ.trim() ? (
                         <div
                           style={{
-                            font: "500 10px/1.5 'Golos Text',sans-serif",
+                            font: "500 12px/1.5 'Golos Text',sans-serif",
                             color: "rgba(255,255,255,.4)",
                           }}
                         >
@@ -1165,14 +1189,14 @@ export function ConstructorScreen({
                             }
                           >
                             <span style={{ flex: 1, minWidth: 0 }}>
-                              <span style={{ display: "block", fontWeight: 600, fontSize: 11 }}>
+                              <span style={{ display: "block", fontWeight: 600, fontSize: 13 }}>
                                 {p.title}
                               </span>
                               <span
                                 style={{
                                   display: "block",
                                   marginTop: 2,
-                                  font: "500 9px/1.3 'JetBrains Mono',monospace",
+                                  font: "500 11px/1.45 'JetBrains Mono',monospace",
                                   color: "rgba(255,255,255,.4)",
                                 }}
                               >
@@ -1209,7 +1233,7 @@ export function ConstructorScreen({
                         <div key={grp} style={{ display: "grid", gap: 4 }}>
                           <div
                             className="gtr-eyebrow"
-                            style={{ fontSize: 8.5, marginTop: 2, color: "rgba(255,255,255,.45)" }}
+                            style={{ fontSize: 10, marginTop: 2, color: "rgba(255,255,255,.45)" }}
                           >
                             {grp}
                           </div>
@@ -1252,7 +1276,7 @@ export function ConstructorScreen({
                                 >
                                   <span style={{ flex: 1, minWidth: 0 }}>
                                     <span
-                                      style={{ display: "block", fontWeight: 600, fontSize: 11 }}
+                                      style={{ display: "block", fontWeight: 600, fontSize: 13 }}
                                     >
                                       {e.name}
                                     </span>
@@ -1260,7 +1284,7 @@ export function ConstructorScreen({
                                       style={{
                                         display: "block",
                                         marginTop: 2,
-                                        font: "700 9.5px/1.3 'JetBrains Mono',monospace",
+                                        font: "700 11px/1.45 'JetBrains Mono',monospace",
                                         color: added ? "rgba(255,255,255,.4)" : RATE_COLOR[e.kind],
                                       }}
                                     >
@@ -1282,7 +1306,7 @@ export function ConstructorScreen({
                           <div key={vd.name} style={{ display: "grid", gap: 4 }}>
                             <div
                               className="gtr-eyebrow"
-                              style={{ fontSize: 8.5, marginTop: 2, color: "rgba(255,255,255,.45)" }}
+                              style={{ fontSize: 10, marginTop: 2, color: "rgba(255,255,255,.45)" }}
                             >
                               {vd.name}
                             </div>
@@ -1312,14 +1336,14 @@ export function ConstructorScreen({
                                 }
                               >
                                 <span style={{ flex: 1, minWidth: 0 }}>
-                                  <span style={{ display: "block", fontWeight: 600, fontSize: 11 }}>
+                                  <span style={{ display: "block", fontWeight: 600, fontSize: 13 }}>
                                     {p.package}
                                   </span>
                                   <span
                                     style={{
                                       display: "block",
                                       marginTop: 2,
-                                      font: "700 9.5px/1.3 'JetBrains Mono',monospace",
+                                      font: "700 11px/1.45 'JetBrains Mono',monospace",
                                       color: K[1],
                                     }}
                                   >
@@ -1335,7 +1359,7 @@ export function ConstructorScreen({
                                       style={{
                                         display: "block",
                                         marginTop: 2,
-                                        font: "500 9px/1.35 'Golos Text',sans-serif",
+                                        font: "500 11px/1.45 'Golos Text',sans-serif",
                                         color: "rgba(255,255,255,.4)",
                                       }}
                                     >
@@ -1366,14 +1390,14 @@ export function ConstructorScreen({
                                 }
                               >
                                 <span style={{ flex: 1, minWidth: 0 }}>
-                                  <span style={{ display: "block", fontWeight: 600, fontSize: 11 }}>
+                                  <span style={{ display: "block", fontWeight: 600, fontSize: 13 }}>
                                     {vd.meta}
                                   </span>
                                   <span
                                     style={{
                                       display: "block",
                                       marginTop: 2,
-                                      font: "600 9px/1.3 'JetBrains Mono',monospace",
+                                      font: "600 11px/1.45 'JetBrains Mono',monospace",
                                       color: "rgba(255,255,255,.4)",
                                     }}
                                   >
@@ -1413,7 +1437,7 @@ export function ConstructorScreen({
             onPointerUp={onPointerUp}
             style={{
               position: "relative",
-              minWidth: 1030,
+              minWidth: openFolder || !venueNode ? 1030 : "auto",
               height: canvasH,
               backgroundImage: "radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px)",
               backgroundSize: "26px 26px",
@@ -1428,7 +1452,7 @@ export function ConstructorScreen({
                 pointerEvents: "none",
               }}
             >
-              {g.links.map((l, i) => {
+              {(showLinks ? g.links : []).map((l, i) => {
                 const a = nodeById(l.from);
                 const b = nodeById(l.to);
                 if (!a || !b) return null;
@@ -1463,22 +1487,25 @@ export function ConstructorScreen({
               })}
             </svg>
 
-            {g.nodes.map((n) => {
+            {visibleNodes.map((n) => {
               const K = KINDS[n.kind];
               const on = sel === n.id;
               const linking = linkFrom === n.id;
               const st = nodeStatus(n);
               const healthy = st.status === "ok";
               const sc = STATUS_COLOR[st.status];
+              const isVenueFolder = n.kind === "venue";
               return (
                 <div
                   key={n.id}
-                  className="gtr-node"
+                  className={`gtr-node${isVenueFolder ? " gtr-node-folder" : ""}`}
                   onPointerDown={(e) => onPointerDown(e, n)}
                   onContextMenu={(e) => e.preventDefault()}
+                  onDoubleClick={isVenueFolder ? () => { cancelHold(); setOpenFolder((o) => !o); } : undefined}
                   style={{
-                    left: n.x,
-                    top: n.y,
+                    left: isVenueFolder && !openFolder ? 30 : n.x,
+                    top: isVenueFolder && !openFolder ? 26 : n.y,
+                    width: isVenueFolder && !openFolder ? 260 : undefined,
                     border: `1px solid ${on ? K[1] : linking ? GREEN : healthy ? "rgba(255,255,255,.11)" : sc}`,
                     boxShadow: on
                       ? "0 14px 34px rgba(229,35,27,.22)"
@@ -1521,7 +1548,7 @@ export function ConstructorScreen({
                     <span
                       className="gtr-mono"
                       style={{
-                        font: "600 8px/1 'JetBrains Mono',monospace",
+                        font: "600 10px/1 'JetBrains Mono',monospace",
                         letterSpacing: ".08em",
                         color: K[1],
                       }}
@@ -1533,7 +1560,7 @@ export function ConstructorScreen({
                         className="gtr-mono"
                         style={{
                           marginLeft: "auto",
-                          font: "600 8.5px/1 'JetBrains Mono',monospace",
+                          font: "600 10px/1 'JetBrains Mono',monospace",
                           color: "rgba(255,255,255,.5)",
                           background: "rgba(255,255,255,.07)",
                           borderRadius: 0,
@@ -1548,14 +1575,47 @@ export function ConstructorScreen({
                   <div
                     style={{
                       marginTop: 4,
-                      font: "500 9.5px/1.35 'Golos Text',sans-serif",
+                      font: "500 11px/1.45 'Golos Text',sans-serif",
                       color: "rgba(255,255,255,.45)",
                     }}
                   >
                     {n.sub}
                   </div>
 
-                  {/* порты */}
+                  {/* площадка-папка: счётчик вложенного и подсказка «войти» */}
+                  {isVenueFolder ? (
+                    <button
+                      className="gtr-folder-open"
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={(e) => { e.stopPropagation(); cancelHold(); setOpenFolder((o) => !o); }}
+                      style={{
+                        marginTop: 10,
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "8px 10px",
+                        background: openFolder ? "rgba(229,35,27,.12)" : "rgba(255,255,255,.05)",
+                        border: `1px solid ${openFolder ? "rgba(229,35,27,.4)" : "rgba(255,255,255,.12)"}`,
+                        color: "#fff",
+                        cursor: "pointer",
+                        font: "600 11px/1 'JetBrains Mono',monospace",
+                        letterSpacing: ".04em",
+                      }}
+                    >
+                      <Icon d={openFolder ? "M6 9l6 6 6-6" : "M3 7h5l2 2h11v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"} size={14} />
+                      <span style={{ color: openFolder ? "#fff" : "rgba(255,255,255,.85)" }}>
+                        {openFolder ? t("Свернуть площадку") : `${insideCount} ${t("модулей внутри")}`}
+                      </span>
+                      <span style={{ marginLeft: "auto", color: "rgba(255,255,255,.5)", fontSize: 13 }}>
+                        {openFolder ? "▲" : "▾"}
+                      </span>
+                    </button>
+                  ) : null}
+
+                  {/* порты: у свёрнутой площадки-папки их нет — тянуть связь не от чего */}
+                  {isVenueFolder && !openFolder ? null : (
+                  <>
                   <span
                     onPointerDown={(e) => e.stopPropagation()}
                     onClick={(e) => {
@@ -1601,9 +1661,28 @@ export function ConstructorScreen({
                       cursor: "crosshair",
                     }}
                   />
+                  </>
+                  )}
                 </div>
               );
             })}
+
+            {/* Пустой развёрнутой папки не бывает: подсказка, что внутри
+                пока ничего нет и модули добавляются слева. */}
+            {openFolder && !insideCount ? (
+              <div
+                style={{
+                  position: "absolute",
+                  left: 30,
+                  top: 150,
+                  maxWidth: 320,
+                  font: "500 12px/1.5 'Golos Text',sans-serif",
+                  color: "rgba(255,255,255,.5)",
+                }}
+              >
+                {t("Папка площадки пуста. Добавьте модули из палитры слева — они появятся здесь.")}
+              </div>
+            ) : null}
           </div>
         </Card>
 
@@ -1614,7 +1693,7 @@ export function ConstructorScreen({
             <Eyebrow>{t("ПАНЕЛЬ СОБЫТИЯ")}</Eyebrow>
             <button
               className="gtr-btn"
-              style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 11 }}
+              style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 13 }}
               onClick={() => setPanelOpen(false)}
               aria-label={t("Закрыть панель")}
             >
@@ -1627,7 +1706,7 @@ export function ConstructorScreen({
                 <span
                   className="gtr-mono"
                   style={{
-                    font: "600 8.5px/1 'JetBrains Mono',monospace",
+                    font: "600 10px/1 'JetBrains Mono',monospace",
                     letterSpacing: ".08em",
                     color: selKind[1],
                   }}
@@ -1639,7 +1718,7 @@ export function ConstructorScreen({
                   style={{
                     marginLeft: "auto",
                     padding: "4px 8px",
-                    fontSize: 9.5,
+                    fontSize: 11,
                     color: "#E5231B",
                     borderColor: "rgba(229,35,27,.4)",
                   }}
@@ -1669,15 +1748,17 @@ export function ConstructorScreen({
                 style={{ marginBottom: 10 }}
               />
               <div style={{ display: "grid", gap: 6 }}>
-                {/* ЦЕНА_THB — служебное числовое поле для сметы, рядом с
-                    человекочитаемой ЦЕНА его показывать незачем */}
+                {/* Служебные поля узла в клиентский инспектор не пускаем:
+                    ЦЕНА_THB — числовой дубль человекочитаемой ЦЕНА, а
+                    ИСТОЧНИК — сырой провенанс наших данных о подрядчике,
+                    организатору его видеть незачем. */}
                 {selNode.fields.map(([k, val], i) =>
-                  k === "ЦЕНА_THB" ? null : (
+                  k === "ЦЕНА_THB" || k === "ИСТОЧНИК" ? null : (
                   <div key={`${k}-${i}`}>
-                    <Eyebrow style={{ fontSize: 8.5, marginBottom: 3 }}>{k}</Eyebrow>
+                    <Eyebrow style={{ fontSize: 10, marginBottom: 3 }}>{k}</Eyebrow>
                     <input
                       className="gtr-input"
-                      style={{ padding: "7px 10px", fontSize: 11 }}
+                      style={{ padding: "7px 10px", fontSize: 13 }}
                       value={val}
                       onChange={(e) =>
                         updateSel({
@@ -1695,12 +1776,12 @@ export function ConstructorScreen({
                 selNode.kind,
               ) ? (
                 <div style={{ marginTop: 10, display: "grid", gap: 5 }}>
-                  <span className="gtr-eyebrow" style={{ fontSize: 8.5 }}>
+                  <span className="gtr-eyebrow" style={{ fontSize: 10 }}>
                     {t("ЗАЛ / ЗОНА БЛОКА")}
                   </span>
                   <select
                     className="gtr-input"
-                    style={{ padding: "7px 9px", fontSize: 11.5 }}
+                    style={{ padding: "7px 9px", fontSize: 13 }}
                     value={
                       g.links.find(
                         (l) =>
@@ -1818,7 +1899,7 @@ export function ConstructorScreen({
                           padding: "6px 8px",
                           borderRadius: 0,
                           cursor: "pointer",
-                          font: "600 9.5px/1 'Golos Text',sans-serif",
+                          font: "600 11px/1 'Golos Text',sans-serif",
                           border: `1px solid ${active ? STATUS_COLOR[s] : "rgba(255,255,255,.12)"}`,
                           background: active ? tint(STATUS_COLOR[s], 0.12) : "transparent",
                           color: active ? STATUS_COLOR[s] : "rgba(255,255,255,.6)",
@@ -1841,7 +1922,7 @@ export function ConstructorScreen({
                 {selNode.status && selNode.status !== "ok" ? (
                   <input
                     className="gtr-input"
-                    style={{ marginTop: 7, padding: "7px 10px", fontSize: 11 }}
+                    style={{ marginTop: 7, padding: "7px 10px", fontSize: 13 }}
                     placeholder={t("Что случилось? (виден всем участникам)")}
                     value={selNode.note ?? ""}
                     onChange={(e) => updateSel({ note: e.target.value })}
@@ -1850,7 +1931,7 @@ export function ConstructorScreen({
                   <div
                     style={{
                       marginTop: 7,
-                      font: "500 9.5px/1.4 'Golos Text',sans-serif",
+                      font: "500 11px/1.5 'Golos Text',sans-serif",
                       color: "var(--gtr-t3)",
                     }}
                   >
@@ -1873,7 +1954,7 @@ export function ConstructorScreen({
                     <span
                       className="gtr-mono"
                       style={{
-                        font: "600 9px/1.4 'JetBrains Mono',monospace",
+                        font: "600 11px/1.5 'JetBrains Mono',monospace",
                         color: K[1],
                         width: 58,
                         flex: "none",
@@ -1883,7 +1964,7 @@ export function ConstructorScreen({
                     </span>
                     <span
                       style={{
-                        font: "500 10.5px/1.4 'Golos Text',sans-serif",
+                        font: "500 12px/1.5 'Golos Text',sans-serif",
                         color: nodes.length ? "#fff" : "rgba(255,255,255,.35)",
                       }}
                     >
@@ -1929,7 +2010,7 @@ export function ConstructorScreen({
               <Eyebrow>{t("СМЕТА СОБЫТИЯ")}</Eyebrow>
               <button
                 className="gtr-btn"
-                style={{ padding: "5px 9px", fontSize: 9.5, marginRight: 6 }}
+                style={{ padding: "5px 9px", fontSize: 11, marginRight: 6 }}
                 onClick={openDeck}
                 title={t("Клиентская презентация события в PDF")}
               >
@@ -1937,7 +2018,7 @@ export function ConstructorScreen({
               </button>
               <button
                 className="gtr-btn"
-                style={{ padding: "4px 8px", fontSize: 9.5 }}
+                style={{ padding: "4px 8px", fontSize: 11 }}
                 onClick={exportQuote}
                 disabled={!quote.lines.length}
               >
@@ -1961,7 +2042,7 @@ export function ConstructorScreen({
                         <span
                           style={{
                             display: "block",
-                            font: "600 11px/1.3 'Golos Text',sans-serif",
+                            font: "600 13px/1.45 'Golos Text',sans-serif",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
@@ -1972,7 +2053,7 @@ export function ConstructorScreen({
                         <span
                           className="gtr-mono"
                           style={{
-                            font: "500 8.5px/1.3 'JetBrains Mono',monospace",
+                            font: "500 10px/1.45 'JetBrains Mono',monospace",
                             color: "var(--gtr-t3)",
                           }}
                         >
@@ -2002,7 +2083,7 @@ export function ConstructorScreen({
                         <span
                           className="gtr-mono"
                           style={{
-                            font: "600 10.5px/1 'JetBrains Mono',monospace",
+                            font: "600 12px/1 'JetBrains Mono',monospace",
                             color: l.amount ? "#fff" : "var(--gtr-t3)",
                           }}
                         >
@@ -2052,7 +2133,7 @@ export function ConstructorScreen({
                   <div
                     style={{
                       marginTop: 9,
-                      font: "500 9px/1.4 'Golos Text',sans-serif",
+                      font: "500 11px/1.5 'Golos Text',sans-serif",
                       color: "var(--gtr-t3)",
                     }}
                   >
@@ -2063,7 +2144,7 @@ export function ConstructorScreen({
               </>
             ) : (
               <div
-                style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
+                style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
               >
                 {t("Добавьте площадку, артистов и подрядчиков — смета соберётся автоматически.")}
               </div>
@@ -2084,7 +2165,7 @@ export function ConstructorScreen({
                     display: "flex",
                     alignItems: "center",
                     gap: 7,
-                    font: "500 10px/1.3 'Golos Text',sans-serif",
+                    font: "500 12px/1.45 'Golos Text',sans-serif",
                     color: "var(--gtr-t2)",
                   }}
                 >
@@ -2101,7 +2182,7 @@ export function ConstructorScreen({
                   </span>
                   <button
                     className="gtr-btn"
-                    style={{ padding: "2px 7px", fontSize: 9 }}
+                    style={{ padding: "2px 7px", fontSize: 11 }}
                     onClick={() =>
                       mutate((gr) => ({ ...gr, links: gr.links.filter((_, j) => j !== i) }))
                     }
@@ -2129,7 +2210,7 @@ export function ConstructorScreen({
                   className="gtr-mono"
                   style={{
                     marginLeft: "auto",
-                    font: "700 9px/1 'JetBrains Mono',monospace",
+                    font: "700 11px/1 'JetBrains Mono',monospace",
                     color: STATUS_COLOR[health.verdict],
                   }}
                 >
@@ -2142,7 +2223,7 @@ export function ConstructorScreen({
                   className="gtr-mono"
                   style={{
                     marginLeft: "auto",
-                    font: "700 9px/1 'JetBrains Mono',monospace",
+                    font: "700 11px/1 'JetBrains Mono',monospace",
                     color: GREEN,
                   }}
                 >
@@ -2164,7 +2245,7 @@ export function ConstructorScreen({
                 }}
               >
                 <Dot color={GREEN} top={0} />
-                <span style={{ font: "600 11px/1.4 'Golos Text',sans-serif", color: "#fff" }}>
+                <span style={{ font: "600 13px/1.5 'Golos Text',sans-serif", color: "#fff" }}>
                   {t("Все связки зелёные — событие идёт по плану.")}
                 </span>
               </div>
@@ -2186,7 +2267,7 @@ export function ConstructorScreen({
                   >
                     <Dot color={STATUS_COLOR[a.severity]} />
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ font: "600 11px/1.3 'Golos Text',sans-serif" }}>
+                      <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>
                         {a.title}
                         {a.nodeId ? (
                           <span style={{ color: STATUS_COLOR[a.severity], fontWeight: 600 }}>
@@ -2198,7 +2279,7 @@ export function ConstructorScreen({
                       <div
                         style={{
                           marginTop: 2,
-                          font: "500 9.5px/1.4 'Golos Text',sans-serif",
+                          font: "500 11px/1.5 'Golos Text',sans-serif",
                           color: "var(--gtr-t2)",
                         }}
                       >
@@ -2219,7 +2300,7 @@ export function ConstructorScreen({
                 className="gtr-mono"
                 style={{
                   marginLeft: "auto",
-                  font: "700 9px/1 'JetBrains Mono',monospace",
+                  font: "700 11px/1 'JetBrains Mono',monospace",
                   color: openQuestions.length ? AMBER : GREEN,
                 }}
               >
@@ -2239,7 +2320,7 @@ export function ConstructorScreen({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      font: "700 9px/1 'JetBrains Mono',monospace",
+                      font: "700 11px/1 'JetBrains Mono',monospace",
                       background: qq.ok
                         ? "rgba(46,204,113,.16)"
                         : qq.required
@@ -2254,7 +2335,7 @@ export function ConstructorScreen({
                   <div style={{ minWidth: 0 }}>
                     <div
                       style={{
-                        font: "600 11px/1.3 'Golos Text',sans-serif",
+                        font: "600 13px/1.45 'Golos Text',sans-serif",
                         color: qq.ok ? "var(--gtr-t2)" : "#fff",
                         textDecoration: qq.ok ? "line-through" : "none",
                       }}
@@ -2268,7 +2349,7 @@ export function ConstructorScreen({
                       <div
                         style={{
                           marginTop: 2,
-                          font: "500 9.5px/1.4 'Golos Text',sans-serif",
+                          font: "500 11px/1.5 'Golos Text',sans-serif",
                           color: "var(--gtr-t3)",
                         }}
                       >
@@ -2313,7 +2394,7 @@ export function ConstructorScreen({
             ) : (
               <div
                 style={{
-                  font: "500 10px/1.5 'Golos Text',sans-serif",
+                  font: "500 12px/1.5 'Golos Text',sans-serif",
                   color: "var(--gtr-t3)",
                   marginBottom: 6,
                 }}
@@ -2326,7 +2407,7 @@ export function ConstructorScreen({
             {stage === "approved" ? (
               <div
                 style={{
-                  font: "500 9.5px/1.4 'Golos Text',sans-serif",
+                  font: "500 11px/1.5 'Golos Text',sans-serif",
                   color: "var(--gtr-t3)",
                   marginBottom: 6,
                 }}
@@ -2345,7 +2426,7 @@ export function ConstructorScreen({
                       <span
                         className="gtr-mono"
                         style={{
-                          font: "500 8.5px/1.5 'JetBrains Mono',monospace",
+                          font: "500 10px/1.5 'JetBrains Mono',monospace",
                           color: "var(--gtr-t3)",
                           flex: "none",
                           width: 34,
@@ -2358,7 +2439,7 @@ export function ConstructorScreen({
                       </span>
                       <span
                         style={{
-                          font: "500 10px/1.4 'Golos Text',sans-serif",
+                          font: "500 12px/1.5 'Golos Text',sans-serif",
                           color: "var(--gtr-t2)",
                           minWidth: 0,
                         }}
@@ -2370,7 +2451,7 @@ export function ConstructorScreen({
                 </div>
               ) : (
                 <div
-                  style={{ font: "500 10px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
+                  style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
                 >
                   {t("История появится по мере сборки события.")}
                 </div>
@@ -2387,12 +2468,12 @@ export function ConstructorScreen({
 function Row({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-      <span style={{ font: "500 10.5px/1.3 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+      <span style={{ font: "500 12px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
         {label}
       </span>
       <span
         className="gtr-mono"
-        style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: accent || "#fff" }}
+        style={{ font: "600 13px/1 'JetBrains Mono',monospace", color: accent || "#fff" }}
       >
         {value}
       </span>
@@ -2405,12 +2486,12 @@ function ArtistPick({ a, color, onAdd }: { a: Artist; color: string; onAdd: () =
   return (
     <button className="gtr-pal-btn" style={{ padding: "7px 9px" }} onClick={onAdd}>
       <span style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ display: "block", fontWeight: 600, fontSize: 11 }}>{a.name}</span>
+        <span style={{ display: "block", fontWeight: 600, fontSize: 13 }}>{a.name}</span>
         <span
           style={{
             display: "block",
             marginTop: 2,
-            font: "500 9px/1.3 'JetBrains Mono',monospace",
+            font: "500 11px/1.45 'JetBrains Mono',monospace",
             color: "rgba(255,255,255,.4)",
           }}
         >
@@ -2421,7 +2502,7 @@ function ArtistPick({ a, color, onAdd }: { a: Artist; color: string; onAdd: () =
             style={{
               display: "block",
               marginTop: 2,
-              font: "600 9px/1.3 'JetBrains Mono',monospace",
+              font: "600 11px/1.45 'JetBrains Mono',monospace",
               color,
             }}
           >
@@ -2488,7 +2569,7 @@ function BriefPanel({
         </Chip>
         <span
           className="gtr-mono"
-          style={{ font: "500 10px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+          style={{ font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
           {format || t("формат не задан", "format not set")} ·{" "}
           {t("вопросы подстраиваются под ответы", "questions adapt to your answers")}
@@ -2514,7 +2595,7 @@ function BriefPanel({
           ))}
           <button
             className="gtr-btn"
-            style={{ padding: "6px 12px", fontSize: 11 }}
+            style={{ padding: "6px 12px", fontSize: 13 }}
             onClick={onClose}
           >
             {t("Свернуть", "Hide")}
@@ -2545,13 +2626,13 @@ function BriefPanel({
               style={{ display: "grid", gap: 8, animationDelay: `${Math.min(qi * 45, 320)}ms` }}
             >
               <div style={{ display: "flex", alignItems: "baseline", gap: 9, flexWrap: "wrap" }}>
-                <span style={{ font: "600 12.5px/1.3 'Golos Text',sans-serif" }}>
+                <span style={{ font: "600 12.5px/1.45 'Golos Text',sans-serif" }}>
                   {t(qq.q, qq.qEn)}
                 </span>
                 {qq.required ? (
                   <span
                     className="gtr-mono"
-                    style={{ font: "600 8.5px/1 'JetBrains Mono',monospace", color: AMBER }}
+                    style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: AMBER }}
                   >
                     {t("ОБЯЗАТЕЛЬНО", "REQUIRED")}
                   </span>
@@ -2559,7 +2640,7 @@ function BriefPanel({
                 {qq.multi ? (
                   <span
                     className="gtr-mono"
-                    style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                    style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
                     {t("НЕСКОЛЬКО", "MULTI")}
                   </span>
@@ -2568,7 +2649,7 @@ function BriefPanel({
               {qq.hint ? (
                 <span
                   style={{
-                    font: "500 10.5px/1.4 'Golos Text',sans-serif",
+                    font: "500 12px/1.5 'Golos Text',sans-serif",
                     color: "var(--gtr-t3)",
                     marginTop: -3,
                   }}
@@ -2625,7 +2706,7 @@ function BriefPanel({
                                 borderRadius: 0,
                                 background: "rgba(10,11,13,.75)",
                                 color: "#fff",
-                                font: "700 10px/18px 'JetBrains Mono',monospace",
+                                font: "700 12px/18px 'JetBrains Mono',monospace",
                                 textAlign: "center",
                               }}
                             >
@@ -2637,7 +2718,7 @@ function BriefPanel({
                           <span
                             style={{
                               display: "block",
-                              font: "600 12px/1.3 'Golos Text',sans-serif",
+                              font: "600 12px/1.45 'Golos Text',sans-serif",
                               color: on ? "#fff" : "rgba(255,255,255,.82)",
                             }}
                           >
@@ -2647,7 +2728,7 @@ function BriefPanel({
                             style={{
                               display: "block",
                               marginTop: 4,
-                              font: "500 10px/1.45 'Golos Text',sans-serif",
+                              font: "500 12px/1.45 'Golos Text',sans-serif",
                               color: "var(--gtr-t3)",
                             }}
                           >
@@ -2712,7 +2793,7 @@ function BriefPanel({
                               style={{
                                 display: "block",
                                 marginTop: 2,
-                                font: "500 9px/1.3 'JetBrains Mono',monospace",
+                                font: "500 11px/1.45 'JetBrains Mono',monospace",
                                 color: "rgba(255,255,255,.4)",
                               }}
                             >
@@ -2725,7 +2806,7 @@ function BriefPanel({
                             className="gtr-mono"
                             title={t(`Добавит блоков: ${adds}`, `Adds ${adds} block(s)`)}
                             style={{
-                              font: "600 8.5px/1 'JetBrains Mono',monospace",
+                              font: "600 10px/1 'JetBrains Mono',monospace",
                               color: on ? GREEN : "rgba(255,255,255,.3)",
                             }}
                           >
@@ -2753,7 +2834,7 @@ function BriefPanel({
         }}
       >
         <span
-          style={{ font: "500 11.5px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t2)", flex: 1 }}
+          style={{ font: "500 13px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t2)", flex: 1 }}
         >
           {pending.length
             ? t(
@@ -2828,7 +2909,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
         <div
           style={{
             marginTop: 10,
-            font: "500 10px/1.5 'Golos Text',sans-serif",
+            font: "500 12px/1.5 'Golos Text',sans-serif",
             color: "var(--gtr-t3)",
           }}
         >
@@ -2869,7 +2950,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
               <div
                 style={{
                   marginTop: 5,
-                  font: "500 9px/1.4 'JetBrains Mono',monospace",
+                  font: "500 11px/1.5 'JetBrains Mono',monospace",
                   color: "var(--gtr-t3)",
                 }}
               >
@@ -2883,7 +2964,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
                       display: "flex",
                       justifyContent: "space-between",
                       gap: 8,
-                      font: "500 9.5px/1.35 'Golos Text',sans-serif",
+                      font: "500 11px/1.45 'Golos Text',sans-serif",
                       color: "var(--gtr-t2)",
                     }}
                   >
@@ -2892,7 +2973,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
                     </span>
                     <span
                       className="gtr-mono"
-                      style={{ flex: "none", font: "600 9.5px/1.35 'JetBrains Mono',monospace" }}
+                      style={{ flex: "none", font: "600 11px/1.45 'JetBrains Mono',monospace" }}
                     >
                       {fmtThb(pick.pkg.price)}
                     </span>
@@ -2906,7 +2987,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
                     marginTop: 2,
                     paddingTop: 4,
                     borderTop: "1px solid rgba(255,255,255,.06)",
-                    font: "500 9px/1.3 'JetBrains Mono',monospace",
+                    font: "500 11px/1.45 'JetBrains Mono',monospace",
                     color: "var(--gtr-t3)",
                   }}
                 >
@@ -2919,7 +3000,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
 
           <div
             style={{
-              font: "500 9px/1.45 'Golos Text',sans-serif",
+              font: "500 11px/1.45 'Golos Text',sans-serif",
               color: "var(--gtr-t3)",
             }}
           >
@@ -2937,7 +3018,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
                     justifyContent: "space-between",
                     gap: 8,
                     marginBottom: 3,
-                    font: "500 9.5px/1.35 'Golos Text',sans-serif",
+                    font: "500 11px/1.45 'Golos Text',sans-serif",
                     color: "var(--gtr-t2)",
                   }}
                 >
@@ -2946,7 +3027,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
                   </span>
                   <span
                     className="gtr-mono"
-                    style={{ flex: "none", font: "600 9.5px/1.35 'JetBrains Mono',monospace" }}
+                    style={{ flex: "none", font: "600 11px/1.45 'JetBrains Mono',monospace" }}
                   >
                     {fmtThb(t.price)}
                   </span>
@@ -2955,7 +3036,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
               <div
                 style={{
                   marginTop: 4,
-                  font: "500 9px/1.45 'Golos Text',sans-serif",
+                  font: "500 11px/1.45 'Golos Text',sans-serif",
                   color: "var(--gtr-t3)",
                 }}
               >
@@ -3047,12 +3128,12 @@ function OfferPanel({
         gap: 7,
       }}
     >
-      <Eyebrow style={{ fontSize: 8.5 }}>{t("ПРЕДЛОЖЕНИЕ АРТИСТУ")}</Eyebrow>
+      <Eyebrow style={{ fontSize: 10 }}>{t("ПРЕДЛОЖЕНИЕ АРТИСТУ")}</Eyebrow>
       {existing ? (
         <div
           className="gtr-mono"
           style={{
-            font: "600 10px/1.5 'JetBrains Mono',monospace",
+            font: "600 12px/1.5 'JetBrains Mono',monospace",
             color: OFFER_COLOR[existing.status],
           }}
         >
@@ -3067,21 +3148,21 @@ function OfferPanel({
           {last?.status === "declined" ? (
             <div
               className="gtr-mono"
-              style={{ font: "500 9.5px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+              style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
             >
               {t("Прошлое предложение отклонено — можно отправить новое.")}
             </div>
           ) : null}
           <input
             className="gtr-input"
-            style={{ padding: "7px 9px", fontSize: 11 }}
+            style={{ padding: "7px 9px", fontSize: 13 }}
             placeholder={t("Гонорар / условия (например: ฿25 000 + трансфер)")}
             value={fee}
             onChange={(e) => setFee(e.target.value)}
           />
           <input
             className="gtr-input"
-            style={{ padding: "7px 9px", fontSize: 11 }}
+            style={{ padding: "7px 9px", fontSize: 13 }}
             placeholder={t("Комментарий (необязательно)")}
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -3095,7 +3176,7 @@ function OfferPanel({
                   flex: "0 0 auto",
                   width: "auto",
                   padding: "5px 10px",
-                  font: "600 9px/1 'JetBrains Mono',monospace",
+                  font: "600 11px/1 'JetBrains Mono',monospace",
                   background: lang === l ? "rgba(229,35,27,.16)" : "transparent",
                   color: lang === l ? "#fff" : "rgba(255,255,255,.5)",
                 }}
@@ -3104,7 +3185,7 @@ function OfferPanel({
                 {l === "ru" ? "RU" : l === "en" ? "EN" : "TH"}
               </button>
             ))}
-            <span style={{ font: "500 9px/2 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+            <span style={{ font: "500 11px/2 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
               {t("язык сообщения артисту")}
             </span>
           </div>
@@ -3119,7 +3200,7 @@ function OfferPanel({
         </>
       )}
       {msg ? (
-        <div style={{ font: "500 10px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+        <div style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
           {msg}
         </div>
       ) : null}
@@ -3153,7 +3234,7 @@ function GuestPanel({ draft }: { draft: EventDraft }) {
           className="gtr-mono"
           style={{
             marginLeft: "auto",
-            font: "500 8.5px/1 'JetBrains Mono',monospace",
+            font: "500 10px/1 'JetBrains Mono',monospace",
             color: "var(--gtr-t3)",
           }}
         >
@@ -3168,19 +3249,19 @@ function GuestPanel({ draft }: { draft: EventDraft }) {
               display: "flex",
               alignItems: "center",
               gap: 7,
-              font: "500 11px/1.3 'Golos Text',sans-serif",
+              font: "500 13px/1.45 'Golos Text',sans-serif",
             }}
           >
             <span style={{ flex: 1, minWidth: 0 }}>{gst.name}</span>
             <span
               className="gtr-mono"
-              style={{ font: "500 8.5px/1 'JetBrains Mono',monospace", color: gst.via === "tg" ? "#7B9EFF" : "var(--gtr-t3)" }}
+              style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: gst.via === "tg" ? "#7B9EFF" : "var(--gtr-t3)" }}
             >
               {gst.via === "tg" ? "TG" : "APP"}
             </span>
             <button
               className="gtr-btn"
-              style={{ padding: "3px 7px", fontSize: 10, color: "#E5231B" }}
+              style={{ padding: "3px 7px", fontSize: 12, color: "#E5231B" }}
               onClick={() =>
                 updateDraft(draft.id, { guestList: list.filter((_, j) => j !== i) })
               }
@@ -3190,7 +3271,7 @@ function GuestPanel({ draft }: { draft: EventDraft }) {
           </div>
         ))}
         {!list.length ? (
-          <span style={{ font: "500 10px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+          <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
             {t("Артисты и команда добавляют гостей списком — здесь или через бота.")}
           </span>
         ) : null}
@@ -3198,7 +3279,7 @@ function GuestPanel({ draft }: { draft: EventDraft }) {
       <div style={{ display: "flex", gap: 6, marginTop: 9 }}>
         <input
           className="gtr-input"
-          style={{ flex: 1, padding: "7px 9px", fontSize: 11 }}
+          style={{ flex: 1, padding: "7px 9px", fontSize: 13 }}
           placeholder={t("Имя гостя")}
           value={name}
           onChange={(e) => setName(e.target.value)}

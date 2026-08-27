@@ -19,8 +19,11 @@ import "leaflet/dist/leaflet.css";
 
 import geoRaw from "../data/venue-geo.json";
 import shapesRaw from "../data/district-shapes.json";
-import { PH, richOf } from "../data/app-data";
+import { PH, richOf, V } from "../data/app-data";
 import { catOf, MAP_CATS, pinHtml } from "../map-style";
+import { useMyLocation } from "../geo-me";
+import { gpsTracker } from "../gps-track";
+import { loadRoute, roadRoute, routeLabel, saveRoute, type LatLon, type RoadRoute } from "../evening-route";
 
 type Geo = Record<string, { lat: number; lon: number; src: string }>;
 type Shape = {
@@ -44,12 +47,21 @@ export function MapScreen() {
     map: import("leaflet").Map;
     pins: import("leaflet").LayerGroup;
     areas: import("leaflet").LayerGroup;
+    /** слой «я и мой вечер»: своя точка, радиус точности, дорога, остановки */
+    mine: import("leaflet").LayerGroup;
     /** перерисовка точек: висит на zoomend/moveend, снимается при смене фильтров */
     redraw?: () => void;
   } | null>(null);
   const [tag, setTag] = useState(ALL);
   const [district, setDistrict] = useState(ALL);
   const [ready, setReady] = useState(false);
+
+  // Своя точка и маршрут вечера. Маршрут собирается на экране «Сегодня» и
+  // до сих пор жил только там: на карте острова его не было вовсе.
+  const { pos: me, state: geoState, error: geoError, ask: askGeo } = useMyLocation();
+  const [route, setRoute] = useState<string[]>([]);
+  const [road, setRoad] = useState<RoadRoute | null>(null);
+  useEffect(() => setRoute(loadRoute()), []);
 
   // Считаем по тем площадкам, у которых есть координата: показывать в
   // счётчике то, чего на карте нет, — обманывать себя же.
@@ -76,14 +88,16 @@ export function MapScreen() {
         zoomControl: true,
         attributionControl: true,
       });
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        attribution: "&copy; OpenStreetMap · &copy; CARTO",
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
         maxZoom: 19,
         className: "gtr-map-tiles",
       }).addTo(map);
       const areas = L.layerGroup().addTo(map);
       const pins = L.layerGroup().addTo(map);
-      L4.current = { map, pins, areas };
+      // Свой слой поверх точек: дорога и «я» не должны тонуть под кустами.
+      const mine = L.layerGroup().addTo(map);
+      L4.current = { map, pins, areas, mine };
       setReady(true);
     })();
     return () => {
@@ -182,6 +196,7 @@ export function MapScreen() {
             const cat = catOf(v.tag);
             const exact = g.src === "nominatim";
             const dim = district !== ALL && v.cluster !== district;
+            const inRoute = route.includes(v.id);
             const icon = L.divIcon({
               className: "",
               html: pinHtml(cat, exact, dim),
@@ -194,11 +209,12 @@ export function MapScreen() {
                 ${hero ? `<img src="${hero}" style="width:100%;height:92px;object-fit:cover;display:block;margin-bottom:7px" />` : ""}
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
                   <span style="width:7px;height:7px;background:${cat.color};display:block"></span>
-                  <span style="font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:${cat.color};text-transform:uppercase">${t(cat.ru)}</span>
+                  <span style="font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.07em;color:${cat.color};text-transform:uppercase">${t(cat.ru)}</span>
                 </div>
-                <div style="font:600 12.5px/1.3 'Golos Text',sans-serif;color:#fff">${v.name}</div>
-                <div style="font:500 9.5px/1.4 monospace;color:rgba(255,255,255,.55);margin:3px 0 8px">${v.area}${exact ? "" : ` · ${t("примерно")}`}</div>
-                <button data-vid="${v.id}" class="gtr-map-open" style="font:600 10px/1 'Golos Text',sans-serif;background:#E5231B;color:#fff;border:none;padding:7px 11px;cursor:pointer;width:100%">${t("Открыть заведение")} →</button>
+                <div style="font:600 13px/1.45 'Golos Text',sans-serif;color:#fff">${v.name}</div>
+                <div style="font:500 11px/1.5 monospace;color:rgba(255,255,255,.72);margin:3px 0 8px">${v.area}${exact ? "" : ` · ${t("примерно")}`}</div>
+                <button data-vid="${v.id}" class="gtr-map-route" style="font:600 12px/1 'Golos Text',sans-serif;background:${inRoute ? "rgba(123,77,255,.18)" : "transparent"};color:${inRoute ? "#7B4DFF" : "#fff"};border:1px solid ${inRoute ? "#7B4DFF" : "rgba(255,255,255,.25)"};padding:8px 11px;cursor:pointer;width:100%;margin-bottom:6px">${inRoute ? `✓ ${t("В маршруте")}` : `+ ${t("В маршрут вечера")}`}</button>
+                <button data-vid="${v.id}" class="gtr-map-open" style="font:600 12px/1 'Golos Text',sans-serif;background:#E5231B;color:#fff;border:none;padding:8px 11px;cursor:pointer;width:100%">${t("Открыть заведение")} →</button>
               </div>`;
             L.marker([g.lat, g.lon], { icon, zIndexOffset: dim ? 0 : 400 })
               .addTo(pins)
@@ -240,14 +256,131 @@ export function MapScreen() {
       const m = L4.current;
       if (m?.redraw) m.map.off("zoomend moveend", m.redraw);
     };
-  }, [ready, tag, district, onMap, t]);
+    // route в зависимостях: попап показывает «✓ В маршруте» текущим
+    // состоянием, поэтому точки перерисовываем и при смене маршрута.
+  }, [ready, tag, district, onMap, t, route]);
+
+  // Дорога вечера. Считаем от своей точки, если она известна: гость стоит
+  // не в первом баре списка, и «сколько ехать» начинается с того места, где
+  // он сейчас. Ответ маршрутизатора кэшируется в evening-route.
+  const stops = useMemo(
+    () => route.map((vid) => GEO[vid]).filter(Boolean).map((g) => [g.lat, g.lon] as LatLon),
+    [route],
+  );
+  useEffect(() => {
+    if (stops.length < 1) {
+      setRoad(null);
+      return;
+    }
+    let alive = true;
+    const pts: LatLon[] = me ? [[me.lat, me.lon], ...stops] : stops;
+    void roadRoute(pts).then((r) => {
+      if (alive) setRoad(r);
+    });
+    return () => {
+      alive = false;
+    };
+    // me по координатам, а не по объекту: watchPosition отдаёт новый объект
+    // на каждый чих датчика, и маршрут пересчитывался бы бесконечно.
+  }, [stops, me?.lat, me?.lon]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Рисуем «я и мой вечер»: точка, радиус точности, дорога, остановки.
+  useEffect(() => {
+    if (!ready || !L4.current) return;
+    let stop = false;
+    void (async () => {
+      const L = await import("leaflet");
+      if (stop || !L4.current) return;
+      const { mine } = L4.current;
+      mine.clearLayers();
+
+      if (road?.line.length) {
+        // Тень под линией: по тёмным тайлам тонкая фиолетовая нитка теряется
+        // на дорогах и берегах — снизу кладём широкую тёмную подложку.
+        L.polyline(road.line, { color: "#0A0B0D", weight: 8, opacity: 0.55 }).addTo(mine);
+        L.polyline(road.line, {
+          color: "#7B4DFF",
+          weight: 4,
+          opacity: 0.95,
+          // Прямая — это признание, что дороги мы не знаем. Пунктир говорит
+          // об этом честно, вместо того чтобы выдавать её за маршрут.
+          dashArray: road.real ? undefined : "7 8",
+        }).addTo(mine);
+      }
+
+      stops.forEach((p, i) => {
+        const vid = route[i];
+        L.marker(p, {
+          zIndexOffset: 600,
+          icon: L.divIcon({
+            className: "",
+            html: `<span class="gtr-map-stop">${i + 1}</span>`,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
+          }),
+        })
+          .addTo(mine)
+          .bindTooltip(`${i + 1}. ${V(vid)?.name ?? ""}`, { direction: "top", className: "gtr-area-tip" });
+      });
+
+      if (me) {
+        // Круг точности рисуем только когда он о чём-то говорит: при ±5 м
+        // это точка под маркером, а при ±2 км — честное «где-то здесь».
+        if (me.accuracy > 25)
+          L.circle([me.lat, me.lon], {
+            radius: me.accuracy,
+            color: "#4A90E2",
+            weight: 1,
+            opacity: 0.5,
+            fillColor: "#4A90E2",
+            fillOpacity: 0.1,
+          }).addTo(mine);
+        L.marker([me.lat, me.lon], {
+          zIndexOffset: 1000,
+          icon: L.divIcon({ className: "", html: `<span class="gtr-map-me"></span>`, iconSize: [22, 22], iconAnchor: [11, 11] }),
+        })
+          .addTo(mine)
+          .bindTooltip(t("Вы здесь"), { direction: "top", className: "gtr-area-tip" });
+      }
+    })();
+    return () => {
+      stop = true;
+    };
+  }, [ready, road, stops, route, me, t]);
+
+  // Первый раз, когда позиция найдена, — показываем её. Дальше карту не
+  // трогаем: гость двигает её сам, и рывок к себе на каждом обновлении
+  // датчика не даёт ничего рассмотреть.
+  const centred = useRef(false);
+  useEffect(() => {
+    if (!ready || !me || centred.current || !L4.current) return;
+    centred.current = true;
+    L4.current.map.flyTo([me.lat, me.lon], 14, { duration: 0.8 });
+  }, [ready, me]);
 
   // клики из попапов (HTML вне React)
   useEffect(() => {
     const h = (e: Event) => {
-      const btn = (e.target as HTMLElement).closest?.(".gtr-map-open");
-      const vid = btn?.getAttribute("data-vid");
-      if (vid) navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid } });
+      const el = e.target as HTMLElement;
+      const open = el.closest?.(".gtr-map-open");
+      if (open) {
+        const vid = open.getAttribute("data-vid");
+        if (vid) navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid } });
+        return;
+      }
+      // Собрать маршрут прямо на карте: тап по «в маршрут» добавляет или
+      // убирает площадку. Линия и подпись километража перерисуются сами,
+      // маршрут — тот же, что на «Сегодня» и в трекере (общее хранилище).
+      const routeBtn = el.closest?.(".gtr-map-route");
+      if (routeBtn) {
+        const vid = routeBtn.getAttribute("data-vid");
+        if (vid)
+          setRoute((cur) => {
+            const next = cur.includes(vid) ? cur.filter((x) => x !== vid) : [...cur, vid];
+            saveRoute(next);
+            return next;
+          });
+      }
     };
     document.addEventListener("click", h);
     return () => document.removeEventListener("click", h);
@@ -261,7 +394,7 @@ export function MapScreen() {
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
         <h1 className="gtr-oswald gtr-h1">{t("Карта")}</h1>
-        <span className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)", letterSpacing: ".12em" }}>
+        <span className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)", letterSpacing: ".12em" }}>
           {shown} / {onMap.length}
         </span>
       </div>
@@ -299,6 +432,82 @@ export function MapScreen() {
             <span style={{ opacity: 0.5 }}>{c.n}</span>
           </button>
         ))}
+      </div>
+
+      {/* Своя точка и маршрут вечера */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          flexWrap: "wrap",
+          margin: "10px 0 0",
+          font: "500 12.5px/1.5 'Golos Text',sans-serif",
+          color: "var(--gtr-t2)",
+        }}
+      >
+        {geoState === "on" ? (
+          <span className="gtr-mono" style={{ font: "600 11.5px/1 'JetBrains Mono',monospace", color: "#4A90E2" }}>
+            {t("Вы здесь")}
+            {me && me.accuracy > 25 ? ` · ±${Math.round(me.accuracy)} ${t("м")}` : ""}
+          </span>
+        ) : (
+          <button className="gtr-btn" onClick={askGeo} disabled={geoState === "asking"}>
+            {geoState === "asking" ? `${t("Ищем вас")}…` : t("Показать меня на карте")}
+          </button>
+        )}
+        {geoState === "denied" ? (
+          <span style={{ color: "var(--gtr-t3)" }}>
+            {t("Доступ к геолокации закрыт — включите его в настройках браузера для этого сайта.")}
+          </span>
+        ) : null}
+        {geoState === "unavailable" && geoError ? (
+          <span style={{ color: "var(--gtr-t3)" }}>{t("Не удалось определить местоположение")}</span>
+        ) : null}
+
+        {route.length ? (
+          <>
+            <span style={{ color: "var(--gtr-t3)" }}>·</span>
+            <span className="gtr-mono" style={{ font: "600 11.5px/1 'JetBrains Mono',monospace", color: "#7B4DFF" }}>
+              {t("МАРШРУТ ВЕЧЕРА")} · {route.length}
+              {road ? ` · ${routeLabel(road)}` : ""}
+            </span>
+            {road && !road.real ? (
+              <span style={{ color: "var(--gtr-t3)" }}>
+                {t("дорога недоступна — показана прямая")}
+              </span>
+            ) : null}
+            {/* Начать вечер: запускаем марафон-трекер по собранному маршруту
+                и уходим на экран трекера с чек-инами. Нужно ≥2 точки —
+                маршрут из одной остановки это не марафон. */}
+            {route.length >= 2 ? (
+              <button
+                className="gtr-btn gtr-btn-red"
+                style={{ padding: "6px 11px", fontSize: 12 }}
+                onClick={() => {
+                  gpsTracker.startTrack(route);
+                  navigate({ to: "/gtr/$screen", params: { screen: "tracking" } });
+                }}
+              >
+                {t("Начать вечер")} →
+              </button>
+            ) : null}
+            <button
+              className="gtr-btn"
+              style={{ padding: "6px 11px", fontSize: 12 }}
+              onClick={() => {
+                setRoute([]);
+                saveRoute([]);
+              }}
+            >
+              {t("Очистить")}
+            </button>
+          </>
+        ) : (
+          <span style={{ color: "var(--gtr-t3)" }}>
+            {t("Нажмите на площадку и добавьте её «в маршрут вечера» — соберите бар-хоппинг прямо на карте.")}
+          </span>
+        )}
       </div>
 
       <div ref={mapRef} className="gtr-map-canvas" />

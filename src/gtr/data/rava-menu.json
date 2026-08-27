@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "venueId": "VEN-0046",
+    "venueName": "RAVA Beach Club",
+    "note": "Собрано через веб-поиск по taste.banyantree.com/bt-phuket-eng-rava-beach-club (прямой доступ к сайту заблокирован сетевой политикой сессии) — цены не первичный прайс-лист, сверить перед запуском в прод."
+  },
+  "sections": [
+    {
+      "id": "grill",
+      "name": "Master Grill",
+      "ru": "Гриль на углях",
+      "groups": [
+        {
+          "id": "meat",
+          "name": "Meat",
+          "ru": "Мясо",
+          "items": [
+            { "id": "rava-chicken", "name": "Charcoal Phuket Chicken", "price": 800 },
+            { "id": "rava-ribeye", "name": "500g Black Angus Rib Eye", "price": 3400 },
+            { "id": "rava-tenderloin", "name": "300g Grass Fed Tenderloin", "price": 1800 },
+            { "id": "rava-wagyu", "name": "250g Wagyu Tenderloin", "price": 3000 }
+          ]
+        },
+        {
+          "id": "seafood",
+          "name": "Seafood",
+          "ru": "Морепродукты",
+          "items": [
+            { "id": "rava-fish", "name": "Whole Market Fish", "price": 1800 },
+            { "id": "rava-prawns", "name": "Grilled Prawns", "price": 1400 },
+            { "id": "rava-lobster", "name": "Grilled Whole Lobster", "price": 4400 },
+            { "id": "rava-charcoal-fish", "name": "Charcoal Fish", "price": 950 }
+          ]
+        },
+        {
+          "id": "thai",
+          "name": "Thai",
+          "ru": "Тайская кухня",
+          "items": [
+            { "id": "rava-padthai", "name": "Phad Thai Goong", "desc": "с креветками", "price": 550 },
+            { "id": "rava-krapao-meat", "name": "Phad Kra Pao", "desc": "курица/свинина", "price": 490 },
+            { "id": "rava-krapao-premium", "name": "Phad Kra Pao", "desc": "говядина/креветки", "price": 550 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bar",
+      "name": "Bar",
+      "ru": "Бар",
+      "groups": [
+        {
+          "id": "cocktails",
+          "name": "Cocktails",
+          "ru": "Коктейли",
+          "items": [{ "id": "rava-cocktail", "name": "Signature Cocktail", "price": 350, "desc": "диапазон 350–450฿" }]
+        },
+        {
+          "id": "spirits",
+          "name": "Bottles",
+          "ru": "Бутылки",
+          "items": [
+            { "id": "rava-belvedere", "name": "Belvedere", "unit": "0.7L", "price": 5500 },
+            { "id": "rava-greygoose", "name": "Grey Goose", "unit": "0.7L", "price": 6500 }
+          ]
+        }
+      ]
+    }
+  ]
+}

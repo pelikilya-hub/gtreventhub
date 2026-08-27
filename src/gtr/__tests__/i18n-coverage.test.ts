@@ -124,4 +124,19 @@ describe("i18n coverage", () => {
     const missing = [...keys].filter((k) => !(k in TH)).sort();
     expect(missing, `нет в TH (${missing.length}):\n${missing.slice(0, 40).join("\n")}`).toEqual([]);
   });
+
+  // Две проверки выше смотрят только на строки, которые удалось увидеть в
+  // коде. Строку, показанную через переменную, разбор не поймает — и она
+  // тихо уедет в прод переведённой наполовину. Паритет словарей ловит это
+  // независимо от того, нашли мы её вызов или нет: если строку однажды
+  // сочли достойной английского, тайский к ней обязан быть тоже.
+  it("словари EN и TH держат одинаковый набор ключей", () => {
+    const onlyEn = Object.keys(EN).filter((k) => !(k in TH)).sort();
+    const onlyTh = Object.keys(TH).filter((k) => !(k in EN)).sort();
+    expect(
+      { onlyEn, onlyTh },
+      `в EN без пары: ${onlyEn.length}, в TH без пары: ${onlyTh.length}\n` +
+        [...onlyEn.slice(0, 20), ...onlyTh.slice(0, 20)].join("\n"),
+    ).toEqual({ onlyEn: [], onlyTh: [] });
+  });
 });

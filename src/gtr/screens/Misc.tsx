@@ -205,6 +205,33 @@ export function InquiriesScreen() {
                         style={{ display: "block", font: "600 13px/1.45 'Golos Text',sans-serif" }}
                       >
                         {r.title}
+                        {/* Заявка, которая не доехала до сервера, обязана
+                            выглядеть иначе: молча показывать её как
+                            отправленную — врать человеку, который ждёт
+                            ответа в пятнадцать минут. */}
+                        {r.sync === "failed" ? (
+                          <span
+                            style={{
+                              marginLeft: 8,
+                              font: "700 10px/1 'JetBrains Mono',monospace",
+                              padding: "3px 6px",
+                              color: RED,
+                              border: `1px solid ${RED}`,
+                            }}
+                          >
+                            {t("НЕ ОТПРАВЛЕНА")}
+                          </span>
+                        ) : r.sync === "pending" ? (
+                          <span
+                            style={{
+                              marginLeft: 8,
+                              font: "700 10px/1 'JetBrains Mono',monospace",
+                              color: "var(--gtr-t3)",
+                            }}
+                          >
+                            {t("ОТПРАВЛЯЕМ…")}
+                          </span>
+                        ) : null}
                       </span>
                       <span
                         style={{

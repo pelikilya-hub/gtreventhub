@@ -599,7 +599,12 @@ export function GtrBroOverlay({
           method: "POST",
           headers: { "content-type": "application/json" },
           credentials: "same-origin",
-          body: JSON.stringify({ text: q, history, lang: langRef.current }),
+          body: JSON.stringify({
+            text: q,
+            history,
+            lang: langRef.current,
+            personaMode: modeRef.current,
+          }),
           signal: AbortSignal.timeout(30_000),
         });
         const data = (await r.json()) as { ok?: boolean; reply?: string; cards?: BroCard[]; error?: string };

@@ -9,7 +9,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { currentUser } from "../gtr/auth";
 import { getKvNs, kvGetJson } from "../gtr/kv-ns";
-import { buildPrompt, type BroContext, type PersonaMode } from "../gtr/bro/prompt.ru";
+import { buildPrompt, pickMode, type BroContext } from "../gtr/bro/prompt.ru";
 import { isBroLang, langDirective, speechLocale } from "../gtr/bro/lang";
 import { toolsForRole } from "../gtr/bro/tools";
 
@@ -49,9 +49,6 @@ const geminiTools = (role?: string) =>
     description: d.description,
     parameters: stripExtra(d.parameters),
   }));
-
-const pickMode = (raw: unknown): PersonaMode =>
-  raw === "concierge" || raw === "unhinged" ? raw : "bro";
 
 export const Route = createFileRoute("/api/gtr-bro-gem")({
   server: {

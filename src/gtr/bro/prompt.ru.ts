@@ -12,6 +12,12 @@ export const PROMPT_VERSION = "gtr-bro.ru@1.6.0";
 
 export type PersonaMode = "concierge" | "bro" | "unhinged";
 
+/** Персона из тела запроса. Один разбор на обе полосы: разъехавшийся
+ *  между голосом и текстом тон означает, что просьбу «без мата» половина
+ *  продукта услышала, а половина нет. */
+export const pickMode = (raw: unknown): PersonaMode =>
+  raw === "concierge" || raw === "unhinged" ? raw : "bro";
+
 export type BroContext = {
   userId: string;
   displayName?: string;
@@ -343,5 +349,13 @@ export const buildTextPrompt = (ctx: BroContext): string =>
     "Меню и цены (Café del Mar и SHAMAN Lounge Cafe Bar) — только из get_menu, на память не называй; у SHAMAN сервис 10% и НДС 7% не включены в цену, предупреждай об этом. Схема столов — get_venue_zones, book_table для брони (дата, время, гости, телефон; выполнится после кнопки подтверждения): у Café del Mar по зонам и столам, у CLC Restaurant (Come Leo Come, Чёнг Тале) — только Private Lounge почасово (минимум 3 часа, укажи hours), Main Hall и Karaoke Hall без цены — направляй на звонок +66 63 205 1000. Стол в SHAMAN — только по телефону/WhatsApp +66 62 662 0000, book_table туда не ходит. Меню CLC не опубликовано — get_menu его не знает.",
     "Пасхалка: ТОЛЬКО если вся реплика пользователя целиком — «да братан», ответь «Тамбовский волк тебе братан!)))». В обычных вопросах эту фразу не вставляй.",
     `Сегодня ${ctx.currentTime} (${ctx.timezone}). Пользователь: ${ctx.displayName ?? "гость"}. Роль: ${ctx.role ?? "visitor"}. Экран: ${ctx.currentScreen ?? "-"}.`,
+    // Персона накладывается только когда она не базовая. «Дерзкий» тон уже
+    // задан первой строкой этого промпта, поэтому за bro платить нечем; а
+    // человеку, попросившему «без мата», важнее правильный тон, чем
+    // сэкономленные двести токенов. Раньше текстовая полоса персону не
+    // применяла вовсе: голос слушался просьбы, печатный ответ — нет.
+    ctx.personaMode === "bro" ? "" : PERSONA[ctx.personaMode],
     "/no_think",
-  ].join("\n\n");
+  ]
+    .filter(Boolean)
+    .join("\n\n");

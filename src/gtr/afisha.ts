@@ -4,6 +4,7 @@
 import artistsRaw from "./data/artists.json";
 import venuesRaw from "./data/venues.json";
 import { kvGetJson, type KvNs } from "./kv-ns";
+import { absImg, posterKvKey, posterUrl } from "./poster";
 
 export type VenueAfishaEvent = {
   id: string;
@@ -81,14 +82,19 @@ const og = (html: string, prop: string) => {
 };
 
 // Постер страницы: og:image, иначе первый контентный <img> (Webflow-сайты
-// вроде Café del Mar og-тегов не ставят — постер лежит просто в разметке)
-function pickPoster(html: string): string {
+// вроде Café del Mar og-тегов не ставят — постер лежит просто в разметке).
+//
+// Адрес страницы обязателен: половина сайтов пишет постер относительным
+// путём («/wp-content/uploads/…»), и без базы он превращался в ссылку на наш
+// собственный домен — картинка не качалась в кэш и билась в браузере.
+function pickPoster(html: string, pageUrl: string): string {
   const meta = og(html, "image");
-  if (meta) return meta;
+  if (meta) return absImg(meta, pageUrl);
   const imgs = [...html.matchAll(/<img[^>]+src=["']([^"']+\.(?:jpe?g|png|webp)[^"']*)["']/gi)].map(
     (x) => x[1],
   );
-  return imgs.find((u) => !/logo|icon|favicon|arrow|badge|32x32|256x256/i.test(u)) ?? "";
+  const hit = imgs.find((u) => !/logo|icon|favicon|arrow|badge|32x32|256x256/i.test(u));
+  return hit ? absImg(hit, pageUrl) : "";
 }
 
 // событийная страница → карточка события
@@ -98,7 +104,7 @@ async function eventFromPage(url: string, slug: string, source: string, room?: s
   try {
     const html = await fetchText(url);
     const title = (og(html, "title") || slug.replace(/-/g, " ")).replace(/\s*[|–-]\s*(Café del Mar|Illuzion).*/i, "").trim();
-    const poster = pickPoster(html);
+    const poster = pickPoster(html, url);
     return {
       id: slug,
       title,
@@ -170,7 +176,7 @@ async function syncCarpeDiem(): Promise<VenueAfishaEvent[]> {
       const title = (og(page, "title") || slug.replace(/-/g, " "))
         .replace(/\s*[|–-]\s*Carpe Diem.*/i, "")
         .trim();
-      const poster = pickPoster(page);
+      const poster = pickPoster(page, url);
       out.push({
         id: slug,
         title,
@@ -273,22 +279,26 @@ async function cachePosters(ns: KvNs, vid: string, events: VenueAfishaEvent[], b
     const src = ev.posterSrc ?? ev.poster;
     if (!src || !/^https?:/.test(src)) continue;
     ev.posterSrc = src;
-    const key = `poster:${vid}:${ev.id}`;
+    const key = posterKvKey(vid, ev.id);
     if (have.has(key)) {
-      ev.poster = `/api/poster?k=${encodeURIComponent(`${vid}:${ev.id}`)}`;
+      ev.poster = posterUrl(vid, ev.id);
       continue;
     }
     if (budget.left <= 0) continue; // докачаем в следующий прогон крона
     budget.left--;
     try {
-      const res = await fetch(src, { headers: { "user-agent": UA } });
+      // Реферер обязателен: CDN половины сайтов отдаёт картинку только
+      // «со своей страницы» и на голый запрос отвечает 403.
+      const res = await fetch(src, {
+        headers: { "user-agent": UA, referer: ev.url || src, accept: "image/*,*/*" },
+      });
       if (!res.ok) continue;
       const ct = res.headers.get("content-type") ?? "image/jpeg";
       if (!ct.startsWith("image/")) continue;
       const buf = await res.arrayBuffer();
       if (buf.byteLength === 0 || buf.byteLength > POSTER_MAX_BYTES) continue;
       await ns.put(key, JSON.stringify({ ct, b64: toB64(buf) }));
-      ev.poster = `/api/poster?k=${encodeURIComponent(`${vid}:${ev.id}`)}`;
+      ev.poster = posterUrl(vid, ev.id);
     } catch {
       // постер не скачался — остаётся внешний URL, попробуем в другой раз
     }
@@ -348,12 +358,13 @@ async function syncResidentAdvisor(raId: number): Promise<VenueAfishaEvent[]> {
     .map((e) => {
       const dateIso = String(e.date).slice(0, 10);
       const names = (e.artists ?? []).map((a) => a.name).join(", ");
+      const img = absImg(e.images?.[0]?.filename, "https://ra.co") || undefined;
       return {
         id: `ra-${e.id}`,
         title: e.title + (names && !e.title.includes(names.split(",")[0]) ? ` · ${names}` : ""),
         dateIso,
-        poster: e.images?.[0]?.filename,
-        posterSrc: e.images?.[0]?.filename,
+        poster: img,
+        posterSrc: img,
         url: e.contentUrl ? `https://ra.co${e.contentUrl}` : "https://ra.co",
         artistIds: matchArtists(`${e.title} ${names}`),
         source: "ra.co",
@@ -428,7 +439,8 @@ function fromTribe(list: TribeEvent[], host: string): VenueAfishaEvent[] {
   return list
     .map((e) => {
       const dateIso = String(e.start_date ?? "").slice(0, 10);
-      const img = typeof e.image === "string" ? e.image : e.image?.url;
+      const raw = typeof e.image === "string" ? e.image : e.image?.url;
+      const img = absImg(raw, e.url || `https://${host}`);
       const title = decodeEntities(String(e.title ?? "")).trim();
       return {
         id: `tribe-${e.id ?? title}-${dateIso}`,
@@ -514,7 +526,7 @@ async function fromWpCpt(
     if (posters > 0 && e.link) {
       posters--;
       try {
-        poster = pickPoster(await fetchText(e.link));
+        poster = pickPoster(await fetchText(e.link), e.link);
       } catch {
         // страница события не открылась — покажем событие без постера
       }
@@ -561,7 +573,8 @@ const ldImage = (img: LdNode["image"]): string | undefined => {
 
 /** Вытащить будущие события из ld+json блоков страницы. Экспорт — для
  *  тестов: сеть в них не ходит, разбирается готовый HTML. */
-export function eventsFromJsonLd(html: string, host: string): VenueAfishaEvent[] {
+export function eventsFromJsonLd(html: string, host: string, pageUrl?: string): VenueAfishaEvent[] {
+  const base = pageUrl || `https://${host}`;
   const today = new Date().toISOString().slice(0, 10);
   const nodes: LdNode[] = [];
   const re = /<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi;
@@ -584,14 +597,14 @@ export function eventsFromJsonLd(html: string, host: string): VenueAfishaEvent[]
     const dateIso = String(n.startDate ?? "").slice(0, 10);
     const title = decodeEntities(String(n.name ?? "")).replace(/\s+/g, " ").trim().slice(0, 90);
     if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(dateIso) || dateIso < today) continue;
-    const img = ldImage(n.image);
+    const img = absImg(ldImage(n.image), base) || undefined;
     out.push({
       id: `ld-${dateIso}-${title.toLowerCase().replace(/[^a-zа-яё0-9]+/gi, "-").slice(0, 40)}`,
       title,
       dateIso,
       poster: img,
       posterSrc: img,
-      url: n.url || `https://${host}`,
+      url: absImg(n.url, base) || `https://${host}`,
       artistIds: matchArtists(title),
       source: host,
     });
@@ -607,7 +620,7 @@ async function probeJsonLd(site: string, host: string): Promise<SrcRec | null> {
   for (const path of LD_PATHS) {
     try {
       const url = `${site}${path}`;
-      const ev = eventsFromJsonLd(await fetchText(url), host);
+      const ev = eventsFromJsonLd(await fetchText(url), host, url);
       if (ev.length)
         return { kind: "jsonld", url, checkedAt: new Date().toISOString().slice(0, 10), found: ev.length };
     } catch {
@@ -619,7 +632,7 @@ async function probeJsonLd(site: string, host: string): Promise<SrcRec | null> {
 
 async function readSource(site: string, rec: SrcRec): Promise<VenueAfishaEvent[]> {
   const host = new URL(site).host;
-  if (rec.kind === "jsonld") return eventsFromJsonLd(await fetchText(rec.url!), host);
+  if (rec.kind === "jsonld") return eventsFromJsonLd(await fetchText(rec.url!), host, rec.url!);
   if (rec.kind === "tribe") {
     const j = (await jsonOrNull(rec.url!)) as { events?: TribeEvent[] } | null;
     return j?.events ? fromTribe(j.events, host) : [];

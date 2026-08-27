@@ -12,6 +12,7 @@ import { Card, Chip, Eyebrow, tint, VenueLogo } from "../ui";
 import { useGtr } from "../store";
 import { allAfishaFn, bookTableFn, promptpayCfgFn, type PromptpayCfg, type VenueAfisha } from "../kv-api";
 import { openAppLink } from "../applink";
+import { posterUrl } from "../poster";
 import { PromptpayModal } from "../promptpay-ui";
 import { SwipeToBook } from "../raw-pulse";
 import { gpsTracker, useGpsTracking } from "../gps-track";
@@ -177,10 +178,9 @@ export function TonightScreen({ vid: fromVenue }: { vid?: string } = {}) {
     const v = V(e.vid);
     return (
       <Card key={e.vid + e.id} style={{ padding: 0, overflow: "hidden" }}>
-        {e.poster ? (
-          <div style={{ position: "relative", aspectRatio: "4/5", overflow: "hidden" }}>
+        <div style={{ position: "relative", aspectRatio: "4/5", overflow: "hidden", background: "#101116" }}>
             <img
-              src={e.poster}
+              src={posterUrl(e.vid, e.id)}
               alt=""
               loading="lazy"
               onError={(ev) => {
@@ -205,8 +205,7 @@ export function TonightScreen({ vid: fromVenue }: { vid?: string } = {}) {
                 {t("НАШ АРТИСТ")}
               </span>
             ) : null}
-          </div>
-        ) : null}
+        </div>
         <div style={{ padding: "11px 14px 13px" }}>
           <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>{e.title}</div>
           <div

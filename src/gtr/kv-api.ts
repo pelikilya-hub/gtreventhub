@@ -1142,6 +1142,53 @@ export const afishaDelFn = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+// Постер события руками: площадка присылает афишу в мессенджере чаще, чем
+// вешает на сайт, а у половины заведений сайта нет вовсе. Загруженная
+// картинка ложится ровно в тот же ключ, что и добытая разведкой, поэтому её
+// сразу отдаёт /api/poster — без отдельной ветки в интерфейсе.
+//
+// Кто вправе: команда GTR по любой площадке, кабинет площадки — только по
+// своей. Роль venue не должна дотягиваться до чужих афиш.
+const POSTER_UP_MAX = 1_400_000; // ~1 МБ картинки после base64
+
+export const afishaPosterFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { vid: string; id: string; dataUrl: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    const mine = u.role === "venue" && u.venueId && u.venueId === data.vid;
+    if (u.role !== "gtr" && !mine) return { ok: false as const, reason: "нет прав на эту площадку" };
+
+    const { posterKvKey, posterUrl } = await import("./poster");
+    const key = posterKvKey(data.vid, data.id);
+
+    // пустая строка — «убрать постер», вернёмся к нарисованной афише
+    if (!data.dataUrl) {
+      await ns.delete(key);
+      return { ok: true as const, poster: posterUrl(data.vid, data.id) };
+    }
+
+    const m = data.dataUrl.match(/^data:(image\/(?:png|webp|jpeg));base64,([A-Za-z0-9+/=]+)$/);
+    if (!m) return { ok: false as const, reason: "нужен PNG, JPEG или WEBP" };
+    if (m[2].length > POSTER_UP_MAX)
+      return { ok: false as const, reason: "картинка тяжелее 1 МБ — сожми" };
+    await ns.put(key, JSON.stringify({ ct: m[1], b64: m[2] }));
+
+    // В самой записи афиши помечаем, что постер наш и лежит в кэше: иначе
+    // следующий прогон разведки снова полезет за оригиналом на сайт.
+    const rec = await kvGetJson<VenueAfisha>(ns, `venueevents:${data.vid}`);
+    if (rec) {
+      const hit = rec.events.find((e) => e.id === data.id);
+      if (hit) {
+        hit.poster = posterUrl(data.vid, data.id);
+        hit.posterSrc = undefined;
+        await ns.put(`venueevents:${data.vid}`, JSON.stringify(rec));
+      }
+    }
+    return { ok: true as const, poster: posterUrl(data.vid, data.id) };
+  });
+
 export const syncAfishaNowFn = createServerFn({ method: "POST" }).handler(async () => {
   const u = await currentUser();
   const ns = await getKvNs();

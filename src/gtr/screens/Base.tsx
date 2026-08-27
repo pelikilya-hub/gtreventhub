@@ -1385,6 +1385,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
   const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [pitchLang, setPitchLang] = useState("ru");
   if (user.role !== "gtr" && user.role !== "sales") return null;
   const st = confirm?.status;
   const make = async () => {
@@ -1406,9 +1407,18 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
       setBusy(false);
     }
   };
-  const waText = encodeURIComponent(
-    `Hi! GTR Event brings events and organizers to Phuket venues. Please confirm your venue details (2 min): ${link}`,
-  );
+  // Текст приглашения — не «подтвердите данные», а ответ на вопрос
+  // «зачем мне это». Площадка получает поток гостей и заявок, анкета —
+  // цена входа, и она две минуты. Три языка: тайский менеджер и
+  // европейский управляющий читают разные письма.
+  const venueName = V(vid)?.name ?? "";
+  const PITCH: Record<string, string> = {
+    ru: `Здравствуйте! GTR Event — приложение о ночной жизни Таиланда: афиша, бронь столов и подбор вечеринок под вкус гостя. ${venueName} уже в нашей базе — гости видят вас на карте и в афише.\n\nЧтобы карточка была живой и к вам шли брони, подтвердите данные (2 минуты): вместимость, условия и контакт. После этого откроем вам кабинет площадки — своя афиша, заявки и брони в одном месте.\n\n${link}`,
+    en: `Hello! GTR Event is a Thailand nightlife app: what's on tonight, table booking and taste-based party matching. ${venueName} is already in our database — guests see you on the map and in the lineup.\n\nTo keep your card live and start receiving bookings, please confirm your details (2 minutes): capacity, terms and a contact. After that we open your venue cabinet — your own lineup, requests and bookings in one place.\n\n${link}`,
+    th: `สวัสดีครับ/ค่ะ! GTR Event คือแอปไนต์ไลฟ์ประเทศไทย — อีเวนต์คืนนี้ จองโต๊ะ และจับคู่ปาร์ตี้ตามรสนิยม ${venueName} อยู่ในฐานข้อมูลของเราแล้ว ลูกค้าเห็นคุณบนแผนที่และในโปรแกรม\n\nกรุณายืนยันข้อมูล (2 นาที): ความจุ เงื่อนไข และผู้ติดต่อ จากนั้นเราจะเปิดระบบจัดการสถานที่ให้คุณ — โปรแกรมของคุณเอง คำขอ และการจอง ในที่เดียว\n\n${link}`,
+  };
+  const pitch = PITCH[pitchLang] ?? PITCH.ru;
+  const waText = encodeURIComponent(pitch);
   return (
     <Card reveal style={{ padding: 18 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
@@ -1447,7 +1457,50 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
             {copied ? "Скопировано · " : ""}
             {link}
           </div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+            {(["ru", "en", "th"] as const).map((lg) => (
+              <button
+                key={lg}
+                onClick={() => setPitchLang(lg)}
+                style={{
+                  border: `1px solid ${pitchLang === lg ? "#E5231B" : "rgba(255,255,255,.16)"}`,
+                  background: pitchLang === lg ? "rgba(229,35,27,.14)" : "transparent",
+                  color: pitchLang === lg ? "#fff" : "var(--gtr-t2)",
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  font: "600 11px/1 'JetBrains Mono',monospace",
+                  letterSpacing: ".08em",
+                }}
+              >
+                {lg.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <div
+            style={{
+              font: "500 12.5px/1.6 'Golos Text',sans-serif",
+              color: "var(--gtr-t2)",
+              whiteSpace: "pre-wrap",
+              border: "1px solid rgba(255,255,255,.1)",
+              padding: 12,
+              marginBottom: 8,
+              maxHeight: 190,
+              overflowY: "auto",
+            }}
+          >
+            {pitch}
+          </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <button
+              className="gtr-btn"
+              onClick={() => {
+                void navigator.clipboard?.writeText(pitch);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2500);
+              }}
+            >
+              {t("Скопировать письмо")}
+            </button>
             <a
               className="gtr-btn"
               style={{ textDecoration: "none" }}
@@ -1460,9 +1513,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
             <a
               className="gtr-btn"
               style={{ textDecoration: "none" }}
-              href={`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(
-                "GTR Event — please confirm your venue details (2 min)",
-              )}`}
+              href={`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(pitch)}`}
               target="_blank"
               rel="noreferrer"
             >
@@ -1470,6 +1521,31 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
             </a>
           </div>
         </>
+      ) : null}
+      {confirm?.cabinetCode ? (
+        <div style={{ marginTop: 14, borderTop: "1px solid rgba(255,255,255,.1)", paddingTop: 12 }}>
+          <Eyebrow style={{ marginBottom: 6 }}>{t("КАБИНЕТ ПЛОЩАДКИ ГОТОВ")}</Eyebrow>
+          <div
+            style={{
+              font: "500 12.5px/1.55 'Golos Text',sans-serif",
+              color: "var(--gtr-t2)",
+              marginBottom: 8,
+            }}
+          >
+            {t("Ссылка заводит аккаунт заведения: своя афиша, заявки и брони. Пароль менеджер задаёт сам, ссылка рассчитана на трёх человек.")}
+          </div>
+          <button
+            className="gtr-btn"
+            onClick={() => {
+              const url = `${window.location.origin}/gtr/join?code=${confirm.cabinetCode}`;
+              void navigator.clipboard?.writeText(url);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2500);
+            }}
+          >
+            {t("Скопировать ссылку на кабинет")}
+          </button>
+        </div>
       ) : null}
     </Card>
   );

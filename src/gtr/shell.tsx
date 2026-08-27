@@ -12,6 +12,7 @@ import {
   NAV_PRIVATE,
   NAV_TABS,
   NAV_VENUE,
+  NAV_VENUE_CABINET,
   NAV_VISITOR,
   STATUS_COLOR,
   STATUS_LABEL,
@@ -243,17 +244,23 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
   const canAfishaGen = Boolean(user.boss) || user.role === "organizer";
   const isArtist = user.role === "artist";
   const isVisitor = user.role === "visitor";
+  // Площадка видит только свой кабинет: своя программа, свои заявки,
+  // свой паспорт. Базы других заведений, каталога артистов и нашего
+  // конструктора в её меню нет вовсе — это внутренняя кухня GTR.
+  const isVenueAcc = user.role === "venue";
   const navVenue = isArtist
     ? NAV_ARTIST
     : isVisitor
       ? NAV_VISITOR
-      : user.role === "organizer"
+      : isVenueAcc
+        ? NAV_VENUE_CABINET
+        : user.role === "organizer"
         ? NAV_VENUE.filter(([id]) => ["dash", "calendar", "events", "constructor"].includes(id))
         : user.role === "gtr"
           ? NAV_VENUE.filter(([id]) => !["venue", "spaces"].includes(id))
           : NAV_VENUE;
   const navNet = (
-    isArtist || isVisitor
+    isArtist || isVisitor || isVenueAcc
       ? ([] as typeof NAV_NET)
       : user.role === "gtr"
         ? [...NAV_NET, ...NAV_PLATFORM_VENUE.filter(([id]) => !["artists", "vendors"].includes(id))]

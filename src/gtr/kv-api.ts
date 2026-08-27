@@ -1887,13 +1887,16 @@ export const setCommunityCfgFn = createServerFn({ method: "POST" })
   });
 
 export const communityPostFn = createServerFn({ method: "POST" })
-  .inputValidator((d: { kind: "digest" | "invite" | "contest"; target: "channel" | "chat" }) => d)
+  .inputValidator(
+    (d: { kind: "digest" | "invite" | "contest" | "moved"; target: "channel" | "chat" }) => d,
+  )
   .handler(async ({ data }) => {
     const u = await currentUser();
     const ns = await getKvNs();
     if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
     if (u.role !== "gtr" && !u.boss) return { ok: false as const, reason: "только BOSS / GTR-админ" };
-    const { COMMUNITY_KEY, buildContestText, buildDigestText, buildInviteText } = await import("./community");
+    const { COMMUNITY_KEY, buildContestText, buildDigestText, buildInviteText, buildMovedText } =
+      await import("./community");
     const cfg = await kvGetJson<import("./community").CommunityCfg>(ns, COMMUNITY_KEY);
     const chatId = data.target === "channel" ? cfg?.channelId : cfg?.chatId;
     if (!chatId) {
@@ -1901,16 +1904,25 @@ export const communityPostFn = createServerFn({ method: "POST" })
     }
     const bot = (await ns.get("tg:bot")) || "Gtrcom1_bot";
     const { APP_URL } = await import("./community");
-    const text =
-      data.kind === "digest"
-        ? await buildDigestText(ns)
-        : data.kind === "contest"
-          ? buildContestText()
-          : buildInviteText(cfg ?? {}, false); // false: ссылки только в кнопках, не в тексте
+    let text: string;
+    if (data.kind === "digest") text = await buildDigestText(ns);
+    else if (data.kind === "contest") text = buildContestText();
+    else if (data.kind === "moved") {
+      // Цифры берём из живой базы, а не из памяти: пост о переезде читают
+      // сотни человек, и «110 площадок» из прошлого месяца — прямая ложь.
+      const { PH, loadArtists } = await import("./data/app-data");
+      const base = await loadArtists();
+      text = buildMovedText(PH.venues.length, base.artists.length);
+    } else text = buildInviteText(cfg ?? {}, false); // false: ссылки только в кнопках
     // ссылки — всегда кнопками, никогда голым текстом в теле поста
     const buttons: { text: string; url: string }[][] =
       data.kind === "contest"
         ? [[{ text: "🎁 Получить мою ссылку", url: `https://t.me/${bot}?start=ref` }]]
+        : data.kind === "moved"
+        ? [
+            [{ text: "🚀 Открыть gtrevent.com", url: `${APP_URL}/gtr/tonight` }],
+            [{ text: "👤 Создать аккаунт", url: `${APP_URL}/gtr/signup` }],
+          ]
         : [
             [{ text: "🎟 Открыть GTR Event", url: `${APP_URL}/gtr/tonight` }],
             [
@@ -1929,10 +1941,97 @@ export const communityPostFn = createServerFn({ method: "POST" })
             link_preview_options: { url: APP_URL, prefer_large_media: true },
           }),
     });
-    return res.ok
-      ? { ok: true as const, reason: "" }
-      : { ok: false as const, reason: res.description || "Telegram отклонил пост" };
+    if (!res.ok)
+      return { ok: false as const, reason: res.description || "Telegram отклонил пост" };
+    // Пост о переезде закрепляем: адрес должен быть первым, что видит
+    // новый подписчик, а не тонуть в ленте через сутки.
+    if (data.kind === "moved") {
+      const id = (res.result as { message_id?: number } | undefined)?.message_id;
+      if (id)
+        await tgApi("pinChatMessage", {
+          chat_id: chatId,
+          message_id: id,
+          disable_notification: false,
+        });
+    }
+    return { ok: true as const, reason: "" };
   });
+
+// ---------- переезд: обновить все ссылки на стороне Telegram ----------
+// Внутри продукта адрес один — APP_URL, и его сторожит тест. Но часть ссылок
+// живёт НЕ в коде, а в настройках самого Telegram: описание бота, кнопка
+// меню, список команд, описание канала и группы. Их правит только Bot API, и
+// после переезда они остались бы с техническим адресом воркера — первое, что
+// видит человек, открывая профиль бота.
+//
+// Эта ручка приводит их все в порядок одним нажатием. Каждый шаг
+// отчитывается отдельно: Telegram отклоняет часть вызовов по правам (бот не
+// админ канала, описание длиннее лимита), и молчаливое «готово» здесь было
+// бы враньём.
+export const tgRelinkFn = createServerFn({ method: "POST" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || !ns) return { ok: false as const, steps: [] as string[], reason: "нужен вход" };
+  if (u.role !== "gtr" && !u.boss)
+    return { ok: false as const, steps: [] as string[], reason: "только BOSS / GTR-админ" };
+
+  const { APP_URL, COMMUNITY_KEY } = await import("./community");
+  const cfg = await kvGetJson<import("./community").CommunityCfg>(ns, COMMUNITY_KEY);
+  const { PH } = await import("./data/app-data");
+  const host = APP_URL.replace(/^https?:\/\//, "");
+  const steps: string[] = [];
+  const run = async (label: string, method: string, params: Record<string, unknown>) => {
+    const r = await tgApi(method, params);
+    steps.push(`${r.ok ? "✓" : "✗"} ${label}${r.ok ? "" : ` — ${r.description ?? "отказ"}`}`);
+    return r.ok;
+  };
+
+  // Профиль бота: длинное описание (пустой чат) и короткое (карточка).
+  // Лимиты Telegram: 512 и 120 знаков — держимся заметно ниже.
+  const about =
+    `GTR Event — гид по ночному Таиланду. ${PH.venues.length} площадок, живая афиша на каждый вечер, ` +
+    `бронь стола и ИИ-подбор вечеринок под твой вкус. Приложение: ${host}`;
+  await run("описание бота", "setMyDescription", { description: about.slice(0, 500) });
+  await run("короткое описание бота", "setMyShortDescription", {
+    short_description: `Ночной Таиланд: афиша, бронь, артисты. ${host}`.slice(0, 118),
+  });
+
+  // Кнопка меню в чате с ботом: ведёт в приложение, а не в никуда.
+  await run("кнопка меню бота", "setChatMenuButton", {
+    menu_button: { type: "web_app", text: "GTR Event", web_app: { url: `${APP_URL}/gtr/tonight` } },
+  });
+
+  // Список команд — то, что подсказывает Telegram при вводе «/».
+  await run("список команд", "setMyCommands", {
+    commands: [
+      { command: "tonight", description: "Куда пойти сегодня" },
+      { command: "afisha", description: "Афиша ближайших вечеров" },
+      { command: "ref", description: "Моя ссылка для конкурса" },
+      { command: "top", description: "Таблица лидеров" },
+      { command: "cabinet", description: "Мой кабинет в приложении" },
+      { command: "status", description: "Мой аккаунт" },
+      { command: "help", description: "Что умеет бот" },
+    ],
+  });
+
+  // Описания канала и группы: адрес должен быть виден до подписки.
+  if (cfg?.channelId)
+    await run("описание канала", "setChatDescription", {
+      chat_id: cfg.channelId,
+      description:
+        `Ночной Таиланд без поисков: афиша на каждый вечер, ${PH.venues.length} площадок, бронь стола за пару касаний. ` +
+        `Приложение — ${host}`,
+    });
+  else steps.push("• канал не привязан — описание не трогали");
+  if (cfg?.chatId)
+    await run("описание чата", "setChatDescription", {
+      chat_id: cfg.chatId,
+      description: `Чат сообщества GTR Event. Куда пойти, кто играет, с кем ехать. Приложение — ${host}`,
+    });
+  else steps.push("• чат не привязан — описание не трогали");
+
+  return { ok: steps.some((s) => s.startsWith("✓")), steps, reason: "" };
+});
 
 // Текст приглашения для ручной рассылки (BOSS копирует и шлёт кому угодно)
 export const communityInviteTextFn = createServerFn({ method: "GET" }).handler(async () => {

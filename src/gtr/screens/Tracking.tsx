@@ -8,6 +8,7 @@ import geoRaw from "../data/venue-geo.json";
 import { Card, Eyebrow } from "../ui";
 import { gpsTracker, useGpsTracking, type ActiveTrack } from "../gps-track";
 import { roadRoute } from "../evening-route";
+import { addDarkBasemap } from "../map-tiles";
 
 const GEO = geoRaw as Record<string, { lat: number; lon: number; src: string }>;
 
@@ -52,11 +53,7 @@ export function TrackingScreen() {
         attributionControl: true,
       });
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-        maxZoom: 19,
-        className: "gtr-map-tiles",
-      }).addTo(map);
+      addDarkBasemap(L, map);
 
       L4.current = {
         map,

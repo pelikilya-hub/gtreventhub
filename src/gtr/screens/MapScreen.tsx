@@ -16,6 +16,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "leaflet/dist/leaflet.css";
+import { addDarkBasemap } from "../map-tiles";
 
 import geoRaw from "../data/venue-geo.json";
 import shapesRaw from "../data/district-shapes.json";
@@ -88,11 +89,7 @@ export function MapScreen() {
         zoomControl: true,
         attributionControl: true,
       });
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-        maxZoom: 19,
-        className: "gtr-map-tiles",
-      }).addTo(map);
+      addDarkBasemap(L, map);
       const areas = L.layerGroup().addTo(map);
       const pins = L.layerGroup().addTo(map);
       // Свой слой поверх точек: дорога и «я» не должны тонуть под кустами.

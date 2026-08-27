@@ -41,7 +41,7 @@ import {
 import { BossCabinet, PushPanel, TgChip } from "./Boss";
 import { openAppLink } from "../applink";
 import { genreLabel, OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
-import { pickHeadliner, islandDigest } from "../guest-digest";
+import { pickHeadliner, islandDigest, loudness } from "../guest-digest";
 import { eventsToday, phuketDayStart } from "../daily-digest";
 import appUpdates from "../data/app-updates.json";
 
@@ -1748,13 +1748,22 @@ function VisitorCabinet() {
   const go = (s: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: s } });
   const [mp, setMp] = useState<import("../spotify").MusicProfile | null>(null);
   const [feed, setFeed] = useState<{ id: string; vid: string; title: string; dateIso: string; poster?: string; artistIds: string[] }[]>([]);
-  const [heads, setHeads] = useState<{ id: string; name: string; styles: string[]; photo?: string; music?: string }[]>([]);
+  // Вся афиша, а не только карусель: хедлайнеры считаются по ней, и
+  // косметический дедуп ленты не должен решать, кого показать на сцене.
+  const [afisha, setAfisha] = useState<{ id: string; vid: string; title: string; dateIso: string; poster?: string; artistIds: string[] }[]>([]);
+  // База артистов с фото и плеерами — сырьё для витрины хедлайнеров.
+  const [artIdx, setArtIdx] = useState<{
+    artists: { id: string; name: string; styles?: string[]; prio?: string; sp?: unknown }[];
+    photos: Record<string, { photo: string }>;
+    players: Record<string, { kind: string; ref: string }>;
+  } | null>(null);
   const [community, setCommunity] = useState<{ channelUrl: string; chatUrl: string }>({ channelUrl: "", chatUrl: "" });
   useEffect(() => {
     musicProfileFn().then((r) => setMp(r.profile)).catch(() => {});
     communityCfgFn().then((r) => setCommunity({ channelUrl: r.channelUrl, chatUrl: r.chatUrl })).catch(() => {});
     allAfishaFn()
       .then((r) => {
+        setAfisha(r.items);
         // лента без повторов: один постер один раз, максимум 2 события
         // с одной площадки — иначе весь ряд забивает одна афиша
         const seenPoster = new Set<string>();
@@ -1772,37 +1781,15 @@ function VisitorCabinet() {
         setFeed(picked);
       })
       .catch(() => {});
-    // хедлайнеры: приоритетные артисты с фото — витрина, не список
-    Promise.all([loadArtists(), import("../data/artist-photos.json"), import("../data/artist-players.json")]).then(
-      ([base, ph, pl]) => {
-        const photos = (ph as { default: { photos: Record<string, { photo: string }> } }).default.photos;
-        const players = (pl as { default: Record<string, { kind: string; ref: string }> }).default;
-        // Кнопка у хедлайнера обязана заиграть, а не открыть поиск:
-        // прямой профиль всегда выигрывает у поисковой выдачи Spotify.
-        const linkOf = (id: string, sp?: string) => {
-          const p = players[id];
-          const spDirect = sp && /open\.spotify\.com\/artist\//.test(sp) ? sp : undefined;
-          if (!p) return spDirect ?? sp;
-          if (p.kind === "spotify") return `https://open.spotify.com/artist/${p.ref}`;
-          if (p.kind === "sc") return p.ref;
-          if (p.kind === "deezer") return spDirect ?? `https://www.deezer.com/artist/${p.ref}`;
-          if (p.kind === "mixcloud") return spDirect ?? `https://www.mixcloud.com${p.ref}`;
-          return spDirect ?? sp;
-        };
-        setHeads(
-          base.artists
-            .filter((a) => a.prio === "A" && photos[a.id] && (a.styles ?? []).length)
-            .slice(0, 6)
-            .map((a) => ({
-              id: a.id,
-              name: a.name,
-              styles: (a.styles ?? []).slice(0, 2),
-              photo: photos[a.id]?.photo,
-              music: linkOf(a.id, a.sp as string | undefined),
-            })),
-        );
-      },
-    ).catch(() => {});
+    Promise.all([loadArtists(), import("../data/artist-photos.json"), import("../data/artist-players.json")])
+      .then(([base, ph, pl]) => {
+        setArtIdx({
+          artists: base.artists,
+          photos: (ph as { default: { photos: Record<string, { photo: string }> } }).default.photos,
+          players: (pl as { default: Record<string, { kind: string; ref: string }> }).default,
+        });
+      })
+      .catch(() => {});
   }, []);
 
   const openEvent = (e: { vid: string; artistIds: string[] }) =>
@@ -1817,6 +1804,73 @@ function VisitorCabinet() {
   // дежурному видео вайба.
   const headliner = useMemo(() => pickHeadliner(feed, todayIso), [feed, todayIso]);
   const island = useMemo(() => islandDigest(feed, todayIso), [feed, todayIso]);
+
+  // ---------- хедлайнеры сцены ----------
+  // Раньше здесь стоял статичный список приоритетных артистов — из-за него
+  // в блоке месяцами висели одни и те же лица. Теперь витрина идёт от
+  // афиши: сначала те, кто играет СЕГОДНЯ (громкие события выше), затем
+  // ближайшие дни. Общая витрина остаётся только как добор, если афиша
+  // пуста, — блок не должен схлопываться в ничто.
+  const heads = useMemo(() => {
+    if (!artIdx) return [];
+    const { artists, photos, players } = artIdx;
+    const byId = new Map(artists.map((a) => [a.id, a]));
+    // Кнопка у хедлайнера обязана заиграть, а не открыть поиск:
+    // прямой профиль всегда выигрывает у поисковой выдачи Spotify.
+    const linkOf = (id: string, sp?: string) => {
+      const p = players[id];
+      const spDirect = sp && /open\.spotify\.com\/artist\//.test(sp) ? sp : undefined;
+      if (!p) return spDirect ?? sp;
+      if (p.kind === "spotify") return `https://open.spotify.com/artist/${p.ref}`;
+      if (p.kind === "sc") return p.ref;
+      if (p.kind === "deezer") return spDirect ?? `https://www.deezer.com/artist/${p.ref}`;
+      if (p.kind === "mixcloud") return spDirect ?? `https://www.mixcloud.com${p.ref}`;
+      return spDirect ?? sp;
+    };
+    const LIMIT = 6;
+    const seen = new Set<string>();
+    const out: {
+      id: string;
+      name: string;
+      styles: string[];
+      photo?: string;
+      music?: string;
+      /** где и когда играет — подпись под именем; пусто у витринного добора */
+      where?: string;
+      tonight?: boolean;
+    }[] = [];
+    const push = (id: string, ev?: { vid: string; dateIso: string }) => {
+      if (seen.has(id) || out.length >= LIMIT) return;
+      const a = byId.get(id);
+      // Без фото карточка хедлайнера — пустой прямоугольник, такого не ставим
+      if (!a || !photos[id]) return;
+      seen.add(id);
+      out.push({
+        id,
+        name: a.name,
+        styles: (a.styles ?? []).slice(0, 2),
+        photo: photos[id]?.photo,
+        music: linkOf(id, a.sp as string | undefined),
+        where: ev ? (V(ev.vid)?.name ?? "") : undefined,
+        tonight: ev?.dateIso === todayIso,
+      });
+    };
+
+    // 1) сегодня: громкие события первыми
+    for (const e of afisha.filter((e) => e.dateIso === todayIso).sort((a, b) => loudness(b) - loudness(a)))
+      for (const id of e.artistIds) push(id, e);
+    // 2) ближайшие дни по возрастанию даты
+    for (const e of afisha
+      .filter((e) => e.dateIso > todayIso)
+      .sort((a, b) => (a.dateIso < b.dateIso ? -1 : 1)))
+      for (const id of e.artistIds) push(id, e);
+    // 3) добор витриной, если афиша ещё не собралась
+    for (const a of artists) {
+      if (out.length >= LIMIT) break;
+      if (a.prio === "A" && (a.styles ?? []).length) push(a.id);
+    }
+    return out;
+  }, [artIdx, afisha, todayIso]);
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto" }}>
@@ -1914,7 +1968,11 @@ function VisitorCabinet() {
       {/* ---- хедлайнеры: артисты, в которых проваливаешься ---- */}
       {heads.length ? (
         <>
-          <Eyebrow style={{ marginBottom: 10 }}>{t("ХЕДЛАЙНЕРЫ СЦЕНЫ")}</Eyebrow>
+          {/* Заголовок честно говорит, откуда список: сегодняшняя афиша
+              или общая витрина сцены, когда на сегодня играть некому. */}
+          <Eyebrow style={{ marginBottom: 10 }}>
+            {heads.some((a) => a.tonight) ? t("КТО ИГРАЕТ СЕГОДНЯ") : t("ХЕДЛАЙНЕРЫ СЦЕНЫ")}
+          </Eyebrow>
           <div className="gtr-hscroll" style={{ marginBottom: 18 }}>
             {heads.map((a) => (
               <Card key={a.id} hover style={{ padding: 0, overflow: "hidden", width: 148 }}
@@ -1939,10 +1997,16 @@ function VisitorCabinet() {
                       </svg>
                     </button>
                   ) : null}
+                  {/* Кто играет сегодня — видно сразу, без захода в афишу */}
+                  {a.tonight ? (
+                    <span className="gtr-mono" style={{ position: "absolute", top: 8, left: 8, font: "700 9px/1 'JetBrains Mono',monospace", padding: "4px 6px", background: "rgba(229,35,27,.92)", letterSpacing: ".08em" }}>
+                      {t("СЕГОДНЯ")}
+                    </span>
+                  ) : null}
                   <div style={{ position: "absolute", left: 9, right: 9, bottom: 8 }}>
                     <div style={{ font: "700 12px/1.2 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".03em" }}>{a.name}</div>
-                    <div className="gtr-mono" style={{ marginTop: 3, font: "500 10px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase" }}>
-                      {a.styles.map((g) => genreLabel(g, i18n.language)).join(" · ")}
+                    <div className="gtr-mono" style={{ marginTop: 3, font: "500 10px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {a.where || a.styles.map((g) => genreLabel(g, i18n.language)).join(" · ")}
                     </div>
                   </div>
                 </div>

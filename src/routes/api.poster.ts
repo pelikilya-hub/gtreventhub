@@ -111,6 +111,19 @@ export const Route = createFileRoute("/api/poster")({
           }
         }
 
+        // Оригинала нет. Дальше — фото самой площадки: живой кадр заведения
+        // читается как афиша вечера куда лучше, чем любая рисованная
+        // заглушка, а карточка в ленте всё равно кладёт поверх название и
+        // дату. Фото наше, лежит рядом в /venues — отдаём редиректом, чтобы
+        // не гонять мегабайты через воркер.
+        const { richOf } = await import("../gtr/data/app-data");
+        const hero = richOf(vid).hero;
+        if (hero && hero.startsWith("/venues/"))
+          return new Response(null, {
+            status: 302,
+            headers: { location: hero, "cache-control": `public, max-age=${DRAWN_TTL}` },
+          });
+
         return drawn(
           posterSvg({
             title: ev?.title || venue?.name || "GTR EVENT",

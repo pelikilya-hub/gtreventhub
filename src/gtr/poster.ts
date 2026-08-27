@@ -149,6 +149,15 @@ const rgba = (hex: string, a: number) => {
   return `rgba(${r},${g},${b},${a})`;
 };
 
+/** Смешать цвет с подложкой: k — доля подложки. Нужен, чтобы яркий цвет
+ *  категории стал ночным фоном, а не заливкой из палитры «весёлые обои». */
+const mix = (hex: string, onto: string, k: number) => {
+  const [r, g, b] = hexRgb(hex);
+  const [r2, g2, b2] = hexRgb(onto);
+  const c = (a: number, b3: number) => Math.round(a * (1 - k) + b3 * k);
+  return `rgb(${c(r, r2)},${c(g, g2)},${c(b, b2)})`;
+};
+
 export type PosterArt = {
   title: string;
   dateIso: string;
@@ -202,42 +211,82 @@ export function posterSvg(o: PosterArt): string {
     )
     .join("");
 
+  // Ночная сцена без фотографии: широкий цветовой замес площадки, косой
+  // световой луч и гигантское число даты за названием. Плоская чёрная
+  // плашка с белым текстом выглядела как страница договора — событию нужен
+  // свет, поэтому цвет здесь работает во всю площадь, а не полоской.
+  const marquee = (o.venueName || "GTR EVENT").toUpperCase().slice(0, 24);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${xml(title)}">
   <defs>
-    <radialGradient id="g" cx="78%" cy="12%" r="82%">
-      <stop offset="0%" stop-color="${rgba(accent, 0.42)}"/>
-      <stop offset="58%" stop-color="${rgba(accent, 0.08)}"/>
+    <linearGradient id="base" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="${mix(accent, "#05060A", 0.72)}"/>
+      <stop offset="46%" stop-color="${mix(accent, "#05060A", 0.86)}"/>
+      <stop offset="100%" stop-color="#05060A"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="24%" cy="88%" r="86%">
+      <stop offset="0%" stop-color="${rgba(accent, 0.55)}"/>
+      <stop offset="46%" stop-color="${rgba(accent, 0.16)}"/>
       <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
     </radialGradient>
-    <pattern id="scan" width="4" height="4" patternUnits="userSpaceOnUse">
-      <rect width="4" height="2" fill="rgba(255,255,255,.022)"/>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${rgba(accent, 0.5)}"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(5,6,10,0)"/>
+      <stop offset="100%" stop-color="rgba(5,6,10,.92)"/>
+    </linearGradient>
+    <pattern id="scan" width="5" height="5" patternUnits="userSpaceOnUse">
+      <rect width="5" height="2" fill="rgba(255,255,255,.03)"/>
     </pattern>
   </defs>
-  <rect width="${W}" height="${H}" fill="#0A0B0D"/>
-  <rect width="${W}" height="${H}" fill="url(#g)"/>
-  <path d="M760 0 L980 0 L400 ${H} L180 ${H} Z" fill="${rgba(accent, 0.14)}"/>
-  <path d="M1006 0 L1058 0 L742 520 L690 520 Z" fill="${rgba(accent, 0.1)}"/>
+
+  <rect width="${W}" height="${H}" fill="url(#base)"/>
+  <rect width="${W}" height="${H}" fill="url(#glow)"/>
+  <!-- лучи со сцены: два косых снопа света от верхней кромки -->
+  <path d="M680 -40 L860 -40 L470 ${H} L250 ${H} Z" fill="url(#beam)" opacity=".5"/>
+  <path d="M950 -40 L1010 -40 L742 700 L676 700 Z" fill="url(#beam)" opacity=".35"/>
   <rect width="${W}" height="${H}" fill="url(#scan)"/>
 
-  <rect x="80" y="120" width="120" height="6" fill="${accent}"/>
-  <text x="80" y="196" font-family="${face}" font-size="34" font-weight="700" letter-spacing="6" fill="${accent}">${xml(
+  <!-- бегущая строка площадки по диагонали: фактура и подпись разом -->
+  <g transform="rotate(-90 0 0)" opacity=".16">
+    <text x="${-H + 90}" y="${W - 34}" font-family="${face}" font-size="30" font-weight="700" letter-spacing="14" fill="#FFFFFF">${xml(
+      `${marquee} · ${marquee} · ${marquee}`,
+    )}</text>
+  </g>
+
+  <!-- дата гигантом за названием: контур, чтобы не спорил с заголовком -->
+  <text x="${W - 40}" y="${H - 330}" text-anchor="end" font-family="${face}" font-size="440" font-weight="800" letter-spacing="-24" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="3">${xml(
+    dd,
+  )}</text>
+
+  <rect x="80" y="118" width="132" height="7" fill="#FFFFFF"/>
+  <text x="80" y="198" font-family="${face}" font-size="34" font-weight="700" letter-spacing="7" fill="#FFFFFF">${xml(
     (o.venueName || "GTR EVENT").toUpperCase().slice(0, 30),
   )}</text>
-  ${o.room ? `<text x="80" y="242" font-family="${face}" font-size="26" letter-spacing="3" fill="rgba(255,255,255,.62)">${xml(o.room.toUpperCase().slice(0, 34))}</text>` : ""}
+  ${o.room ? `<text x="80" y="246" font-family="${face}" font-size="26" letter-spacing="4" fill="rgba(255,255,255,.7)">${xml(o.room.toUpperCase().slice(0, 34))}</text>` : ""}
 
+  <rect y="${H - 560}" width="${W}" height="560" fill="url(#floor)"/>
   ${rows}
 
-  <text x="80" y="${H - 250}" font-family="${face}" font-size="170" font-weight="800" letter-spacing="-6" fill="#FFFFFF">${xml(dd)}</text>
-  <text x="80" y="${H - 208}" font-family="${face}" font-size="52" font-weight="700" letter-spacing="10" fill="${accent}" text-anchor="start" transform="translate(${dd ? 210 : 0},0)">${xml(mon)}</text>
-
-  <rect x="80" y="${H - 190}" width="${W - 160}" height="2" fill="rgba(255,255,255,.16)"/>
-  <g transform="translate(80,${H - 148})">
-    <rect x="0" y="0" width="8" height="72" fill="#FFFFFF"/>
-    <rect x="0" y="0" width="30" height="7" fill="#FFFFFF"/>
-    <rect x="0" y="65" width="30" height="7" fill="#FFFFFF"/>
-    <text x="52" y="52" font-family="${face}" font-size="46" font-weight="800" letter-spacing="4" fill="#FFFFFF">GTR</text>
+  <g transform="translate(80,${H - 214})">
+    <rect x="0" y="-4" width="7" height="86" fill="${accent}"/>
+    <text x="30" y="66" font-family="${face}" font-size="92" font-weight="800" letter-spacing="-3" fill="#FFFFFF">${xml(
+      dd,
+    )}</text>
+    <text x="${dd ? 168 : 30}" y="66" font-family="${face}" font-size="50" font-weight="700" letter-spacing="9" fill="#FFFFFF">${xml(
+      mon,
+    )}</text>
   </g>
-  <text x="${W - 80}" y="${H - 96}" text-anchor="end" font-family="${face}" font-size="30" letter-spacing="3" fill="rgba(255,255,255,.62)">${xml(
+
+  <rect x="80" y="${H - 118}" width="${W - 160}" height="2" fill="rgba(255,255,255,.22)"/>
+  <g transform="translate(80,${H - 92})">
+    <rect x="0" y="0" width="7" height="56" fill="#FFFFFF"/>
+    <rect x="0" y="0" width="24" height="6" fill="#FFFFFF"/>
+    <rect x="0" y="50" width="24" height="6" fill="#FFFFFF"/>
+    <text x="44" y="42" font-family="${face}" font-size="38" font-weight="800" letter-spacing="4" fill="#FFFFFF">GTR</text>
+  </g>
+  <text x="${W - 80}" y="${H - 50}" text-anchor="end" font-family="${face}" font-size="28" letter-spacing="3" fill="rgba(255,255,255,.7)">${xml(
     o.foot || "gtrevent.com",
   )}</text>
 </svg>`;

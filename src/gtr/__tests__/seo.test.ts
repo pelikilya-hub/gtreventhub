@@ -30,7 +30,10 @@ describe("мета витрины", () => {
     it(`${lang}: страница разрешена к индексации и несёт превью`, () => {
       const meta = seoMeta(lang);
       const by = (k: string, v: string) =>
-        meta.find((m) => (m as Record<string, string>)[k] === v) as Record<string, string>;
+        meta.find((m) => (m as unknown as Record<string, string>)[k] === v) as unknown as Record<
+          string,
+          string
+        >;
       expect(by("name", "robots").content).toContain("index");
       expect(by("name", "robots").content).not.toContain("noindex");
       expect(by("property", "og:image").content).toBe(OG_IMAGE);

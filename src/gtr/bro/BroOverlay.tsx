@@ -388,6 +388,32 @@ export function GtrBroOverlay({
     return () => window.removeEventListener("keydown", esc);
   }, [open, onClose]);
 
+  // Клавиатура iOS. Она НЕ уменьшает окно: position:fixed продолжает
+  // считать высоту по старому, и лист с полем ввода уезжает под клавиатуру —
+  // человек печатает вслепую, а эфир «плавает». Настоящий размер видимой
+  // области знает только visualViewport; его разницу с окном кладём в
+  // переменную, а вёрстка поднимает на неё лист.
+  useEffect(() => {
+    if (!open) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const root = document.documentElement;
+    const apply = () => {
+      const hidden = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
+      // Мелкие колебания (панель Safari, инерция прокрутки) не считаем
+      // клавиатурой — иначе лист дёргается на каждом кадре скролла.
+      root.style.setProperty("--gtr-kb", `${hidden > 90 ? Math.round(hidden) : 0}px`);
+    };
+    apply();
+    vv.addEventListener("resize", apply);
+    vv.addEventListener("scroll", apply);
+    return () => {
+      vv.removeEventListener("resize", apply);
+      vv.removeEventListener("scroll", apply);
+      root.style.removeProperty("--gtr-kb");
+    };
+  }, [open]);
+
   if (!open) return null;
 
   if (mini) {

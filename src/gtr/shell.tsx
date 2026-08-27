@@ -346,6 +346,12 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
           alt="GTR — Global Transformation Reality"
           style={{ height: 30, width: "auto", minWidth: 0, maxWidth: "46vw", objectFit: "contain" }}
         />
+        {/* GTR SOUND живёт в шапке узкой полосой.
+            В футере он занимал целую строку над таб-баром и налезал на
+            содержимое: в списке заявок кнопки и текст уходили под него.
+            В шапке места ровно на то, что нужно на ходу, — играть,
+            следующий трек и что сейчас звучит. */}
+        <GtrPlayerBar />
         <LangSwitch style={{ marginLeft: "auto", flex: "none" }} />
       </header>
       {/* скрим всегда в DOM: видимость через CSS-фейд, чтобы меню не моргало */}
@@ -529,8 +535,6 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
         </div>
       </main>
 
-      {/* ---------- GTR SOUND: плеер в футере мобильной версии ---------- */}
-      <GtrPlayerBar />
       <GtrDancer />
 
       {/* ---------- нижняя навигация (телефон и iPad) ---------- */}

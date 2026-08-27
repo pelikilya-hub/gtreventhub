@@ -338,12 +338,15 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
           <span />
           <span />
         </button>
+        {/* Логотипу разрешено ужиматься, переключателю языка — нет: на
+            узком телефоне переполняться должна картинка, а не кнопки,
+            по которым человек попадает пальцем. */}
         <img
           src="/brand/GTR_primary_dark_clean.svg"
           alt="GTR — Global Transformation Reality"
-          style={{ height: 30, width: "auto" }}
+          style={{ height: 30, width: "auto", minWidth: 0, maxWidth: "46vw", objectFit: "contain" }}
         />
-        <LangSwitch style={{ marginLeft: "auto" }} />
+        <LangSwitch style={{ marginLeft: "auto", flex: "none" }} />
       </header>
       {/* скрим всегда в DOM: видимость через CSS-фейд, чтобы меню не моргало */}
       <div className="gtr-scrim" aria-hidden={!navOpen} onClick={() => setNavOpen(false)} />

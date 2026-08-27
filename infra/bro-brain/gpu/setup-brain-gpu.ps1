@@ -74,7 +74,12 @@ trap {
     Write-Host ""
     Write-Host "!! ОШИБКА: $_" -ForegroundColor Red
     Write-Host ($_.ScriptStackTrace)
-    Wait-Enter "Скопируй текст ошибки и пришли Claude. Enter — закрыть"
+    Write-Host ""
+    Write-Host "Весь прогон записан в: C:\gtr-brain\brain.log" -ForegroundColor Cyan
+    Write-Host "Пришли Claude этот файл целиком — по одной строке ошибки"
+    Write-Host "причину видно не всегда."
+    try { Stop-Transcript | Out-Null } catch { }
+    Wait-Enter "Enter — закрыть"
     exit 1
 }
 
@@ -97,12 +102,15 @@ if ((Test-Path $legacy) -and $legacy -ne $dir) {
 
 Set-Location $dir
 
-# Под SYSTEM консоли нет и Write-Host уходит в пустоту. Без журнала любой
-# отказ автозапуска неотличим от выключенного компьютера — ровно та беда,
-# из-за которой мозг однажды лежал неделю. Пишем всё в файл.
-if ($Unattended) {
-    try { Start-Transcript -Path "$dir\brain.log" -Append -Force | Out-Null } catch { }
-}
+# Журнал ведём ВСЕГДА, а не только в автозапуске.
+#
+# Под SYSTEM консоли нет и Write-Host уходит в пустоту — это первая
+# причина. Вторая оказалась важнее: 27.08.2026 запуск падал шесть раз
+# подряд, и каждый разбор стоил отдельного круга «пришлите строку ошибки».
+# Полный журнал показывает весь прогон сразу, включая то, что человек не
+# заметил и не скопировал.
+$logPath = "$dir\brain.log"
+try { Start-Transcript -Path $logPath -Append -Force | Out-Null } catch { }
 
 # Качаем потоково через WebClient: Invoke-WebRequest в PowerShell 5.1
 # держит весь файл в памяти — на модели в 5 ГБ это конец.

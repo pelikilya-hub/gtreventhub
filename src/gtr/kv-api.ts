@@ -1921,6 +1921,7 @@ export const communityPostFn = createServerFn({ method: "POST" })
       const pr = await tgApi("sendPoll", {
         chat_id: chatId,
         question: poll.question,
+        question_parse_mode: "HTML",
         options: poll.options,
         is_anonymous: true,
         allows_multiple_answers: Boolean(poll.multiple),

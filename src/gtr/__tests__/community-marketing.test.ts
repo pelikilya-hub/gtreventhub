@@ -4,6 +4,8 @@
 // то, что превращает объявление в приглашение — и то, обо что оно ломается
 // молча: Telegram не умеет SVG в фото, режет варианты опроса длиннее сотни
 // знаков и не принимает альбом из одного элемента.
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { APP_URL } from "../app-url";
@@ -177,5 +179,32 @@ describe("склонение при числе", () => {
     expect(t).toContain("354 площадки");
     expect(t).toContain("312 артистов");
     expect(t).not.toContain("354 площадок");
+  });
+});
+
+describe("фирменный слой", () => {
+  it("каждый вопрос опроса начинается со знака из фирменного пака", () => {
+    // brandEmojify в tgApi подменяет обычный знак на наш только по точному
+    // совпадению — поэтому вопрос обязан начинаться именно с того эмодзи,
+    // который есть в карте BRAND_EMOJI.
+    const tg = readFileSync(join(__dirname, "..", "tg.ts"), "utf8");
+    const brand = new Set([...tg.matchAll(/"(\p{Extended_Pictographic}[️]?)":\s*"\d+"/gu)].map((m) => m[1]));
+    expect(brand.size).toBeGreaterThan(30);
+    for (let d = 0; d < 7; d++) {
+      const q = buildThemePoll(d).question;
+      const first = [...q][0];
+      expect(brand.has(first), `вопрос «${q.slice(0, 40)}…» начинается с «${first}», которого нет в паке`).toBe(true);
+    }
+  });
+
+  it("опрос уходит с question_parse_mode — иначе знак останется обычным", () => {
+    for (const f of ["../../routes/api.community-digest.ts", "../kv-api.ts"])
+      expect(readFileSync(join(__dirname, f), "utf8"), f).toContain('question_parse_mode: "HTML"');
+  });
+
+  it("помощник телеграма знает, где у опроса текст и где режим разметки", () => {
+    const tg = readFileSync(join(__dirname, "..", "tg.ts"), "utf8");
+    expect(tg).toContain('sendPoll: "question"');
+    expect(tg).toContain('sendPoll: "question_parse_mode"');
   });
 });

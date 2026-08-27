@@ -239,6 +239,9 @@ export async function buildDigestText(ns: KvNs, lang: TgLang = "dual"): Promise<
 // один и тот же вопрос не приходил дважды за неделю.
 
 export type TgPoll = {
+  /** Вопрос начинается с эмодзи из фирменного пака: tgApi подменит его на
+   *  наш знак, если отправить с question_parse_mode: "HTML". Знак в опросе
+   *  разглядывают дольше, чем где-либо ещё в ленте. */
   question: string;
   options: string[];
   /** несколько ответов: уместно там, где выбор не взаимоисключающий */
@@ -263,33 +266,33 @@ export const fitPoll = (p: TgPoll): TgPoll => ({
 
 const THEME_POLLS: TgPoll[] = [
   {
-    question: "Во сколько выходишь? · What time do you head out?",
+    question: "🕐 Во сколько выходишь? · What time do you head out?",
     options: ["До 22:00 · Before 10pm", "22:00–00:00 · 10pm–midnight", "После полуночи · After midnight", "Я уже там · Already out"],
   },
   {
-    question: "Что решает при выборе места? · What makes the place?",
+    question: "🎚 Что решает при выборе места? · What makes the place?",
     options: ["Музыка · Music", "Люди · The crowd", "Вид и локация · The view", "Цена входа · The price"],
     multiple: true,
   },
   {
-    question: "Пляжный клуб или ночной? · Beach club or nightclub?",
+    question: "🌴 Пляжный клуб или ночной? · Beach club or nightclub?",
     options: ["Пляжный днём · Beach by day", "Ночной до утра · Club till morning", "И то и то · Both", "Бар потише · A quiet bar"],
   },
   {
-    question: "Какой звук твой? · What's your sound?",
+    question: "🎧 Какой звук твой? · What's your sound?",
     options: ["Хаус · House", "Техно · Techno", "Хип-хоп · Hip-hop", "Латина · Latin", "Лайв-музыка · Live music"],
     multiple: true,
   },
   {
-    question: "Что мешает выбраться вечером? · What stops you going out?",
+    question: "🚪 Что мешает выбраться вечером? · What stops you going out?",
     options: ["Не знаю куда · Don't know where", "Далеко ехать · Too far", "Дорого · Too pricey", "Ничего, я иду · Nothing, I'm out"],
   },
   {
-    question: "Стол бронируешь заранее? · Do you book a table ahead?",
+    question: "🍸 Стол бронируешь заранее? · Do you book a table ahead?",
     options: ["Да, всегда · Always", "Иногда · Sometimes", "Иду без стола · Never bother", "Ни разу не пробовал(а) · Never tried"],
   },
   {
-    question: "С кем идёшь чаще? · Who do you go out with?",
+    question: "🤝 С кем идёшь чаще? · Who do you go out with?",
     options: ["Один(а) · Solo", "Вдвоём · As a pair", "Компанией · With friends", "Как получится · Depends"],
   },
 ];
@@ -312,7 +315,7 @@ export async function buildTonightPoll(ns: KvNs): Promise<TgPoll | null> {
   }
   if (names.length < 2) return null;
   return fitPoll({
-    question: "Куда сегодня? · Where are you going tonight?",
+    question: "🪩 Куда сегодня? · Where are you going tonight?",
     // «Сижу дома» — не шутка, а рабочий вариант: без него голосуют только
     // те, кто уже собрался, и картина спроса выходит нарисованной.
     options: [...names, "Сижу дома · Staying in"],

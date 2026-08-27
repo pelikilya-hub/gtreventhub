@@ -68,7 +68,14 @@ const TEXT_FIELD: Record<string, string> = {
   editMessageCaption: "caption",
   sendDocument: "caption",
   sendVideo: "caption",
+  sendPoll: "question",
 };
+
+// У опроса своя пара полей: текст лежит в question, а режим разметки — в
+// question_parse_mode, не в общем parse_mode. Без этой карты фирменные
+// эмодзи проходили везде, кроме опросов, — а опрос как раз то место, где
+// на знак смотрят дольше всего.
+const PARSE_FIELD: Record<string, string> = { sendPoll: "question_parse_mode" };
 
 export async function tgApi<T = unknown>(
   method: string,
@@ -86,7 +93,8 @@ export async function tgApi<T = unknown>(
   };
   try {
     const field = TEXT_FIELD[method];
-    if (field && params.parse_mode === "HTML" && typeof params[field] === "string" && !String(params[field]).includes("<tg-emoji")) {
+    const mode = params[PARSE_FIELD[method] ?? "parse_mode"];
+    if (field && mode === "HTML" && typeof params[field] === "string" && !String(params[field]).includes("<tg-emoji")) {
       const branded = brandEmojify(params[field] as string);
       if (branded !== params[field]) {
         const r = await call({ ...params, [field]: branded });

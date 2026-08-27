@@ -1109,3 +1109,50 @@ describe("рабочий слой: знания про конструктор с
     expect(r.ok).toBe(false);
   });
 });
+
+// Площадка ищется по названию, а не по внутреннему id.
+//
+// Повод конкретный: get_venue_live_status требовал venueId, а
+// build_night_route — «id площадок». Взять их гостю неоткуда — id нигде
+// не показан и в разговоре не звучит. Модель, упершись в незаполняемый
+// параметр, спрашивала id у гостя: вопрос, на который нельзя ответить.
+describe("площадка по названию", () => {
+  it("схемы не требуют от гостя внутренний id", () => {
+    for (const d of TOOL_DEFS) {
+      const props = (d.parameters as { properties?: Record<string, unknown> }).properties ?? {};
+      for (const [name, spec] of Object.entries(props)) {
+        const text = `${name} ${JSON.stringify(spec)}`.toLowerCase();
+        // Единственный законный id в схемах — тот, что пришёл из выдачи
+        // другого инструмента; у площадок такого случая нет.
+        expect(text).not.toMatch(/venueid|id площад/);
+      }
+    }
+  });
+
+  it("живой статус принимает название", async () => {
+    const r = await handlers.get_venue_live_status({ venue: "Illuzion" }, ctx);
+    expect(r.ok).toBe(true);
+  });
+
+  it("живой статус ещё понимает старое имя параметра", async () => {
+    const r = await handlers.get_venue_live_status({ venueId: "Illuzion" }, ctx);
+    expect(r.ok).toBe(true);
+  });
+
+  it("на незнакомое название отсылает к поиску, а не просит id", async () => {
+    const r = await handlers.get_venue_live_status({ venue: "Бар Оксюморон" }, ctx);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toContain("search_venues");
+      expect(r.error).not.toContain("id");
+    }
+  });
+
+  it("маршрут строится по названиям", async () => {
+    const r = await handlers.build_night_route(
+      { stops: ["Illuzion", "Cafe del Mar"], startHour: 21 },
+      ctx,
+    );
+    expect(r.ok).toBe(true);
+  });
+});

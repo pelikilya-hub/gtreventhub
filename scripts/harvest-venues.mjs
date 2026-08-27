@@ -6,7 +6,10 @@
 //
 // Запуск: node scripts/harvest-venues.mjs [--limit N] [--out файл]
 import { readFileSync, writeFileSync } from "node:fs";
-import { execSync } from "node:child_process";
+import { execFile, execSync } from "node:child_process";
+import { promisify } from "node:util";
+
+const run = promisify(execFile);
 
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
@@ -52,6 +55,29 @@ const pagesFor = (website) => {
   return [...exact, root, ...PATHS.slice(1).map((p) => root + p)];
 };
 
+// Часть сайтов встроенный fetch не берёт: сидят на HTTP/2 и на HTTP/1.1
+// отвечают вечным 301 на самих себя. curl умеет h2 и проходит там, где
+// fetch кружит. Это не хитрость, а обычный браузерный путь.
+const viaCurl = async (url) => {
+  // Часть сайтов рвёт соединение через раз — на второй попытке отвечает
+  // тем же кодом 200. Один отказ поэтому ещё не приговор ссылке.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      // Только асинхронно: синхронный запуск замораживает цикл событий,
+      // и тогда таймауты остальных запросов не срабатывают — сбор виснет.
+      const { stdout } = await run(
+        "curl",
+        ["-sSL", "-m", String(TIMEOUT / 1000), "-A", UA, url],
+        { encoding: "utf8", maxBuffer: 12 * 1024 * 1024, timeout: TIMEOUT + 5000 },
+      );
+      if (stdout && stdout.length > 200) return stdout;
+    } catch {
+      // Следующая попытка.
+    }
+  }
+  return null;
+};
+
 const get = async (url) => {
   try {
     const r = await fetch(url, {
@@ -59,10 +85,27 @@ const get = async (url) => {
       signal: AbortSignal.timeout(TIMEOUT),
       redirect: "follow",
     });
-    if (!r.ok) return null;
-    return await r.text();
+    if (r.ok) return await r.text();
   } catch {
-    return null;
+    // Ниже попробуем curl: причина отказа может быть в клиенте, а не в сайте.
+  }
+  const t = viaCurl(url);
+  return t && t.length > 200 ? t : null;
+};
+
+// Домена нет вовсе или сайт просто не отвечает — разные новости. Первое
+// значит, что ссылка в базе протухла и её нельзя показывать гостю.
+const resolves = async (host) => {
+  try {
+    const r = await fetch(`https://cloudflare-dns.com/dns-query?name=${host}&type=A`, {
+      headers: { accept: "application/dns-json" },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!r.ok) return true; // проверить не смогли — не обвиняем площадку
+    const d = await r.json();
+    return d.Status !== 3;
+  } catch {
+    return true;
   }
 };
 
@@ -86,7 +129,12 @@ async function harvest(v) {
   // «Не открылся» и «открылся, но данных нет» — разные вещи: первое чинится
   // с нашей стороны, второе нет. Одним словом их звать значит не знать,
   // сколько площадок мы ещё можем закрыть.
-  if (!best) return { id: v.id, name: v.name, status: reached ? "no-markup" : "unreachable" };
+  if (!best) {
+    if (reached) return { id: v.id, name: v.name, status: "no-markup" };
+    const host = new URL(pages[pages.length - 1]).host;
+    const alive = await resolves(host);
+    return { id: v.id, name: v.name, status: alive ? "unreachable" : "dead-domain", site: host };
+  }
   const { score, ...facts } = best;
   return { id: v.id, name: v.name, status: "ok", ...facts };
 }
@@ -105,6 +153,26 @@ async function worker() {
 }
 await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
+// Сайты отвечают через раз, и прогон, который забывает уже собранное,
+// хуже, чем не запущенный: паспорт площадки исчезает из продукта из-за
+// одной сетевой икоты. Поэтому старый факт остаётся, пока не заменён
+// новым; дата съёма при нём своя и честно показывает возраст.
+let kept = 0;
+try {
+  const prev = JSON.parse(readFileSync(OUT, "utf8"));
+  const before = new Map(prev.venues.map((v) => [v.id, v]));
+  for (let i = 0; i < results.length; i++) {
+    if (results[i].status === "ok") continue;
+    const old = before.get(results[i].id);
+    if (old?.status === "ok") {
+      results[i] = old;
+      kept++;
+    }
+  }
+} catch {
+  // Первый прогон — сливать не с чем.
+}
+
 const ok = results.filter((r) => r.status === "ok");
 const byField = (f) => ok.filter((r) => r[f]).length;
 const report = {
@@ -115,6 +183,8 @@ const report = {
     withMarkup: ok.length,
     noMarkup: results.filter((r) => r.status === "no-markup").length,
     unreachable: results.filter((r) => r.status === "unreachable").length,
+    deadDomain: results.filter((r) => r.status === "dead-domain").length,
+    keptFromPrevious: kept,
     hours: byField("hours"),
     address: byField("address"),
     phone: byField("phone"),

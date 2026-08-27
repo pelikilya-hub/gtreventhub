@@ -28,7 +28,7 @@ import { hasReserve as venueHasReserve, menuVenues, reserveVenues } from "../ven
 import { capacityOf, forecast, pullScore } from "./forecast";
 import { isTeam, TEAM_ROLES } from "./roles";
 import { genreName, resolveGenre } from "../genres";
-import { publicFactsOf } from "../venue-facts";
+import { publicFactsOf, siteIsDead } from "../venue-facts";
 import { fitArtist, primeSlot, slotAt, soundOf } from "../venue-sound";
 
 // ------------------------------------------------------------- типы
@@ -1134,7 +1134,9 @@ export const handlers: Record<
       concept: clean(hit.concept ?? "", 160),
       music: clean(hit.music ?? "", 120),
       capacity: hit.capacity ?? null,
-      website: hit.website ?? null,
+      // Мёртвую ссылку не предлагаем: домена больше нет, и гость упрётся
+      // в пустоту вместо брони.
+      website: siteIsDead(hit.id) ? null : (hit.website ?? null),
       format: sound?.label ?? null,
       audience: sound?.audience ?? null,
       slots: sound?.slots.map((sl) => ({ role: sl.role, from: sl.from, to: sl.to, bpm: sl.bpm })) ?? [],

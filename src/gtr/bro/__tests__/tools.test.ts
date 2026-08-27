@@ -530,6 +530,18 @@ describe("паспорт площадки отдаёт часы работы", (
     expect(d.hours_source).toBe("GTR");
   });
 
+  it("мёртвую ссылку на сайт не предлагаем", async () => {
+    // Домена нет вовсе — проверено внешним DNS. Отдать такую ссылку
+    // значит отправить гостя в пустоту вместо брони.
+    const { PH } = await import("../../data/app-data");
+    const { siteIsDead } = await import("../../venue-facts");
+    const dead = PH.venues.find((v) => siteIsDead(v.id));
+    if (!dead) return;
+    const r = await handlers.get_venue_profile({ venue: dead.name }, ctx);
+    if (!r.ok) return;
+    expect((r.data as { website: string | null }).website).toBeNull();
+  });
+
   it("открытый адрес и телефон площадки видит и гость", async () => {
     // Это не контакт из нашей базы, а то, что площадка сама повесила на
     // главной. Прятать его от гостя незачем — он идёт туда ехать.

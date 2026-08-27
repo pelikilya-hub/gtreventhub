@@ -31,5 +31,14 @@ const BY_ID = new Map<string, PublicFacts>(
 
 export const publicFactsOf = (venueId: string): PublicFacts | undefined => BY_ID.get(venueId);
 
+/** Площадки, чей сайт в базе перестал существовать: домена нет вовсе,
+ *  проверено внешним DNS. Такую ссылку гостю показывать нельзя — она не
+ *  «временно не грузится», а никуда не ведёт. */
+const DEAD = new Set(
+  (raw.venues as Row[]).filter((v) => v.status === "dead-domain").map((v) => v.id),
+);
+
+export const siteIsDead = (venueId: string): boolean => DEAD.has(venueId);
+
 /** Сколько площадок закрыто их собственными данными — для сводок. */
 export const publicFactsCount = (): number => BY_ID.size;

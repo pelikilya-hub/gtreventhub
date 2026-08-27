@@ -4,8 +4,10 @@
     "note": "Паспорта площадок из разметки schema.org на их собственных сайтах. Каждый факт с адресом страницы, откуда взят. Ничего не сгенерировано.",
     "sitesTried": 70,
     "withMarkup": 24,
-    "noMarkup": 36,
-    "unreachable": 10,
+    "noMarkup": 35,
+    "unreachable": 7,
+    "deadDomain": 4,
+    "keptFromPrevious": 0,
     "hours": 8,
     "address": 20,
     "phone": 20,
@@ -36,7 +38,8 @@
     {
       "id": "VEN-0006",
       "name": "YONA Beach Club",
-      "status": "unreachable"
+      "status": "unreachable",
+      "site": "yonabeach.com"
     },
     {
       "id": "VEN-0007",
@@ -88,12 +91,14 @@
     {
       "id": "VEN-0017",
       "name": "TaiPan Nightclub",
-      "status": "unreachable"
+      "status": "dead-domain",
+      "site": "www.taipanclubphuket.com"
     },
     {
       "id": "VEN-0018",
       "name": "New York Live Music Bar",
-      "status": "unreachable"
+      "status": "dead-domain",
+      "site": "newyorklivemusic.club"
     },
     {
       "id": "VEN-0019",
@@ -126,7 +131,8 @@
     {
       "id": "VEN-0033",
       "name": "InterContinental Phuket Resort",
-      "status": "unreachable"
+      "status": "unreachable",
+      "site": "www.ihg.com"
     },
     {
       "id": "VEN-0035",
@@ -141,7 +147,8 @@
     {
       "id": "VEN-0037",
       "name": "Grand Mercure Phuket Patong",
-      "status": "unreachable"
+      "status": "unreachable",
+      "site": "grandmercurephuketpatong.com"
     },
     {
       "id": "VEN-0039",
@@ -279,7 +286,8 @@
     {
       "id": "VEN-0067",
       "name": "Phuket Boat Lagoon",
-      "status": "unreachable"
+      "status": "unreachable",
+      "site": "phuketboatlagoon.com"
     },
     {
       "id": "VEN-0068",
@@ -396,12 +404,14 @@
     {
       "id": "VEN-0088",
       "name": "Pullman Phuket Karon Beach Resort",
-      "status": "unreachable"
+      "status": "unreachable",
+      "site": "pullmanphuketkaron.com"
     },
     {
       "id": "VEN-0092",
       "name": "Pullman Phuket Arcadia Naithon Beach",
-      "status": "unreachable"
+      "status": "unreachable",
+      "site": "pullmanphuketarcadia.com"
     },
     {
       "id": "VEN-0093",
@@ -416,7 +426,8 @@
     {
       "id": "VEN-0098",
       "name": "Seduction Complex",
-      "status": "unreachable"
+      "status": "dead-domain",
+      "site": "seductionphuket.com"
     },
     {
       "id": "VEN-0101",
@@ -441,7 +452,8 @@
     {
       "id": "VEN-0106",
       "name": "Andaman Riviera",
-      "status": "unreachable"
+      "status": "dead-domain",
+      "site": "andaman-riviera.com"
     },
     {
       "id": "VEN-0107",
@@ -456,7 +468,8 @@
     {
       "id": "VEN-0109",
       "name": "CLC Restaurant (Come Leo Come)",
-      "status": "no-markup"
+      "status": "unreachable",
+      "site": "clcphuket.com"
     },
     {
       "id": "VEN-0110",

@@ -3,6 +3,7 @@
 // экране. Контакты, телефоны и разведка живут на сервере и приходят
 // server-функцией с проверкой роли (venueContactsFn).
 import venuesRaw from "./venues.public.json";
+import regionsRaw from "./regions.json";
 import { genreName, resolveGenre } from "../genres";
 import nightRaw from "./venue-night.json";
 import richRaw from "./rich.json";
@@ -39,6 +40,8 @@ export type Venue = {
   verified: string;
   notes: string;
   address?: string;
+  /** код региона из regions.json; пусто у исторической базы = phuket */
+  region?: string;
   gallery?: string;
   readiness: null | {
     score: number;
@@ -126,7 +129,50 @@ type PhuketBase = {
   research: Research[];
 };
 
-export const PH = venuesRaw as unknown as PhuketBase;
+// ---------- регионы ----------
+// География продукта больше не равна Пхукету. Реестр описывает регион
+// (имена ru/en/th, центр карты, префикс id, словарь районов), а данные
+// каждого региона живут в data/regions/<code>.public.json и подхватываются
+// глобом: новый регион — это новый json, без правок кода.
+export type RegionInfo = {
+  ru: string;
+  en: string;
+  th: string;
+  center: [number, number];
+  zoom: number;
+  prefix: string;
+  clusters: string[];
+};
+const { _note: _regionsNote, ...regionsClean } = regionsRaw as unknown as Record<
+  string,
+  RegionInfo | string
+>;
+export const REGIONS = regionsClean as Record<string, RegionInfo>;
+/** Имя региона на языке интерфейса; ru — язык по умолчанию продукта. */
+export const regionName = (code: string, lang: string): string => {
+  const r = REGIONS[code];
+  if (!r) return code;
+  return lang.startsWith("en") ? r.en : lang.startsWith("th") ? r.th : r.ru;
+};
+/** Регион площадки. Историческая база Пхукета поля не несёт — дефолт. */
+export const regionOf = (v: { region?: unknown }): string =>
+  typeof v.region === "string" && v.region ? v.region : "phuket";
+
+type RegionFile = { meta?: { region?: string }; venues?: Venue[]; spaces?: Space[] };
+const regionModules = import.meta.glob("./regions/*.public.json", {
+  eager: true,
+}) as Record<string, { default: RegionFile }>;
+
+const baseRaw = venuesRaw as unknown as PhuketBase;
+const mergedVenues: Venue[] = [...baseRaw.venues];
+const mergedSpaces: Space[] = [...baseRaw.spaces];
+for (const [path, mod] of Object.entries(regionModules)) {
+  const code = path.match(/([a-z]{3})\.public\.json$/)?.[1] ?? mod.default.meta?.region ?? "";
+  for (const v of mod.default.venues ?? []) mergedVenues.push({ ...v, region: code });
+  for (const s of mod.default.spaces ?? []) mergedSpaces.push(s);
+}
+
+export const PH: PhuketBase = { ...baseRaw, venues: mergedVenues, spaces: mergedSpaces };
 export const RICH_ALL = richRaw as unknown as Record<string, RichVenue>;
 
 export const V = (id: string): Venue => PH.venues.find((v) => v.id === id) ?? ({} as Venue);

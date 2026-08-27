@@ -1,4 +1,7 @@
-// Карта Пхукета: 110 заведений, районы контурами, категории знаками.
+// Карта Таиланда: регионы чипами, районы контурами, категории знаками.
+// Пхукет — исторический дом с полигонами тамбонов; остальные регионы
+// (Самуи, Панган, Паттайя, Бангкок, Пханг-Нга) живут точками и кластерами,
+// их контуры появятся, когда будут нарезаны из OSM.
 //
 // Что здесь важно по логике. Район — не фильтр списка, а область на
 // карте: нажал «Патонг» — контур загорелся, карта подлетела к границам,
@@ -20,7 +23,7 @@ import { addDarkBasemap } from "../map-tiles";
 
 import geoRaw from "../data/venue-geo.json";
 import shapesRaw from "../data/district-shapes.json";
-import { PH, richOf, V } from "../data/app-data";
+import { PH, REGIONS, regionName, regionOf, richOf, V } from "../data/app-data";
 import { catOf, MAP_CATS, pinHtml } from "../map-style";
 import { useMyLocation } from "../geo-me";
 import { gpsTracker } from "../gps-track";
@@ -41,7 +44,7 @@ const SHAPES = shapesRaw as unknown as Record<string, Shape>;
 const ALL = "Все";
 
 export function MapScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const mapRef = useRef<HTMLDivElement | null>(null);
   const L4 = useRef<{
@@ -55,7 +58,13 @@ export function MapScreen() {
   } | null>(null);
   const [tag, setTag] = useState(ALL);
   const [district, setDistrict] = useState(ALL);
+  const [region, setRegion] = useState("phuket");
   const [ready, setReady] = useState(false);
+  // Смена региона обнуляет район: кластеры соседнего региона тут не живут.
+  const pickRegion = (code: string) => {
+    setRegion(code);
+    setDistrict(ALL);
+  };
 
   // Своя точка и маршрут вечера. Маршрут собирается на экране «Сегодня» и
   // до сих пор жил только там: на карте острова его не было вовсе.
@@ -66,17 +75,32 @@ export function MapScreen() {
 
   // Считаем по тем площадкам, у которых есть координата: показывать в
   // счётчике то, чего на карте нет, — обманывать себя же.
-  const onMap = useMemo(() => PH.venues.filter((v) => GEO[v.id]), []);
+  const onMap = useMemo(
+    () => PH.venues.filter((v) => GEO[v.id] && regionOf(v) === region),
+    [region],
+  );
+  // Регионы показываем только те, где есть точки: пустой чип — обещание,
+  // которое карта не сдержит. Порядок — как в реестре.
+  const regionRow = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const v of PH.venues) if (GEO[v.id]) c[regionOf(v)] = (c[regionOf(v)] || 0) + 1;
+    return Object.keys(REGIONS)
+      .filter((code) => c[code])
+      .map((code) => [code, c[code]] as const);
+  }, []);
   const tags = useMemo(() => {
     const c: Record<string, number> = {};
     for (const v of onMap) c[v.tag] = (c[v.tag] || 0) + 1;
     return MAP_CATS.filter((x) => c[x.tag]).map((x) => ({ ...x, n: c[x.tag] }));
   }, [onMap]);
+  // Контуры тамбонов есть только у Пхукета; в остальных регионах район —
+  // это кластер из базы, без полигона, но с тем же поведением фильтра.
   const districts = useMemo(() => {
     const c: Record<string, number> = {};
-    for (const v of onMap) if (SHAPES[v.cluster]) c[v.cluster] = (c[v.cluster] || 0) + 1;
+    for (const v of onMap)
+      if (region !== "phuket" || SHAPES[v.cluster]) c[v.cluster] = (c[v.cluster] || 0) + 1;
     return Object.entries(c).sort((a, b) => b[1] - a[1]);
-  }, [onMap]);
+  }, [onMap, region]);
 
   useEffect(() => {
     let alive = true;
@@ -113,6 +137,21 @@ export function MapScreen() {
       const L = await import("leaflet");
       const { areas, map } = L4.current!;
       areas.clearLayers();
+      // Контуры тамбонов нарезаны только для Пхукета. В остальных регионах
+      // карта летит к центру региона (или к точкам выбранного кластера) —
+      // без полигонов, пока их границы не собраны из OSM.
+      if (region !== "phuket") {
+        const reg = REGIONS[region];
+        const pts = onMap
+          .filter((v) => district !== ALL && v.cluster === district)
+          .map((v) => [GEO[v.id]!.lat, GEO[v.id]!.lon] as [number, number]);
+        if (pts.length) {
+          map.flyToBounds(L.latLngBounds(pts), { padding: [40, 40], maxZoom: 15, duration: 0.7 });
+        } else if (reg) {
+          map.flyTo(reg.center, reg.zoom, { duration: 0.7 });
+        }
+        return;
+      }
       // Старый город и Пхукет-таун — один и тот же тамбон. Рисовать его
       // дважды нельзя: заливки складываются и район выглядит ярче
       // выбранного. Поэтому контур один, а зажигают его обе кнопки.
@@ -147,7 +186,7 @@ export function MapScreen() {
         map.flyTo([7.95, 98.34], 11, { duration: 0.7 });
       }
     })();
-  }, [ready, district]);
+  }, [ready, district, region, onMap]);
 
   // Точки: знак категории в кольце её цвета, со склейкой близких.
   //
@@ -396,10 +435,26 @@ export function MapScreen() {
         </span>
       </div>
 
+      {/* регионы: Пхукет — исторический дом, остальные подключаются по мере
+          наполнения. Чип виден только когда региону есть что показать. */}
+      {regionRow.length > 1 && (
+        <div className="gtr-map-row">
+          {regionRow.map(([code, n]) => (
+            <button
+              key={code}
+              className={`gtr-map-chip${region === code ? " on" : ""}`}
+              onClick={() => pickRegion(code)}
+            >
+              {regionName(code, i18n.language)} · {n}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* районы: выбор области, а не фильтр списка */}
       <div className="gtr-map-row">
         <button className={`gtr-map-chip${district === ALL ? " on" : ""}`} onClick={() => setDistrict(ALL)}>
-          {t("Весь остров")}
+          {region === "phuket" ? t("Весь остров") : t("Весь регион")}
         </button>
         {districts.map(([k, n]) => (
           <button

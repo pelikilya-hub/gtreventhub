@@ -1,0 +1,57 @@
+{
+  "_note": "Реестр регионов GTR Event. Код региона = имя файла в data/regions/<code>.json. prefix — префикс id площадок региона (VEN-SMU-0001). clusters — словарь районов для фильтров и валидатора; у Пхукета кластеры живут в исторической базе venues.json и здесь не дублируются.",
+  "phuket": {
+    "ru": "Пхукет",
+    "en": "Phuket",
+    "th": "ภูเก็ต",
+    "center": [7.95, 98.34],
+    "zoom": 11,
+    "prefix": "VEN",
+    "clusters": []
+  },
+  "smu": {
+    "ru": "Самуи",
+    "en": "Samui",
+    "th": "เกาะสมุย",
+    "center": [9.512, 100.014],
+    "zoom": 12,
+    "prefix": "VEN-SMU",
+    "clusters": ["Chaweng", "Lamai", "Bophut / Fisherman's Village", "Maenam / Bangrak", "Choeng Mon", "West Coast / Nathon"]
+  },
+  "pgn": {
+    "ru": "Панган",
+    "en": "Phangan",
+    "th": "เกาะพะงัน",
+    "center": [9.738, 100.015],
+    "zoom": 12,
+    "prefix": "VEN-PGN",
+    "clusters": ["Haad Rin", "Baan Tai / Baan Khai", "Thong Sala", "Srithanu / West Coast", "North / Chaloklum"]
+  },
+  "pty": {
+    "ru": "Паттайя",
+    "en": "Pattaya",
+    "th": "พัทยา",
+    "center": [12.936, 100.889],
+    "zoom": 12,
+    "prefix": "VEN-PTY",
+    "clusters": ["Walking Street", "Central Pattaya", "Naklua / Wongamat", "Jomtien / Pratumnak", "East Pattaya"]
+  },
+  "bkk": {
+    "ru": "Бангкок",
+    "en": "Bangkok",
+    "th": "กรุงเทพฯ",
+    "center": [13.745, 100.55],
+    "zoom": 11,
+    "prefix": "VEN-BKK",
+    "clusters": ["Sukhumvit / Thonglor / Ekkamai", "RCA / Rama 9", "Silom / Sathorn", "Riverside / Charoenkrung", "Khaosan / Old Town", "North / Muang Thong"]
+  },
+  "pna": {
+    "ru": "Пханг-Нга",
+    "en": "Phang Nga",
+    "th": "พังงา",
+    "center": [8.45, 98.3],
+    "zoom": 10,
+    "prefix": "VEN-PNA",
+    "clusters": ["Khao Lak", "Natai Beach", "Phang Nga Town / Bay", "Koh Yao"]
+  }
+}

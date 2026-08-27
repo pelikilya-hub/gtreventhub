@@ -1996,20 +1996,38 @@ export const tgRelinkFn = createServerFn({ method: "POST" }).handler(async () =>
     short_description: `Ночной Таиланд: афиша, бронь, артисты. ${host}`.slice(0, 118),
   });
 
-  // Кнопка меню в чате с ботом: ведёт в приложение, а не в никуда.
-  await run("кнопка меню бота", "setChatMenuButton", {
-    menu_button: { type: "web_app", text: "GTR Event", web_app: { url: `${APP_URL}/gtr/tonight` } },
-  });
+  // Кнопка меню в чате с ботом — ТОЛЬКО список команд.
+  //
+  // Здесь стояла кнопка Web App на приложение, и это было ошибкой сразу по
+  // двум причинам. Первая: Telegram на десктопе и в вебе открывает Web App
+  // во фрейме, а наш собственный периметр отдаёт
+  // `content-security-policy: frame-ancestors 'self'` — браузер такой фрейм
+  // не рисует, и кнопка просто ничего не делала. Вторая: она заняла место
+  // списка команд, то есть человек лишился и «/» тоже.
+  //
+  // Ссылке на приложение место в кнопках под сообщениями: там обычный url,
+  // он открывается в браузере и никакими фреймами не ограничен.
+  await run("кнопка меню бота", "setChatMenuButton", { menu_button: { type: "commands" } });
 
   // Список команд — то, что подсказывает Telegram при вводе «/».
+  // Перечислены ВСЕ команды, которые бот реально понимает: короткий список
+  // прячет половину бота, а сам вызов затирает то, что было заведено в
+  // BotFather, и восстановить это оттуда нечем.
   await run("список команд", "setMyCommands", {
     commands: [
       { command: "tonight", description: "Куда пойти сегодня" },
       { command: "afisha", description: "Афиша ближайших вечеров" },
+      { command: "menu", description: "Кнопки быстрых действий" },
       { command: "ref", description: "Моя ссылка для конкурса" },
-      { command: "top", description: "Таблица лидеров" },
+      { command: "top", description: "Таблица лидеров конкурса" },
       { command: "cabinet", description: "Мой кабинет в приложении" },
-      { command: "status", description: "Мой аккаунт" },
+      { command: "offers", description: "Предложения выступить" },
+      { command: "gigs", description: "Мои подтверждённые выступления" },
+      { command: "events", description: "Мои события и сметы (команда)" },
+      { command: "requests", description: "Заявки организаторов (команда)" },
+      { command: "offair", description: "Снять себя с эфира" },
+      { command: "status", description: "Кто я" },
+      { command: "cancel", description: "Отменить текущую форму" },
       { command: "help", description: "Что умеет бот" },
     ],
   });

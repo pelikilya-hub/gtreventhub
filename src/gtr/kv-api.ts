@@ -27,6 +27,7 @@ export const ROLE_LABELS: Record<RoleId, string> = {
   artist: "Артист / диджей",
   organizer: "Организатор",
   visitor: "Посетитель",
+  venue: "Площадка",
 };
 
 const initialsOf = (name: string) =>
@@ -422,8 +423,10 @@ export const sendOfferFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const me = await currentUser();
-    if (!me || me.role === "artist")
-      return { ok: false as const, error: "Только команда GTR и площадки" };
+    // Аккаунт заведения (роль venue) сюда не пускаем: офферы артистам —
+    // работа нашего букинга, площадка договаривается через менеджера.
+    if (!me || me.role === "artist" || me.role === "venue")
+      return { ok: false as const, error: "Только команда GTR и организаторы" };
     const ns = await getKvNs();
     if (!ns) return { ok: false as const, error: "Хранилище недоступно (локальный режим)" };
 
@@ -577,6 +580,10 @@ export const tgActivateFn = createServerFn({ method: "POST" }).handler(async () 
 export type AppInvite = {
   role: RoleId;
   teamOf: string; // команда организатора-тимлида ("" — вне команды)
+  /** Площадка, к которой привязан кабинет. Для роли venue обязателен:
+   *  без него аккаунт заведения не знает, чью программу показывать, и
+   *  скоуп по venueId не работает. */
+  venueId?: string;
   invitedBy: string;
   inviterName: string;
   created: number;
@@ -589,7 +596,7 @@ export const createInviteFn = createServerFn({ method: "POST" })
   .inputValidator((d: { role?: RoleId; maxUses?: number }) => d)
   .handler(async ({ data }) => {
     const me = await currentUser();
-    if (!me || me.role === "artist")
+    if (!me || me.role === "artist" || me.role === "venue")
       return { ok: false as const, error: "Приглашать могут команда GTR и организаторы" };
     const ns = await getKvNs();
     if (!ns) return { ok: false as const, error: "Хранилище недоступно (локальный режим)" };
@@ -652,7 +659,9 @@ export const joinFn = createServerFn({ method: "POST" })
       name: data.name.trim(),
       role: inv.role,
       roleLabel: ROLE_LABELS[inv.role],
-      venueId: "",
+      // Кабинет площадки привязан к своему заведению: по venueId идёт
+      // весь скоуп — программа, заявки, брони, паспорт.
+      venueId: inv.venueId ?? "",
       artistId: "",
       teamOf: inv.teamOf || undefined,
       initials: initialsOf(data.name),
@@ -1008,7 +1017,10 @@ export type ContactUser = {
 export const contactsUsersFn = createServerFn({ method: "GET" }).handler(async () => {
   const me = await currentUser();
   const ns = await getKvNs();
-  if (!me || me.role === "artist" || !ns) return { users: [] as ContactUser[] };
+  // Центр связи — внутренний контур команды. Заведение общается с нами
+  // через своего менеджера, а не через список всех сотрудников и клиентов.
+  if (!me || me.role === "artist" || me.role === "venue" || !ns)
+    return { users: [] as ContactUser[] };
   const keys = await kvListAll(ns, "user:");
   const users = (
     await Promise.all(keys.map((k) => kvGetJson<StoredUser & { tgNick?: string }>(ns, k)))
@@ -1165,6 +1177,10 @@ export type VenueConfirm = {
   rate?: VenueConfirmRate;
   capacity?: string;
   notes?: string;
+  /** Код приглашения в кабинет площадки. Заводится в момент
+   *  подтверждения: заведение уже здесь и уже отвечает на вопросы —
+   *  второй раз собрать его внимание будет втрое дороже. */
+  cabinetCode?: string;
 };
 
 const randToken = () => {
@@ -1274,10 +1290,29 @@ export const venueConfirmSubmitFn = createServerFn({ method: "POST" })
       capacity: data.capacity.trim().slice(0, 60),
       notes: data.notes?.trim().slice(0, 500),
     };
-    await ns.put(key, JSON.stringify(next));
+    // Кабинет заводим прямо здесь, а не отдельным шагом позже: площадка
+    // только что потратила время на анкету — это лучшая и единственная
+    // минута, когда она готова завести аккаунт. Ссылка одноразовая и
+    // привязана к её же площадке, пароль человек задаёт сам.
+    const cabCode = `join-${randToken().slice(0, 10)}`;
+    const cabInvite: AppInvite = {
+      role: "venue",
+      teamOf: "",
+      venueId: link.vid,
+      invitedBy: next.sentBy,
+      inviterName: "GTR Event",
+      created: Date.now(),
+      uses: 0,
+      maxUses: 3, // менеджер, владелец, маркетолог — обычно этого хватает
+      exp: Date.now() + 30 * 24 * 3600 * 1000,
+    };
+    await ns.put(`invite:${cabCode}`, JSON.stringify(cabInvite));
+    await ns.put(key, JSON.stringify({ ...next, cabinetCode: cabCode } satisfies VenueConfirm));
+
     // Телеграм: лично отправившему и в общий канал — подтверждение это событие
     if (tgConfigured()) {
       const { V } = await import("./data/app-data");
+      const { APP_URL } = await import("./community");
       const name = V(link.vid)?.name ?? link.vid;
       const text = [
         "✅ <b>GTR EVENT · площадка подтвердила данные</b>",
@@ -1290,6 +1325,11 @@ export const venueConfirmSubmitFn = createServerFn({ method: "POST" })
         `<b>Контакт:</b> ${tgEsc(next.contact!.name)}${next.contact!.role ? " · " + tgEsc(next.contact!.role) : ""}`,
         `<b>Телефон:</b> ${tgEsc(next.contact!.phone)}`,
         next.notes ? `<b>Комментарий:</b> ${tgEsc(next.notes)}` : "",
+        "",
+        // Ссылку кладём в то же сообщение: менеджеру не надо идти в
+        // дашборд и искать код — он пересылает её площадке в тот же чат,
+        // пока разговор ещё тёплый.
+        `<b>Кабинет площадки:</b> ${APP_URL}/gtr/join?code=${cabCode}`,
       ]
         .filter((l) => l !== "")
         .join("\n");
@@ -1307,7 +1347,10 @@ export const venueConfirmSubmitFn = createServerFn({ method: "POST" })
           disable_web_page_preview: true,
         });
     }
-    return { ok: true as const };
+    // Код кабинета возвращаем на страницу подтверждения: площадка видит
+    // «ваш кабинет готов» сразу после отправки анкеты, а не когда-нибудь
+    // потом, когда до неё дойдут руки менеджера.
+    return { ok: true as const, cabinetCode: cabCode };
   });
 
 // Команде: все статусы подтверждений — для базы, паспорта и спринт-дашборда
@@ -1316,6 +1359,14 @@ export const venueConfirmsFn = createServerFn({ method: "GET" }).handler(async (
   const ns = await getKvNs();
   const empty = { confirms: {} as Record<string, VenueConfirm> };
   if (!me || me.role === "artist" || me.role === "organizer" || !ns) return empty;
+  // Здесь лежат контакты и ставки всех заведений сети. Аккаунту площадки
+  // отдаём ровно одну запись — его собственную: чужой прайс и чужой
+  // менеджер не его дело, а показать их означало бы слить конкуренту.
+  if (me.role === "venue") {
+    if (!me.venueId) return empty;
+    const own = await kvGetJson<VenueConfirm>(ns, `vconfirm:${me.venueId}`);
+    return { confirms: own ? { [me.venueId]: own } : {} };
+  }
   const keys = await kvListAll(ns, "vconfirm:");
   const confirms: Record<string, VenueConfirm> = {};
   for (const k of keys) {
@@ -1480,7 +1531,7 @@ export const contactTeamFn = createServerFn({ method: "POST" })
       const target = k.slice("tg:".length);
       // только команде: артистам и организаторам чужие сообщения не шлём
       const rec = await kvGetJson<StoredUser>(ns, `user:${target}`);
-      if (rec && (rec.role === "artist" || rec.role === "organizer")) continue;
+      if (rec && (rec.role === "artist" || rec.role === "organizer" || rec.role === "venue")) continue;
       const chat = await ns.get(k);
       if (!chat || sent.has(chat)) continue;
       sent.add(chat);

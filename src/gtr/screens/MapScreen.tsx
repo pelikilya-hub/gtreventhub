@@ -19,8 +19,10 @@ import "leaflet/dist/leaflet.css";
 
 import geoRaw from "../data/venue-geo.json";
 import shapesRaw from "../data/district-shapes.json";
-import { PH, richOf } from "../data/app-data";
+import { PH, richOf, V } from "../data/app-data";
 import { catOf, MAP_CATS, pinHtml } from "../map-style";
+import { useMyLocation } from "../geo-me";
+import { loadRoute, roadRoute, routeLabel, type LatLon, type RoadRoute } from "../evening-route";
 
 type Geo = Record<string, { lat: number; lon: number; src: string }>;
 type Shape = {
@@ -44,12 +46,21 @@ export function MapScreen() {
     map: import("leaflet").Map;
     pins: import("leaflet").LayerGroup;
     areas: import("leaflet").LayerGroup;
+    /** слой «я и мой вечер»: своя точка, радиус точности, дорога, остановки */
+    mine: import("leaflet").LayerGroup;
     /** перерисовка точек: висит на zoomend/moveend, снимается при смене фильтров */
     redraw?: () => void;
   } | null>(null);
   const [tag, setTag] = useState(ALL);
   const [district, setDistrict] = useState(ALL);
   const [ready, setReady] = useState(false);
+
+  // Своя точка и маршрут вечера. Маршрут собирается на экране «Сегодня» и
+  // до сих пор жил только там: на карте острова его не было вовсе.
+  const { pos: me, state: geoState, error: geoError, ask: askGeo } = useMyLocation();
+  const [route, setRoute] = useState<string[]>([]);
+  const [road, setRoad] = useState<RoadRoute | null>(null);
+  useEffect(() => setRoute(loadRoute()), []);
 
   // Считаем по тем площадкам, у которых есть координата: показывать в
   // счётчике то, чего на карте нет, — обманывать себя же.
@@ -83,7 +94,9 @@ export function MapScreen() {
       }).addTo(map);
       const areas = L.layerGroup().addTo(map);
       const pins = L.layerGroup().addTo(map);
-      L4.current = { map, pins, areas };
+      // Свой слой поверх точек: дорога и «я» не должны тонуть под кустами.
+      const mine = L.layerGroup().addTo(map);
+      L4.current = { map, pins, areas, mine };
       setReady(true);
     })();
     return () => {
@@ -242,6 +255,104 @@ export function MapScreen() {
     };
   }, [ready, tag, district, onMap, t]);
 
+  // Дорога вечера. Считаем от своей точки, если она известна: гость стоит
+  // не в первом баре списка, и «сколько ехать» начинается с того места, где
+  // он сейчас. Ответ маршрутизатора кэшируется в evening-route.
+  const stops = useMemo(
+    () => route.map((vid) => GEO[vid]).filter(Boolean).map((g) => [g.lat, g.lon] as LatLon),
+    [route],
+  );
+  useEffect(() => {
+    if (stops.length < 1) {
+      setRoad(null);
+      return;
+    }
+    let alive = true;
+    const pts: LatLon[] = me ? [[me.lat, me.lon], ...stops] : stops;
+    void roadRoute(pts).then((r) => {
+      if (alive) setRoad(r);
+    });
+    return () => {
+      alive = false;
+    };
+    // me по координатам, а не по объекту: watchPosition отдаёт новый объект
+    // на каждый чих датчика, и маршрут пересчитывался бы бесконечно.
+  }, [stops, me?.lat, me?.lon]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Рисуем «я и мой вечер»: точка, радиус точности, дорога, остановки.
+  useEffect(() => {
+    if (!ready || !L4.current) return;
+    let stop = false;
+    void (async () => {
+      const L = await import("leaflet");
+      if (stop || !L4.current) return;
+      const { mine } = L4.current;
+      mine.clearLayers();
+
+      if (road?.line.length) {
+        // Тень под линией: по тёмным тайлам тонкая фиолетовая нитка теряется
+        // на дорогах и берегах — снизу кладём широкую тёмную подложку.
+        L.polyline(road.line, { color: "#0A0B0D", weight: 8, opacity: 0.55 }).addTo(mine);
+        L.polyline(road.line, {
+          color: "#7B4DFF",
+          weight: 4,
+          opacity: 0.95,
+          // Прямая — это признание, что дороги мы не знаем. Пунктир говорит
+          // об этом честно, вместо того чтобы выдавать её за маршрут.
+          dashArray: road.real ? undefined : "7 8",
+        }).addTo(mine);
+      }
+
+      stops.forEach((p, i) => {
+        const vid = route[i];
+        L.marker(p, {
+          zIndexOffset: 600,
+          icon: L.divIcon({
+            className: "",
+            html: `<span class="gtr-map-stop">${i + 1}</span>`,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
+          }),
+        })
+          .addTo(mine)
+          .bindTooltip(`${i + 1}. ${V(vid)?.name ?? ""}`, { direction: "top", className: "gtr-area-tip" });
+      });
+
+      if (me) {
+        // Круг точности рисуем только когда он о чём-то говорит: при ±5 м
+        // это точка под маркером, а при ±2 км — честное «где-то здесь».
+        if (me.accuracy > 25)
+          L.circle([me.lat, me.lon], {
+            radius: me.accuracy,
+            color: "#4A90E2",
+            weight: 1,
+            opacity: 0.5,
+            fillColor: "#4A90E2",
+            fillOpacity: 0.1,
+          }).addTo(mine);
+        L.marker([me.lat, me.lon], {
+          zIndexOffset: 1000,
+          icon: L.divIcon({ className: "", html: `<span class="gtr-map-me"></span>`, iconSize: [22, 22], iconAnchor: [11, 11] }),
+        })
+          .addTo(mine)
+          .bindTooltip(t("Вы здесь"), { direction: "top", className: "gtr-area-tip" });
+      }
+    })();
+    return () => {
+      stop = true;
+    };
+  }, [ready, road, stops, route, me, t]);
+
+  // Первый раз, когда позиция найдена, — показываем её. Дальше карту не
+  // трогаем: гость двигает её сам, и рывок к себе на каждом обновлении
+  // датчика не даёт ничего рассмотреть.
+  const centred = useRef(false);
+  useEffect(() => {
+    if (!ready || !me || centred.current || !L4.current) return;
+    centred.current = true;
+    L4.current.map.flyTo([me.lat, me.lon], 14, { duration: 0.8 });
+  }, [ready, me]);
+
   // клики из попапов (HTML вне React)
   useEffect(() => {
     const h = (e: Event) => {
@@ -299,6 +410,57 @@ export function MapScreen() {
             <span style={{ opacity: 0.5 }}>{c.n}</span>
           </button>
         ))}
+      </div>
+
+      {/* Своя точка и маршрут вечера */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          flexWrap: "wrap",
+          margin: "10px 0 0",
+          font: "500 12.5px/1.5 'Golos Text',sans-serif",
+          color: "var(--gtr-t2)",
+        }}
+      >
+        {geoState === "on" ? (
+          <span className="gtr-mono" style={{ font: "600 11.5px/1 'JetBrains Mono',monospace", color: "#4A90E2" }}>
+            {t("Вы здесь")}
+            {me && me.accuracy > 25 ? ` · ±${Math.round(me.accuracy)} ${t("м")}` : ""}
+          </span>
+        ) : (
+          <button className="gtr-btn" onClick={askGeo} disabled={geoState === "asking"}>
+            {geoState === "asking" ? `${t("Ищем вас")}…` : t("Показать меня на карте")}
+          </button>
+        )}
+        {geoState === "denied" ? (
+          <span style={{ color: "var(--gtr-t3)" }}>
+            {t("Доступ к геолокации закрыт — включите его в настройках браузера для этого сайта.")}
+          </span>
+        ) : null}
+        {geoState === "unavailable" && geoError ? (
+          <span style={{ color: "var(--gtr-t3)" }}>{t("Не удалось определить местоположение")}</span>
+        ) : null}
+
+        {route.length ? (
+          <>
+            <span style={{ color: "var(--gtr-t3)" }}>·</span>
+            <span className="gtr-mono" style={{ font: "600 11.5px/1 'JetBrains Mono',monospace", color: "#7B4DFF" }}>
+              {t("МАРШРУТ ВЕЧЕРА")} · {route.length}
+              {road ? ` · ${routeLabel(road)}` : ""}
+            </span>
+            {road && !road.real ? (
+              <span style={{ color: "var(--gtr-t3)" }}>
+                {t("дорога недоступна — показана прямая")}
+              </span>
+            ) : null}
+          </>
+        ) : (
+          <span style={{ color: "var(--gtr-t3)" }}>
+            {t("Соберите маршрут вечера в разделе «Сегодня» — он появится на карте.")}
+          </span>
+        )}
       </div>
 
       <div ref={mapRef} className="gtr-map-canvas" />

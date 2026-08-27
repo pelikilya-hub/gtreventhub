@@ -7,6 +7,7 @@ import { V } from "../data/app-data";
 import geoRaw from "../data/venue-geo.json";
 import { Card, Eyebrow } from "../ui";
 import { gpsTracker, useGpsTracking, type ActiveTrack } from "../gps-track";
+import { roadRoute } from "../evening-route";
 
 const GEO = geoRaw as Record<string, { lat: number; lon: number; src: string }>;
 
@@ -115,12 +116,19 @@ export function TrackingScreen() {
       }
 
       if (routePoints.length > 1) {
-        L4.current!.routePolyline = L.polyline(routePoints, {
+        // Дорога, а не прямая. Между Патонгом и Камалой хребет: прямая
+        // показывала два километра там, где такси едет двадцать минут по
+        // серпантину, и гость планировал вечер по неправде. Если
+        // маршрутизатор недоступен, roadRoute сам вернёт прямую — и тогда
+        // пунктир честно говорит, что дороги мы не знаем.
+        const road = await roadRoute(routePoints);
+        if (!L4.current) return;
+        L4.current.routePolyline = L.polyline(road.line, {
           color: "#7B4DFF",
-          weight: 2,
-          opacity: 0.7,
-          dashArray: "5,5",
-        }).addTo(L4.current!.map);
+          weight: road.real ? 4 : 2,
+          opacity: road.real ? 0.9 : 0.7,
+          dashArray: road.real ? undefined : "5,5",
+        }).addTo(L4.current.map);
       }
 
       // Рисуем маркеры чек-инов

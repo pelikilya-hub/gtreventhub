@@ -15,18 +15,14 @@ import { openAppLink } from "../applink";
 import { PromptpayModal } from "../promptpay-ui";
 import { SwipeToBook } from "../raw-pulse";
 import { gpsTracker, useGpsTracking } from "../gps-track";
+import { loadRoute, saveRoute } from "../evening-route";
 
 const GEO = geoRaw as Record<string, { lat: number; lon: number; src: string }>;
 type FeedItem = VenueAfisha["events"][number] & { vid: string };
 
-const ROUTE_KEY = "gtr-evening-route";
-const loadRoute = (): string[] => {
-  try {
-    return JSON.parse(localStorage.getItem(ROUTE_KEY) ?? "[]") as string[];
-  } catch {
-    return [];
-  }
-};
+/** Сколько дней вперёд предлагаем лентой. Две недели — горизонт, на котором
+ *  у площадок реально есть анонсы; дальше выбор идёт через поле даты. */
+const STRIP_DAYS = 14;
 
 // Ночные площадки отбираем по сути места, а не по тому, дошли ли до него
 // руки разведки. Прежний фильтр требовал часов или цены входа — и прятал
@@ -79,14 +75,32 @@ export function TonightScreen() {
   // рядом рисовала правильное число местной датой.
   const todayIso = bkkToday();
   const tomorrowIso = bkkToday(1);
-  const todayEvents = items.filter((e) => e.dateIso === todayIso);
-  const tomorrowEvents = items.filter((e) => e.dateIso === tomorrowIso);
+
+  // Выбранный вечер. Раньше экран жёстко показывал два блока — сегодня и
+  // завтра, — и события пятницы посмотреть было нечем: гость видел всю
+  // ленту без возможности выбрать день. Теперь день один и выбирается.
+  const [dayIso, setDayIso] = useState(todayIso);
+  const dayEvents = items.filter((e) => e.dateIso === dayIso);
   const venues = useMemo(nightVenues, []);
+
+  // Сколько событий на каждый день ленты — число едет прямо на плашку,
+  // чтобы было видно, где вечер живой, ещё до нажатия.
+  const byDay = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const e of items) c[e.dateIso] = (c[e.dateIso] ?? 0) + 1;
+    return c;
+  }, [items]);
+
+  const strip = useMemo(
+    () => Array.from({ length: STRIP_DAYS }, (_, i) => bkkToday(i)),
+    // bkkToday читает часы: пересчитываем на смене суток, а не раз навсегда.
+    [todayIso],
+  );
 
   const toggleRoute = (vid: string) => {
     const next = route.includes(vid) ? route.filter((x) => x !== vid) : [...route, vid];
     setRoute(next);
-    localStorage.setItem(ROUTE_KEY, JSON.stringify(next));
+    saveRoute(next);
   };
 
   const routeUrl = () => {
@@ -105,7 +119,10 @@ export function TonightScreen() {
       const r = await bookTableFn({
         data: {
           vid,
-          dateIso: todayIso,
+          // Дата выбранного вечера, а не сегодняшняя. Раньше сюда жёстко
+          // уезжал todayIso: гость бронировал стол из блока «Завтра», а
+          // площадка ждала его сегодня.
+          dateIso: dayIso,
           guests: bkGuests,
           name: bkName,
           phone: bkPhone,
@@ -128,12 +145,23 @@ export function TonightScreen() {
   const dayLocale = { ru: "ru-RU", en: "en-GB", th: "th-TH" }[i18n.language] ?? "en-GB";
   // Число берём то же, по которому отобран список, — день острова. Иначе у
   // гостя из другого пояса шапка и программа под ней расходятся на сутки.
-  const dayLabel = new Date(`${todayIso}T12:00:00Z`).toLocaleDateString(dayLocale, {
+  const dayLabel = new Date(`${dayIso}T12:00:00Z`).toLocaleDateString(dayLocale, {
     weekday: "long",
     day: "numeric",
     month: "long",
     timeZone: "UTC",
   });
+  // Короткая подпись на плашке ленты: «пт 29». Полное название дня в ряд
+  // из четырнадцати кнопок не помещается ни на одном телефоне.
+  const chipLabel = (iso: string) => {
+    if (iso === todayIso) return t("Сегодня");
+    if (iso === tomorrowIso) return t("Завтра");
+    return new Date(`${iso}T12:00:00Z`).toLocaleDateString(dayLocale, {
+      weekday: "short",
+      day: "numeric",
+      timeZone: "UTC",
+    });
+  };
 
   const eventCard = (e: FeedItem) => {
     const v = V(e.vid);
@@ -433,6 +461,45 @@ export function TonightScreen() {
         {t("Выберите вечер: события дня, открытые площадки, бронь стола и маршрут по нескольким местам.")}
       </div>
 
+      {/* Выбор вечера. Лента на две недели вперёд плюс поле даты для всего,
+          что дальше: у площадок бывают анонсы за месяц, и упираться в
+          горизонт ленты гость не должен. */}
+      <div className="gtr-map-row" style={{ marginBottom: 8 }}>
+        {strip.map((iso) => {
+          const on = iso === dayIso;
+          const n = byDay[iso] ?? 0;
+          return (
+            <button
+              key={iso}
+              className={`gtr-map-chip${on ? " on" : ""}`}
+              onClick={() => setDayIso(iso)}
+              aria-pressed={on}
+            >
+              {chipLabel(iso)}
+              {/* Ноль не рисуем: пустая плашка и так читается как пустой
+                  день, а «· 0» превращает ленту в частокол нулей. */}
+              {n ? <span style={{ opacity: 0.55 }}> · {n}</span> : null}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+        <input
+          className="gtr-input"
+          type="date"
+          value={dayIso}
+          min={todayIso}
+          onChange={(e) => setDayIso(e.target.value || todayIso)}
+          style={{ maxWidth: 190 }}
+          aria-label={t("Дата")}
+        />
+        {dayIso !== todayIso ? (
+          <button className="gtr-btn" onClick={() => setDayIso(todayIso)}>
+            {t("Вернуться к сегодня")}
+          </button>
+        ) : null}
+      </div>
+
       {/* Маршрут вечера — бар-хоппинг */}
       {route.length ? (
         <Card style={{ padding: "12px 16px", marginBottom: 14 }}>
@@ -513,7 +580,7 @@ export function TonightScreen() {
                 style={{ padding: "6px 10px", fontSize: 12 }}
                 onClick={() => {
                   setRoute([]);
-                  localStorage.setItem(ROUTE_KEY, "[]");
+                  saveRoute([]);
                   if (isTracking) setIsTrackingEnabled(false);
                 }}
               >
@@ -548,11 +615,11 @@ export function TonightScreen() {
         </Card>
       ) : null}
 
-      {/* События сегодня из афиш площадок */}
+      {/* События выбранного вечера из афиш площадок */}
       <Eyebrow style={{ marginBottom: 10 }}>
-        {t("СОБЫТИЯ СЕГОДНЯ")} · {todayEvents.length}
+        {dayIso === todayIso ? t("СОБЫТИЯ СЕГОДНЯ") : dayLabel.toUpperCase()} · {dayEvents.length}
       </Eyebrow>
-      {todayEvents.length ? (
+      {dayEvents.length ? (
         <div
           style={{
             display: "grid",
@@ -561,7 +628,7 @@ export function TonightScreen() {
             marginBottom: 18,
           }}
         >
-          {todayEvents.map(eventCard)}
+          {dayEvents.map(eventCard)}
         </div>
       ) : (
         <div
@@ -571,27 +638,11 @@ export function TonightScreen() {
             margin: "0 0 18px",
           }}
         >
-          {t("В афишах пока нет событий на сегодня — ниже площадки, открытые вечером.")}
+          {dayIso === todayIso
+            ? t("В афишах пока нет событий на сегодня — ниже площадки, открытые вечером.")
+            : t("На этот день в афишах пока пусто — выберите другую дату или смотрите площадки ниже.")}
         </div>
       )}
-
-      {tomorrowEvents.length ? (
-        <>
-          <Eyebrow style={{ marginBottom: 10 }}>
-            {t("ЗАВТРА")} · {tomorrowEvents.length}
-          </Eyebrow>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill,minmax(210px,1fr))",
-              gap: 11,
-              marginBottom: 18,
-            }}
-          >
-            {tomorrowEvents.map(eventCard)}
-          </div>
-        </>
-      ) : null}
 
       {/* Ночные площадки: часы, вход, фирменные ночи */}
       <Eyebrow style={{ marginBottom: 10 }}>

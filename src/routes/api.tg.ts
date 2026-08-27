@@ -165,11 +165,12 @@ async function refLeaderboard(ns: KvNs): Promise<string> {
   rows.sort((a, b) => b.n - a.n);
   if (!rows.length)
     return "Пока никто не приглашал. Возьми личную ссылку — /ref — и открой счёт!";
-  const medal = ["🥇", "🥈", "🥉"];
+  // В паке есть только золото: серебро и бронза приходили сток-знаками и
+  // ломали ряд — фирменный кубок, фирменное золото, дальше просто номера.
   return [
     "🏆 <b>Топ инвайтеров GTR</b>",
     "",
-    ...rows.slice(0, 10).map((r, i) => `${medal[i] ?? `${i + 1}.`} <b>${tgEsc(r.name)}</b> — ${r.n}`),
+    ...rows.slice(0, 10).map((r, i) => `${i ? `${i + 1}.` : "🥇"} <b>${tgEsc(r.name)}</b> — ${r.n}`),
     "",
     "Личная ссылка: /ref",
   ].join("\n");
@@ -217,11 +218,11 @@ const kbFor = (u: { role?: string }) => ({
   keyboard: isStaff(u)
     ? [
         [{ text: "📅 Мои события" }, { text: "📨 Заявки" }],
-        [{ text: "🎧 Предложения" }, { text: "👥 Пригласить" }],
+        [{ text: "🎧 Предложения" }, { text: "🤝 Пригласить" }],
         [{ text: "🌐 Кабинет" }, { text: "ℹ️ Помощь" }],
       ]
     : [
-        [{ text: "🎧 Предложения" }, { text: "🎟 Выступления" }],
+        [{ text: "🎧 Предложения" }, { text: "🎫 Выступления" }],
         [{ text: "🔴 Я в эфире" }, { text: "⏹ Завершить эфир" }],
         [{ text: "🌐 Кабинет" }, { text: "ℹ️ Помощь" }],
       ],
@@ -234,8 +235,8 @@ const BUTTON_CMDS: [RegExp, string][] = [
   [/^📅|^мои события/i, "/events"],
   [/^📨|^заявки/i, "/requests"],
   [/^🎧|^предложени/i, "/offers"],
-  [/^🎟|^выступлени/i, "/gigs"],
-  [/^👥|^пригласи/i, "/invite_form"],
+  [/^🎫|^выступлени/i, "/gigs"],
+  [/^🤝|^пригласи/i, "/invite_form"],
   [/^отмена$/i, "/cancel"],
   [/^🔴|^я в эфире/i, "/live"],
   [/^⏹|^заверши/i, "/offair"],
@@ -248,7 +249,7 @@ const HELP_STAFF = [
   "/events — мои события и суммы смет",
   "/requests — заявки организаторов (взять/принять из чата)",
   "/offers — мои предложения артистам и их статусы",
-  "👥 Пригласить — форма: имя + @ник, бот соберёт пост с постером",
+  "🤝 Пригласить — форма: имя + @ник, бот соберёт пост с постером",
   "/guest &lt;код события&gt; &lt;имя&gt; — спец-гость в список",
   "/status — кто я",
 ].join("\n");
@@ -302,7 +303,7 @@ async function finishInvite(
   const code = `tm-${Math.random().toString(36).slice(2, 10)}`;
   await ns.put(`tglink:${code}`, login);
   const welcome = [
-    `🎟 <b>${tgEsc(name)}, добро пожаловать в GTR Event!</b>`,
+    `🎫 <b>${tgEsc(name)}, добро пожаловать в GTR Event!</b>`,
     "",
     teamOf
       ? `Вы в команде организатора <b>${tgEsc(su.name ?? su.email)}</b> — его события уже у вас в кабинете. Ваш Telegram привязан, уведомления будут приходить сюда.`
@@ -321,7 +322,7 @@ async function finishInvite(
   const deep = `https://t.me/${bot}?start=${code}`;
   const who = nick ? `@${nick}` : tgEsc(name);
   const caption = [
-    `🎟 <b>${who}, это личное приглашение</b>`,
+    `🎫 <b>${who}, это личное приглашение</b>`,
     "",
     `<b>${tgEsc(su.name ?? su.email)}</b> зовёт вас в GTR EVENT — платформу событий Пхукета: <b>110 площадок · 312 артистов · события под ключ</b>.`,
     "",
@@ -529,7 +530,7 @@ async function handleUpdate(ns: KvNs, up: TgUpdate): Promise<Response> {
               const where = isCh ? "канал" : isGr ? "чат" : "GTR";
               await reply(
                 own.chat,
-                `🎉 <b>${tgEsc(joined)}</b> вступил(а) в ${where} по твоей ссылке!\nТвой счёт: <b>${cur.n}</b> · таблица лидеров — /top`,
+                `🍾 <b>${tgEsc(joined)}</b> вступил(а) в ${where} по твоей ссылке!\nТвой счёт: <b>${cur.n}</b> · таблица лидеров — /top`,
               );
             }
           }
@@ -558,7 +559,7 @@ async function handleUpdate(ns: KvNs, up: TgUpdate): Promise<Response> {
                 parse_mode: "HTML",
                 text: [
                   `👋 <b>${tgEsc(who)}</b>, добро пожаловать в GTR! · welcome to GTR!`,
-                  `Комнаты · Rooms: 🔥 Афиша · 🎵 Музыка · 🎉 Знакомства · 💡 Идеи`,
+                  `Комнаты · Rooms: 🔥 Афиша · 🎶 Музыка · 🤝 Знакомства · ⚡ Идеи`,
                   `🌴 /tonight — куда пойти сегодня · where to go tonight`,
                 ].join("\n"),
                 link_preview_options: { is_disabled: true },
@@ -667,7 +668,7 @@ async function handleUpdate(ns: KvNs, up: TgUpdate): Promise<Response> {
               `А афиша вечера всегда тут: /tonight`,
             ];
             const refButtons = [
-              ...(links.channel ? [{ text: "📣 Моя ссылка на канал", url: links.channel }] : []),
+              ...(links.channel ? [{ text: "🔊 Моя ссылка на канал", url: links.channel }] : []),
               ...(links.chat ? [{ text: "💬 Моя ссылка на чат", url: links.chat }] : []),
             ].map((b) => [b]);
             await reply(chatId, lines.join("\n"), refButtons.length ? { inline_keyboard: refButtons } : undefined);
@@ -735,7 +736,7 @@ async function handleUpdate(ns: KvNs, up: TgUpdate): Promise<Response> {
             await ns.put(`draft:${draft.id}`, JSON.stringify(draft));
             await reply(
               chatId,
-              `🎟 <b>${tgEsc(name)}</b> добавлен(а) в спец-гости события ${tgEsc(draftId)}. Всего в списке: ${draft.guestList.length}.`,
+              `🎫 <b>${tgEsc(name)}</b> добавлен(а) в спец-гости события ${tgEsc(draftId)}. Всего в списке: ${draft.guestList.length}.`,
             );
             return Response.json({ ok: true });
           }
@@ -751,7 +752,7 @@ async function handleUpdate(ns: KvNs, up: TgUpdate): Promise<Response> {
           if (cmd === "/tonight" || cmd === "/afisha") {
             const { APP_URL, buildDigestText, tgLangOf } = await import("../gtr/community");
             await reply(chatId, await buildDigestText(ns, tgLangOf(up.message.from?.language_code)), {
-              inline_keyboard: [[{ text: "🎟 Открыть в приложении", url: `${APP_URL}/gtr/tonight` }]],
+              inline_keyboard: [[{ text: "🎫 Открыть в приложении", url: `${APP_URL}/gtr/tonight` }]],
             });
             return Response.json({ ok: true });
           }
@@ -763,9 +764,9 @@ async function handleUpdate(ns: KvNs, up: TgUpdate): Promise<Response> {
             const who = up.message.from?.first_name || up.message.from?.username || "участник";
             const links = await issueRefLinks(ns, chatId, who);
             const REF_T = {
-              ru: { h: "🎁 <b>Твои личные ссылки GTR Live:</b>", ch: "📣 Моя ссылка на канал", gr: "💬 Моя ссылка на чат", f: "Зови друзей по кнопкам ниже — каждый, кто вступит, засчитается тебе.", top: "Счёт и лидеры: /top", none: "Ссылки пока не готовы — сообщество ещё настраивается." },
-              en: { h: "🎁 <b>Your personal GTR Live links:</b>", ch: "📣 My channel link", gr: "💬 My chat link", f: "Share the buttons below — everyone who joins counts for you.", top: "Score & leaderboard: /top", none: "Links aren't ready yet — community setup in progress." },
-              th: { h: "🎁 <b>ลิงก์ส่วนตัวของคุณ:</b>", ch: "📣 ลิงก์ช่องของฉัน", gr: "💬 ลิงก์แชทของฉัน", f: "แชร์ปุ่มด้านล่างให้เพื่อน — ทุกคนที่เข้าร่วมนับเป็นคะแนนของคุณ", top: "คะแนนและอันดับ: /top", none: "ลิงก์ยังไม่พร้อม — กำลังตั้งค่าคอมมูนิตี้" },
+              ru: { h: "🎁 <b>Твои личные ссылки GTR Live:</b>", ch: "🔊 Моя ссылка на канал", gr: "💬 Моя ссылка на чат", f: "Зови друзей по кнопкам ниже — каждый, кто вступит, засчитается тебе.", top: "Счёт и лидеры: /top", none: "Ссылки пока не готовы — сообщество ещё настраивается." },
+              en: { h: "🎁 <b>Your personal GTR Live links:</b>", ch: "🔊 My channel link", gr: "💬 My chat link", f: "Share the buttons below — everyone who joins counts for you.", top: "Score & leaderboard: /top", none: "Links aren't ready yet — community setup in progress." },
+              th: { h: "🎁 <b>ลิงก์ส่วนตัวของคุณ:</b>", ch: "🔊 ลิงก์ช่องของฉัน", gr: "💬 ลิงก์แชทของฉัน", f: "แชร์ปุ่มด้านล่างให้เพื่อน — ทุกคนที่เข้าร่วมนับเป็นคะแนนของคุณ", top: "คะแนนและอันดับ: /top", none: "ลิงก์ยังไม่พร้อม — กำลังตั้งค่าคอมมูนิตี้" },
             } as const;
             const T = REF_T[lng];
             const lines = [T.h, "", links.channel || links.chat ? T.f : T.none, T.top];
@@ -882,7 +883,7 @@ async function handleUpdate(ns: KvNs, up: TgUpdate): Promise<Response> {
             });
             await reply(
               chatId,
-              "👥 <b>Приглашение в GTR Event</b>\n\nШаг 1 из 2 — напишите <b>имя и фамилию</b> человека.\n\n/cancel — отменить",
+              "🤝 <b>Приглашение в GTR Event</b>\n\nШаг 1 из 2 — напишите <b>имя и фамилию</b> человека.\n\n/cancel — отменить",
             );
             return Response.json({ ok: true });
           }
@@ -1077,7 +1078,7 @@ async function handleUpdate(ns: KvNs, up: TgUpdate): Promise<Response> {
             if (!name) {
               await reply(
                 chatId,
-                "Формат: /invite Имя Фамилия [@ник] [email]\nНапример: <code>/invite Анна Ким @anna_kim</code>\nИли просто нажмите «👥 Пригласить» — бот спросит по шагам.",
+                "Формат: /invite Имя Фамилия [@ник] [email]\nНапример: <code>/invite Анна Ким @anna_kim</code>\nИли просто нажмите «🤝 Пригласить» — бот спросит по шагам.",
               );
               return Response.json({ ok: true });
             }

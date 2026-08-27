@@ -222,7 +222,7 @@ export async function buildDigestText(ns: KvNs, lang: TgLang = "dual"): Promise<
     lines.push("", pick("empty"));
   }
   // ссылка — только под кнопкой у отправителя, в тексте её нет вообще
-  lines.push("", `🎟 ${pick("cta")}`);
+  lines.push("", `🎫 ${pick("cta")}`);
   return lines.join("\n");
 }
 
@@ -386,7 +386,7 @@ export async function buildOpsSummary(ns: KvNs): Promise<string> {
   const lines = [
     `📊 <b>GTR OPS · сводка за ${today}</b>`,
     "",
-    `📣 Канал: <b>${chN}</b> подписчиков · за день +${m.chJoin} / −${m.chLeave}`,
+    `🔊 Канал: <b>${chN}</b> подписчиков · за день +${m.chJoin} / −${m.chLeave}`,
     `💬 Чат: <b>${gN}</b> участников · за день +${m.gJoin} / −${m.gLeave}`,
     `🆕 Регистраций в приложении: <b>${m.reg}</b>`,
   ];
@@ -435,7 +435,7 @@ export function buildMovedText(venues: number, artists: number): string {
     `🍸 <b>Бронь стола</b> в пару касаний, ответ за 15 минут`,
     `🪩 <b>ИИ-подбор вечеринок</b> под твой музыкальный вкус`,
     "",
-    `📲 <b>Поставь на телефон как приложение</b>`,
+    `🚀 <b>Поставь на телефон как приложение</b>`,
     `iPhone: открой gtrevent.com в Safari → «Поделиться» → «На экран «Домой»`,
     `Android: открой в Chrome → меню ⋮ → «Установить приложение»`,
     `Иконка встанет на главный экран, открывается на весь экран, без адресной строки.`,
@@ -449,7 +449,7 @@ export function buildMovedText(venues: number, artists: number): string {
     "",
     `${venues} venues across Thailand, ${artists} artists, a live lineup for every night, table booking in two taps and an AI party match for your taste.`,
     "",
-    `📲 Install it: iPhone — Safari → Share → Add to Home Screen. Android — Chrome → ⋮ → Install app.`,
+    `🚀 Install it: iPhone — Safari → Share → Add to Home Screen. Android — Chrome → ⋮ → Install app.`,
     `👤 Create an account and the lineup starts matching your music.`,
   ].join("\n");
 }
@@ -459,13 +459,13 @@ export function buildMovedText(venues: number, artists: number): string {
 // не бывает); false — когда пост шлёт сам бот, там ссылки только в кнопках.
 export function buildInviteText(cfg: CommunityCfg, linksAsText = true): string {
   const lines = [
-    `🎉 <b>GTR Event — твой гид по ночному Пхукету</b>`,
+    `🍾 <b>GTR Event — твой гид по ночному Пхукету</b>`,
     "",
     `110 клубов и баров, 312 артистов, живая афиша на каждый вечер, бронь столов в пару касаний и ИИ-подбор вечеринок под твой вкус.`,
   ];
   if (linksAsText) {
     lines.push("", `▶ Открыть приложение: ${APP_URL}`);
-    if (cfg.channelUrl) lines.push(`📣 Новости: ${tgEsc(cfg.channelUrl)}`);
+    if (cfg.channelUrl) lines.push(`🔊 Новости: ${tgEsc(cfg.channelUrl)}`);
     if (cfg.chatUrl) lines.push(`💬 Чат сообщества: ${tgEsc(cfg.chatUrl)}`);
   }
   lines.push(`📩 Связь и сотрудничество: @bangtaostyle`);

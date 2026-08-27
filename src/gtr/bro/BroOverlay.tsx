@@ -36,10 +36,13 @@ import { isTeam } from "./roles";
 import { safetyOf } from "./safety";
 import { BroSmoke } from "./smoke";
 import { GemSession } from "./gem";
+import { LocalVoiceSession } from "./local-voice";
+import { LaneGuard } from "./voice-lane";
+import { loadLang, saveLang, type BroLang } from "./lang";
 import { BroSession, type BroCard, type BroState } from "./session";
 import { VibeCheck } from "./vibecheck";
 
-type VoiceSession = BroSession | GemSession;
+type VoiceSession = BroSession | GemSession | LocalVoiceSession;
 type VoiceProvider = "openai" | "gemini";
 
 const STATE_RU: Record<BroState, string> = {
@@ -57,6 +60,7 @@ const STATE_RU: Record<BroState, string> = {
 };
 
 const ERROR_RU: Record<string, string> = {
+  "stt-unsupported": "В этом браузере нет распознавания речи. Пиши текстом — отвечу.",
   "mic-denied": "Микрофон закрыт. Разреши доступ в настройках браузера — без него голоса не будет.",
   network: "Связь не поднялась. Попробуй ещё раз.",
   webrtc: "Голосовой канал не открылся. Проверь сеть и повтори.",
@@ -202,6 +206,11 @@ export function GtrBroOverlay({
   // Рация по умолчанию: в клубе авто-детектор речи слышит толпу, а не
   // человека. Свободный разговор остаётся выбором в настройках.
   const [hands, setHands] = useState(false);
+  // Язык разговора. Один на обе полосы и на текст: человек не должен
+  // слышать смену языка при пересадке на резерв.
+  const [lang, setLang] = useState<BroLang>(() => loadLang());
+  const langRef = useRef(lang);
+  langRef.current = lang;
   const [holding, setHolding] = useState(false);
   const held = useRef(false);
   const [lab, setLab] = useState(false);
@@ -214,6 +223,16 @@ export function GtrBroOverlay({
   const [mini, setMini] = useState(false);
   const ses = useRef<VoiceSession | null>(null);
   const starting = useRef(false);
+  // Стабильная полоса: голосовой провайдер сбоит — пересаживаемся на
+  // браузерный слух + текстовый мозг + системную озвучку. Решение
+  // принимает LaneGuard; до конца открытия оверлея назад не прыгаем,
+  // чтобы разговор не мигал между голосами.
+  const [laneStable, setLaneStable] = useState(false);
+  const laneRef = useRef(false);
+  const laneGuard = useRef(new LaneGuard());
+  // Дошла ли текущая сессия хоть раз до эфира: сбой на этапе соединения
+  // и обрыв живого разговора караются по-разному.
+  const everLive = useRef(false);
   // Визитка — один раз на открытие оверлея: на табло текстом, голосом — репликой.
   const hello = useRef(false);
   const greeted = useRef(false);
@@ -254,11 +273,40 @@ export function GtrBroOverlay({
       starting.current = true;
       ses.current?.stop("restart");
       reset();
-      const S = provider === "gemini" ? GemSession : BroSession;
+      everLive.current = false;
+      const S = laneRef.current
+        ? LocalVoiceSession
+        : provider === "gemini"
+          ? GemSession
+          : BroSession;
       const s = new S({
         onState: (st, d) => {
           setState(st);
           setDetail(d);
+          if (st === "listening") everLive.current = true;
+          // Сбой премиальной полосы. Ошибка соединения или обрыв живого
+          // эфира (ws-close) — кандидаты на пересадку; решает LaneGuard.
+          const failish =
+            st === "error" ? (d ?? "unknown") : st === "closed" && d === "ws-close" ? d : null;
+          if (
+            failish &&
+            !laneRef.current &&
+            laneGuard.current.failed(failish, everLive.current, Date.now())
+          ) {
+            laneRef.current = true;
+            setLaneStable(true);
+            metric("bro.lane.stable");
+            setRows((p) => [
+              ...p.slice(-60),
+              { who: "sys" as const, text: "голосовой канал сбоит — включаю стабильную полосу", done: true },
+            ]);
+            // Перезапуск после того, как begin() текущей сессии отпустит
+            // замок starting — иначе вторая попытка молча проглотится.
+            window.setTimeout(() => {
+              if (laneRef.current && !ses.current?.current.match(/listening|speaking|thinking/))
+                void beginRef.current?.(voiceRef.current, modeRef.current);
+            }, 400);
+          }
           // Соединение поднялось, а палец всё ещё на кнопке — открываем
           // микрофон сразу, без второго нажатия.
           if (st === "listening" && held.current && ses.current?.isPtt) ses.current.holdStart();
@@ -307,7 +355,7 @@ export function GtrBroOverlay({
       });
       ses.current = s;
       try {
-        await s.start({ voice: v, personaMode: m, screen, district, ptt: !handsRef.current });
+        await s.start({ voice: v, personaMode: m, screen, district, lang: langRef.current, ptt: !handsRef.current });
         s.setGain(gainRef.current);
       } finally {
         starting.current = false;
@@ -318,6 +366,15 @@ export function GtrBroOverlay({
   // Актуальный режим для begin() без пересоздания колбэка.
   const handsRef = useRef(hands);
   handsRef.current = hands;
+  // Пересадка на стабильную полосу перезапускает разговор из колбэка
+  // сессии — туда нужны свежие голос, режим и сам begin, без циклов
+  // в зависимостях.
+  const voiceRef = useRef(voice);
+  voiceRef.current = voice;
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const beginRef = useRef<typeof begin | null>(null);
+  beginRef.current = begin;
 
   // Закрытие оверлея всегда рвёт соединение: забытая в фоне сессия — это
   // открытый микрофон и счёт по времени.
@@ -329,6 +386,11 @@ export function GtrBroOverlay({
       touchChat();
       hello.current = false;
       greeted.current = false;
+      // Новое открытие снова пробует премиальную полосу: ночной сбой
+      // провайдера не должен навсегда оставить BRO с системным голосом.
+      laneRef.current = false;
+      setLaneStable(false);
+      laneGuard.current.reset();
     }
   }, [open, stop]);
   useEffect(() => () => ses.current?.stop("unmount"), []);
@@ -537,7 +599,12 @@ export function GtrBroOverlay({
           method: "POST",
           headers: { "content-type": "application/json" },
           credentials: "same-origin",
-          body: JSON.stringify({ text: q, history }),
+          body: JSON.stringify({
+            text: q,
+            history,
+            lang: langRef.current,
+            personaMode: modeRef.current,
+          }),
           signal: AbortSignal.timeout(30_000),
         });
         const data = (await r.json()) as { ok?: boolean; reply?: string; cards?: BroCard[]; error?: string };
@@ -718,6 +785,11 @@ export function GtrBroOverlay({
             {STATE_RU[state]}
             {state === "closed" && detail ? ` · ${detail}` : ""}
           </span>
+          {laneStable && (
+            <span className="gtr-bro-lane" title="Голосовой провайдер недоступен — работает резервный канал">
+              резерв
+            </span>
+          )}
           <button className="gtr-bro-x" onClick={onClose} aria-label="Закрыть">
             ✕
           </button>
@@ -946,6 +1018,33 @@ export function GtrBroOverlay({
                 >
                   {name as string}
                   <i>{note as string}</i>
+                </button>
+              ))}
+            </div>
+
+            <div className="gtr-bro-tune-t">Язык</div>
+            <div className="gtr-bro-chips">
+              {([
+                ["ru", "Русский", "как писали"],
+                ["en", "English", "for guests"],
+              ] as [BroLang, string, string][]).map(([id, name, note]) => (
+                <button
+                  key={id}
+                  className={`gtr-bro-chip${lang === id ? " on" : ""}`}
+                  onClick={() => {
+                    setLang(id);
+                    saveLang(id);
+                    metric(`bro.lang.${id}`);
+                    // Язык уходит в setup сессии — живой разговор
+                    // переподнимаем, иначе слух останется на прежнем.
+                    if (live) {
+                      langRef.current = id;
+                      void begin(voice, mode);
+                    }
+                  }}
+                >
+                  {name}
+                  <i>{note}</i>
                 </button>
               ))}
             </div>

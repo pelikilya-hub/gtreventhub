@@ -12,7 +12,8 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { currentUser } from "../gtr/auth";
 import { getKvNs, kvGetJson, type KvNs } from "../gtr/kv-ns";
-import { buildTextPrompt, type BroContext } from "../gtr/bro/prompt.ru";
+import { buildTextPrompt, pickMode, type BroContext } from "../gtr/bro/prompt.ru";
+import { isBroLang, langDirective } from "../gtr/bro/lang";
 import { kvProvider } from "../gtr/bro/provider";
 import { looksInvented } from "../gtr/bro/guard";
 import {
@@ -130,8 +131,12 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         const deadline = Date.now() + 26_000;
         const timeLeft = () => deadline - Date.now();
 
-        let body: { text?: string; history?: { who: string; text: string }[] } =
-          {};
+        let body: {
+          text?: string;
+          history?: { who: string; text: string }[];
+          lang?: unknown;
+          personaMode?: unknown;
+        } = {};
         try {
           body = (await request.json()) as typeof body;
         } catch {
@@ -166,15 +171,31 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         if (looksLikeExtraction(text))
           return json({ ok: true, reply: EXTRACTION_REPLY });
 
+        // Язык выбирает клиент — тот же выбор, что уходит в голосовую
+        // полосу. Обе полосы обязаны отвечать на одном языке: человек
+        // не должен слышать смену языка при пересадке на резерв.
+        const lang = isBroLang(body.lang) ? body.lang : "ru";
+        // Персона приходит от клиента — как и язык. Раньше здесь стояло
+        // «bro» намертво: гость просил «без мата», голос слушался, а на
+        // печатный вопрос отвечал прежним тоном. Настройка, которую
+        // слышит одна половина продукта и не слышит вторая, хуже
+        // отсутствующей: человек считает, что его просьбу проигнорировали.
+        const persona = pickMode(body.personaMode);
+
         const ctx: BroContext = {
           userId: user.email,
           displayName: user.name,
           role: user.role,
-          language: "ru",
-          personaMode: "bro",
+          language: lang,
+          personaMode: persona,
           timezone: "Asia/Bangkok",
           currentTime: new Date().toISOString(),
         };
+
+        // Собираем один раз на три входа (Gemini дважды и свой мозг):
+        // разъехавшийся между ними промпт означал бы, что резервный
+        // движок отвечает по другим правилам, чем основной.
+        const systemPrompt = buildTextPrompt(ctx) + langDirective(lang);
 
         // ---- База знаний в промпт, а не в надежду на инструмент -------
         //
@@ -213,7 +234,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         // История — хвост табло. Префикс сообщений стабилен, поэтому
         // llama.cpp прокэширует его и повторные ответы будут быстрыми.
         const messages: Msg[] = [
-          { role: "system", content: buildTextPrompt(ctx) },
+          { role: "system", content: systemPrompt },
         ];
         if (qaHint)
           messages.push({
@@ -370,7 +391,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
                   headers: { "content-type": "application/json" },
                   body: JSON.stringify({
                     systemInstruction: {
-                      parts: [{ text: buildTextPrompt(ctx) }],
+                      parts: [{ text: systemPrompt }],
                     },
                     contents,
                     tools: [{ functionDeclarations: gemTools(user.role) }],
@@ -406,7 +427,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
                   headers: { "content-type": "application/json" },
                   body: JSON.stringify({
                     systemInstruction: {
-                      parts: [{ text: buildTextPrompt(ctx) }],
+                      parts: [{ text: systemPrompt }],
                     },
                     contents,
                     tools: [{ functionDeclarations: gemTools(user.role) }],

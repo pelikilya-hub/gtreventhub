@@ -65,7 +65,7 @@ const err = (error: string, retryable = false): ToolErr => ({ ok: false, error, 
 // не должно уметь говорить модели, что ей делать.
 const clean = (s: string, max = 160): string =>
   String(s ?? "")
-    .replace(/[\x00-\x1f]/g, " ")
+    .replace(/[\x00-\x1f\x7f]/g, " ")
     .replace(/```|<\/?system>|<\/?instructions?>/gi, " ")
     .replace(/\s+/g, " ")
     .trim()
@@ -107,6 +107,45 @@ const km = (a: [number, number], b: [number, number]): number => {
 };
 
 // -------------------------------------------------- описания для модели
+
+/** Экраны продукта, куда BRO умеет отправить человека.
+ *
+ *  Один источник правды: и схема для модели, и проверка в обработчике
+ *  берутся отсюда. Раньше список был написан дважды — в enum и в
+ *  обработчике, — и разъезжался молча.
+ *
+ *  Описание у каждого экрана обязательно. Голый идентификатор вроде
+ *  «aimatch» модели ничего не говорит: она угадывает, куда ведёт кнопка,
+ *  и уводит человека не туда. Эти же описания BRO пересказывает, когда
+ *  его спрашивают, что в продукте есть.
+ *
+ *  team: экран рабочего контура — гостю туда нельзя. */
+export const APP_ROUTES: { id: string; what: string; team?: true }[] = [
+  { id: "tonight", what: "«Сегодня» — главный экран вечера: что происходит сейчас и куда пойти" },
+  { id: "feed", what: "«Афиша» — все события по дням: «что на выходных», «покажи афишу»" },
+  { id: "map", what: "«Карта» — площадки и события на карте острова" },
+  { id: "base", what: "«Заведения» — каталог площадок Пхукета с фильтрами по району, типу и музыке" },
+  { id: "venueCard", what: "карточка одной площадки; в entityId передай НАЗВАНИЕ, например Illuzion" },
+  { id: "artists", what: "«Артисты и диджеи» — каталог профилей: 312 диджеев, лайвов и агентств" },
+  { id: "aimatch", what: "«ИИ подбор» — подобрать артиста или место под запрос" },
+  { id: "promo", what: "«Промо и бронь» — акции площадок, депозиты, бронь стола" },
+  { id: "community", what: "«Комьюнити» — чаты и сообщество GTR" },
+  { id: "private", what: "«Private · виллы» — аренда вилл" },
+  { id: "dash", what: "«Мой профиль» — свой профиль, брони и билеты; у команды тут дашборд" },
+  { id: "calendar", what: "«Календарь и программа» площадки", team: true },
+  { id: "events", what: "«События» площадки — свои мероприятия", team: true },
+  { id: "constructor", what: "«Конструктор события» — собрать мероприятие", team: true },
+  { id: "inquiries", what: "«Заявки организаторов»", team: true },
+  { id: "spaces", what: "«Залы и прайс» площадки", team: true },
+  { id: "venue", what: "«Паспорт площадки» — свои данные площадки", team: true },
+  { id: "vendors", what: "«Каталог подрядчиков» — звук, свет, LED, оборудование", team: true },
+  { id: "contacts", what: "«Центр связи» — переписка с площадками и артистами", team: true },
+  { id: "afishagen", what: "«Генератор афиш»", team: true },
+  { id: "outreach", what: "«Работа с площадками»", team: true },
+];
+
+/** Экраны, куда гостя не пускает навигация BRO. */
+export const TEAM_ONLY_ROUTES = APP_ROUTES.filter((r) => r.team).map((r) => r.id);
 
 export const TOOL_DEFS = [
   {
@@ -154,8 +193,9 @@ export const TOOL_DEFS = [
       "Живой статус площадки: сколько людей, какая музыка сейчас. Источник может быть не подключён — тогда честно вернётся unknown.",
     parameters: {
       type: "object",
-      properties: { venueId: { type: "string" } },
-      required: ["venueId"],
+      // Название, а не id: у гостя внутреннего id нет и быть не может.
+      properties: { venue: { type: "string", description: "Название: Illuzion, Cafe del Mar" } },
+      required: ["venue"],
       additionalProperties: false,
     },
   },
@@ -167,7 +207,11 @@ export const TOOL_DEFS = [
     parameters: {
       type: "object",
       properties: {
-        stops: { type: "array", items: { type: "string" }, description: "id площадок по порядку" },
+        stops: {
+          type: "array",
+          items: { type: "string" },
+          description: "названия площадок по порядку: Illuzion, Cafe del Mar",
+        },
         startHour: { type: "integer" },
         partySize: { type: "integer" },
         safeTransportOnly: { type: "boolean" },
@@ -183,18 +227,19 @@ export const TOOL_DEFS = [
     type: "function" as const,
     name: "open_in_app",
     description:
-      "Открыть экран или сущность внутри GTR. Навигация, ничего не покупает. Только для экранов платформы: для музыки, клипов и внешних ссылок используй open_music, иначе человек уедет в случайный раздел вместо того, что просил.",
+      "Открыть экран внутри GTR. Навигация, ничего не покупает. Этим же списком отвечай на «что тут есть» и «где посмотреть…» — экраны описаны ниже. Для музыки, клипов и внешних ссылок — open_music, иначе человек уедет в случайный раздел вместо того, что просил.",
     parameters: {
       type: "object",
       properties: {
         route: {
           type: "string",
-          enum: [
-            "tonight", "map", "venueCard", "artists", "calendar", "promo", "aimatch",
-            "base", "community", "events", "constructor", "vendors", "dash",
-          ],
+          description: APP_ROUTES.map((r) => `${r.id} — ${r.what}`).join("; "),
+          enum: APP_ROUTES.map((r) => r.id),
         },
-        entityId: { type: "string" },
+        entityId: {
+          type: "string",
+          description: "для venueCard — название площадки",
+        },
       },
       required: ["route"],
       additionalProperties: false,
@@ -465,8 +510,6 @@ export { TEAM_ROLES, isTeam } from "./roles";
 /** Инструменты, закрытые для гостя и артиста. */
 const TEAM_ONLY_TOOLS = ["create_event_draft", "search_vendors", "forecast_attendance", "artist_pull"];
 
-/** Экраны, куда гостя не пускает навигация BRO. */
-export const TEAM_ONLY_ROUTES = ["events", "constructor", "vendors", "dash"];
 
 /** Набор инструментов для роли — то, что уходит модели в схемах. */
 export const toolsForRole = (role?: string) =>
@@ -534,6 +577,24 @@ const venue = (vid: string) => {
   const v = V(vid);
   return v && v.id ? v : null;
 };
+/** Название или внутренний id — в id.
+ *
+ *  Гость говорит «Illuzion», а часть инструментов исторически принимала
+ *  только внутренний id. Взять его гостю неоткуда: он не показан нигде в
+ *  интерфейсе и не звучит в разговоре. Модель, упершись в незаполняемый
+ *  параметр, делала единственное, что умеет — спрашивала id у гостя.
+ *  Вопрос без ответа: разговор упирался в тупик на ровном месте.
+ *
+ *  Сначала пробуем строку как id (её мог передать прошлый инструмент),
+ *  затем ищем по названию тем же матчером, что и паспорт площадки. */
+const resolveVenueId = async (q: string): Promise<string | null> => {
+  const s = clean(q, 60);
+  if (!s) return null;
+  if (venue(s)) return s;
+  const { PH } = await import("../data/app-data");
+  return PH.venues.find((v) => venueMatch(v.name, s))?.id ?? null;
+};
+
 const venueLatLon = (vid: string): [number, number] | null => {
   const g = GEO[vid];
   return g ? [g.lat, g.lon] : null;
@@ -815,8 +876,11 @@ export const handlers: Record<
   },
 
   async get_venue_live_status(args) {
-    const vid = clean(String(args.venueId ?? ""), 20);
-    if (!venue(vid)) return err("такой площадки нет в базе");
+    // venueId — старое имя параметра: читаем оба, чтобы сессия, начатая
+    // на прежней схеме, не осталась без ответа.
+    const vid = await resolveVenueId(String(args.venue ?? args.venueId ?? ""));
+    if (!vid)
+      return err("не нашёл такую площадку — назови иначе или подбери через search_venues");
     // Источник живой посещаемости не подключён. Возвращаем это честно —
     // модель обязана сказать «не знаю», а не придумать толпу.
     return ok({
@@ -830,11 +894,12 @@ export const handlers: Record<
   },
 
   async build_night_route(args) {
-    const stops = (Array.isArray(args.stops) ? (args.stops as string[]) : [])
-      .map((s) => clean(String(s), 20))
-      .filter((s) => venue(s))
+    const asked = (Array.isArray(args.stops) ? (args.stops as string[]) : []).slice(0, 8);
+    const stops = (await Promise.all(asked.map((s) => resolveVenueId(String(s)))))
+      .filter((s): s is string => Boolean(s))
       .slice(0, 5);
-    if (!stops.length) return err("нужен хотя бы один id площадки");
+    if (!stops.length)
+      return err("не нашёл эти площадки — назови иначе или подбери через search_venues");
     const startHour = Math.min(23, Math.max(11, Number(args.startHour ?? 19)));
     // Всё время держим в минутах от полуночи — переносы через час и через
     // сутки (после полуночи) считаются сами, без ручного деления с остатком
@@ -1683,19 +1748,20 @@ export const handlers: Record<
 
   async open_in_app(args, ctx) {
     const route = String(args.route ?? "");
-    const allowed = [
-      "tonight", "map", "venueCard", "artists", "calendar", "promo", "aimatch",
-      "base", "community", "events", "constructor", "vendors", "dash",
-    ];
-    if (!allowed.includes(route)) return err("неизвестный экран");
+    if (!APP_ROUTES.some((r) => r.id === route)) return err("неизвестный экран");
     // Рабочие экраны — только команде: гостю там нечего делать, и
     // показывать ему кухню продукта мы не будем.
     if (TEAM_ONLY_ROUTES.includes(route) && !isTeam(ctx.user?.role))
       return err("этот экран для команды GTR — гостю он не нужен");
-    const entityId = args.entityId ? clean(String(args.entityId), 40) : undefined;
-    if (route === "venueCard" && (!entityId || !venue(entityId.split(":")[0])))
-      return err("для карточки площадки нужен её id");
-    return ok({ route, entityId: entityId?.split(":")[0] });
+    // Карточка площадки открывается по НАЗВАНИЮ: внутренний id гостю
+    // взять неоткуда, и требовать его — значит задать вопрос, на который
+    // нельзя ответить.
+    if (route === "venueCard") {
+      const vid = await resolveVenueId(String(args.entityId ?? ""));
+      if (!vid) return err("не нашёл такую площадку — назови иначе или подбери через search_venues");
+      return ok({ route, entityId: vid });
+    }
+    return ok({ route });
   },
 
   // ------------------------------------------------- рабочий контур GTR

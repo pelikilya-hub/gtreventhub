@@ -144,9 +144,39 @@ if ($vram -ge 16000) {
 }
 Write-Host ">> Видеопамять: $vram МБ -> слотов $slots, контекст $ctx"
 
-# ---- 2. llama.cpp (CUDA) ---------------------------------------------
-# Ничего не перемещаем: находим llama-server.exe где бы он ни лежал в
-# распакованном архиве и запускаем прямо оттуда; cudart-DLL кладём рядом.
+# ---- 2. llama.cpp: сборка под нужную архитектуру ---------------------
+# Официальные сборки llama.cpp под Windows собраны с CUDA 12.4, а первая
+# CUDA с поддержкой Blackwell (RTX 50xx, sm_120) — это 12.8. Сборок 12.8 и
+# 13 под Windows в релизах нет вовсе: проверено на b10648, обе дают 404.
+# Значит, на RTX 50xx CUDA-сборка не заработает, и надо брать Vulkan — он
+# идёт в тех же релизах и на Blackwell работает через штатный драйвер
+# NVIDIA, без всякого CUDA-тулкита.
+#
+# Порядок такой: если появится CUDA 12.8+ под Windows — берём её (она
+# покрывает и новые карты, и старые). Нет — Blackwell идёт на Vulkan,
+# остальные на CUDA 12.4.
+$rel = Invoke-RestMethod "https://api.github.com/repos/ggml-org/llama.cpp/releases/latest"
+$names = $rel.assets | Select-Object -Expand name
+$newCuda = $names | Where-Object { $_ -match "^llama-.*bin-win-cuda-(1[3-9]|12\.(?:[89]|1[0-9]))" } | Select-Object -First 1
+$blackwell = "$gpu" -match "RTX\s*50[0-9]{2}"
+
+if ($newCuda) {
+    $backend = "cuda"; $assetPat = "^" + [regex]::Escape($newCuda) + "$"
+    $cudartPat = "^cudart-.*x64\.zip$"
+} elseif ($blackwell) {
+    $backend = "vulkan"; $assetPat = "^llama-.*bin-win-vulkan-x64\.zip$"; $cudartPat = $null
+    Write-Host ">> Карта Blackwell (RTX 50xx): беру сборку Vulkan — CUDA-сборки"
+    Write-Host "   под Windows пока только 12.4, а она эти карты не умеет."
+} else {
+    $backend = "cuda"; $assetPat = "^llama-.*bin-win-cuda-12\.4-x64\.zip$"
+    $cudartPat = "^cudart-.*cuda-12\.4-x64\.zip$"
+}
+Write-Host ">> Сборка llama.cpp: $backend"
+
+# Папка своя на каждый бэкенд: иначе после смены карты найдётся старый
+# llama-server.exe от прошлой сборки и молча не заведётся на GPU.
+$llamaDir = "$dir\llama-$backend"
+
 # Чужие папки, случайно перенесённые с C:\ первым (багованным) прогоном —
 # возвращаем на место, чтобы не мешали и не потерялись.
 $stray = Get-ChildItem "$dir\llama" -Directory -ErrorAction SilentlyContinue |
@@ -156,23 +186,24 @@ foreach ($s in $stray) {
     try { Move-Item $s.FullName "C:\" -Force } catch { Write-Host "   не вышло ($_) — верни вручную" }
 }
 
-$find = { Get-ChildItem "$dir\llama" -Recurse -Filter "llama-server.exe" -Force -ErrorAction SilentlyContinue |
+$find = { Get-ChildItem $llamaDir -Recurse -Filter "llama-server.exe" -Force -ErrorAction SilentlyContinue |
     Select-Object -First 1 }
 $serverExe = & $find
 if (-not $serverExe) {
-    # Старые архивы могли скачаться не те (шаблон цеплял cudart вместо
-    # сервера) — сносим кэш и качаем заново по точным именам.
-    Remove-Item "$dir\llama-cuda.zip", "$dir\cudart.zip" -Force -ErrorAction SilentlyContinue
-    Get-GithubAsset "ggml-org/llama.cpp" "^llama-.*bin-win-cuda-12\.4-x64\.zip$" "$dir\llama-cuda.zip"
-    Expand-Archive "$dir\llama-cuda.zip" -DestinationPath "$dir\llama" -Force
+    $zip = "$dir\llama-$backend.zip"
+    Remove-Item $zip, "$dir\cudart.zip" -Force -ErrorAction SilentlyContinue
+    Get-GithubAsset "ggml-org/llama.cpp" $assetPat $zip
+    Expand-Archive $zip -DestinationPath $llamaDir -Force
     $serverExe = & $find
     if (-not $serverExe) {
         Write-Host "Содержимое архива:"
-        Get-ChildItem "$dir\llama" -Recurse -ErrorAction SilentlyContinue | Select-Object -Expand FullName
+        Get-ChildItem $llamaDir -Recurse -ErrorAction SilentlyContinue | Select-Object -Expand FullName
         throw "llama-server.exe не найден в скачанном архиве — пришли Claude список выше."
     }
-    Get-GithubAsset "ggml-org/llama.cpp" "^cudart-.*cuda-12\.4-x64\.zip$" "$dir\cudart.zip"
-    Expand-Archive "$dir\cudart.zip" -DestinationPath $serverExe.DirectoryName -Force
+    if ($cudartPat) {
+        Get-GithubAsset "ggml-org/llama.cpp" $cudartPat "$dir\cudart.zip"
+        Expand-Archive "$dir\cudart.zip" -DestinationPath $serverExe.DirectoryName -Force
+    }
 }
 
 # ---- 3. Модель: Qwen3-8B Q4_K_M (~5 ГБ) ------------------------------

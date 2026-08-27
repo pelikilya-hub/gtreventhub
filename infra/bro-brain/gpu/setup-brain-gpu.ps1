@@ -107,13 +107,33 @@ function Get-File($url, $out) {
     (New-Object System.Net.WebClient).DownloadFile($url, $out)
 }
 
+# Ищем ассет по списку релизов, а не через /releases/latest.
+#
+# Все сборки llama.cpp помечены пре-релизом, а /releases/latest в API
+# пре-релизы ИСКЛЮЧАЕТ: он отдавал отдельный релиз v0.3.0 с тремя файлами,
+# где Windows-бинарников нет вовсе. Отсюда «не нашёл ассет» на ровном
+# месте, хотя файл лежит в соседней сборке.
+#
+# Шаблоны идут списком по убыванию предпочтения. Приоритет у шаблона, а не
+# у свежести: сборка с нужным ускорителем позавчерашняя лучше вчерашней
+# без него. Внутри одного шаблона берём самый свежий релиз.
+function Find-GithubAsset($repo, $patterns, $take = 15) {
+    $rels = Invoke-RestMethod "https://api.github.com/repos/$repo/releases?per_page=$take"
+    foreach ($pat in $patterns) {
+        foreach ($r in $rels) {
+            $a = $r.assets | Where-Object { $_.name -match $pat } | Select-Object -First 1
+            if ($a) { return @{ asset = $a; release = $r; pattern = $pat } }
+        }
+    }
+    return $null
+}
+
 function Get-GithubAsset($repo, $pattern, $out) {
     if (Test-Path $out) { return }
     Write-Host ">> Скачиваю $pattern из $repo ..."
-    $rel = Invoke-RestMethod "https://api.github.com/repos/$repo/releases/latest"
-    $asset = $rel.assets | Where-Object { $_.name -match $pattern } | Select-Object -First 1
-    if (-not $asset) { throw "Не нашёл ассет $pattern в $repo — проверьте вручную." }
-    Get-File $asset.browser_download_url $out
+    $hit = Find-GithubAsset $repo @($pattern)
+    if (-not $hit) { throw "Не нашёл ассет $pattern в $repo — проверьте вручную." }
+    Get-File $hit.asset.browser_download_url $out
 }
 
 # ---- 1. Проверка GPU --------------------------------------------------
@@ -145,33 +165,40 @@ if ($vram -ge 16000) {
 Write-Host ">> Видеопамять: $vram МБ -> слотов $slots, контекст $ctx"
 
 # ---- 2. llama.cpp: сборка под нужную архитектуру ---------------------
-# Официальные сборки llama.cpp под Windows собраны с CUDA 12.4, а первая
-# CUDA с поддержкой Blackwell (RTX 50xx, sm_120) — это 12.8. Сборок 12.8 и
-# 13 под Windows в релизах нет вовсе: проверено на b10648, обе дают 404.
-# Значит, на RTX 50xx CUDA-сборка не заработает, и надо брать Vulkan — он
-# идёт в тех же релизах и на Blackwell работает через штатный драйвер
-# NVIDIA, без всякого CUDA-тулкита.
+# Официальные Windows-сборки llama.cpp собраны с CUDA 12.4, а первая CUDA
+# с поддержкой Blackwell (RTX 50xx, sm_120) — 12.8. Значит, на RTX 5060 Ti
+# CUDA 12.4 не заработает, и нужен Vulkan: он лежит в тех же релизах и
+# работает на Blackwell через штатный драйвер NVIDIA, без CUDA-тулкита.
 #
-# Порядок такой: если появится CUDA 12.8+ под Windows — берём её (она
-# покрывает и новые карты, и старые). Нет — Blackwell идёт на Vulkan,
-# остальные на CUDA 12.4.
-$rel = Invoke-RestMethod "https://api.github.com/repos/ggml-org/llama.cpp/releases/latest"
-$names = $rel.assets | Select-Object -Expand name
-$newCuda = $names | Where-Object { $_ -match "^llama-.*bin-win-cuda-(1[3-9]|12\.(?:[89]|1[0-9]))" } | Select-Object -First 1
+# Список шаблонов, а не один: набор ассетов от сборки к сборке разный
+# (в b10649 Vulkan под Windows нет, в b10648 есть). Порядок — по убыванию
+# предпочтения; если однажды появится CUDA 12.8+ или 13 под Windows, она
+# возьмётся сама и без правки скрипта.
 $blackwell = "$gpu" -match "RTX\s*50[0-9]{2}"
-
-if ($newCuda) {
-    $backend = "cuda"; $assetPat = "^" + [regex]::Escape($newCuda) + "$"
-    $cudartPat = "^cudart-.*x64\.zip$"
-} elseif ($blackwell) {
-    $backend = "vulkan"; $assetPat = "^llama-.*bin-win-vulkan-x64\.zip$"; $cudartPat = $null
-    Write-Host ">> Карта Blackwell (RTX 50xx): беру сборку Vulkan — CUDA-сборки"
-    Write-Host "   под Windows пока только 12.4, а она эти карты не умеет."
+$patterns = if ($blackwell) {
+    @(
+        "^llama-.*bin-win-cuda-1[3-9].*x64\.zip$",
+        "^llama-.*bin-win-cuda-12\.(?:[89]|[1-9][0-9]).*x64\.zip$",
+        "^llama-.*bin-win-vulkan-x64\.zip$"
+    )
 } else {
-    $backend = "cuda"; $assetPat = "^llama-.*bin-win-cuda-12\.4-x64\.zip$"
-    $cudartPat = "^cudart-.*cuda-12\.4-x64\.zip$"
+    @(
+        "^llama-.*bin-win-cuda-12\.4-x64\.zip$",
+        "^llama-.*bin-win-vulkan-x64\.zip$"
+    )
 }
-Write-Host ">> Сборка llama.cpp: $backend"
+
+Write-Host ">> Подбираю сборку llama.cpp..."
+$pick = Find-GithubAsset "ggml-org/llama.cpp" $patterns
+if (-not $pick) {
+    throw "Не нашёл ни одной подходящей сборки llama.cpp под Windows — пришли этот текст Claude."
+}
+$backend = if ($pick.asset.name -match "vulkan") { "vulkan" } else { "cuda" }
+Write-Host ">> Сборка: $($pick.asset.name) (релиз $($pick.release.tag_name), бэкенд $backend)"
+if ($blackwell -and $backend -eq "vulkan") {
+    Write-Host "   Карта Blackwell: CUDA-сборки под Windows пока только 12.4,"
+    Write-Host "   а она эти карты не умеет. Vulkan — это тоже GPU."
+}
 
 # Папка своя на каждый бэкенд: иначе после смены карты найдётся старый
 # llama-server.exe от прошлой сборки и молча не заведётся на GPU.
@@ -192,7 +219,8 @@ $serverExe = & $find
 if (-not $serverExe) {
     $zip = "$dir\llama-$backend.zip"
     Remove-Item $zip, "$dir\cudart.zip" -Force -ErrorAction SilentlyContinue
-    Get-GithubAsset "ggml-org/llama.cpp" $assetPat $zip
+    Write-Host ">> Скачиваю $($pick.asset.name) ..."
+    Get-File $pick.asset.browser_download_url $zip
     Expand-Archive $zip -DestinationPath $llamaDir -Force
     $serverExe = & $find
     if (-not $serverExe) {
@@ -200,9 +228,17 @@ if (-not $serverExe) {
         Get-ChildItem $llamaDir -Recurse -ErrorAction SilentlyContinue | Select-Object -Expand FullName
         throw "llama-server.exe не найден в скачанном архиве — пришли Claude список выше."
     }
-    if ($cudartPat) {
-        Get-GithubAsset "ggml-org/llama.cpp" $cudartPat "$dir\cudart.zip"
-        Expand-Archive "$dir\cudart.zip" -DestinationPath $serverExe.DirectoryName -Force
+    # cudart строго из того же релиза: версии рантайма и сервера обязаны
+    # совпадать, иначе сервер стартует и падает на первом же запросе.
+    if ($backend -eq "cuda") {
+        $cudart = $pick.release.assets | Where-Object { $_.name -match "^cudart-.*x64\.zip$" } | Select-Object -First 1
+        if ($cudart) {
+            Write-Host ">> Скачиваю $($cudart.name) ..."
+            Get-File $cudart.browser_download_url "$dir\cudart.zip"
+            Expand-Archive "$dir\cudart.zip" -DestinationPath $serverExe.DirectoryName -Force
+        } else {
+            Write-Host "!! cudart в релизе $($pick.release.tag_name) нет — если сервер не стартует, пришли Claude."
+        }
     }
 }
 

@@ -387,6 +387,17 @@ if (Test-Path $cert) {
     if ($m.Success) { $brainHost = $m.Groups[1].Value.TrimEnd(".") }
     elseif ($BrainHost) { $brainHost = $BrainHost }
 
+    # Бесплатный сертификат Cloudflare покрывает ОДИН уровень поддомена:
+    # brain.example.com — да, brain.foo.example.com — нет, и такое имя
+    # отваливается на рукопожатии TLS, а не по DNS. Разбор этого стоит
+    # часа: имя резолвится, а достучаться нельзя.
+    if ($brainHost -and ($brainHost.Split(".").Count -gt 3)) {
+        Write-Host "!! Имя $brainHost глубже одного уровня — бесплатный сертификат" -ForegroundColor Yellow
+        Write-Host "   Cloudflare его не покроет, и HTTPS не поднимется. Задай имя"
+        Write-Host "   вида brain.твойдомен.com через -BrainHost."
+        $brainHost = ""
+    }
+
     $listed = (Invoke-Cf tunnel list) -match [regex]::Escape($TUNNEL)
     # Доказательство постоянного адреса — живая DNS-запись, а не наличие
     # туннеля в списке: tunnel create проходит и без зоны в Cloudflare.

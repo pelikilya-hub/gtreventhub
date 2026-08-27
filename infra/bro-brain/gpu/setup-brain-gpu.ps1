@@ -55,7 +55,9 @@ param(
     [string]$BrainHost = "",
     # Разовый вход в Cloudflare ради постоянного адреса. Открывает браузер
     # и ждёт — поэтому только по явной просьбе, не сам собой.
-    [switch]$Login
+    [switch]$Login,
+    # Адрес продукта, куда уезжает адрес мозга.
+    [string]$ApiBase = "https://gtrevent.com"
 )
 
 $ErrorActionPreference = "Stop"
@@ -309,7 +311,11 @@ $keyFile = "$dir\pult-key.txt"
 if ($PultKey) { $PultKey.Trim() | Set-Content $keyFile -NoNewline }
 elseif (Test-Path $keyFile) { $PultKey = (Get-Content $keyFile -Raw).Trim() }
 
-$api = "https://gtr-event-hub.gtr-event.workers.dev/api/bro-dev"
+# Адрес продукта. Переезд на свой домен отключает workers.dev у Cloudflare
+# автоматически, и прежний адрес начинает отдавать 404: публикация уходила
+# в никуда молча, а в KV оставалась пара от прошлого запуска. Именно так
+# «адрес прописан» и «мозг не отвечает» уживались в одном прогоне.
+$api = "$ApiBase/api/bro-dev"
 
 function Publish-Address($url) {
     if (-not $PultKey) {
@@ -328,7 +334,10 @@ function Publish-Address($url) {
         Write-Host "!! Продукт не принял адрес: $($r | ConvertTo-Json -Compress)" -ForegroundColor Yellow
     } catch {
         Write-Host "!! Не вышло прописать адрес ($_)." -ForegroundColor Yellow
-        Write-Host "   Вот он, отнеси руками: $url" -ForegroundColor Yellow
+        Write-Host "   Продукт: $api" -ForegroundColor Yellow
+        Write-Host "   Если тут 404 — у продукта сменился адрес, задай новый"
+        Write-Host "   через -ApiBase. Пока не прописано, мозг для BRO не существует."
+        Write-Host "   Вот адрес, отнеси руками: $url" -ForegroundColor Yellow
     }
     return $false
 }

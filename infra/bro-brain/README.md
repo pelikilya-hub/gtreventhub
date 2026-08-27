@@ -61,7 +61,7 @@ Claude вписывает сам через пульт (`pult.brain`). Убра�
 проверка — запросом с `Authorization`:
 
 ```bash
-curl -sS -X POST https://gtr-event-hub.gtr-event.workers.dev/api/bro-dev \
+curl -sS -X POST https://gtrevent.com/api/bro-dev \
   -H 'content-type: application/json' \
   -d '{"action":"pult.brainTest","key":"<ключ пульта>"}'
 ```

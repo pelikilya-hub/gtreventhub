@@ -1888,15 +1888,22 @@ export const setCommunityCfgFn = createServerFn({ method: "POST" })
 
 export const communityPostFn = createServerFn({ method: "POST" })
   .inputValidator(
-    (d: { kind: "digest" | "invite" | "contest" | "moved"; target: "channel" | "chat" }) => d,
+    (d: { kind: "digest" | "invite" | "contest" | "moved" | "poll"; target: "channel" | "chat" }) => d,
   )
   .handler(async ({ data }) => {
     const u = await currentUser();
     const ns = await getKvNs();
     if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
     if (u.role !== "gtr" && !u.boss) return { ok: false as const, reason: "только BOSS / GTR-админ" };
-    const { COMMUNITY_KEY, buildContestText, buildDigestText, buildInviteText, buildMovedText } =
-      await import("./community");
+    const {
+      COMMUNITY_KEY,
+      bkkDayNo,
+      buildContestText,
+      buildDigest,
+      buildInviteText,
+      buildMovedText,
+      buildPoll,
+    } = await import("./community");
     const cfg = await kvGetJson<import("./community").CommunityCfg>(ns, COMMUNITY_KEY);
     const chatId = data.target === "channel" ? cfg?.channelId : cfg?.chatId;
     if (!chatId) {
@@ -1904,8 +1911,31 @@ export const communityPostFn = createServerFn({ method: "POST" })
     }
     const bot = (await ns.get("tg:bot")) || "Gtrcom1_bot";
     const { APP_URL } = await import("./community");
+
+    // Опрос — не текстовый пост: у него свой метод и свои пределы, поэтому
+    // он уходит здесь и дальше по общей ветке не идёт.
+    if (data.kind === "poll") {
+      const poll = await buildPoll(ns, bkkDayNo());
+      if (poll.options.length < 2)
+        return { ok: false as const, reason: "нечего спрашивать — программа на сегодня пуста" };
+      const pr = await tgApi("sendPoll", {
+        chat_id: chatId,
+        question: poll.question,
+        options: poll.options,
+        is_anonymous: true,
+        allows_multiple_answers: Boolean(poll.multiple),
+      });
+      return pr.ok
+        ? { ok: true as const, reason: "" }
+        : { ok: false as const, reason: pr.description || "Telegram отклонил опрос" };
+    }
     let text: string;
-    if (data.kind === "digest") text = await buildDigestText(ns);
+    let photos: string[] = [];
+    if (data.kind === "digest") {
+      const d = await buildDigest(ns);
+      text = d.text;
+      photos = d.photos;
+    }
     else if (data.kind === "contest") text = buildContestText();
     else if (data.kind === "moved") {
       // Цифры берём из живой базы, а не из памяти: пост о переезде читают
@@ -1930,13 +1960,22 @@ export const communityPostFn = createServerFn({ method: "POST" })
               ...(cfg?.chatUrl ? [{ text: "💬 Чат", url: cfg.chatUrl }] : []),
             ],
           ].filter((row) => row.length);
+    // Афиши вперёд, текст следом — как в кроновом дайджесте. Альбому
+    // Telegram не даёт ни подписи, ни кнопок, поэтому это два сообщения.
+    if (photos.length >= 2)
+      await tgApi("sendMediaGroup", {
+        chat_id: chatId,
+        media: photos.slice(0, 10).map((u) => ({ type: "photo", media: u })),
+      });
+    else if (photos.length === 1) await tgApi("sendPhoto", { chat_id: chatId, photo: photos[0] });
+
     const res = await tgApi("sendMessage", {
       chat_id: chatId,
       text,
       parse_mode: "HTML",
       reply_markup: { inline_keyboard: buttons },
-      ...(data.kind === "contest"
-        ? {}
+      ...(data.kind === "contest" || photos.length
+        ? { link_preview_options: { is_disabled: true } }
         : {
             link_preview_options: { url: APP_URL, prefer_large_media: true },
           }),

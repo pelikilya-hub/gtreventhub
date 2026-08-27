@@ -5054,3 +5054,134 @@ canvas.gtr-dancer-img {
   display: block;
   pointer-events: auto;
 }
+
+/* =====================================================================
+   ГЕРО ПАСПОРТА ПЛОЩАДКИ
+   ---------------------------------------------------------------------
+   Раньше фото лежало фоном под текстом карточки в 140 точек, поверх — 
+   горизонтальная заливка почти в ноль: кадр работал тусклой текстурой, а
+   имя и кнопки шли прямо по нему. Теперь кадр во всю ширину и в полный
+   рост, а текст — в нижней полосе поверх ВЕРТИКАЛЬНОЙ заливки: верх
+   остаётся чистым, низ уходит в фон приложения.
+   ===================================================================== */
+.gtr-vhero {
+  position: relative;
+  /* вылет ровно на отступ колонки: на телефоне это край экрана */
+  margin-inline: calc(-1 * var(--gtr-pad, 14px));
+  margin-bottom: 16px;
+  /* min-height, а не height: если подпись длинная (имя + чипы + кнопки),
+     блок вырастает, а не срезает себе верх под overflow. */
+  min-height: clamp(300px, 54vh, 480px);
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--gtr-bg, #0a0b0d);
+  display: flex;
+  align-items: flex-end;
+}
+
+/* Слой кадра выше блока: параллакс сдвигает его вверх, и запас снизу не
+   должен обнажать фон. */
+.gtr-vhero-media {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -8%;
+  bottom: -8%;
+  z-index: 0;
+  will-change: transform;
+}
+.gtr-vhero-media > * {
+  width: 100%;
+  height: 100%;
+}
+.gtr-vhero-shot,
+.gtr-vhero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* наплыв: кадры сменяются затуханием, а не рывком */
+.gtr-vhero-shot {
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+.gtr-vhero-shot.on { opacity: 1; }
+
+/* Ken Burns: медленный наезд оживляет даже одиночный кадр */
+@keyframes gtrken {
+  from { transform: scale(1.04); }
+  to { transform: scale(1.14); }
+}
+.gtr-vhero-ken { animation: gtrken 16s ease-out both; }
+
+/* Вертикальная заливка: верх кадра почти чист, низ уходит в фон
+   приложения — подпись читается, а фотография остаётся фотографией. */
+.gtr-vhero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 11, 13, 0.34) 0%,
+      rgba(10, 11, 13, 0.05) 22%,
+      rgba(10, 11, 13, 0.55) 58%,
+      rgba(10, 11, 13, 0.93) 84%,
+      var(--gtr-bg, #0a0b0d) 100%
+    ),
+    /* лёгкое затемнение к торцам, чтобы кадр не спорил с колонкой */
+      linear-gradient(90deg, rgba(10, 11, 13, 0.5) 0%, transparent 22%, transparent 78%, rgba(10, 11, 13, 0.5) 100%);
+}
+
+.gtr-vhero-in {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 24px 26px 22px;
+}
+
+@media (max-width: 860px) {
+  .gtr-vhero { min-height: clamp(260px, 46vh, 380px); }
+  .gtr-vhero-in { padding: 18px 18px 16px; }
+}
+
+/* телефон набок: высоты мало — кадр ужимается, но не исчезает */
+@media (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
+  .gtr-vhero { min-height: 210px; }
+  .gtr-vhero-in { padding: 12px 18px 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-vhero-ken { animation: none; }
+  .gtr-vhero-shot { transition: none; }
+  .gtr-vhero-media { transform: none !important; }
+}
+
+/* =====================================================================
+   РАСКРЫТИЕ ПРИ ПРОКРУТКЕ
+   ---------------------------------------------------------------------
+   Блоки не появляются разом простынёй: каждый входит, когда до него
+   доскроллили. Прячем только если сценарий реально включился (класс
+   вешает JS) — иначе при отключённом скрипте страница осталась бы пустой.
+   ===================================================================== */
+.gtr-reveal-on [data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.55s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.55s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.gtr-reveal-on [data-reveal].in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-reveal-on [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

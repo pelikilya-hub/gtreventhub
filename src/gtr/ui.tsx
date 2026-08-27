@@ -186,6 +186,7 @@ export const Card = ({
   className = "",
   onClick,
   id,
+  reveal,
 }: {
   children: ReactNode;
   hover?: boolean;
@@ -194,9 +195,14 @@ export const Card = ({
   onClick?: () => void;
   /** Якорь для прокрутки: «покажи мне бронь» должно куда-то вести. */
   id?: string;
+  /** Проявляться при прокрутке (см. gtr/reveal.ts). Отдельным пропом, а не
+   *  атрибутом data-*: атрибут с дефисом TypeScript у компонента не
+   *  проверяет и в DOM он бы молча не доехал. */
+  reveal?: boolean;
 }) => (
   <div
     id={id}
+    data-reveal={reveal ? "" : undefined}
     className={`gtr-card ${hover ? "gtr-card-hover" : ""} ${className}`}
     style={{ ...(onClick ? { cursor: "pointer" } : {}), ...style }}
     onClick={onClick}

@@ -30,25 +30,52 @@ const fold = (s: string) =>
 
 export const slugOf = (s: string) => fold(s).replace(/\s+/g, "-").slice(0, 40);
 
+// Слова, которые на Пхукете носит половина заведений. Они ничего не
+// различают: «Pullman Phuket Panwa Beach Resort» и «Pullman Phuket Karon
+// Beach Resort» — разные отели на разных берегах, а общих слов у них
+// четыре. Раньше такие пары набирали проходной балл и событие уезжало
+// чужой площадке — это хуже, чем не узнать площадку вовсе.
+const GENERIC_WORDS =
+  /^(the|and|bar|pub|club|beach|phuket|hotel|resort|spa|restaurant|cafe|lounge|patong|kata|karon|kamala|bangtao|rawai|thailand|grill|house|room|sky|sea|blue)$/;
+
+/** Площадка по названию среди переданного списка. Чистая функция: её же
+ *  зовёт агент афиш, у которого свой срез базы и нет доступа к app-data. */
+export const pickVenueByName = <V extends { id: string; name: string }>(
+  query: string,
+  venues: readonly V[],
+): { id: string; name: string } | null => {
+  if (!query || query.length < 3) return null;
+  const q = fold(query);
+  const words = q.split(" ").filter((w) => w.length > 2 && !GENERIC_WORDS.test(w));
+  if (!words.length) return null;
+  let best: { id: string; name: string; score: number } | null = null;
+  for (const v of venues) {
+    const n = fold(v.name);
+    // Значимые слова самой площадки: если у неё их нет вовсе (название
+    // целиком из общих слов), опознать её по имени нельзя.
+    const own = new Set(n.split(" ").filter((w) => w.length > 2 && !GENERIC_WORDS.test(w)));
+    let score = 0;
+    if (n === q) score = 100;
+    else if (n.includes(q) || q.includes(n)) score = 60;
+    else {
+      // Одного общего значимого слова мало: сетевые отели делят название
+      // сети («Pullman Phuket Panwa» и «Pullman Phuket Karon» — разные
+      // отели на разных берегах), а «Royal Paradise Hotel» и «Paradise
+      // Beach» — вообще разные места. Точное имя ловит ветка выше.
+      const shared = words.filter((w) => own.has(w));
+      score = shared.length >= 2 ? 40 + shared.length * 20 : 0;
+    }
+    if (score >= 40 && (!best || score > best.score)) best = { id: v.id, name: v.name, score };
+  }
+  return best ? { id: best.id, name: best.name } : null;
+};
+
 /** Площадка по названию из поста. Требуем совпадения по значимым словам:
  *  «Illuzion» находит Illuzion Phuket, а «Beach Club» — никого, потому
  *  что пляжных клубов на острове десятки и угадывать нельзя. */
 export const matchVenue = async (query: string): Promise<{ id: string; name: string } | null> => {
-  if (!query || query.length < 3) return null;
   const { PH } = await import("./data/app-data");
-  const q = fold(query);
-  const words = q.split(" ").filter((w) => w.length > 2 && !/^(the|bar|pub|club|beach|phuket)$/.test(w));
-  if (!words.length) return null;
-  let best: { id: string; name: string; score: number } | null = null;
-  for (const v of PH.venues) {
-    const n = fold(v.name);
-    let score = 0;
-    if (n === q) score = 100;
-    else if (n.includes(q) || q.includes(n)) score = 60;
-    else score = words.filter((w) => n.includes(w)).length * 20;
-    if (score >= 40 && (!best || score > best.score)) best = { id: v.id, name: v.name, score };
-  }
-  return best ? { id: best.id, name: best.name } : null;
+  return pickVenueByName(query, PH.venues);
 };
 
 /** Артисты лайнапа против базы. Порог высокий: приписать чужому вечеру

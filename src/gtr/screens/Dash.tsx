@@ -24,7 +24,7 @@ import { FAMILY_LABEL } from "../match";
 import { useTranslation } from "react-i18next";
 import { ArtistStudio } from "./ArtistStudio";
 import "../i18n";
-import { Card, Chip, Dot, Eyebrow, Icon, Ring, Stk, TrashTitle } from "../ui";
+import { Card, Chip, Dot, Eyebrow, Icon, Ring, Stk, TrashTitle, type StkName } from "../ui";
 import { ImpulseArt } from "../impulse";
 import {
   allAfishaFn,
@@ -41,6 +41,8 @@ import {
 import { BossCabinet, PushPanel, TgChip } from "./Boss";
 import { openAppLink } from "../applink";
 import { genreLabel, OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
+import { pickHeadliner, islandDigest } from "../guest-digest";
+import appUpdates from "../data/app-updates.json";
 
 type Action = [string, string, string, ScreenId, string, string];
 type Kpi = [string, string | number, string, string, string];
@@ -1775,6 +1777,11 @@ function VisitorCabinet() {
 
   const todayIso = new Date().toISOString().slice(0, 10);
   const tonightCount = feed.filter((e) => e.dateIso === todayIso).length;
+  // Геро больше не прибит к одному видео: берём самое шумное событие
+  // сегодня и показываем его промо. Если на сегодня афиши нет — откат к
+  // дежурному видео вайба.
+  const headliner = useMemo(() => pickHeadliner(feed, todayIso), [feed, todayIso]);
+  const island = useMemo(() => islandDigest(feed, todayIso), [feed, todayIso]);
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto" }}>
@@ -1783,7 +1790,17 @@ function VisitorCabinet() {
            экрана, а по краям свет заваливается, как на изогнутом стекле —
            видео читается уходящим за грань, а не вырезанным в окошке. ---- */}
       <div className="gtr-hero-edge">
-        <video
+        {headliner?.poster ? (
+          // Промо самого шумного события сегодня: его постер как задник геро
+          <img
+            src={headliner.poster}
+            alt=""
+            aria-hidden
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "saturate(1.08) contrast(1.03)" }}
+            onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }}
+          />
+        ) : (
+          <video
             src="https://cwsdn.b-cdn.net/Illuzion/illuzion-intro-2025.mp4"
             poster="/venues/VEN-0013-hero.jpg"
             autoPlay
@@ -1793,22 +1810,34 @@ function VisitorCabinet() {
             aria-hidden
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "saturate(1.08) contrast(1.05)" }}
           />
+        )}
         <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(180deg, rgba(10,11,13,0) 18%, rgba(10,11,13,.45) 58%, rgba(10,11,13,.8) 100%)" }} />
         <div className="gtr-laser" style={{ ["--gtr-run" as string]: "340px", zIndex: 1 }} />
         <div className="gtr-hero-edge-in gtr-hero-tall">
             <div className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "rgba(255,255,255,.75)", letterSpacing: ".16em", marginBottom: 10 }}>
-              {user.name.toUpperCase()} · PHUKET
+              {headliner
+                ? `${t("ГРОМЧЕ ВСЕХ СЕГОДНЯ")} · ${(V(headliner.vid)?.name ?? "PHUKET").toUpperCase()}`
+                : `${user.name.toUpperCase()} · PHUKET`}
             </div>
-            <TrashTitle text={t("Сегодня вечером")} size={40} />
+            <TrashTitle text={headliner ? headliner.title.slice(0, 46) : t("Сегодня вечером")} size={headliner ? 34 : 40} />
             <div style={{ margin: "10px 0 16px", font: "500 13px/1.5 'Golos Text',sans-serif", color: "rgba(255,255,255,.82)", maxWidth: 420 }}>
-              {tonightCount
-                ? `${t("В афише")}: ${tonightCount} · ${t("Весь остров открыт — собери свой вечер")}`
-                : t("Остров открыт — собери свой вечер: клубы, пляжные вечеринки, живая музыка")}
+              {headliner
+                ? (headliner.artistIds.length
+                    ? `${t("Наш артист на сцене")} · ${island.events} ${t("событий на острове сегодня")}`
+                    : `${island.events} ${t("событий в")} ${island.venues} ${t("заведениях сегодня")}`)
+                : tonightCount
+                  ? `${t("В афише")}: ${tonightCount} · ${t("Весь остров открыт — собери свой вечер")}`
+                  : t("Остров открыт — собери свой вечер: клубы, пляжные вечеринки, живая музыка")}
             </div>
-            <div>
-              <button className="gtr-btn-wow" onClick={() => go("tonight")}>
-                {t("Выбрать вечер")} →
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button className="gtr-btn-wow" onClick={() => (headliner ? openEvent(headliner) : go("tonight"))}>
+                {headliner ? t("Смотреть событие") : t("Выбрать вечер")} →
               </button>
+              {headliner ? (
+                <button className="gtr-btn" style={{ padding: "12px 18px" }} onClick={() => go("tonight")}>
+                  {t("Вся афиша")}
+                </button>
+              ) : null}
             </div>
         </div>
       </div>
@@ -1913,6 +1942,67 @@ function VisitorCabinet() {
           <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Стол на вечер")}</div>
           <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>{t("Бронь в пару касаний")}</div>
         </Card>
+      </div>
+
+      {/* ---- сегодня на острове: живая сводка + что нового + чем поможет BRO ---- */}
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
+        <span className="gtr-eq" aria-hidden><span /><span /><span /><span /></span>
+        <Eyebrow>{t("СЕГОДНЯ НА ОСТРОВЕ")}</Eyebrow>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 12, marginBottom: 16 }}>
+        {/* сводка дня — из реальной афиши, без выдумок */}
+        <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("tonight")}>
+          <div className="gtr-laser" aria-hidden />
+          <Eyebrow style={{ fontSize: 10, marginBottom: 8 }}>{t("НОВОСТИ ВЕЧЕРА")}</Eyebrow>
+          {island.events ? (
+            <>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+                <span className="gtr-mono" style={{ font: "700 26px/1 'JetBrains Mono',monospace", color: "#fff" }}>{island.events}</span>
+                <span style={{ font: "600 13px/1.2 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+                  {t("событий в")} {island.venues} {t("заведениях")}
+                </span>
+              </div>
+              {island.withArtist ? (
+                <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+                  {t("Из них с нашими артистами на сцене:")} {island.withArtist}
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <div style={{ font: "500 12.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+              {t("На сегодня афиша ещё собирается — загляни в раздел «Сегодня», остров не спит.")}
+            </div>
+          )}
+        </Card>
+
+        {/* чем поможет BRO сегодня — открывает голосового помощника */}
+        <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }}
+          onClick={() => window.dispatchEvent(new CustomEvent("gtr:bro-open"))}>
+          <img src="/raw-pulse/handle-logo.webp" alt="" aria-hidden style={{ position: "absolute", right: -6, bottom: -8, width: 66, opacity: 0.8 }} />
+          <Eyebrow style={{ fontSize: 10, marginBottom: 8 }}>{t("BRO СЕГОДНЯ")}</Eyebrow>
+          <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase", paddingRight: 54 }}>{t("Спроси, куда пойти")}</div>
+          <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 54 }}>
+            {t("Подберёт вечер под твой вкус, забронирует стол, переведёт официанту — просто спроси.")}
+          </div>
+        </Card>
+      </div>
+
+      {/* что нового в приложении: реально выпущенные опции */}
+      <Eyebrow style={{ marginBottom: 10 }}>{t("ЧТО НОВОГО В ПРИЛОЖЕНИИ")}</Eyebrow>
+      <div className="gtr-hscroll" style={{ marginBottom: 18 }}>
+        {appUpdates.updates.map((u) => (
+          <Card key={u.id} hover style={{ padding: "14px 16px", width: 208, display: "grid", gap: 7, alignContent: "start" }}
+            onClick={() => go(u.screen as ScreenId)}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Stk name={u.icon as StkName} size={26} />
+              <span style={{ font: "700 12.5px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t(u.title)}</span>
+            </div>
+            <div style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{t(u.text)}</div>
+            <span className="gtr-mono" style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".08em" }}>
+              {u.dateIso.slice(8, 10)}.{u.dateIso.slice(5, 7)}
+            </span>
+          </Card>
+        ))}
       </div>
 
       {community.channelUrl || community.chatUrl ? (

@@ -158,6 +158,17 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
       alive = false;
     };
   }, []);
+  // Экраны зовут BRO событием окна (в дереве компонентов до setBroOpen не
+  // дотянуться): дайджест гостя «чем бро может помочь сегодня» открывает
+  // помощника, не пробрасывая колбэк через полприложения. Открываем только
+  // когда голос реально включён — иначе окно пустое.
+  const broOnRef = useRef(broOn);
+  broOnRef.current = broOn;
+  useEffect(() => {
+    const open = () => { if (broOnRef.current) setBroOpen(true); };
+    window.addEventListener("gtr:bro-open", open);
+    return () => window.removeEventListener("gtr:bro-open", open);
+  }, []);
   useDeviceTilt(); // гироскоп: наклон телефона двигает атмосферный свет
 
   const go = (id: ScreenId) => {

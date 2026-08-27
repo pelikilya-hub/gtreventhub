@@ -4,6 +4,7 @@
 import artistsRaw from "./data/artists.json";
 import venuesRaw from "./data/venues.json";
 import { kvGetJson, type KvNs } from "./kv-ns";
+import { pickVenueByName } from "./intake";
 import { absImg, posterKvKey, posterUrl } from "./poster";
 
 export type VenueAfishaEvent = {
@@ -52,9 +53,12 @@ const ARTISTS: ArtistLite[] = ((artistsRaw as { artists?: ArtistLite[] }).artist
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
-type VenueLite = { id: string; website?: string };
+// Имя нужно не для показа, а чтобы свести площадку из городского
+// агрегатора с нашей базой — там события подписаны названием, не id.
+type VenueLite = { id: string; name: string; website?: string };
 const VENUES: VenueLite[] = ((venuesRaw as { venues?: VenueLite[] }).venues ?? []).map((v) => ({
   id: v.id,
+  name: v.name,
   website: v.website,
 }));
 
@@ -680,6 +684,47 @@ async function probeSite(site: string): Promise<SrcRec> {
   return { kind: "none", checkedAt, found: 0 };
 }
 
+/** Один и тот же вечер, пришедший из двух источников: даты уже совпали,
+ *  остаётся сверить начала названий — «Industry Night at RAVA» и
+ *  «Industry Night» это одно, а «Sunset Sessions» рядом с ними — другое. */
+const sameNight = (a: string, b: string) => {
+  const [x, y] = [a.toLowerCase(), b.toLowerCase()];
+  return x.includes(y.slice(0, 12)) || y.includes(x.slice(0, 12));
+};
+
+// Городской календарь Пхукета на The Events Calendar: единственный из
+// разведанных агрегаторов, который отдаёт анониму структурированный JSON
+// с датой и названием площадки. Проверено живой загрузкой 27.08.2026:
+// ra.co отвечает 403, megatix — 404 на региональной ручке.
+const CITY_CALENDARS = ["https://www.phuket.net"];
+const CITY_WINDOW_DAYS = 95;
+
+/** События города по площадкам. Имя площадки из агрегатора сводим с базой
+ *  строгим сопоставлением: неузнанное имя — не наша площадка, и приписать
+ *  вечер соседу хуже, чем не показать его вовсе. */
+async function syncCityCalendar(): Promise<Map<string, VenueAfishaEvent[]>> {
+  const out = new Map<string, VenueAfishaEvent[]>();
+  const today = new Date().toISOString().slice(0, 10);
+  const until = new Date(Date.now() + CITY_WINDOW_DAYS * 86400e3).toISOString().slice(0, 10);
+  for (const site of CITY_CALENDARS) {
+    const host = new URL(site).host;
+    const j = (await jsonOrNull(
+      `${site}/wp-json/tribe/events/v1/events?per_page=50&start_date=${today}&end_date=${until}`,
+    )) as { events?: (TribeEvent & { venue?: { venue?: string } })[] } | null;
+    if (!j?.events?.length) continue;
+    for (const raw of j.events) {
+      const place = decodeEntities(String(raw.venue?.venue ?? "")).trim();
+      if (!place) continue;
+      const hit = pickVenueByName(place, VENUES);
+      if (!hit) continue; // площадки нет в базе — её заводит поток черновиков
+      const [ev] = fromTribe([raw], host);
+      if (!ev) continue;
+      out.set(hit.id, [...(out.get(hit.id) ?? []), ev]);
+    }
+  }
+  return out;
+}
+
 const daysBetween = (iso: string) =>
   Math.floor((Date.now() - new Date(`${iso}T00:00:00Z`).getTime()) / 86400000);
 
@@ -884,6 +929,19 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
     }
   } catch {
     // разведка — необязательный слой, её падение не ломает основной прогон
+  }
+
+  // Городской агрегатор поверх сайтов площадок. Он видит вечера тех, у
+  // кого своего календаря нет вовсе, — отели и рестораны выкладывают
+  // программу туда, а не к себе на сайт.
+  try {
+    for (const [vid, ev] of await syncCityCalendar()) {
+      const cur = byVid.get(vid) ?? [];
+      const fresh = ev.filter((e) => !cur.some((c) => c.dateIso === e.dateIso && sameNight(c.title, e.title)));
+      byVid.set(vid, dedupe([...cur, ...fresh]));
+    }
+  } catch {
+    // агрегатор — тоже необязательный слой
   }
 
   // Resident Advisor поверх сайтов: одинаковые события (та же дата и

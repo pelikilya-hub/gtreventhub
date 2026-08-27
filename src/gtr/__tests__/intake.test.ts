@@ -6,7 +6,7 @@
 // и без подсказки о канале такой пост заводил мусорный черновик.
 import { describe, expect, it } from "vitest";
 
-import { intakePost } from "../intake";
+import { intakePost, pickVenueByName } from "../intake";
 import type { KvNs } from "../kv-ns";
 
 function memKv() {
@@ -92,5 +92,38 @@ describe("приёмник афиш", () => {
     const r = await intakePost(ns, `Event · ${FUTURE} · DJ X`, "личка", "личка");
     expect(r.venueId).toBeUndefined();
     expect(store.get("chanmap:licka")).toBeFalsy();
+  });
+});
+
+describe("узнавание площадки по имени", () => {
+  // Городской агрегатор подписывает событие названием площадки, а не id.
+  // 27.08.2026 на живых данных phuket.net прежний порог отдавал вечер
+  // «Pullman Phuket Panwa» отелю «Pullman Phuket Karon» — другой берег
+  // острова, — а «The Royal Paradise Hotel» превращался в «Paradise
+  // Beach». Приписать вечер соседу хуже, чем не показать его вовсе.
+  const base = [
+    { id: "VEN-0088", name: "Pullman Phuket Karon Beach Resort" },
+    { id: "VEN-0055", name: "Paradise Beach Phuket" },
+    { id: "VEN-0013", name: "Illuzion Phuket" },
+    { id: "VEN-0047", name: "Barra Cuda Beach Club" },
+    { id: "VEN-0051", name: "NORA Beach Club" },
+  ];
+
+  it("сетевой отель на другом берегу — не наша площадка", () => {
+    expect(pickVenueByName("Pullman Phuket Panwa Beach Resort", base)).toBeNull();
+  });
+
+  it("общее слово в названии не делает два места одним", () => {
+    expect(pickVenueByName("The Royal Paradise Hotel & Spa Patong Phuket", base)).toBeNull();
+  });
+
+  it("точное и вложенное имя по-прежнему узнаются", () => {
+    expect(pickVenueByName("NORA Beach Club", base)?.id).toBe("VEN-0051");
+    expect(pickVenueByName("Illuzion", base)?.id).toBe("VEN-0013");
+    expect(pickVenueByName("Barra Cuda Phuket", base)?.id).toBe("VEN-0047");
+  });
+
+  it("название из одних общих слов не привязывается ни к кому", () => {
+    expect(pickVenueByName("Beach Club Phuket", base)).toBeNull();
   });
 });

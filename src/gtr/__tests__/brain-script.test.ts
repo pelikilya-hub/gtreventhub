@@ -136,10 +136,12 @@ describe("скрипт мозга на домашнем GPU", () => {
   });
 
   it("ловит ту самую опечатку, ради которой написан", () => {
-    const broken = src.replace(
-      'Write-Host ">> Видеопамять: $vram МБ -> слотов $slots, контекст $ctx"',
-      'Write-Host ">> Видеопамять: $vram МБ -> слотов $slots, контекст $ctx',
-    );
+    // Не привязываемся к конкретной строке — она переписывается. Берём
+    // любой Write-Host со строкой и роняем закрывающую кавычку, как это и
+    // случилось 25.08.2026 в сообщении про видеопамять.
+    const m = /Write-Host "[^"\n]+"/.exec(src);
+    expect(m).not.toBeNull();
+    const broken = src.replace(m![0], m![0].slice(0, -1));
     expect(broken).not.toBe(src);
     expect(scan(broken).state).not.toBe("code");
   });

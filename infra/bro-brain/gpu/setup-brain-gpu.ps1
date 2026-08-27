@@ -9,11 +9,25 @@
 # Запуск: правый клик по файлу -> "Выполнить с помощью PowerShell",
 # либо в PowerShell:  powershell -ExecutionPolicy Bypass -File .\setup-brain-gpu.ps1
 #
-# Первый раз стоит передать ключ пульта — он есть на стенде /bro-dev:
+# Первый раз запускать ОТ ИМЕНИ АДМИНИСТРАТОРА и с ключом пульта (ключ
+# есть на стенде /bro-dev):
 #   powershell -ExecutionPolicy Bypass -File .\setup-brain-gpu.ps1 -PultKey <ключ>
-# Ключ ложится рядом со скриптом, дальше он не нужен: скрипт сам вписывает
+# Ключ ложится в рабочую папку, дальше он не нужен: скрипт сам вписывает
 # адрес мозга в продукт при каждом запуске и при каждой смене адреса.
 # Без ключа всё работает по-прежнему — адрес придётся отнести руками.
+#
+# ---- Про автозапуск ---------------------------------------------------
+#
+# Мозг поднимается ПРИ ЗАГРУЗКЕ Windows и работает от имени SYSTEM. Это не
+# придирка к настройке, а единственный способ пережить две обычные вещи:
+# компьютер перезагрузили и никто ещё не вошёл в систему, и на компьютере
+# сменили пользователя. Задача, привязанная к входу конкретного человека,
+# в обоих случаях либо не стартует, либо умирает вместе с его сеансом — а
+# гость в это время спрашивает BRO про сегодняшний вечер.
+#
+# Отсюда же фиксированная рабочая папка C:\gtr-brain вместо профиля
+# пользователя: у SYSTEM профиль свой, и модель на 5 ГБ уехала бы качаться
+# заново. Старую папку из профиля скрипт перенесёт сам.
 #
 # ---- Про адрес --------------------------------------------------------
 #
@@ -33,7 +47,9 @@ param(
     # Ключ пульта со стенда /bro-dev. Достаточно передать один раз.
     [string]$PultKey = "",
     # Режим автозапуска: не задавать вопросов, которых некому услышать.
-    [switch]$Unattended
+    [switch]$Unattended,
+    # Рабочая папка. Машинная, а не в профиле: под SYSTEM профиль другой.
+    [string]$Dir = "C:\gtr-brain"
 )
 
 $ErrorActionPreference = "Stop"
@@ -59,9 +75,31 @@ trap {
     exit 1
 }
 
-$dir = "$env:USERPROFILE\gtr-brain"
+$dir = $Dir
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
+
+# Раньше всё лежало в профиле пользователя. Под SYSTEM это другая папка,
+# поэтому переносим — иначе первый же запуск от SYSTEM пойдёт качать пять
+# гигабайт модели заново. В пределах одного диска это переименование,
+# то есть мгновенно.
+$legacy = "$env:USERPROFILE\gtr-brain"
+if ((Test-Path $legacy) -and $legacy -ne $dir) {
+    Write-Host ">> Переношу $legacy -> $dir ..."
+    foreach ($f in Get-ChildItem $legacy -Force) {
+        $to = Join-Path $dir $f.Name
+        if (Test-Path $to) { continue }
+        try { Move-Item $f.FullName $to -Force } catch { Write-Host "   пропускаю $($f.Name): $_" }
+    }
+}
+
 Set-Location $dir
+
+# Под SYSTEM консоли нет и Write-Host уходит в пустоту. Без журнала любой
+# отказ автозапуска неотличим от выключенного компьютера — ровно та беда,
+# из-за которой мозг однажды лежал неделю. Пишем всё в файл.
+if ($Unattended) {
+    try { Start-Transcript -Path "$dir\brain.log" -Append -Force | Out-Null } catch { }
+}
 
 # Качаем потоково через WebClient: Invoke-WebRequest в PowerShell 5.1
 # держит весь файл в памяти — на модели в 5 ГБ это конец.
@@ -293,23 +331,58 @@ if (-not (Wait-Brain)) {
 }
 Write-Host ">> Модель готова."
 
-# ---- 8. Автозапуск при перезагрузке -----------------------------------
-# Домашний компьютер перезагружают. Без этой задачи мозг после каждой
-# перезагрузки офлайн, и узнаём мы об этом от гостя, а не от техники.
-# Регистрируем всегда через -Force: задача, заведённая прошлой версией
-# скрипта, не знает про -Unattended и под автозапуском повиснет на первом
-# же Read-Host в невидимом окне.
+# ---- 8. Автозапуск: при загрузке Windows, от имени SYSTEM -------------
+# Прошлая версия вешала задачу на вход пользователя. Это ломалось дважды:
+# компьютер перезагрузили и никто ещё не вошёл — мозга нет; сменили
+# пользователя — сеанс закрылся и мозг умер вместе с ним. Оба раза снаружи
+# это выглядит одинаково: гость спрашивает, BRO не отвечает.
+#
+# Поэтому триггер AtStartup, а исполнитель — SYSTEM: он не привязан ни к
+# чьему сеансу и живёт, пока включён компьютер.
 $taskName = "GTR BRO brain"
-try {
-    $act = New-ScheduledTaskAction -Execute "powershell.exe" `
-        -Argument "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$PSCommandPath`" -Unattended"
-    $trg = New-ScheduledTaskTrigger -AtLogOn
-    Register-ScheduledTask -TaskName $taskName -Action $act -Trigger $trg -Force `
-        -Description "Мозг GTR BRO: llama-server и туннель" | Out-Null
-    Write-Host ">> Автозапуск при входе в систему настроен."
-} catch {
-    Write-Host "!! Автозапуск настроить не вышло ($_). Не критично: после"
-    Write-Host "   перезагрузки запустите скрипт руками."
+
+# Задача от SYSTEM регистрируется только с правами администратора.
+$admin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()
+    ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+# Задача зовёт копию скрипта из рабочей папки, а не тот файл, откуда его
+# запустили: скачанный в Downloads он однажды переедет в корзину, и
+# автозапуск будет ссылаться в пустоту.
+$selfCopy = Join-Path $dir "setup-brain-gpu.ps1"
+if ($PSCommandPath -and (Resolve-Path $PSCommandPath).Path -ne (Join-Path $dir "setup-brain-gpu.ps1")) {
+    try { Copy-Item $PSCommandPath $selfCopy -Force } catch { Write-Host "!! Не скопировал скрипт в $dir ($_)" }
+}
+
+if (-not $admin) {
+    Write-Host ""
+    Write-Host "!! Автозапуск НЕ настроен: нужны права администратора." -ForegroundColor Yellow
+    Write-Host "   Мозг сейчас поднимется и будет работать, пока открыто это окно,"
+    Write-Host "   но после перезагрузки не вернётся."
+    Write-Host "   Чтобы починить: закрой окно, открой PowerShell от имени"
+    Write-Host "   администратора и запусти скрипт ещё раз."
+    Write-Host ""
+} elseif (Test-Path $selfCopy) {
+    try {
+        $act = New-ScheduledTaskAction -Execute "powershell.exe" `
+            -Argument "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$selfCopy`" -Unattended -Dir `"$dir`""
+        $trg = New-ScheduledTaskTrigger -AtStartup
+        # SYSTEM: не зависит от того, кто вошёл и вошёл ли вообще.
+        $prn = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+        # ExecutionTimeLimit 0 — без него планировщик убьёт задачу через
+        # трое суток, и мозг тихо пропадёт в среду ночью.
+        # IgnoreNew — второй экземпляр не полезет драться за порт 8080.
+        # RestartCount — если процесс всё-таки умрёт, задача поднимется.
+        $set = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
+            -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew `
+            -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1) -StartWhenAvailable
+        Register-ScheduledTask -TaskName $taskName -Action $act -Trigger $trg -Principal $prn `
+            -Settings $set -Force -Description "Мозг GTR BRO: llama-server и туннель" | Out-Null
+        Write-Host ">> Автозапуск настроен: старт при загрузке Windows, от имени SYSTEM."
+        Write-Host "   Смена пользователя и выход из системы мозг больше не гасят."
+    } catch {
+        Write-Host "!! Автозапуск настроить не вышло ($_)." -ForegroundColor Yellow
+        Write-Host "   Мозг работает, но после перезагрузки его придётся поднять руками."
+    }
 }
 
 # ---- 9. Туннель наружу ------------------------------------------------

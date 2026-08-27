@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { broLogFn } from "../kv-api";
+import { appendPartial, sealLine, type BoardRow } from "./board";
 import { Stk, type StkName } from "../ui";
 import { GAIN_MAX, GAIN_MIN, loadGain, routeAudio } from "./audio-out";
 import {
@@ -174,7 +175,7 @@ export function GtrBroOverlay({
   // Табло: расшифровка разговора и служебные строки в одном потоке,
   // как лог терминала. Незавершённые реплики печатаются по мере
   // произнесения.
-  type Row = { who: "user" | "bro" | "sys"; text: string; done: boolean; wait?: boolean };
+  type Row = BoardRow;
   const [rows, setRows] = useState<Row[]>([]);
   const dosRef = useRef<HTMLDivElement | null>(null);
   const [cmd, setCmd] = useState("");
@@ -333,32 +334,12 @@ export function GtrBroOverlay({
             partBuf.current = { user: "", bro: "" };
             setRows((p) => {
               let next = p;
-              for (const w of ["user", "bro"] as const) {
-                const chunk = buf[w];
-                if (!chunk) continue;
-                const last = next[next.length - 1];
-                if (last && last.who === w && !last.done)
-                  next = [...next.slice(0, -1), { ...last, text: last.text + chunk }];
-                else next = [...next.slice(-60), { who: w, text: chunk, done: false }];
-              }
+              for (const w of ["user", "bro"] as const) next = appendPartial(next, w, buf[w]);
               return next;
             });
           }, 130);
         },
-        onLine: (l) =>
-          setRows((p) => {
-            // Финал заменяет НЕДОПЕЧАТАННУЮ строку того же автора, где бы
-            // она ни стояла: реплики двух сторон перемежаются, и «последняя
-            // строка» — не всегда та.
-            for (let i = p.length - 1; i >= 0; i--) {
-              if (p[i].who === l.who && !p[i].done) {
-                const next = [...p];
-                next[i] = { who: l.who, text: l.text, done: true };
-                return next.slice(-120);
-              }
-            }
-            return [...p.slice(-60), { who: l.who, text: l.text, done: true }];
-          }),
+        onLine: (l) => setRows((p) => sealLine(p, l.who, l.text)),
         onCard: (c) => {
           if (c.kind === "navigate") {
             // Навигация больше не убивает разговор: приложение открывает
@@ -468,6 +449,32 @@ export function GtrBroOverlay({
     window.addEventListener("keydown", esc);
     return () => window.removeEventListener("keydown", esc);
   }, [open, onClose]);
+
+  // Клавиатура iOS. Она НЕ уменьшает окно: position:fixed продолжает
+  // считать высоту по старому, и лист с полем ввода уезжает под клавиатуру —
+  // человек печатает вслепую, а эфир «плавает». Настоящий размер видимой
+  // области знает только visualViewport; его разницу с окном кладём в
+  // переменную, а вёрстка поднимает на неё лист.
+  useEffect(() => {
+    if (!open) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const root = document.documentElement;
+    const apply = () => {
+      const hidden = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
+      // Мелкие колебания (панель Safari, инерция прокрутки) не считаем
+      // клавиатурой — иначе лист дёргается на каждом кадре скролла.
+      root.style.setProperty("--gtr-kb", `${hidden > 90 ? Math.round(hidden) : 0}px`);
+    };
+    apply();
+    vv.addEventListener("resize", apply);
+    vv.addEventListener("scroll", apply);
+    return () => {
+      vv.removeEventListener("resize", apply);
+      vv.removeEventListener("scroll", apply);
+      root.style.removeProperty("--gtr-kb");
+    };
+  }, [open]);
 
   if (!open) return null;
 

@@ -7,6 +7,10 @@ import type { EventDraft, Offer, OrgRequest, RoleId } from "./data/app-data";
 import { getKvNs, kvGetJson, kvListAll, type KvNs } from "./kv-ns";
 import { tgApi, tgConfigured, tgEsc, tgWebhookSecret } from "./tg";
 import type { VenueAfisha } from "./afisha";
+// Афиша площадки возвращается наружу серверными функциями этого модуля,
+// поэтому тип обязан уезжать вместе с ними — экраны импортируют его отсюда.
+export type { VenueAfisha };
+import { menuOf } from "./venue-commerce";
 import {
   gtrFrom,
   priceKey,
@@ -23,6 +27,7 @@ export const ROLE_LABELS: Record<RoleId, string> = {
   artist: "Артист / диджей",
   organizer: "Организатор",
   visitor: "Посетитель",
+  venue: "Площадка",
 };
 
 const initialsOf = (name: string) =>
@@ -418,8 +423,10 @@ export const sendOfferFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const me = await currentUser();
-    if (!me || me.role === "artist")
-      return { ok: false as const, error: "Только команда GTR и площадки" };
+    // Аккаунт заведения (роль venue) сюда не пускаем: офферы артистам —
+    // работа нашего букинга, площадка договаривается через менеджера.
+    if (!me || me.role === "artist" || me.role === "venue")
+      return { ok: false as const, error: "Только команда GTR и организаторы" };
     const ns = await getKvNs();
     if (!ns) return { ok: false as const, error: "Хранилище недоступно (локальный режим)" };
 
@@ -573,6 +580,10 @@ export const tgActivateFn = createServerFn({ method: "POST" }).handler(async () 
 export type AppInvite = {
   role: RoleId;
   teamOf: string; // команда организатора-тимлида ("" — вне команды)
+  /** Площадка, к которой привязан кабинет. Для роли venue обязателен:
+   *  без него аккаунт заведения не знает, чью программу показывать, и
+   *  скоуп по venueId не работает. */
+  venueId?: string;
   invitedBy: string;
   inviterName: string;
   created: number;
@@ -585,7 +596,7 @@ export const createInviteFn = createServerFn({ method: "POST" })
   .inputValidator((d: { role?: RoleId; maxUses?: number }) => d)
   .handler(async ({ data }) => {
     const me = await currentUser();
-    if (!me || me.role === "artist")
+    if (!me || me.role === "artist" || me.role === "venue")
       return { ok: false as const, error: "Приглашать могут команда GTR и организаторы" };
     const ns = await getKvNs();
     if (!ns) return { ok: false as const, error: "Хранилище недоступно (локальный режим)" };
@@ -648,7 +659,9 @@ export const joinFn = createServerFn({ method: "POST" })
       name: data.name.trim(),
       role: inv.role,
       roleLabel: ROLE_LABELS[inv.role],
-      venueId: "",
+      // Кабинет площадки привязан к своему заведению: по venueId идёт
+      // весь скоуп — программа, заявки, брони, паспорт.
+      venueId: inv.venueId ?? "",
       artistId: "",
       teamOf: inv.teamOf || undefined,
       initials: initialsOf(data.name),
@@ -1004,7 +1017,10 @@ export type ContactUser = {
 export const contactsUsersFn = createServerFn({ method: "GET" }).handler(async () => {
   const me = await currentUser();
   const ns = await getKvNs();
-  if (!me || me.role === "artist" || !ns) return { users: [] as ContactUser[] };
+  // Центр связи — внутренний контур команды. Заведение общается с нами
+  // через своего менеджера, а не через список всех сотрудников и клиентов.
+  if (!me || me.role === "artist" || me.role === "venue" || !ns)
+    return { users: [] as ContactUser[] };
   const keys = await kvListAll(ns, "user:");
   const users = (
     await Promise.all(keys.map((k) => kvGetJson<StoredUser & { tgNick?: string }>(ns, k)))
@@ -1126,6 +1142,53 @@ export const afishaDelFn = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+// Постер события руками: площадка присылает афишу в мессенджере чаще, чем
+// вешает на сайт, а у половины заведений сайта нет вовсе. Загруженная
+// картинка ложится ровно в тот же ключ, что и добытая разведкой, поэтому её
+// сразу отдаёт /api/poster — без отдельной ветки в интерфейсе.
+//
+// Кто вправе: команда GTR по любой площадке, кабинет площадки — только по
+// своей. Роль venue не должна дотягиваться до чужих афиш.
+const POSTER_UP_MAX = 1_400_000; // ~1 МБ картинки после base64
+
+export const afishaPosterFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { vid: string; id: string; dataUrl: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    const mine = u.role === "venue" && u.venueId && u.venueId === data.vid;
+    if (u.role !== "gtr" && !mine) return { ok: false as const, reason: "нет прав на эту площадку" };
+
+    const { posterKvKey, posterUrl } = await import("./poster");
+    const key = posterKvKey(data.vid, data.id);
+
+    // пустая строка — «убрать постер», вернёмся к нарисованной афише
+    if (!data.dataUrl) {
+      await ns.delete(key);
+      return { ok: true as const, poster: posterUrl(data.vid, data.id) };
+    }
+
+    const m = data.dataUrl.match(/^data:(image\/(?:png|webp|jpeg));base64,([A-Za-z0-9+/=]+)$/);
+    if (!m) return { ok: false as const, reason: "нужен PNG, JPEG или WEBP" };
+    if (m[2].length > POSTER_UP_MAX)
+      return { ok: false as const, reason: "картинка тяжелее 1 МБ — сожми" };
+    await ns.put(key, JSON.stringify({ ct: m[1], b64: m[2] }));
+
+    // В самой записи афиши помечаем, что постер наш и лежит в кэше: иначе
+    // следующий прогон разведки снова полезет за оригиналом на сайт.
+    const rec = await kvGetJson<VenueAfisha>(ns, `venueevents:${data.vid}`);
+    if (rec) {
+      const hit = rec.events.find((e) => e.id === data.id);
+      if (hit) {
+        hit.poster = posterUrl(data.vid, data.id);
+        hit.posterSrc = undefined;
+        await ns.put(`venueevents:${data.vid}`, JSON.stringify(rec));
+      }
+    }
+    return { ok: true as const, poster: posterUrl(data.vid, data.id) };
+  });
+
 export const syncAfishaNowFn = createServerFn({ method: "POST" }).handler(async () => {
   const u = await currentUser();
   const ns = await getKvNs();
@@ -1161,6 +1224,10 @@ export type VenueConfirm = {
   rate?: VenueConfirmRate;
   capacity?: string;
   notes?: string;
+  /** Код приглашения в кабинет площадки. Заводится в момент
+   *  подтверждения: заведение уже здесь и уже отвечает на вопросы —
+   *  второй раз собрать его внимание будет втрое дороже. */
+  cabinetCode?: string;
 };
 
 const randToken = () => {
@@ -1270,10 +1337,29 @@ export const venueConfirmSubmitFn = createServerFn({ method: "POST" })
       capacity: data.capacity.trim().slice(0, 60),
       notes: data.notes?.trim().slice(0, 500),
     };
-    await ns.put(key, JSON.stringify(next));
+    // Кабинет заводим прямо здесь, а не отдельным шагом позже: площадка
+    // только что потратила время на анкету — это лучшая и единственная
+    // минута, когда она готова завести аккаунт. Ссылка одноразовая и
+    // привязана к её же площадке, пароль человек задаёт сам.
+    const cabCode = `join-${randToken().slice(0, 10)}`;
+    const cabInvite: AppInvite = {
+      role: "venue",
+      teamOf: "",
+      venueId: link.vid,
+      invitedBy: next.sentBy,
+      inviterName: "GTR Event",
+      created: Date.now(),
+      uses: 0,
+      maxUses: 3, // менеджер, владелец, маркетолог — обычно этого хватает
+      exp: Date.now() + 30 * 24 * 3600 * 1000,
+    };
+    await ns.put(`invite:${cabCode}`, JSON.stringify(cabInvite));
+    await ns.put(key, JSON.stringify({ ...next, cabinetCode: cabCode } satisfies VenueConfirm));
+
     // Телеграм: лично отправившему и в общий канал — подтверждение это событие
     if (tgConfigured()) {
       const { V } = await import("./data/app-data");
+      const { APP_URL } = await import("./community");
       const name = V(link.vid)?.name ?? link.vid;
       const text = [
         "✅ <b>GTR EVENT · площадка подтвердила данные</b>",
@@ -1286,6 +1372,11 @@ export const venueConfirmSubmitFn = createServerFn({ method: "POST" })
         `<b>Контакт:</b> ${tgEsc(next.contact!.name)}${next.contact!.role ? " · " + tgEsc(next.contact!.role) : ""}`,
         `<b>Телефон:</b> ${tgEsc(next.contact!.phone)}`,
         next.notes ? `<b>Комментарий:</b> ${tgEsc(next.notes)}` : "",
+        "",
+        // Ссылку кладём в то же сообщение: менеджеру не надо идти в
+        // дашборд и искать код — он пересылает её площадке в тот же чат,
+        // пока разговор ещё тёплый.
+        `<b>Кабинет площадки:</b> ${APP_URL}/gtr/join?code=${cabCode}`,
       ]
         .filter((l) => l !== "")
         .join("\n");
@@ -1303,7 +1394,10 @@ export const venueConfirmSubmitFn = createServerFn({ method: "POST" })
           disable_web_page_preview: true,
         });
     }
-    return { ok: true as const };
+    // Код кабинета возвращаем на страницу подтверждения: площадка видит
+    // «ваш кабинет готов» сразу после отправки анкеты, а не когда-нибудь
+    // потом, когда до неё дойдут руки менеджера.
+    return { ok: true as const, cabinetCode: cabCode };
   });
 
 // Команде: все статусы подтверждений — для базы, паспорта и спринт-дашборда
@@ -1312,6 +1406,14 @@ export const venueConfirmsFn = createServerFn({ method: "GET" }).handler(async (
   const ns = await getKvNs();
   const empty = { confirms: {} as Record<string, VenueConfirm> };
   if (!me || me.role === "artist" || me.role === "organizer" || !ns) return empty;
+  // Здесь лежат контакты и ставки всех заведений сети. Аккаунту площадки
+  // отдаём ровно одну запись — его собственную: чужой прайс и чужой
+  // менеджер не его дело, а показать их означало бы слить конкуренту.
+  if (me.role === "venue") {
+    if (!me.venueId) return empty;
+    const own = await kvGetJson<VenueConfirm>(ns, `vconfirm:${me.venueId}`);
+    return { confirms: own ? { [me.venueId]: own } : {} };
+  }
   const keys = await kvListAll(ns, "vconfirm:");
   const confirms: Record<string, VenueConfirm> = {};
   for (const k of keys) {
@@ -1476,7 +1578,7 @@ export const contactTeamFn = createServerFn({ method: "POST" })
       const target = k.slice("tg:".length);
       // только команде: артистам и организаторам чужие сообщения не шлём
       const rec = await kvGetJson<StoredUser>(ns, `user:${target}`);
-      if (rec && (rec.role === "artist" || rec.role === "organizer")) continue;
+      if (rec && (rec.role === "artist" || rec.role === "organizer" || rec.role === "venue")) continue;
       const chat = await ns.get(k);
       if (!chat || sent.has(chat)) continue;
       sent.add(chat);
@@ -1785,13 +1887,23 @@ export const setCommunityCfgFn = createServerFn({ method: "POST" })
   });
 
 export const communityPostFn = createServerFn({ method: "POST" })
-  .inputValidator((d: { kind: "digest" | "invite" | "contest"; target: "channel" | "chat" }) => d)
+  .inputValidator(
+    (d: { kind: "digest" | "invite" | "contest" | "moved" | "poll"; target: "channel" | "chat" }) => d,
+  )
   .handler(async ({ data }) => {
     const u = await currentUser();
     const ns = await getKvNs();
     if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
     if (u.role !== "gtr" && !u.boss) return { ok: false as const, reason: "только BOSS / GTR-админ" };
-    const { COMMUNITY_KEY, buildContestText, buildDigestText, buildInviteText } = await import("./community");
+    const {
+      COMMUNITY_KEY,
+      bkkDayNo,
+      buildContestText,
+      buildDigest,
+      buildInviteText,
+      buildMovedText,
+      buildPoll,
+    } = await import("./community");
     const cfg = await kvGetJson<import("./community").CommunityCfg>(ns, COMMUNITY_KEY);
     const chatId = data.target === "channel" ? cfg?.channelId : cfg?.chatId;
     if (!chatId) {
@@ -1799,16 +1911,48 @@ export const communityPostFn = createServerFn({ method: "POST" })
     }
     const bot = (await ns.get("tg:bot")) || "Gtrcom1_bot";
     const { APP_URL } = await import("./community");
-    const text =
-      data.kind === "digest"
-        ? await buildDigestText(ns)
-        : data.kind === "contest"
-          ? buildContestText()
-          : buildInviteText(cfg ?? {}, false); // false: ссылки только в кнопках, не в тексте
+
+    // Опрос — не текстовый пост: у него свой метод и свои пределы, поэтому
+    // он уходит здесь и дальше по общей ветке не идёт.
+    if (data.kind === "poll") {
+      const poll = await buildPoll(ns, bkkDayNo());
+      if (poll.options.length < 2)
+        return { ok: false as const, reason: "нечего спрашивать — программа на сегодня пуста" };
+      const pr = await tgApi("sendPoll", {
+        chat_id: chatId,
+        question: poll.question,
+        options: poll.options,
+        is_anonymous: true,
+        allows_multiple_answers: Boolean(poll.multiple),
+      });
+      return pr.ok
+        ? { ok: true as const, reason: "" }
+        : { ok: false as const, reason: pr.description || "Telegram отклонил опрос" };
+    }
+    let text: string;
+    let photos: string[] = [];
+    if (data.kind === "digest") {
+      const d = await buildDigest(ns);
+      text = d.text;
+      photos = d.photos;
+    }
+    else if (data.kind === "contest") text = buildContestText();
+    else if (data.kind === "moved") {
+      // Цифры берём из живой базы, а не из памяти: пост о переезде читают
+      // сотни человек, и «110 площадок» из прошлого месяца — прямая ложь.
+      const { PH, loadArtists } = await import("./data/app-data");
+      const base = await loadArtists();
+      text = buildMovedText(PH.venues.length, base.artists.length);
+    } else text = buildInviteText(cfg ?? {}, false); // false: ссылки только в кнопках
     // ссылки — всегда кнопками, никогда голым текстом в теле поста
     const buttons: { text: string; url: string }[][] =
       data.kind === "contest"
         ? [[{ text: "🎁 Получить мою ссылку", url: `https://t.me/${bot}?start=ref` }]]
+        : data.kind === "moved"
+        ? [
+            [{ text: "🚀 Открыть gtrevent.com", url: `${APP_URL}/gtr/tonight` }],
+            [{ text: "👤 Создать аккаунт", url: `${APP_URL}/gtr/signup` }],
+          ]
         : [
             [{ text: "🎟 Открыть GTR Event", url: `${APP_URL}/gtr/tonight` }],
             [
@@ -1816,21 +1960,135 @@ export const communityPostFn = createServerFn({ method: "POST" })
               ...(cfg?.chatUrl ? [{ text: "💬 Чат", url: cfg.chatUrl }] : []),
             ],
           ].filter((row) => row.length);
+    // Афиши вперёд, текст следом — как в кроновом дайджесте. Альбому
+    // Telegram не даёт ни подписи, ни кнопок, поэтому это два сообщения.
+    if (photos.length >= 2)
+      await tgApi("sendMediaGroup", {
+        chat_id: chatId,
+        media: photos.slice(0, 10).map((u) => ({ type: "photo", media: u })),
+      });
+    else if (photos.length === 1) await tgApi("sendPhoto", { chat_id: chatId, photo: photos[0] });
+
     const res = await tgApi("sendMessage", {
       chat_id: chatId,
       text,
       parse_mode: "HTML",
       reply_markup: { inline_keyboard: buttons },
-      ...(data.kind === "contest"
-        ? {}
+      ...(data.kind === "contest" || photos.length
+        ? { link_preview_options: { is_disabled: true } }
         : {
             link_preview_options: { url: APP_URL, prefer_large_media: true },
           }),
     });
-    return res.ok
-      ? { ok: true as const, reason: "" }
-      : { ok: false as const, reason: res.description || "Telegram отклонил пост" };
+    if (!res.ok)
+      return { ok: false as const, reason: res.description || "Telegram отклонил пост" };
+    // Пост о переезде закрепляем: адрес должен быть первым, что видит
+    // новый подписчик, а не тонуть в ленте через сутки.
+    if (data.kind === "moved") {
+      const id = (res.result as { message_id?: number } | undefined)?.message_id;
+      if (id)
+        await tgApi("pinChatMessage", {
+          chat_id: chatId,
+          message_id: id,
+          disable_notification: false,
+        });
+    }
+    return { ok: true as const, reason: "" };
   });
+
+// ---------- переезд: обновить все ссылки на стороне Telegram ----------
+// Внутри продукта адрес один — APP_URL, и его сторожит тест. Но часть ссылок
+// живёт НЕ в коде, а в настройках самого Telegram: описание бота, кнопка
+// меню, список команд, описание канала и группы. Их правит только Bot API, и
+// после переезда они остались бы с техническим адресом воркера — первое, что
+// видит человек, открывая профиль бота.
+//
+// Эта ручка приводит их все в порядок одним нажатием. Каждый шаг
+// отчитывается отдельно: Telegram отклоняет часть вызовов по правам (бот не
+// админ канала, описание длиннее лимита), и молчаливое «готово» здесь было
+// бы враньём.
+export const tgRelinkFn = createServerFn({ method: "POST" }).handler(async () => {
+  const u = await currentUser();
+  const ns = await getKvNs();
+  if (!u || !ns) return { ok: false as const, steps: [] as string[], reason: "нужен вход" };
+  if (u.role !== "gtr" && !u.boss)
+    return { ok: false as const, steps: [] as string[], reason: "только BOSS / GTR-админ" };
+
+  const { APP_URL, COMMUNITY_KEY } = await import("./community");
+  const cfg = await kvGetJson<import("./community").CommunityCfg>(ns, COMMUNITY_KEY);
+  const { PH } = await import("./data/app-data");
+  const host = APP_URL.replace(/^https?:\/\//, "");
+  const steps: string[] = [];
+  const run = async (label: string, method: string, params: Record<string, unknown>) => {
+    const r = await tgApi(method, params);
+    steps.push(`${r.ok ? "✓" : "✗"} ${label}${r.ok ? "" : ` — ${r.description ?? "отказ"}`}`);
+    return r.ok;
+  };
+
+  // Профиль бота: длинное описание (пустой чат) и короткое (карточка).
+  // Лимиты Telegram: 512 и 120 знаков — держимся заметно ниже.
+  const about =
+    `GTR Event — гид по ночному Таиланду. ${PH.venues.length} площадок, живая афиша на каждый вечер, ` +
+    `бронь стола и ИИ-подбор вечеринок под твой вкус. Приложение: ${host}`;
+  await run("описание бота", "setMyDescription", { description: about.slice(0, 500) });
+  await run("короткое описание бота", "setMyShortDescription", {
+    short_description: `Ночной Таиланд: афиша, бронь, артисты. ${host}`.slice(0, 118),
+  });
+
+  // Кнопка меню в чате с ботом — ТОЛЬКО список команд.
+  //
+  // Здесь стояла кнопка Web App на приложение, и это было ошибкой сразу по
+  // двум причинам. Первая: Telegram на десктопе и в вебе открывает Web App
+  // во фрейме, а наш собственный периметр отдаёт
+  // `content-security-policy: frame-ancestors 'self'` — браузер такой фрейм
+  // не рисует, и кнопка просто ничего не делала. Вторая: она заняла место
+  // списка команд, то есть человек лишился и «/» тоже.
+  //
+  // Ссылке на приложение место в кнопках под сообщениями: там обычный url,
+  // он открывается в браузере и никакими фреймами не ограничен.
+  await run("кнопка меню бота", "setChatMenuButton", { menu_button: { type: "commands" } });
+
+  // Список команд — то, что подсказывает Telegram при вводе «/».
+  // Перечислены ВСЕ команды, которые бот реально понимает: короткий список
+  // прячет половину бота, а сам вызов затирает то, что было заведено в
+  // BotFather, и восстановить это оттуда нечем.
+  await run("список команд", "setMyCommands", {
+    commands: [
+      { command: "tonight", description: "Куда пойти сегодня" },
+      { command: "afisha", description: "Афиша ближайших вечеров" },
+      { command: "menu", description: "Кнопки быстрых действий" },
+      { command: "ref", description: "Моя ссылка для конкурса" },
+      { command: "top", description: "Таблица лидеров конкурса" },
+      { command: "cabinet", description: "Мой кабинет в приложении" },
+      { command: "offers", description: "Предложения выступить" },
+      { command: "gigs", description: "Мои подтверждённые выступления" },
+      { command: "events", description: "Мои события и сметы (команда)" },
+      { command: "requests", description: "Заявки организаторов (команда)" },
+      { command: "offair", description: "Снять себя с эфира" },
+      { command: "status", description: "Кто я" },
+      { command: "cancel", description: "Отменить текущую форму" },
+      { command: "help", description: "Что умеет бот" },
+    ],
+  });
+
+  // Описания канала и группы: адрес должен быть виден до подписки.
+  if (cfg?.channelId)
+    await run("описание канала", "setChatDescription", {
+      chat_id: cfg.channelId,
+      description:
+        `Ночной Таиланд без поисков: афиша на каждый вечер, ${PH.venues.length} площадок, бронь стола за пару касаний. ` +
+        `Приложение — ${host}`,
+    });
+  else steps.push("• канал не привязан — описание не трогали");
+  if (cfg?.chatId)
+    await run("описание чата", "setChatDescription", {
+      chat_id: cfg.chatId,
+      description: `Чат сообщества GTR Event. Куда пойти, кто играет, с кем ехать. Приложение — ${host}`,
+    });
+  else steps.push("• чат не привязан — описание не трогали");
+
+  return { ok: steps.some((s) => s.startsWith("✓")), steps, reason: "" };
+});
 
 // Текст приглашения для ручной рассылки (BOSS копирует и шлёт кому угодно)
 export const communityInviteTextFn = createServerFn({ method: "GET" }).handler(async () => {
@@ -1928,16 +2186,32 @@ export async function bookTableCore(
     if (await ns.get(`bklimit:${u.email}`))
       return { ok: false as const, reason: "не чаще одной заявки в минуту" };
     await ns.put(`bklimit:${u.email}`, "1", { expirationTtl: 60 });
+    // Предзаказ обязан состоять из блюд ЭТОЙ площадки. Раньше сюда
+    // проходило что угодно: форма брони — один живой компонент на все
+    // заведения, и при смене площадки её корзина уезжала в заявку
+    // соседнего ресторана. Менеджеру приходил заказ блюд, которых у него
+    // нет, с суммой из чужого прайса. Клиент починен, но проверка нужна
+    // здесь: заявка уходит живому человеку, и граница — последнее место,
+    // где ошибку ещё можно остановить.
+    const venueMenu = menuOf(data.vid);
+    const onMenu = new Map<string, { name: string; price: number; opts?: { l: string; p: number }[] }>();
+    for (const sec of venueMenu?.sections ?? [])
+      for (const g of sec.groups) for (const it of g.items) onMenu.set(it.id, it);
     const preorder = (data.preorder ?? [])
-      .filter((l) => l && l.qty > 0 && l.price >= 0)
+      .filter((l) => l && l.qty > 0 && l.price >= 0 && onMenu.has(String(l.id)))
       .slice(0, 40)
-      .map((l) => ({
-        id: String(l.id).slice(0, 60),
-        name: String(l.name).slice(0, 90),
-        opt: l.opt ? String(l.opt).slice(0, 40) : undefined,
-        qty: Math.max(1, Math.min(99, Math.round(l.qty))),
-        price: Math.max(0, Math.round(l.price)),
-      }));
+      .map((l) => {
+        const it = onMenu.get(String(l.id))!;
+        // Цену берём из меню, а не из заявки: клиент её не назначает.
+        const opt = l.opt ? it.opts?.find((o) => o.l === l.opt) : undefined;
+        return {
+          id: String(l.id).slice(0, 60),
+          name: it.name.slice(0, 90),
+          opt: opt?.l,
+          qty: Math.max(1, Math.min(99, Math.round(l.qty))),
+          price: Math.max(0, Math.round(opt ? opt.p : it.price)),
+        };
+      });
     const booking: TableBooking = {
       id: `BK-${Date.now().toString(36)}`,
       vid: data.vid,
@@ -1989,7 +2263,15 @@ export const bookTableFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const u = await currentUser();
     const ns = await getKvNs();
-    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    // Две разные беды — два разных ответа. Слитые в «нужен вход» они врут
+    // залогиненному гостю: 18.08.2026 прод уехал без биндинга KV, и человек
+    // с живой сессией видел предложение войти, выходил и заходил снова.
+    if (!u) return { ok: false as const, reason: "нужен вход" };
+    if (!ns)
+      return {
+        ok: false as const,
+        reason: "Хранилище недоступно — бронь не сохранить. Напишите площадке напрямую.",
+      };
     return bookTableCore(ns, u, data);
   });
 

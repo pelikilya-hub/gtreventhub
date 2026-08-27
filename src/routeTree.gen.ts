@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EnRouteImport } from './routes/en'
 import { Route as GtrRouteRouteImport } from './routes/gtr/route'
 import { Route as ApiAfishaRouteImport } from './routes/api.afisha'
 import { Route as ApiAfishaLlmRouteImport } from './routes/api.afisha-llm'
@@ -50,6 +51,11 @@ import { Route as GtrVRouteImport } from './routes/gtr/v'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnRoute = EnRouteImport.update({
+  id: '/en',
+  path: '/en',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GtrRouteRoute = GtrRouteRouteImport.update({
@@ -236,6 +242,7 @@ const GtrVRoute = GtrVRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
+  '/en': typeof EnRoute
   '/api/afisha': typeof ApiAfishaRoute
   '/api/afisha-llm': typeof ApiAfishaLlmRoute
   '/api/afisha-send': typeof ApiAfishaSendRoute
@@ -274,6 +281,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/en': typeof EnRoute
   '/api/afisha': typeof ApiAfishaRoute
   '/api/afisha-llm': typeof ApiAfishaLlmRoute
   '/api/afisha-send': typeof ApiAfishaSendRoute
@@ -314,6 +322,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
+  '/en': typeof EnRoute
   '/api/afisha': typeof ApiAfishaRoute
   '/api/afisha-llm': typeof ApiAfishaLlmRoute
   '/api/afisha-send': typeof ApiAfishaSendRoute
@@ -355,6 +364,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/gtr'
+    | '/en'
     | '/api/afisha'
     | '/api/afisha-llm'
     | '/api/afisha-send'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/en'
     | '/api/afisha'
     | '/api/afisha-llm'
     | '/api/afisha-send'
@@ -432,6 +443,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/gtr'
+    | '/en'
     | '/api/afisha'
     | '/api/afisha-llm'
     | '/api/afisha-send'
@@ -472,6 +484,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GtrRouteRoute: typeof GtrRouteRouteWithChildren
+  EnRoute: typeof EnRoute
   ApiAfishaRoute: typeof ApiAfishaRoute
   ApiAfishaLlmRoute: typeof ApiAfishaLlmRoute
   ApiAfishaSendRoute: typeof ApiAfishaSendRoute
@@ -509,6 +522,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en': {
+      id: '/en'
+      path: '/en'
+      fullPath: '/en'
+      preLoaderRoute: typeof EnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gtr': {
@@ -793,6 +813,7 @@ const GtrRouteRouteWithChildren = GtrRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GtrRouteRoute: GtrRouteRouteWithChildren,
+  EnRoute: EnRoute,
   ApiAfishaRoute: ApiAfishaRoute,
   ApiAfishaLlmRoute: ApiAfishaLlmRoute,
   ApiAfishaSendRoute: ApiAfishaSendRoute,

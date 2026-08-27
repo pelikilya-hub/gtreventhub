@@ -24,7 +24,7 @@ import { FAMILY_LABEL } from "../match";
 import { useTranslation } from "react-i18next";
 import { ArtistStudio } from "./ArtistStudio";
 import "../i18n";
-import { Card, Chip, Dot, Eyebrow, Icon, Ring, Stk, TrashTitle } from "../ui";
+import { Card, Chip, Dot, Eyebrow, Icon, Ring, Stk, TrashTitle, type StkName } from "../ui";
 import { ImpulseArt } from "../impulse";
 import {
   allAfishaFn,
@@ -40,7 +40,11 @@ import {
 } from "../kv-api";
 import { BossCabinet, PushPanel, TgChip } from "./Boss";
 import { openAppLink } from "../applink";
+import { posterUrl } from "../poster";
 import { genreLabel, OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
+import { pickHeadliner, islandDigest, loudness } from "../guest-digest";
+import { eventsToday, phuketDayStart } from "../daily-digest";
+import appUpdates from "../data/app-updates.json";
 
 type Action = [string, string, string, ScreenId, string, string];
 type Kpi = [string, string | number, string, string, string];
@@ -160,7 +164,7 @@ export function DashScreen() {
         [
           t("Марины — выездные обследования"),
           t("Зоны, электричество, парковка, разрешения, шум, морские ограничения"),
-          t("База Пхукета"),
+          t("Площадки Таиланд"),
           "base",
           "M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z",
           AMBER,
@@ -483,7 +487,7 @@ export function DashScreen() {
             className="gtr-mono"
             style={{
               marginTop: 6,
-              font: "500 10.5px/1.4 'JetBrains Mono',monospace",
+              font: "500 12px/1.5 'JetBrains Mono',monospace",
               color: "var(--gtr-t3)",
             }}
           >
@@ -511,7 +515,7 @@ export function DashScreen() {
             <div
               style={{
                 margin: "8px 0 10px",
-                font: "500 11.5px/1.5 'Golos Text',sans-serif",
+                font: "500 13px/1.5 'Golos Text',sans-serif",
                 color: "var(--gtr-t2)",
               }}
             >
@@ -525,7 +529,7 @@ export function DashScreen() {
                     display: "flex",
                     gap: 8,
                     alignItems: "flex-start",
-                    font: "500 11px/1.4 'Golos Text',sans-serif",
+                    font: "500 13px/1.5 'Golos Text',sans-serif",
                   }}
                 >
                   <Dot color={c} /> <span style={{ color: "var(--gtr-t2)" }}>{t}</span>
@@ -564,7 +568,7 @@ export function DashScreen() {
               <div
                 style={{
                   marginTop: 8,
-                  font: "500 10.5px/1.4 'Golos Text',sans-serif",
+                  font: "500 12px/1.5 'Golos Text',sans-serif",
                   color: "var(--gtr-t3)",
                 }}
               >
@@ -624,14 +628,14 @@ export function DashScreen() {
                 <Icon d={icon} size={16} />
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: "block", font: "600 12.5px/1.3 'Golos Text',sans-serif" }}>
+                <span style={{ display: "block", font: "600 12.5px/1.45 'Golos Text',sans-serif" }}>
                   {title}
                 </span>
                 <span
                   style={{
                     display: "block",
                     marginTop: 4,
-                    font: "500 11px/1.4 'Golos Text',sans-serif",
+                    font: "500 13px/1.5 'Golos Text',sans-serif",
                     color: "var(--gtr-t2)",
                   }}
                 >
@@ -665,11 +669,11 @@ export function DashScreen() {
               >
                 <Dot color={r.color} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ font: "600 11.5px/1.3 'Golos Text',sans-serif" }}>{r.title}</div>
+                  <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>{r.title}</div>
                   <div
                     style={{
                       marginTop: 3,
-                      font: "500 10.5px/1.4 'Golos Text',sans-serif",
+                      font: "500 12px/1.5 'Golos Text',sans-serif",
                       color: "var(--gtr-t3)",
                     }}
                   >
@@ -678,7 +682,7 @@ export function DashScreen() {
                 </div>
                 <span
                   className="gtr-mono"
-                  style={{ font: "600 9.5px/1 'JetBrains Mono',monospace", color: r.color }}
+                  style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: r.color }}
                 >
                   {r.meta}
                 </span>
@@ -733,7 +737,7 @@ export function DashScreen() {
               onClick={r.vid ? () => go("venueCard", r.vid) : () => go(d.mainGo)}
             >
               <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                <div style={{ font: "600 13px/1.3 'Golos Text',sans-serif" }}>{r.title}</div>
+                <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>{r.title}</div>
                 <div
                   className="gtr-mono"
                   style={{
@@ -747,7 +751,7 @@ export function DashScreen() {
               <div
                 style={{
                   margin: "6px 0 9px",
-                  font: "500 10.5px/1.4 'Golos Text',sans-serif",
+                  font: "500 12px/1.5 'Golos Text',sans-serif",
                   color: "var(--gtr-t3)",
                 }}
               >
@@ -770,15 +774,26 @@ const MONTHS_S = ["янв", "фев", "мар", "апр", "май", "июн", "�
 function SalesCabinet() {
   const { t } = useTranslation();
   const { user, myDrafts, shared } = useGtr();
+  // Организатор — платящий клиент, а не сотрудник GTR: ему не показываем
+  // внутреннюю выручку (комиссию GTR) и приглашение в команду.
+  const isTeam = ["gtr", "sales", "owner", "pr"].includes(user.role);
   const navigate = useNavigate();
   const go = (s: ScreenId, search?: Record<string, string>) =>
     navigate({ to: "/gtr/$screen", params: { screen: s }, search });
   const v = V(user.venueId);
   // Язык, на котором уходят предложения артистам (Telegram)
   const [prefLang, setPrefLang] = useState<"ru" | "en" | "th">("ru");
+  const [afisha, setAfisha] = useState<{ vid: string; dateIso: string; artistIds: string[] }[]>([]);
   useEffect(() => {
     getPrefsFn().then((r) => setPrefLang(r.prefLang)).catch(() => {});
+    allAfishaFn().then((r) => setAfisha(r.items)).catch(() => {});
   }, []);
+  // Пульс рынка: сколько событий на острове сегодня и где — организатору
+  // это ориентир, где живёт спрос. Считаем по пхукетским суткам.
+  const marketToday = useMemo(() => {
+    const iso = new Date(phuketDayStart(Date.now()) + 12 * 3600_000).toISOString().slice(0, 10);
+    return eventsToday(afisha, iso);
+  }, [afisha]);
 
   const rows = useMemo(
     () =>
@@ -843,7 +858,15 @@ function SalesCabinet() {
     [t("В РАБОТЕ"), String(inWork), inWork ? t("черновики и отправленные") : t("создайте первое событие"), "#fff"],
     [t("СОГЛАСОВАНО"), String(approved), approved ? t("подтверждённые события") : t("пока нет"), approved ? GREEN : "#fff"],
     [t("ПАЙПЛАЙН"), pipeline ? fmtThb(pipeline) : "—", t("сумма смет кабинета"), "#fff"],
-    [t("КОМИССИЯ GTR"), commission ? fmtThb(commission) : "—", t("с текущего пайплайна"), commission ? GREEN : "#fff"],
+    // Комиссия GTR — внутренняя выручка; клиенту-организатору не показываем
+    ...(isTeam
+      ? ([[t("КОМИССИЯ GTR"), commission ? fmtThb(commission) : "—", t("с текущего пайплайна"), commission ? GREEN : "#fff"]] as [
+          string,
+          string,
+          string,
+          string,
+        ][])
+      : []),
   ];
 
   return (
@@ -893,7 +916,7 @@ function SalesCabinet() {
               {v.name ? <Chip color="rgba(255,255,255,.5)">{v.name.toUpperCase()}</Chip> : null}
               <span
                 className="gtr-mono"
-                style={{ font: "500 10.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                style={{ font: "500 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
               >
                 {user.email} {t("· событий:")} {rows.length}
               </span>
@@ -910,7 +933,7 @@ function SalesCabinet() {
             <button className="gtr-btn" style={{ padding: "9px 16px" }} onClick={() => go("events")}>
               {t("Мои события →")}
             </button>
-            <InviteLinkButton />
+            {isTeam ? <InviteLinkButton /> : null}
           </div>
         </div>
       </div>
@@ -921,7 +944,7 @@ function SalesCabinet() {
         <TgChip />
         <PushPanel />
         <span style={{ display: "inline-flex", alignItems: "center", gap: 7, marginLeft: "auto" }}>
-          <span className="gtr-mono" style={{ font: "600 9px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".1em" }}>
+          <span className="gtr-mono" style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".1em" }}>
             {t("ЯЗЫК ПРЕДЛОЖЕНИЙ")}
           </span>
           <select
@@ -953,7 +976,7 @@ function SalesCabinet() {
       >
         {kpis.map(([label, value, note, color]) => (
           <Card key={label} style={{ padding: "16px 18px", display: "grid", gap: 7 }}>
-            <Eyebrow style={{ fontSize: 8.5 }}>{label}</Eyebrow>
+            <Eyebrow style={{ fontSize: 10 }}>{label}</Eyebrow>
             <span
               className="gtr-mono"
               style={{
@@ -965,12 +988,38 @@ function SalesCabinet() {
             >
               {value}
             </span>
-            <span style={{ font: "500 10.5px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {note}
             </span>
           </Card>
         ))}
       </div>
+
+      {/* ---------- пульс рынка: афиша острова сегодня ---------- */}
+      <Card style={{ padding: "16px 20px", marginBottom: 18, position: "relative", overflow: "hidden" }}>
+        <div className="gtr-laser" aria-hidden />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+          <Eyebrow>{t("ПУЛЬС РЫНКА · СЕГОДНЯ")}</Eyebrow>
+          <button className="gtr-btn gtr-btn-sm" onClick={() => go("tonight")}>{t("Афиша →")}</button>
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+          <span className="gtr-mono" style={{ font: "700 24px/1 'JetBrains Mono',monospace", color: "#fff" }}>{marketToday.total}</span>
+          <span style={{ font: "500 13px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+            {t("событий в")} {marketToday.venues} {t("заведениях сегодня")}
+          </span>
+        </div>
+        {marketToday.byVenue.length ? (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+            {marketToday.byVenue.slice(0, 6).map((b) => (
+              <Chip key={b.vid} color="rgba(255,255,255,.5)">{(V(b.vid)?.name ?? b.vid)} · {b.count}</Chip>
+            ))}
+          </div>
+        ) : (
+          <div style={{ marginTop: 8, font: "500 12.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            {t("На сегодня событий в афише пока нет.")}
+          </div>
+        )}
+      </Card>
 
       {/* ---------- воронка + пайплайн по месяцам ---------- */}
       <div
@@ -983,7 +1032,7 @@ function SalesCabinet() {
             <div key={st} style={{ display: "grid", gap: 5 }}>
               <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                 <Dot color={STAGE_COLOR[st]} />
-                <span style={{ font: "600 11.5px/1 'Golos Text',sans-serif" }}>{t(STAGE_LABEL[st])}</span>
+                <span style={{ font: "600 13px/1 'Golos Text',sans-serif" }}>{t(STAGE_LABEL[st])}</span>
                 <span
                   className="gtr-mono"
                   style={{ font: "700 12px/1 'JetBrains Mono',monospace", color: "#fff" }}
@@ -994,7 +1043,7 @@ function SalesCabinet() {
                   className="gtr-mono"
                   style={{
                     marginLeft: "auto",
-                    font: "500 10px/1 'JetBrains Mono',monospace",
+                    font: "500 12px/1 'JetBrains Mono',monospace",
                     color: "var(--gtr-t3)",
                   }}
                 >
@@ -1014,7 +1063,7 @@ function SalesCabinet() {
               </div>
             </div>
           ))}
-          <span style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+          <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
             {t("Стадию события меняет конструктор: черновик → отправлено → согласовано.")}
           </span>
         </Card>
@@ -1024,7 +1073,7 @@ function SalesCabinet() {
             <Eyebrow>{t("ПАЙПЛАЙН ПО МЕСЯЦАМ")}</Eyebrow>
             <span
               className="gtr-mono"
-              style={{ marginLeft: "auto", font: "500 9.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+              style={{ marginLeft: "auto", font: "500 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
             >
               {t("суммы смет с датой события")}
             </span>
@@ -1043,7 +1092,7 @@ function SalesCabinet() {
                 <span
                   className="gtr-mono"
                   style={{
-                    font: "600 8.5px/1 'JetBrains Mono',monospace",
+                    font: "600 10px/1 'JetBrains Mono',monospace",
                     color: m.sum ? "#fff" : "var(--gtr-t3)",
                     textAlign: "center",
                     overflowWrap: "anywhere",
@@ -1064,7 +1113,7 @@ function SalesCabinet() {
                 <span
                   className="gtr-mono"
                   style={{
-                    font: "500 9px/1 'JetBrains Mono',monospace",
+                    font: "500 11px/1 'JetBrains Mono',monospace",
                     color: "var(--gtr-t3)",
                     textAlign: "center",
                     textTransform: "uppercase",
@@ -1098,7 +1147,7 @@ function SalesCabinet() {
             <Eyebrow>{user.role === "organizer" ? t("МОИ ЗАЯВКИ ПЛОЩАДКАМ") : t("ЗАЯВКИ НА МНЕ")}</Eyebrow>
             <button
               className="gtr-btn"
-              style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10 }}
+              style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 12 }}
               onClick={() => go("inquiries")}
             >
               {t("Все заявки →")}
@@ -1120,12 +1169,12 @@ function SalesCabinet() {
                 }}
               >
                 <span style={{ flex: 1, minWidth: 160 }}>
-                  <span style={{ display: "block", font: "600 11.5px/1.3 'Golos Text',sans-serif" }}>
+                  <span style={{ display: "block", font: "600 13px/1.45 'Golos Text',sans-serif" }}>
                     {r.title || t("Заявка")}
                   </span>
                   <span
                     className="gtr-mono"
-                    style={{ display: "block", marginTop: 2, font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                    style={{ display: "block", marginTop: 2, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
                     {r.venueName} · {r.date || t("дата не указана")} · {r.guests || "—"} {t("гостей ·")}{" "}
                     {r.organizerName || t("организатор")}
@@ -1133,7 +1182,7 @@ function SalesCabinet() {
                 </span>
                 <span
                   className="gtr-mono"
-                  style={{ font: "700 11px/1 'JetBrains Mono',monospace", color: "#2ECC71" }}
+                  style={{ font: "700 13px/1 'JetBrains Mono',monospace", color: "#2ECC71" }}
                 >
                   {fmtThb(r.quoteTotal)}
                 </span>
@@ -1143,7 +1192,7 @@ function SalesCabinet() {
               </div>
             ))
           ) : (
-            <span style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <span style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {user.role === "organizer"
                 ? t("Заявок пока нет. Соберите событие в конструкторе и отправьте запрос площадке — статус будет виден здесь.")
                 : t("Назначенных заявок нет. Возьмите заявку на себя в разделе «Заявки организаторов» — она появится здесь, а в Telegram-канал GTR уйдёт уведомление.")}
@@ -1177,7 +1226,7 @@ function SalesCabinet() {
                   className="gtr-mono"
                   style={{
                     flex: "none",
-                    font: "700 10px/1.3 'JetBrains Mono',monospace",
+                    font: "700 12px/1.45 'JetBrains Mono',monospace",
                     color: "var(--gtr-red)",
                     border: "1px solid rgba(229,35,27,.45)",
                     padding: "5px 7px",
@@ -1188,14 +1237,14 @@ function SalesCabinet() {
                   {d.date ? d.date.split(" · ")[0] : d.dateIso}
                 </span>
                 <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                  <span style={{ display: "block", fontWeight: 600, fontSize: 11.5 }}>
+                  <span style={{ display: "block", fontWeight: 600, fontSize: 13 }}>
                     {t(draftTitle(d))}
                   </span>
                   <span
                     style={{
                       display: "block",
                       marginTop: 2,
-                      font: "500 9px/1.3 'JetBrains Mono',monospace",
+                      font: "500 11px/1.45 'JetBrains Mono',monospace",
                       color: "rgba(255,255,255,.4)",
                     }}
                   >
@@ -1207,7 +1256,7 @@ function SalesCabinet() {
               </button>
             ))
           ) : (
-            <span style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <span style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {t("Дат впереди нет. Укажите дату в мастере события или в слоте конструктора — событие появится здесь и в пайплайне по месяцам.")}
             </span>
           )}
@@ -1218,7 +1267,7 @@ function SalesCabinet() {
             <Eyebrow>{t("МОИ СОБЫТИЯ")}</Eyebrow>
             <button
               className="gtr-btn"
-              style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 10 }}
+              style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 12 }}
               onClick={() => go("events")}
             >
               {t("Все →")}
@@ -1252,7 +1301,7 @@ function SalesCabinet() {
                     style={{
                       display: "block",
                       marginTop: 3,
-                      font: "500 9px/1.3 'JetBrains Mono',monospace",
+                      font: "500 11px/1.45 'JetBrains Mono',monospace",
                       color: "rgba(255,255,255,.4)",
                     }}
                   >
@@ -1264,7 +1313,7 @@ function SalesCabinet() {
                   className="gtr-mono"
                   style={{
                     flex: "none",
-                    font: "600 8.5px/1 'JetBrains Mono',monospace",
+                    font: "600 10px/1 'JetBrains Mono',monospace",
                     color: STAGE_COLOR[stage],
                     border: `1px solid ${STAGE_COLOR[stage]}55`,
                     padding: "4px 7px",
@@ -1274,14 +1323,14 @@ function SalesCabinet() {
                 </span>
                 <span
                   className="gtr-mono"
-                  style={{ flex: "none", font: "700 11px/1 'JetBrains Mono',monospace", color: quote.total ? "#fff" : "var(--gtr-t3)" }}
+                  style={{ flex: "none", font: "700 13px/1 'JetBrains Mono',monospace", color: quote.total ? "#fff" : "var(--gtr-t3)" }}
                 >
                   {quote.total ? fmtThb(quote.total) : "—"}
                 </span>
               </button>
             ))
           ) : (
-            <span style={{ font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <span style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {t("В кабинете пока пусто. Нажмите «")}{t("+ Новое событие")}{t("» — мастер проведёт по шагам: сценарий, дата, вместимость, площадка.")}
             </span>
           )}
@@ -1368,7 +1417,7 @@ function CabinetMonth({
           );
         })}
       </div>
-      <span style={{ font: "500 10px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+      <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
         {t("Красные дни — ваши события; клик открывает конструктор.")}
       </span>
     </div>
@@ -1464,7 +1513,7 @@ function ArtistCabinet() {
               {user.artistId ? <Chip color="rgba(255,255,255,.5)">{user.artistId}</Chip> : null}
               <span
                 className="gtr-mono"
-                style={{ font: "500 10.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                style={{ font: "500 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
               >
                 {user.email}
               </span>
@@ -1495,7 +1544,7 @@ function ArtistCabinet() {
             {onAir ? t("Завершить эфир") : t("Я в эфире")}
           </button>
         </div>
-        <span style={{ font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+        <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
           {t("Кнопка в каталоге станет зелёной, зрители перейдут прямо в эфир. Автоотключение через 4 часа. Из Telegram: «Я в эфире» на клавиатуре бота.")}
         </span>
       </Card>
@@ -1508,7 +1557,7 @@ function ArtistCabinet() {
             <Chip color={GREEN}>{t("ПРИВЯЗАН — ПРЕДЛОЖЕНИЯ ПРИХОДЯТ В ЧАТ")}</Chip>
           ) : tg?.bot ? (
             <>
-              <span style={{ font: "500 11.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+              <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
                 {t("Привяжите чат — предложения будут приходить с кнопками «Принять / Отклонить».")}
               </span>
               {tgLink ? (
@@ -1532,12 +1581,12 @@ function ArtistCabinet() {
               )}
             </>
           ) : (
-            <span style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {t("Бот GTR ещё не активирован администратором.")}
             </span>
           )}
           {tgMsg ? (
-            <span style={{ font: "500 10.5px/1.4 'Golos Text',sans-serif", color: "#FF5B4D" }}>{tgMsg}</span>
+            <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "#FF5B4D" }}>{tgMsg}</span>
           ) : null}
         </div>
       </Card>
@@ -1561,13 +1610,13 @@ function ArtistCabinet() {
                   borderLeft: `2px solid ${OFFER_COLOR[o.status]}`,
                 }}
               >
-                <div style={{ font: "600 13px/1.35 'Golos Text',sans-serif" }}>
+                <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>
                   {o.venueName}
                   {o.date ? ` · ${o.date}` : ""}
                 </div>
                 <div
                   className="gtr-mono"
-                  style={{ font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                  style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                 >
                   {o.fee ? `${t("условия")}: ${o.fee}` : t("условия обсуждаются")}
                   {o.note ? ` · ${o.note}` : ""} {t("· от")} {o.fromName}
@@ -1583,7 +1632,7 @@ function ArtistCabinet() {
               </div>
             ))
           ) : (
-            <span style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <span style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {t("Новых предложений нет. Когда площадка позовёт вас в событие, оно появится здесь")}
               {tg?.linked ? t(" и в Telegram") : ""}.
             </span>
@@ -1607,12 +1656,12 @@ function ArtistCabinet() {
                 }}
               >
                 <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ display: "block", font: "600 12px/1.3 'Golos Text',sans-serif" }}>
+                  <span style={{ display: "block", font: "600 12px/1.45 'Golos Text',sans-serif" }}>
                     {o.venueName}
                   </span>
                   <span
                     className="gtr-mono"
-                    style={{ display: "block", marginTop: 2, font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                    style={{ display: "block", marginTop: 2, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
                     {o.date || t("дата уточняется")}
                     {o.fee ? ` · ${o.fee}` : ""}
@@ -1622,14 +1671,14 @@ function ArtistCabinet() {
               </div>
             ))
           ) : (
-            <span style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <span style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
               {t("Подтверждённых выступлений пока нет.")}
             </span>
           )}
           {mine.some((o) => o.status === "declined") ? (
             <span
               className="gtr-mono"
-              style={{ font: "500 9px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+              style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
             >
               {t("отклонённых:")} {mine.filter((o) => o.status === "declined").length}
             </span>
@@ -1680,11 +1729,11 @@ function InviteLinkButton() {
           readOnly
           value={link}
           onFocus={(e) => e.currentTarget.select()}
-          style={{ padding: "6px 8px", fontSize: 9.5, width: 220 }}
+          style={{ padding: "6px 8px", fontSize: 11, width: 220 }}
         />
       ) : null}
       {msg ? (
-        <span style={{ font: "500 9.5px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t3)", maxWidth: 220 }}>
+        <span style={{ font: "500 11px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)", maxWidth: 220 }}>
           {msg}
         </span>
       ) : null}
@@ -1700,13 +1749,22 @@ function VisitorCabinet() {
   const go = (s: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: s } });
   const [mp, setMp] = useState<import("../spotify").MusicProfile | null>(null);
   const [feed, setFeed] = useState<{ id: string; vid: string; title: string; dateIso: string; poster?: string; artistIds: string[] }[]>([]);
-  const [heads, setHeads] = useState<{ id: string; name: string; styles: string[]; photo?: string; music?: string }[]>([]);
+  // Вся афиша, а не только карусель: хедлайнеры считаются по ней, и
+  // косметический дедуп ленты не должен решать, кого показать на сцене.
+  const [afisha, setAfisha] = useState<{ id: string; vid: string; title: string; dateIso: string; poster?: string; artistIds: string[] }[]>([]);
+  // База артистов с фото и плеерами — сырьё для витрины хедлайнеров.
+  const [artIdx, setArtIdx] = useState<{
+    artists: { id: string; name: string; styles?: string[]; prio?: string; sp?: unknown }[];
+    photos: Record<string, { photo: string }>;
+    players: Record<string, { kind: string; ref: string }>;
+  } | null>(null);
   const [community, setCommunity] = useState<{ channelUrl: string; chatUrl: string }>({ channelUrl: "", chatUrl: "" });
   useEffect(() => {
     musicProfileFn().then((r) => setMp(r.profile)).catch(() => {});
     communityCfgFn().then((r) => setCommunity({ channelUrl: r.channelUrl, chatUrl: r.chatUrl })).catch(() => {});
     allAfishaFn()
       .then((r) => {
+        setAfisha(r.items);
         // лента без повторов: один постер один раз, максимум 2 события
         // с одной площадки — иначе весь ряд забивает одна афиша
         const seenPoster = new Set<string>();
@@ -1724,37 +1782,15 @@ function VisitorCabinet() {
         setFeed(picked);
       })
       .catch(() => {});
-    // хедлайнеры: приоритетные артисты с фото — витрина, не список
-    Promise.all([loadArtists(), import("../data/artist-photos.json"), import("../data/artist-players.json")]).then(
-      ([base, ph, pl]) => {
-        const photos = (ph as { default: { photos: Record<string, { photo: string }> } }).default.photos;
-        const players = (pl as { default: Record<string, { kind: string; ref: string }> }).default;
-        // Кнопка у хедлайнера обязана заиграть, а не открыть поиск:
-        // прямой профиль всегда выигрывает у поисковой выдачи Spotify.
-        const linkOf = (id: string, sp?: string) => {
-          const p = players[id];
-          const spDirect = sp && /open\.spotify\.com\/artist\//.test(sp) ? sp : undefined;
-          if (!p) return spDirect ?? sp;
-          if (p.kind === "spotify") return `https://open.spotify.com/artist/${p.ref}`;
-          if (p.kind === "sc") return p.ref;
-          if (p.kind === "deezer") return spDirect ?? `https://www.deezer.com/artist/${p.ref}`;
-          if (p.kind === "mixcloud") return spDirect ?? `https://www.mixcloud.com${p.ref}`;
-          return spDirect ?? sp;
-        };
-        setHeads(
-          base.artists
-            .filter((a) => a.prio === "A" && photos[a.id] && (a.styles ?? []).length)
-            .slice(0, 6)
-            .map((a) => ({
-              id: a.id,
-              name: a.name,
-              styles: (a.styles ?? []).slice(0, 2),
-              photo: photos[a.id]?.photo,
-              music: linkOf(a.id, a.sp as string | undefined),
-            })),
-        );
-      },
-    ).catch(() => {});
+    Promise.all([loadArtists(), import("../data/artist-photos.json"), import("../data/artist-players.json")])
+      .then(([base, ph, pl]) => {
+        setArtIdx({
+          artists: base.artists,
+          photos: (ph as { default: { photos: Record<string, { photo: string }> } }).default.photos,
+          players: (pl as { default: Record<string, { kind: string; ref: string }> }).default,
+        });
+      })
+      .catch(() => {});
   }, []);
 
   const openEvent = (e: { vid: string; artistIds: string[] }) =>
@@ -1764,6 +1800,78 @@ function VisitorCabinet() {
 
   const todayIso = new Date().toISOString().slice(0, 10);
   const tonightCount = feed.filter((e) => e.dateIso === todayIso).length;
+  // Геро больше не прибит к одному видео: берём самое шумное событие
+  // сегодня и показываем его промо. Если на сегодня афиши нет — откат к
+  // дежурному видео вайба.
+  const headliner = useMemo(() => pickHeadliner(feed, todayIso), [feed, todayIso]);
+  const island = useMemo(() => islandDigest(feed, todayIso), [feed, todayIso]);
+
+  // ---------- хедлайнеры сцены ----------
+  // Раньше здесь стоял статичный список приоритетных артистов — из-за него
+  // в блоке месяцами висели одни и те же лица. Теперь витрина идёт от
+  // афиши: сначала те, кто играет СЕГОДНЯ (громкие события выше), затем
+  // ближайшие дни. Общая витрина остаётся только как добор, если афиша
+  // пуста, — блок не должен схлопываться в ничто.
+  const heads = useMemo(() => {
+    if (!artIdx) return [];
+    const { artists, photos, players } = artIdx;
+    const byId = new Map(artists.map((a) => [a.id, a]));
+    // Кнопка у хедлайнера обязана заиграть, а не открыть поиск:
+    // прямой профиль всегда выигрывает у поисковой выдачи Spotify.
+    const linkOf = (id: string, sp?: string) => {
+      const p = players[id];
+      const spDirect = sp && /open\.spotify\.com\/artist\//.test(sp) ? sp : undefined;
+      if (!p) return spDirect ?? sp;
+      if (p.kind === "spotify") return `https://open.spotify.com/artist/${p.ref}`;
+      if (p.kind === "sc") return p.ref;
+      if (p.kind === "deezer") return spDirect ?? `https://www.deezer.com/artist/${p.ref}`;
+      if (p.kind === "mixcloud") return spDirect ?? `https://www.mixcloud.com${p.ref}`;
+      return spDirect ?? sp;
+    };
+    const LIMIT = 6;
+    const seen = new Set<string>();
+    const out: {
+      id: string;
+      name: string;
+      styles: string[];
+      photo?: string;
+      music?: string;
+      /** где и когда играет — подпись под именем; пусто у витринного добора */
+      where?: string;
+      tonight?: boolean;
+    }[] = [];
+    const push = (id: string, ev?: { vid: string; dateIso: string }) => {
+      if (seen.has(id) || out.length >= LIMIT) return;
+      const a = byId.get(id);
+      // Без фото карточка хедлайнера — пустой прямоугольник, такого не ставим
+      if (!a || !photos[id]) return;
+      seen.add(id);
+      out.push({
+        id,
+        name: a.name,
+        styles: (a.styles ?? []).slice(0, 2),
+        photo: photos[id]?.photo,
+        music: linkOf(id, a.sp as string | undefined),
+        where: ev ? (V(ev.vid)?.name ?? "") : undefined,
+        tonight: ev?.dateIso === todayIso,
+      });
+    };
+
+    // 1) сегодня: громкие события первыми
+    for (const e of afisha.filter((e) => e.dateIso === todayIso).sort((a, b) => loudness(b) - loudness(a)))
+      for (const id of e.artistIds) push(id, e);
+    // 2) ближайшие дни по возрастанию даты
+    for (const e of afisha
+      .filter((e) => e.dateIso > todayIso)
+      .sort((a, b) => (a.dateIso < b.dateIso ? -1 : 1)))
+      for (const id of e.artistIds) push(id, e);
+    // 3) добор витриной, если афиша ещё не собралась
+    for (const a of artists) {
+      if (out.length >= LIMIT) break;
+      if (a.prio === "A" && (a.styles ?? []).length) push(a.id);
+    }
+    return out;
+  }, [artIdx, afisha, todayIso]);
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto" }}>
@@ -1772,7 +1880,17 @@ function VisitorCabinet() {
            экрана, а по краям свет заваливается, как на изогнутом стекле —
            видео читается уходящим за грань, а не вырезанным в окошке. ---- */}
       <div className="gtr-hero-edge">
-        <video
+        {headliner?.poster ? (
+          // Промо самого шумного события сегодня: его постер как задник геро
+          <img
+            src={posterUrl(headliner.vid, headliner.id)}
+            alt=""
+            aria-hidden
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "saturate(1.08) contrast(1.03)" }}
+            onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }}
+          />
+        ) : (
+          <video
             src="https://cwsdn.b-cdn.net/Illuzion/illuzion-intro-2025.mp4"
             poster="/venues/VEN-0013-hero.jpg"
             autoPlay
@@ -1782,22 +1900,34 @@ function VisitorCabinet() {
             aria-hidden
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "saturate(1.08) contrast(1.05)" }}
           />
+        )}
         <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(180deg, rgba(10,11,13,0) 18%, rgba(10,11,13,.45) 58%, rgba(10,11,13,.8) 100%)" }} />
         <div className="gtr-laser" style={{ ["--gtr-run" as string]: "340px", zIndex: 1 }} />
         <div className="gtr-hero-edge-in gtr-hero-tall">
-            <div className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "rgba(255,255,255,.75)", letterSpacing: ".16em", marginBottom: 10 }}>
-              {user.name.toUpperCase()} · PHUKET
+            <div className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "rgba(255,255,255,.75)", letterSpacing: ".16em", marginBottom: 10 }}>
+              {headliner
+                ? `${t("ГРОМЧЕ ВСЕХ СЕГОДНЯ")} · ${(V(headliner.vid)?.name ?? "PHUKET").toUpperCase()}`
+                : `${user.name.toUpperCase()} · PHUKET`}
             </div>
-            <TrashTitle text={t("Сегодня вечером")} size={40} />
+            <TrashTitle text={headliner ? headliner.title.slice(0, 46) : t("Сегодня вечером")} size={headliner ? 34 : 40} />
             <div style={{ margin: "10px 0 16px", font: "500 13px/1.5 'Golos Text',sans-serif", color: "rgba(255,255,255,.82)", maxWidth: 420 }}>
-              {tonightCount
-                ? `${t("В афише")}: ${tonightCount} · ${t("Весь остров открыт — собери свой вечер")}`
-                : t("Остров открыт — собери свой вечер: клубы, пляжные вечеринки, живая музыка")}
+              {headliner
+                ? (headliner.artistIds.length
+                    ? `${t("Наш артист на сцене")} · ${island.events} ${t("событий на острове сегодня")}`
+                    : `${island.events} ${t("событий в")} ${island.venues} ${t("заведениях сегодня")}`)
+                : tonightCount
+                  ? `${t("В афише")}: ${tonightCount} · ${t("Весь остров открыт — собери свой вечер")}`
+                  : t("Остров открыт — собери свой вечер: клубы, пляжные вечеринки, живая музыка")}
             </div>
-            <div>
-              <button className="gtr-btn-wow" onClick={() => go("tonight")}>
-                {t("Выбрать вечер")} →
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button className="gtr-btn-wow" onClick={() => (headliner ? openEvent(headliner) : go("tonight"))}>
+                {headliner ? t("Смотреть событие") : t("Выбрать вечер")} →
               </button>
+              {headliner ? (
+                <button className="gtr-btn" style={{ padding: "12px 18px" }} onClick={() => go("tonight")}>
+                  {t("Вся афиша")}
+                </button>
+              ) : null}
             </div>
         </div>
       </div>
@@ -1813,19 +1943,17 @@ function VisitorCabinet() {
             {feed.map((e) => (
               <Card key={e.vid + e.id} hover style={{ padding: 0, overflow: "hidden", width: 168 }} onClick={() => openEvent(e)}>
                 <div style={{ position: "relative", aspectRatio: "4/5", background: "#101116" }}>
-                  {e.poster ? (
-                    <img src={e.poster} alt="" loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-                      onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
-                  ) : null}
+                  <img src={posterUrl(e.vid, e.id)} alt="" loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                    onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
                   <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 50%, rgba(10,11,13,.95))" }} />
                   {e.artistIds.length ? (
-                    <span className="gtr-mono" style={{ position: "absolute", top: 7, left: 7, font: "700 8px/1 'JetBrains Mono',monospace", padding: "4px 6px", background: "rgba(229,35,27,.9)", letterSpacing: ".08em" }}>
+                    <span className="gtr-mono" style={{ position: "absolute", top: 7, left: 7, font: "700 10px/1 'JetBrains Mono',monospace", padding: "4px 6px", background: "rgba(229,35,27,.9)", letterSpacing: ".08em" }}>
                       {t("НАШ АРТИСТ")}
                     </span>
                   ) : null}
                   <div style={{ position: "absolute", left: 9, right: 9, bottom: 8 }}>
                     <div style={{ font: "600 12.5px/1.25 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".04em" }}>{e.title.slice(0, 44)}</div>
-                    <div className="gtr-mono" style={{ marginTop: 3, font: "500 8.5px/1.3 'JetBrains Mono',monospace", color: "rgba(255,255,255,.65)" }}>
+                    <div className="gtr-mono" style={{ marginTop: 3, font: "500 10px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.65)" }}>
                       {e.dateIso.slice(8, 10)}.{e.dateIso.slice(5, 7)} · {V(e.vid)?.name?.slice(0, 20)}
                     </div>
                   </div>
@@ -1839,7 +1967,11 @@ function VisitorCabinet() {
       {/* ---- хедлайнеры: артисты, в которых проваливаешься ---- */}
       {heads.length ? (
         <>
-          <Eyebrow style={{ marginBottom: 10 }}>{t("ХЕДЛАЙНЕРЫ СЦЕНЫ")}</Eyebrow>
+          {/* Заголовок честно говорит, откуда список: сегодняшняя афиша
+              или общая витрина сцены, когда на сегодня играть некому. */}
+          <Eyebrow style={{ marginBottom: 10 }}>
+            {heads.some((a) => a.tonight) ? t("КТО ИГРАЕТ СЕГОДНЯ") : t("ХЕДЛАЙНЕРЫ СЦЕНЫ")}
+          </Eyebrow>
           <div className="gtr-hscroll" style={{ marginBottom: 18 }}>
             {heads.map((a) => (
               <Card key={a.id} hover style={{ padding: 0, overflow: "hidden", width: 148 }}
@@ -1864,10 +1996,16 @@ function VisitorCabinet() {
                       </svg>
                     </button>
                   ) : null}
+                  {/* Кто играет сегодня — видно сразу, без захода в афишу */}
+                  {a.tonight ? (
+                    <span className="gtr-mono" style={{ position: "absolute", top: 8, left: 8, font: "700 9px/1 'JetBrains Mono',monospace", padding: "4px 6px", background: "rgba(229,35,27,.92)", letterSpacing: ".08em" }}>
+                      {t("СЕГОДНЯ")}
+                    </span>
+                  ) : null}
                   <div style={{ position: "absolute", left: 9, right: 9, bottom: 8 }}>
                     <div style={{ font: "700 12px/1.2 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".03em" }}>{a.name}</div>
-                    <div className="gtr-mono" style={{ marginTop: 3, font: "500 8px/1.3 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase" }}>
-                      {a.styles.map((g) => genreLabel(g, i18n.language)).join(" · ")}
+                    <div className="gtr-mono" style={{ marginTop: 3, font: "500 10px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {a.where || a.styles.map((g) => genreLabel(g, i18n.language)).join(" · ")}
                     </div>
                   </div>
                 </div>
@@ -1886,7 +2024,7 @@ function VisitorCabinet() {
             <span style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Мой вкус")}</span>
             {mp ? <Chip color="#2ECC71">{t("СОБРАН")}</Chip> : null}
           </div>
-          <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>
+          <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>
             {mp
               ? mp.genres.slice(0, 3).map(([f]) => FAMILY_LABEL[f] ?? f).join(" · ")
               : t("Выбери жанры — получи свои места")}
@@ -1895,20 +2033,81 @@ function VisitorCabinet() {
         <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("map")}>
           <img src="/brand/stickers/map.png" alt="" aria-hidden style={{ position: "absolute", right: -8, bottom: -10, width: 74, opacity: 0.85, transform: "rotate(6deg)" }} />
           <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Карта")}</div>
-          <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>{t("Весь остров точками")}</div>
+          <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>{t("Весь остров точками")}</div>
         </Card>
         <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("promo")}>
           <img src="/brand/stickers/champagne.png" alt="" aria-hidden style={{ position: "absolute", right: -8, bottom: -10, width: 74, opacity: 0.85, transform: "rotate(-6deg)" }} />
           <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Стол на вечер")}</div>
-          <div style={{ marginTop: 7, font: "500 10.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>{t("Бронь в пару касаний")}</div>
+          <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>{t("Бронь в пару касаний")}</div>
         </Card>
+      </div>
+
+      {/* ---- сегодня на острове: живая сводка + что нового + чем поможет BRO ---- */}
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
+        <span className="gtr-eq" aria-hidden><span /><span /><span /><span /></span>
+        <Eyebrow>{t("СЕГОДНЯ НА ОСТРОВЕ")}</Eyebrow>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 12, marginBottom: 16 }}>
+        {/* сводка дня — из реальной афиши, без выдумок */}
+        <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("tonight")}>
+          <div className="gtr-laser" aria-hidden />
+          <Eyebrow style={{ fontSize: 10, marginBottom: 8 }}>{t("НОВОСТИ ВЕЧЕРА")}</Eyebrow>
+          {island.events ? (
+            <>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+                <span className="gtr-mono" style={{ font: "700 26px/1 'JetBrains Mono',monospace", color: "#fff" }}>{island.events}</span>
+                <span style={{ font: "600 13px/1.2 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+                  {t("событий в")} {island.venues} {t("заведениях")}
+                </span>
+              </div>
+              {island.withArtist ? (
+                <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+                  {t("Из них с нашими артистами на сцене:")} {island.withArtist}
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <div style={{ font: "500 12.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+              {t("На сегодня афиша ещё собирается — загляни в раздел «Сегодня», остров не спит.")}
+            </div>
+          )}
+        </Card>
+
+        {/* чем поможет BRO сегодня — открывает голосового помощника */}
+        <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }}
+          onClick={() => window.dispatchEvent(new CustomEvent("gtr:bro-open"))}>
+          <img src="/raw-pulse/handle-logo.webp" alt="" aria-hidden style={{ position: "absolute", right: -6, bottom: -8, width: 66, opacity: 0.8 }} />
+          <Eyebrow style={{ fontSize: 10, marginBottom: 8 }}>{t("BRO СЕГОДНЯ")}</Eyebrow>
+          <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase", paddingRight: 54 }}>{t("Спроси, куда пойти")}</div>
+          <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 54 }}>
+            {t("Подберёт вечер под твой вкус, забронирует стол, переведёт официанту — просто спроси.")}
+          </div>
+        </Card>
+      </div>
+
+      {/* что нового в приложении: реально выпущенные опции */}
+      <Eyebrow style={{ marginBottom: 10 }}>{t("ЧТО НОВОГО В ПРИЛОЖЕНИИ")}</Eyebrow>
+      <div className="gtr-hscroll" style={{ marginBottom: 18 }}>
+        {appUpdates.updates.map((u) => (
+          <Card key={u.id} hover style={{ padding: "14px 16px", width: 208, display: "grid", gap: 7, alignContent: "start" }}
+            onClick={() => go(u.screen as ScreenId)}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Stk name={u.icon as StkName} size={26} />
+              <span style={{ font: "700 12.5px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t(u.title)}</span>
+            </div>
+            <div style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{t(u.text)}</div>
+            <span className="gtr-mono" style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".08em" }}>
+              {u.dateIso.slice(8, 10)}.{u.dateIso.slice(5, 7)}
+            </span>
+          </Card>
+        ))}
       </div>
 
       {community.channelUrl || community.chatUrl ? (
         <Card style={{ padding: "16px 18px", marginBottom: 16, position: "relative", overflow: "hidden" }}>
           <div className="gtr-laser" aria-hidden />
           <Eyebrow style={{ marginBottom: 8 }}>{t("КОМЬЮНИТИ GTR")}</Eyebrow>
-          <div style={{ font: "500 11.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", marginBottom: 10 }}>
+          <div style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", marginBottom: 10 }}>
             {t("Новости острова и живой чат — вся тусовка в одном месте")}
           </div>
           {/* Навигация комьюнити: кнопкой служит сам знак, заливок и рамок

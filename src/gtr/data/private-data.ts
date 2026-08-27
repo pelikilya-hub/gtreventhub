@@ -50,8 +50,26 @@ type ArtistsFull = {
   }[];
 };
 
-export const loadVenuesFull = () =>
-  import("./venues.json").then((m) => m.default as unknown as VenuesFull);
+// Полные файлы регионов (с контактами и разведкой) — только на сервере.
+// Глоб ленивый: код региона грузится при первом обращении, .public-файлы
+// отфильтрованы — они и так уезжают в браузер через app-data.
+const regionFullModules = import.meta.glob("./regions/*.json");
+
+export const loadVenuesFull = async (): Promise<VenuesFull> => {
+  const base = (await import("./venues.json")).default as unknown as VenuesFull;
+  const out: VenuesFull = {
+    venues: [...base.venues],
+    contacts: [...base.contacts],
+    research: base.research,
+  };
+  for (const [path, load] of Object.entries(regionFullModules)) {
+    if (path.includes(".public.")) continue;
+    const m = (await load()) as { default: Partial<VenuesFull> };
+    out.venues.push(...(m.default.venues ?? []));
+    out.contacts.push(...(m.default.contacts ?? []));
+  }
+  return out;
+};
 
 export const loadArtistsFull = () =>
   import("./artists.json").then((m) => m.default as unknown as ArtistsFull);

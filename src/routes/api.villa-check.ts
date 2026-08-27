@@ -11,8 +11,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { afishaKey } from "../gtr/afisha";
 import { tgEsc } from "../gtr/tg";
 import { checkLink, runDailyCheck, VILLA_MARKUP } from "../gtr/villa-price";
+import { APP_URL } from "../gtr/app-url";
 
-const APP = "https://gtr-event-hub.gtr-event.workers.dev";
+const APP = APP_URL;
 
 export const Route = createFileRoute("/api/villa-check")({
   server: {

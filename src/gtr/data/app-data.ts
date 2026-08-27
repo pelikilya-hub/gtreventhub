@@ -3,6 +3,7 @@
 // экране. Контакты, телефоны и разведка живут на сервере и приходят
 // server-функцией с проверкой роли (venueContactsFn).
 import venuesRaw from "./venues.public.json";
+import regionsRaw from "./regions.json";
 import { genreName, resolveGenre } from "../genres";
 import nightRaw from "./venue-night.json";
 import richRaw from "./rich.json";
@@ -39,6 +40,8 @@ export type Venue = {
   verified: string;
   notes: string;
   address?: string;
+  /** код региона из regions.json; пусто у исторической базы = phuket */
+  region?: string;
   gallery?: string;
   readiness: null | {
     score: number;
@@ -126,7 +129,55 @@ type PhuketBase = {
   research: Research[];
 };
 
-export const PH = venuesRaw as unknown as PhuketBase;
+// ---------- регионы ----------
+// География продукта больше не равна Пхукету. Реестр описывает регион
+// (имена ru/en/th, центр карты, префикс id, словарь районов), а данные
+// каждого региона живут в data/regions/<code>.public.json и подхватываются
+// глобом: новый регион — это новый json, без правок кода.
+export type RegionInfo = {
+  ru: string;
+  en: string;
+  th: string;
+  center: [number, number];
+  zoom: number;
+  prefix: string;
+  clusters: string[];
+};
+const { _note: _regionsNote, ...regionsClean } = regionsRaw as unknown as Record<
+  string,
+  RegionInfo | string
+>;
+export const REGIONS = regionsClean as Record<string, RegionInfo>;
+/** Имя региона на языке интерфейса; ru — язык по умолчанию продукта. */
+export const regionName = (code: string, lang: string): string => {
+  const r = REGIONS[code];
+  if (!r) return code;
+  return lang.startsWith("en") ? r.en : lang.startsWith("th") ? r.th : r.ru;
+};
+/** Регион площадки. Историческая база Пхукета поля не несёт — дефолт. */
+export const regionOf = (v: { region?: unknown }): string =>
+  typeof v.region === "string" && v.region ? v.region : "phuket";
+
+type RegionFile = { meta?: { region?: string }; venues?: Venue[]; spaces?: Space[] };
+const regionModules = import.meta.glob("./regions/*.public.json", {
+  eager: true,
+}) as Record<string, { default: RegionFile }>;
+
+const baseRaw = venuesRaw as unknown as PhuketBase;
+const mergedVenues: Venue[] = [...baseRaw.venues];
+const mergedSpaces: Space[] = [...baseRaw.spaces];
+for (const [path, mod] of Object.entries(regionModules)) {
+  const code = path.match(/([a-z]{3})\.public\.json$/)?.[1] ?? mod.default.meta?.region ?? "";
+  for (const v of mod.default.venues ?? []) mergedVenues.push({ ...v, region: code });
+  for (const s of mod.default.spaces ?? []) mergedSpaces.push(s);
+}
+
+export const PH: PhuketBase = { ...baseRaw, venues: mergedVenues, spaces: mergedSpaces };
+
+/** Счётчик площадок в меню. Раньше стояло «110» строкой и врало при каждом
+ *  пополнении базы; теперь считаем по факту — регионы подключаются файлами,
+ *  и цифра в меню обязана ехать вместе с ними. */
+const VENUE_COUNT = String(PH.venues.length);
 export const RICH_ALL = richRaw as unknown as Record<string, RichVenue>;
 
 export const V = (id: string): Venue => PH.venues.find((v) => v.id === id) ?? ({} as Venue);
@@ -139,7 +190,23 @@ export const AMBER = "#F5A623";
 export const RED = "#E5231B";
 
 // ---------- роли ----------
-export type RoleId = "pr" | "owner" | "sales" | "gtr" | "artist" | "organizer" | "visitor";
+/** Роли продукта.
+ *
+ *  «venue» — сама площадка: аккаунт заведения, а не нашего сотрудника.
+ *  До появления этой роли аккаунт площадки приходилось выдавать как
+ *  owner/pr, а это командные роли: с ними заведение видело базу всех
+ *  площадок острова, каталог артистов и конструктор. Приглашать
+ *  площадки в таком виде было нельзя, поэтому роль отдельная и с
+ *  жёстким скоупом по venueId. */
+export type RoleId =
+  | "pr"
+  | "owner"
+  | "sales"
+  | "gtr"
+  | "artist"
+  | "organizer"
+  | "visitor"
+  | "venue";
 export const ROLES: [RoleId, string, string, string][] = [
   ["pr", "PR-директор", "VEN-0013", "ПД"],
   ["owner", "Владелец", "VEN-0061", "ВЛ"],
@@ -169,7 +236,9 @@ export type ScreenId =
   | "map"
   | "feed"
   | "tonight"
+  | "tracking"
   | "aimatch"
+  | "phrases"
   | "community"
   | "visas"
   | "promo"
@@ -225,9 +294,9 @@ export const NAV_NET: [ScreenId, string, string, string][] = [
   ],
   [
     "base",
-    "База · Пхукет",
+    "Площадки Таиланд",
     "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z",
-    "110",
+    VENUE_COUNT,
   ],
   ["contacts", "Центр связи", "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z", ""],
   [
@@ -257,8 +326,9 @@ export const NAV_ARTIST: [ScreenId, string, string, string][] = [
   ["dash", "Мой профиль", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", ""],
   ["tonight", "Сегодня", "M12 3v2 M12 19v2 M3 12h2 M19 12h2 M5.6 5.6l1.4 1.4 M17 17l1.4 1.4 M5.6 18.4 7 17 M17 7l1.4-1.4 M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z", ""],
   ["feed", "События", "M4 4h16v16H4z M4 9h16 M9 13h6", ""],
-  ["base", "Заведения", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "110"],
+  ["base", "Площадки Таиланд", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", VENUE_COUNT],
   ["aimatch", "ИИ подбор", "M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6l-6-4.4h7.6z", ""],
+  ["phrases", "Разговорник", "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z M8 9h8 M8 13h5", ""],
   ["community", "Комьюнити", "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75", ""],
   ["visas", "Визы", "M4 3h16v18H4z M8 7h8 M8 11h8 M8 15h5", ""],
   ["myshows", "Мои выступления", "M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z", ""],
@@ -268,8 +338,9 @@ export const NAV_VISITOR: [ScreenId, string, string, string][] = [
   ["dash", "Мой профиль", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", ""],
   ["tonight", "Сегодня", "M12 3v2 M12 19v2 M3 12h2 M19 12h2 M5.6 5.6l1.4 1.4 M17 17l1.4 1.4 M5.6 18.4 7 17 M17 7l1.4-1.4 M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z", ""],
   ["feed", "События", "M4 4h16v16H4z M4 9h16 M9 13h6", ""],
-  ["base", "Заведения", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "104"],
+  ["base", "Площадки Таиланд", "M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20 M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", VENUE_COUNT],
   ["aimatch", "ИИ подбор", "M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6l-6-4.4h7.6z", ""],
+  ["phrases", "Разговорник", "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z M8 9h8 M8 13h5", ""],
   ["promo", "Промо и бронь", "M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-7 M22 7H2v5h20z M12 22V7 M12 7a3 3 0 1 1 3-3c0 2-3 3-3 3z M12 7a3 3 0 1 0-3-3c0 2 3 3 3 3z", ""],
   ["community", "Комьюнити · PRO", "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75", ""],
   ["map", "Карта", "M1 6v16l7-4 8 4 7-4V2l-7 4-8-4z M8 2v16 M16 6v16", ""],
@@ -297,6 +368,24 @@ export const NAV_TABS: [ScreenId, string, string][] = [
   ["tonight", "GTR", ""], // центр: фирменный знак вместо иконки
   ["community", "Чаты", "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"],
   ["dash", "Профиль", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"],
+];
+
+/** Кабинет самой площадки. Здесь нет ни базы других заведений, ни
+ *  каталога артистов, ни конструктора: заведение работает со своей
+ *  программой, своими заявками и своим паспортом. Всё остальное —
+ *  наша внутренняя кухня, и площадке её видеть незачем. */
+export const NAV_VENUE_CABINET: [ScreenId, string, string, string][] = [
+  ["dash", "Моя площадка", "M3 3h7v7H3z M14 3h7v4h-7z M14 10h7v11h-7z M3 14h7v7H3z", ""],
+  ["calendar", "Афиша и программа", "M3 6h18v15H3z M8 3v5 M16 3v5 M3 11h18", ""],
+  ["events", "Мои события", "M4 4h16v16H4z M4 9h16 M9 13h6 M9 17h3", ""],
+  ["inquiries", "Заявки и брони", "M4 4h16v12H9l-5 4z", ""],
+  ["spaces", "Залы и прайс", "M3 21V8l9-5 9 5v13 M9 21v-7h6v7", ""],
+  [
+    "venue",
+    "Паспорт и фото",
+    "M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z M12 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z",
+    "",
+  ],
 ];
 
 export const NAV_PLATFORM_VENUE: [ScreenId, string, string, string][] = [
@@ -1687,7 +1776,31 @@ export const ILZ_RICH: RichVenue = {
 };
 
 const NIGHT_ALL = nightRaw as Record<string, NightInfo>;
-export const nightOf = (vid: string): NightInfo => NIGHT_ALL[vid] ?? {};
+
+/** Теги, за которыми стоит вечернее место, а не переговорная с банкетом.
+ *  Курортные MICE-залы, виллы и «прочее» гостю вечером не предлагаем —
+ *  они живут в базе для организаторов, а не в афише ночи. Марины сюда тоже
+ *  не входят: под этим тегом лежат яхт-клубы и площадки под boat show —
+ *  бизнес-события, а не ответ на вопрос «куда пойти сегодня». */
+const NIGHT_TAGS = /nightclub|beach club|rooftop|bar|lounge|live|show/i;
+export const isNightVenue = (v: { tag?: string; type?: string }): boolean =>
+  NIGHT_TAGS.test(`${v.tag ?? ""} ${v.type ?? ""}`);
+
+/** Ночная карточка площадки. Свипы гайдов закрыли 42 места из 110 — у
+ *  остальных карточка была пустой, а сама площадка выпадала из вечернего
+ *  списка. Часы и цену входа не выдумываем: чего не разведали, того нет.
+ *  Но собственные поля площадки — концепт и музыкальную политику — гостю
+ *  показать честно можем, и клуб перестаёт быть невидимым из-за того, что
+ *  до него не дошли руки. */
+export const nightOf = (vid: string): NightInfo => {
+  const known = NIGHT_ALL[vid];
+  if (known) return known;
+  const v = V(vid);
+  if (!v.id) return {};
+  const fact = (v.concept ?? "").trim();
+  const music = (v.music ?? "").trim();
+  return fact || music ? { fact: fact || undefined, music: music || undefined } : {};
+};
 
 export const richOf = (vid: string): RichVenue =>
   vid === "VEN-0013" ? ILZ_RICH : (RICH_ALL[vid] ?? {});
@@ -1903,6 +2016,9 @@ export type Artist = {
       её видит менеджер, — а машина работает с этими идентификаторами. */
   styleIds?: string[];
   bio?: string; // короткое описание для профиля (RU)
+  /** Лейблы из label-logos.json, для которых есть настоящий логотип
+      с прозрачным фоном — карточка рисует значок, а не гадает по bio. */
+  labels?: string[];
   twitch?: string; // логин канала Twitch — для индикатора «в эфире»
   tier: string;
   rider: string;

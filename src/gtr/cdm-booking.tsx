@@ -1,6 +1,6 @@
-// Бронь рассадки Café del Mar: зона → стол → дата/время/гости →
-// предзаказ по меню → заявка. Источник правды — cdm-reserve.json и
-// cdm-menu.json (сняты с официального виджета SevenRooms и флипбука меню).
+// Бронь рассадки: зона → стол → дата/время/гости → предзаказ по меню →
+// заявка. Данные конкретной площадки берутся из реестра venue-commerce,
+// а не импортируются напрямую: форма одна на все заведения с рассадкой.
 //
 // Депозит стола — это не наша цена, а условия площадки: часть или весь
 // депозит возвращается гостю кредитом на еду и напитки. Предзаказ ни к
@@ -8,31 +8,27 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import cdmMenu from "./data/cdm-menu.json";
-import cdmReserve from "./data/cdm-reserve.json";
 import { bookTableFn, type PreorderLine } from "./kv-api";
 import { useGtr } from "./store";
 import { Card, Chip, Eyebrow } from "./ui";
+import {
+  hasReserve,
+  menuOf,
+  reserveOf,
+  zonesOfSpace,
+  type MenuItem,
+  type ReserveTable,
+  type ReserveZone,
+} from "./venue-commerce";
 
 const GREEN = "#2ECC71";
 const RED = "#E5231B";
 const AMBER = "#F5A623";
 
-type Zone = (typeof cdmReserve.zones)[number] & { days?: number[] };
-type CdmTable = (typeof cdmReserve.tables)[number] & {
-  perPerson?: boolean;
-  extraPax?: number;
-  extraPrice?: number;
-};
-type MenuItem = {
-  id: string;
-  name: string;
-  desc?: string;
-  price: number;
-  unit?: string;
-  photo?: string;
-  opts?: { l: string; p: number }[];
-};
+// Формы данных живут в реестре: там они общие для всех площадок,
+// а не выведены из одного JSON-файла через typeof.
+type Zone = ReserveZone;
+type CdmTable = ReserveTable;
 
 const thb = (n: number) => `${n.toLocaleString("ru-RU")} THB`;
 
@@ -42,7 +38,7 @@ const label = (s: string) => (
     style={{
       display: "block",
       marginBottom: 5,
-      font: "600 9px/1 'JetBrains Mono',monospace",
+      font: "600 11px/1 'JetBrains Mono',monospace",
       letterSpacing: ".14em",
       textTransform: "uppercase",
       color: "var(--gtr-t3)",
@@ -113,7 +109,7 @@ function DishModal({
             </span>
           </div>
           {item.desc ? (
-            <div style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{item.desc}</div>
+            <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{item.desc}</div>
           ) : null}
           {item.opts?.length ? (
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -164,8 +160,12 @@ function DishModal({
 export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean }) {
   const { t } = useTranslation();
   const { user } = useGtr();
-  const zones = cdmReserve.zones as Zone[];
-  const tables = cdmReserve.tables as CdmTable[];
+  // Рассадка и меню — этой площадки, а не жёстко Café del Mar.
+  const reserve = reserveOf(vid);
+  const menu = menuOf(vid);
+  const zones: Zone[] = reserve?.zones ?? [];
+  const tables: CdmTable[] = reserve?.tables ?? [];
+  const sections = menu?.sections ?? [];
 
   const [zoneId, setZoneId] = useState<string | null>(null);
   const [tableId, setTableId] = useState<string | null>(null);
@@ -173,7 +173,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
   const [slot, setSlot] = useState("");
   const [guests, setGuests] = useState(2);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [secId, setSecId] = useState(cdmMenu.sections[0].id);
+  const [secId, setSecId] = useState(sections[0]?.id ?? "");
   const [cart, setCart] = useState<Record<string, PreorderLine>>({});
   const [dish, setDish] = useState<MenuItem | null>(null);
   const [name, setName] = useState(user?.name ?? "");
@@ -181,6 +181,33 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
   const [note, setNote] = useState("");
   const [state, setState] = useState("");
   const [sentId, setSentId] = useState("");
+
+  // Смена площадки обязана обнулить всё, что принадлежало прошлой.
+  //
+  // Данные-то берутся по vid (reserveOf/menuOf выше), но React держит один
+  // и тот же экземпляр формы, пока она стоит на том же месте дерева: и на
+  // экране «Промо и бронь» селектор заведения, и переход между паспортами
+  // площадок меняют только пропс. Без сброса корзина Café del Mar уезжала
+  // в заявку соседнего ресторана, а раздел меню оставался с чужим id —
+  // менеджеру приходил заказ блюд, которых у него нет.
+  //
+  // Сброс живёт здесь, а не в key у вызывающих: точек вызова три, и
+  // четвёртая ключ забудет. Дату, число гостей и контакты не трогаем —
+  // они принадлежат гостю, а не заведению, и стирать их значит заставить
+  // человека набирать телефон заново.
+  const [prevVid, setPrevVid] = useState(vid);
+  if (prevVid !== vid) {
+    setPrevVid(vid);
+    setZoneId(null);
+    setTableId(null);
+    setSlot("");
+    setCart({});
+    setMenuOpen(false);
+    setSecId(sections[0]?.id ?? "");
+    setDish(null);
+    setState("");
+    setSentId("");
+  }
 
   const zone = zones.find((z) => z.id === zoneId) ?? null;
   const table = tables.find((tb) => tb.id === tableId) ?? null;
@@ -231,14 +258,19 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
           tableType: table.name,
           slot,
           deposit: table.perPerson ? table.deposit * guests : table.deposit,
-          credit: table.perPerson ? table.credit * guests : table.credit,
+          // Кредит на еду и напитки есть не у каждого стола — без него в
+          // заявку уходит ноль, а не NaN в письме менеджеру.
+          credit: table.perPerson ? (table.credit ?? 0) * guests : table.credit,
           preorder: cartLines,
         },
       });
       if (r.ok) {
         setSentId(r.id);
         setState("");
-      } else setState(r.reason ?? "…");
+        // Причина отказа приходит с сервера по-русски: прогоняем через
+        // словарь, иначе гость с английским интерфейсом упирается в
+        // русскую строку ровно в тот момент, когда что-то пошло не так.
+      } else setState(t(r.reason ?? "…"));
     } catch {
       setState(t("Сервер недоступен"));
     }
@@ -248,13 +280,13 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
     return (
       <Card className="gtr-fade" style={{ padding: "22px 24px", display: "grid", gap: 10, justifyItems: "start" }}>
         <Chip color={GREEN}>{t("ЗАЯВКА УЛЕТЕЛА")}</Chip>
-        <div style={{ font: "700 15px/1.4 'Golos Text',sans-serif" }}>
+        <div style={{ font: "700 15px/1.5 'Golos Text',sans-serif" }}>
           {zone?.name} · {table?.name} · {dateIso} {slot}
         </div>
-        <div style={{ font: "500 11.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+        <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
           {t("Менеджер площадки и команда GTR получили бронь в Telegram — подтверждение придёт одной кнопкой. Статус смотрите в «Мои брони».")}
         </div>
-        <span className="gtr-mono" style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+        <span className="gtr-mono" style={{ font: "500 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
           {sentId}
           {cartTotal ? ` · предзаказ ${thb(cartTotal)}` : ""}
         </span>
@@ -317,7 +349,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                         background: RED,
                         color: "#fff",
                         padding: "3px 7px",
-                        font: "700 9px/1 'JetBrains Mono',monospace",
+                        font: "700 11px/1 'JetBrains Mono',monospace",
                         letterSpacing: ".1em",
                       }}
                     >
@@ -329,7 +361,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                   <div style={{ font: "700 12.5px/1.2 'Golos Text',sans-serif" }}>{z.name}</div>
                   <div
                     className="gtr-mono"
-                    style={{ marginTop: 4, font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                    style={{ marginTop: 4, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
                     {z.hours}
                   </div>
@@ -341,7 +373,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
         {zone ? (
           <div
             className="gtr-fade"
-            style={{ marginTop: 8, font: "500 11px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}
+            style={{ marginTop: 8, font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}
           >
             {zone.desc} <span style={{ color: "var(--gtr-t3)" }}>{zone.best}.</span>
           </div>
@@ -384,12 +416,12 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                   <div style={{ padding: "9px 11px 9px 0", minWidth: 0 }}>
                     <div style={{ display: "flex", gap: 8, alignItems: "baseline", flexWrap: "wrap" }}>
                       <span style={{ font: "700 12.5px/1.2 'Golos Text',sans-serif" }}>{tb.name}</span>
-                      <span className="gtr-mono" style={{ font: "500 9.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+                      <span className="gtr-mono" style={{ font: "500 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
                         {t("до")} {tb.pax}
                         {tb.extraPax ? `+${tb.extraPax}` : ""} {t("чел.")}
                       </span>
                     </div>
-                    <div className="gtr-mono" style={{ marginTop: 5, font: "700 11px/1.3 'JetBrains Mono',monospace", color: GREEN }}>
+                    <div className="gtr-mono" style={{ marginTop: 5, font: "700 13px/1.45 'JetBrains Mono',monospace", color: GREEN }}>
                       {t("депозит")} {thb(tb.deposit)}
                       {tb.perPerson ? ` / ${t("чел.")}` : ""}
                       {tb.credit ? (
@@ -399,9 +431,11 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                         </span>
                       ) : null}
                     </div>
-                    {on ? (
-                      <div className="gtr-fade" style={{ marginTop: 6, font: "500 10.5px/1.55 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-                        {tb.includes.join(" · ")}
+                    {/* Что входит в стол: у одних площадок список, у других
+                        связный текст. Показываем то, что есть. */}
+                    {on && (tb.includes?.length || tb.desc) ? (
+                      <div className="gtr-fade" style={{ marginTop: 6, font: "500 12px/1.55 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+                        {tb.includes?.length ? tb.includes.join(" · ") : tb.desc}
                       </div>
                     ) : null}
                   </div>
@@ -427,7 +461,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                 onChange={(e) => setDateIso(e.target.value)}
               />
               {!dateOk ? (
-                <span className="gtr-mono" style={{ display: "block", marginTop: 4, font: "500 9px/1.4 'JetBrains Mono',monospace", color: AMBER }}>
+                <span className="gtr-mono" style={{ display: "block", marginTop: 4, font: "500 11px/1.5 'JetBrains Mono',monospace", color: AMBER }}>
                   {t("Club Room работает ср–сб — выберите другую дату")}
                 </span>
               ) : null}
@@ -446,7 +480,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                 </button>
               </div>
               {table.extraPax && guests > table.pax ? (
-                <span className="gtr-mono" style={{ display: "block", marginTop: 4, font: "500 9px/1.4 'JetBrains Mono',monospace", color: AMBER }}>
+                <span className="gtr-mono" style={{ display: "block", marginTop: 4, font: "500 11px/1.5 'JetBrains Mono',monospace", color: AMBER }}>
                   +{thb((table.extraPrice ?? 0) * (guests - table.pax))} {t("за доп. гостей (зачтётся на бар)")}
                 </span>
               ) : null}
@@ -466,15 +500,17 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                 </button>
               ))}
             </div>
-            <span className="gtr-mono" style={{ display: "block", marginTop: 5, font: "500 9px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+            <span className="gtr-mono" style={{ display: "block", marginTop: 5, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
               {zone?.arrival}
             </span>
           </div>
         </div>
       ) : null}
 
-      {/* ШАГ 4 · предзаказ */}
-      {table ? (
+      {/* ШАГ 4 · предзаказ. Только там, где у площадки есть своё меню:
+          у коворкинга и других залов без кухни шаг рисовался пустым, и
+          кнопка «Открыть меню» разворачивала ничто. */}
+      {table && sections.length ? (
         <div className="gtr-fade">
           <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 8 }}>
             <Eyebrow>
@@ -491,11 +527,11 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                   key={`${l.id}-${l.opt ?? ""}`}
                   style={{ display: "flex", gap: 8, alignItems: "center", border: "1px solid rgba(46,204,113,.25)", padding: "6px 10px" }}
                 >
-                  <span style={{ flex: 1, font: "600 11px/1.3 'Golos Text',sans-serif" }}>
+                  <span style={{ flex: 1, font: "600 13px/1.45 'Golos Text',sans-serif" }}>
                     {l.name}
                     {l.opt ? <span style={{ color: "var(--gtr-t3)" }}> · {l.opt}</span> : null}
                   </span>
-                  <span className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
+                  <span className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
                     ×{l.qty} · {thb(l.price * l.qty)}
                   </span>
                   <button
@@ -518,7 +554,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
           {menuOpen ? (
             <Card className="gtr-fade" style={{ padding: 14 }}>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-                {cdmMenu.sections.map((s) => (
+                {sections.map((s) => (
                   <button
                     key={s.id}
                     className="gtr-btn"
@@ -530,14 +566,12 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                 ))}
               </div>
               <div style={{ maxHeight: 430, overflowY: "auto", display: "grid", gap: 12, paddingRight: 4 }}>
-                {cdmMenu.sections
-                  .find((s) => s.id === secId)!
-                  .groups.map((g) => (
+                {(sections.find((s) => s.id === secId) ?? sections[0])?.groups.map((g) => (
                     <div key={g.id}>
                       <div
                         className="gtr-mono"
                         style={{
-                          font: "700 9.5px/1 'JetBrains Mono',monospace",
+                          font: "700 11px/1 'JetBrains Mono',monospace",
                           letterSpacing: ".12em",
                           textTransform: "uppercase",
                           color: AMBER,
@@ -572,11 +606,11 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                             ) : (
                               <span style={{ width: 44, height: 34, flexShrink: 0, background: "rgba(255,255,255,.04)" }} />
                             )}
-                            <span style={{ flex: 1, minWidth: 0, font: "600 11.5px/1.3 'Golos Text',sans-serif" }}>
+                            <span style={{ flex: 1, minWidth: 0, font: "600 13px/1.45 'Golos Text',sans-serif" }}>
                               {it.name}
                               {inCart ? <Chip color={GREEN}> ×{inCart}</Chip> : null}
                             </span>
-                            <span className="gtr-mono" style={{ font: "600 10.5px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
+                            <span className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
                               {it.opts ? `${t("от")} ` : ""}
                               {it.price ? it.price.toLocaleString("ru-RU") : "—"}
                             </span>
@@ -625,10 +659,10 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
             }}
           >
             <div style={{ flex: 1, minWidth: 200 }}>
-              <div style={{ font: "700 12.5px/1.3 'Golos Text',sans-serif" }}>
+              <div style={{ font: "700 12.5px/1.45 'Golos Text',sans-serif" }}>
                 {zone?.name} · {table.name}
               </div>
-              <div className="gtr-mono" style={{ marginTop: 4, font: "500 10px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
+              <div className="gtr-mono" style={{ marginTop: 4, font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
                 {dateIso || "—"} · {slot || "—"} · {guests} {t("чел.")}
                 <br />
                 {t("депозит")}{" "}
@@ -650,11 +684,11 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
             </button>
           </div>
           {state && state !== "…" ? (
-            <span className="gtr-mono" style={{ font: "500 10px/1.4 'JetBrains Mono',monospace", color: AMBER }}>
+            <span className="gtr-mono" style={{ font: "500 12px/1.5 'JetBrains Mono',monospace", color: AMBER }}>
               {state}
             </span>
           ) : null}
-          <span className="gtr-mono" style={{ font: "500 9px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+          <span className="gtr-mono" style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
             {t("Оплата депозита — на площадке при подтверждении. Депозит зачитывается кредитом на еду и напитки по правилам Café del Mar.")}
           </span>
         </div>
@@ -673,12 +707,6 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
   );
 }
 
-/** Есть ли для площадки полная схема рассадки (пока только Café del Mar). */
-export const hasCdmReserve = (vid: string) => vid === cdmReserve.meta.venueId;
-
-/** Зоны рассадки по id зала из venues.json — паспорт подтягивает фото
- *  и часы прямо в список «Нормализованные залы». */
-export const cdmZonesOfSpace = (vid: string, spaceId: string) =>
-  hasCdmReserve(vid)
-    ? (cdmReserve.zones as Zone[]).filter((z) => z.spaceId === spaceId)
-    : [];
+// Проверка «есть ли рассадка» и зоны зала живут в реестре — экраны
+// импортируют их отсюда по привычке, чтобы не переписывать call-site'ы.
+export { hasReserve, zonesOfSpace } from "./venue-commerce";

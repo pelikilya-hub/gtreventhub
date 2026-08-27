@@ -208,9 +208,14 @@
   /* ---- линии: волосяные, видимые, без мягкости ---- */
   --gtr-border: rgba(255, 255, 255, 0.09);
   --gtr-border2: rgba(255, 255, 255, 0.17);
+  /* ---- текст: три ступени, каждая проходит контраст AA ----
+     Было .55 и .33 — второстепенный текст давал 5.3:1, а служебный 2.5:1
+     при норме 4.5:1, то есть подписи и эйлброу физически не читались на
+     солнце и на плохих экранах. Ступени подняты и разведены заново:
+     15.7:1 / 8.5:1 / 5.3:1 — иерархия та же, но дно теперь выше нормы. */
   --gtr-t1: #eaeaea;
-  --gtr-t2: rgba(234, 234, 234, 0.55);
-  --gtr-t3: rgba(234, 234, 234, 0.33);
+  --gtr-t2: rgba(234, 234, 234, 0.72);
+  --gtr-t3: rgba(234, 234, 234, 0.55);
 
   /* ---- геометрия: 90 градусов, никаких скруглений ---- */
   --gtr-r: 0px;
@@ -238,7 +243,7 @@
   inset: 0;
   z-index: var(--gtr-z-grain);
   pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.035;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -250,11 +255,15 @@
   inset: 0;
   z-index: var(--gtr-z-grain);
   pointer-events: none;
-  opacity: 0.4;
+  /* Развёртка ЭЛТ — фирменная фактура, но на кегле 10–13px тёмная полоса
+     каждый третий пиксель садилась поперёк строчных букв и давала эффект
+     гребёнки: текст выглядел грязным, а не стилизованным. Фактура осталась,
+     вес снят более чем вдвое — на крупном она видна, мелкий больше не ест. */
+  opacity: 0.16;
   background: repeating-linear-gradient(
     0deg,
     transparent 0 2px,
-    rgba(0, 0, 0, 0.16) 2px 3px
+    rgba(0, 0, 0, 0.13) 2px 3px
   );
 }
 
@@ -312,7 +321,7 @@
 /* штамп-метка */
 .gtr-stamp {
   display: inline-block;
-  font: 700 8.5px/1 "JetBrains Mono", monospace;
+  font: 700 10px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--gtr-red);
@@ -725,18 +734,87 @@
 }
 .gtr-card-hover:active { transform: translate(0, 0); }
 
+/* ---------- я и мой вечер на карте ---------- */
+/* Синий — единственный чужой цвет на нашей карте, и это намеренно: точка
+   гостя не должна путаться ни с красным продуктом, ни с фиолетовым
+   маршрутом. Пульс — не украшение: он отличает живой сигнал датчика от
+   статичной метки площадки. */
+.gtr-map-me {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #4a90e2;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.55);
+  animation: gtr-me-pulse 2.4s ease-out infinite;
+}
+@keyframes gtr-me-pulse {
+  70% { box-shadow: 0 0 0 16px rgba(74, 144, 226, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(74, 144, 226, 0); }
+}
+/* Номер остановки: тот же фиолетовый, что у линии маршрута, — цепочка
+   читается как одно целое, а не как набор точек. */
+.gtr-map-stop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #7b4dff;
+  border: 2px solid #fff;
+  color: #fff;
+  font: 700 14px/1 "JetBrains Mono", monospace;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-map-me { animation: none; }
+}
+
+/* ---------- карточка площадки: снимок держит карточку ---------- */
+/* Снимок был полосой 16/7 — от фотографии заведения оставалась горизонталь
+   без неба и без зала, по ней невозможно понять, куда идёшь. 4/3 отдаёт
+   кадру три четверти карточки: на витрине гость выбирает глазами, а
+   подписи читает вторым шагом. Название переехало на сам снимок — тёмный
+   градиент внизу и так был нарисован, но ничего не держал. */
+.gtr-venue-shot {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+/* Медленный наезд кадра на наведение: карточка отзывается, но снимок не
+   «прыгает» — 0.45s с затуханием читается как движение камеры, а не как
+   анимация интерфейса. */
+.gtr-venue-shot img {
+  transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.gtr-card-hover:hover .gtr-venue-shot img {
+  transform: scale(1.045);
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-venue-shot img,
+  .gtr-card-hover:hover .gtr-venue-shot img {
+    transition: none;
+    transform: none;
+  }
+}
+
 .gtr-eyebrow {
-  font: 600 10px/1 "JetBrains Mono", monospace;
-  letter-spacing: 0.16em;
+  /* Самый частый служебный стиль продукта — 178 применений. На 10px с
+     трекингом .16em кириллица рассыпается на отдельные буквы: глаз читает
+     не слово, а частокол. Кегль поднят, трекинг ослаблен, строке дан воздух. */
+  font: 600 11px/1.3 "JetBrains Mono", monospace;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--gtr-t3);
 }
 .gtr-chip {
-  font: 600 8.5px/1 "JetBrains Mono", monospace;
-  letter-spacing: 0.08em;
+  /* 8.5px — ниже любого разумного порога: статусы площадок читались лупой */
+  font: 600 11px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   border-radius: 0;
-  padding: 4px 6px;
+  padding: 5px 7px;
   white-space: nowrap;
   display: inline-block;
 }
@@ -751,11 +829,23 @@
   border-radius: 0;
   cursor: pointer;
   transition: background 0.18s, color 0.18s, border-color 0.18s, letter-spacing 0.18s;
-  font: 500 12px/1 "Golos Text", sans-serif;
+  font: 500 12px/1.25 "Golos Text", sans-serif;
   background: transparent;
   color: rgba(234, 234, 234, 0.55);
   text-align: left;
 }
+/* Подпись пункта: длинное имя раздела не имеет права выдавливать счётчик
+   за край колонки. «Площадки Таиланд · 354» и «Заявки организаторов»
+   длиннее прежних подписей, и без этих трёх строк счётчик уезжал за
+   границу сайдбара. Обрезаем подпись, а не ломаем строку: пункт меню
+   обязан оставаться одной строки высотой. */
+.gtr-nav-item > span:not([class]) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Счётчик и тревожный значок не сжимаются никогда */
+.gtr-nav-item > .gtr-mono { flex: none; }
 .gtr-nav-item:hover {
   background: rgba(255, 255, 255, 0.045);
   color: var(--gtr-t1);
@@ -772,6 +862,12 @@
 
 .gtr-input {
   width: 100%;
+  /* Без border-box ширина 100% складывается с паддингами и рамкой: поле
+     вылезает за колонку на 26px и тянет за собой страницу вбок. На вебе
+     это незаметно, на телефоне даёт горизонтальный скролл всей формы —
+     ловилось на брони столика при 390px. Класс общий для всех форм
+     продукта, поэтому чинится один раз здесь. */
+  box-sizing: border-box;
   background: var(--gtr-card2);
   border: var(--gtr-hair) solid var(--gtr-border2);
   border-radius: 0;
@@ -902,6 +998,26 @@
 }
 .gtr-node:active { cursor: grabbing; }
 
+/* Площадка-папка: несёт весь граф внутри, поэтому весит больше обычного
+   блока — плотнее фон, тёплая кромка и лёгкий «язычок» сверху, как у папки. */
+.gtr-node-folder {
+  background: linear-gradient(180deg, #1a1414, #100d0e);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(229, 35, 27, 0.12);
+}
+.gtr-node-folder::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 14px;
+  width: 46px;
+  height: 7px;
+  background: linear-gradient(180deg, #1a1414, #100d0e);
+  border-top: 1px solid rgba(229, 35, 27, 0.3);
+  clip-path: polygon(0 100%, 10% 0, 90% 0, 100% 100%);
+}
+.gtr-folder-open { transition: background 0.16s ease, border-color 0.16s ease; }
+.gtr-folder-open:active { transform: scale(0.98); }
+
 /* ---------- бриф ---------- */
 @keyframes gtrBriefIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -974,7 +1090,14 @@
 /* ---------- каркас приложения ---------- */
 .gtr-shell { display: flex; min-height: 100dvh; }
 .gtr-sidebar {
-  width: 238px;
+  /* Ширина не фиксированная: на узком ноутбуке 238 px отъедали половину
+     рабочей области, на широком мониторе колонка выглядела худой. */
+  width: clamp(216px, 17vw, 258px);
+  /* Глобального border-box в проекте нет, он расставлен точечно. В меню
+     его отсутствие резало счётчики: пункт с width:100% и боковыми
+     полями оказывался на 24 px шире колонки, и «312» превращалось в
+     «3», а рамка карточки профиля уходила за край панели. */
+  box-sizing: border-box;
   flex: none;
   background: var(--gtr-side);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
@@ -985,6 +1108,20 @@
   top: 0;
   height: 100dvh;
   overflow-y: auto;
+  /* по горизонтали не прокручиваем никогда: боковое смещение панели
+     читается как «меню уплыло» */
+  overflow-x: hidden;
+}
+.gtr-sidebar * { box-sizing: border-box; }
+/* Шапка меню: логотип, языки, карточка профиля. Держится на месте, пока
+   список разделов прокручивается под ней. */
+.gtr-side-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--gtr-side);
+  margin: 0 -14px 0;
+  padding: 0 14px 10px;
 }
 .gtr-main { flex: 1; min-width: 0; --gtr-pad: 30px; padding: 22px var(--gtr-pad) 40px; }
 .gtr-topbar { display: none; }
@@ -1011,7 +1148,13 @@
     border-bottom: none;
     padding: 10px 14px;
     padding-top: calc(10px + env(safe-area-inset-top));
+    /* шапка — одна строка: бургер, логотип, языки. Перенос превратил бы
+       её в две строки и сдвинул весь экран вниз */
+    flex-wrap: nowrap;
+    min-width: 0;
   }
+  .gtr-topbar > * { min-width: 0; }
+  .gtr-burger { flex: none; }
   /* стекло шапки — отдельным слоем, чтобы уходило в ноль книзу: контент
      подныривает под неё, а не упирается в кромку */
   .gtr-topbar::after {
@@ -1081,8 +1224,15 @@
     transform: translateX(-105%);
     transition: transform 0.24s cubic-bezier(0.2, 0.75, 0.25, 1);
     box-shadow: 14px 0 40px rgba(0, 0, 0, 0.55);
-    padding-top: calc(20px + env(safe-area-inset-top));
+    /* Отступ под вырез несёт закреплённая шапка, а не сама панель:
+       у панели он прокручивался вместе с содержимым, и логотип с
+       профилем уезжали под системные часы. */
+    padding-top: 0;
     padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  .gtr-side-head {
+    padding-top: calc(14px + env(safe-area-inset-top));
+    box-shadow: 0 10px 18px -14px #000;
   }
   .nav-open .gtr-sidebar { transform: none; }
 
@@ -1141,8 +1291,8 @@
   flex: 1;
   min-width: 0;
   overflow-wrap: anywhere;
-  font: 500 12px/1.55 "Golos Text", sans-serif;
-  color: rgba(234, 234, 234, 0.78);
+  font: 500 13px/1.6 "Golos Text", sans-serif;
+  color: rgba(234, 234, 234, 0.88);
 }
 .gtr-field-v.mono {
   font: 500 11.5px/1.55 "JetBrains Mono", monospace;
@@ -1170,7 +1320,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font: 700 10px/1 "JetBrains Mono", monospace;
+  font: 700 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--gtr-t1);
@@ -1273,7 +1423,7 @@
 }
 .gtr-cal-week span {
   text-align: center;
-  font: 600 8.5px/1 "JetBrains Mono", monospace;
+  font: 600 10px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.12em;
   color: rgba(255, 255, 255, 0.35);
   padding: 3px 0;
@@ -1377,7 +1527,7 @@
 }
 
 /* ---------- BOSS: дашборд контроля ---------- */
-.gtr-btn-sm { padding: 6px 11px; font-size: 10px; }
+.gtr-btn-sm { padding: 6px 11px; font-size: 11px; }
 
 .gtr-boss-hero {
   display: flex;
@@ -1630,7 +1780,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font: 700 8.5px/1 "JetBrains Mono", monospace;
+  font: 700 10px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.1em;
   color: #2ecc71;
   border: 1px solid rgba(46, 204, 113, 0.5);
@@ -1771,12 +1921,28 @@
   transform: translateX(105%);
   transition: transform 0.24s ease;
   overflow-y: auto;
-  padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+  /* Панель идёт от самой кромки экрана, поэтому считается с вырезом:
+     без верхнего инсета шапка панели уезжала под «остров» iPhone, без
+     правого — под скруглённый угол в ландшафте. */
+  padding: calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right))
+    calc(14px + env(safe-area-inset-bottom)) 14px;
+  /* Ничего не уезжает вбок: длинное значение поля переносится, а не
+     растягивает панель и не даёт горизонтальную прокрутку. */
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
   display: grid;
   gap: 12px;
   align-content: start;
   overscroll-behavior: contain;
 }
+/* дети сетки по умолчанию не сжимаются ниже своего контента */
+.gtr-cons-drawer > * { min-width: 0; }
+.gtr-cons-drawer input,
+.gtr-cons-drawer select,
+.gtr-cons-drawer textarea { max-width: 100%; }
+/* широкие блоки внутри панели (таблицы смет, ряды цифр) прокручиваются
+   внутри себя, а не рвут лист */
+.gtr-cons-drawer table { width: 100%; table-layout: fixed; }
 .gtr-cons-drawer::before {
   content: "";
   position: absolute;
@@ -1795,6 +1961,83 @@
   );
 }
 .gtr-cons-drawer.open { transform: translateX(0); }
+
+/* ---------- панель события на телефоне ----------
+   Боковой лист в 348 точек на экране шириной 390 оставлял от графа
+   полоску и всё равно жал содержимое. На узком экране панель становится
+   нижним листом во всю ширину: приходит снизу — оттуда, где палец, —
+   и занимает не больше 86% высоты, чтобы граф под ней оставался виден. */
+@media (max-width: 700px) {
+  .gtr-cons-drawer {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: auto;
+    max-height: 86dvh;
+    transform: translateY(105%);
+    box-shadow: 0 -18px 44px rgba(0, 0, 0, 0.6);
+    padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
+  }
+  /* кромка света переезжает с левого торца на верхний */
+  .gtr-cons-drawer::before {
+    top: 0;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 12%,
+      rgba(255, 255, 255, 0.16) 50%,
+      rgba(255, 255, 255, 0.04) 88%,
+      transparent 100%
+    );
+  }
+  .gtr-cons-drawer.open { transform: translateY(0); }
+}
+
+/* Телефон набок: высоты мало, нижний лист съел бы экран целиком —
+   возвращаем боковой, но во всю высоту и с учётом выреза сбоку. */
+@media (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
+  .gtr-cons-drawer {
+    top: 0;
+    bottom: 0;
+    left: auto;
+    right: 0;
+    width: min(360px, 62vw);
+    height: 100dvh;
+    max-height: none;
+    transform: translateX(105%);
+    padding-top: calc(10px + env(safe-area-inset-top));
+  }
+  /* узкий ландшафт попадает и под правило нижнего листа — возвращаем
+     кромку света на левый торец, где она и должна быть у бокового листа */
+  .gtr-cons-drawer::before {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: auto;
+    width: 1px;
+    height: auto;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 10%,
+      rgba(255, 255, 255, 0.16) 50%,
+      rgba(255, 255, 255, 0.04) 90%,
+      transparent 100%
+    );
+  }
+  .gtr-cons-drawer.open { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-cons-drawer { transition: none; }
+}
 .gtr-cons-scrim {
   position: fixed;
   inset: 0;
@@ -1828,6 +2071,30 @@
   border: none;
 }
 .leaflet-container { background: #0a0b0d; font-family: 'Golos Text', sans-serif; }
+
+/* ---------- подложка карты в цвет продукта ----------
+   Основной слой — тёмная картография (см. gtr/map-tiles.ts): земля там
+   уже тёмная, а дороги светлее земли, как и должно быть на ночной карте.
+   Здесь мы только доводим её до нашего графита: гасим до уровня фона
+   приложения и снимаем лишнюю синеву, чтобы карта читалась продолжением
+   интерфейса, а не вставкой из другого продукта.
+   Фильтр — на СЛОЕ ПЛИТОК, не на контейнере: иначе вместе с подложкой
+   потемнели бы наши маркеры, маршрут и попапы. */
+/* Коэффициенты подобраны по реальной плитке, а не на глаз: земля подложки
+   (яркость ~71) уходит в ~13 при фоне приложения #0a0b0d = 10, то есть
+   карта садится ровно на цвет продукта, а дороги (~104) остаются на ~33 и
+   продолжают читаться. */
+.leaflet-container .gtr-tiles-dark {
+  filter: brightness(0.5) contrast(1.25) saturate(0.6);
+}
+
+/* Страховочный слой: если тёмная подложка отвалится, приезжает светлый
+   OpenStreetMap — его инвертируем, иначе в тёмном интерфейсе вспыхнет
+   белый лист. Красиво не будет (на светлой карте дороги светлее земли,
+   после инверсии — темнее), но продукт останется тёмным и рабочим. */
+.leaflet-container .gtr-tiles-osm {
+  filter: invert(1) hue-rotate(186deg) brightness(0.7) contrast(1.12) saturate(0.5);
+}
 .leaflet-container a.leaflet-popup-close-button { color: rgba(255,255,255,.6); }
 
 /* стекло: карточки полупрозрачны, дрейфующий свет просвечивает сквозь них */
@@ -1852,6 +2119,23 @@
 .gtr-screenin { animation: gtrscreenin 0.5s cubic-bezier(0.32, 0.72, 0, 1) both; }
 html { -webkit-tap-highlight-color: transparent; }
 .gtr-app { touch-action: manipulation; }
+
+/* ---------- поворот телефона: перекомпоновка как смена сцены ----------
+   Переход портрет↔ландшафт менял раскладку скачком. Класс gtr-rotating
+   вешается на полсекунды из шелла на смене ориентации — контент проявляется
+   тем же языком, что и переход между экранами, а не рвётся на глазах.
+   Фон, шапка и навигация не трогаются: анимируется только полотно. */
+@keyframes gtrrotatein {
+  from { opacity: 0.45; transform: scale(0.986); filter: blur(5px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.gtr-shell.gtr-rotating .gtr-main {
+  animation: gtrrotatein 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
+  will-change: transform, filter, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-shell.gtr-rotating .gtr-main { animation: none; }
+}
 
 /* ---------- мобильная игровая графика (тест: iPhone 12 Pro Max) ---------- */
 @media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
@@ -2095,7 +2379,7 @@ html { -webkit-tap-highlight-color: transparent; }
     text-overflow: ellipsis;
   }
   .gtr-playbar-sub {
-    font: 500 8.5px/1 'JetBrains Mono', monospace;
+    font: 500 10px/1 'JetBrains Mono', monospace;
     letter-spacing: 0.08em;
     color: rgba(255, 255, 255, 0.45);
   }
@@ -2669,13 +2953,18 @@ html { -webkit-tap-highlight-color: transparent; }
     transition: color 0.18s;
   }
   .gtr-tab-label {
-    font: 600 9px/1 "JetBrains Mono", monospace;
+    font: 600 11px/1 "JetBrains Mono", monospace;
     /* разрядка ужата: «ПРОФИЛЬ» — самое длинное слово, при 0.06em оно
        не помещалось в свою пятую часть и срезалось у грани */
     letter-spacing: 0.01em;
     text-transform: uppercase;
     white-space: nowrap;
     max-width: 100%;
+    /* Кегль подписи поднят с 9px — на 360px «ПРОФИЛЬ» занимает ~47px из
+       68px вкладки и помещается. Но история этой строки — про срез у грани,
+       поэтому предел страхуем многоточием, а не обрезкой на живую. */
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .gtr-tab { padding-inline: 2px; }
   .gtr-tab.on { color: #fff; }
@@ -2767,7 +3056,7 @@ html { -webkit-tap-highlight-color: transparent; }
     .gtr-tab-core { width: 48px; height: 48px; bottom: 13px; margin-left: -24px; }
     .gtr-tab-core img { width: 37px; }
     .gtr-tab-center::after { width: 60px; height: 60px; margin-left: -30px; }
-    .gtr-tab-label { font-size: 8.5px; }
+    .gtr-tab-label { font-size: 10px; }
   }
 
   /* ландшафт: панель ещё ниже, подписи прячем — по высоте её почти нет.
@@ -3286,7 +3575,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-comm-label {
   position: relative;
   z-index: 1;
-  font: 600 10px/1.15 "JetBrains Mono", monospace;
+  font: 600 11px/1.15 "JetBrains Mono", monospace;
   letter-spacing: 0.01em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -3314,13 +3603,29 @@ html { -webkit-tap-highlight-color: transparent; }
    КАРТА: РАЙОНЫ КОНТУРОМ, ТОЧКИ ЗНАКАМИ
    ===================================================================== */
 
-/* Тайлы Carto приходят синевато-серыми и рядом с нашим чёрно-красным
-   выглядят чужой картинкой. Фильтр уводит их в нашу температуру: чуть
-   темнее, чуть контрастнее, с уходом от синевы. Менять сами тайлы мы не
-   можем — они чужие, — но покрасить их в свой свет можем. */
+/* Тайлы OpenStreetMap приходят светлыми — CARTO закрыл бесплатный доступ
+   к готовым тёмным тайлам API-ключом, а OSM бесплатен всегда и без
+   регистрации. Invert + компенсирующий hue-rotate(180) — стандартный
+   приём: переворачивает яркость (светлое становится тёмным), но
+   возвращает исходные цвета суши/воды/дорог на место. Остальное —
+   лёгкая подстройка под нашу чёрно-красную температуру. */
 .gtr-map-tiles {
-  filter: brightness(0.82) contrast(1.18) saturate(0.55) hue-rotate(-12deg);
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.6);
 }
+
+/* Карта трекера вечера. Живёт рядом с панелью статистики, поэтому запас
+   сверху меньше, чем у обзорной карты острова. dvh, а не vh: на iOS
+   адресная строка съедает низ, и на vh карта уезжает под нижнюю панель. */
+.gtr-track-canvas {
+  height: calc(100dvh - 150px);
+  min-height: 340px;
+  background: #0a0b0d;
+  position: relative;
+  overflow: hidden;
+}
+/* В колонке рядом с картой список маршрута не должен выдавливать чек-ин
+   за нижний край экрана — отсюда потолок. На телефоне он снимается. */
+.gtr-track-list { max-height: 50dvh; }
 
 .gtr-map-canvas {
   height: calc(100dvh - 260px);
@@ -3412,7 +3717,7 @@ html { -webkit-tap-highlight-color: transparent; }
   background: rgba(10, 11, 13, 0.92);
   border: none;
   color: #fff;
-  font: 600 10px/1 "JetBrains Mono", monospace;
+  font: 600 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 5px 8px;
@@ -3421,6 +3726,19 @@ html { -webkit-tap-highlight-color: transparent; }
 .leaflet-tooltip.gtr-area-tip::before { display: none; }
 
 @media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
+  /* Трекер в столбик: карта сверху занимает пол-экрана, под ней статистика
+     и список маршрута обычной прокруткой страницы. Полноэкранная карта тут
+     не нужна — в трекере человек смотрит не остров, а свою точку и список. */
+  .gtr-track-canvas {
+    height: 46dvh;
+    min-height: 260px;
+    width: 100vw;
+    max-width: 100vw;
+    margin-inline: calc(50% - 50vw);
+  }
+  /* Потолок высоты списка снят: в столбике он режет маршрут без нужды */
+  .gtr-track-list { max-height: none; }
+
   /* На телефоне карта занимает экран целиком между строками выбора и
      нижней панелью: карта — это и есть содержимое экрана. */
   .gtr-map-canvas {
@@ -3441,7 +3759,7 @@ html { -webkit-tap-highlight-color: transparent; }
     padding-inline: var(--gtr-pad, 14px);
     scroll-padding-inline: var(--gtr-pad, 14px);
   }
-  .gtr-map-chip { padding: 5px 8px; font-size: 10px; }
+  .gtr-map-chip { padding: 5px 8px; font-size: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3475,7 +3793,7 @@ html { -webkit-tap-highlight-color: transparent; }
   padding: 0 3px;
   background: var(--c);
   color: #0a0b0d;
-  font: 700 9.5px/16px "JetBrains Mono", monospace;
+  font: 700 11px/16px "JetBrains Mono", monospace;
   text-align: center;
 }
 .gtr-map-cluster:hover { transform: scale(1.14); }
@@ -3531,12 +3849,12 @@ html { -webkit-tap-highlight-color: transparent; }
   margin-bottom: 14px;
 }
 .gtr-bro-eyebrow {
-  font: 700 10px/1 "JetBrains Mono", monospace;
+  font: 700 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.22em;
   color: #fff;
 }
 .gtr-bro-state {
-  font: 500 10px/1 "JetBrains Mono", monospace;
+  font: 500 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.1em;
   color: var(--gtr-t2);
   padding: 4px 8px;
@@ -3644,7 +3962,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-bro-card.act { cursor: pointer; }
 .gtr-bro-card.act:active { background: rgba(255, 255, 255, 0.11); }
 .gtr-bro-card-k {
-  font: 700 10px/1 "JetBrains Mono", monospace;
+  font: 700 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #fff;
@@ -3701,7 +4019,7 @@ html { -webkit-tap-highlight-color: transparent; }
 
 .gtr-bro-tune { margin-top: 14px; display: grid; gap: 8px; }
 .gtr-bro-tune-t {
-  font: 700 10px/1 "JetBrains Mono", monospace;
+  font: 700 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.18em;
   color: var(--gtr-t2);
   margin-top: 4px;
@@ -3782,7 +4100,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .gtr-bro-chip.on { background: rgba(123, 77, 255, 0.3); color: #fff; }
 .gtr-bro-chip i {
   font-style: normal;
-  font: 500 10px/1 "JetBrains Mono", monospace;
+  font: 500 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.06em;
   opacity: 0.7;
 }
@@ -3911,7 +4229,7 @@ html { -webkit-tap-highlight-color: transparent; }
   gap: 10px;
 }
 .gtr-bro-confirm-t {
-  font: 700 10px/1 "JetBrains Mono", monospace;
+  font: 700 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.2em;
   color: #fff;
 }
@@ -3966,7 +4284,7 @@ html { -webkit-tap-highlight-color: transparent; }
   transition: transform 0.18s cubic-bezier(0.32, 0.72, 0, 1), filter 0.2s ease;
 }
 .gtr-bro-dock span {
-  font: 700 9px/1 "JetBrains Mono", monospace;
+  font: 700 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.2em;
   color: var(--gtr-t2);
   text-transform: uppercase;
@@ -4020,7 +4338,7 @@ html { -webkit-tap-highlight-color: transparent; }
   overscroll-behavior: contain;
 }
 .gtr-bro-dos-h {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   color: #9dffb0;
   border-bottom: 1px dashed rgba(51, 255, 51, 0.35);
@@ -4097,6 +4415,8 @@ html { -webkit-tap-highlight-color: transparent; }
   font-size: 12px;
   cursor: pointer;
 }
+
+
 
 
 
@@ -4614,7 +4934,7 @@ html { -webkit-tap-highlight-color: transparent; }
   align-items: center;
   gap: 12px;
   padding-top: 4px;
-  font: 500 9px/1 "JetBrains Mono", monospace;
+  font: 500 11px/1 "JetBrains Mono", monospace;
   letter-spacing: 0.42em;
   color: var(--gtr-t3);
   white-space: nowrap;
@@ -4790,4 +5110,244 @@ canvas.gtr-dancer-img {
   height: auto;
   display: block;
   pointer-events: auto;
+}
+
+/* =====================================================================
+   ГЕРО ПАСПОРТА ПЛОЩАДКИ
+   ---------------------------------------------------------------------
+   Раньше фото лежало фоном под текстом карточки в 140 точек, поверх — 
+   горизонтальная заливка почти в ноль: кадр работал тусклой текстурой, а
+   имя и кнопки шли прямо по нему. Теперь кадр во всю ширину и в полный
+   рост, а текст — в нижней полосе поверх ВЕРТИКАЛЬНОЙ заливки: верх
+   остаётся чистым, низ уходит в фон приложения.
+   ===================================================================== */
+.gtr-vhero {
+  position: relative;
+  /* вылет ровно на отступ колонки: на телефоне это край экрана */
+  margin-inline: calc(-1 * var(--gtr-pad, 14px));
+  margin-bottom: 16px;
+  /* min-height, а не height: если подпись длинная (имя + чипы + кнопки),
+     блок вырастает, а не срезает себе верх под overflow. */
+  min-height: clamp(300px, 54vh, 480px);
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--gtr-bg, #0a0b0d);
+  display: flex;
+  align-items: flex-end;
+}
+
+/* Слой кадра выше блока: параллакс сдвигает его вверх, и запас снизу не
+   должен обнажать фон. */
+.gtr-vhero-media {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -8%;
+  bottom: -8%;
+  z-index: 0;
+  will-change: transform;
+}
+.gtr-vhero-media > * {
+  width: 100%;
+  height: 100%;
+}
+.gtr-vhero-shot,
+.gtr-vhero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* наплыв: кадры сменяются затуханием, а не рывком */
+.gtr-vhero-shot {
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+.gtr-vhero-shot.on { opacity: 1; }
+
+/* Ken Burns: медленный наезд оживляет даже одиночный кадр */
+@keyframes gtrken {
+  from { transform: scale(1.04); }
+  to { transform: scale(1.14); }
+}
+.gtr-vhero-ken { animation: gtrken 16s ease-out both; }
+
+/* Вертикальная заливка: верх кадра почти чист, низ уходит в фон
+   приложения — подпись читается, а фотография остаётся фотографией. */
+.gtr-vhero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 11, 13, 0.34) 0%,
+      rgba(10, 11, 13, 0.05) 22%,
+      rgba(10, 11, 13, 0.55) 58%,
+      rgba(10, 11, 13, 0.93) 84%,
+      var(--gtr-bg, #0a0b0d) 100%
+    ),
+    /* лёгкое затемнение к торцам, чтобы кадр не спорил с колонкой */
+      linear-gradient(90deg, rgba(10, 11, 13, 0.5) 0%, transparent 22%, transparent 78%, rgba(10, 11, 13, 0.5) 100%);
+}
+
+.gtr-vhero-in {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 24px 26px 22px;
+}
+
+@media (max-width: 860px) {
+  .gtr-vhero { min-height: clamp(260px, 46vh, 380px); }
+  .gtr-vhero-in { padding: 18px 18px 16px; }
+}
+
+/* телефон набок: высоты мало — кадр ужимается, но не исчезает */
+@media (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
+  .gtr-vhero { min-height: 210px; }
+  .gtr-vhero-in { padding: 12px 18px 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gtr-vhero-ken { animation: none; }
+  .gtr-vhero-shot { transition: none; }
+  .gtr-vhero-media { transform: none !important; }
+}
+
+/* =====================================================================
+   РАСКРЫТИЕ ПРИ ПРОКРУТКЕ
+   ---------------------------------------------------------------------
+   Блоки не появляются разом простынёй: каждый входит, когда до него
+   доскроллили. Прячем только если сценарий реально включился (класс
+   вешает JS) — иначе при отключённом скрипте страница осталась бы пустой.
+   ===================================================================== */
+.gtr-reveal-on [data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.55s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.55s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.gtr-reveal-on [data-reveal].in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-reveal-on [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+
+/* ================================================================== */
+/* BRO на телефоне и планшете: эфир не должен плавать                 */
+/*                                                                    */
+/* Блок стоит последним намеренно. Скин v1.1 выше делает лист         */
+/* полноэкранным (height: 100dvh) — это верное решение, и мы его не   */
+/* отменяем. Чиним то, что из него следует на больших и на низких     */
+/* экранах.                                                           */
+/*                                                                    */
+/* 1. Клавиатура iOS не уменьшает окно: position:fixed продолжает      */
+/*    считать высоту по-старому, и поле ввода уезжает под клавиатуру — */
+/*    человек печатает вслепую. Настоящую видимую высоту знает только  */
+/*    visualViewport; оверлей кладёт её разницу в --gtr-kb.            */
+/* 2. На iPad контент полноэкранного листа расползался во всю ширину:  */
+/*    реплика разговора шла строкой в 735 px, ряд быстрых команд —     */
+/*    редкой гребёнкой. Лист остаётся во весь экран, а содержимое      */
+/*    собирается в колонку чтения по центру.                           */
+/* 3. Телефон в ландшафте: 390 px высоты не вмещали шапку, разговор в  */
+/*    208 px, поле ввода и ряд команд.                                 */
+/* ================================================================== */
+
+/* Клавиатура. Вне iOS с открытой клавиатурой --gtr-kb равна нулю, и
+   правило ничего не меняет. */
+.gtr-bro-sheet {
+  height: calc(100dvh - var(--gtr-kb, 0px));
+  transition: height 0.18s ease;
+}
+
+/* Лист — вертикальная колонка, в которой тянется только разговор.
+   Раньше все блоки шли естественной высотой: на планшете снизу
+   оставалась пустота в треть экрана, а в ландшафте телефона шар и
+   кнопки уезжали за нижний край, и до главной кнопки надо было
+   доскроллить. Теперь органы управления всегда на виду, а недостаток
+   или избыток высоты забирает разговор. */
+.gtr-bro-sheet {
+  display: flex;
+  flex-direction: column;
+}
+.gtr-bro-chat,
+.gtr-bro-dos {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 160px;
+}
+
+/* Колонка чтения. Лист во весь экран, содержимое — по центру: на
+   планшете строка в 700 px теряет начало следующей, а восемь значков
+   быстрых команд расползаются на всю ширину. */
+@media (min-width: 701px) {
+  /* Без width: 100% — блочные дети и так занимают доступную ширину, а
+     явная ширина при content-box ломала поле ввода: 100 % плюс его
+     собственные отступы давали горизонтальную прокрутку листа. */
+  .gtr-bro-sheet > *:not(.gtr-bro-smoke) {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  /* Ровно четыре в ряд: восемь команд в одну строку на планшете дают
+     редкую гребёнку, а auto-fit оставлял хвост из одного значка. */
+  .gtr-bro-quick { grid-template-columns: repeat(4, 1fr); gap: 10px 6px; }
+  .gtr-bro-cards { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+}
+
+/* Длина строки внутри колонки. Реплика в 88 % даже от 720 px — это
+   630 px текста; по знакам читается вернее, чем по процентам. */
+/* Ответ BRO скин v1.1 распустил на всю ширину колонки — на телефоне это
+   верно, на планшете строка уходит за 700 px. Ограничиваем по знакам:
+   .bro нужен тот же вес селектора, что и у правила выше. */
+.gtr-bro-msg,
+.gtr-bro-msg.bro { max-width: min(92%, 52ch); }
+.gtr-bro-dos-l,
+.gtr-bro-line { max-width: 78ch; }
+
+/* Телефон в ландшафте: высоты нет совсем. Сжимаем всё, кроме разговора —
+   ради него эфир и открывают. */
+@media (orientation: landscape) and (max-height: 560px) and (any-pointer: coarse) {
+  .gtr-bro-sheet { padding-top: calc(8px + env(safe-area-inset-top)); }
+  .gtr-bro-head { margin-bottom: 8px; }
+  .gtr-bro-chat,
+  .gtr-bro-dos { min-height: 72px; margin-bottom: 6px; gap: 10px; }
+  /* Кегль разговора скин v1.1 поднял до 17 px — на 390 px высоты это
+     две реплики на весь экран. В ландшафте возвращаем плотность. */
+  .gtr-bro-msg { font-size: 15px; line-height: 1.5; }
+  .gtr-bro-hint { font-size: 10px; }
+  .gtr-bro-orb-wrap { padding: 0 0 4px; gap: 4px; }
+  .gtr-bro-orb { width: 64px; height: 64px; }
+  .gtr-bro-orb img { width: 34px; height: 34px; }
+  .gtr-bro-quick { margin: 6px 0 0; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 2px; }
+  .gtr-bro-q { padding: 4px 2px 5px; gap: 3px; }
+  /* Размер знака компонент задаёт инлайном (Stk size={30}), поэтому здесь
+     единственное место во всём файле, где без !important не обойтись. */
+  .gtr-bro-q .gtr-stk { width: 24px !important; height: 24px !important; }
+  .gtr-bro-btn { padding: 8px 10px; }
+  .gtr-bro-say { margin-bottom: 6px; }
+  /* Таблетка свёрнутого эфира висела на высоте нижней панели, которой в
+     ландшафте нет: она оказывалась посреди экрана. */
+  .gtr-bro-pill-wrap { bottom: calc(12px + env(safe-area-inset-bottom)); }
+}
+
+/* Вырезы экрана. В ландшафте чёлка и скруглённые углы съедают края, а
+   полноэкранный лист про них не знал: подпись состояния и кнопка выхода
+   уходили под вырез. */
+@media (any-pointer: coarse) {
+  .gtr-bro-sheet {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
 }

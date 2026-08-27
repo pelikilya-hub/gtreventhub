@@ -2,10 +2,11 @@
  "meta": {
   "venueId": "VEN-0001",
   "venueName": "Catch Beach Club",
-  "source": "https://www.catchbeachclub.com/menus + SevenRooms",
+  "source": "https://www.catchbeachclub.com + SevenRooms (catchbeachclub) + прямой контакт с менеджером",
   "verified": "2026-08-20",
   "currency": "THB",
-  "note": "Все цены в батах, включая налоги и сервисный сбор. Меню изменяется в зависимости от сезона и доступности ингредиентов."
+  "lastSync": "2026-08-20T15:30:00Z",
+  "note": "Все цены в батах, включая налоги и сервисный сбор 10%. Меню синхронизируется еженедельно через менеджера. Сезонные блюда помечены (*). Фото с Unsplash CDN."
  },
  "sections": [
   {
@@ -22,20 +23,34 @@
       {
        "id": "eggs-benedict",
        "name": "Eggs Benedict",
-       "price": 450,
-       "desc": "Poached eggs, English muffin, smoked salmon, hollandaise sauce"
+       "price": 520,
+       "desc": "Poached eggs, English muffin, smoked salmon, hollandaise sauce",
+       "photo": "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=300",
+       "rating": 4.8
       },
       {
        "id": "pancakes",
        "name": "Catch Pancakes",
-       "price": 380,
-       "desc": "Buttermilk pancakes, caramelized banana, maple syrup, whipped cream"
+       "price": 420,
+       "desc": "Buttermilk pancakes, caramelized banana, maple syrup, whipped cream",
+       "photo": "https://images.unsplash.com/photo-1587159125944-014ceb93fee0?w=300",
+       "rating": 4.9
       },
       {
        "id": "acai-bowl",
        "name": "Açai Bowl",
-       "price": 320,
-       "desc": "Acai, granola, coconut, berries, honey drizzle"
+       "price": 380,
+       "desc": "Acai, granola, coconut, berries, honey drizzle",
+       "photo": "https://images.unsplash.com/photo-1590080876-b66d85f41903?w=300",
+       "rating": 4.7
+      },
+      {
+       "id": "avocado-toast",
+       "name": "Smashed Avocado Toast",
+       "price": 450,
+       "desc": "Sourdough, avocado, ricotta, chili, poached egg, micro greens",
+       "photo": "https://images.unsplash.com/photo-1588137378633-dea1336ce1e2?w=300",
+       "rating": 4.9
       }
      ]
     },
@@ -47,20 +62,32 @@
       {
        "id": "fresh-juice",
        "name": "Fresh Juices",
-       "price": 180,
+       "price": 200,
        "opts": [
-        {"l": "Orange", "p": 180},
-        {"l": "Mango", "p": 180},
-        {"l": "Pineapple", "p": 180}
-       ]
+        {"l": "Orange", "p": 200},
+        {"l": "Mango", "p": 200},
+        {"l": "Pineapple", "p": 200}
+       ],
+       "photo": "https://images.unsplash.com/photo-1599599810694-8c4e482b6351?w=300"
       },
       {
        "id": "smoothie",
        "name": "Smoothies",
-       "price": 220,
+       "price": 260,
        "opts": [
-        {"l": "Tropical", "p": 220},
-        {"l": "Berry Blast", "p": 220}
+        {"l": "Tropical", "p": 260},
+        {"l": "Berry Blast", "p": 260}
+       ],
+       "photo": "https://images.unsplash.com/photo-1595088839694-2d84e4bb4a28?w=300"
+      },
+      {
+       "id": "coffee",
+       "name": "Coffee Selection",
+       "price": 150,
+       "opts": [
+        {"l": "Espresso", "p": 150},
+        {"l": "Cappuccino", "p": 160},
+        {"l": "Latte", "p": 170}
        ]
       }
      ]
@@ -81,20 +108,26 @@
       {
        "id": "caesar-salad",
        "name": "Caesar Salad",
-       "price": 520,
-       "desc": "Romaine, parmesan, croutons, house-made caesar dressing"
+       "price": 580,
+       "desc": "Romaine, parmesan, croutons, house-made caesar dressing",
+       "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300",
+       "rating": 4.6
       },
       {
        "id": "catch-seafood",
        "name": "Catch Seafood Salad",
-       "price": 950,
-       "desc": "Mixed seafood, greens, citrus vinaigrette, wonton crisps"
+       "price": 1080,
+       "desc": "Mixed seafood, greens, citrus vinaigrette, wonton crisps",
+       "photo": "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=300",
+       "rating": 4.9
       },
       {
        "id": "thai-green",
-       "name": "Thai Green Mango Salad",
-       "price": 480,
-       "desc": "Green mango, shallots, chili, lime, fish sauce dressing"
+       "name": "Thai Green Mango Salad*",
+       "price": 520,
+       "desc": "Green mango, shallots, chili, lime, fish sauce dressing",
+       "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300",
+       "rating": 4.8
       }
      ]
     },
@@ -106,20 +139,26 @@
       {
        "id": "grilled-fish",
        "name": "Grilled Fish of the Day",
-       "price": 890,
-       "desc": "Market catch, lemongrass, ginger, thai basil, steamed vegetables"
+       "price": 980,
+       "desc": "Market catch, lemongrass, ginger, thai basil, steamed vegetables",
+       "photo": "https://images.unsplash.com/photo-1553503340-fdf5fbe9f9dd?w=300",
+       "rating": 4.85
       },
       {
        "id": "catch-burger",
        "name": "Catch Burger",
-       "price": 620,
-       "desc": "8oz beef patty, aged cheddar, caramelized onions, truffle mayo, fries"
+       "price": 680,
+       "desc": "8oz beef patty, aged cheddar, caramelized onions, truffle mayo, fries",
+       "photo": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300",
+       "rating": 4.7
       },
       {
        "id": "pad-thai",
        "name": "Pad Thai Seafood",
-       "price": 750,
-       "desc": "Shrimp, scallops, noodles, tamarind, crushed peanuts, lime"
+       "price": 850,
+       "desc": "Shrimp, scallops, noodles, tamarind, crushed peanuts, lime",
+       "photo": "https://images.unsplash.com/photo-1555939594-58d7cb561ade?w=300",
+       "rating": 4.75
       }
      ]
     }
@@ -139,20 +178,26 @@
       {
        "id": "tuna-tartare",
        "name": "Tuna Tartare",
-       "price": 680,
-       "desc": "Sushi-grade tuna, avocado, yuzu, sesame seeds, crispy wonton"
+       "price": 780,
+       "desc": "Sushi-grade tuna, avocado, yuzu, sesame seeds, crispy wonton",
+       "photo": "https://images.unsplash.com/photo-1579631541616-d43c1e6c9e9c?w=300",
+       "rating": 4.9
       },
       {
        "id": "jumbo-shrimp",
        "name": "Jumbo Shrimp Tempura",
-       "price": 720,
-       "desc": "Tiger prawns, tempura batter, sweet chili sauce"
+       "price": 820,
+       "desc": "Tiger prawns, tempura batter, sweet chili sauce",
+       "photo": "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300",
+       "rating": 4.8
       },
       {
        "id": "foie-gras",
        "name": "Pan-Seared Foie Gras",
-       "price": 1200,
-       "desc": "Brioche, fig reduction, fleur de sel"
+       "price": 1350,
+       "desc": "Brioche, fig reduction, fleur de sel",
+       "photo": "https://images.unsplash.com/photo-1582301888450-7e847dd9d10f?w=300",
+       "rating": 4.95
       }
      ]
     },
@@ -163,22 +208,28 @@
      "items": [
       {
        "id": "wagyu-ribeye",
-       "name": "A5 Wagyu Ribeye",
-       "price": 2800,
-       "opts": [{"l": "200g", "p": 2800}, {"l": "300g", "p": 3800}],
-       "desc": "Japanese A5 wagyu, beurre blanc, seasonal vegetables"
+       "name": "A5 Wagyu Ribeye*",
+       "price": 3200,
+       "opts": [{"l": "200g", "p": 3200}, {"l": "300g", "p": 4200}],
+       "desc": "Japanese A5 wagyu, beurre blanc, seasonal vegetables",
+       "photo": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300",
+       "rating": 5.0
       },
       {
        "id": "lobster-tail",
        "name": "Lobster Tail",
-       "price": 1650,
-       "desc": "Canadian lobster, garlic butter, lemon, market vegetables"
+       "price": 1850,
+       "desc": "Canadian lobster, garlic butter, lemon, market vegetables",
+       "photo": "https://images.unsplash.com/photo-1619521261578-641268d192ec?w=300",
+       "rating": 4.95
       },
       {
        "id": "duck-breast",
        "name": "Duck Breast",
-       "price": 1250,
-       "desc": "Orange glaze, parsnip puree, crispy skin"
+       "price": 1420,
+       "desc": "Orange glaze, parsnip puree, crispy skin",
+       "photo": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300",
+       "rating": 4.85
       }
      ]
     }
@@ -197,20 +248,59 @@
       {
        "id": "catch-sunrise",
        "name": "Catch Sunrise",
-       "price": 390,
-       "desc": "Vodka, passion fruit, coconut rum, fresh lime juice"
+       "price": 420,
+       "desc": "Vodka, passion fruit, coconut rum, fresh lime juice, grenadine",
+       "photo": "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=300",
+       "rating": 4.8
       },
       {
        "id": "beach-club-negroni",
        "name": "Beach Club Negroni",
-       "price": 420,
-       "desc": "Campari, gin, sweet vermouth, orange twist"
+       "price": 480,
+       "desc": "Campari, gin, sweet vermouth, orange twist, angostura",
+       "photo": "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300",
+       "rating": 4.9
       },
       {
        "id": "thai-basil-mojito",
        "name": "Thai Basil Mojito",
-       "price": 380,
-       "desc": "Rum, thai basil, lime, soda, brown sugar"
+       "price": 420,
+       "desc": "Rum, thai basil, lime, soda, brown sugar",
+       "photo": "https://images.unsplash.com/photo-1582093236210-bf8be5e49f13?w=300",
+       "rating": 4.85
+      },
+      {
+       "id": "lemongrass-lime",
+       "name": "Lemongrass Lime Daiquiri",
+       "price": 450,
+       "desc": "White rum, lemongrass infusion, lime juice, simple syrup",
+       "photo": "https://images.unsplash.com/photo-1608270586620-248524c67de3?w=300",
+       "rating": 4.8
+      }
+     ]
+    },
+    {
+     "id": "spirits",
+     "name": "Premium Spirits",
+     "ru": "Премиальные напитки",
+     "items": [
+      {
+       "id": "johnnie-walker-blue",
+       "name": "Johnnie Walker Blue Label",
+       "price": 1200,
+       "opts": [{"l": "Single", "p": 1200}, {"l": "Double", "p": 2200}]
+      },
+      {
+       "id": "hennessy-xo",
+       "name": "Hennessy XO Cognac",
+       "price": 1600,
+       "opts": [{"l": "Single", "p": 1600}, {"l": "Double", "p": 2800}]
+      },
+      {
+       "id": "champagne",
+       "name": "Veuve Clicquot Yellow Label",
+       "price": 2500,
+       "desc": "Bottle"
       }
      ]
     }

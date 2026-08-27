@@ -21,10 +21,12 @@ import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
 import { Card, Chip, Dot, Eyebrow, Icon, StkBtn, tint } from "../ui";
 import {
+  allAfishaFn,
   bossHeadFn,
   broadcastFn,
   communityInviteTextFn,
   communityPostFn,
+  tgRelinkFn,
   deleteTaskFn,
   metaCfgFn,
   metaExchangeFn,
@@ -57,6 +59,7 @@ import {
   type VenueConfirm,
 } from "../kv-api";
 import { VAPID_PUBLIC_KEY } from "../push";
+import { eventsToday, signupsToday, createdToday, phuketDayStart } from "../daily-digest";
 
 const mono = (s: number, w = 500) => `${w} ${s}px/1.3 'JetBrains Mono',monospace`;
 const golos = (s: number, w = 500) => `${w} ${s}px/1.4 'Golos Text',sans-serif`;
@@ -183,8 +186,8 @@ function BossHeadCard({ head, onSaved }: { head: BossHead | null; onSaved: (h: B
       <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
         <BossHead3D head={head} size={132} force={preview} />
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, flex: 1, minWidth: 260 }}>
-          {slot("day", "ДЕНЬ · 06–18", "прозрачные очки, дневной свет")}
-          {slot("night", "НОЧЬ · 18–06", "тёмные очки, клубный свет")}
+          {slot("day", t("ДЕНЬ · 06–18"), "прозрачные очки, дневной свет")}
+          {slot("night", t("НОЧЬ · 18–06"), "тёмные очки, клубный свет")}
         </div>
       </div>
       <span style={{ font: mono(8.5), color: "rgba(255,255,255,.4)" }}>
@@ -342,9 +345,9 @@ function TasksBlock({ users, me }: { users: PublicUser[]; me: string }) {
   const open = tasks.filter((t) => t.status !== "done");
   const done = tasks.filter((t) => t.status === "done").slice(0, 3);
   const ST: Record<GtrTask["status"], [string, string]> = {
-    new: ["НОВАЯ", AMBER],
-    doing: ["В РАБОТЕ", "#7B4DFF"],
-    done: ["ГОТОВО", GREEN],
+    new: [t("НОВАЯ"), AMBER],
+    doing: [t("В РАБОТЕ"), "#7B4DFF"],
+    done: [t("ГОТОВО"), GREEN],
   };
 
   return (
@@ -457,10 +460,10 @@ function BroadcastBlock() {
     if (r.ok) setText("");
   }, [text, aud]);
   const AUD: [typeof aud, string][] = [
-    ["all", "ВСЕМ"],
-    ["team", "КОМАНДЕ"],
-    ["artists", "АРТИСТАМ"],
-    ["organizers", "ОРГАМ"],
+    ["all", t("ВСЕМ")],
+    ["team", t("КОМАНДЕ")],
+    ["artists", t("АРТИСТАМ")],
+    ["organizers", t("ОРГАМ")],
   ];
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
@@ -511,11 +514,13 @@ export function BossCabinet() {
   const go = (s: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: s } });
   const [users, setUsers] = useState<PublicUser[]>([]);
   const [head, setHead] = useState<BossHead | null>(null);
+  const [afisha, setAfisha] = useState<{ vid: string; dateIso: string; artistIds: string[] }[]>([]);
   useEffect(() => {
     listUsersFn().then((r) => {
       if (r.ok) setUsers(r.users);
     });
     bossHeadFn().then((r) => setHead(r.head)).catch(() => {});
+    allAfishaFn().then((r) => setAfisha(r.items)).catch(() => {});
   }, []);
 
   const money = useMemo(() => {
@@ -576,12 +581,25 @@ export function BossCabinet() {
     return h < 48 ? `${h}ч` : `${Math.round(h / 24)}д`;
   };
 
+  // Сводка дня: живые сигналы за сегодняшние сутки (Пхукет, UTC+7). Афиша —
+  // из реального синка, регистрации/черновики/заявки — по своим таймстемпам.
+  const digest = useMemo(() => {
+    const dayStart = phuketDayStart(Date.now());
+    const todayIso = new Date(dayStart + 12 * 3600_000).toISOString().slice(0, 10);
+    return {
+      events: eventsToday(afisha, todayIso),
+      signups: signupsToday(users, dayStart),
+      newDrafts: createdToday(shared.drafts.map((d) => ({ ts: d.updated })), dayStart),
+      newReqs: createdToday(reqs.map((r) => ({ ts: r.ts })), dayStart),
+    };
+  }, [afisha, users, shared.drafts, reqs]);
+
   const kpis: [string, string, string][] = [
-    ["ПАЙПЛАЙН", fmtThb(money.total), "все сметы"],
+    [t("ПАЙПЛАЙН"), fmtThb(money.total), "все сметы"],
     ["КОМИССИЯ GTR", fmtThb(money.commission), "заложено"],
-    ["СОБЫТИЯ", String(shared.drafts.length), `${upcoming.length} впереди`],
-    ["ЗАЯВКИ", String(reqOpen.length), "открытых"],
-    ["КОМАНДА", String(users.length), "аккаунтов"],
+    [t("СОБЫТИЯ"), String(shared.drafts.length), `${upcoming.length} впереди`],
+    [t("ЗАЯВКИ"), String(reqOpen.length), "открытых"],
+    [t("КОМАНДА"), String(users.length), "аккаунтов"],
   ];
 
   return (
@@ -623,6 +641,66 @@ export function BossCabinet() {
 
       <div className="gtr-boss-grid">
         <SprintBlock go={go} />
+        {/* -------- сводка дня: что произошло на платформе за сегодня -------- */}
+        <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Eyebrow>{t("СВОДКА ДНЯ")}</Eyebrow>
+            <button className="gtr-btn gtr-btn-sm" onClick={() => go("tonight")}>
+              {t("Афиша →")}
+            </button>
+          </div>
+          {/* афиша сегодня */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ font: "700 22px/1 'Oswald',sans-serif", color: "#fff" }}>{digest.events.total}</span>
+            <span style={{ font: "500 12px/1.4 'Golos Text',sans-serif", color: "rgba(255,255,255,.7)" }}>
+              {t("событий в")} {digest.events.venues} {t("заведениях сегодня")}
+              {digest.events.withArtist ? ` · ${digest.events.withArtist} ${t("с нашими артистами")}` : ""}
+            </span>
+          </div>
+          {/* в каких заведениях есть мероприятия — топ по числу событий */}
+          {digest.events.byVenue.length ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ font: mono(8, 600), color: "rgba(255,255,255,.4)", letterSpacing: ".12em" }}>
+                {t("ЗАВЕДЕНИЯ С СОБЫТИЯМИ")}
+              </span>
+              {digest.events.byVenue.slice(0, 5).map((b) => (
+                <button
+                  key={b.vid}
+                  onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "base" }, search: { vid: b.vid } })}
+                  style={{ display: "flex", justifyContent: "space-between", gap: 8, padding: "3px 0", background: "none", border: "none", color: "inherit", cursor: "pointer", textAlign: "left" }}
+                >
+                  <span style={{ font: "500 12px/1.4 'Golos Text',sans-serif", color: "rgba(255,255,255,.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {V(b.vid)?.name ?? b.vid}
+                  </span>
+                  <span style={{ font: mono(10, 600), color: GREEN }}>{b.count}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "rgba(255,255,255,.5)" }}>
+              {t("На сегодня событий в афише пока нет.")}
+            </span>
+          )}
+          {/* регистрации и активность за сегодня */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 2 }}>
+            {([
+              [t("площадки"), digest.signups.venues],
+              [t("организаторы"), digest.signups.organizers],
+              [t("артисты"), digest.signups.artists],
+              [t("черновики"), digest.newDrafts],
+              [t("заявки"), digest.newReqs],
+            ] as [string, number][])
+              .filter(([, n]) => n > 0)
+              .map(([label, n]) => (
+                <Chip key={label} color={GREEN}>+{n} {label}</Chip>
+              ))}
+            {digest.signups.total === 0 && digest.newDrafts === 0 && digest.newReqs === 0 ? (
+              <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "rgba(255,255,255,.45)" }}>
+                {t("Новых регистраций и заявок сегодня ещё не было.")}
+              </span>
+            ) : null}
+          </div>
+        </Card>
         {/* -------- деньги -------- */}
         <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -666,9 +744,9 @@ export function BossCabinet() {
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {(
               [
-                ["new", "НОВЫЕ", RED],
-                ["seen", "В РАЗБОРЕ", AMBER],
-                ["accepted", "ПРИНЯТЫ", GREEN],
+                ["new", t("НОВЫЕ"), RED],
+                ["seen", t("В РАЗБОРЕ"), AMBER],
+                ["accepted", t("ПРИНЯТЫ"), GREEN],
               ] as const
             ).map(([k, l, c]) => (
               <span
@@ -913,11 +991,36 @@ function CommunityCard() {
       setState("Сервер недоступен");
     }
   };
-  const post = async (kind: "digest" | "invite" | "contest", target: "channel" | "chat") => {
-    setState(kind === "digest" ? "Собираю дайджест вечера…" : kind === "contest" ? "Публикую конкурс…" : "Отправляю приглашение…");
+  const post = async (
+    kind: "digest" | "invite" | "contest" | "moved" | "poll",
+    target: "channel" | "chat",
+  ) => {
+    setState(
+      kind === "digest"
+        ? "Собираю дайджест вечера…"
+        : kind === "contest"
+          ? "Публикую конкурс…"
+          : kind === "moved"
+            ? "Объявляю о переезде и закрепляю пост…"
+            : kind === "poll"
+              ? "Публикую опрос…"
+              : "Отправляю приглашение…",
+    );
     try {
       const r = await communityPostFn({ data: { kind, target } });
       setState(r.ok ? "✓ Опубликовано" : r.reason);
+    } catch {
+      setState("Сервер недоступен");
+    }
+  };
+  // Ссылки, живущие не в коде, а в настройках Telegram: описание бота,
+  // кнопка меню, команды, описания канала и чата. Отчёт построчный —
+  // часть вызовов Telegram отклоняет по правам, и это надо видеть.
+  const relink = async () => {
+    setState("Обновляю ссылки в Telegram…");
+    try {
+      const r = await tgRelinkFn();
+      setState(r.steps.length ? r.steps.join("\n") : r.reason || "Telegram не ответил");
     } catch {
       setState("Сервер недоступен");
     }
@@ -941,15 +1044,15 @@ function CommunityCard() {
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
         <Eyebrow>{t("КОМЬЮНИТИ TELEGRAM · НОВОСТИ И ОБЩЕНИЕ")}</Eyebrow>
         <Chip color={channelTitle ? GREEN : AMBER}>
-          {channelTitle ? `КАНАЛ · ${channelTitle.toUpperCase()}` : "КАНАЛ НЕ ПРИВЯЗАН"}
+          {channelTitle ? `КАНАЛ · ${channelTitle.toUpperCase()}` : t("КАНАЛ НЕ ПРИВЯЗАН")}
         </Chip>
         <Chip color={chatTitle ? GREEN : AMBER}>
-          {chatTitle ? `ЧАТ · ${chatTitle.toUpperCase()}` : "ЧАТ НЕ ПРИВЯЗАН"}
+          {chatTitle ? `ЧАТ · ${chatTitle.toUpperCase()}` : t("ЧАТ НЕ ПРИВЯЗАН")}
         </Chip>
       </div>
       <div
         className="gtr-mono"
-        style={{ font: "500 9.5px/1.6 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 10 }}
+        style={{ font: "500 11px/1.6 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 10 }}
       >
         {t("1) создай публичный канал (новости) и группу (чат) · 2) добавь бота @Gtrcom1_bot админом в оба · 3) вставь ссылки t.me и привяжи. Дайджест вечера уходит в канал сам — каждый день в 17:00.")}
       </div>
@@ -972,7 +1075,7 @@ function CommunityCard() {
       </div>
       <div
         className="gtr-mono"
-        style={{ font: "600 9px/1 'JetBrains Mono',monospace", letterSpacing: "0.09em", color: "var(--gtr-t3)", marginBottom: 6 }}
+        style={{ font: "600 11px/1 'JetBrains Mono',monospace", letterSpacing: "0.09em", color: "var(--gtr-t3)", marginBottom: 6 }}
       >
         {t("ПУБЛИКАЦИЯ")}
       </div>
@@ -985,6 +1088,14 @@ function CommunityCard() {
           <Icon d="M11 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6 M15 8l4 4-4 4 M19 12H9" size={13} />
           {t("Приглашение в канал")}
         </button>
+        <button className="gtr-btn gtr-btn-red" onClick={() => post("moved", "channel")}>
+          <Icon d="M4 20h16 M12 3v13 M7 11l5 5 5-5" size={13} />
+          {t("Объявить о переезде на gtrevent.com")}
+        </button>
+        <button className="gtr-btn" onClick={() => post("poll", "channel")}>
+          <Icon d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2" size={13} />
+          {t("Опрос в канал")}
+        </button>
         <button className="gtr-btn" onClick={() => post("contest", "channel")}>
           <Icon d="M7 4h10v4a5 5 0 0 1-10 0V4z M5 5H3v2a4 4 0 0 0 4 4 M21 5h-2v2a4 4 0 0 0-4 4 M9 21h6 M12 17v4" size={13} />
           {t("Конкурс инвайтинга в канал")}
@@ -992,7 +1103,7 @@ function CommunityCard() {
       </div>
       <div
         className="gtr-mono"
-        style={{ font: "600 9px/1 'JetBrains Mono',monospace", letterSpacing: "0.09em", color: "var(--gtr-t3)", marginBottom: 6 }}
+        style={{ font: "600 11px/1 'JetBrains Mono',monospace", letterSpacing: "0.09em", color: "var(--gtr-t3)", marginBottom: 6 }}
       >
         {t("ИНСТРУМЕНТЫ")}
       </div>
@@ -1005,11 +1116,20 @@ function CommunityCard() {
           <Icon d="M20 11a8 8 0 1 0-2.2 6.6 M20 6v5h-5" size={13} />
           {t("Обновить вебхук (для конкурса)")}
         </button>
+        <button className="gtr-btn gtr-btn-ghost" onClick={relink}>
+          <Icon d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2" size={13} />
+          {t("Обновить ссылки в Telegram")}
+        </button>
       </div>
       {state ? (
         <div
           className="gtr-mono"
-          style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+          style={{
+            marginTop: 8,
+            font: "500 11px/1.5 'JetBrains Mono',monospace",
+            color: "var(--gtr-t2)",
+            whiteSpace: "pre-line",
+          }}
         >
           {state}
         </div>
@@ -1019,7 +1139,7 @@ function CommunityCard() {
           className="gtr-input"
           readOnly
           value={inviteText}
-          style={{ marginTop: 8, width: "100%", minHeight: 120, font: "500 11px/1.5 'Golos Text',sans-serif" }}
+          style={{ marginTop: 8, width: "100%", minHeight: 120, font: "500 13px/1.5 'Golos Text',sans-serif" }}
         />
       ) : null}
     </Card>
@@ -1080,7 +1200,7 @@ function ThreadsCard() {
     <Card style={{ padding: 14, gridColumn: "1 / -1" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
         <Eyebrow>{t("THREADS · ПУБЛИКАЦИЯ АФИШИ")}</Eyebrow>
-        <Chip color={who ? GREEN : AMBER}>{who ? `@${who.toUpperCase()}` : "НЕ ПОДКЛЮЧЁН"}</Chip>
+        <Chip color={who ? GREEN : AMBER}>{who ? `@${who.toUpperCase()}` : t("НЕ ПОДКЛЮЧЁН")}</Chip>
         {daysLeft !== null ? (
           <Chip color={daysLeft < 10 ? RED : "#7B4DFF"}>{t("ТОКЕН ·")} {daysLeft} {t("ДН.")}</Chip>
         ) : null}
@@ -1104,7 +1224,7 @@ function ThreadsCard() {
       </div>
       <div
         className="gtr-mono"
-        style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+        style={{ marginTop: 8, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
       >
         {state ||
           "Вечерний дайджест уходит в Threads вместе с Telegram. Лимит поста — 500 знаков, разметки нет: текст режется по строкам, а не по буквам. Токен живёт 60 дней."}
@@ -1172,7 +1292,7 @@ function MetaCard() {
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
         <Eyebrow>{t("META · СТРАНИЦА FACEBOOK / INSTAGRAM")}</Eyebrow>
         <Chip color={connected ? GREEN : AMBER}>
-          {connected ? `ПОДКЛЮЧЕНА${pageName ? ` · ${pageName.toUpperCase()}` : ""}` : "НЕ ПОДКЛЮЧЕНА"}
+          {connected ? `ПОДКЛЮЧЕНА${pageName ? ` · ${pageName.toUpperCase()}` : ""}` : t("НЕ ПОДКЛЮЧЕНА")}
         </Chip>
         {igUser ? <Chip color="#7B4DFF">IG @{igUser}</Chip> : null}
       </div>
@@ -1217,7 +1337,7 @@ function MetaCard() {
       ) : null}
       <div
         className="gtr-mono"
-        style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+        style={{ marginTop: 8, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
       >
         {state ||
           "Токен проверяется живым запросом к Meta: подхватываем страницу, её IG Business и последние публикации. Инструкция по выдаче токена — в Telegram."}
@@ -1243,13 +1363,13 @@ function MetaCard() {
             >
               <span
                 className="gtr-mono"
-                style={{ font: "600 9px/1.3 'JetBrains Mono',monospace", color: "var(--gtr-t3)", flex: "none" }}
+                style={{ font: "600 11px/1.45 'JetBrains Mono',monospace", color: "var(--gtr-t3)", flex: "none" }}
               >
                 {f.kind.toUpperCase()} · {(f.ts ?? "").slice(0, 10)}
               </span>
               <span
                 style={{
-                  font: "500 11px/1.4 'Golos Text',sans-serif",
+                  font: "500 13px/1.5 'Golos Text',sans-serif",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -1298,7 +1418,7 @@ function PromptpayCard() {
     <Card style={{ padding: 14, gridColumn: "1 / -1" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
         <Eyebrow>{t("PROMPTPAY · ПРИЁМ ОПЛАТ")}</Eyebrow>
-        <Chip color={saved ? GREEN : AMBER}>{saved ? "ВКЛЮЧЕНО" : "НЕ НАСТРОЕНО"}</Chip>
+        <Chip color={saved ? GREEN : AMBER}>{saved ? t("ВКЛЮЧЕНО") : t("НЕ НАСТРОЕНО")}</Chip>
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <input
@@ -1321,7 +1441,7 @@ function PromptpayCard() {
       </div>
       <div
         className="gtr-mono"
-        style={{ marginTop: 8, font: "500 9.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+        style={{ marginTop: 8, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
       >
         {state ||
           "Гость сканирует QR в своём банке — деньги приходят напрямую на этот реквизит. Кнопка оплаты появляется в брони раздела «Сегодня» сразу после сохранения."}
@@ -1379,9 +1499,9 @@ function SprintBlock({ go }: { go: (s: ScreenId) => void }) {
       </div>
       <div style={{ display: "flex", gap: 12 }}>
         {[
-          ["ОТПРАВЛЕНО", sent, "rgba(255,255,255,.6)"],
-          ["ОТКРЫТО", opened, AMBER],
-          ["ПОДТВЕРЖДЕНО", confirmed.length, GREEN],
+          [t("ОТПРАВЛЕНО"), sent, "rgba(255,255,255,.6)"],
+          [t("ОТКРЫТО"), opened, AMBER],
+          [t("ПОДТВЕРЖДЕНО"), confirmed.length, GREEN],
         ].map(([l, n, c]) => (
           <span key={l as string} style={{ font: mono(9.5, 600), color: c as string }}>
             {l}: {n}

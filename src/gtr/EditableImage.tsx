@@ -72,7 +72,7 @@ export function EditableImage({
               position: "absolute",
               right: 8,
               bottom: 6,
-              font: "500 8px/1 'JetBrains Mono',monospace",
+              font: "500 10px/1 'JetBrains Mono',monospace",
               color: "rgba(255,255,255,.25)",
               letterSpacing: ".12em",
             }}
@@ -104,7 +104,7 @@ export function EditableImage({
               border: "1px solid rgba(229,35,27,.6)",
               background: "rgba(10,11,13,.8)",
               color: "#fff",
-              font: "600 10px/1 'Golos Text',sans-serif",
+              font: "600 12px/1 'Golos Text',sans-serif",
               backdropFilter: "blur(4px)",
             }}
           >
@@ -166,10 +166,10 @@ function Slider({
   return (
     <label style={{ display: "grid", gap: 4 }}>
       <span style={{ display: "flex", justifyContent: "space-between" }}>
-        <Eyebrow style={{ fontSize: 8.5 }}>{label}</Eyebrow>
+        <Eyebrow style={{ fontSize: 10 }}>{label}</Eyebrow>
         <span
           className="gtr-mono"
-          style={{ font: "600 9px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+          style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
         >
           {value}
           {suffix}
@@ -244,7 +244,7 @@ function PhotoPanel({
         Заменить фото…
       </button>
 
-      <Eyebrow style={{ fontSize: 8.5, marginTop: 2 }}>КАДР</Eyebrow>
+      <Eyebrow style={{ fontSize: 10, marginTop: 2 }}>КАДР</Eyebrow>
       <Slider
         label="Зум"
         value={photo.scale}
@@ -271,7 +271,7 @@ function PhotoPanel({
         onChange={(v) => onChange({ y: v })}
       />
 
-      <Eyebrow style={{ fontSize: 8.5, marginTop: 2 }}>ЭКСПОЗИЦИЯ</Eyebrow>
+      <Eyebrow style={{ fontSize: 10, marginTop: 2 }}>ЭКСПОЗИЦИЯ</Eyebrow>
       <Slider
         label="Яркость"
         value={photo.brightness}

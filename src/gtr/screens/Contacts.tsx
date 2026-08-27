@@ -62,7 +62,7 @@ function ContactRow({ r }: { r: Row }) {
       }}
     >
       <span style={{ flex: "1 1 200px", minWidth: 0 }}>
-        <span style={{ display: "block", font: "600 12.5px/1.3 'Golos Text',sans-serif", color: "#fff" }}>
+        <span style={{ display: "block", font: "600 12.5px/1.45 'Golos Text',sans-serif", color: "#fff" }}>
           {r.name}
         </span>
         <span style={{ font: mono(9), color: "rgba(255,255,255,.45)" }}>{r.sub}</span>
@@ -172,7 +172,7 @@ export function ContactsScreen() {
               flex: "0 0 auto",
               width: "auto",
               padding: "7px 13px",
-              font: "600 11px/1 'Golos Text',sans-serif",
+              font: "600 13px/1 'Golos Text',sans-serif",
               background: tab === k ? tint(RED, 0.14) : "transparent",
               color: tab === k ? "#fff" : "rgba(255,255,255,.55)",
             }}

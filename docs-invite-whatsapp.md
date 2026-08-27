@@ -21,7 +21,7 @@
 
 Бесплатно. Ставится на телефон как приложение.
 
-https://gtr-event-hub.gtr-event.workers.dev
+https://gtrevent.com
 
 Новости и движ: t.me/gtr_live
 ```
@@ -34,7 +34,7 @@ https://gtr-event-hub.gtr-event.workers.dev
 *GTR Event* — вся ночная афиша Пхукета в одном месте. Где сегодня играют,
 что за артист, где сесть, как доехать. Стол бронируется прямо в приложении.
 
-https://gtr-event-hub.gtr-event.workers.dev
+https://gtrevent.com
 
 Открой с телефона и добавь на экран — работает как приложение.
 ```
@@ -54,7 +54,7 @@ Live listings: who plays tonight, tomorrow and this weekend.
 
 Free. Installs on your phone like an app.
 
-https://gtr-event-hub.gtr-event.workers.dev
+https://gtrevent.com
 
 News: t.me/gtr_live
 ```
@@ -68,7 +68,7 @@ News: t.me/gtr_live
 Заводим карточку заведения: фото, залы, депозиты, меню, ваша афиша —
 и гости бронируют стол в пару касаний. Для площадки это бесплатно.
 
-Посмотреть: https://gtr-event-hub.gtr-event.workers.dev
+Посмотреть: https://gtrevent.com
 
 Написать: WhatsApp этого номера или Telegram @gtr_live
 ```

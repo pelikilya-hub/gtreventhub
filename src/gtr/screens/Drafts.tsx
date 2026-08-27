@@ -55,7 +55,7 @@ export function DraftsScreen() {
 
       {note ? (
         <Card style={{ padding: 12, marginBottom: 12 }}>
-          <span style={{ font: "600 12.5px/1.4 'Golos Text',sans-serif", color: GREEN }}>{note}</span>
+          <span style={{ font: "600 12.5px/1.5 'Golos Text',sans-serif", color: GREEN }}>{note}</span>
         </Card>
       ) : null}
 
@@ -66,7 +66,7 @@ export function DraftsScreen() {
           </div>
           <div
             className="gtr-mono"
-            style={{ marginTop: 10, font: "500 10.5px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+            style={{ marginTop: 10, font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
           >
             {t("Как прислать: перешли пост с афишей боту @Gtrcom1_bot в личку.")}
           </div>
@@ -80,7 +80,7 @@ export function DraftsScreen() {
             {venues.map((v) => (
               <Card key={v.slug} style={{ padding: 14 }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
-                  <span style={{ font: "700 15px/1.3 'Golos Text',sans-serif" }}>{v.name}</span>
+                  <span style={{ font: "700 15px/1.45 'Golos Text',sans-serif" }}>{v.name}</span>
                   {v.kind ? <Chip color={AMBER}>{v.kind.toUpperCase()}</Chip> : null}
                   {v.waiting.length ? (
                     <Chip color={GREEN}>{t("СОБЫТИЙ ЖДЁТ:")} {v.waiting.length}</Chip>
@@ -89,7 +89,7 @@ export function DraftsScreen() {
 
                 <div
                   className="gtr-mono"
-                  style={{ marginTop: 6, font: "500 10.5px/1.6 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+                  style={{ marginTop: 6, font: "500 12px/1.6 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
                 >
                   {v.address ? <div>{t("адрес:")} {v.address}</div> : null}
                   {v.hours ? <div>{t("часы:")} {v.hours}</div> : null}
@@ -167,7 +167,7 @@ export function DraftsScreen() {
             {artists.map((a) => (
               <Card key={a.slug} style={{ padding: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                  <span style={{ font: "700 14px/1.3 'Golos Text',sans-serif", flex: "1 1 160px" }}>{a.name}</span>
+                  <span style={{ font: "700 14px/1.45 'Golos Text',sans-serif", flex: "1 1 160px" }}>{a.name}</span>
                   {/* Счётчик встреч — главный признак: имя из одного поста
                       чаще всего название вечеринки, из пяти — артист. */}
                   <Chip color={a.seen > 2 ? GREEN : AMBER}>{t("ВСТРЕЧАЛОСЬ:")} {a.seen}</Chip>

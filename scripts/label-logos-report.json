@@ -1,0 +1,19 @@
+{
+ "found": [
+  {
+   "id": "piston-recordings",
+   "name": "Piston Recordings",
+   "src": "https://www.pistonrecordings.com/wp-content/uploads/2020/09/PistonRecordingsLogo.png",
+   "score": 185.0,
+   "size": "512x142"
+  },
+  {
+   "id": "suara",
+   "name": "Suara",
+   "src": "https://www.suara-music.com/img/logo.png",
+   "score": 167.2,
+   "size": "89x42"
+  }
+ ],
+ "nologo": []
+}

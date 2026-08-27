@@ -15,6 +15,7 @@ import { currentUser } from "../gtr/auth";
 import { getKvNs, kvGetJson } from "../gtr/kv-ns";
 import { buildPrompt, PROMPT_VERSION, type BroContext, type PersonaMode } from "../gtr/bro/prompt.ru";
 import { toolsForRole } from "../gtr/bro/tools";
+import { APP_ORIGINS } from "../gtr/app-url";
 
 const MODEL = "gpt-realtime-2.1";
 const VOICES = ["cedar", "marin", "ash"] as const;
@@ -26,12 +27,7 @@ const RATE_MAX = 30;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 
 // Разрешённые источники: свой домен и локальный стенд разработчика.
-const ORIGINS = [
-  "https://gtr-event-hub.gtr-event.workers.dev",
-  "https://gtr.events",
-  "http://localhost:8811",
-  "http://127.0.0.1:8811",
-];
+const ORIGINS = [...APP_ORIGINS, "http://localhost:8811", "http://127.0.0.1:8811"];
 
 type Flags = { broEnabled?: boolean; broKill?: boolean; broRoles?: string[] };
 

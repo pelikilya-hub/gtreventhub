@@ -125,20 +125,79 @@ export type IntakeResult = {
   event?: ParsedEvent;
   venueId?: string;
   venueName?: string;
+  /** Откуда узнали площадку: из текста поста или из канала-источника. */
+  venueVia?: "text" | "channel";
   newVenue?: VenueDraft;
   knownArtists: { id: string; name: string }[];
   newArtists: string[];
 };
 
+/** Канал-источник как площадка. Пост, пересланный из канала «Illuzion
+ *  Phuket», сплошь и рядом не называет площадку в тексте — «TONIGHT · DJ
+ *  Snake · 23:00», и всё. Раньше такой пост заводил мусорный черновик по
+ *  заголовку. Но площадка — это сам канал, и мы её узнаём тремя шагами:
+ *
+ *  1. запомненная связка канал→площадка (её однажды подтвердил человек
+ *     или вывел автомат) — мгновенно и без догадок;
+ *  2. имя канала как имя площадки через тот же matchVenue: «Illuzion
+ *     Phuket» находит Illuzion, «Catch Beach Club» — Catch;
+ *  3. не вышло — обычный путь с черновиком.
+ *
+ *  Найденную связку запоминаем: со второго поста из того же канала
+ *  площадка определяется без разбора имени. */
+const chanKey = (channel: string) => `chanmap:${slugOf(channel)}`;
+/** Счётчик находок по каналу — по нему BOSS видит, какие каналы кормят
+ *  афишу, а какие держать в подписках незачем. */
+const chanSrcKey = (channel: string) => `chansrc:${slugOf(channel)}`;
+
+const venueFromChannel = async (
+  ns: KvNs,
+  channel: string,
+): Promise<{ id: string; name: string } | null> => {
+  const mapped = await kvGetJson<{ venueId: string }>(ns, chanKey(channel));
+  if (mapped?.venueId) {
+    const { V } = await import("./data/app-data");
+    const v = V(mapped.venueId);
+    if (v) return { id: v.id, name: v.name };
+  }
+  return matchVenue(channel);
+};
+
 /** Разобрать пост и разложить по местам. Площадка известна — событие в её
  *  календарь; неизвестна — черновик карточки, а событие ждёт в очереди,
- *  чтобы не потеряться. */
-export const intakePost = async (ns: KvNs, text: string, source: string): Promise<IntakeResult> => {
+ *  чтобы не потеряться.
+ *
+ *  `channel` — заголовок или @username канала, из которого пост переслан:
+ *  используется как запасной способ узнать площадку, когда в тексте её нет. */
+export const intakePost = async (
+  ns: KvNs,
+  text: string,
+  source: string,
+  channel?: string,
+): Promise<IntakeResult> => {
   const ev = parsePost(text);
   if (!ev)
     return { ok: false, reason: "в посте нет даты — это не афиша", knownArtists: [], newArtists: [] };
 
-  const venue = await matchVenue(ev.venueQuery);
+  // Площадку сперва ищем в тексте; не нашли — пробуем канал-источник.
+  let venue = await matchVenue(ev.venueQuery);
+  let venueVia: "text" | "channel" | undefined = venue ? "text" : undefined;
+  if (!venue && channel) {
+    venue = await venueFromChannel(ns, channel);
+    if (venue) venueVia = "channel";
+  }
+  // Канал, из которого пришла афиша, — запоминаем связку и считаем находки.
+  if (channel && venue) {
+    await ns.put(chanKey(channel), JSON.stringify({ venueId: venue.id, at: Date.now() }), {
+      expirationTtl: 180 * 24 * 3600,
+    });
+    const src = await kvGetJson<{ n: number }>(ns, chanSrcKey(channel));
+    await ns.put(
+      chanSrcKey(channel),
+      JSON.stringify({ n: (src?.n ?? 0) + 1, venueId: venue.id, name: venue.name, at: Date.now() }),
+      { expirationTtl: 180 * 24 * 3600 },
+    );
+  }
   const { known, unknown } = await matchArtists(ev.artistNames);
 
   // Незнакомые имена копим отдельно: часть из них — реальные артисты,
@@ -205,6 +264,7 @@ export const intakePost = async (ns: KvNs, text: string, source: string): Promis
     event: ev,
     venueId: venue.id,
     venueName: venue.name,
+    venueVia,
     knownArtists: known,
     newArtists: unknown,
   };
@@ -217,7 +277,7 @@ export const intakeReport = (r: IntakeResult): string => {
   const lines = [
     `📅 <b>${e.dateIso}</b>${e.timeText ? ` · ${e.timeText}` : ""} — ${e.title}`,
     r.venueId
-      ? `🏠 ${r.venueName} — событие в календаре площадки`
+      ? `🏠 ${r.venueName} — событие в календаре площадки${r.venueVia === "channel" ? " (узнали по каналу)" : ""}`
       : `🆕 Площадки нет в базе: <b>${r.newVenue?.name ?? "?"}</b>${r.newVenue?.address ? ` (${r.newVenue.address})` : ""} — черновик заведён`,
   ];
   if (r.knownArtists.length) lines.push(`🎧 Наши: ${r.knownArtists.map((a) => a.name).join(", ")}`);

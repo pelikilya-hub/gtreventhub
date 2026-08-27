@@ -95,13 +95,13 @@ export function GtrLightbox({
         </>
       ) : null}
       <div className="gtr-lightbox-bar" onClick={(e) => e.stopPropagation()}>
-        <span className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace" }}>
+        <span className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace" }}>
           {i + 1} / {images.length}
         </span>
         {credit ? (
           <span
             className="gtr-mono"
-            style={{ font: "500 9px/1.3 'JetBrains Mono',monospace", opacity: 0.55, marginLeft: 10 }}
+            style={{ font: "500 11px/1.45 'JetBrains Mono',monospace", opacity: 0.55, marginLeft: 10 }}
           >
             {credit}
           </span>

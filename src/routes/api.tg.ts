@@ -19,6 +19,7 @@ import type { StoredUser } from "../gtr/auth";
 import { decideOfferCore } from "../gtr/kv-api";
 import { getKvNs, kvGetJson, kvListAll, type KvNs } from "../gtr/kv-ns";
 import { tgApi, tgEsc, tgWebhookSecret } from "../gtr/tg";
+import { APP_URL } from "../gtr/app-url";
 
 const sha256hex = async (t: string) => {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
@@ -252,7 +253,7 @@ const HELP_STAFF = [
   "/status — кто я",
 ].join("\n");
 
-const APP_HOST = "https://gtr-event-hub.gtr-event.workers.dev";
+const APP_HOST = APP_URL;
 const POSTER_URL = `${APP_HOST}/brand/invite-poster.jpg`;
 
 // Анкета приглашения в чате: шаг 1 — имя, шаг 2 — @ник
@@ -394,10 +395,53 @@ export const Route = createFileRoute("/api/tg")({
         const up = (await request.json().catch(() => null)) as TgUpdate | null;
         if (!up) return Response.json({ ok: true });
 
+        // Любая необработанная ошибка ниже обязана остаться ошибкой ОДНОГО
+        // сообщения, а не всего бота.
+        //
+        // Telegram доставляет апдейты строго по очереди и повторяет тот, на
+        // котором получил не-200. Один запрос, уронивший обработчик,
+        // затыкает очередь целиком: новые нажатия кнопок просто не доходят,
+        // пока отравленный апдейт не протухнет. Ровно это и выглядит как
+        // «кнопки в боте не работают».
+        //
+        // Поэтому наружу всегда 200, а разбор летит в служебный контур —
+        // с типом апдейта и чатом, чтобы ошибку можно было воспроизвести,
+        // а не гадать по счётчику в getWebhookInfo.
+        try {
+          return await handleUpdate(ns, up);
+        } catch (e) {
+          const kind = Object.keys(up).filter((k) => k !== "update_id").join(",") || "?";
+          const chat =
+            up.message?.chat.id ?? up.callback_query?.message?.chat.id ?? up.channel_post?.chat.id;
+          try {
+            const { notifyBossTg } = await import("../gtr/kv-api");
+            await notifyBossTg(
+              ns,
+              `⚠️ <b>Вебхук телеграма упал на апдейте</b>\nтип: ${tgEsc(kind)} · чат: ${tgEsc(String(chat ?? "—"))}\n<code>${tgEsc(
+                (e instanceof Error ? `${e.message}\n${e.stack ?? ""}` : String(e)).slice(0, 700),
+              )}</code>`,
+            );
+          } catch {
+            // служебный контур недоступен — молчим, но 200 отдаём всё равно
+          }
+          return Response.json({ ok: true, handled: false });
+        }
+      },
+    },
+  },
+});
+
+/** Разбор одного апдейта. Вынесен из ручки, чтобы у неё остался один
+ *  выход и один перехват ошибок на всё тело. */
+async function handleUpdate(ns: KvNs, up: TgUpdate): Promise<Response> {
+
         // ---------- /ops в закрытом канале: привязка служебного контура ----------
         if (up.channel_post?.text) {
           const cp = up.channel_post;
-          const cmd0 = cp.text.trim().split(/[\s@]/)[0].toLowerCase();
+          // Текст уже проверен условием выше, но сужение не переносится на
+          // отдельную привязку — забираем строку явно.
+          const cpText = cp.text ?? "";
+          const cmd0 = cpText.trim().split(/[\s@]/)[0].toLowerCase();
           if (cmd0 === "/ops") {
             const { COMMUNITY_KEY, OPS_KEY } = await import("../gtr/community");
             const ccfg = await kvGetJson<import("../gtr/community").CommunityCfg>(ns, COMMUNITY_KEY);
@@ -547,7 +591,11 @@ export const Route = createFileRoute("/api/tg")({
             if (inGroup || (staff && isStaff(staff as { role?: string }))) {
               const { intakePost, intakeReport } = await import("../gtr/intake");
               const src = fromChannel || m.chat.title || (inGroup ? `chat:${m.chat.id}` : "личка");
-              const r = await intakePost(ns, body, String(src).slice(0, 60));
+              // Тот же источник — как подсказка о площадке: пост из канала
+              // «Illuzion Phuket» или из группы площадки часто не называет
+              // её в тексте, но её знает канал. «личка» подсказкой не станет
+              // — matchVenue такого слова не найдёт, и это правильно.
+              const r = await intakePost(ns, body, String(src).slice(0, 60), String(src).slice(0, 60));
               if (r.ok) {
                 const { notifyBossTg } = await import("../gtr/kv-api");
                 const report = intakeReport(r);
@@ -886,7 +934,7 @@ export const Route = createFileRoute("/api/tg")({
                 [
                   {
                     text: "🌐 Открыть кабинет",
-                    url: `https://gtr-event-hub.gtr-event.workers.dev/gtr/login?invite=${encodeURIComponent(su.email)}`,
+                    url: `${APP_URL}/gtr/login?invite=${encodeURIComponent(su.email)}`,
                   },
                 ],
               ],
@@ -1173,7 +1221,4 @@ export const Route = createFileRoute("/api/tg")({
         }
 
         return Response.json({ ok: true });
-      },
-    },
-  },
-});
+}

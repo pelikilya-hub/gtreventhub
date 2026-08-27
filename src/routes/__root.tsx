@@ -4,6 +4,7 @@ import {
   Link,
   Outlet,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
@@ -25,23 +26,26 @@ export const Route = createRootRoute({
         content:
           "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
       },
-      { title: "GTR Event — операционная платформа площадок Пхукета" },
+      // Значения по умолчанию для всего продукта. Витрина (/ и /en) их
+      // перекрывает своими — там текст пишется под выдачу, а не под кабинет.
+      { title: "GTR Event — ночной Таиланд: афиша, бронь столов, артисты" },
       {
         name: "description",
         content:
-          "GTR Event: конструктор события, смета с комиссией, каталоги площадок, артистов и подрядчиков Пхукета.",
+          "GTR Event: живая афиша площадок Таиланда, бронь стола, маршрут вечера, каталог артистов и кабинеты площадок.",
       },
       // Ссылку кидают в мессенджеры — без og-тегов превью там пустое
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "GTR Event" },
       { property: "og:locale", content: "ru_RU" },
-      { property: "og:title", content: "GTR Event — операционная платформа площадок Пхукета" },
+      { property: "og:title", content: "GTR Event — ночной Таиланд в одном приложении" },
       {
         property: "og:description",
         content:
-          "Конструктор события, смета с комиссией GTR, каталоги 110 площадок, 312 артистов, подрядчиков и оборудования.",
+          "Афиша на каждый вечер, бронь стола, маршрут вечера и подбор вечеринок под твой музыкальный вкус.",
       },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:image", content: "/og-cover.png" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#0A0B0D" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
@@ -73,8 +77,14 @@ export const Route = createRootRoute({
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  // Язык документа — не украшение: по нему поисковик решает, для какой
+  // аудитории страница, а экранный диктор выбирает голос. Английская
+  // витрина под lang="ru" читалась бы русским синтезатором и конкурировала
+  // бы в выдаче с русской версией как дубль.
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const lang = path === "/en" || path.startsWith("/en/") ? "en" : "ru";
   return (
-    <html lang="ru" style={{ background: "#0A0B0D" }}>
+    <html lang={lang} style={{ background: "#0A0B0D" }}>
       <head>
         <HeadContent />
       </head>

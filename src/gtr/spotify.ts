@@ -1,11 +1,17 @@
 // Spotify OAuth и музыкальный профиль. Ключи живут в окружении воркера:
 // SPOTIFY_CLIENT_ID (var) и SPOTIFY_CLIENT_SECRET (secret). Пока их нет,
 // вход честно отвечает «не настроено» — интерфейс показывает лист ожидания.
-export const SPOTIFY_REDIRECT =
-  "https://gtr-event-hub.gtr-event.workers.dev/api/spotify-callback";
+// ВАЖНО: этот адрес обязан совпадать с Redirect URI в кабинете
+// разработчика Spotify. При переезде на домен туда нужно добавить
+// новый адрес — иначе вход по Spotify ответит INVALID_CLIENT.
+import { APP_URL } from "./app-url";
+export const SPOTIFY_REDIRECT = `${APP_URL}/api/spotify-callback`;
 
 export type MusicProfile = {
-  source: "spotify";
+  // "manual" — профиль собран руками из списка жанров, когда ключи Spotify
+  // не подключены. Тип обязан знать оба источника: иначе ветка «мой выбор»
+  // в кабинете считается недостижимой и молча вырезается.
+  source: "spotify" | "manual";
   displayName?: string;
   genres: [string, number][]; // семейство → вес 0..1 (см. match.ts)
   rawGenres: [string, number][]; // сырые жанры Spotify для статистики

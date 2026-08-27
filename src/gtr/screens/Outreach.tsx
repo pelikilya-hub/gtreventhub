@@ -128,7 +128,7 @@ export function OutreachScreen() {
                 cursor: "pointer",
                 background: filter === key ? "rgba(123,77,255,.28)" : "rgba(255,255,255,.06)",
                 color: STAGE_COLOR[key],
-                font: "700 11px/1 'JetBrains Mono',monospace",
+                font: "700 13px/1 'JetBrains Mono',monospace",
                 padding: "9px 12px",
               }}
             >
@@ -138,7 +138,7 @@ export function OutreachScreen() {
         </div>
         <div
           className="gtr-mono"
-          style={{ marginTop: 12, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+          style={{ marginTop: 12, font: "500 13px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
           {t("Всего площадок:")} {PH.venues.length}{t(". Твоя цель — довести каждую до «Карточка готова».")}
         </div>
@@ -186,10 +186,10 @@ export function OutreachScreen() {
               >
                 <span style={{ width: 8, height: 8, flex: "none", background: STAGE_COLOR[st] }} />
                 <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ font: "700 14px/1.3 'Golos Text',sans-serif" }}>{v.name}</span>
+                  <span style={{ font: "700 14px/1.45 'Golos Text',sans-serif" }}>{v.name}</span>
                   <span
                     className="gtr-mono"
-                    style={{ display: "block", font: "500 10.5px/1.4 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                    style={{ display: "block", font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
                     {v.area} · {v.type}
                     {r?.owner ? ` · ${r.owner}` : ""}
@@ -197,7 +197,7 @@ export function OutreachScreen() {
                 </span>
                 <span
                   className="gtr-mono"
-                  style={{ font: "700 10px/1 'JetBrains Mono',monospace", color: STAGE_COLOR[st] }}
+                  style={{ font: "700 12px/1 'JetBrains Mono',monospace", color: STAGE_COLOR[st] }}
                 >
                   {STAGES.find(([k]) => k === st)?.[1]}
                 </span>
@@ -246,7 +246,7 @@ export function OutreachScreen() {
                           border: 0,
                           cursor: "pointer",
                           padding: "8px 11px",
-                          font: "600 11px/1 'Golos Text',sans-serif",
+                          font: "600 13px/1 'Golos Text',sans-serif",
                           background: st === key ? "rgba(123,77,255,.3)" : "rgba(255,255,255,.06)",
                           color: st === key ? "#fff" : "var(--gtr-t2)",
                         }}
@@ -285,11 +285,11 @@ export function OutreachScreen() {
                           >
                             <span style={{ color: done ? "#2ECC71" : "var(--gtr-t3)" }}>{done ? "✓" : "○"}</span>
                             <span style={{ flex: 1 }}>
-                              <span style={{ font: "600 12.5px/1.4 'Golos Text',sans-serif" }}>{n.title}</span>
+                              <span style={{ font: "600 12.5px/1.5 'Golos Text',sans-serif" }}>{n.title}</span>
                               <span
                                 style={{
                                   display: "block",
-                                  font: "500 11px/1.45 'Golos Text',sans-serif",
+                                  font: "500 13px/1.45 'Golos Text',sans-serif",
                                   color: "var(--gtr-t3)",
                                 }}
                               >

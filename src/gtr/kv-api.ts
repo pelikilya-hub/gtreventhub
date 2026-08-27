@@ -289,17 +289,25 @@ export const deleteDraftKvFn = createServerFn({ method: "POST" })
   });
 
 // Заявку создаёт организатор без сессии; правки — только авторизованные
+// Заявка — это деньги и обещание человеку. Раньше вся эта дорога молчала:
+// без KV функция возвращала «не ок», отправитель глушил ответ через
+// .catch(() => {}), заявка оставалась только на экране автора, и никто
+// об этом не узнавал. Поэтому здесь каждый шаг называет причину, а
+// сообщение, которое никому не ушло, поднимает тревогу вместо тишины.
 export const pushRequestFn = createServerFn({ method: "POST" })
   .inputValidator((d: OrgRequest) => d)
   .handler(async ({ data }) => {
     const ns = await getKvNs();
-    if (!ns) return { ok: false as const };
+    if (!ns) return { ok: false as const, reason: "нет хранилища" };
     const existing = await kvGetJson<OrgRequest>(ns, `req:${data.id}`);
     if (existing) {
       const u = await currentUser();
-      if (!u || !canSeeRequest(u, existing)) return { ok: false as const };
+      if (!u || !canSeeRequest(u, existing)) return { ok: false as const, reason: "нет доступа" };
     }
-    await ns.put(`req:${data.id}`, JSON.stringify(data));
+    // Метка доставки живёт на устройстве автора: в хранилище попадает
+    // только сама заявка, иначе она приедет менеджеру с чужим «везём».
+    const { sync: _drop, ...clean } = data;
+    await ns.put(`req:${data.id}`, JSON.stringify(clean));
 
     // Новая заявка: личные уведомления сотрудникам площадки (и в общий канал)
     if (!existing && data.status === "new") {
@@ -326,19 +334,45 @@ export const pushRequestFn = createServerFn({ method: "POST" })
         (u) => u.role !== "artist" && (u.role === "gtr" || u.venueId === data.venueId),
       );
       const sent = new Set<string>();
+      // Считаем не попытки, а доставки: у бота полно причин ответить «нет»
+      // — человек не нажимал /start у этого бота, чат удалён, токен не тот.
+      let delivered = 0;
       for (const st of staff) {
         const chat = await ns.get(`tg:${st.email}`);
         if (chat && !sent.has(chat)) {
           sent.add(chat);
-          await tgApi("sendMessage", { chat_id: chat, text, parse_mode: "HTML", reply_markup: markup });
+          const r = await tgApi("sendMessage", {
+            chat_id: chat,
+            text,
+            parse_mode: "HTML",
+            reply_markup: markup,
+          });
+          if (r.ok) delivered++;
         }
       }
       const { guardInternalChatId } = await import("./community");
       const channel = await guardInternalChatId(ns, process.env.TELEGRAM_CHAT_ID);
-      if (channel && !sent.has(channel))
-        await tgApi("sendMessage", { chat_id: channel, text, parse_mode: "HTML" });
+      if (channel && !sent.has(channel)) {
+        const r = await tgApi("sendMessage", { chat_id: channel, text, parse_mode: "HTML" });
+        if (r.ok) delivered++;
+      }
+      // Никому не дошло — это авария, а не мелочь: заявка лежит в базе, а
+      // человек ждёт ответа в пятнадцать минут. Будим BOSS по всем его
+      // адресам и оставляем след, чтобы поломку было видно и потом.
+      if (!delivered) {
+        await ns.put(
+          `reqmiss:${data.id}`,
+          JSON.stringify({ id: data.id, venueId: data.venueId, ts: Date.now(), staff: sent.size }),
+          { expirationTtl: 60 * 60 * 24 * 30 },
+        );
+        await notifyBossTg(
+          ns,
+          `🔻 <b>Заявка не ушла ни одному менеджеру</b>\n\n${text}\n\nПривязанных чатов: ${sent.size}. Проверьте /start у бота и TELEGRAM_CHAT_ID.`,
+        ).catch(() => {});
+      }
+      return { ok: true as const, notified: delivered };
     }
-    return { ok: true as const };
+    return { ok: true as const, notified: 0 };
   });
 
 // ---------- предложения артистам ----------

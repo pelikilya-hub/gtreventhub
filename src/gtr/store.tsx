@@ -59,6 +59,24 @@ const CH = "gtr-sync-v1";
 
 const mkId = () => `EV-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
 
+/** Довезти заявку до сервера. Сеть на острове рвётся, воркер на деплое
+ *  моргает — одна неудачная попытка не повод терять заявку, поэтому их
+ *  три с нарастающей паузой. Возвращаем честный ответ: «не ок» от сервера
+ *  считается провалом наравне с оборванной сетью. */
+const deliverRequest = async (req: OrgRequest): Promise<boolean> => {
+  const { sync: _skip, ...clean } = req;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const r = (await pushRequestFn({ data: clean as OrgRequest })) as { ok?: boolean };
+      if (r?.ok) return true;
+    } catch {
+      /* сеть — пробуем ещё раз */
+    }
+    if (attempt < 2) await new Promise((done) => setTimeout(done, 1200 * (attempt + 1)));
+  }
+  return false;
+};
+
 // Стартовые события: по одному на каждую засеянную вручную площадку —
 // чтобы демо не открывалось пустым, но они уже обычные записи, а не
 // единственно возможный граф этой площадки.
@@ -319,9 +337,31 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
         deleteDraftKvFn({ data: { id } }).catch(() => {});
       },
 
+      // Заявка уходит с подтверждением, а не «в направлении сервера».
+      //
+      // 27.08.2026 заявка не дошла ни менеджеру в Telegram, ни в приложение,
+      // и продукт этого не заметил: ответ сервера глушился через
+      // .catch(() => {}), а «не ок» от него не отличался от успеха вовсе.
+      // На экране автора заявка при этом лежала как отправленная. Теперь
+      // отправка помечается, повторяется и при провале честно краснеет.
       addRequest: (req) => {
-        commit({ ...shared, requests: [req, ...shared.requests] });
-        pushRequestFn({ data: req }).catch(() => {});
+        commit({ ...shared, requests: [{ ...req, sync: "pending" }, ...shared.requests] });
+        void deliverRequest(req).then((ok) =>
+          setShared((cur) => {
+            const next = {
+              ...cur,
+              requests: cur.requests.map((r) =>
+                r.id === req.id ? { ...r, sync: ok ? undefined : ("failed" as const) } : r,
+              ),
+            };
+            try {
+              window.localStorage.setItem(KEY, JSON.stringify(next));
+            } catch {
+              /* квота localStorage */
+            }
+            return next;
+          }),
+        );
       },
       applyOffer: (offer) =>
         commit({

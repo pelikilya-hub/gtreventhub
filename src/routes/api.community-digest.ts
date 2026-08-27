@@ -104,6 +104,9 @@ export const Route = createFileRoute("/api/community-digest")({
               await tgApi("sendPoll", {
                 chat_id: cfg.channelId,
                 question: poll.question,
+                // HTML нужен ровно затем, чтобы обычный знак в начале
+                // вопроса стал фирменным (см. brandEmojify в tg.ts)
+                question_parse_mode: "HTML",
                 options: poll.options,
                 is_anonymous: true,
                 allows_multiple_answers: Boolean(poll.multiple),

@@ -49,7 +49,10 @@ param(
     # Режим автозапуска: не задавать вопросов, которых некому услышать.
     [switch]$Unattended,
     # Рабочая папка. Машинная, а не в профиле: под SYSTEM профиль другой.
-    [string]$Dir = "C:\gtr-brain"
+    [string]$Dir = "C:\gtr-brain",
+    # Имя для постоянного адреса. Пусто — просим у cloudflared метку
+    # «brain» и берём то имя, которое он создаст в вашей зоне.
+    [string]$BrainHost = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -317,9 +320,24 @@ if (-not (Test-Path $cf)) {
 }
 
 $TUNNEL = "gtr-brain"
-$brainHost = "brain.gtr.events"
-$brainZone = "gtr.events"
 $cert = "$env:USERPROFILE\.cloudflared\cert.pem"
+
+# cloudflared пишет свой обычный лог в stderr. При $ErrorActionPreference
+# = "Stop" и перенаправлении 2>&1 PowerShell превращает такую строку в
+# ТЕРМИНИРУЮЩУЮ ошибку — и скрипт падал на строке вида
+# «INF Added CNAME … which will route to this tunnel», то есть на
+# сообщении об успехе. Зовём cloudflared только через эту обёртку.
+function Invoke-Cf {
+    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$CfArgs)
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $out = & $cf @CfArgs 2>&1 | ForEach-Object { "$_" }
+    } finally {
+        $ErrorActionPreference = $prev
+    }
+    return ($out -join "`n")
+}
 
 # Резолвится ли имя в мире, а не только в наших намерениях. Спрашиваем
 # публичный DoH, а не системный резолвер: у него свой кэш и свои сюрпризы.
@@ -338,37 +356,53 @@ if (-not (Test-Path $cert)) {
     Write-Host "==============================================================="
     Write-Host " ПОСТОЯННЫЙ АДРЕС — разовая настройка, дальше никогда"
     Write-Host ""
-    Write-Host " Сейчас откроется браузер. Выберите домен $brainZone и"
-    Write-Host " подтвердите. После этого запустите скрипт ещё раз — адрес"
-    Write-Host " станет https://$brainHost и больше меняться не будет."
+    Write-Host " Сейчас откроется браузер. Выберите свой домен и подтвердите."
+    Write-Host " После этого запустите скрипт ещё раз — у мозга появится"
+    Write-Host " постоянный адрес, который не меняется при перезапуске."
     Write-Host ""
-    Write-Host " Домена нет в списке? Значит, его серверы имён — не"
+    Write-Host " Ни одного домена в списке? Значит, серверы имён не"
     Write-Host " Cloudflare, и постоянный адрес пока невозможен. Закройте"
     Write-Host " браузер: скрипт поднимет временный адрес и продолжит."
     Write-Host "==============================================================="
     Write-Host ""
-    if (-not $Unattended) { & $cf tunnel login }
+    if (-not $Unattended) { Invoke-Cf tunnel login | Out-Null }
 }
 
+# Имя не выдумываем. Раньше здесь было зашито brain.gtr.events, но зона в
+# аккаунте называется иначе, и cloudflared приклеил её к нашему имени,
+# получив brain.gtr.events.gtrevent.com. Поэтому просим короткую метку и
+# СЧИТЫВАЕМ то имя, которое cloudflared реально создал.
+$brainHost = ""
 $named = $false
 if (Test-Path $cert) {
     # Создание туннеля и маршрута идемпотентно по сути, но не по коду
     # возврата: повторный вызов ругается «уже существует». Это не ошибка,
     # поэтому смотрим не на код, а на итог.
-    & $cf tunnel create $TUNNEL 2>&1 | Out-Null
-    $route = (& $cf tunnel route dns --overwrite-dns $TUNNEL $brainHost 2>&1) -join "`n"
-    $listed = ((& $cf tunnel list 2>&1) -join "`n") -match [regex]::Escape($TUNNEL)
-    # Доказательство постоянного адреса — DNS-запись, а не наличие
-    # туннеля в списке. Если зона $brainZone живёт не в Cloudflare,
-    # маршрут не создастся, но сам туннель создастся прекрасно — и
-    # прежняя версия скрипта на этом основании объявляла постоянным
-    # адрес, которого нет в природе.
-    $named = $listed -and (Test-PublicDns $brainHost)
+    Invoke-Cf tunnel create $TUNNEL | Out-Null
+    $label = if ($BrainHost) { $BrainHost } else { "brain" }
+    $route = Invoke-Cf tunnel route dns --overwrite-dns $TUNNEL $label
+
+    # cloudflared сам называет созданную запись — берём имя оттуда.
+    $m = [regex]::Match($route, "(?:Added CNAME|record for)\s+([A-Za-z0-9._-]+\.[A-Za-z]{2,})")
+    if ($m.Success) { $brainHost = $m.Groups[1].Value.TrimEnd(".") }
+    elseif ($BrainHost) { $brainHost = $BrainHost }
+
+    $listed = (Invoke-Cf tunnel list) -match [regex]::Escape($TUNNEL)
+    # Доказательство постоянного адреса — живая DNS-запись, а не наличие
+    # туннеля в списке: tunnel create проходит и без зоны в Cloudflare.
+    if ($brainHost -and $listed) {
+        # Свежесозданной записи нужно несколько секунд, чтобы разойтись.
+        foreach ($i in 1..6) {
+            if (Test-PublicDns $brainHost) { $named = $true; break }
+            Start-Sleep -Seconds 5
+        }
+    }
     if (-not $named) {
         Write-Host "!! Постоянный адрес не получился. Ответ cloudflared:"
         Write-Host $route
-        Write-Host "   Обычная причина: домен $brainZone обслуживают не серверы"
-        Write-Host "   имён Cloudflare. Пока работаем на временном адресе."
+        Write-Host "   Пока работаем на временном адресе."
+    } else {
+        Write-Host ">> Постоянный адрес: https://$brainHost"
     }
 }
 

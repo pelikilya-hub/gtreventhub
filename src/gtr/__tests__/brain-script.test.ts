@@ -175,6 +175,21 @@ describe("скрипт мозга на домашнем GPU", () => {
   });
 
   it("постоянным адрес зовётся только с живой DNS-записью", () => {
-    expect(src).toMatch(/\$named\s*=\s*\$listed\s*-and\s*\(Test-PublicDns/);
+    // tunnel create проходит и без зоны в Cloudflare, поэтому наличие
+    // туннеля ничего не доказывает — доказывает только резолв имени.
+    expect(src).toMatch(/if\s*\(Test-PublicDns \$brainHost\)\s*\{\s*\$named = \$true/);
+    // И ни одного другого места, где адрес объявляется постоянным.
+    expect((src.match(/\$named = \$true/g) ?? []).length).toBe(1);
+  });
+
+  // cloudflared пишет обычный лог в stderr, а при $ErrorActionPreference
+  // = "Stop" перенаправление 2>&1 делает из такой строки терминирующую
+  // ошибку. 27.08.2026 скрипт так упал на «INF Added CNAME …» — то есть
+  // на сообщении об УСПЕХЕ.
+  it("cloudflared зовётся только через обёртку, гасящую stderr", () => {
+    const direct = src.match(/&\s*\$cf\s+\S/g) ?? [];
+    // Единственное допустимое прямое обращение — внутри самой обёртки.
+    expect(direct.length).toBe(1);
+    expect(src).toContain('$ErrorActionPreference = "Continue"');
   });
 });

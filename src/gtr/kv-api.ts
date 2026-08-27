@@ -2014,10 +2014,12 @@ export const tgRelinkFn = createServerFn({ method: "POST" }).handler(async () =>
   if (u.role !== "gtr" && !u.boss)
     return { ok: false as const, steps: [] as string[], reason: "только BOSS / GTR-админ" };
 
-  const { APP_URL, COMMUNITY_KEY } = await import("./community");
+  const { APP_URL, COMMUNITY_KEY, plural } = await import("./community");
   const cfg = await kvGetJson<import("./community").CommunityCfg>(ns, COMMUNITY_KEY);
   const { PH } = await import("./data/app-data");
   const host = APP_URL.replace(/^https?:\/\//, "");
+  // «354 площадок» в описании канала видит каждый, кто открывает его впервые
+  const venueWord = plural(PH.venues.length, "площадка", "площадки", "площадок");
   const steps: string[] = [];
   const run = async (label: string, method: string, params: Record<string, unknown>) => {
     const r = await tgApi(method, params);
@@ -2028,7 +2030,7 @@ export const tgRelinkFn = createServerFn({ method: "POST" }).handler(async () =>
   // Профиль бота: длинное описание (пустой чат) и короткое (карточка).
   // Лимиты Telegram: 512 и 120 знаков — держимся заметно ниже.
   const about =
-    `GTR Event — гид по ночному Таиланду. ${PH.venues.length} площадок, живая афиша на каждый вечер, ` +
+    `GTR Event — гид по ночному Таиланду. ${PH.venues.length} ${venueWord}, живая афиша на каждый вечер, ` +
     `бронь стола и ИИ-подбор вечеринок под твой вкус. Приложение: ${host}`;
   await run("описание бота", "setMyDescription", { description: about.slice(0, 500) });
   await run("короткое описание бота", "setMyShortDescription", {
@@ -2076,7 +2078,7 @@ export const tgRelinkFn = createServerFn({ method: "POST" }).handler(async () =>
     await run("описание канала", "setChatDescription", {
       chat_id: cfg.channelId,
       description:
-        `Ночной Таиланд без поисков: афиша на каждый вечер, ${PH.venues.length} площадок, бронь стола за пару касаний. ` +
+        `Ночной Таиланд без поисков: афиша на каждый вечер, ${PH.venues.length} ${venueWord}, бронь стола за пару касаний. ` +
         `Приложение — ${host}`,
     });
   else steps.push("• канал не привязан — описание не трогали");

@@ -31,14 +31,16 @@ const GROUP_LABEL: Record<string, string> = {
 export function quoteDocument({
   no,
   venue,
-  vid,
   rooms,
   when,
   quote,
 }: {
   no: string;
   venue: string;
-  vid: string;
+  /** vid больше не печатаем в клиентском документе — внутренний код
+   *  площадки не должен уехать площадке или подрядчику. Оставлен в типе
+   *  опционально, чтобы не ломать вызовы. */
+  vid?: string;
   rooms: string;
   when: string;
   quote: Quote;
@@ -141,7 +143,7 @@ body{padding-top:76px}
 <h1>Предложение по событию</h1>
 
 <div class="meta">
-  <div><span class="k">Площадка</span><span class="v">${esc(venue)} · ${esc(vid)}</span></div>
+  <div><span class="k">Площадка</span><span class="v">${esc(venue)}</span></div>
   <div><span class="k">Залы</span><span class="v">${esc(rooms)}</span></div>
   <div><span class="k">Когда</span><span class="v">${esc(when)}</span></div>
 </div>

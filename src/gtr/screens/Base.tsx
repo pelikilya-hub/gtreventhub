@@ -42,9 +42,11 @@ export function BaseScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useGtr();
-  // Балл готовности и достоверность источника — внутренние ops-метрики.
-  // Команде на списке они полезны, гостю (артист/посетитель) — нет.
-  const commercial = !["artist", "visitor"].includes(user.role);
+  // Балл готовности и достоверность источника — внутренние ops-метрики
+  // КОМАНДЫ GTR. Организатор — платящий клиент, а не команда: коды площадок
+  // и наши оценки ему не показываем. Поэтому гейт по isTeam, а не по
+  // «не гость»: разница ровно в организаторе.
+  const isTeam = ["gtr", "sales", "owner", "pr"].includes(user.role);
   const [cluster, setCluster] = useState(t("Все"));
   const [tag, setTag] = useState(t("Все"));
   const [q, setQ] = useState("");
@@ -280,7 +282,7 @@ export function BaseScreen() {
                 h={22}
                 style={{ position: "absolute", left: 12, top: 10, zIndex: 2 }}
               />
-              {commercial && x.readiness ? (
+              {isTeam && x.readiness ? (
                 <span
                   className="gtr-mono"
                   style={{
@@ -314,10 +316,11 @@ export function BaseScreen() {
                 {x.type} · {x.area}
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {/* Достоверность источника — команде. Гостю на карточке
-                    остаётся «бронируемая» и «прайс подтверждён» — это про
-                    него, а не про нашу кухню оценки площадок. */}
-                {commercial ? (
+                {/* Достоверность источника — только команде GTR. Клиенту
+                    (организатор) и гостю на карточке остаётся «бронируемая»
+                    и «прайс подтверждён» — это про них, а не про нашу
+                    кухню оценки площадок. */}
+                {isTeam ? (
                   <Chip color={confColor(x.confidence)}>{(x.confidence ?? "—").toUpperCase()}</Chip>
                 ) : null}
                 {x.readiness?.state === "Бронируемая" ? (
@@ -378,8 +381,12 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
   const ct = venueContact(v.id);
   const R = v.readiness;
   // Публичной аудитории (артисты, посетители) — витрина без коммерции:
-  // прайсы, контакты площадки и внутренние статусы видит только команда
+  // прайсы и «собрать событие здесь» им не нужны. Организатор — клиент:
+  // цену аренды и конструктор события видит, а вот наши ops-метрики,
+  // коды площадок и провенанс исследования — нет. Для этого два уровня:
+  // commercial (не гость) и isTeam (только команда GTR).
   const commercial = !["artist", "visitor"].includes(user.role);
+  const isTeam = ["gtr", "sales", "owner", "pr"].includes(user.role);
   // Подтверждённые площадкой значения важнее наших оценок
   const cRate = confirm?.status === "confirmed" ? (confirm.rate ?? null) : null;
 
@@ -413,7 +420,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           <Eyebrow>
             {/* Внутренний id площадки — только команде. Гостю показываем
                 район, а не «VEN-0061»: это наш служебный код, не его дело. */}
-            {commercial ? `${v.id} · ` : ""}
+            {isTeam ? `${v.id} · ` : ""}
             {(v.cluster ?? v.area ?? "").toUpperCase()}
           </Eyebrow>
           <div
@@ -431,10 +438,10 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             <TrashTitle text={v.name} size={29} />
             {/* «Достоверность источника» и «готовность к бронированию» —
                 наши внутренние ops-метрики: по ним видно, что мы скрейпим
-                и оцениваем площадки. Гостю это знать незачем и вредно.
-                Ему остаётся только «подтверждено площадкой» — знак доверия,
-                а не кухня. */}
-            {commercial ? (
+                и оцениваем площадки. Ни гостю, ни клиенту-организатору это
+                знать незачем. Им остаётся «подтверждено площадкой» — знак
+                доверия, а не кухня. Только команде GTR. */}
+            {isTeam ? (
               <>
                 <Chip color={confColor(v.confidence)}>{t("ДОСТОВЕРНОСТЬ:")} {(v.confidence ?? "—").toUpperCase()}</Chip>
                 {R ? (
@@ -775,7 +782,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                   color: "var(--gtr-t2)",
                 }}
               >
-                {commercial
+                {isTeam
                   ? t("Живая схема зон и столов площадки: депозиты, кредит на еду и напитки, предзаказ по официальному меню. Заявка уходит менеджеру в Telegram, подтверждение — одной кнопкой.")
                   : t("Выберите зону и стол, дату и гостей, при желании — предзаказ по меню. Площадка свяжется с вами и подтвердит бронь.")}
               </div>
@@ -929,7 +936,11 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 ) : null}
               </div>
             ) : null}
-            {commercial ? (<>
+            {/* Источники, провенанс и рабочие контакты площадки — только
+                команде GTR. Организатору эта карточка ни к чему: сырой
+                URL исследования, тип источника и «верифицировано» — наша
+                кухня. Официальный сайт площадки он видит в блоке ссылок выше. */}
+            {isTeam ? (<>
             <Eyebrow style={{ marginBottom: 10 }}>{t("ИСТОЧНИКИ И КОНТАКТ")}</Eyebrow>
             {[
               [
@@ -1000,7 +1011,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             </>) : null}
           </Card>
 
-          {commercial && R ? (
+          {isTeam && R ? (
             <Card style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>
                 {t("ГОТОВНОСТЬ К БРОНИРОВАНИЮ ·")} {R.score}/100

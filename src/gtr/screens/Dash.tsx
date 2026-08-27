@@ -770,6 +770,9 @@ const MONTHS_S = ["янв", "фев", "мар", "апр", "май", "июн", "�
 function SalesCabinet() {
   const { t } = useTranslation();
   const { user, myDrafts, shared } = useGtr();
+  // Организатор — платящий клиент, а не сотрудник GTR: ему не показываем
+  // внутреннюю выручку (комиссию GTR) и приглашение в команду.
+  const isTeam = ["gtr", "sales", "owner", "pr"].includes(user.role);
   const navigate = useNavigate();
   const go = (s: ScreenId, search?: Record<string, string>) =>
     navigate({ to: "/gtr/$screen", params: { screen: s }, search });
@@ -843,7 +846,15 @@ function SalesCabinet() {
     [t("В РАБОТЕ"), String(inWork), inWork ? t("черновики и отправленные") : t("создайте первое событие"), "#fff"],
     [t("СОГЛАСОВАНО"), String(approved), approved ? t("подтверждённые события") : t("пока нет"), approved ? GREEN : "#fff"],
     [t("ПАЙПЛАЙН"), pipeline ? fmtThb(pipeline) : "—", t("сумма смет кабинета"), "#fff"],
-    [t("КОМИССИЯ GTR"), commission ? fmtThb(commission) : "—", t("с текущего пайплайна"), commission ? GREEN : "#fff"],
+    // Комиссия GTR — внутренняя выручка; клиенту-организатору не показываем
+    ...(isTeam
+      ? ([[t("КОМИССИЯ GTR"), commission ? fmtThb(commission) : "—", t("с текущего пайплайна"), commission ? GREEN : "#fff"]] as [
+          string,
+          string,
+          string,
+          string,
+        ][])
+      : []),
   ];
 
   return (
@@ -910,7 +921,7 @@ function SalesCabinet() {
             <button className="gtr-btn" style={{ padding: "9px 16px" }} onClick={() => go("events")}>
               {t("Мои события →")}
             </button>
-            <InviteLinkButton />
+            {isTeam ? <InviteLinkButton /> : null}
           </div>
         </div>
       </div>

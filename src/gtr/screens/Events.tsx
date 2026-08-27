@@ -46,6 +46,10 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
 
   // Личный кабинет: менеджер видит только свои события, GTR-админ — все
   const isAdmin = user.role === "gtr";
+  // Код площадки и наш балл готовности — внутренняя кухня команды. В
+  // визарде выбора площадки его видит и организатор-клиент, поэтому эти
+  // подписи гейтим по команде GTR, а не показываем всем.
+  const isTeam = ["gtr", "sales", "owner", "pr"].includes(user.role);
   const scoped = myDrafts;
 
   const [q, setQ] = useState("");
@@ -112,6 +116,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
       {creating ? (
         <NewEvent
           isAdmin={isAdmin}
+          isTeam={isTeam}
           ownVenue={presetVenue || user.venueId}
           onCancel={() => setCreating(false)}
           onCreate={(init) => {
@@ -461,11 +466,13 @@ function Step({ n, title, note }: { n: number; title: string; note?: string }) {
 
 function NewEvent({
   isAdmin,
+  isTeam,
   ownVenue,
   onCancel,
   onCreate,
 }: {
   isAdmin: boolean;
+  isTeam: boolean;
   ownVenue: string;
   onCancel: () => void;
   onCreate: (init: {
@@ -744,7 +751,7 @@ function NewEvent({
         />
         {picked ? (
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            <Chip color="#E5231B">{picked.id}</Chip>
+            {isTeam ? <Chip color="#E5231B">{picked.id}</Chip> : null}
             <span style={{ font: "500 12.5px/1.45 'Golos Text',sans-serif" }}>{picked.name}</span>
             <span
               className="gtr-mono"
@@ -835,7 +842,7 @@ function NewEvent({
                           color: "rgba(255,255,255,.4)",
                         }}
                       >
-                        {v.id} · {v.type || "—"} · {v.cluster || v.area}
+                        {isTeam ? `${v.id} · ` : ""}{v.type || "—"} · {v.cluster || v.area}
                         {cap ? ` · до ${cap}` : ""}
                       </span>
                       {cRate?.amount ? (
@@ -878,7 +885,7 @@ function NewEvent({
                       >
                         ✓ {guests}
                       </span>
-                    ) : score ? (
+                    ) : isTeam && score ? (
                       <span
                         className="gtr-mono"
                         style={{

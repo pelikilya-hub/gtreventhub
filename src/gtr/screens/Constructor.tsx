@@ -599,7 +599,7 @@ export function ConstructorScreen({
     if (!win) {
       const body = [
         `GTR EVENT · Предложение по событию № ${no}`,
-        `Площадка: ${v.name} (${vid})`,
+        `Площадка: ${v.name}`,
         `Залы: ${rooms}`,
         `Когда: ${when}`,
         ``,
@@ -1669,10 +1669,12 @@ export function ConstructorScreen({
                 style={{ marginBottom: 10 }}
               />
               <div style={{ display: "grid", gap: 6 }}>
-                {/* ЦЕНА_THB — служебное числовое поле для сметы, рядом с
-                    человекочитаемой ЦЕНА его показывать незачем */}
+                {/* Служебные поля узла в клиентский инспектор не пускаем:
+                    ЦЕНА_THB — числовой дубль человекочитаемой ЦЕНА, а
+                    ИСТОЧНИК — сырой провенанс наших данных о подрядчике,
+                    организатору его видеть незачем. */}
                 {selNode.fields.map(([k, val], i) =>
-                  k === "ЦЕНА_THB" ? null : (
+                  k === "ЦЕНА_THB" || k === "ИСТОЧНИК" ? null : (
                   <div key={`${k}-${i}`}>
                     <Eyebrow style={{ fontSize: 10, marginBottom: 3 }}>{k}</Eyebrow>
                     <input

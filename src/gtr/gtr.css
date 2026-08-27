@@ -1937,6 +1937,23 @@
 html { -webkit-tap-highlight-color: transparent; }
 .gtr-app { touch-action: manipulation; }
 
+/* ---------- поворот телефона: перекомпоновка как смена сцены ----------
+   Переход портрет↔ландшафт менял раскладку скачком. Класс gtr-rotating
+   вешается на полсекунды из шелла на смене ориентации — контент проявляется
+   тем же языком, что и переход между экранами, а не рвётся на глазах.
+   Фон, шапка и навигация не трогаются: анимируется только полотно. */
+@keyframes gtrrotatein {
+  from { opacity: 0.45; transform: scale(0.986); filter: blur(5px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.gtr-shell.gtr-rotating .gtr-main {
+  animation: gtrrotatein 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
+  will-change: transform, filter, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-shell.gtr-rotating .gtr-main { animation: none; }
+}
+
 /* ---------- мобильная игровая графика (тест: iPhone 12 Pro Max) ---------- */
 @media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   /* перф: blur на скроллящихся карточках роняет кадры —

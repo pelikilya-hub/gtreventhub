@@ -139,6 +139,29 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
   // Мобильное меню: на узком экране сайдбар живёт как выезжающая панель
   const [navOpen, setNavOpen] = useState(false);
 
+  // Поворот телефона: на переходе портрет↔ландшафт раскладка
+  // перекомпоновывается, и раньше это был резкий скачок. Ловим смену
+  // ориентации и на полсекунды включаем класс — по нему CSS проигрывает
+  // мягкий перевод сцены, а не рывок. Строчку закрываем ещё и на resize:
+  // на части Android orientationchange приходит без matchMedia-события.
+  const [rotating, setRotating] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(orientation: landscape)");
+    let timer = 0;
+    const pulse = () => {
+      setRotating(true);
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setRotating(false), 520);
+    };
+    mq.addEventListener?.("change", pulse);
+    window.addEventListener("orientationchange", pulse);
+    return () => {
+      mq.removeEventListener?.("change", pulse);
+      window.removeEventListener("orientationchange", pulse);
+      window.clearTimeout(timer);
+    };
+  }, []);
+
   // GTR BRO: центральная кнопка GTR — активатор голоса. Флаг спрашиваем
   // один раз: пока фича выключена, кнопка работает как раньше и никому
   // ничего не обещает.
@@ -291,7 +314,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
   );
 
   return (
-    <div className={`gtr-shell ${navOpen ? "nav-open" : ""}`}>
+    <div className={`gtr-shell ${navOpen ? "nav-open" : ""}${rotating ? " gtr-rotating" : ""}`}>
       {/* атмосфера вечеринки: дрейфующий рассеянный свет за всем контентом */}
       <div className="gtr-atmo" aria-hidden>
         <span /><span /><span /><span />

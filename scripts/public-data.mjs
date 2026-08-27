@@ -12,7 +12,7 @@
 //
 // Скрипт запускается перед сборкой и переписывает *.public.json.
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 
 /** Отпечаток витрины. Копирование каталога целиком оставляет в копии наш
  *  идентификатор — это не защита, а доказательство происхождения. */
@@ -80,6 +80,33 @@ const venuesPub = {
   research: [],
 };
 writeFileSync("src/gtr/data/venues.public.json", JSON.stringify(venuesPub, null, 2));
+
+// ---- регионы: те же правила разделения, файл на регион
+// Источник — data/regions/<code>.json (полный, с контактами), выход —
+// <code>.public.json рядом. Контакты и разведка в браузер не уезжают.
+const REG_DIR = "src/gtr/data/regions";
+if (existsSync(REG_DIR)) {
+  for (const f of readdirSync(REG_DIR)) {
+    if (!/^[a-z]{3}\.json$/.test(f)) continue;
+    const code = f.slice(0, 3);
+    const R = JSON.parse(readFileSync(`${REG_DIR}/${f}`, "utf8"));
+    const pub = {
+      meta: {
+        ...(R.meta ?? {}),
+        region: code,
+        scope: "public",
+        rights: "© GTR Event. Каталог собран командой GTR; копирование и машинный сбор запрещены.",
+        fingerprint: fingerprint(JSON.stringify((R.venues ?? []).map((v) => v.id))),
+      },
+      venues: (R.venues ?? []).map((v) => ({ ...pick(v, VENUE_PUBLIC), region: code })),
+      spaces: R.spaces ?? [],
+      contacts: [],
+      research: [],
+    };
+    writeFileSync(`${REG_DIR}/${code}.public.json`, JSON.stringify(pub, null, 1) + "\n");
+    console.log(`регион ${code}: площадок ${pub.venues.length}, контактов снято ${R.contacts?.length ?? 0}`);
+  }
+}
 
 const dropped = (full, pub) => {
   const a = new Set(Object.keys(full));

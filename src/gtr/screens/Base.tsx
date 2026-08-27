@@ -6,6 +6,9 @@ import {
   fmtThb,
   GREEN,
   PH,
+  REGIONS,
+  regionName,
+  regionOf,
   RATE_COLOR,
   RATE_LABEL,
   nightOf,
@@ -40,7 +43,7 @@ const isQuar = (x: { confidence: string; status?: string }) =>
   x.confidence === "Low" || /verify|Closed/i.test(x.status || "");
 
 export function BaseScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user } = useGtr();
   // Балл готовности и достоверность источника — внутренние ops-метрики
@@ -48,6 +51,15 @@ export function BaseScreen() {
   // и наши оценки ему не показываем. Поэтому гейт по isTeam, а не по
   // «не гость»: разница ровно в организаторе.
   const isTeam = ["gtr", "sales", "owner", "pr"].includes(user.role);
+  // География: продукт больше не равен Пхукету. Регион — верхний фильтр,
+  // при его смене кластеры и теги сбрасываются: районы соседнего региона
+  // здесь бессмысленны.
+  const [region, setRegion] = useState("phuket");
+  const pickRegion = (code: string) => {
+    setRegion(code);
+    setCluster(t("Все"));
+    setTag(t("Все"));
+  };
   const [cluster, setCluster] = useState(t("Все"));
   const [tag, setTag] = useState(t("Все"));
   const [q, setQ] = useState("");
@@ -56,10 +68,21 @@ export function BaseScreen() {
     venueConfirmsFn().then((r) => setConfirms(r.confirms)).catch(() => {});
   }, []);
 
+  const regionRow = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const x of PH.venues) c[regionOf(x)] = (c[regionOf(x)] || 0) + 1;
+    // порядок реестра, не алфавит: Пхукет первым как домашний регион
+    return Object.keys(REGIONS)
+      .filter((code) => c[code])
+      .map((code) => [code, c[code]] as [string, number]);
+  }, []);
+  const regionTotal = regionRow.find(([c]) => c === region)?.[1] ?? 0;
+
   const { clusters, tags } = useMemo(() => {
     const c: Record<string, number> = {};
     const t: Record<string, number> = {};
     for (const x of PH.venues) {
+      if (regionOf(x) !== region) continue;
       c[x.cluster] = (c[x.cluster] || 0) + 1;
       t[x.tag] = (t[x.tag] || 0) + 1;
     }
@@ -67,11 +90,12 @@ export function BaseScreen() {
       clusters: Object.entries(c).sort((a, b) => b[1] - a[1]),
       tags: Object.entries(t).sort((a, b) => b[1] - a[1]),
     };
-  }, []);
+  }, [region]);
 
   const rows = PH.venues
     .filter(
       (x) =>
+        regionOf(x) === region &&
         !isQuar(x) &&
         (cluster === t("Все") || x.cluster === cluster) &&
         (tag === t("Все") || x.tag === tag) &&
@@ -90,7 +114,7 @@ export function BaseScreen() {
     onPick: (v: string) => void;
   }) => (
     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-      {[[t("Все"), PH.venues.length] as [string, number], ...items].map(([label, n]) => (
+      {[[t("Все"), regionTotal] as [string, number], ...items].map(([label, n]) => (
         <button
           key={label}
           onClick={() => onPick(label)}
@@ -114,15 +138,37 @@ export function BaseScreen() {
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 6 }}>
         <h1 className="gtr-oswald gtr-h1">
-          {t("База · Пхукет")}
+          {t("База")} · {regionName(region, i18n.language)}
         </h1>
         <span
           className="gtr-mono"
           style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
-          {rows.length} / {PH.meta.total} · {t("обновлено")} {PH.meta.updated}
+          {rows.length} / {regionTotal} · {t("обновлено")} {PH.meta.updated}
         </span>
       </div>
+      {regionRow.length > 1 ? (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", margin: "12px 0 2px" }}>
+          {regionRow.map(([code, n]) => (
+            <button
+              key={code}
+              onClick={() => pickRegion(code)}
+              style={{
+                border: `1px solid ${region === code ? "#E5231B" : "rgba(255,255,255,.2)"}`,
+                background: region === code ? "rgba(229,35,27,.14)" : "transparent",
+                color: region === code ? "#fff" : "rgba(255,255,255,.72)",
+                borderRadius: 0,
+                padding: "8px 13px",
+                cursor: "pointer",
+                font: `${region === code ? 700 : 600} 12px/1 'Golos Text',sans-serif`,
+                letterSpacing: ".02em",
+              }}
+            >
+              {regionName(code, i18n.language)} · {n}
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div style={{ margin: "12px 0 8px" }}>
         <FilterRow items={clusters} value={cluster} onPick={setCluster} />
       </div>

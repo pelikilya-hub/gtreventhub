@@ -986,6 +986,26 @@
 }
 .gtr-node:active { cursor: grabbing; }
 
+/* Площадка-папка: несёт весь граф внутри, поэтому весит больше обычного
+   блока — плотнее фон, тёплая кромка и лёгкий «язычок» сверху, как у папки. */
+.gtr-node-folder {
+  background: linear-gradient(180deg, #1a1414, #100d0e);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(229, 35, 27, 0.12);
+}
+.gtr-node-folder::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 14px;
+  width: 46px;
+  height: 7px;
+  background: linear-gradient(180deg, #1a1414, #100d0e);
+  border-top: 1px solid rgba(229, 35, 27, 0.3);
+  clip-path: polygon(0 100%, 10% 0, 90% 0, 100% 100%);
+}
+.gtr-folder-open { transition: background 0.16s ease, border-color 0.16s ease; }
+.gtr-folder-open:active { transform: scale(0.98); }
+
 /* ---------- бриф ---------- */
 @keyframes gtrBriefIn {
   from { opacity: 0; transform: translateY(8px); }

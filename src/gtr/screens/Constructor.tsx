@@ -131,6 +131,10 @@ export function ConstructorScreen({
   // Панель взаимодействия: граф ничем не перекрыт, панель выезжает только
   // по длительному нажатию на блок (или кнопкой в шапке)
   const [panelOpen, setPanelOpen] = useState(false);
+  // Граф-папка: по умолчанию всё, что поставлено на площадку, свёрнуто
+  // внутрь её блока — канвас чист. Двойной клик или долгое нажатие на
+  // площадку «открывает папку»: показывается вложенный граф модулей.
+  const [openFolder, setOpenFolder] = useState(false);
   const holdRef = useRef<{ t: number; x: number; y: number } | null>(null);
   // «Куда ставим?» — блок не добавляется, пока не выбран зал/зона
   const [placing, setPlacing] = useState<{
@@ -475,13 +479,15 @@ export function ConstructorScreen({
     dragRef.current = { id: n.id, dx: e.clientX - r.left - n.x, dy: e.clientY - r.top - n.y };
     setSel(n.id);
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    // длительное нажатие (~0.5с) без движения → панель взаимодействия
+    // длительное нажатие (~0.5с) без движения: на площадке — «войти в папку»
+    // (раскрыть вложенный граф), на остальных блоках — панель взаимодействия.
     cancelHold();
     holdRef.current = {
       t: window.setTimeout(() => {
         holdRef.current = null;
         dragRef.current = null;
-        setPanelOpen(true);
+        if (n.kind === "venue") setOpenFolder((o) => !o);
+        else setPanelOpen(true);
       }, 500),
       x: e.clientX,
       y: e.clientY,
@@ -526,7 +532,17 @@ export function ConstructorScreen({
     0,
   );
 
-  const canvasH = Math.max(560, ...g.nodes.map((n) => n.y + NODE_H + 60));
+  // Папка площадки: блок venue — «папка», всё остальное живёт внутри неё.
+  const venueNode = g.nodes.find((n) => n.kind === "venue");
+  const insideNodes = g.nodes.filter((n) => n.kind !== "venue");
+  const insideCount = insideNodes.length;
+  // Свёрнуто — на канвасе только площадка; развёрнуто — весь граф.
+  const visibleNodes = openFolder || !venueNode ? g.nodes : g.nodes.filter((n) => n.kind === "venue");
+  const showLinks = openFolder || !venueNode;
+
+  const canvasH = openFolder
+    ? Math.max(560, ...g.nodes.map((n) => n.y + NODE_H + 60))
+    : 420;
 
   // Смета события из графа: площадка + артисты + подрядчики + комиссия GTR
   const quote = computeQuote(g, vid);
@@ -860,6 +876,14 @@ export function ConstructorScreen({
         >
           {t("Бриф ·")} {briefProgress(briefFormat, briefAnswers).done}/
           {briefProgress(briefFormat, briefAnswers).total}
+        </button>
+        <button
+          className={openFolder ? "gtr-btn gtr-btn-red" : "gtr-btn"}
+          style={{ padding: "6px 12px", fontSize: 13 }}
+          title={t("Двойной клик или удержание на площадке — то же самое")}
+          onClick={() => setOpenFolder((x) => !x)}
+        >
+          {openFolder ? t("Свернуть площадку ▲") : `${t("Открыть площадку ▾")}${insideCount ? ` · ${insideCount}` : ""}`}
         </button>
         <button
           className={panelOpen ? "gtr-btn gtr-btn-red" : "gtr-btn"}
@@ -1413,7 +1437,7 @@ export function ConstructorScreen({
             onPointerUp={onPointerUp}
             style={{
               position: "relative",
-              minWidth: 1030,
+              minWidth: openFolder || !venueNode ? 1030 : "auto",
               height: canvasH,
               backgroundImage: "radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px)",
               backgroundSize: "26px 26px",
@@ -1428,7 +1452,7 @@ export function ConstructorScreen({
                 pointerEvents: "none",
               }}
             >
-              {g.links.map((l, i) => {
+              {(showLinks ? g.links : []).map((l, i) => {
                 const a = nodeById(l.from);
                 const b = nodeById(l.to);
                 if (!a || !b) return null;
@@ -1463,22 +1487,25 @@ export function ConstructorScreen({
               })}
             </svg>
 
-            {g.nodes.map((n) => {
+            {visibleNodes.map((n) => {
               const K = KINDS[n.kind];
               const on = sel === n.id;
               const linking = linkFrom === n.id;
               const st = nodeStatus(n);
               const healthy = st.status === "ok";
               const sc = STATUS_COLOR[st.status];
+              const isVenueFolder = n.kind === "venue";
               return (
                 <div
                   key={n.id}
-                  className="gtr-node"
+                  className={`gtr-node${isVenueFolder ? " gtr-node-folder" : ""}`}
                   onPointerDown={(e) => onPointerDown(e, n)}
                   onContextMenu={(e) => e.preventDefault()}
+                  onDoubleClick={isVenueFolder ? () => { cancelHold(); setOpenFolder((o) => !o); } : undefined}
                   style={{
-                    left: n.x,
-                    top: n.y,
+                    left: isVenueFolder && !openFolder ? 30 : n.x,
+                    top: isVenueFolder && !openFolder ? 26 : n.y,
+                    width: isVenueFolder && !openFolder ? 260 : undefined,
                     border: `1px solid ${on ? K[1] : linking ? GREEN : healthy ? "rgba(255,255,255,.11)" : sc}`,
                     boxShadow: on
                       ? "0 14px 34px rgba(229,35,27,.22)"
@@ -1555,7 +1582,40 @@ export function ConstructorScreen({
                     {n.sub}
                   </div>
 
-                  {/* порты */}
+                  {/* площадка-папка: счётчик вложенного и подсказка «войти» */}
+                  {isVenueFolder ? (
+                    <button
+                      className="gtr-folder-open"
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={(e) => { e.stopPropagation(); cancelHold(); setOpenFolder((o) => !o); }}
+                      style={{
+                        marginTop: 10,
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "8px 10px",
+                        background: openFolder ? "rgba(229,35,27,.12)" : "rgba(255,255,255,.05)",
+                        border: `1px solid ${openFolder ? "rgba(229,35,27,.4)" : "rgba(255,255,255,.12)"}`,
+                        color: "#fff",
+                        cursor: "pointer",
+                        font: "600 11px/1 'JetBrains Mono',monospace",
+                        letterSpacing: ".04em",
+                      }}
+                    >
+                      <Icon d={openFolder ? "M6 9l6 6 6-6" : "M3 7h5l2 2h11v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"} size={14} />
+                      <span style={{ color: openFolder ? "#fff" : "rgba(255,255,255,.85)" }}>
+                        {openFolder ? t("Свернуть площадку") : `${insideCount} ${t("модулей внутри")}`}
+                      </span>
+                      <span style={{ marginLeft: "auto", color: "rgba(255,255,255,.5)", fontSize: 13 }}>
+                        {openFolder ? "▲" : "▾"}
+                      </span>
+                    </button>
+                  ) : null}
+
+                  {/* порты: у свёрнутой площадки-папки их нет — тянуть связь не от чего */}
+                  {isVenueFolder && !openFolder ? null : (
+                  <>
                   <span
                     onPointerDown={(e) => e.stopPropagation()}
                     onClick={(e) => {
@@ -1601,9 +1661,28 @@ export function ConstructorScreen({
                       cursor: "crosshair",
                     }}
                   />
+                  </>
+                  )}
                 </div>
               );
             })}
+
+            {/* Пустой развёрнутой папки не бывает: подсказка, что внутри
+                пока ничего нет и модули добавляются слева. */}
+            {openFolder && !insideCount ? (
+              <div
+                style={{
+                  position: "absolute",
+                  left: 30,
+                  top: 150,
+                  maxWidth: 320,
+                  font: "500 12px/1.5 'Golos Text',sans-serif",
+                  color: "rgba(255,255,255,.5)",
+                }}
+              >
+                {t("Папка площадки пуста. Добавьте модули из палитры слева — они появятся здесь.")}
+              </div>
+            ) : null}
           </div>
         </Card>
 

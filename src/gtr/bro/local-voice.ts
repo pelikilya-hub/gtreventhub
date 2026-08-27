@@ -13,6 +13,7 @@
 // теми же инструментами (афиша, брони, маршруты) без отдельной сверки
 // голосового промпта.
 
+import { fixHeardNames } from "./heard-names";
 import type { BroCard, BroEvents, BroPersona, BroState } from "./session";
 import { loadLang, speechLocale, type BroLang } from "./lang";
 import { callBroTool, rulesReply } from "./voice-rules";
@@ -227,7 +228,9 @@ export class LocalVoiceSession {
 
   /** Собранная реплика уходит в мозг. Пустая — тишина в эфире, промах. */
   private async dispatch() {
-    const text = this.finalText.trim();
+    // «кетч бич клаб» → Catch Beach Club: мозг ищет по написанию из баз,
+    // и на табло реплика тоже уходит в каноническом виде.
+    const text = fixHeardNames(this.finalText.trim());
     this.finalText = "";
     this.shown = 0;
     if (!text) {

@@ -320,6 +320,17 @@ function Publish-Address($url) {
         Write-Host "   Ключа пульта нет — адрес отнеси сам: $url" -ForegroundColor Yellow
         return $false
     }
+    # Публиковать имеет право только тот экземпляр, чей токен принимает
+    # сервер на 8080. Иначе два окна скрипта переписывают пару
+    # «адрес+токен» друг за другом, порт держит один сервер, а в KV
+    # остаётся токен другого — и продукт получает вечный 401 над живым с
+    # виду мозгом. Ровно это и происходило 27.08.2026.
+    if (-not (Test-BrainToken)) {
+        Write-Host "!! Не публикую: сервер на 8080 не принимает МОЙ токен." -ForegroundColor Yellow
+        Write-Host "   Значит, порт держит другой экземпляр (второе окно или"
+        Write-Host "   автозапуск). Закрой лишние окна и перезапусти скрипт."
+        return $false
+    }
     $body = @{ action = "pult.brain"; key = $PultKey; url = $url; token = $token; model = "qwen3-8b" } |
         ConvertTo-Json -Compress
     try {

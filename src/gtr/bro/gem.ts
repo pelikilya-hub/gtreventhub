@@ -14,6 +14,7 @@
 
 import { LoudOut, routeAudio } from "./audio-out";
 import { speechLocale, type BroLang } from "./lang";
+import { fixHeardNames } from "./heard-names";
 import type { BroCard, BroEvents, BroPersona, BroState } from "./session";
 import { NEEDS_CONFIRM } from "./session";
 
@@ -409,7 +410,10 @@ export class GemSession {
   }
 
   private finalize() {
-    if (this.bufUser.trim()) this.ev.onLine?.({ who: "user", text: this.bufUser.trim(), at: Date.now() });
+    if (this.bufUser.trim())
+      // Имена мест и артистов в базах латиницей, а распознавание отдаёт
+      // «кетч бич клаб». На табло и в историю строка идёт починенной.
+      this.ev.onLine?.({ who: "user", text: fixHeardNames(this.bufUser.trim()), at: Date.now() });
     if (this.bufBro.trim()) this.ev.onLine?.({ who: "bro", text: this.bufBro.trim(), at: Date.now() });
     this.bufUser = "";
     this.bufBro = "";

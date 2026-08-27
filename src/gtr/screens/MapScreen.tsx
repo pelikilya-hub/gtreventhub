@@ -1,18 +1,21 @@
 // Карта Таиланда: регионы чипами, районы контурами, категории знаками.
-// Пхукет — исторический дом с полигонами тамбонов; остальные регионы
-// (Самуи, Панган, Паттайя, Бангкок, Пханг-Нга) живут точками и кластерами,
-// их контуры появятся, когда будут нарезаны из OSM.
+// Контуры есть во всех шести регионах — Пхукет, Самуи, Панган, Паттайя,
+// Бангкок, Пханг-Нга.
 //
 // Что здесь важно по логике. Район — не фильтр списка, а область на
 // карте: нажал «Патонг» — контур загорелся, карта подлетела к границам,
 // остальные точки притухли, но не исчезли. Так видно и выбранное, и
 // соседей, между которыми гость может перейти пешком.
 //
-// Контуры районов — настоящие рубежи, а не оболочка вокруг точек. Взяты
-// административные границы тамбонов Пхукета из OpenStreetMap: тамбон
-// отделяется от соседа ровно по дороге, хребту или берегу, потому что так
-// его и нарезали на местности. Наш кластер собирается как объединение
-// тамбонов, в которых реально стоят его площадки (scripts/map-districts-osm.py).
+// Откуда берётся контур — двумя способами, и способ виден глазом
+// (scripts/map-districts-all.py). Там, где OpenStreetMap знает
+// административную сетку целиком — Пхукет и Бангкок, — район собирается
+// объединением тамбонов и кхвэнгов, в которых реально стоят его площадки:
+// такая линия идёт по дороге, хребту или берегу, потому что так её и
+// нарезали на местности. Где сетки нет — Самуи, Панган, Паттайя,
+// Пханг-Нга, — рисуется зона вокруг наших же точек, и у неё частый
+// пунктир вместо сплошной линии: это не кадастровая граница, и
+// притворяться ею она не должна.
 //
 // Leaflet грузится только в браузере — SSR его не трогает.
 import { useNavigate } from "@tanstack/react-router";
@@ -35,11 +38,20 @@ type Shape = {
   center: [number, number];
   count: number;
   tambons: string[];
+  /** «osm» — административная граница по дороге, хребту или берегу;
+   *  «venues» — зона вокруг наших точек там, где настоящей границы в
+   *  OpenStreetMap нет. Рисуются по-разному: линия против пунктира. */
+  src: "osm" | "venues";
   /** контуров может быть несколько: тамбон бывает с островами и анклавами */
   rings: [number, number][][];
 };
 const GEO = geoRaw as Geo;
-const SHAPES = shapesRaw as unknown as Record<string, Shape>;
+/** Районы всех регионов: код региона → кластер → контур.
+ *
+ *  Лежат в общем чанке данных вместе с базой площадок. Отдельной загрузки
+ *  не делаем: сборщик всё равно сводит их в тот же чанк, а ленивый импорт
+ *  тогда только усложняет экран, ничего не выигрывая. */
+const SHAPES = shapesRaw as unknown as Record<string, Record<string, Shape>>;
 
 const ALL = "Все";
 
@@ -93,14 +105,15 @@ export function MapScreen() {
     for (const v of onMap) c[v.tag] = (c[v.tag] || 0) + 1;
     return MAP_CATS.filter((x) => c[x.tag]).map((x) => ({ ...x, n: c[x.tag] }));
   }, [onMap]);
-  // Контуры тамбонов есть только у Пхукета; в остальных регионах район —
-  // это кластер из базы, без полигона, но с тем же поведением фильтра.
+  /** Контуры текущего региона. Кластер без контура на карте не рисуется,
+   *  но кнопкой-фильтром остаётся. */
+  const shapes = useMemo(() => SHAPES[region] ?? {}, [region]);
+
   const districts = useMemo(() => {
     const c: Record<string, number> = {};
-    for (const v of onMap)
-      if (region !== "phuket" || SHAPES[v.cluster]) c[v.cluster] = (c[v.cluster] || 0) + 1;
+    for (const v of onMap) if (shapes[v.cluster]) c[v.cluster] = (c[v.cluster] || 0) + 1;
     return Object.entries(c).sort((a, b) => b[1] - a[1]);
-  }, [onMap, region]);
+  }, [onMap, shapes]);
 
   useEffect(() => {
     let alive = true;
@@ -137,35 +150,25 @@ export function MapScreen() {
       const L = await import("leaflet");
       const { areas, map } = L4.current!;
       areas.clearLayers();
-      // Контуры тамбонов нарезаны только для Пхукета. В остальных регионах
-      // карта летит к центру региона (или к точкам выбранного кластера) —
-      // без полигонов, пока их границы не собраны из OSM.
-      if (region !== "phuket") {
-        const reg = REGIONS[region];
-        const pts = onMap
-          .filter((v) => district !== ALL && v.cluster === district)
-          .map((v) => [GEO[v.id]!.lat, GEO[v.id]!.lon] as [number, number]);
-        if (pts.length) {
-          map.flyToBounds(L.latLngBounds(pts), { padding: [40, 40], maxZoom: 15, duration: 0.7 });
-        } else if (reg) {
-          map.flyTo(reg.center, reg.zoom, { duration: 0.7 });
-        }
-        return;
-      }
       // Старый город и Пхукет-таун — один и тот же тамбон. Рисовать его
       // дважды нельзя: заливки складываются и район выглядит ярче
       // выбранного. Поэтому контур один, а зажигают его обе кнопки.
+      // Ключ склейки — набор границ; у зон он пустой, поэтому склеиваем их
+      // по имени: две зоны никогда не совпадают.
       const drawn = new Set<string>();
-      for (const [key, sh] of Object.entries(SHAPES)) {
-        const sig = sh.tambons.join("|");
+      const sigOf = (sh: Shape) => (sh.tambons.length ? sh.tambons.join("|") : `~${sh.name}`);
+      for (const [key, sh] of Object.entries(shapes)) {
+        const sig = sigOf(sh);
         if (drawn.has(sig)) continue;
         drawn.add(sig);
-        const on =
-          district !== ALL && SHAPES[district] && SHAPES[district].tambons.join("|") === sig;
+        const on = district !== ALL && shapes[district] && sigOf(shapes[district]) === sig;
+        // Зона по нашим точкам — не кадастровая линия, и выглядеть как
+        // граница она не должна: у неё пунктир и в невыбранном виде тоже.
+        const zone = sh.src === "venues";
         const poly = L.polygon(sh.rings, {
           color: on ? "#E5231B" : "rgba(255,255,255,.26)",
           weight: on ? 2 : 1,
-          dashArray: on ? undefined : "5 7",
+          dashArray: on && !zone ? undefined : zone ? "2 6" : "5 7",
           fillColor: on ? "#E5231B" : "#ffffff",
           fillOpacity: on ? 0.1 : 0.035,
           interactive: true,
@@ -177,16 +180,17 @@ export function MapScreen() {
           direction: "center",
         });
       }
-      if (district !== ALL && SHAPES[district]) {
-        map.flyToBounds(L.polygon(SHAPES[district].rings).getBounds(), {
+      if (district !== ALL && shapes[district]) {
+        map.flyToBounds(L.polygon(shapes[district].rings).getBounds(), {
           padding: [30, 30],
           duration: 0.7,
         });
       } else {
-        map.flyTo([7.95, 98.34], 11, { duration: 0.7 });
+        const reg = REGIONS[region];
+        map.flyTo(reg?.center ?? [7.95, 98.34], reg?.zoom ?? 11, { duration: 0.7 });
       }
     })();
-  }, [ready, district, region, onMap]);
+  }, [ready, district, region, shapes]);
 
   // Точки: знак категории в кольце её цвета, со склейкой близких.
   //

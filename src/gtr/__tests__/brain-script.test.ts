@@ -9,10 +9,12 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const src = readFileSync(
+const raw = readFileSync(
   new URL("../../../infra/bro-brain/gpu/setup-brain-gpu.ps1", import.meta.url),
   "utf8",
 );
+/** Тело без метки порядка байтов — её наличие проверяется отдельно. */
+const src = raw.replace(/^\uFEFF/, "");
 
 type State = "code" | "sq" | "dq" | "line" | "block" | "hereSq" | "hereDq";
 
@@ -140,6 +142,15 @@ describe("скрипт мозга на домашнем GPU", () => {
     );
     expect(broken).not.toBe(src);
     expect(scan(broken).state).not.toBe("code");
+  });
+
+  // Windows PowerShell 5.1 читает .ps1 как ANSI (cp1251), если нет метки
+  // порядка байтов. Кириллица тогда рассыпается — само по себе полбеды, но
+  // тире «—» в UTF-8 это байты E2 80 94, а байт 94 в cp1251 — это символ
+  // «”», настоящая закрывающая кавычка. Она обрывает строку, и разбор
+  // валится каскадом. 27.08.2026 скрипт ровно так и не запустился у BOSS.
+  it("начинается с метки UTF-8 — иначе PowerShell 5.1 прочтёт его как cp1251", () => {
+    expect(raw.charCodeAt(0)).toBe(0xfeff);
   });
 
   it("параметры объявлены до первой команды", () => {

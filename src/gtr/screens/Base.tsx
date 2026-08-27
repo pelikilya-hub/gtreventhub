@@ -41,6 +41,10 @@ const isQuar = (x: { confidence: string; status?: string }) =>
 export function BaseScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useGtr();
+  // Балл готовности и достоверность источника — внутренние ops-метрики.
+  // Команде на списке они полезны, гостю (артист/посетитель) — нет.
+  const commercial = !["artist", "visitor"].includes(user.role);
   const [cluster, setCluster] = useState(t("Все"));
   const [tag, setTag] = useState(t("Все"));
   const [q, setQ] = useState("");
@@ -276,7 +280,7 @@ export function BaseScreen() {
                 h={22}
                 style={{ position: "absolute", left: 12, top: 10, zIndex: 2 }}
               />
-              {x.readiness ? (
+              {commercial && x.readiness ? (
                 <span
                   className="gtr-mono"
                   style={{
@@ -310,7 +314,12 @@ export function BaseScreen() {
                 {x.type} · {x.area}
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                <Chip color={confColor(x.confidence)}>{(x.confidence ?? "—").toUpperCase()}</Chip>
+                {/* Достоверность источника — команде. Гостю на карточке
+                    остаётся «бронируемая» и «прайс подтверждён» — это про
+                    него, а не про нашу кухню оценки площадок. */}
+                {commercial ? (
+                  <Chip color={confColor(x.confidence)}>{(x.confidence ?? "—").toUpperCase()}</Chip>
+                ) : null}
                 {x.readiness?.state === "Бронируемая" ? (
                   <Chip color={GREEN}>{t("БРОНИРУЕМАЯ")}</Chip>
                 ) : null}
@@ -402,7 +411,10 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
         <div className="gtr-beam" />
         <div style={{ position: "relative" }}>
           <Eyebrow>
-            {v.id} · {(v.cluster ?? "").toUpperCase()}
+            {/* Внутренний id площадки — только команде. Гостю показываем
+                район, а не «VEN-0061»: это наш служебный код, не его дело. */}
+            {commercial ? `${v.id} · ` : ""}
+            {(v.cluster ?? v.area ?? "").toUpperCase()}
           </Eyebrow>
           <div
             style={{
@@ -417,9 +429,18 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 площадку узнают, а набранное имя — уже подпись под ним. */}
             <VenueLogo vid={v.id} h={34} />
             <TrashTitle text={v.name} size={29} />
-            <Chip color={confColor(v.confidence)}>{t("ДОСТОВЕРНОСТЬ:")} {(v.confidence ?? "—").toUpperCase()}</Chip>
-            {R ? (
-              <Chip color={R.state === "Бронируемая" ? GREEN : AMBER}>{R.state.toUpperCase()}</Chip>
+            {/* «Достоверность источника» и «готовность к бронированию» —
+                наши внутренние ops-метрики: по ним видно, что мы скрейпим
+                и оцениваем площадки. Гостю это знать незачем и вредно.
+                Ему остаётся только «подтверждено площадкой» — знак доверия,
+                а не кухня. */}
+            {commercial ? (
+              <>
+                <Chip color={confColor(v.confidence)}>{t("ДОСТОВЕРНОСТЬ:")} {(v.confidence ?? "—").toUpperCase()}</Chip>
+                {R ? (
+                  <Chip color={R.state === "Бронируемая" ? GREEN : AMBER}>{R.state.toUpperCase()}</Chip>
+                ) : null}
+              </>
             ) : null}
             {confirm?.status === "confirmed" ? (
               <Chip color={GREEN}>{t("✓ ПОДТВЕРЖДЕНО ПЛОЩАДКОЙ")}</Chip>
@@ -741,9 +762,12 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
 
           {hasReserve(v.id) ? (
             <Card id="gtr-reserve" style={{ padding: 18 }}>
-              <Eyebrow style={{ marginBottom: 4 }}>
-                {t("РАССАДКА И БРОНЬ")} {t("· SEVENROOMS-ПАРИТЕТ")}
-              </Eyebrow>
+              {/* «SEVENROOMS-паритет» — наша внутренняя формулировка про то,
+                  что схема брони не хуже, чем у сервиса рассадки. Гостю это
+                  ничего не говорит; ему — «Рассадка и бронь». Как именно
+                  заявка доходит до площадки (наш Telegram-контур) — тоже
+                  кухня, гостю важно «площадка свяжется и подтвердит». */}
+              <Eyebrow style={{ marginBottom: 4 }}>{t("РАССАДКА И БРОНЬ")}</Eyebrow>
               <div
                 style={{
                   margin: "0 0 12px",
@@ -751,7 +775,9 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                   color: "var(--gtr-t2)",
                 }}
               >
-                {t("Живая схема зон и столов площадки: депозиты, кредит на еду и напитки, предзаказ по официальному меню. Заявка уходит менеджеру в Telegram, подтверждение — одной кнопкой.")}
+                {commercial
+                  ? t("Живая схема зон и столов площадки: депозиты, кредит на еду и напитки, предзаказ по официальному меню. Заявка уходит менеджеру в Telegram, подтверждение — одной кнопкой.")
+                  : t("Выберите зону и стол, дату и гостей, при желании — предзаказ по меню. Площадка свяжется с вами и подтвердит бронь.")}
               </div>
               <CdmReserve vid={v.id} />
             </Card>

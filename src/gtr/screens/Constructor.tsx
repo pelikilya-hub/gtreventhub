@@ -205,7 +205,7 @@ export function ConstructorScreen({
   ) => {
     const id = `n${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
     const finalFields: [string, string][] = room
-      ? [...fields.filter((f) => f[0] !== "ЗАЛ"), ["ЗАЛ", room.title]]
+      ? [...fields.filter((f) => f[0] !== "ЗАЛ"), [t("ЗАЛ"), room.title]]
       : fields;
     mutate((gr) => {
       const roomNode = room ? gr.nodes.find((n) => n.id === room.id) : undefined;
@@ -279,13 +279,13 @@ export function ConstructorScreen({
       "artist",
       a.name,
       [(a.styles || []).slice(0, 2).join(" · "), a.tier].filter(Boolean).join(" · ") || a.role,
-      a.prio ? `ПРИО ${a.prio}` : "АРТИСТ",
+      a.prio ? `ПРИО ${a.prio}` : t("АРТИСТ"),
       [
-        ["СТИЛИ", (a.styles || []).join(", ") || "—"],
-        ["УРОВЕНЬ", a.tier || a.cat || "—"],
-        ["РАЙДЕР", a.rider ? RIDER_LABEL[a.rider] || a.rider : "—"],
-        ["КОНТАКТ", a.email || a.wa || a.phone || a.mgmt || "по запросу"],
-        ["КАРТОЧКА", a.id],
+        [t("СТИЛИ"), (a.styles || []).join(", ") || "—"],
+        [t("УРОВЕНЬ"), a.tier || a.cat || "—"],
+        [t("РАЙДЕР"), a.rider ? RIDER_LABEL[a.rider] || a.rider : "—"],
+        [t("КОНТАКТ"), a.email || a.wa || a.phone || a.mgmt || "по запросу"],
+        [t("КАРТОЧКА"), a.id],
       ],
       true,
     );
@@ -821,7 +821,7 @@ export function ConstructorScreen({
                         color: r.badge === "ЗОНА" ? "#7B9EFF" : "#E5231B",
                       }}
                     >
-                      {r.badge === "ЗОНА" ? "ЗОНА" : "ЗАЛ"}
+                      {r.badge === "ЗОНА" ? t("ЗОНА") : t("ЗАЛ")}
                     </span>
                   </button>
                 ))}
@@ -898,7 +898,7 @@ export function ConstructorScreen({
           style={health.clean ? undefined : { animation: "gtralert 1.8s ease-out infinite" }}
         >
           {health.clean
-            ? "СОБЫТИЕ В ПОРЯДКЕ"
+            ? t("СОБЫТИЕ В ПОРЯДКЕ")
             : `${health.problems + health.delays} ПРОБЛЕМ · ${health.warns} ВНИМАНИЕ`}
         </Chip>
         {linkFrom ? <Chip color={GREEN}>{t("СВЯЗЬ: выберите левый порт целевого блока")}</Chip> : null}
@@ -1095,11 +1095,11 @@ export function ConstructorScreen({
                   kind,
                   label,
                   "Заполните данные блока",
-                  "НОВОЕ",
+                  t("НОВОЕ"),
                   [
-                    ["ТИП", K[0]],
-                    ["СТАТУС", "Черновик"],
-                    ["ИСТОЧНИК", "—"],
+                    [t("ТИП"), K[0]],
+                    [t("СТАТУС"), "Черновик"],
+                    [t("ИСТОЧНИК"), "—"],
                   ],
                   VENDOR_KINDS.includes(kind),
                 );
@@ -1292,10 +1292,10 @@ export function ConstructorScreen({
                                           kind,
                                           e.name,
                                           e.spec,
-                                          e.price ? "ПОЗИЦИЯ" : "ЗАПРОС",
+                                          e.price ? t("ПОЗИЦИЯ") : t("ЗАПРОС"),
                                           [
-                                            ["ГРУППА", e.group],
-                                            ["ЦЕНА", equipPrice(e)],
+                                            [t("ГРУППА"), e.group],
+                                            [t("ЦЕНА"), equipPrice(e)],
                                             // цену в расчёт кладём только когда она есть:
                                             // ноль в ЦЕНА_THB смета приняла бы за твёрдую цифру
                                             ...(e.price
@@ -1304,10 +1304,10 @@ export function ConstructorScreen({
                                                   string,
                                                 ][])
                                               : []),
-                                            ["СТАТУС ЦЕНЫ", RATE_LABEL[e.kind]],
-                                            ["ПОДРЯДЧИК", e.vendor || "не назначен"],
-                                            ["КОНТАКТ", e.contact || "—"],
-                                            ["ИСТОЧНИК", e.source || "—"],
+                                            [t("СТАТУС ЦЕНЫ"), RATE_LABEL[e.kind]],
+                                            [t("ПОДРЯДЧИК"), e.vendor || "не назначен"],
+                                            [t("КОНТАКТ"), e.contact || "—"],
+                                            [t("ИСТОЧНИК"), e.source || "—"],
                                           ],
                                           true,
                                         )
@@ -1361,14 +1361,14 @@ export function ConstructorScreen({
                                     kind,
                                     p.package,
                                     `${vd.name} · ${p.system}`,
-                                    "ПАКЕТ",
+                                    t("ПАКЕТ"),
                                     [
-                                      ["ПОДРЯДЧИК", vd.name],
-                                      ["ЦЕНА", packagePrice(p)],
+                                      [t("ПОДРЯДЧИК"), vd.name],
+                                      [t("ЦЕНА"), packagePrice(p)],
                                       ["ЦЕНА_THB", String(p.price)],
-                                      ["ПРОВЕРЕНО", p.verified || "не подтверждена"],
-                                      ["КОНТАКТ", p.contact || vd.contact || "—"],
-                                      ["ИСТОЧНИК", p.source || vd.source || "—"],
+                                      [t("ПРОВЕРЕНО"), p.verified || "не подтверждена"],
+                                      [t("КОНТАКТ"), p.contact || vd.contact || "—"],
+                                      [t("ИСТОЧНИК"), p.source || vd.source || "—"],
                                     ],
                                     true,
                                   )
@@ -1417,12 +1417,12 @@ export function ConstructorScreen({
                                     kind,
                                     vd.name,
                                     vd.meta,
-                                    "ЗАПРОС",
+                                    t("ЗАПРОС"),
                                     [
-                                      ["ПОДРЯДЧИК", vd.name],
-                                      ["ЦЕНА", vd.price || "по запросу"],
-                                      ["КОНТАКТ", vd.contact || "—"],
-                                      ["ИСТОЧНИК", vd.source || "—"],
+                                      [t("ПОДРЯДЧИК"), vd.name],
+                                      [t("ЦЕНА"), vd.price || "по запросу"],
+                                      [t("КОНТАКТ"), vd.contact || "—"],
+                                      [t("ИСТОЧНИК"), vd.source || "—"],
                                     ],
                                     true,
                                   )
@@ -1892,7 +1892,7 @@ export function ConstructorScreen({
                                   fields: room
                                     ? [
                                         ...n.fields.filter((f) => f[0] !== "ЗАЛ"),
-                                        ["ЗАЛ", room.title] as [string, string],
+                                        [t("ЗАЛ"), room.title] as [string, string],
                                       ]
                                     : n.fields.filter((f) => f[0] !== "ЗАЛ"),
                                 }

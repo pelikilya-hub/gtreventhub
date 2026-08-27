@@ -232,7 +232,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
           {saved ? <Chip color={GREEN}>{t("СОХРАНЕНО")}</Chip> : null}
         </div>
         <div>
-          {label("О СЕБЕ · ВИДНО В КАТАЛОГЕ")}
+          {label(t("О СЕБЕ · ВИДНО В КАТАЛОГЕ"))}
           <textarea
             className="gtr-input"
             rows={4}

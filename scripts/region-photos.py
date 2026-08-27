@@ -33,16 +33,31 @@ def fetch(url, binary=False):
 
 
 def candidates(page, base):
-    """Кадры со страницы по убыванию доверия: og -> twitter -> крупные img."""
+    """Кадры со страницы по убыванию доверия: og -> twitter -> разметка -> img.
+
+    Половина сайтов грузит картинки лениво: в `src` стоит заглушка, а
+    настоящий файл лежит в data-src или srcset. Раньше мы их не видели и
+    уходили ни с чем с сайтов, где фото были на виду."""
     out = []
     for pat in (
         r'<meta[^>]+property=["\']og:image(?::secure_url)?["\'][^>]+content=["\']([^"\']+)',
         r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']',
         r'<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\']([^"\']+)',
+        r'<link[^>]+rel=["\']image_src["\'][^>]+href=["\']([^"\']+)',
+        r'"image"\s*:\s*"([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"',
+        r'"contentUrl"\s*:\s*"([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"',
     ):
         out += re.findall(pat, page, re.I)
-    # запасной ход: картинки в теле страницы
-    out += re.findall(r'<img[^>]+src=["\']([^"\']+\.(?:jpg|jpeg|png|webp))', page, re.I)[:12]
+    # тело страницы: обычные, ленивые и адаптивные картинки
+    body = re.findall(
+        r'(?:src|data-src|data-lazy-src|data-original|data-bg)=["\']([^"\']+\.(?:jpg|jpeg|png|webp)[^"\']*)',
+        page, re.I)[:20]
+    for s in re.findall(r'srcset=["\']([^"\']+)["\']', page, re.I)[:10]:
+        # из набора берём последний — он самый крупный
+        parts = [p.strip().split(" ")[0] for p in s.split(",") if p.strip()]
+        if parts:
+            body.append(parts[-1])
+    out += body
     seen, clean = set(), []
     for u in out:
         u = urljoin(base, u.strip())
@@ -50,7 +65,7 @@ def candidates(page, base):
             continue
         seen.add(u)
         clean.append(u)
-    return clean[:6]
+    return clean[:10]
 
 
 def save_hero(vid, url):
@@ -92,8 +107,18 @@ def main():
                 nosite += 1
                 continue
             page = fetch(site)
+            pool = candidates(page, site)
+            # Если на главной кадра не нашлось — заглядываем в галерею.
+            # Дальше не идём: обходить сайт целиком ради одной картинки
+            # дорого и невежливо к чужому серверу.
+            if not pool:
+                for href in re.findall(
+                        r'href="([^"]{0,120}(?:gallery|photos|about|venue)[^"]{0,40})"', page, re.I)[:2]:
+                    pool = candidates(fetch(urljoin(site, href)), site)
+                    if pool:
+                        break
             ok = False
-            for u in candidates(page, site):
+            for u in pool:
                 if save_hero(vid, u):
                     dom = urlparse(site).netloc.replace("www.", "")
                     rich.setdefault(vid, {}).update(

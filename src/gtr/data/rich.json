@@ -1109,5 +1109,130 @@
     "hero": "/venues/VEN-SMU-0057-hero.jpg",
     "src": "KIMPTONKITALAYSAMUI.COM",
     "credit": "Kimpton Kitalay Samui · официальный сайт"
+  },
+  "VEN-BKK-0008": {
+    "hero": "/venues/VEN-BKK-0008-hero.jpg",
+    "src": "CLUBINSANITYBANGKOK.COM",
+    "credit": "Insanity Nightclub · официальный сайт"
+  },
+  "VEN-BKK-0022": {
+    "hero": "/venues/VEN-BKK-0022-hero.jpg",
+    "src": "US-BAR.COM",
+    "credit": "Bar Us · официальный сайт"
+  },
+  "VEN-BKK-0028": {
+    "hero": "/venues/VEN-BKK-0028-hero.jpg",
+    "src": "ELYSIUMBKK.CLUB",
+    "credit": "Elysium Immersive Club Bangkok · официальный сайт"
+  },
+  "VEN-BKK-0030": {
+    "hero": "/venues/VEN-BKK-0030-hero.jpg",
+    "src": "SPACEPLUSBKK.COM",
+    "credit": "Spaceplus Bangkok · официальный сайт"
+  },
+  "VEN-BKK-0035": {
+    "hero": "/venues/VEN-BKK-0035-hero.jpg",
+    "src": "THEGRAVITIQUEHOTEL.COM",
+    "credit": "Sanay Rooftop Bar · официальный сайт"
+  },
+  "VEN-BKK-0046": {
+    "hero": "/venues/VEN-BKK-0046-hero.jpg",
+    "src": "VESPERBAR.CO",
+    "credit": "Vesper · официальный сайт"
+  },
+  "VEN-BKK-0047": {
+    "hero": "/venues/VEN-BKK-0047-hero.jpg",
+    "src": "AESOPSBANGKOK.COM",
+    "credit": "Aesop's · официальный сайт"
+  },
+  "VEN-PGN-0004": {
+    "hero": "/venues/VEN-PGN-0004-hero.jpg",
+    "src": "JUNGLE-EXPERIENCE.COM",
+    "credit": "Jungle Experience · официальный сайт"
+  },
+  "VEN-PGN-0006": {
+    "hero": "/venues/VEN-PGN-0006-hero.jpg",
+    "src": "HALFMOONFESTIVAL.COM",
+    "credit": "Half Moon Festival · официальный сайт"
+  },
+  "VEN-PGN-0047": {
+    "hero": "/venues/VEN-PGN-0047-hero.jpg",
+    "src": "ALCOVEPHANGAN.COM",
+    "credit": "L'Alcove · официальный сайт"
+  },
+  "VEN-PNA-0026": {
+    "hero": "/venues/VEN-PNA-0026-hero.jpg",
+    "src": "KOHYAOYAI.SANTHIYA.COM",
+    "credit": "Santhiya Koh Yao Yai Resort & Spa · официальный сайт"
+  },
+  "VEN-PNA-0027": {
+    "hero": "/venues/VEN-PNA-0027-hero.jpg",
+    "src": "BLUEBAYBEACHRESORT.COM",
+    "credit": "Blue Bay Resort Hotel · официальный сайт"
+  },
+  "VEN-PTY-0016": {
+    "hero": "/venues/VEN-PTY-0016-hero.jpg",
+    "src": "SKYBARSUMMERCLUB.COM",
+    "credit": "Skybar Summer Club · официальный сайт"
+  },
+  "VEN-PTY-0017": {
+    "hero": "/venues/VEN-PTY-0017-hero.jpg",
+    "src": "LAYBEACHCLUB.COM",
+    "credit": "LAY Beach Club · официальный сайт"
+  },
+  "VEN-PTY-0043": {
+    "hero": "/venues/VEN-PTY-0043-hero.jpg",
+    "src": "VARUNA.ORG",
+    "credit": "Royal Varuna Yacht Club · официальный сайт"
+  },
+  "VEN-SMU-0006": {
+    "hero": "/venues/VEN-SMU-0006-hero.jpg",
+    "src": "COCO-TAMS.WEEBLYTE.COM",
+    "credit": "Coco Tam's · официальный сайт"
+  },
+  "VEN-SMU-0011": {
+    "hero": "/venues/VEN-SMU-0011-hero.jpg",
+    "src": "SAMUIROCKBAR.COM",
+    "credit": "Rock Bar Samui · официальный сайт"
+  },
+  "VEN-SMU-0022": {
+    "hero": "/venues/VEN-SMU-0022-hero.jpg",
+    "src": "TROPICALMURPHYS.COM",
+    "credit": "Tropical Murphy's Irish Pub · официальный сайт"
+  },
+  "VEN-SMU-0049": {
+    "hero": "/venues/VEN-SMU-0049-hero.jpg",
+    "src": "GREENLIGHTSAMUI.COM",
+    "credit": "Greenlight Cafe & Bar · официальный сайт"
+  },
+  "VEN-SMU-0050": {
+    "hero": "/venues/VEN-SMU-0050-hero.jpg",
+    "src": "BARBAGUETTE.SHOP",
+    "credit": "Bar Baguette · официальный сайт"
+  },
+  "VEN-SMU-0053": {
+    "hero": "/venues/VEN-SMU-0053-hero.jpg",
+    "src": "2FISHESSAMUI.COM",
+    "credit": "2 Fishes Restaurant · официальный сайт"
+  },
+  "VEN-SMU-0060": {
+    "hero": "/venues/VEN-SMU-0060-hero.jpg",
+    "src": "NATUREBARANDBUNGALOWS.WORDPRESS.COM",
+    "credit": "Nature Bar · официальный сайт"
+  },
+  "VEN-BKK-0039": {
+    "hero": "/venues/VEN-BKK-0039-hero.jpg",
+    "src": "RIVAARUNBANGKOK.COM",
+    "credit": "Above Riva · официальный сайт"
+  },
+  "VEN-SMU-0015": {
+    "hero": "/venues/VEN-SMU-0015-hero.jpg",
+    "src": "CHISAMUI.COM",
+    "credit": "CHI Samui Beach Club · официальный сайт"
+  },
+  "VEN-SMU-0058": {
+    "hero": "/venues/VEN-SMU-0058-hero.jpg",
+    "src": "HANSARSAMUI.COM",
+    "credit": "Hansar Koh Samui · официальный сайт"
   }
 }

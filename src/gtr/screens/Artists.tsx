@@ -1044,7 +1044,7 @@ function ArtistCard({
                   color: "var(--gtr-t3)",
                 }}
               >
-                {sSet.url.includes("soundcloud") ? "SOUNDCLOUD" : sSet.url.includes("mixcloud") ? "MIXCLOUD" : sSet.url.includes("youtu") ? "YOUTUBE" : sSet.url.includes("spotify") ? "SPOTIFY" : "ССЫЛКА"} ↗
+                {sSet.url.includes("soundcloud") ? "SOUNDCLOUD" : sSet.url.includes("mixcloud") ? "MIXCLOUD" : sSet.url.includes("youtu") ? "YOUTUBE" : sSet.url.includes("spotify") ? "SPOTIFY" : t("ССЫЛКА")} ↗
               </span>
             </a>
           ))}

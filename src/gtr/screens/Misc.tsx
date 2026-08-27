@@ -261,12 +261,12 @@ export function InquiriesScreen() {
                         }
                       >
                         {r.status === "accepted"
-                          ? "ПРИНЯТО"
+                          ? t("ПРИНЯТО")
                           : r.status === "declined"
-                            ? "ОТКЛОНЕНО"
+                            ? t("ОТКЛОНЕНО")
                             : r.status === "seen"
-                              ? "ПРОСМОТРЕНО"
-                              : "НОВЫЙ"}
+                              ? t("ПРОСМОТРЕНО")
+                              : t("НОВЫЙ")}
                       </Chip>
                       {r.status !== "accepted" && r.status !== "declined" ? (
                         <>
@@ -364,7 +364,7 @@ export function InquiriesScreen() {
                   </span>
                 </span>
                 <Chip color={c} style={{ width: 108, textAlign: "center" }}>
-                  {replied.includes(i) ? "ОТВЕЧЕНО" : status}
+                  {replied.includes(i) ? t("ОТВЕЧЕНО") : status}
                 </Chip>
                 <button
                   className={`gtr-btn ${cta === "Ответить" && !replied.includes(i) ? "gtr-btn-red" : ""}`}
@@ -800,7 +800,7 @@ export function SpacesScreen() {
             borderBottom: "1px solid rgba(255,255,255,.07)",
           }}
         >
-          {["ЗАЛ", "ПЛОЩАДЬ", "ВМЕСТИМОСТЬ", "СТАТУС"].map((h) => (
+          {[t("ЗАЛ"), t("ПЛОЩАДЬ"), t("ВМЕСТИМОСТЬ"), t("СТАТУС")].map((h) => (
             <span key={h} className="gtr-eyebrow">
               {h}
             </span>
@@ -954,7 +954,7 @@ export function VenueScreen() {
               {v.name}
             </h2>
             <Chip color={v.verified ? GREEN : AMBER}>
-              {v.verified ? `ПРОВЕРЕНО ${v.verified}` : "НЕ ВЕРИФИЦИРОВАНО"}
+              {v.verified ? `ПРОВЕРЕНО ${v.verified}` : t("НЕ ВЕРИФИЦИРОВАНО")}
             </Chip>
             {rich.badge ? <Chip color="#FFD166">{rich.badge}</Chip> : null}
           </div>
@@ -974,11 +974,11 @@ export function VenueScreen() {
         <Card style={{ padding: 18 }}>
           <Eyebrow style={{ marginBottom: 10 }}>{t("ДАННЫЕ ПЛОЩАДКИ")}</Eyebrow>
           {[
-            ["ФОРМАТЫ СОБЫТИЙ", v.events],
-            ["ЗОНЫ И ИНФРАСТРУКТУРА", v.facilities],
-            ["ВМЕСТИМОСТЬ", v.capacity],
-            ["МУЗЫКА / РАЗВЛЕЧЕНИЯ", v.music],
-            ["ИНТЕГРАЦИОННЫЕ ЗАМЕТКИ", v.notes],
+            [t("ФОРМАТЫ СОБЫТИЙ"), v.events],
+            [t("ЗОНЫ И ИНФРАСТРУКТУРА"), v.facilities],
+            [t("ВМЕСТИМОСТЬ"), v.capacity],
+            [t("МУЗЫКА / РАЗВЛЕЧЕНИЯ"), v.music],
+            [t("ИНТЕГРАЦИОННЫЕ ЗАМЕТКИ"), v.notes],
           ]
             .filter(([, val]) => val)
             .map(([k, val]) => (
@@ -1205,32 +1205,32 @@ export function FinanceScreen() {
       rateMissing
         ? "Не опубликован — организатор не видит расчёт"
         : "Опубликован в источнике площадки",
-      rateMissing ? "НЕТ" : "OK",
+      rateMissing ? t("НЕТ") : "OK",
       rateMissing ? RED : GREEN,
     ],
     [
       "Договор с платформой",
       R && !/Missing/i.test(R.contract) ? "Согласован" : "Не согласован — блокирует «подтверждено»",
-      R && !/Missing/i.test(R.contract) ? "ОК" : "НЕТ",
+      R && !/Missing/i.test(R.contract) ? "ОК" : t("НЕТ"),
       R && !/Missing/i.test(R.contract) ? GREEN : RED,
     ],
     [
       "Условия оплаты",
       R && !/Missing/i.test(R.payment) ? "Определены" : "Не определены",
-      R && !/Missing/i.test(R.payment) ? "ОК" : "НЕТ",
+      R && !/Missing/i.test(R.payment) ? "ОК" : t("НЕТ"),
       R && !/Missing/i.test(R.payment) ? GREEN : RED,
     ],
     [
       "Метод доступности",
       R?.avail || "Ручной запрос",
-      /Manual|Proposal|enquiry/i.test(R?.avail || "Вручную") ? "ВРУЧНУЮ" : "ОК",
+      /Manual|Proposal|enquiry/i.test(R?.avail || "Вручную") ? t("ВРУЧНУЮ") : "ОК",
       /Manual|Proposal|enquiry/i.test(R?.avail || "Вручную") ? AMBER : GREEN,
     ],
-    ["Права на фото", R?.photo || "Только официальная галерея", "ОГРАНИЧЕНО", AMBER],
+    ["Права на фото", R?.photo || "Только официальная галерея", t("ОГРАНИЧЕНО"), AMBER],
     [
       "Тех-райдер",
       R?.rider || "Не опубликован",
-      /Published/i.test(R?.rider || "") ? "ОК" : "ЧАСТИЧНО",
+      /Published/i.test(R?.rider || "") ? "ОК" : t("ЧАСТИЧНО"),
       /Published/i.test(R?.rider || "") ? GREEN : AMBER,
     ],
   ];
@@ -1854,10 +1854,10 @@ export function AdminScreen() {
         style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 16 }}
       >
         {[
-          ["ПЛОЩАДОК", PH.meta.total, "#fff"],
-          ["ЗАЛОВ", PH.meta.spaces, "#fff"],
+          [t("ПЛОЩАДОК"), PH.meta.total, "#fff"],
+          [t("ЗАЛОВ"), PH.meta.spaces, "#fff"],
           ["КОНТАКТОВ P0/P1", PH.meta.contacts, AMBER],
-          ["КАРАНТИН", quar.length, RED],
+          [t("КАРАНТИН"), quar.length, RED],
         ].map(([l, v2, c]) => (
           <Card key={String(l)} style={{ padding: "16px 18px" }}>
             <Eyebrow>{l}</Eyebrow>

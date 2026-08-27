@@ -395,6 +395,46 @@ export const Route = createFileRoute("/api/tg")({
         const up = (await request.json().catch(() => null)) as TgUpdate | null;
         if (!up) return Response.json({ ok: true });
 
+        // Любая необработанная ошибка ниже обязана остаться ошибкой ОДНОГО
+        // сообщения, а не всего бота.
+        //
+        // Telegram доставляет апдейты строго по очереди и повторяет тот, на
+        // котором получил не-200. Один запрос, уронивший обработчик,
+        // затыкает очередь целиком: новые нажатия кнопок просто не доходят,
+        // пока отравленный апдейт не протухнет. Ровно это и выглядит как
+        // «кнопки в боте не работают».
+        //
+        // Поэтому наружу всегда 200, а разбор летит в служебный контур —
+        // с типом апдейта и чатом, чтобы ошибку можно было воспроизвести,
+        // а не гадать по счётчику в getWebhookInfo.
+        try {
+          return await handleUpdate(ns, up);
+        } catch (e) {
+          const kind = Object.keys(up).filter((k) => k !== "update_id").join(",") || "?";
+          const chat =
+            up.message?.chat.id ?? up.callback_query?.message?.chat.id ?? up.channel_post?.chat.id;
+          try {
+            const { notifyBossTg } = await import("../gtr/kv-api");
+            await notifyBossTg(
+              ns,
+              `⚠️ <b>Вебхук телеграма упал на апдейте</b>\nтип: ${tgEsc(kind)} · чат: ${tgEsc(String(chat ?? "—"))}\n<code>${tgEsc(
+                (e instanceof Error ? `${e.message}\n${e.stack ?? ""}` : String(e)).slice(0, 700),
+              )}</code>`,
+            );
+          } catch {
+            // служебный контур недоступен — молчим, но 200 отдаём всё равно
+          }
+          return Response.json({ ok: true, handled: false });
+        }
+      },
+    },
+  },
+});
+
+/** Разбор одного апдейта. Вынесен из ручки, чтобы у неё остался один
+ *  выход и один перехват ошибок на всё тело. */
+async function handleUpdate(ns: KvNs, up: TgUpdate): Promise<Response> {
+
         // ---------- /ops в закрытом канале: привязка служебного контура ----------
         if (up.channel_post?.text) {
           const cp = up.channel_post;
@@ -1181,7 +1221,4 @@ export const Route = createFileRoute("/api/tg")({
         }
 
         return Response.json({ ok: true });
-      },
-    },
-  },
-});
+}

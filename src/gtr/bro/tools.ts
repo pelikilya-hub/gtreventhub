@@ -28,6 +28,7 @@ import { hasReserve as venueHasReserve, menuVenues, reserveVenues } from "../ven
 import { capacityOf, forecast, pullScore } from "./forecast";
 import { isTeam, TEAM_ROLES } from "./roles";
 import { genreName, resolveGenre } from "../genres";
+import { publicFactsOf } from "../venue-facts";
 import { fitArtist, primeSlot, slotAt, soundOf } from "../venue-sound";
 
 // ------------------------------------------------------------- типы
@@ -1111,6 +1112,12 @@ export const handlers: Record<
     // репозитории — но до сих пор не доходили до BRO вовсе, и на «во
     // сколько открывается» он не мог ответить даже там, где мы знаем.
     const night = nightOf(hit.id);
+    // Чего не знаем сами — берём с сайта самой площадки. Это слабее
+    // проверенного факта, поэтому идёт только в пустое место и всегда с
+    // указанием, откуда снято: «по сайту площадки» — честный ответ,
+    // «работает до трёх» без источника — нет.
+    const pub = publicFactsOf(hit.id);
+    const hours = night.hours || pub?.hours || null;
     const rate = (ratesRaw as { venueId: string; amount: number; unit: string; currency: string; covers: string; kind: string }[]).find(
       (r) => r.venueId === hit.id,
     );
@@ -1139,7 +1146,15 @@ export const handlers: Record<
       // null, а не пустая строка: модель обязана увидеть разницу между
       // «работает круглосуточно» и «мы не знаем» — во втором случае она
       // должна сказать это вслух, а не промолчать.
-      hours: night.hours || null,
+      hours,
+      // Откуда часы: наша проверка или сайт площадки. BRO обязан уметь
+      // назвать источник, если гость переспросит.
+      hours_source: hours ? (night.hours ? "GTR" : (pub?.source ?? null)) : null,
+      hours_checked: hours && !night.hours ? (pub?.fetchedAt ?? null) : null,
+      // Адрес и телефон площадка публикует у себя открыто — это не
+      // контакт из нашей базы, и гостю их можно называть.
+      address: pub?.address ?? null,
+      public_phone: pub?.phone ?? null,
       entry: night.entry || null,
       best: night.best || null,
       fact: night.fact || null,

@@ -490,13 +490,54 @@ describe("паспорт площадки отдаёт часы работы", (
   it("где часов нет — null, а не пустая строка", async () => {
     // Разница существенная: null модель обязана прочитать как «не знаем»
     // и сказать это вслух, а не промолчать и не выдумать расписание.
-    const { PH } = await import("../../data/app-data");
-    const { nightOf } = await import("../../data/app-data");
-    const blank = PH.venues.find((v) => !nightOf(v.id).hours);
+    const { PH, nightOf } = await import("../../data/app-data");
+    const { publicFactsOf } = await import("../../venue-facts");
+    const blank = PH.venues.find((v) => !nightOf(v.id).hours && !publicFactsOf(v.id)?.hours);
     expect(blank, "все площадки с часами — тест бессмыслен").toBeTruthy();
     const r = await handlers.get_venue_profile({ venue: blank!.name }, ctx);
     if (!r.ok) return;
-    expect((r.data as { hours: string | null }).hours).toBeNull();
+    const d = r.data as { hours: string | null; hours_source: string | null };
+    expect(d.hours).toBeNull();
+    expect(d.hours_source).toBeNull();
+  });
+
+  it("часы с сайта площадки доходят до BRO вместе с источником", async () => {
+    // Смысл сбора: там, где мы часы не проверяли руками, ответ всё равно
+    // есть — но помеченный как «с их сайта», а не как знание GTR.
+    const { PH, nightOf } = await import("../../data/app-data");
+    const { publicFactsOf } = await import("../../venue-facts");
+    const borrowed = PH.venues.find((v) => !nightOf(v.id).hours && publicFactsOf(v.id)?.hours);
+    expect(borrowed, "нет ни одной площадки, закрытой её собственным сайтом").toBeTruthy();
+    const r = await handlers.get_venue_profile({ venue: borrowed!.name }, ctx);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { hours: string | null; hours_source: string | null; hours_checked: string | null };
+    expect(d.hours).toBe(publicFactsOf(borrowed!.id)!.hours);
+    // Без источника такой факт выдавать нельзя: он слабее нашего.
+    expect(d.hours_source).toMatch(/^https?:\/\//);
+    expect(d.hours_checked).toBeTruthy();
+  });
+
+  it("наша проверка сильнее сайта площадки", async () => {
+    const { PH, nightOf } = await import("../../data/app-data");
+    const { publicFactsOf } = await import("../../venue-facts");
+    const both = PH.venues.find((v) => nightOf(v.id).hours && publicFactsOf(v.id)?.hours);
+    if (!both) return;
+    const r = await handlers.get_venue_profile({ venue: both.name }, ctx);
+    if (!r.ok) return;
+    const d = r.data as { hours: string | null; hours_source: string | null };
+    expect(d.hours).toBe(nightOf(both.id).hours);
+    expect(d.hours_source).toBe("GTR");
+  });
+
+  it("открытый адрес и телефон площадки видит и гость", async () => {
+    // Это не контакт из нашей базы, а то, что площадка сама повесила на
+    // главной. Прятать его от гостя незачем — он идёт туда ехать.
+    const r = await handlers.get_venue_profile({ venue: "Illuzion" }, ctx);
+    if (!r.ok) return;
+    const d = r.data as { address: string | null; public_phone: string | null };
+    expect(d.address).toBeTruthy();
+    expect(d.public_phone).toMatch(/^\+66/);
   });
 });
 

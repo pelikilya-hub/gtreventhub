@@ -131,10 +131,11 @@ export function ConstructorScreen({
   // Панель взаимодействия: граф ничем не перекрыт, панель выезжает только
   // по длительному нажатию на блок (или кнопкой в шапке)
   const [panelOpen, setPanelOpen] = useState(false);
-  // Граф-папка: по умолчанию всё, что поставлено на площадку, свёрнуто
-  // внутрь её блока — канвас чист. Двойной клик или долгое нажатие на
-  // площадку «открывает папку»: показывается вложенный граф модулей.
-  const [openFolder, setOpenFolder] = useState(false);
+  // Граф-папка уровня ЗАЛА. Папка — это не площадка целиком, а конкретный
+  // зал или зона: артист, звук, свет, промо крепятся к своему залу, и на
+  // верхнем уровне зал показывает их значками, а не вываливает весь граф.
+  // Двойной клик или долгое нажатие на зал раскрывает его содержимое.
+  const [openRoom, setOpenRoom] = useState<string | null>(null);
   const holdRef = useRef<{ t: number; x: number; y: number } | null>(null);
   // «Куда ставим?» — блок не добавляется, пока не выбран зал/зона
   const [placing, setPlacing] = useState<{
@@ -243,6 +244,15 @@ export function ConstructorScreen({
     linkFromVenue = false,
   ) => {
     const rooms = g.nodes.filter((n) => n.kind === "room");
+    // Открытый зал — это контекст «мы внутри папки»: блок кладём сюда и
+    // ничего не переспрашиваем. Иначе человек, стоя в зале, каждый раз
+    // отвечает на вопрос, ответ на который уже дал, войдя в него.
+    const current = rooms.find((r) => r.id === openRoom);
+    if (current && PLACEABLE.includes(kind))
+      return performAdd(kind, title, sub, badge, fields, linkFromVenue, {
+        id: current.id,
+        title: current.title,
+      });
     if (PLACEABLE.includes(kind) && rooms.length > 1) {
       // несколько залов/зон — спрашиваем, куда ставим
       setPlacing({ kind, title, sub, badge, fields, linkFromVenue });
@@ -479,14 +489,14 @@ export function ConstructorScreen({
     dragRef.current = { id: n.id, dx: e.clientX - r.left - n.x, dy: e.clientY - r.top - n.y };
     setSel(n.id);
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    // длительное нажатие (~0.5с) без движения: на площадке — «войти в папку»
-    // (раскрыть вложенный граф), на остальных блоках — панель взаимодействия.
+    // длительное нажатие (~0.5с) без движения: на зале — «войти в папку»
+    // (раскрыть его граф), на остальных блоках — панель взаимодействия.
     cancelHold();
     holdRef.current = {
       t: window.setTimeout(() => {
         holdRef.current = null;
         dragRef.current = null;
-        if (n.kind === "venue") setOpenFolder((o) => !o);
+        if (n.kind === "room") setOpenRoom((cur) => (cur === n.id ? null : n.id));
         else setPanelOpen(true);
       }, 500),
       x: e.clientX,
@@ -532,17 +542,40 @@ export function ConstructorScreen({
     0,
   );
 
-  // Папка площадки: блок venue — «папка», всё остальное живёт внутри неё.
+  // ---------- папки уровня зала ----------
+  // Модель графа уже хранит нужную вложенность: performAdd вешает связь
+  // зал → модуль, а сборщик — площадка → зал. Здесь мы её только читаем.
   const venueNode = g.nodes.find((n) => n.kind === "venue");
-  const insideNodes = g.nodes.filter((n) => n.kind !== "venue");
-  const insideCount = insideNodes.length;
-  // Свёрнуто — на канвасе только площадка; развёрнуто — весь граф.
-  const visibleNodes = openFolder || !venueNode ? g.nodes : g.nodes.filter((n) => n.kind === "venue");
-  const showLinks = openFolder || !venueNode;
+  const roomNodes = g.nodes.filter((n) => n.kind === "room");
+  // Что прикреплено к залу: прямые потомки по связям.
+  const childrenOf = (roomId: string) => {
+    const ids = new Set(g.links.filter((l) => l.from === roomId).map((l) => l.to));
+    return g.nodes.filter((n) => ids.has(n.id));
+  };
+  // Модули без зала (площадка без залов, либо повешено прямо на неё) —
+  // они не должны потеряться: показываем их на верхнем уровне.
+  const roomChildIds = new Set(
+    g.links.filter((l) => roomNodes.some((r) => r.id === l.from)).map((l) => l.to),
+  );
+  const looseNodes = g.nodes.filter(
+    (n) => n.kind !== "venue" && n.kind !== "room" && !roomChildIds.has(n.id),
+  );
 
-  const canvasH = openFolder
-    ? Math.max(560, ...g.nodes.map((n) => n.y + NODE_H + 60))
-    : 420;
+  const openRoomNode = openRoom ? g.nodes.find((n) => n.id === openRoom) : undefined;
+  // Верхний уровень — площадка и залы (плюс бесхозные блоки). Зал открыт —
+  // площадка, сам зал и всё, что к нему подключено.
+  const visibleNodes = openRoomNode
+    ? [...(venueNode ? [venueNode] : []), openRoomNode, ...childrenOf(openRoomNode.id)]
+    : [...(venueNode ? [venueNode] : []), ...roomNodes, ...looseNodes];
+  const visibleIds = new Set(visibleNodes.map((n) => n.id));
+  // Связь рисуем только когда оба её конца на канвасе — иначе линия
+  // уходит в пустоту к спрятанному блоку.
+  const visibleLinks = g.links.filter((l) => visibleIds.has(l.from) && visibleIds.has(l.to));
+
+  const canvasH = Math.max(
+    openRoomNode ? 460 : 420,
+    ...visibleNodes.map((n) => n.y + NODE_H + 60),
+  );
 
   // Смета события из графа: площадка + артисты + подрядчики + комиссия GTR
   const quote = computeQuote(g, vid);
@@ -877,14 +910,20 @@ export function ConstructorScreen({
           {t("Бриф ·")} {briefProgress(briefFormat, briefAnswers).done}/
           {briefProgress(briefFormat, briefAnswers).total}
         </button>
-        <button
-          className={openFolder ? "gtr-btn gtr-btn-red" : "gtr-btn"}
-          style={{ padding: "6px 12px", fontSize: 13 }}
-          title={t("Двойной клик или удержание на площадке — то же самое")}
-          onClick={() => setOpenFolder((x) => !x)}
-        >
-          {openFolder ? t("Свернуть площадку ▲") : `${t("Открыть площадку ▾")}${insideCount ? ` · ${insideCount}` : ""}`}
-        </button>
+        {openRoomNode ? (
+          <button
+            className="gtr-btn gtr-btn-red"
+            style={{ padding: "6px 12px", fontSize: 13 }}
+            title={t("Вернуться к списку залов")}
+            onClick={() => setOpenRoom(null)}
+          >
+            ← {t("Все залы")} · {openRoomNode.title}
+          </button>
+        ) : roomNodes.length ? (
+          <Chip color="rgba(255,255,255,.45)">
+            {t("Залы:")} {roomNodes.length} · {t("откройте зал двойным кликом")}
+          </Chip>
+        ) : null}
         <button
           className={panelOpen ? "gtr-btn gtr-btn-red" : "gtr-btn"}
           style={{ padding: "6px 12px", fontSize: 13 }}
@@ -1437,7 +1476,7 @@ export function ConstructorScreen({
             onPointerUp={onPointerUp}
             style={{
               position: "relative",
-              minWidth: openFolder || !venueNode ? 1030 : "auto",
+              minWidth: 1030,
               height: canvasH,
               backgroundImage: "radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px)",
               backgroundSize: "26px 26px",
@@ -1452,7 +1491,7 @@ export function ConstructorScreen({
                 pointerEvents: "none",
               }}
             >
-              {(showLinks ? g.links : []).map((l, i) => {
+              {visibleLinks.map((l, i) => {
                 const a = nodeById(l.from);
                 const b = nodeById(l.to);
                 if (!a || !b) return null;
@@ -1494,18 +1533,26 @@ export function ConstructorScreen({
               const st = nodeStatus(n);
               const healthy = st.status === "ok";
               const sc = STATUS_COLOR[st.status];
-              const isVenueFolder = n.kind === "venue";
+              // Зал — папка. На верхнем уровне он закрыт и показывает
+              // значками, что к нему прикреплено; открытый зал — обычный блок.
+              const isRoom = n.kind === "room";
+              const roomKids = isRoom ? childrenOf(n.id) : [];
+              const isShutRoom = isRoom && !openRoomNode;
               return (
                 <div
                   key={n.id}
-                  className={`gtr-node${isVenueFolder ? " gtr-node-folder" : ""}`}
+                  className={`gtr-node${isShutRoom ? " gtr-node-folder" : ""}`}
                   onPointerDown={(e) => onPointerDown(e, n)}
                   onContextMenu={(e) => e.preventDefault()}
-                  onDoubleClick={isVenueFolder ? () => { cancelHold(); setOpenFolder((o) => !o); } : undefined}
+                  onDoubleClick={
+                    isRoom
+                      ? () => { cancelHold(); setOpenRoom((cur) => (cur === n.id ? null : n.id)); }
+                      : undefined
+                  }
                   style={{
-                    left: isVenueFolder && !openFolder ? 30 : n.x,
-                    top: isVenueFolder && !openFolder ? 26 : n.y,
-                    width: isVenueFolder && !openFolder ? 260 : undefined,
+                    left: n.x,
+                    top: n.y,
+                    width: isShutRoom ? 236 : undefined,
                     border: `1px solid ${on ? K[1] : linking ? GREEN : healthy ? "rgba(255,255,255,.11)" : sc}`,
                     boxShadow: on
                       ? "0 14px 34px rgba(229,35,27,.22)"
@@ -1582,39 +1629,74 @@ export function ConstructorScreen({
                     {n.sub}
                   </div>
 
-                  {/* площадка-папка: счётчик вложенного и подсказка «войти» */}
-                  {isVenueFolder ? (
+                  {/* Закрытый зал: что к нему прикреплено — значками, а не
+                      списком. Одинаковые виды сворачиваются в один значок со
+                      счётчиком: пять артистов не должны занимать полблока. */}
+                  {isShutRoom ? (
                     <button
                       className="gtr-folder-open"
                       onPointerDown={(e) => e.stopPropagation()}
-                      onClick={(e) => { e.stopPropagation(); cancelHold(); setOpenFolder((o) => !o); }}
+                      onClick={(e) => { e.stopPropagation(); cancelHold(); setOpenRoom(n.id); }}
+                      title={t("Открыть зал: весь его граф")}
                       style={{
                         marginTop: 10,
                         width: "100%",
                         display: "flex",
                         alignItems: "center",
-                        gap: 8,
-                        padding: "8px 10px",
-                        background: openFolder ? "rgba(229,35,27,.12)" : "rgba(255,255,255,.05)",
-                        border: `1px solid ${openFolder ? "rgba(229,35,27,.4)" : "rgba(255,255,255,.12)"}`,
+                        gap: 6,
+                        flexWrap: "wrap",
+                        padding: "8px 9px",
+                        background: "rgba(255,255,255,.05)",
+                        border: "1px solid rgba(255,255,255,.12)",
                         color: "#fff",
                         cursor: "pointer",
-                        font: "600 11px/1 'JetBrains Mono',monospace",
-                        letterSpacing: ".04em",
+                        minHeight: 42,
                       }}
                     >
-                      <Icon d={openFolder ? "M6 9l6 6 6-6" : "M3 7h5l2 2h11v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"} size={14} />
-                      <span style={{ color: openFolder ? "#fff" : "rgba(255,255,255,.85)" }}>
-                        {openFolder ? t("Свернуть площадку") : `${insideCount} ${t("модулей внутри")}`}
-                      </span>
-                      <span style={{ marginLeft: "auto", color: "rgba(255,255,255,.5)", fontSize: 13 }}>
-                        {openFolder ? "▲" : "▾"}
-                      </span>
+                      {roomKids.length ? (
+                        <>
+                          {[...new Map(roomKids.map((k) => [k.kind, k])).values()].map((kid) => {
+                            const KK = KINDS[kid.kind];
+                            const cnt = roomKids.filter((x) => x.kind === kid.kind).length;
+                            return (
+                              <span
+                                key={kid.kind}
+                                title={`${KK[0]}${cnt > 1 ? ` · ${cnt}` : ""}`}
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 3,
+                                  padding: "3px 5px",
+                                  background: KK[2],
+                                  color: KK[1],
+                                }}
+                              >
+                                <Icon d={KK[3]} size={12} />
+                                {cnt > 1 ? (
+                                  <span className="gtr-mono" style={{ font: "700 10px/1 'JetBrains Mono',monospace" }}>
+                                    {cnt}
+                                  </span>
+                                ) : null}
+                              </span>
+                            );
+                          })}
+                          <span
+                            className="gtr-mono"
+                            style={{ marginLeft: "auto", font: "600 10px/1 'JetBrains Mono',monospace", color: "rgba(255,255,255,.5)" }}
+                          >
+                            {roomKids.length} ▾
+                          </span>
+                        </>
+                      ) : (
+                        <span style={{ font: "500 11px/1.4 'Golos Text',sans-serif", color: "rgba(255,255,255,.45)" }}>
+                          {t("Пусто — добавьте блоки в этот зал")}
+                        </span>
+                      )}
                     </button>
                   ) : null}
 
-                  {/* порты: у свёрнутой площадки-папки их нет — тянуть связь не от чего */}
-                  {isVenueFolder && !openFolder ? null : (
+                  {/* порты: у закрытого зала их нет — связь тянут внутри зала */}
+                  {isShutRoom ? null : (
                   <>
                   <span
                     onPointerDown={(e) => e.stopPropagation()}
@@ -1667,20 +1749,19 @@ export function ConstructorScreen({
               );
             })}
 
-            {/* Пустой развёрнутой папки не бывает: подсказка, что внутри
-                пока ничего нет и модули добавляются слева. */}
-            {openFolder && !insideCount ? (
+            {/* Открытый, но пустой зал: подсказываем, откуда берутся блоки. */}
+            {openRoomNode && !childrenOf(openRoomNode.id).length ? (
               <div
                 style={{
                   position: "absolute",
-                  left: 30,
-                  top: 150,
-                  maxWidth: 320,
+                  left: Math.max(30, openRoomNode.x),
+                  top: openRoomNode.y + NODE_H + 24,
+                  maxWidth: 340,
                   font: "500 12px/1.5 'Golos Text',sans-serif",
                   color: "rgba(255,255,255,.5)",
                 }}
               >
-                {t("Папка площадки пуста. Добавьте модули из палитры слева — они появятся здесь.")}
+                {t("В этом зале пока пусто. Добавьте блок из палитры слева — при добавлении выберите этот зал.")}
               </div>
             ) : null}
           </div>

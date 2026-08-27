@@ -22,7 +22,8 @@ import shapesRaw from "../data/district-shapes.json";
 import { PH, richOf, V } from "../data/app-data";
 import { catOf, MAP_CATS, pinHtml } from "../map-style";
 import { useMyLocation } from "../geo-me";
-import { loadRoute, roadRoute, routeLabel, type LatLon, type RoadRoute } from "../evening-route";
+import { gpsTracker } from "../gps-track";
+import { loadRoute, roadRoute, routeLabel, saveRoute, type LatLon, type RoadRoute } from "../evening-route";
 
 type Geo = Record<string, { lat: number; lon: number; src: string }>;
 type Shape = {
@@ -195,6 +196,7 @@ export function MapScreen() {
             const cat = catOf(v.tag);
             const exact = g.src === "nominatim";
             const dim = district !== ALL && v.cluster !== district;
+            const inRoute = route.includes(v.id);
             const icon = L.divIcon({
               className: "",
               html: pinHtml(cat, exact, dim),
@@ -211,6 +213,7 @@ export function MapScreen() {
                 </div>
                 <div style="font:600 13px/1.45 'Golos Text',sans-serif;color:#fff">${v.name}</div>
                 <div style="font:500 11px/1.5 monospace;color:rgba(255,255,255,.72);margin:3px 0 8px">${v.area}${exact ? "" : ` · ${t("примерно")}`}</div>
+                <button data-vid="${v.id}" class="gtr-map-route" style="font:600 12px/1 'Golos Text',sans-serif;background:${inRoute ? "rgba(123,77,255,.18)" : "transparent"};color:${inRoute ? "#7B4DFF" : "#fff"};border:1px solid ${inRoute ? "#7B4DFF" : "rgba(255,255,255,.25)"};padding:8px 11px;cursor:pointer;width:100%;margin-bottom:6px">${inRoute ? `✓ ${t("В маршруте")}` : `+ ${t("В маршрут вечера")}`}</button>
                 <button data-vid="${v.id}" class="gtr-map-open" style="font:600 12px/1 'Golos Text',sans-serif;background:#E5231B;color:#fff;border:none;padding:8px 11px;cursor:pointer;width:100%">${t("Открыть заведение")} →</button>
               </div>`;
             L.marker([g.lat, g.lon], { icon, zIndexOffset: dim ? 0 : 400 })
@@ -253,7 +256,9 @@ export function MapScreen() {
       const m = L4.current;
       if (m?.redraw) m.map.off("zoomend moveend", m.redraw);
     };
-  }, [ready, tag, district, onMap, t]);
+    // route в зависимостях: попап показывает «✓ В маршруте» текущим
+    // состоянием, поэтому точки перерисовываем и при смене маршрута.
+  }, [ready, tag, district, onMap, t, route]);
 
   // Дорога вечера. Считаем от своей точки, если она известна: гость стоит
   // не в первом баре списка, и «сколько ехать» начинается с того места, где
@@ -356,9 +361,26 @@ export function MapScreen() {
   // клики из попапов (HTML вне React)
   useEffect(() => {
     const h = (e: Event) => {
-      const btn = (e.target as HTMLElement).closest?.(".gtr-map-open");
-      const vid = btn?.getAttribute("data-vid");
-      if (vid) navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid } });
+      const el = e.target as HTMLElement;
+      const open = el.closest?.(".gtr-map-open");
+      if (open) {
+        const vid = open.getAttribute("data-vid");
+        if (vid) navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid } });
+        return;
+      }
+      // Собрать маршрут прямо на карте: тап по «в маршрут» добавляет или
+      // убирает площадку. Линия и подпись километража перерисуются сами,
+      // маршрут — тот же, что на «Сегодня» и в трекере (общее хранилище).
+      const routeBtn = el.closest?.(".gtr-map-route");
+      if (routeBtn) {
+        const vid = routeBtn.getAttribute("data-vid");
+        if (vid)
+          setRoute((cur) => {
+            const next = cur.includes(vid) ? cur.filter((x) => x !== vid) : [...cur, vid];
+            saveRoute(next);
+            return next;
+          });
+      }
     };
     document.addEventListener("click", h);
     return () => document.removeEventListener("click", h);
@@ -455,10 +477,35 @@ export function MapScreen() {
                 {t("дорога недоступна — показана прямая")}
               </span>
             ) : null}
+            {/* Начать вечер: запускаем марафон-трекер по собранному маршруту
+                и уходим на экран трекера с чек-инами. Нужно ≥2 точки —
+                маршрут из одной остановки это не марафон. */}
+            {route.length >= 2 ? (
+              <button
+                className="gtr-btn gtr-btn-red"
+                style={{ padding: "6px 11px", fontSize: 12 }}
+                onClick={() => {
+                  gpsTracker.startTrack(route);
+                  navigate({ to: "/gtr/$screen", params: { screen: "tracking" } });
+                }}
+              >
+                {t("Начать вечер")} →
+              </button>
+            ) : null}
+            <button
+              className="gtr-btn"
+              style={{ padding: "6px 11px", fontSize: 12 }}
+              onClick={() => {
+                setRoute([]);
+                saveRoute([]);
+              }}
+            >
+              {t("Очистить")}
+            </button>
           </>
         ) : (
           <span style={{ color: "var(--gtr-t3)" }}>
-            {t("Соберите маршрут вечера в разделе «Сегодня» — он появится на карте.")}
+            {t("Нажмите на площадку и добавьте её «в маршрут вечера» — соберите бар-хоппинг прямо на карте.")}
           </span>
         )}
       </div>

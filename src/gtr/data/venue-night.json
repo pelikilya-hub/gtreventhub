@@ -257,5 +257,137 @@
   "music": "Jazz · live",
   "fact": "Первый и единственный джаз-клуб острова (с 2000); ежегодный International Jazz Day с 2012.",
   "src": "phuket.com"
+ },
+ "VEN-BKK-0007": {
+  "hours": "Mo-Sa 18:00-02:00; Su 18:00-00:00",
+  "src": "OpenStreetMap"
+ },
+ "VEN-BKK-0014": {
+  "hours": "18:00-02:00",
+  "src": "OpenStreetMap"
+ },
+ "VEN-BKK-0021": {
+  "hours": "19:00–01:00 · ежедневно",
+  "src": "OpenStreetMap"
+ },
+ "VEN-BKK-0022": {
+  "hours": "Su-Th 18:00-00:00; Fr-Sa 18:00-13:00",
+  "src": "OpenStreetMap"
+ },
+ "VEN-PGN-0009": {
+  "hours": "10:00–00:00 · ежедневно",
+  "src": "OpenStreetMap"
+ },
+ "VEN-PGN-0038": {
+  "hours": "11:00–21:00 · пн-сб",
+  "src": "OpenStreetMap"
+ },
+ "VEN-PGN-0043": {
+  "hours": "09:00–22:00 · ежедневно",
+  "src": "OpenStreetMap"
+ },
+ "VEN-PNA-0006": {
+  "hours": "24/7",
+  "src": "OpenStreetMap"
+ },
+ "VEN-PNA-0014": {
+  "hours": "19:00–02:00 · ежедневно",
+  "src": "OpenStreetMap"
+ },
+ "VEN-PTY-0009": {
+  "hours": "10:00–22:00 · ежедневно",
+  "src": "OpenStreetMap"
+ },
+ "VEN-PTY-0050": {
+  "hours": "11:00–23:00 · ежедневно",
+  "src": "OpenStreetMap"
+ },
+ "VEN-SMU-0052": {
+  "hours": "16:00–01:00 · ежедневно",
+  "src": "OpenStreetMap"
+ },
+ "VEN-BKK-0028": {
+  "hours": "22:00–02:00+ (Closed Mondays)",
+  "src": "разведка GTR"
+ },
+ "VEN-BKK-0031": {
+  "hours": "10:00–00:00",
+  "src": "разведка GTR"
+ },
+ "VEN-BKK-0035": {
+  "hours": "15:00–02:00",
+  "src": "разведка GTR"
+ },
+ "VEN-PGN-0032": {
+  "hours": "20:00-01:00",
+  "src": "разведка GTR"
+ },
+ "VEN-PGN-0034": {
+  "hours": "13:00-20:30",
+  "src": "разведка GTR"
+ },
+ "VEN-PGN-0047": {
+  "hours": "18:00-00:00",
+  "src": "разведка GTR"
+ },
+ "VEN-PTY-0002": {
+  "hours": "22:00-02:00",
+  "src": "разведка GTR"
+ },
+ "VEN-PTY-0003": {
+  "hours": "22:00",
+  "src": "разведка GTR"
+ },
+ "VEN-PTY-0016": {
+  "hours": "18:00-19:00",
+  "src": "разведка GTR"
+ },
+ "VEN-PTY-0017": {
+  "hours": "11:00-00:00",
+  "src": "разведка GTR"
+ },
+ "VEN-PTY-0020": {
+  "hours": "20:00-03:00",
+  "src": "разведка GTR"
+ },
+ "VEN-PTY-0031": {
+  "hours": "17:00-02:00",
+  "src": "разведка GTR"
+ },
+ "VEN-PTY-0034": {
+  "hours": "10:00-02:00",
+  "src": "разведка GTR"
+ },
+ "VEN-PTY-0035": {
+  "hours": "11:00-23:00",
+  "src": "разведка GTR"
+ },
+ "VEN-PTY-0051": {
+  "hours": "17:00-23:30",
+  "src": "разведка GTR"
+ },
+ "VEN-PTY-0055": {
+  "hours": "14:00-00:00",
+  "src": "разведка GTR"
+ },
+ "VEN-SMU-0006": {
+  "hours": "11:00–01:00",
+  "src": "разведка GTR"
+ },
+ "VEN-SMU-0011": {
+  "hours": "Mon–Sat 11:00–02:00, Sun 11:00–00:00",
+  "src": "разведка GTR"
+ },
+ "VEN-SMU-0029": {
+  "hours": "09:30–02:00",
+  "src": "разведка GTR"
+ },
+ "VEN-SMU-0049": {
+  "hours": "08:00–22:00",
+  "src": "разведка GTR"
+ },
+ "VEN-SMU-0051": {
+  "hours": "18:00–22:00",
+  "src": "разведка GTR"
  }
 }

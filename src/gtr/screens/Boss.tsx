@@ -185,8 +185,8 @@ function BossHeadCard({ head, onSaved }: { head: BossHead | null; onSaved: (h: B
       <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
         <BossHead3D head={head} size={132} force={preview} />
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, flex: 1, minWidth: 260 }}>
-          {slot("day", "ДЕНЬ · 06–18", "прозрачные очки, дневной свет")}
-          {slot("night", "НОЧЬ · 18–06", "тёмные очки, клубный свет")}
+          {slot("day", t("ДЕНЬ · 06–18"), "прозрачные очки, дневной свет")}
+          {slot("night", t("НОЧЬ · 18–06"), "тёмные очки, клубный свет")}
         </div>
       </div>
       <span style={{ font: mono(8.5), color: "rgba(255,255,255,.4)" }}>
@@ -344,9 +344,9 @@ function TasksBlock({ users, me }: { users: PublicUser[]; me: string }) {
   const open = tasks.filter((t) => t.status !== "done");
   const done = tasks.filter((t) => t.status === "done").slice(0, 3);
   const ST: Record<GtrTask["status"], [string, string]> = {
-    new: ["НОВАЯ", AMBER],
-    doing: ["В РАБОТЕ", "#7B4DFF"],
-    done: ["ГОТОВО", GREEN],
+    new: [t("НОВАЯ"), AMBER],
+    doing: [t("В РАБОТЕ"), "#7B4DFF"],
+    done: [t("ГОТОВО"), GREEN],
   };
 
   return (
@@ -459,10 +459,10 @@ function BroadcastBlock() {
     if (r.ok) setText("");
   }, [text, aud]);
   const AUD: [typeof aud, string][] = [
-    ["all", "ВСЕМ"],
-    ["team", "КОМАНДЕ"],
-    ["artists", "АРТИСТАМ"],
-    ["organizers", "ОРГАМ"],
+    ["all", t("ВСЕМ")],
+    ["team", t("КОМАНДЕ")],
+    ["artists", t("АРТИСТАМ")],
+    ["organizers", t("ОРГАМ")],
   ];
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
@@ -594,11 +594,11 @@ export function BossCabinet() {
   }, [afisha, users, shared.drafts, reqs]);
 
   const kpis: [string, string, string][] = [
-    ["ПАЙПЛАЙН", fmtThb(money.total), "все сметы"],
+    [t("ПАЙПЛАЙН"), fmtThb(money.total), "все сметы"],
     ["КОМИССИЯ GTR", fmtThb(money.commission), "заложено"],
-    ["СОБЫТИЯ", String(shared.drafts.length), `${upcoming.length} впереди`],
-    ["ЗАЯВКИ", String(reqOpen.length), "открытых"],
-    ["КОМАНДА", String(users.length), "аккаунтов"],
+    [t("СОБЫТИЯ"), String(shared.drafts.length), `${upcoming.length} впереди`],
+    [t("ЗАЯВКИ"), String(reqOpen.length), "открытых"],
+    [t("КОМАНДА"), String(users.length), "аккаунтов"],
   ];
 
   return (
@@ -743,9 +743,9 @@ export function BossCabinet() {
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {(
               [
-                ["new", "НОВЫЕ", RED],
-                ["seen", "В РАЗБОРЕ", AMBER],
-                ["accepted", "ПРИНЯТЫ", GREEN],
+                ["new", t("НОВЫЕ"), RED],
+                ["seen", t("В РАЗБОРЕ"), AMBER],
+                ["accepted", t("ПРИНЯТЫ"), GREEN],
               ] as const
             ).map(([k, l, c]) => (
               <span
@@ -1018,10 +1018,10 @@ function CommunityCard() {
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
         <Eyebrow>{t("КОМЬЮНИТИ TELEGRAM · НОВОСТИ И ОБЩЕНИЕ")}</Eyebrow>
         <Chip color={channelTitle ? GREEN : AMBER}>
-          {channelTitle ? `КАНАЛ · ${channelTitle.toUpperCase()}` : "КАНАЛ НЕ ПРИВЯЗАН"}
+          {channelTitle ? `КАНАЛ · ${channelTitle.toUpperCase()}` : t("КАНАЛ НЕ ПРИВЯЗАН")}
         </Chip>
         <Chip color={chatTitle ? GREEN : AMBER}>
-          {chatTitle ? `ЧАТ · ${chatTitle.toUpperCase()}` : "ЧАТ НЕ ПРИВЯЗАН"}
+          {chatTitle ? `ЧАТ · ${chatTitle.toUpperCase()}` : t("ЧАТ НЕ ПРИВЯЗАН")}
         </Chip>
       </div>
       <div
@@ -1157,7 +1157,7 @@ function ThreadsCard() {
     <Card style={{ padding: 14, gridColumn: "1 / -1" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
         <Eyebrow>{t("THREADS · ПУБЛИКАЦИЯ АФИШИ")}</Eyebrow>
-        <Chip color={who ? GREEN : AMBER}>{who ? `@${who.toUpperCase()}` : "НЕ ПОДКЛЮЧЁН"}</Chip>
+        <Chip color={who ? GREEN : AMBER}>{who ? `@${who.toUpperCase()}` : t("НЕ ПОДКЛЮЧЁН")}</Chip>
         {daysLeft !== null ? (
           <Chip color={daysLeft < 10 ? RED : "#7B4DFF"}>{t("ТОКЕН ·")} {daysLeft} {t("ДН.")}</Chip>
         ) : null}
@@ -1249,7 +1249,7 @@ function MetaCard() {
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
         <Eyebrow>{t("META · СТРАНИЦА FACEBOOK / INSTAGRAM")}</Eyebrow>
         <Chip color={connected ? GREEN : AMBER}>
-          {connected ? `ПОДКЛЮЧЕНА${pageName ? ` · ${pageName.toUpperCase()}` : ""}` : "НЕ ПОДКЛЮЧЕНА"}
+          {connected ? `ПОДКЛЮЧЕНА${pageName ? ` · ${pageName.toUpperCase()}` : ""}` : t("НЕ ПОДКЛЮЧЕНА")}
         </Chip>
         {igUser ? <Chip color="#7B4DFF">IG @{igUser}</Chip> : null}
       </div>
@@ -1375,7 +1375,7 @@ function PromptpayCard() {
     <Card style={{ padding: 14, gridColumn: "1 / -1" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
         <Eyebrow>{t("PROMPTPAY · ПРИЁМ ОПЛАТ")}</Eyebrow>
-        <Chip color={saved ? GREEN : AMBER}>{saved ? "ВКЛЮЧЕНО" : "НЕ НАСТРОЕНО"}</Chip>
+        <Chip color={saved ? GREEN : AMBER}>{saved ? t("ВКЛЮЧЕНО") : t("НЕ НАСТРОЕНО")}</Chip>
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <input
@@ -1456,9 +1456,9 @@ function SprintBlock({ go }: { go: (s: ScreenId) => void }) {
       </div>
       <div style={{ display: "flex", gap: 12 }}>
         {[
-          ["ОТПРАВЛЕНО", sent, "rgba(255,255,255,.6)"],
-          ["ОТКРЫТО", opened, AMBER],
-          ["ПОДТВЕРЖДЕНО", confirmed.length, GREEN],
+          [t("ОТПРАВЛЕНО"), sent, "rgba(255,255,255,.6)"],
+          [t("ОТКРЫТО"), opened, AMBER],
+          [t("ПОДТВЕРЖДЕНО"), confirmed.length, GREEN],
         ].map(([l, n, c]) => (
           <span key={l as string} style={{ font: mono(9.5, 600), color: c as string }}>
             {l}: {n}

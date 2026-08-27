@@ -1518,5 +1518,30 @@
   "lat": 9.55872,
   "lon": 100.03055,
   "src": "osm-address"
+ },
+ "VEN-PNA-0013": {
+  "lat": 8.64939,
+  "lon": 98.24939,
+  "src": "site-map"
+ },
+ "VEN-SMU-0020": {
+  "lat": 9.53216,
+  "lon": 100.06339,
+  "src": "site-map"
+ },
+ "VEN-SMU-0028": {
+  "lat": 9.47239,
+  "lon": 100.04321,
+  "src": "site-map"
+ },
+ "VEN-SMU-0051": {
+  "lat": 9.56018,
+  "lon": 100.02708,
+  "src": "site-map"
+ },
+ "VEN-SMU-0058": {
+  "lat": 9.56134,
+  "lon": 100.02602,
+  "src": "site-map"
  }
 }

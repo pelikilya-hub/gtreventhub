@@ -620,10 +620,10 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               >
                 {(
                   [
-                    ["ЧАСЫ", night.hours || t("уточняем")],
-                    ["ВХОД", night.entry || t("по ситуации")],
-                    ["ЛУЧШИЕ ВЕЧЕРА", night.best || t("смотри афишу")],
-                    ["ЗВУК", v.music],
+                    [t("ЧАСЫ"), night.hours || t("уточняем")],
+                    [t("ВХОД"), night.entry || t("по ситуации")],
+                    [t("ЛУЧШИЕ ВЕЧЕРА"), night.best || t("смотри афишу")],
+                    [t("ЗВУК"), v.music],
                   ] as [string, string | undefined][]
                 )
                   .filter(([, val]) => val)
@@ -706,18 +706,18 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           <Card reveal style={{ padding: 18 }}>
             <Eyebrow style={{ marginBottom: 10 }}>{t("ПРОФИЛЬ ПЛОЩАДКИ")}</Eyebrow>
             {[
-              ["КОНЦЕПЦИЯ", v.concept],
-              ["ФОРМАТЫ СОБЫТИЙ", v.events],
-              ["ИНФРАСТРУКТУРА", v.facilities],
+              [t("КОНЦЕПЦИЯ"), v.concept],
+              [t("ФОРМАТЫ СОБЫТИЙ"), v.events],
+              [t("ИНФРАСТРУКТУРА"), v.facilities],
               [
-                "ВМЕСТИМОСТЬ",
+                t("ВМЕСТИМОСТЬ"),
                 confirm?.status === "confirmed" && confirm.capacity
                   ? `${confirm.capacity} · подтверждено площадкой`
                   : v.capacity,
               ],
-              ["МУЗЫКА", v.music],
-              ["КЕЙТЕРИНГ", v.catering],
-              ["ЗАМЕТКИ", v.notes],
+              [t("МУЗЫКА"), v.music],
+              [t("КЕЙТЕРИНГ"), v.catering],
+              [t("ЗАМЕТКИ"), v.notes],
             ]
               .filter(([, val]) => val)
               .map(([k, val]) => (
@@ -730,10 +730,10 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               <Eyebrow style={{ marginBottom: 10 }}>{t("НОЧНАЯ ЖИЗНЬ")}</Eyebrow>
               {(
                 [
-                  ["ЧАСЫ", night.hours],
-                  ["ВХОД", night.entry],
-                  ["ЛУЧШИЕ ВЕЧЕРА", night.best],
-                  ["МУЗЫКА ПО ГАЙДАМ", night.music],
+                  [t("ЧАСЫ"), night.hours],
+                  [t("ВХОД"), night.entry],
+                  [t("ЛУЧШИЕ ВЕЧЕРА"), night.best],
+                  [t("МУЗЫКА ПО ГАЙДАМ"), night.music],
                 ] as [string, string | undefined][]
               )
                 .filter(([, val]) => val)
@@ -1417,7 +1417,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
           <Chip
             color={st === "confirmed" ? GREEN : st === "opened" ? AMBER : "rgba(255,255,255,.5)"}
           >
-            {st === "confirmed" ? "✓ ПОДТВЕРЖДЕНО" : st === "opened" ? "ОТКРЫТО" : "ОТПРАВЛЕНО"}
+            {st === "confirmed" ? "✓ ПОДТВЕРЖДЕНО" : st === "opened" ? t("ОТКРЫТО") : t("ОТПРАВЛЕНО")}
           </Chip>
         ) : null}
       </div>

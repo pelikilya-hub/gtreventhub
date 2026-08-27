@@ -11,9 +11,11 @@ import {
   bkkWeekday,
   buildDigest,
   buildDigestText,
+  buildMovedText,
   buildThemePoll,
   buildTonightPoll,
   fitPoll,
+  plural,
 } from "../community";
 import { posterPhoto } from "../poster";
 import type { KvNs } from "../kv-ns";
@@ -151,5 +153,29 @@ describe("опросы", () => {
     // 00:30 понедельника на Пхукете — это ещё воскресенье по UTC.
     expect(bkkWeekday(Date.UTC(2026, 7, 30, 17, 30))).toBe(1);
     expect(new Date(Date.UTC(2026, 7, 30, 17, 30)).getUTCDay()).toBe(0);
+  });
+});
+
+describe("склонение при числе", () => {
+  it("русские формы выбираются правилом, а не подбираются под текущее число", () => {
+    const f = (n: number) => `${n} ${plural(n, "площадка", "площадки", "площадок")}`;
+    expect(f(1)).toBe("1 площадка");
+    expect(f(2)).toBe("2 площадки");
+    expect(f(5)).toBe("5 площадок");
+    // подвох: 11–14 всегда «много», сколько бы ни было в единицах
+    expect(f(11)).toBe("11 площадок");
+    expect(f(12)).toBe("12 площадок");
+    expect(f(21)).toBe("21 площадка");
+    expect(f(22)).toBe("22 площадки");
+    expect(f(111)).toBe("111 площадок");
+    expect(f(354)).toBe("354 площадки");
+    expect(f(0)).toBe("0 площадок");
+  });
+
+  it("объявление о переезде склоняет обе цифры", () => {
+    const t = buildMovedText(354, 312);
+    expect(t).toContain("354 площадки");
+    expect(t).toContain("312 артистов");
+    expect(t).not.toContain("354 площадок");
   });
 });

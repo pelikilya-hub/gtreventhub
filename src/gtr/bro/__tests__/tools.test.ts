@@ -3,7 +3,14 @@
 // незнание за знание.
 import { describe, expect, it } from "vitest";
 
-import { handlers, TOOL_DEFS, toolsForRole, type EventsProvider } from "../tools";
+import {
+  APP_ROUTES,
+  handlers,
+  TEAM_ONLY_ROUTES,
+  TOOL_DEFS,
+  toolsForRole,
+  type EventsProvider,
+} from "../tools";
 
 const provider = (
   rows: { vid: string; events: { title: string; dateIso: string }[] }[] = [],
@@ -1154,5 +1161,60 @@ describe("площадка по названию", () => {
       ctx,
     );
     expect(r.ok).toBe(true);
+  });
+});
+
+// Навигация по продукту.
+//
+// Повод: в схеме open_in_app лежали тринадцать голых идентификаторов вроде
+// «aimatch» — без единого слова о том, что это за экран. Модель угадывала
+// и уводила человека не туда, а на «что тут есть» отвечать ей было нечем.
+// Заодно вскрылись два настоящих промаха: «Афиши» (feed) в списке не было
+// вовсе, а «Мой профиль» (dash) числился рабочим экраном команды, и гостя
+// заворачивали с его собственного профиля.
+describe("экраны продукта", () => {
+  const decl = TOOL_DEFS.find((d) => d.name === "open_in_app")!;
+  const props = decl.parameters.properties as {
+    route: { enum: string[]; description?: string };
+  };
+
+  it("у каждого экрана есть описание, а не голый идентификатор", () => {
+    for (const r of APP_ROUTES) {
+      expect(`${r.id}: ${r.what.length} симв.`).not.toContain(": 0 симв.");
+      expect(r.what.length).toBeGreaterThan(10);
+    }
+    // Описания реально уезжают модели в схеме.
+    for (const r of APP_ROUTES) expect(props.route.description).toContain(r.id);
+  });
+
+  it("схема и обработчик берут список из одного места", () => {
+    expect(props.route.enum).toEqual(APP_ROUTES.map((r) => r.id));
+  });
+
+  it("главные гостевые экраны на месте и открыты гостю", async () => {
+    for (const id of ["tonight", "feed", "map", "base", "dash", "promo", "community"]) {
+      expect(APP_ROUTES.map((r) => r.id)).toContain(id);
+      expect(TEAM_ONLY_ROUTES).not.toContain(id);
+      const r = await handlers.open_in_app({ route: id }, ctx);
+      expect(`${id}: ${r.ok}`).toBe(`${id}: true`);
+    }
+  });
+
+  it("рабочие экраны гостю закрыты", async () => {
+    for (const id of ["events", "constructor", "vendors", "calendar"]) {
+      const r = await handlers.open_in_app({ route: id }, ctx);
+      expect(`${id}: ${r.ok}`).toBe(`${id}: false`);
+    }
+  });
+
+  it("карточка площадки открывается по названию", async () => {
+    const r = await handlers.open_in_app({ route: "venueCard", entityId: "Illuzion" }, ctx);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect((r.data as { entityId: string }).entityId).toMatch(/^VEN-/);
+  });
+
+  it("незнакомый экран не выдумывается", async () => {
+    const r = await handlers.open_in_app({ route: "секретный-зал" }, ctx);
+    expect(r.ok).toBe(false);
   });
 });

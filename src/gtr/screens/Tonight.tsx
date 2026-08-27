@@ -40,7 +40,7 @@ const nightVenues = () =>
       return rank(a.type) - rank(b.type) || a.name.localeCompare(b.name);
     });
 
-export function TonightScreen() {
+export function TonightScreen({ vid: fromVenue }: { vid?: string } = {}) {
   const { t, i18n } = useTranslation();
   const { user } = useGtr();
   const navigate = useNavigate();
@@ -80,16 +80,26 @@ export function TonightScreen() {
   // завтра, — и события пятницы посмотреть было нечем: гость видел всю
   // ленту без возможности выбрать день. Теперь день один и выбирается.
   const [dayIso, setDayIso] = useState(todayIso);
-  const dayEvents = items.filter((e) => e.dateIso === dayIso);
-  const venues = useMemo(nightVenues, []);
+
+  // Площадка, с которой пришли по кнопке «Что здесь сегодня». Раньше vid
+  // терялся, и гость из карточки заведения попадал на программу всего
+  // острова — искать своё место в ленте из ста десяти.
+  const [onlyVid, setOnlyVid] = useState(fromVenue ?? "");
+  const only = onlyVid && V(onlyVid) ? onlyVid : "";
+
+  const dayEvents = items.filter((e) => e.dateIso === dayIso && (!only || e.vid === only));
+  const allVenues = useMemo(nightVenues, []);
+  const venues = only ? allVenues.filter((v) => v.id === only) : allVenues;
 
   // Сколько событий на каждый день ленты — число едет прямо на плашку,
   // чтобы было видно, где вечер живой, ещё до нажатия.
   const byDay = useMemo(() => {
     const c: Record<string, number> = {};
-    for (const e of items) c[e.dateIso] = (c[e.dateIso] ?? 0) + 1;
+    // Считаем в том же разрезе, в котором показываем: если открыта одна
+    // площадка, число на плашке должно быть её, а не всего острова.
+    for (const e of items) if (!only || e.vid === only) c[e.dateIso] = (c[e.dateIso] ?? 0) + 1;
     return c;
-  }, [items]);
+  }, [items, only]);
 
   const strip = useMemo(
     () => Array.from({ length: STRIP_DAYS }, (_, i) => bkkToday(i)),
@@ -461,6 +471,28 @@ export function TonightScreen() {
         {t("Выберите вечер: события дня, открытые площадки, бронь стола и маршрут по нескольким местам.")}
       </div>
 
+      {/* Открыта одна площадка — говорим об этом прямо и даём выход на
+          весь остров: иначе пустой день читается как «на Пхукете ничего
+          не происходит», хотя это программа одного бара. */}
+      {only ? (
+        <Card style={{ padding: "10px 14px", marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <VenueLogo vid={only} h={20} />
+            <span style={{ font: "600 14px/1.3 'Golos Text',sans-serif" }}>{V(only).name}</span>
+            <span style={{ font: "500 12.5px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+              {V(only).area}
+            </span>
+            <button
+              className="gtr-btn"
+              style={{ marginLeft: "auto", padding: "6px 10px", fontSize: 12 }}
+              onClick={() => setOnlyVid("")}
+            >
+              {t("Показать весь остров")}
+            </button>
+          </div>
+        </Card>
+      ) : null}
+
       {/* Выбор вечера. Лента на две недели вперёд плюс поле даты для всего,
           что дальше: у площадок бывают анонсы за месяц, и упираться в
           горизонт ленты гость не должен. */}
@@ -638,9 +670,11 @@ export function TonightScreen() {
             margin: "0 0 18px",
           }}
         >
-          {dayIso === todayIso
-            ? t("В афишах пока нет событий на сегодня — ниже площадки, открытые вечером.")
-            : t("На этот день в афишах пока пусто — выберите другую дату или смотрите площадки ниже.")}
+          {only
+            ? t("У этой площадки на выбранный день анонсов нет. Часы и вход — в карточке ниже.")
+            : dayIso === todayIso
+              ? t("В афишах пока нет событий на сегодня — ниже площадки, открытые вечером.")
+              : t("На этот день в афишах пока пусто — выберите другую дату или смотрите площадки ниже.")}
         </div>
       )}
 

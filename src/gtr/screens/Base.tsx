@@ -454,7 +454,11 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               <button
                 className="gtr-btn gtr-btn-red"
                 onClick={() =>
-                  navigate({ to: "/gtr/$screen", params: { screen: "promo" } })
+                  navigate({
+                    to: "/gtr/$screen",
+                    params: { screen: "promo" },
+                    search: { vid: v.id },
+                  })
                 }
               >
                 {t("Забронировать стол →")}
@@ -553,7 +557,14 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                       ? document
                           .getElementById("gtr-reserve")
                           ?.scrollIntoView({ behavior: "smooth", block: "start" })
-                      : navigate({ to: "/gtr/$screen", params: { screen: "promo" } })
+                      : // Площадку передаём с собой: без vid форма брони
+                        // открывалась на своей стартовой, а не на той, из
+                        // которой гость нажал «Забронировать стол».
+                        navigate({
+                          to: "/gtr/$screen",
+                          params: { screen: "promo" },
+                          search: { vid: v.id },
+                        })
                   }
                 >
                   {t("Забронировать стол")}
@@ -572,7 +583,13 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 ) : null}
                 <button
                   className="gtr-btn"
-                  onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "tonight" } })}
+                  onClick={() =>
+                    navigate({
+                      to: "/gtr/$screen",
+                      params: { screen: "tonight" },
+                      search: { vid: v.id },
+                    })
+                  }
                 >
                   {t("Что здесь сегодня")}
                 </button>

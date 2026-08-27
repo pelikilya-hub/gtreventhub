@@ -609,7 +609,7 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
     case "feed":
       return <FeedScreen />;
     case "tonight":
-      return <TonightScreen />;
+      return <TonightScreen vid={search.vid} />;
     case "tracking":
       return <TrackingScreen />;
     case "aimatch":
@@ -623,7 +623,7 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
     case "visas":
       return <VisasScreen />;
     case "promo":
-      return <PromoScreen />;
+      return <PromoScreen vid={search.vid} />;
     case "outreach":
       return <OutreachScreen />;
     case "drafts":

@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import { loadArtists, PH, V, type Artist } from "../data/app-data";
 import { CdmReserve, hasReserve } from "../cdm-booking";
+import { reserveVenues } from "../venue-commerce";
 import {
   aiMatchFn,
   allAfishaFn,
@@ -623,10 +624,16 @@ export function VisasScreen() {
 }
 
 // ---------- ПРОМО И БРОНЬ ----------
-export function PromoScreen() {
+export function PromoScreen({ vid: fromVenue }: { vid?: string } = {}) {
   const { t } = useTranslation();
   const { user } = useGtr();
-  const [vid, setVid] = useState("VEN-0002");
+  // Площадка, с которой пришли. Раньше здесь стоял жёсткий VEN-0002, и
+  // «Забронировать стол» из любого заведения открывало Café del Mar:
+  // гость нажимал бронь в одном месте, а форма предлагала другое.
+  // Запасной вариант — первая площадка с рассадкой, а не именная.
+  const [vid, setVid] = useState(
+    () => fromVenue ?? reserveVenues()[0]?.vid ?? PH.venues[0]?.id ?? "",
+  );
   const [dateIso, setDateIso] = useState("");
   const [guests, setGuests] = useState(2);
   const [name, setName] = useState(user.name);

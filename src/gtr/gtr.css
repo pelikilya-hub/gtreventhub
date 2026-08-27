@@ -829,11 +829,23 @@
   border-radius: 0;
   cursor: pointer;
   transition: background 0.18s, color 0.18s, border-color 0.18s, letter-spacing 0.18s;
-  font: 500 12px/1 "Golos Text", sans-serif;
+  font: 500 12px/1.25 "Golos Text", sans-serif;
   background: transparent;
   color: rgba(234, 234, 234, 0.55);
   text-align: left;
 }
+/* Подпись пункта: длинное имя раздела не имеет права выдавливать счётчик
+   за край колонки. «Площадки Таиланд · 354» и «Заявки организаторов»
+   длиннее прежних подписей, и без этих трёх строк счётчик уезжал за
+   границу сайдбара. Обрезаем подпись, а не ломаем строку: пункт меню
+   обязан оставаться одной строки высотой. */
+.gtr-nav-item > span:not([class]) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Счётчик и тревожный значок не сжимаются никогда */
+.gtr-nav-item > .gtr-mono { flex: none; }
 .gtr-nav-item:hover {
   background: rgba(255, 255, 255, 0.045);
   color: var(--gtr-t1);
@@ -1078,7 +1090,9 @@
 /* ---------- каркас приложения ---------- */
 .gtr-shell { display: flex; min-height: 100dvh; }
 .gtr-sidebar {
-  width: 238px;
+  /* Ширина не фиксированная: на узком ноутбуке 238 px отъедали половину
+     рабочей области, на широком мониторе колонка выглядела худой. */
+  width: clamp(216px, 17vw, 258px);
   flex: none;
   background: var(--gtr-side);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
@@ -1115,7 +1129,13 @@
     border-bottom: none;
     padding: 10px 14px;
     padding-top: calc(10px + env(safe-area-inset-top));
+    /* шапка — одна строка: бургер, логотип, языки. Перенос превратил бы
+       её в две строки и сдвинул весь экран вниз */
+    flex-wrap: nowrap;
+    min-width: 0;
   }
+  .gtr-topbar > * { min-width: 0; }
+  .gtr-burger { flex: none; }
   /* стекло шапки — отдельным слоем, чтобы уходило в ноль книзу: контент
      подныривает под неё, а не упирается в кромку */
   .gtr-topbar::after {

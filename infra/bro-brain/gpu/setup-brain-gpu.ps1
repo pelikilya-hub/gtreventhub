@@ -118,13 +118,30 @@ function Get-File($url, $out) {
 # у свежести: сборка с нужным ускорителем позавчерашняя лучше вчерашней
 # без него. Внутри одного шаблона берём самый свежий релиз.
 function Find-GithubAsset($repo, $patterns, $take = 15) {
-    $rels = Invoke-RestMethod "https://api.github.com/repos/$repo/releases?per_page=$take"
+    try {
+        $rels = Invoke-RestMethod "https://api.github.com/repos/$repo/releases?per_page=$take"
+    } catch {
+        # У API GitHub без токена лимит 60 запросов в час на адрес. При
+        # превышении приходит 403, и «ассет не найден» означало бы совсем
+        # не то, что написано. Отличаем явно.
+        throw "GitHub API не ответил ($_). Если это 403 — исчерпан часовой лимит запросов, подожди час и повтори."
+    }
     foreach ($pat in $patterns) {
         foreach ($r in $rels) {
             $a = $r.assets | Where-Object { $_.name -match $pat } | Select-Object -First 1
             if ($a) { return @{ asset = $a; release = $r; pattern = $pat } }
         }
     }
+    # Отказ обязан быть разбираемым с первого раза: показываем, что именно
+    # искали и что при этом видели. Иначе разбор идёт по третьему кругу.
+    Write-Host ""
+    Write-Host "!! Ни один шаблон не совпал. Искали:" -ForegroundColor Yellow
+    foreach ($pat in $patterns) { Write-Host "   $pat" }
+    Write-Host "!! Просмотрено релизов: $($rels.Count). Файлы под Windows в них:" -ForegroundColor Yellow
+    $seen = $rels | ForEach-Object { $_.assets } | Where-Object { $_.name -match "win" } |
+        Select-Object -Expand name -Unique
+    if ($seen) { foreach ($n in $seen) { Write-Host "   $n" } } else { Write-Host "   (ни одного)" }
+    Write-Host ""
     return $null
 }
 

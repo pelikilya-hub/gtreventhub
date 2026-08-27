@@ -51,7 +51,7 @@ export const Route = createFileRoute("/api/community-digest")({
             // публикацию в Telegram, ради которой крон и запускается.
           }
           const markup = {
-            inline_keyboard: [[{ text: "🎟 Открыть GTR Event", url: `${APP_URL}/gtr/tonight` }]],
+            inline_keyboard: [[{ text: "🎫 Открыть GTR Event", url: `${APP_URL}/gtr/tonight` }]],
           };
           // Афиши вперёд, текст следом. Порядок важен: в ленте канала
           // сначала видно вечер, а потом читают, где он.

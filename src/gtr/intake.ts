@@ -282,6 +282,6 @@ export const intakeReport = (r: IntakeResult): string => {
   ];
   if (r.knownArtists.length) lines.push(`🎧 Наши: ${r.knownArtists.map((a) => a.name).join(", ")}`);
   if (r.newArtists.length) lines.push(`➕ Новые имена: ${r.newArtists.join(", ")}`);
-  if (e.priceText) lines.push(`🎟 ${e.priceText}`);
+  if (e.priceText) lines.push(`🎫 ${e.priceText}`);
   return lines.join("\n");
 };

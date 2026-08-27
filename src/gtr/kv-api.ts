@@ -871,13 +871,13 @@ export const broadcastFn = createServerFn({ method: "POST" })
         seen.add(chat);
         const r = await tgApi("sendMessage", {
           chat_id: chat,
-          text: `📣 <b>${tgEsc(u.name)}</b>:\n\n${tgEsc(text)}`,
+          text: `🔊 <b>${tgEsc(u.name)}</b>:\n\n${tgEsc(text)}`,
           parse_mode: "HTML",
         });
         if (r.ok) sent++;
       }
       const { sendPushTo } = await import("./push");
-      sendPushTo(ns, p.email, { title: `📣 ${u.name}`, body: text.slice(0, 140), url: "/gtr/dash" }).catch(
+      sendPushTo(ns, p.email, { title: `🔊 ${u.name}`, body: text.slice(0, 140), url: "/gtr/dash" }).catch(
         () => {},
       );
     }
@@ -1955,9 +1955,9 @@ export const communityPostFn = createServerFn({ method: "POST" })
             [{ text: "👤 Создать аккаунт", url: `${APP_URL}/gtr/signup` }],
           ]
         : [
-            [{ text: "🎟 Открыть GTR Event", url: `${APP_URL}/gtr/tonight` }],
+            [{ text: "🎫 Открыть GTR Event", url: `${APP_URL}/gtr/tonight` }],
             [
-              ...(cfg?.channelUrl ? [{ text: "📣 Канал", url: cfg.channelUrl }] : []),
+              ...(cfg?.channelUrl ? [{ text: "🔊 Канал", url: cfg.channelUrl }] : []),
               ...(cfg?.chatUrl ? [{ text: "💬 Чат", url: cfg.chatUrl }] : []),
             ],
           ].filter((row) => row.length);

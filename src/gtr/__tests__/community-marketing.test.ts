@@ -202,6 +202,25 @@ describe("фирменный слой", () => {
       expect(readFileSync(join(__dirname, f), "utf8"), f).toContain('question_parse_mode: "HTML"');
   });
 
+  it("в текстах бота нет знаков, у которых есть паковый двойник", () => {
+    // Сток-знак рядом с фирменным виден сразу: у одного наша заливка, у
+    // второго системная. Здесь перечислены те, чей смысл в паке уже занят.
+    const dubs: [string, string][] = [
+      ["🎟", "🎫"],
+      ["📣", "🔊"],
+      ["🎉", "🍾"],
+      ["👥", "🤝"],
+      ["📲", "🚀"],
+      ["🥈", "номер строки"],
+      ["🥉", "номер строки"],
+    ];
+    for (const f of ["../../routes/api.tg.ts", "../../routes/api.community-digest.ts", "../community.ts", "../kv-api.ts", "../intake.ts"]) {
+      const src = readFileSync(join(__dirname, f), "utf8");
+      for (const [stock, brand] of dubs)
+        expect(src.includes(stock), `${f}: «${stock}» — в паке для этого есть «${brand}»`).toBe(false);
+    }
+  });
+
   it("помощник телеграма знает, где у опроса текст и где режим разметки", () => {
     const tg = readFileSync(join(__dirname, "..", "tg.ts"), "utf8");
     expect(tg).toContain('sendPoll: "question"');

@@ -1093,6 +1093,11 @@
   /* Ширина не фиксированная: на узком ноутбуке 238 px отъедали половину
      рабочей области, на широком мониторе колонка выглядела худой. */
   width: clamp(216px, 17vw, 258px);
+  /* Глобального border-box в проекте нет, он расставлен точечно. В меню
+     его отсутствие резало счётчики: пункт с width:100% и боковыми
+     полями оказывался на 24 px шире колонки, и «312» превращалось в
+     «3», а рамка карточки профиля уходила за край панели. */
+  box-sizing: border-box;
   flex: none;
   background: var(--gtr-side);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
@@ -1103,6 +1108,20 @@
   top: 0;
   height: 100dvh;
   overflow-y: auto;
+  /* по горизонтали не прокручиваем никогда: боковое смещение панели
+     читается как «меню уплыло» */
+  overflow-x: hidden;
+}
+.gtr-sidebar * { box-sizing: border-box; }
+/* Шапка меню: логотип, языки, карточка профиля. Держится на месте, пока
+   список разделов прокручивается под ней. */
+.gtr-side-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--gtr-side);
+  margin: 0 -14px 0;
+  padding: 0 14px 10px;
 }
 .gtr-main { flex: 1; min-width: 0; --gtr-pad: 30px; padding: 22px var(--gtr-pad) 40px; }
 .gtr-topbar { display: none; }
@@ -1205,8 +1224,15 @@
     transform: translateX(-105%);
     transition: transform 0.24s cubic-bezier(0.2, 0.75, 0.25, 1);
     box-shadow: 14px 0 40px rgba(0, 0, 0, 0.55);
-    padding-top: calc(20px + env(safe-area-inset-top));
+    /* Отступ под вырез несёт закреплённая шапка, а не сама панель:
+       у панели он прокручивался вместе с содержимым, и логотип с
+       профилем уезжали под системные часы. */
+    padding-top: 0;
     padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  .gtr-side-head {
+    padding-top: calc(14px + env(safe-area-inset-top));
+    box-shadow: 0 10px 18px -14px #000;
   }
   .nav-open .gtr-sidebar { transform: none; }
 

@@ -353,6 +353,11 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
 
       {/* ---------- сайдбар ---------- */}
       <aside className="gtr-sidebar">
+        {/* Шапка меню закреплена: список разделов длинный, и при его
+            прокрутке логотип, языки и карточка профиля уезжали наверх —
+            на телефоне прямо под системные часы, потому что контент
+            приложения идёт под статус-бар. Прокручивается только список. */}
+        <div className="gtr-side-head">
         <div className="gtr-neon" style={{ padding: "0 11px", marginBottom: 14 }}>
           <img
             src="/brand/GTR_primary_dark_clean.svg"
@@ -410,6 +415,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
               {venue ? venue.name : t("Сеть · 110 площадок")}
             </span>
           </span>
+        </div>
         </div>
 
         <NavGroup label={isArtist || isVisitor ? t("ПЛАТФОРМА") : t("ПЛОЩАДКА")} items={navVenue} />

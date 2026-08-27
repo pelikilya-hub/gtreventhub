@@ -243,6 +243,20 @@ describe("ночь не разрезается полуночью", () => {
 });
 
 describe("адрес без мусора", () => {
+  it("хвост, уже сказанный в начале, не повторяется", () => {
+    // Так отдаёт разметка: город и индекс есть и внутри улицы, и
+    // отдельными полями. В паспорте это читается как наша ошибка.
+    expect(
+      readAddress({
+        address: {
+          streetAddress: "33/1 Taweewong Road, Patong Beach, Kathu, Phuket 83150, Thailand",
+          addressLocality: "Phuket",
+          postalCode: "83150",
+        },
+      }),
+    ).toBe("33/1 Taweewong Road, Patong Beach, Kathu, Phuket 83150, Thailand");
+  });
+
   it("повторы и пустые значения выбрасываются", () => {
     expect(
       readAddress({

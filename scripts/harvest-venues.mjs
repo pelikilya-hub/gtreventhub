@@ -37,13 +37,19 @@ const { factsFromHtml } = await import("/tmp/harvest.mjs");
 const raw = JSON.parse(readFileSync("src/gtr/data/venues.json", "utf8"));
 const venues = (Array.isArray(raw) ? raw : raw.venues).filter((v) => v.website);
 
-const siteRoot = (url) => {
+// Куда идти за паспортом. Первым делом — по тому адресу, который стоит в
+// базе: у площадок внутри отелей это страница самой площадки, и часы там
+// её собственные, а на главной группы — часы ресепшена или ничего.
+const pagesFor = (website) => {
+  let u;
   try {
-    const u = new URL(url.startsWith("http") ? url : `https://${url}`);
-    return `${u.protocol}//${u.host}`;
+    u = new URL(website.startsWith("http") ? website : `https://${website}`);
   } catch {
     return null;
   }
+  const root = `${u.protocol}//${u.host}`;
+  const exact = u.pathname.replace(/\/+$/, "") ? [u.toString()] : [];
+  return [...exact, root, ...PATHS.slice(1).map((p) => root + p)];
 };
 
 const get = async (url) => {
@@ -63,19 +69,24 @@ const get = async (url) => {
 const today = new Date().toISOString().slice(0, 10);
 
 async function harvest(v) {
-  const root = siteRoot(v.website);
-  if (!root) return { id: v.id, name: v.name, status: "bad-url" };
+  const pages = pagesFor(v.website);
+  if (!pages) return { id: v.id, name: v.name, status: "bad-url" };
   let best = null;
-  for (const p of PATHS) {
-    const html = await get(root + p);
+  let reached = false;
+  for (const page of pages) {
+    const html = await get(page);
     if (!html) continue;
-    const f = factsFromHtml(html, root + p, today);
+    reached = true;
+    const f = factsFromHtml(html, page, today);
     if (!f) continue;
     const score = (f.hours ? 2 : 0) + (f.address ? 1 : 0) + (f.phone ? 1 : 0) + (f.email ? 1 : 0);
     if (!best || score > best.score) best = { ...f, score };
     if (f.hours && f.address && f.phone) break; // полный набор — дальше не ходим
   }
-  if (!best) return { id: v.id, name: v.name, status: "no-markup" };
+  // «Не открылся» и «открылся, но данных нет» — разные вещи: первое чинится
+  // с нашей стороны, второе нет. Одним словом их звать значит не знать,
+  // сколько площадок мы ещё можем закрыть.
+  if (!best) return { id: v.id, name: v.name, status: reached ? "no-markup" : "unreachable" };
   const { score, ...facts } = best;
   return { id: v.id, name: v.name, status: "ok", ...facts };
 }
@@ -102,6 +113,8 @@ const report = {
     note: "Паспорта площадок из разметки schema.org на их собственных сайтах. Каждый факт с адресом страницы, откуда взят. Ничего не сгенерировано.",
     sitesTried: results.length,
     withMarkup: ok.length,
+    noMarkup: results.filter((r) => r.status === "no-markup").length,
+    unreachable: results.filter((r) => r.status === "unreachable").length,
     hours: byField("hours"),
     address: byField("address"),
     phone: byField("phone"),

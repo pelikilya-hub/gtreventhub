@@ -3,11 +3,13 @@
     "collectedAt": "2026-08-27",
     "note": "Паспорта площадок из разметки schema.org на их собственных сайтах. Каждый факт с адресом страницы, откуда взят. Ничего не сгенерировано.",
     "sitesTried": 70,
-    "withMarkup": 13,
-    "hours": 7,
-    "address": 13,
-    "phone": 13,
-    "email": 6
+    "withMarkup": 24,
+    "noMarkup": 36,
+    "unreachable": 10,
+    "hours": 8,
+    "address": 20,
+    "phone": 20,
+    "email": 10
   },
   "venues": [
     {
@@ -34,17 +36,24 @@
     {
       "id": "VEN-0006",
       "name": "YONA Beach Club",
-      "status": "no-markup"
+      "status": "unreachable"
     },
     {
       "id": "VEN-0007",
       "name": "KUDO Beach Club",
-      "status": "no-markup"
+      "status": "ok",
+      "address": "33/1 Taweewong Road, Patong Beach, Kathu, Phuket 83150, Thailand",
+      "email": "info@kudohotel.com",
+      "source": "https://kudohotel.com",
+      "fetchedAt": "2026-08-27"
     },
     {
       "id": "VEN-0009",
       "name": "Tann Terrace Phuket",
-      "status": "no-markup"
+      "status": "ok",
+      "email": "resv@tannterracephuket.com",
+      "source": "https://tannterracephuket.com",
+      "fetchedAt": "2026-08-27"
     },
     {
       "id": "VEN-0010",
@@ -79,17 +88,21 @@
     {
       "id": "VEN-0017",
       "name": "TaiPan Nightclub",
-      "status": "no-markup"
+      "status": "unreachable"
     },
     {
       "id": "VEN-0018",
       "name": "New York Live Music Bar",
-      "status": "no-markup"
+      "status": "unreachable"
     },
     {
       "id": "VEN-0019",
       "name": "Hard Rock Cafe Phuket",
-      "status": "no-markup"
+      "status": "ok",
+      "address": "48/1 Ruamjai Road, Patong Kathu, Phuket 83150 TH",
+      "phone": "+66969307494",
+      "source": "https://cafe.hardrock.com/phuket/",
+      "fetchedAt": "2026-08-27"
     },
     {
       "id": "VEN-0027",
@@ -113,17 +126,22 @@
     {
       "id": "VEN-0033",
       "name": "InterContinental Phuket Resort",
-      "status": "no-markup"
+      "status": "unreachable"
     },
     {
       "id": "VEN-0035",
       "name": "Paradox Resort Phuket",
-      "status": "no-markup"
+      "status": "ok",
+      "address": "509 Patak Road, Phuket, Chang Wat Phuket, 83100",
+      "phone": "+6676683350",
+      "email": "reservations@paradoxresortphuket.com",
+      "source": "https://www.paradoxhotels.com/phuket",
+      "fetchedAt": "2026-08-27"
     },
     {
       "id": "VEN-0037",
       "name": "Grand Mercure Phuket Patong",
-      "status": "no-markup"
+      "status": "unreachable"
     },
     {
       "id": "VEN-0039",
@@ -143,7 +161,12 @@
     {
       "id": "VEN-0044",
       "name": "Amanpuri",
-      "status": "no-markup"
+      "status": "ok",
+      "address": "Amanpuri, Pansea Beach, Cherngtalay, Thalang District, Phuket 83110, Thailand",
+      "phone": "+6676324333",
+      "email": "amanpuri@aman.com",
+      "source": "https://www.aman.com/resorts/amanpuri",
+      "fetchedAt": "2026-08-27"
     },
     {
       "id": "VEN-0045",
@@ -184,7 +207,10 @@
     {
       "id": "VEN-0053",
       "name": "Laku Beach Club",
-      "status": "no-markup"
+      "status": "ok",
+      "phone": "+6676352148",
+      "source": "https://lakubeachclub.com",
+      "fetchedAt": "2026-08-27"
     },
     {
       "id": "VEN-0054",
@@ -206,7 +232,7 @@
       "name": "The Deck Beach Club Patong",
       "status": "ok",
       "hours": "10:00–21:00 · ежедневно",
-      "address": "Four Points by Sheraton Phuket Patong Beach Resort 198/8-9 Thawewong Road, Patong, Kathu, Phuket, 83150",
+      "address": "Four Points by Sheraton Phuket Patong Beach Resort 198/8-9 Thawewong Road, Kathu, 83150",
       "phone": "+6676645999",
       "email": "fb.phuket@fourpoints.com",
       "source": "https://thedeckbeachclubpatong.com",
@@ -245,12 +271,15 @@
     {
       "id": "VEN-0066",
       "name": "Royal Phuket Marina",
-      "status": "no-markup"
+      "status": "ok",
+      "phone": "+6676360833",
+      "source": "https://royalphuketmarina.com",
+      "fetchedAt": "2026-08-27"
     },
     {
       "id": "VEN-0067",
       "name": "Phuket Boat Lagoon",
-      "status": "no-markup"
+      "status": "unreachable"
     },
     {
       "id": "VEN-0068",
@@ -260,13 +289,17 @@
     {
       "id": "VEN-0069",
       "name": "Phuket Marriott Resort & Spa, Merlin Beach",
-      "status": "no-markup"
+      "status": "ok",
+      "address": "99 Muen-Ngoen Road, Tri-Trang Beach, Patong, Phuket, 83150",
+      "phone": "+6676335300",
+      "source": "https://www.marriott.com/en-us/hotels/hktmb-phuket-marriott-resort-and-spa-merlin-beach/events/",
+      "fetchedAt": "2026-08-27"
     },
     {
       "id": "VEN-0070",
       "name": "The Shore at Katathani",
       "status": "ok",
-      "address": "18 Kata Noi Rd, Karon, Maung, Phuket 83100, Thailand, Phuket, 83100",
+      "address": "18 Kata Noi Rd, Karon, Maung, Phuket 83100, Thailand",
       "phone": "+6676318350",
       "email": "theshorereservation@katathani.com",
       "source": "https://theshorephuket.com",
@@ -299,7 +332,11 @@
     {
       "id": "VEN-0074",
       "name": "COMO Point Yamu",
-      "status": "no-markup"
+      "status": "ok",
+      "address": "225 Moo 7, Paklok, Thalang, Phuket 83110",
+      "phone": "+6676360100",
+      "source": "https://www.comohotels.com/thailand/como-point-yamu",
+      "fetchedAt": "2026-08-27"
     },
     {
       "id": "VEN-0075",
@@ -314,15 +351,18 @@
     {
       "id": "VEN-0078",
       "name": "Casa Boho Phuket",
-      "status": "no-markup"
+      "status": "ok",
+      "address": "16/12 Moo.6, Tambon Kamala, Phuket, Thailand, 83150 (located in Hyatt Regency Phuket Resort)",
+      "source": "https://casabohophuket.com",
+      "fetchedAt": "2026-08-27"
     },
     {
       "id": "VEN-0079",
       "name": "Vanilla Sky Bar & Lounge",
       "status": "ok",
-      "address": "Paradise Beach Kamala Co., Ltd, 18/40 Moo 6, Nakalay Road, T. Kamala, A. Kathu, Phuket 83150, Thailand, Phuket",
+      "address": "Paradise Beach Kamala Co., Ltd, 18/40 Moo 6, Nakalay Road, T. Kamala, A. Kathu, Phuket 83150, Thailand",
       "phone": "+6676337300",
-      "source": "https://www.capesienna.com",
+      "source": "https://www.capesienna.com/restaurants/vanilla-sky-bar-gastro-pub/",
       "fetchedAt": "2026-08-27"
     },
     {
@@ -343,7 +383,10 @@
     {
       "id": "VEN-0085",
       "name": "Phuket Co Working Space / Summit Tower",
-      "status": "no-markup"
+      "status": "ok",
+      "hours": "09:00–17:00 · ежедневно",
+      "source": "https://phuketcoworkingspace.com",
+      "fetchedAt": "2026-08-27"
     },
     {
       "id": "VEN-0087",
@@ -353,12 +396,12 @@
     {
       "id": "VEN-0088",
       "name": "Pullman Phuket Karon Beach Resort",
-      "status": "no-markup"
+      "status": "unreachable"
     },
     {
       "id": "VEN-0092",
       "name": "Pullman Phuket Arcadia Naithon Beach",
-      "status": "no-markup"
+      "status": "unreachable"
     },
     {
       "id": "VEN-0093",
@@ -373,7 +416,7 @@
     {
       "id": "VEN-0098",
       "name": "Seduction Complex",
-      "status": "no-markup"
+      "status": "unreachable"
     },
     {
       "id": "VEN-0101",
@@ -398,7 +441,7 @@
     {
       "id": "VEN-0106",
       "name": "Andaman Riviera",
-      "status": "no-markup"
+      "status": "unreachable"
     },
     {
       "id": "VEN-0107",

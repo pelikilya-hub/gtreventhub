@@ -13,11 +13,18 @@
 // Здесь только извлечение: сеть и запись живут в скрипте прогона, а этот
 // модуль разбирает готовый HTML и потому закрыт тестами.
 
-/** Типы schema.org, под которыми площадки описывают себя. */
+/** Типы schema.org, под которыми площадки описывают себя.
+ *
+ *  Organization здесь не лишний: половина сайтов — на конструкторах, и
+ *  контакты площадки лежат именно в этом узле. Пустой такой узел ничего
+ *  не портит — он не наберёт очков и не будет выбран. */
 const BIZ_TYPES = new Set([
   "localbusiness", "restaurant", "nightclub", "barorpub", "bar", "cafe",
   "hotel", "resort", "lodgingbusiness", "entertainmentbusiness",
   "foodestablishment", "eventvenue", "place", "winery", "brewery",
+  "organization", "corporation", "internetcafe", "touristattraction",
+  "spa", "healthandbeautybusiness", "sportsactivitylocation", "casino",
+  "amusementpark", "artgallery", "museum", "store",
 ]);
 
 type LdNode = {
@@ -223,7 +230,10 @@ const tidyAddress = (bits: string[]): string | undefined => {
   for (const raw of bits.flatMap((b) => b.split(","))) {
     const part = raw.trim().replace(/\s+/g, " ");
     if (!part || JUNK.has(part.toLowerCase())) continue;
-    if (out.some((x) => x.toLowerCase() === part.toLowerCase())) continue;
+    // Кусок, который уже есть внутри собранного, — это повтор поля, а не
+    // новая часть адреса: «…Phuket 83150, Thailand» плюс отдельные
+    // «Phuket» и «83150» читаются как наша ошибка.
+    if (out.join(", ").toLowerCase().includes(part.toLowerCase())) continue;
     out.push(part);
   }
   return out.length ? out.join(", ") : undefined;

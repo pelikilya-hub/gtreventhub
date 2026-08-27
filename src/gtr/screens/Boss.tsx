@@ -21,6 +21,7 @@ import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
 import { Card, Chip, Dot, Eyebrow, Icon, StkBtn, tint } from "../ui";
 import {
+  allAfishaFn,
   bossHeadFn,
   broadcastFn,
   communityInviteTextFn,
@@ -57,6 +58,7 @@ import {
   type VenueConfirm,
 } from "../kv-api";
 import { VAPID_PUBLIC_KEY } from "../push";
+import { eventsToday, signupsToday, createdToday, phuketDayStart } from "../daily-digest";
 
 const mono = (s: number, w = 500) => `${w} ${s}px/1.3 'JetBrains Mono',monospace`;
 const golos = (s: number, w = 500) => `${w} ${s}px/1.4 'Golos Text',sans-serif`;
@@ -511,11 +513,13 @@ export function BossCabinet() {
   const go = (s: ScreenId) => navigate({ to: "/gtr/$screen", params: { screen: s } });
   const [users, setUsers] = useState<PublicUser[]>([]);
   const [head, setHead] = useState<BossHead | null>(null);
+  const [afisha, setAfisha] = useState<{ vid: string; dateIso: string; artistIds: string[] }[]>([]);
   useEffect(() => {
     listUsersFn().then((r) => {
       if (r.ok) setUsers(r.users);
     });
     bossHeadFn().then((r) => setHead(r.head)).catch(() => {});
+    allAfishaFn().then((r) => setAfisha(r.items)).catch(() => {});
   }, []);
 
   const money = useMemo(() => {
@@ -576,6 +580,19 @@ export function BossCabinet() {
     return h < 48 ? `${h}ч` : `${Math.round(h / 24)}д`;
   };
 
+  // Сводка дня: живые сигналы за сегодняшние сутки (Пхукет, UTC+7). Афиша —
+  // из реального синка, регистрации/черновики/заявки — по своим таймстемпам.
+  const digest = useMemo(() => {
+    const dayStart = phuketDayStart(Date.now());
+    const todayIso = new Date(dayStart + 12 * 3600_000).toISOString().slice(0, 10);
+    return {
+      events: eventsToday(afisha, todayIso),
+      signups: signupsToday(users, dayStart),
+      newDrafts: createdToday(shared.drafts.map((d) => ({ ts: d.updated })), dayStart),
+      newReqs: createdToday(reqs.map((r) => ({ ts: r.ts })), dayStart),
+    };
+  }, [afisha, users, shared.drafts, reqs]);
+
   const kpis: [string, string, string][] = [
     ["ПАЙПЛАЙН", fmtThb(money.total), "все сметы"],
     ["КОМИССИЯ GTR", fmtThb(money.commission), "заложено"],
@@ -623,6 +640,66 @@ export function BossCabinet() {
 
       <div className="gtr-boss-grid">
         <SprintBlock go={go} />
+        {/* -------- сводка дня: что произошло на платформе за сегодня -------- */}
+        <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Eyebrow>{t("СВОДКА ДНЯ")}</Eyebrow>
+            <button className="gtr-btn gtr-btn-sm" onClick={() => go("tonight")}>
+              {t("Афиша →")}
+            </button>
+          </div>
+          {/* афиша сегодня */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ font: "700 22px/1 'Oswald',sans-serif", color: "#fff" }}>{digest.events.total}</span>
+            <span style={{ font: "500 12px/1.4 'Golos Text',sans-serif", color: "rgba(255,255,255,.7)" }}>
+              {t("событий в")} {digest.events.venues} {t("заведениях сегодня")}
+              {digest.events.withArtist ? ` · ${digest.events.withArtist} ${t("с нашими артистами")}` : ""}
+            </span>
+          </div>
+          {/* в каких заведениях есть мероприятия — топ по числу событий */}
+          {digest.events.byVenue.length ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ font: mono(8, 600), color: "rgba(255,255,255,.4)", letterSpacing: ".12em" }}>
+                {t("ЗАВЕДЕНИЯ С СОБЫТИЯМИ")}
+              </span>
+              {digest.events.byVenue.slice(0, 5).map((b) => (
+                <button
+                  key={b.vid}
+                  onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "base" }, search: { vid: b.vid } })}
+                  style={{ display: "flex", justifyContent: "space-between", gap: 8, padding: "3px 0", background: "none", border: "none", color: "inherit", cursor: "pointer", textAlign: "left" }}
+                >
+                  <span style={{ font: "500 12px/1.4 'Golos Text',sans-serif", color: "rgba(255,255,255,.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {V(b.vid)?.name ?? b.vid}
+                  </span>
+                  <span style={{ font: mono(10, 600), color: GREEN }}>{b.count}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "rgba(255,255,255,.5)" }}>
+              {t("На сегодня событий в афише пока нет.")}
+            </span>
+          )}
+          {/* регистрации и активность за сегодня */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 2 }}>
+            {([
+              [t("площадки"), digest.signups.venues],
+              [t("организаторы"), digest.signups.organizers],
+              [t("артисты"), digest.signups.artists],
+              [t("черновики"), digest.newDrafts],
+              [t("заявки"), digest.newReqs],
+            ] as [string, number][])
+              .filter(([, n]) => n > 0)
+              .map(([label, n]) => (
+                <Chip key={label} color={GREEN}>+{n} {label}</Chip>
+              ))}
+            {digest.signups.total === 0 && digest.newDrafts === 0 && digest.newReqs === 0 ? (
+              <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "rgba(255,255,255,.45)" }}>
+                {t("Новых регистраций и заявок сегодня ещё не было.")}
+              </span>
+            ) : null}
+          </div>
+        </Card>
         {/* -------- деньги -------- */}
         <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

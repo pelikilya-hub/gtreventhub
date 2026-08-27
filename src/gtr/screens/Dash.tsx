@@ -42,6 +42,7 @@ import { BossCabinet, PushPanel, TgChip } from "./Boss";
 import { openAppLink } from "../applink";
 import { genreLabel, OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
 import { pickHeadliner, islandDigest } from "../guest-digest";
+import { eventsToday, phuketDayStart } from "../daily-digest";
 import appUpdates from "../data/app-updates.json";
 
 type Action = [string, string, string, ScreenId, string, string];
@@ -781,9 +782,17 @@ function SalesCabinet() {
   const v = V(user.venueId);
   // Язык, на котором уходят предложения артистам (Telegram)
   const [prefLang, setPrefLang] = useState<"ru" | "en" | "th">("ru");
+  const [afisha, setAfisha] = useState<{ vid: string; dateIso: string; artistIds: string[] }[]>([]);
   useEffect(() => {
     getPrefsFn().then((r) => setPrefLang(r.prefLang)).catch(() => {});
+    allAfishaFn().then((r) => setAfisha(r.items)).catch(() => {});
   }, []);
+  // Пульс рынка: сколько событий на острове сегодня и где — организатору
+  // это ориентир, где живёт спрос. Считаем по пхукетским суткам.
+  const marketToday = useMemo(() => {
+    const iso = new Date(phuketDayStart(Date.now()) + 12 * 3600_000).toISOString().slice(0, 10);
+    return eventsToday(afisha, iso);
+  }, [afisha]);
 
   const rows = useMemo(
     () =>
@@ -984,6 +993,32 @@ function SalesCabinet() {
           </Card>
         ))}
       </div>
+
+      {/* ---------- пульс рынка: афиша острова сегодня ---------- */}
+      <Card style={{ padding: "16px 20px", marginBottom: 18, position: "relative", overflow: "hidden" }}>
+        <div className="gtr-laser" aria-hidden />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+          <Eyebrow>{t("ПУЛЬС РЫНКА · СЕГОДНЯ")}</Eyebrow>
+          <button className="gtr-btn gtr-btn-sm" onClick={() => go("tonight")}>{t("Афиша →")}</button>
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+          <span className="gtr-mono" style={{ font: "700 24px/1 'JetBrains Mono',monospace", color: "#fff" }}>{marketToday.total}</span>
+          <span style={{ font: "500 13px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+            {t("событий в")} {marketToday.venues} {t("заведениях сегодня")}
+          </span>
+        </div>
+        {marketToday.byVenue.length ? (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+            {marketToday.byVenue.slice(0, 6).map((b) => (
+              <Chip key={b.vid} color="rgba(255,255,255,.5)">{(V(b.vid)?.name ?? b.vid)} · {b.count}</Chip>
+            ))}
+          </div>
+        ) : (
+          <div style={{ marginTop: 8, font: "500 12.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            {t("На сегодня событий в афише пока нет.")}
+          </div>
+        )}
+      </Card>
 
       {/* ---------- воронка + пайплайн по месяцам ---------- */}
       <div

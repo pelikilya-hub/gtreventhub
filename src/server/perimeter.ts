@@ -6,6 +6,7 @@
 // nitro index.mjs — и этот плагин часть сборки при любом пути деплоя.
 import { HTTPError } from "h3";
 import { definePlugin } from "nitro";
+import { WORKER_URL } from "../gtr/app-url";
 
 // Краулеры ИИ и скрейперы представляются честно — по User-Agent. Это не
 // защита от целенаправленного копирования (агент подделает заголовок),
@@ -91,7 +92,9 @@ export default definePlugin((nitroApp) => {
     "cloudflare:scheduled" as never,
     (async ({ controller, env }: ScheduledPayload) => {
       const key = await deriveKey(env.GTR_SESSION_SECRET as string | undefined);
-      const base = "https://gtr-event-hub.gtr-event.workers.dev";
+      // Внутренний вызов самого себя: домен тут не нужен и даже вреден —
+      // запрос не должен зависеть от того, доехал ли DNS.
+      const base = WORKER_URL;
       const route = CRON_ROUTES[controller.cron ?? ""];
       if (route) {
         await nitroApp.fetch(new Request(`${base}${route}?key=${key}`));

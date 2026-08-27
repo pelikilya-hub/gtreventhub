@@ -26,6 +26,7 @@ import { GtrLightbox } from "../lightbox";
 import {
   createVenueLinkFn,
   afishaAddFn,
+  afishaPosterFn,
   listAfishaFn,
   styleProfileFn,
   syncAfishaNowFn,
@@ -35,6 +36,7 @@ import {
   type VenueConfirm,
 } from "../kv-api";
 import { catOf, stickerUrl } from "../map-style";
+import { posterUrl } from "../poster";
 import { useVenueContacts } from "../work-contacts";
 import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
@@ -1206,6 +1208,29 @@ function AfishaBlock({ vid }: { vid: string }) {
   const [mTitle, setMTitle] = useState("");
   const [mDate, setMDate] = useState("");
   const [mNote, setMNote] = useState("");
+  // Постер руками: команда — по любой площадке, кабинет площадки — по своей.
+  // Ключ картинки один и тот же, поэтому загруженная афиша встаёт на место
+  // добытой разведкой без отдельной ветки в интерфейсе.
+  const canPoster = user.role === "gtr" || (user.role === "venue" && user.venueId === vid);
+  const [pBusy, setPBusy] = useState("");
+  // счётчик обновлений постера — ломает кэш <img> после загрузки
+  const [pRev, setPRev] = useState<Record<string, number>>({});
+  const uploadPoster = async (id: string, file: File | null) => {
+    if (!file) return;
+    setPBusy(id);
+    try {
+      const { shrinkPoster } = await import("../poster-upload");
+      const dataUrl = await shrinkPoster(file);
+      const r = await afishaPosterFn({ data: { vid, id, dataUrl } });
+      if (r.ok) setPRev((m) => ({ ...m, [id]: (m[id] ?? 0) + 1 }));
+      else setMNote(String(r.reason));
+    } catch {
+      setMNote(t("Не получилось прочитать картинку"));
+    } finally {
+      setPBusy("");
+      setTimeout(() => setMNote(""), 3000);
+    }
+  };
   useEffect(() => {
     styleProfileFn({ data: { vid } })
       .then((r) => setStyle(r.profile))
@@ -1307,8 +1332,10 @@ function AfishaBlock({ vid }: { vid: string }) {
           style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(150px,1fr))", gap: 10 }}
         >
           {upcoming.map((e) => (
+            // Кнопка загрузки афиши лежит СНАРУЖИ ссылки: внутри неё тап по
+            // «выбрать файл» открывал бы заодно сайт площадки в новой вкладке.
+            <div key={e.id} style={{ position: "relative", display: "flex" }}>
             <a
-              key={e.id}
               href={e.url}
               target="_blank"
               rel="noreferrer"
@@ -1318,16 +1345,16 @@ function AfishaBlock({ vid }: { vid: string }) {
                 border: "1px solid rgba(255,255,255,.09)",
                 display: "flex",
                 flexDirection: "column",
+                flex: 1,
+                minWidth: 0,
               }}
             >
-              {e.poster ? (
-                <img
-                  src={e.poster}
-                  alt=""
-                  loading="lazy"
-                  style={{ width: "100%", aspectRatio: "4/5", objectFit: "cover" }}
-                />
-              ) : null}
+              <img
+                src={`${posterUrl(vid, e.id)}${pRev[e.id] ? `&r=${pRev[e.id]}` : ""}`}
+                alt=""
+                loading="lazy"
+                style={{ width: "100%", aspectRatio: "4/5", objectFit: "cover", background: "#101116" }}
+              />
               <span style={{ padding: "8px 10px", display: "grid", gap: 3 }}>
                 <span
                   className="gtr-mono"
@@ -1365,6 +1392,33 @@ function AfishaBlock({ vid }: { vid: string }) {
                 ) : null}
               </span>
             </a>
+            {canPoster ? (
+              <label
+                className="gtr-mono"
+                title={t("Загрузить афишу события")}
+                style={{
+                  position: "absolute",
+                  right: 6,
+                  top: 6,
+                  font: "700 10px/1 'JetBrains Mono',monospace",
+                  letterSpacing: ".08em",
+                  padding: "5px 7px",
+                  background: "rgba(10,11,13,.82)",
+                  border: "1px solid rgba(255,255,255,.22)",
+                  color: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                {pBusy === e.id ? "…" : t("АФИША")}
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(ev) => uploadPoster(e.id, ev.target.files?.[0] ?? null)}
+                />
+              </label>
+            ) : null}
+            </div>
           ))}
         </div>
       ) : (

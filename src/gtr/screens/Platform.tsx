@@ -24,6 +24,7 @@ import {
   type TableBooking,
 } from "../kv-api";
 import { FAMILY_LABEL } from "../match";
+import { posterUrl } from "../poster";
 import type { MusicProfile } from "../spotify";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow } from "../ui";
@@ -123,17 +124,15 @@ export function FeedScreen() {
                   }
                 >
                   <div style={{ position: "relative", aspectRatio: "4/5", background: "#101116" }}>
-                    {e.poster ? (
-                      <img
-                        src={e.poster}
-                        alt=""
-                        loading="lazy"
-                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                        onError={(ev) => {
-                          (ev.currentTarget as HTMLImageElement).style.display = "none";
-                        }}
-                      />
-                    ) : null}
+                    <img
+                      src={posterUrl(e.vid, e.id)}
+                      alt=""
+                      loading="lazy"
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      onError={(ev) => {
+                        (ev.currentTarget as HTMLImageElement).style.display = "none";
+                      }}
+                    />
                     <div
                       style={{
                         position: "absolute",

@@ -26,6 +26,7 @@ import {
   broadcastFn,
   communityInviteTextFn,
   communityPostFn,
+  tgRelinkFn,
   deleteTaskFn,
   metaCfgFn,
   metaExchangeFn,
@@ -990,11 +991,34 @@ function CommunityCard() {
       setState("Сервер недоступен");
     }
   };
-  const post = async (kind: "digest" | "invite" | "contest", target: "channel" | "chat") => {
-    setState(kind === "digest" ? "Собираю дайджест вечера…" : kind === "contest" ? "Публикую конкурс…" : "Отправляю приглашение…");
+  const post = async (
+    kind: "digest" | "invite" | "contest" | "moved",
+    target: "channel" | "chat",
+  ) => {
+    setState(
+      kind === "digest"
+        ? "Собираю дайджест вечера…"
+        : kind === "contest"
+          ? "Публикую конкурс…"
+          : kind === "moved"
+            ? "Объявляю о переезде и закрепляю пост…"
+            : "Отправляю приглашение…",
+    );
     try {
       const r = await communityPostFn({ data: { kind, target } });
       setState(r.ok ? "✓ Опубликовано" : r.reason);
+    } catch {
+      setState("Сервер недоступен");
+    }
+  };
+  // Ссылки, живущие не в коде, а в настройках Telegram: описание бота,
+  // кнопка меню, команды, описания канала и чата. Отчёт построчный —
+  // часть вызовов Telegram отклоняет по правам, и это надо видеть.
+  const relink = async () => {
+    setState("Обновляю ссылки в Telegram…");
+    try {
+      const r = await tgRelinkFn();
+      setState(r.steps.length ? r.steps.join("\n") : r.reason || "Telegram не ответил");
     } catch {
       setState("Сервер недоступен");
     }
@@ -1062,6 +1086,10 @@ function CommunityCard() {
           <Icon d="M11 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6 M15 8l4 4-4 4 M19 12H9" size={13} />
           {t("Приглашение в канал")}
         </button>
+        <button className="gtr-btn gtr-btn-red" onClick={() => post("moved", "channel")}>
+          <Icon d="M4 20h16 M12 3v13 M7 11l5 5 5-5" size={13} />
+          {t("Объявить о переезде на gtrevent.com")}
+        </button>
         <button className="gtr-btn" onClick={() => post("contest", "channel")}>
           <Icon d="M7 4h10v4a5 5 0 0 1-10 0V4z M5 5H3v2a4 4 0 0 0 4 4 M21 5h-2v2a4 4 0 0 0-4 4 M9 21h6 M12 17v4" size={13} />
           {t("Конкурс инвайтинга в канал")}
@@ -1082,11 +1110,20 @@ function CommunityCard() {
           <Icon d="M20 11a8 8 0 1 0-2.2 6.6 M20 6v5h-5" size={13} />
           {t("Обновить вебхук (для конкурса)")}
         </button>
+        <button className="gtr-btn gtr-btn-ghost" onClick={relink}>
+          <Icon d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2" size={13} />
+          {t("Обновить ссылки в Telegram")}
+        </button>
       </div>
       {state ? (
         <div
           className="gtr-mono"
-          style={{ marginTop: 8, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
+          style={{
+            marginTop: 8,
+            font: "500 11px/1.5 'JetBrains Mono',monospace",
+            color: "var(--gtr-t2)",
+            whiteSpace: "pre-line",
+          }}
         >
           {state}
         </div>

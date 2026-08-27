@@ -40,6 +40,7 @@ import {
 } from "../kv-api";
 import { BossCabinet, PushPanel, TgChip } from "./Boss";
 import { openAppLink } from "../applink";
+import { posterUrl } from "../poster";
 import { genreLabel, OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
 import { pickHeadliner, islandDigest, loudness } from "../guest-digest";
 import { eventsToday, phuketDayStart } from "../daily-digest";
@@ -1882,7 +1883,7 @@ function VisitorCabinet() {
         {headliner?.poster ? (
           // Промо самого шумного события сегодня: его постер как задник геро
           <img
-            src={headliner.poster}
+            src={posterUrl(headliner.vid, headliner.id)}
             alt=""
             aria-hidden
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "saturate(1.08) contrast(1.03)" }}
@@ -1942,10 +1943,8 @@ function VisitorCabinet() {
             {feed.map((e) => (
               <Card key={e.vid + e.id} hover style={{ padding: 0, overflow: "hidden", width: 168 }} onClick={() => openEvent(e)}>
                 <div style={{ position: "relative", aspectRatio: "4/5", background: "#101116" }}>
-                  {e.poster ? (
-                    <img src={e.poster} alt="" loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-                      onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
-                  ) : null}
+                  <img src={posterUrl(e.vid, e.id)} alt="" loading="lazy" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                    onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
                   <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 50%, rgba(10,11,13,.95))" }} />
                   {e.artistIds.length ? (
                     <span className="gtr-mono" style={{ position: "absolute", top: 7, left: 7, font: "700 10px/1 'JetBrains Mono',monospace", padding: "4px 6px", background: "rgba(229,35,27,.9)", letterSpacing: ".08em" }}>

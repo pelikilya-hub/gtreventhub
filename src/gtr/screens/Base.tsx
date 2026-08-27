@@ -16,8 +16,9 @@ import {
   V,
 } from "../data/app-data";
 import { CdmReserve, zonesOfSpace, hasReserve } from "../cdm-booking";
-import { EditableImage } from "../EditableImage";
 import { Card, Chip, Eyebrow, Field, tint, TrashTitle, VenueLogo } from "../ui";
+import { VenueHero } from "../venue-hero";
+import { useReveal } from "../reveal";
 import { GtrLightbox } from "../lightbox";
 import {
   createVenueLinkFn,
@@ -390,8 +391,13 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
   // Подтверждённые площадкой значения важнее наших оценок
   const cRate = confirm?.status === "confirmed" ? (confirm.rate ?? null) : null;
 
+  // Блоки паспорта проявляются по мере прокрутки. Пересобираем наблюдение,
+  // когда доезжают данные: карточки афиши и фото приходят асинхронно и
+  // появляются в дереве уже после первого прохода.
+  const revealRef = useReveal<HTMLDivElement>([v.id, vphotos.length]);
+
   return (
-    <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+    <div style={{ maxWidth: 1080, margin: "0 auto" }} ref={revealRef}>
       <button
         className="gtr-btn"
         style={{ marginBottom: 14 }}
@@ -400,22 +406,15 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
         {t("← К базе Пхукета")}
       </button>
 
-      <Card
-        style={{
-          position: "relative",
-          overflow: "hidden",
-          padding: "24px 26px",
-          marginBottom: 16,
-          minHeight: 140,
-        }}
+      <VenueHero
+        vid={v.id}
+        name={v.name}
+        video={rich.video}
+        poster={rich.hero}
+        // Наплыв идёт по кадрам самой площадки: сначала загруженные ею,
+        // потом наша галерея — паспорт дышит даже без видео.
+        shots={[...vphotos, ...(rich.gallery ?? [])]}
       >
-        <EditableImage
-          vid={v.id}
-          fallback={rich.hero}
-          alt={v.name}
-          overlay="linear-gradient(90deg,#0A0B0Df2,#0A0B0D66)"
-        />
-        <div className="gtr-beam" />
         <div style={{ position: "relative" }}>
           <Eyebrow>
             {/* Внутренний id площадки — только команде. Гостю показываем
@@ -526,7 +525,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             </div>
           ) : null}
         </div>
-      </Card>
+      </VenueHero>
 
       <div
         className="gtr-md-stack"
@@ -537,7 +536,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               на вопрос «что я тут буду делать». Витрина отдыха идёт до
               паспорта и говорит человеческим языком. */}
           {!commercial ? (
-            <Card style={{ padding: 18 }}>
+            <Card reveal style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>{t("ЧЕМ ЗАНЯТЬСЯ ЗДЕСЬ")}</Eyebrow>
               <div style={{ font: "500 12.5px/1.65 'Golos Text',sans-serif", color: "var(--gtr-t1)" }}>
                 {v.concept || v.events || v.facilities}
@@ -635,7 +634,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             </Card>
           ) : null}
 
-          <Card style={{ padding: 18 }}>
+          <Card reveal style={{ padding: 18 }}>
             <Eyebrow style={{ marginBottom: 10 }}>{t("ПРОФИЛЬ ПЛОЩАДКИ")}</Eyebrow>
             {[
               ["КОНЦЕПЦИЯ", v.concept],
@@ -658,7 +657,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           </Card>
 
           {night.hours || night.entry || night.best || night.fact ? (
-            <Card style={{ padding: 18 }}>
+            <Card reveal style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>{t("НОЧНАЯ ЖИЗНЬ")}</Eyebrow>
               {(
                 [
@@ -700,7 +699,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           ) : null}
 
           {sp.length ? (
-            <Card style={{ padding: 18 }}>
+            <Card reveal style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>{t("НОРМАЛИЗОВАННЫЕ ЗАЛЫ ·")} {sp.length}</Eyebrow>
               {sp.map((s) => {
                 const zs = zonesOfSpace(v.id, s.id);
@@ -791,7 +790,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           ) : null}
 
           {rich.gallery?.length ? (
-            <Card style={{ padding: 18 }}>
+            <Card reveal style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>{t("ОФИЦИАЛЬНАЯ ГАЛЕРЕЯ")}</Eyebrow>
               <div
                 className="gtr-gallery"
@@ -827,7 +826,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           ) : null}
 
           {vphotos.length ? (
-            <Card style={{ padding: 18 }}>
+            <Card reveal style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>
                 {t("ФОТО ОТ ПЛОЩАДКИ")} · {vphotos.length}
               </Eyebrow>
@@ -869,7 +868,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
 
         <div style={{ display: "grid", gap: 14, alignContent: "start" }}>
           <VenueLinkBlock vid={v.id} confirm={confirm} />
-          <Card style={{ padding: 18 }}>
+          <Card reveal style={{ padding: 18 }}>
             {commercial && (cRate || rate) ? (
               <div
                 style={{
@@ -1012,7 +1011,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           </Card>
 
           {isTeam && R ? (
-            <Card style={{ padding: 18 }}>
+            <Card reveal style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>
                 {t("ГОТОВНОСТЬ К БРОНИРОВАНИЮ ·")} {R.score}/100
               </Eyebrow>
@@ -1069,7 +1068,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
           ) : null}
 
           {rich.afisha?.length ? (
-            <Card style={{ padding: 18 }}>
+            <Card reveal style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>{t("ОФИЦИАЛЬНАЯ АФИША")}</Eyebrow>
               <div style={{ display: "grid", gap: 8 }}>
                 {rich.afisha.map(([date, title, meta]) => (
@@ -1157,7 +1156,7 @@ function AfishaBlock({ vid }: { vid: string }) {
   if (!upcoming.length && user.role !== "gtr") return null;
 
   return (
-    <Card style={{ padding: 18 }}>
+    <Card reveal style={{ padding: 18 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
         <Eyebrow>{t("АФИША")}</Eyebrow>
         {data?.syncedAt ? (
@@ -1342,7 +1341,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
     `Hi! GTR Event brings events and organizers to Phuket venues. Please confirm your venue details (2 min): ${link}`,
   );
   return (
-    <Card style={{ padding: 18 }}>
+    <Card reveal style={{ padding: 18 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
         <Eyebrow>{t("ПОДТВЕРЖДЕНИЕ ПЛОЩАДКОЙ")}</Eyebrow>
         {st ? (

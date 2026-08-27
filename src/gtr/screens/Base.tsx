@@ -34,6 +34,7 @@ import {
   type StyleProfile,
   type VenueConfirm,
 } from "../kv-api";
+import { catOf, stickerUrl } from "../map-style";
 import { useVenueContacts } from "../work-contacts";
 import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
@@ -138,7 +139,7 @@ export function BaseScreen() {
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 6 }}>
         <h1 className="gtr-oswald gtr-h1">
-          {t("База")} · {regionName(region, i18n.language)}
+          {t("Площадки")} · {regionName(region, i18n.language)}
         </h1>
         <span
           className="gtr-mono"
@@ -192,6 +193,7 @@ export function BaseScreen() {
       >
         {rows.map((x) => {
           const hero = richOf(x.id).hero;
+          const cat = catOf(x.tag);
           const initials = x.name
             .split(/\s+/)
             .filter((w) => /^[A-Za-zА-Яа-я]/.test(w))
@@ -213,16 +215,37 @@ export function BaseScreen() {
             }
           >
             {/* фото заведения; фолбэк-плашка всегда под ним — если фото нет
-                или не загрузилось, карточка остаётся фирменной, не «битой» */}
+                или не загрузилось, карточка остаётся фирменной, не «битой».
+                Плашка не нейтральная, а в цвете категории со знаком с карты:
+                когда фото нет у целого региона, список должен читаться как
+                живой каталог — пляжные клубы, крыши, клубы, — а не как
+                колонка одинаковых серых прямоугольников. */}
             <div className="gtr-venue-shot">
               <div
                 style={{
                   position: "absolute",
                   inset: 0,
-                  background:
-                    "repeating-linear-gradient(135deg, rgba(255,255,255,.028) 0 2px, transparent 2px 9px), linear-gradient(160deg, #17181C 0%, #0C0D10 100%)",
+                  background: `repeating-linear-gradient(135deg, rgba(255,255,255,.028) 0 2px, transparent 2px 9px), radial-gradient(120% 90% at 18% 12%, ${tint(cat.color, 0.17)} 0%, transparent 62%), linear-gradient(160deg, #17181C 0%, #0C0D10 100%)`,
                 }}
               >
+                {!hero ? (
+                  <img
+                    src={stickerUrl(cat.sticker)}
+                    alt=""
+                    aria-hidden
+                    style={{
+                      position: "absolute",
+                      left: 16,
+                      top: "50%",
+                      width: 78,
+                      height: 78,
+                      transform: "translateY(-58%)",
+                      opacity: 0.5,
+                      filter: "saturate(.85)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                ) : null}
                 {/* Инициалы — водяной знак кадра, а не подпись: на высокой
                     карточке они держат центр, где у соседей стоит фото. */}
                 <span

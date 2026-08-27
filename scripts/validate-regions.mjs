@@ -14,9 +14,12 @@ const { _note: _n, ...REGIONS } = JSON.parse(readFileSync("src/gtr/data/regions.
 const BASE = JSON.parse(readFileSync("src/gtr/data/venues.json", "utf8"));
 const GEO = JSON.parse(readFileSync("src/gtr/data/venue-geo.json", "utf8"));
 
+// Словарь ровно тот, по которому живут карта и фильтры (map-style MAP_CATS).
+// Свой «почти такой же» словарь в регионах уже стоил нам 97 площадок,
+// упавших в «Прочее» серой точкой: тег не совпал регистром и написанием.
 const TAGS = new Set([
-  "Beach club", "Nightclub", "Rooftop", "Bar / lounge", "Live music",
-  "Event space", "Restaurant / bar", "Hotel / resort", "Marina",
+  "Beach club", "Nightclub", "Rooftop", "Bar / Lounge", "Resort / MICE",
+  "Marina / Yacht", "Show / Park", "Live music", "Event space", "Villa", "Other",
 ]);
 const REQUIRED = ["id", "name", "type", "tag", "area", "cluster", "district", "concept", "source", "sourceType", "confidence", "status", "notes"];
 

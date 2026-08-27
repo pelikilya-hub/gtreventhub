@@ -864,5 +864,20 @@
    ]
   ],
   "artistsNote": "Живая музыка в лаунж-зоне и караоке; именной состав площадкой не публикуется — запросить напрямую."
+ },
+ "VEN-0106": {
+  "src": "ANDAMAN-RIVIERA.COM",
+  "credit": "Andaman Riviera · рендеры застройщика (Radisson Individuals)",
+  "hero": "/venues/VEN-0106-hero.jpg",
+  "gallery": [
+   "/venues/VEN-0106-g1.jpg",
+   "/venues/VEN-0106-g2.jpg",
+   "/venues/VEN-0106-g3.jpg",
+   "/venues/VEN-0106-g4.jpg",
+   "/venues/VEN-0106-g5.jpg",
+   "/venues/VEN-0106-g6.jpg",
+   "/venues/VEN-0106-g7.jpg"
+  ],
+  "badge": "РУФТОП · ИНФИНИТИ-БАССЕЙН · 2 РЕСТОРАНА"
  }
 }

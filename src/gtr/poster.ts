@@ -74,6 +74,32 @@ export const parsePosterKey = (k: string): { vid: string; slug: string } | null 
   return { vid, slug };
 };
 
+/** Адрес постера, пригодный для Telegram.
+ *
+ *  Telegram не умеет SVG в sendPhoto и sendMediaGroup: нарисованная афиша
+ *  туда не годится, а один негодный элемент роняет весь альбом целиком.
+ *  Поэтому здесь строгая гарантия растра — адрес отдаётся только тогда,
+ *  когда за ним точно стоит картинка:
+ *
+ *    • постер уже в нашем кэше (`/api/poster?k=…` в записи события) — он
+ *      попал туда скачиванием, то есть это настоящий файл площадки;
+ *    • у площадки есть фото в /venues — ручка отдаст его редиректом.
+ *
+ *  Внешняя ссылка без кэша сюда не проходит: она может не скачаться в
+ *  момент отправки, и тогда ручка нарисует SVG — пост уйдёт битым.
+ *  Пустая строка означает «этому событию картинки в Telegram не будет». */
+export function posterPhoto(
+  appUrl: string,
+  vid: string,
+  ev: { id: string; poster?: string },
+  venueHero?: string,
+): string {
+  const cached = ev.poster?.startsWith("/api/poster");
+  const hero = venueHero?.startsWith("/venues/");
+  if (!cached && !hero) return "";
+  return `${appUrl}${posterUrl(vid, ev.id)}`;
+}
+
 // ---------- адреса картинок ----------
 
 /** Абсолютный адрес картинки относительно страницы, где она найдена.

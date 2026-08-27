@@ -992,7 +992,7 @@ function CommunityCard() {
     }
   };
   const post = async (
-    kind: "digest" | "invite" | "contest" | "moved",
+    kind: "digest" | "invite" | "contest" | "moved" | "poll",
     target: "channel" | "chat",
   ) => {
     setState(
@@ -1002,7 +1002,9 @@ function CommunityCard() {
           ? "Публикую конкурс…"
           : kind === "moved"
             ? "Объявляю о переезде и закрепляю пост…"
-            : "Отправляю приглашение…",
+            : kind === "poll"
+              ? "Публикую опрос…"
+              : "Отправляю приглашение…",
     );
     try {
       const r = await communityPostFn({ data: { kind, target } });
@@ -1089,6 +1091,10 @@ function CommunityCard() {
         <button className="gtr-btn gtr-btn-red" onClick={() => post("moved", "channel")}>
           <Icon d="M4 20h16 M12 3v13 M7 11l5 5 5-5" size={13} />
           {t("Объявить о переезде на gtrevent.com")}
+        </button>
+        <button className="gtr-btn" onClick={() => post("poll", "channel")}>
+          <Icon d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2" size={13} />
+          {t("Опрос в канал")}
         </button>
         <button className="gtr-btn" onClick={() => post("contest", "channel")}>
           <Icon d="M7 4h10v4a5 5 0 0 1-10 0V4z M5 5H3v2a4 4 0 0 0 4 4 M21 5h-2v2a4 4 0 0 0-4 4 M9 21h6 M12 17v4" size={13} />

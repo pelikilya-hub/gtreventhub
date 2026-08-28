@@ -5,6 +5,7 @@
 import { cleanEventTitle, isJunkEventTitle } from "./afisha-clean";
 import type { VenueAfisha } from "./afisha";
 import { kvGetJson, kvListAll, type KvNs } from "./kv-ns";
+import { plural } from "./plural";
 import { tgApi, tgEsc } from "./tg";
 
 import { APP_URL } from "./app-url";
@@ -95,14 +96,7 @@ const RU_DATE = (iso: string) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}`;
  *  площадок» видит каждый, кто открывает GTR Live впервые. Числа в наших
  *  текстах живые — сегодня 354, завтра 380, — поэтому форма выбирается
  *  правилом, а не подбирается руками под текущее значение. */
-export function plural(n: number, one: string, few: string, many: string): string {
-  const a = Math.abs(Math.trunc(n)) % 100;
-  const b = a % 10;
-  if (a > 10 && a < 20) return many;
-  if (b === 1) return one;
-  if (b >= 2 && b <= 4) return few;
-  return many;
-}
+export { plural };
 
 // Дайджест вечера: сегодняшняя программа, при тишине — ближайшие дни
 // Языки бота: Telegram присылает language_code пользователя — бот отвечает

@@ -67,6 +67,7 @@ import { eventDeckDocument } from "../event-deck";
 import { drawImpulse } from "../impulse";
 import { useGtr } from "../store";
 import { getPrefsFn, sendOfferFn } from "../kv-api";
+import { plural } from "../plural";
 import { Card, Chip, Dot, Eyebrow, Icon, tint } from "../ui";
 
 const VENDOR_KINDS: NodeKind[] = ["sound", "light", "decor", "content"];
@@ -2596,12 +2597,6 @@ function ArtistPick({ a, color, onAdd }: { a: Artist; color: string; onAdd: () =
   );
 }
 
-const plural = (n: number, one: string, few: string, many: string) => {
-  const m10 = n % 10, m100 = n % 100;
-  if (m10 === 1 && m100 !== 11) return one;
-  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
-  return many;
-};
 
 // ---------- панель брифа ----------
 // Вайб рендерится карточками с палитрой-градиентом, остальные вопросы —

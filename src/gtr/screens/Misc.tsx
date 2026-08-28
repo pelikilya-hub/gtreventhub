@@ -9,9 +9,12 @@ import {
   inviteUserFn,
   listManagersFn,
   listUsersFn,
+  loginStatsFn,
+  setUserPasswordFn,
   createInviteFn,
   tgLinkFn,
   tgStatusFn,
+  type LoginDay,
   type PublicUser,
 } from "../kv-api";
 import { notifyAssignFn } from "../notify";
@@ -1502,6 +1505,78 @@ function TgPanel() {
 }
 
 // ---------- команда: приглашения менеджеров (только GTR-админ) ----------
+// Пароль для выдачи: без похожих знаков (0/O, 1/l/I) — его диктуют голосом
+// и переписывают от руки, и «единица или эль» стоит потерянного вечера.
+const newPassword = () => {
+  const abc = "abcdefghjkmnpqrstuvwxyz23456789";
+  const pick = crypto.getRandomValues(new Uint8Array(10));
+  return Array.from(pick, (n) => abc[n % abc.length]).join("");
+};
+
+// Исходы входов: что именно происходит, когда человек говорит «не заходит».
+// Без этой панели badpass (пароль не тот), nouser (почта не та) и rate
+// (упёрся в защиту от перебора) снаружи выглядят одинаково, а лечатся
+// по-разному. Пустой день при живых жалобах — отдельный диагноз: запрос
+// вообще не долетел до сервера.
+const LOGIN_OUTCOMES: { match: (k: string) => boolean; label: string; color: string }[] = [
+  { match: (k) => k.startsWith("ok-"), label: "вошли", color: GREEN },
+  { match: (k) => k.startsWith("badpass"), label: "пароль не тот", color: AMBER },
+  { match: (k) => k.startsWith("nouser"), label: "почта не та", color: AMBER },
+  { match: (k) => k.startsWith("rate"), label: "защита от перебора", color: RED },
+  { match: (k) => k.startsWith("nostore"), label: "база аккаунтов недоступна", color: RED },
+];
+
+function LoginStats() {
+  const { t } = useTranslation();
+  const [days, setDays] = useState<LoginDay[] | null>(null);
+  useEffect(() => {
+    loginStatsFn()
+      .then((r) => setDays(r.days))
+      .catch(() => setDays([]));
+  }, []);
+  if (!days?.length) return null;
+
+  const total = (d: LoginDay, i: number) =>
+    Object.entries(d.outcomes)
+      .filter(([k]) => LOGIN_OUTCOMES[i].match(k))
+      .reduce((s, [, n]) => s + n, 0);
+
+  return (
+    <div style={{ display: "grid", gap: 6 }}>
+      <Eyebrow style={{ fontSize: 10 }}>{t("ВХОДЫ ЗА НЕДЕЛЮ")}</Eyebrow>
+      {days.map((d) => (
+        <div
+          key={d.date}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            flexWrap: "wrap",
+            padding: "6px 10px",
+            border: "1px solid rgba(255,255,255,.08)",
+            background: "var(--gtr-card2)",
+          }}
+        >
+          <span
+            className="gtr-mono"
+            style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+          >
+            {d.date}
+          </span>
+          {LOGIN_OUTCOMES.map((o, i) => {
+            const n = total(d, i);
+            return n ? (
+              <span key={o.label} style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: o.color }}>
+                {n} · {t(o.label)}
+              </span>
+            ) : null;
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // Аккаунты живут в общей базе (Workers KV): у каждого менеджера свой пароль
 // и свой кабинет. В локальном dev-режиме база недоступна — панель скажет об этом.
 function TeamPanel() {
@@ -1532,11 +1607,27 @@ function TeamPanel() {
     refresh();
   }, []);
 
-  const genPassword = () => {
-    const abc = "abcdefghjkmnpqrstuvwxyz23456789";
-    let out = "";
-    for (let i = 0; i < 10; i++) out += abc[Math.floor(Math.random() * abc.length)];
-    setPassword(out);
+  const genPassword = () => setPassword(newPassword());
+
+  // Сброс пароля. Старый показать нельзя — он не хранится, только хэш.
+  // Поэтому админ не «смотрит» пароль, а выдаёт новый и передаёт человеку.
+  const resetPassword = async (u: PublicUser) => {
+    if (!confirm(`Задать новый пароль для ${u.email}? Старый перестанет работать.`)) return;
+    const pw = newPassword();
+    setBusy(true);
+    setMsg(null);
+    try {
+      const r = await setUserPasswordFn({ data: { email: u.email, password: pw } });
+      setMsg(
+        r.ok
+          ? { ok: true, text: `Новый пароль для ${u.email}: ${pw} — передайте его лично и попросите сменить.` }
+          : { ok: false, text: r.error ?? "Не получилось" },
+      );
+    } catch {
+      setMsg({ ok: false, text: "Сервер недоступен" });
+    } finally {
+      setBusy(false);
+    }
   };
 
   const artHits =
@@ -1809,6 +1900,9 @@ function TeamPanel() {
               style={{
                 display: "flex",
                 alignItems: "center",
+                // Кнопок стало две: на телефоне они переносятся под строку,
+                // а не срезаются краем карточки.
+                flexWrap: "wrap",
                 gap: 10,
                 padding: "8px 10px",
                 border: "1px solid rgba(255,255,255,.08)",
@@ -1843,6 +1937,14 @@ function TeamPanel() {
               </span>
               <button
                 className="gtr-btn"
+                style={{ padding: "5px 9px", fontSize: 12 }}
+                disabled={busy}
+                onClick={() => resetPassword(u)}
+              >
+                {t("Новый пароль")}
+              </button>
+              <button
+                className="gtr-btn"
                 style={{ padding: "5px 9px", fontSize: 12, color: "#E5231B" }}
                 onClick={() => {
                   if (confirm(`Удалить доступ ${u.email}?`))
@@ -1855,6 +1957,8 @@ function TeamPanel() {
           ))}
         </div>
       ) : null}
+
+      <LoginStats />
     </Card>
   );
 }

@@ -23,6 +23,7 @@ import {
   type OrgRequest,
 } from "./data/app-data";
 import { deleteDraftKvFn, pullOffersFn, pullSharedFn, pushDraftFn, pushRequestFn } from "./kv-api";
+import { parseDate } from "./afisha-parse";
 
 type Shared = {
   events: CalEvent[];
@@ -58,6 +59,24 @@ const KEY = "gtr-shared-v1";
 const CH = "gtr-sync-v1";
 
 const mkId = () => `EV-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+
+/** Машинная дата события из того, что человек написал на канвасе.
+ *
+ *  Дата события живёт в узле-слоте обычным текстом — «Суббота, 30 августа,
+ *  с 22:00». Календарю нужна дата машиной, в поле dateIso. Его не писал
+ *  никто и никогда: поле было в типе, календарь по нему фильтровал слой
+ *  «наши события», и слой всегда оставался пустым — свои же события в
+ *  календаре не появлялись.
+ *
+ *  Разбираем текст слота тем же parseDate, что понимает посты из Telegram.
+ *  Если в слоте даты нет — поле остаётся пустым: выдуманная дата хуже
+ *  отсутствующей, событие уехало бы в чужой день. */
+const withDateIso = (d: EventDraft): EventDraft => {
+  const slot = d.graph?.nodes?.find((n) => n.kind === "slot");
+  const text = [slot?.title, slot?.sub, d.date].filter(Boolean).join(" ");
+  const iso = text ? parseDate(text) : null;
+  return iso && iso !== d.dateIso ? { ...d, dateIso: iso } : d;
+};
 
 /** Довезти заявку до сервера. Сеть на острове рвётся, воркер на деплое
  *  моргает — одна неудачная попытка не повод терять заявку, поэтому их
@@ -312,13 +331,14 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
           graph: init.graph ?? venueGraph(init.venueId),
           brief: init.brief ?? {},
         };
-        commit({ ...shared, drafts: [draft, ...shared.drafts] });
-        pushDraftFn({ data: draft }).catch(() => {});
+        const ready = withDateIso(draft);
+        commit({ ...shared, drafts: [ready, ...shared.drafts] });
+        pushDraftFn({ data: ready }).catch(() => {});
         return id;
       },
       updateDraft: (id, patch) => {
         const next = shared.drafts.map((d) =>
-          d.id === id ? { ...d, ...patch, updated: Date.now() } : d,
+          d.id === id ? withDateIso({ ...d, ...patch, updated: Date.now() }) : d,
         );
         commit({ ...shared, drafts: next });
         const changed = next.find((d) => d.id === id);
@@ -326,7 +346,7 @@ export function GtrProvider({ user, children }: { user: SessionUser; children: R
       },
       setDraftGraph: (id, fn) => {
         const next = shared.drafts.map((d) =>
-          d.id === id ? { ...d, graph: fn(d.graph), updated: Date.now() } : d,
+          d.id === id ? withDateIso({ ...d, graph: fn(d.graph), updated: Date.now() }) : d,
         );
         commit({ ...shared, drafts: next });
         const changed = next.find((d) => d.id === id);

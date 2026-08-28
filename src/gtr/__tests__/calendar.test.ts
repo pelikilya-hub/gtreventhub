@@ -13,7 +13,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { bkkToday } from "../afisha-parse";
+import { bkkToday, parseDate } from "../afisha-parse";
 
 const src = readFileSync(join(__dirname, "..", "screens", "Calendar.tsx"), "utf8");
 const kvApi = readFileSync(join(__dirname, "..", "kv-api.ts"), "utf8");
@@ -64,5 +64,33 @@ describe("занятость площадки", () => {
   it("день считает и брони, и гостей", () => {
     expect(fn).toContain("day.total++");
     expect(fn).toContain("day.guests += Number(b.guests)");
+  });
+});
+
+describe("связка конструктора с календарём", () => {
+  const store = readFileSync(join(__dirname, "..", "store.tsx"), "utf8");
+
+  it("дата события выводится из слота на канвасе", () => {
+    // dateIso не писал никто и никогда: поле было в типе, календарь по
+    // нему фильтровал слой «наши события», и слой всегда был пустым.
+    expect(store).toContain("const withDateIso");
+    expect(store).toContain('n.kind === "slot"');
+    for (const call of ["createDraft", "updateDraft", "setDraftGraph"])
+      expect(store.includes("withDateIso"), `${call} обязан пройти через withDateIso`).toBe(true);
+    expect(store).toContain("withDateIso({ ...d, ...patch");
+    expect(store).toContain("withDateIso({ ...d, graph: fn(d.graph)");
+  });
+
+  it("текст слота действительно разбирается в дату", () => {
+    // Тот же разборщик, что понимает посты из Telegram: год в афишах
+    // почти не пишут, поэтому берётся ближайшее будущее.
+    const now = Date.UTC(2026, 7, 28, 5, 0);
+    expect(parseDate("Суббота, 30 августа, с 22:00", now)).toBe("2026-08-30");
+    expect(parseDate("Saturday 5 September", now)).toBe("2026-09-05");
+  });
+
+  it("без даты в слоте поле остаётся пустым", () => {
+    // Выдуманная дата хуже отсутствующей: событие уехало бы в чужой день.
+    expect(parseDate("дата уточняется", Date.UTC(2026, 7, 28))).toBeNull();
   });
 });

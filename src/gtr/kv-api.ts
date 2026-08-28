@@ -169,6 +169,52 @@ export const listUsersFn = createServerFn({ method: "GET" }).handler(async () =>
   };
 });
 
+// Сброс пароля. Единственный способ вернуть человеку доступ: сам пароль
+// не хранится нигде — только PBKDF2-хэш, из которого его не достать ни
+// админу, ни разработчику. Поэтому «напомнить пароль» в продукте нет и
+// быть не может, а есть «задать новый».
+export const setUserPasswordFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { email: string; password: string }) => d)
+  .handler(async ({ data }) => {
+    const me = await currentUser();
+    if (me?.role !== "gtr") return { ok: false as const, error: "Только GTR-админ" };
+    const ns = await getKvNs();
+    if (!ns) return { ok: false as const, error: "Хранилище недоступно (локальный режим)" };
+
+    const email = data.email.trim().toLowerCase();
+    if (data.password.length < 6) return { ok: false as const, error: "Пароль от 6 символов" };
+    const stored = await kvGetJson<StoredUser>(ns, `user:${email}`);
+    // Аккаунта нет — значит дело не в пароле, и новый пароль ничего не
+    // починит. Говорим прямо, чтобы админ завёл доступ, а не гадал.
+    if (!stored) return { ok: false as const, error: "Нет такого аккаунта — нужно приглашение" };
+
+    stored.passHash = await hashPassword(data.password);
+    await ns.put(`user:${email}`, JSON.stringify(stored));
+    const { clearLimit, LIMITS } = await import("./abuse");
+    await clearLimit("login-acc", email, LIMITS.login, ns);
+    return { ok: true as const, email };
+  });
+
+// Исходы входов за неделю: продукт считает их давно, но показать было
+// негде. Снаружи «не могу войти» выглядит одинаково, а лечится по-разному:
+// badpass — пароль не тот, nouser — почта не та (или аккаунта нет вовсе),
+// rate — упёрся в защиту от перебора, пусто — запрос вообще не долетел.
+export type LoginDay = { date: string; outcomes: Record<string, number> };
+
+export const loginStatsFn = createServerFn({ method: "GET" }).handler(async () => {
+  const me = await currentUser();
+  if (me?.role !== "gtr") return { ok: false as const, days: [] as LoginDay[] };
+  const ns = await getKvNs();
+  if (!ns) return { ok: false as const, days: [] as LoginDay[] };
+  const days: LoginDay[] = [];
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(Date.now() - i * 86_400_000).toISOString().slice(0, 10);
+    const outcomes = await kvGetJson<Record<string, number>>(ns, `loginstat:${date}`);
+    if (outcomes) days.push({ date, outcomes });
+  }
+  return { ok: true as const, days };
+});
+
 export const deleteUserFn = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string }) => d)
   .handler(async ({ data }) => {

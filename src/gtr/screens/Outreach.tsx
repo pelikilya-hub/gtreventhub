@@ -7,20 +7,160 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { PH, V } from "../data/app-data";
+import { loadArtists, PH, REGIONS, V } from "../data/app-data";
 import {
   callScript,
   msgChecklist,
-  msgFirst,
+  msgFirstEn,
+  msgFirstRu,
   msgFollowUp,
   msgInstagram,
   NEEDS,
   STAGES,
   type Manager,
+  type Pitch,
 } from "../data/outreach";
-import { outreachAllFn, outreachSaveFn, type OutreachRow } from "../kv-api";
+import { createVenueLinkFn, outreachAllFn, outreachSaveFn, type OutreachRow } from "../kv-api";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow } from "../ui";
+
+/** Черновик письма: шаблон открывается в поле, правится под площадку и
+ *  копируется уже правленым.
+ *
+ *  Раньше кнопка копировала шаблон в буфер молча — менеджер вставлял его
+ *  в мессенджер и там же правил, каждый раз заново. Правка не сохранялась
+ *  нигде, а увидеть письмо целиком до отправки было негде.
+ *
+ *  Правки живут на устройстве менеджера и привязаны к площадке: у каждой
+ *  свой разговор, и общий на всех текст затирал бы личные добавления. */
+function Drafter({
+  manager,
+  venue,
+  pitch,
+  onCopy,
+  vid,
+  onLink,
+}: {
+  manager: Manager;
+  venue: string;
+  pitch: Pitch;
+  onCopy: (text: string, label: string) => void | Promise<void>;
+  vid: string;
+  onLink: (url: string) => void;
+}) {
+  const { t } = useTranslation();
+  const kinds = useMemo(
+    () =>
+      [
+        ["first-en", t("Первое · EN"), () => msgFirstEn(manager, venue, pitch)],
+        ["first-ru", t("Первое · RU"), () => msgFirstRu(manager, venue, pitch)],
+        ["ig", t("Директ в Instagram"), () => msgInstagram(manager, venue, pitch)],
+        ["follow", t("Напоминание"), () => msgFollowUp(manager, venue, pitch)],
+        ["check", t("Что прислать"), () => msgChecklist(manager, venue, pitch)],
+        [
+          "call",
+          t("Скрипт звонка"),
+          () =>
+            callScript(manager, venue, pitch)
+              .map((s) => `${s.step}\n${s.text}`)
+              .join("\n\n"),
+        ],
+      ] as [string, string, () => string][],
+    [manager, venue, pitch, t],
+  );
+  const [linkBusy, setLinkBusy] = useState(false);
+  const makeLink = async () => {
+    setLinkBusy(true);
+    try {
+      const r = await createVenueLinkFn({ data: { vid } });
+      if (r.ok) onLink(`${window.location.origin}/gtr/v?t=${r.token}`);
+    } finally {
+      setLinkBusy(false);
+    }
+  };
+  const [kind, setKind] = useState(kinds[0][0]);
+  const [text, setText] = useState("");
+  const storeKey = `gtr-outreach-draft:${venue}:${kind}`;
+
+  // Шаблон — заготовка: если менеджер уже правил это письмо для этой
+  // площадки, показываем его правку, а не начинаем с нуля.
+  useEffect(() => {
+    const base = kinds.find((k) => k[0] === kind)?.[2]() ?? "";
+    let saved: string | null = null;
+    try {
+      saved = window.localStorage.getItem(storeKey);
+    } catch {
+      /* приватный режим — работаем без памяти */
+    }
+    setText(saved ?? base);
+  }, [kind, storeKey, kinds]);
+
+  const remember = (v: string) => {
+    setText(v);
+    try {
+      window.localStorage.setItem(storeKey, v);
+    } catch {
+      /* квота */
+    }
+  };
+
+  const reset = () => {
+    try {
+      window.localStorage.removeItem(storeKey);
+    } catch {
+      /* нечего забывать */
+    }
+    setText(kinds.find((k) => k[0] === kind)?.[2]() ?? "");
+  };
+
+  return (
+    <div>
+      <Eyebrow style={{ marginBottom: 8 }}>{t("ТЕКСТ ПЕРЕД ОТПРАВКОЙ")}</Eyebrow>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+        {kinds.map(([k, label]) => (
+          <button
+            key={k}
+            className={`gtr-btn${kind === k ? " gtr-btn-red" : ""}`}
+            onClick={() => setKind(k)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {/* Ссылка-приглашение делается здесь же: раньше за ней надо было
+          уходить в паспорт площадки, и письма уходили без неё — то есть
+          просили поверить на слово. */}
+      {!pitch.link ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+          <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "#F5A623" }}>
+            {t("В письме нет ссылки на карточку")}
+          </span>
+          <button className="gtr-btn" onClick={() => void makeLink()} disabled={linkBusy}>
+            {linkBusy ? t("Делаю…") : t("Сделать приглашение")}
+          </button>
+        </div>
+      ) : null}
+      <textarea
+        className="gtr-input"
+        rows={12}
+        value={text}
+        onChange={(e) => remember(e.target.value)}
+        style={{ width: "100%", font: "500 13px/1.6 'Golos Text',sans-serif" }}
+      />
+      <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+        <button
+          className="gtr-btn gtr-btn-red"
+          onClick={() => void onCopy(text, t("Текст скопирован"))}
+        >
+          {t("Скопировать")}
+        </button>
+        <button className="gtr-btn" onClick={reset}>
+          {t("Вернуть шаблон")}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const STAGE_COLOR: Record<string, string> = {
   new: "rgba(255,255,255,.35)",
@@ -62,6 +202,23 @@ export function OutreachScreen() {
   const [openVid, setOpenVid] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [copied, setCopied] = useState("");
+
+  // Масштаб базы берём из самой базы. В шаблонах раньше стояли «110
+  // площадок» и «312 артистов» строкой: база выросла до 354 в шести
+  // регионах, а письма продолжали называть старое число — и занижали нас
+  // же втрое по географии.
+  const [artistCount, setArtistCount] = useState(0);
+  useEffect(() => {
+    void loadArtists().then((b) => setArtistCount(b.artists.length));
+  }, []);
+  const scale = useMemo(
+    () => ({
+      venues: PH.venues.length,
+      artists: artistCount,
+      regions: Object.keys(REGIONS).length,
+    }),
+    [artistCount],
+  );
 
   const manager: Manager = useMemo(
     // Телефон и ник берём из профиля аккаунта, если менеджер их указал:
@@ -321,37 +478,17 @@ export function OutreachScreen() {
                     </div>
                   </div>
 
-                  {/* Готовые тексты — уже с именем менеджера */}
-                  <div>
-                    <Eyebrow style={{ marginBottom: 8 }}>{t("ТЕКСТЫ В ОДИН ТАП")}</Eyebrow>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                      <button className="gtr-btn" onClick={() => void hit(msgFirst(manager, v.name), "Первое сообщение скопировано")}>
-                        {t("Первое сообщение")}
-                      </button>
-                      <button className="gtr-btn" onClick={() => void hit(msgInstagram(manager, v.name), "Директ скопирован")}>
-                        {t("Директ в Instagram")}
-                      </button>
-                      <button className="gtr-btn" onClick={() => void hit(msgFollowUp(manager, v.name), "Напоминание скопировано")}>
-                        {t("Напоминание")}
-                      </button>
-                      <button className="gtr-btn" onClick={() => void hit(msgChecklist(manager, v.name), "Чек-лист скопирован")}>
-                        {t("Что прислать")}
-                      </button>
-                      <button
-                        className="gtr-btn"
-                        onClick={() =>
-                          void hit(
-                            callScript(manager, v.name)
-                              .map((s) => `${s.step}\n${s.text}`)
-                              .join("\n\n"),
-                            "Скрипт звонка скопирован",
-                          )
-                        }
-                      >
-                        {t("Скрипт звонка")}
-                      </button>
-                    </div>
-                  </div>
+                  {/* Готовые тексты. Шаблон — заготовка, а не приговор:
+                      он открывается в поле, где его правят под площадку,
+                      и правку видно до отправки, а не после. */}
+                  <Drafter
+                    manager={manager}
+                    venue={v.name}
+                    vid={v.id}
+                    pitch={{ scale, link: r?.links?.invite || undefined }}
+                    onCopy={hit}
+                    onLink={(url) => void save(v.id, { links: { invite: url } })}
+                  />
 
                   <textarea
                     className="gtr-input"

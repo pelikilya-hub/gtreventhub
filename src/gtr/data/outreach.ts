@@ -77,52 +77,110 @@ export const NEEDS: Need[] = [
   },
 ];
 
+import { plural } from "../plural";
+
 export type Manager = { name: string; phone?: string; tg?: string; ig?: string };
+
+/** Живые цифры базы. Раньше в текстах стояли «110 площадок» и «312
+ *  артистов» прямо в строке — база выросла до 354 в шести регионах, а
+ *  письма продолжали называть старое число. Цифру в тексте продажи
+ *  занижать нельзя, а править её в пяти шаблонах руками — значит однажды
+ *  снова забыть. Экран передаёт сюда фактические числа. */
+export type Scale = { venues: number; artists: number; regions: number };
+
+/** Ссылка-приглашение: персональная страница площадки, где она видит свою
+ *  карточку и подтверждает данные. Её выдаёт кнопка в базе площадок. */
+export type Pitch = { scale: Scale; link?: string; call?: string };
 
 const sign = (m: Manager) =>
   [m.name, m.phone && `WhatsApp ${m.phone}`, m.tg && `Telegram ${m.tg}`]
     .filter(Boolean)
     .join(" · ");
 
-/** Первое сообщение в WhatsApp или Telegram. Короткое: длинное первое
- *  сообщение от незнакомого человека не читают. */
-export const msgFirst = (m: Manager, venue: string): string =>
+/** Первое сообщение — по-английски.
+ *
+ *  На Пхукете управляющий площадкой чаще тайский или интернациональный,
+ *  и русское письмо от незнакомого человека он просто не читает. Русская
+ *  версия остаётся ниже: русскоязычных владельцев на острове тоже много,
+ *  и им лучше писать на русском — но выбирать язык должен человек, а не
+ *  шаблон за него.
+ *
+ *  Что обязательно внутри: масштаб базы, голосовой помощник, языки,
+ *  ссылка на свою карточку и предложение созвона. Без ссылки письмо
+ *  просит поверить на слово, без звонка — оставляет решение на переписку,
+ *  которая умирает через два сообщения. */
+export const msgFirstEn = (m: Manager, venue: string, p: Pitch): string =>
   [
-    `Здравствуйте! Меня зовут ${m.name}, я из GTR Event — это афиша и брони ночного Пхукета.`,
+    `Hi! I'm ${m.name} from GTR Event — the nightlife guide and booking platform for Thailand.`,
     "",
-    `Мы собрали 110 площадок острова и 312 артистов, у нас живая афиша и бронь столов прямо в приложении. ${venue} у нас уже есть в базе — хочу довести карточку до ума вместе с вами.`,
+    `We've built a live catalogue of ${p.scale.venues} venues across ${p.scale.regions} regions and ${p.scale.artists} artists. ${venue} is already in it — I'd like to finish your page together with you.`,
     "",
-    "На время беты доступ бесплатный: вы не платите ничего, мы приводим гостей и берём на себя витрину, афишу и приём броней.",
+    "Two things that make us different for a venue like yours:",
     "",
-    "Скину пример карточки, чтобы вы видели, о чём речь. С кем можно обсудить?",
+    "• A voice assistant. A guest just asks out loud where to go tonight, and gets your venue with tonight's line-up — no searching, no scrolling.",
+    "• No language barrier. Your page, menu and booking work in English, Russian and Thai. A guest who speaks none of your staff's languages still books a table — you don't lose them at hello.",
+    "",
+    "Guests book tables with a pre-order; the request lands in your manager's Telegram and is confirmed with one tap.",
+    "",
+    ...(p.link ? [`Here's your page — have a look: ${p.link}`, ""] : []),
+    "Free while we're in beta: you pay nothing, we bring guests.",
+    "",
+    `Could we do a short call — 10 minutes${p.call ? `, ${p.call}` : ""}? Or tell me what works for you.`,
     "",
     sign(m),
-  ].join("\n");
+  ]
+    .filter((l, i, a) => !(l === "" && a[i - 1] === ""))
+    .join("\n");
+
+/** Русская версия первого сообщения — для русскоязычных владельцев. */
+export const msgFirstRu = (m: Manager, venue: string, p: Pitch): string =>
+  [
+    `Здравствуйте! Меня зовут ${m.name}, я из GTR Event — афиша и брони ночного Таиланда.`,
+    "",
+    `У нас живая база: ${p.scale.venues} ${plural(p.scale.venues, "площадка", "площадки", "площадок")} в ${p.scale.regions} ${plural(p.scale.regions, "регионе", "регионах", "регионах")} и ${p.scale.artists} ${plural(p.scale.artists, "артист", "артиста", "артистов")}. ${venue} уже в ней — хочу довести вашу карточку до ума вместе с вами.`,
+    "",
+    "Две вещи, ради которых это стоит вашего времени:",
+    "",
+    "• Голосовой помощник. Гость вслух спрашивает, куда пойти сегодня, и получает вашу площадку с программой вечера — без поиска и листания.",
+    "• Никакого языкового барьера. Карточка, меню и бронь работают на английском, русском и тайском. Гость, который не говорит на языке вашей смены, всё равно бронирует стол — вы не теряете его на первом слове.",
+    "",
+    "Бронь стола идёт с предзаказом: заявка падает вашему менеджеру в Telegram, подтверждение одной кнопкой.",
+    "",
+    ...(p.link ? [`Вот ваша страница, посмотрите: ${p.link}`, ""] : []),
+    "Пока идёт бета — бесплатно: вы не платите ничего, мы приводим гостей.",
+    "",
+    `Давайте созвонимся на 10 минут${p.call ? `, ${p.call}` : ""}? Или скажите, когда вам удобно.`,
+    "",
+    sign(m),
+  ]
+    .filter((l, i, a) => !(l === "" && a[i - 1] === ""))
+    .join("\n");
 
 /** Директ в Instagram: там первое сообщение уходит в «запросы», поэтому
- *  оно должно объяснять себя за две строки, без ссылок в первом касании —
- *  со ссылками сообщение чаще падает в спам. */
-export const msgInstagram = (m: Manager, venue: string): string =>
+ *  оно должно объяснять себя за две строки. Ссылку в первом касании не
+ *  ставим — со ссылками сообщение чаще падает в спам; она уйдёт вторым. */
+export const msgInstagram = (m: Manager, venue: string, p: Pitch): string =>
   [
-    `Здравствуйте! ${m.name}, GTR Event — афиша и брони ночного Пхукета.`,
+    `Hi! ${m.name} here, GTR Event — nightlife guide and table booking for Thailand.`,
     "",
-    `${venue} уже в нашей базе. Хотим бесплатно на время беты вести вашу афишу и присылать вам брони столов.`,
+    `${venue} is already in our catalogue of ${p.scale.venues} venues. Guests find you by voice and book in their own language — English, Russian or Thai.`,
     "",
-    "Куда написать по делу — WhatsApp или Telegram?",
+    "Free during beta. Where's best to reach you — WhatsApp or Telegram? Happy to jump on a 10-minute call.",
   ].join("\n");
 
 /** Второе касание, если молчат третий день. */
-export const msgFollowUp = (m: Manager, venue: string): string =>
+export const msgFollowUp = (m: Manager, venue: string, p: Pitch): string =>
   [
-    `${m.name}, GTR Event. Написала по ${venue} пару дней назад — поднимаю выше, чтобы не потерялось.`,
+    `${m.name} from GTR Event — I wrote about ${venue} a couple of days ago, bumping it up so it doesn't get lost.`,
     "",
-    "Нужно 10 минут: показать карточку и договориться, кто присылает фото и меню. Бесплатно на время беты.",
+    ...(p.link ? [`Your page is here: ${p.link}`, ""] : []),
+    "It takes 10 minutes on a call: I show you the page and we agree who sends photos and the menu. Free during beta.",
     "",
-    "Когда удобно — сегодня или завтра?",
+    "Today or tomorrow — which suits you?",
   ].join("\n");
 
 /** Сообщение после согласия: что прислать. */
-export const msgChecklist = (m: Manager, venue: string): string =>
+export const msgChecklist = (m: Manager, venue: string, p: Pitch): string =>
   [
     `Отлично! Чтобы карточка ${venue} заработала в полную силу, нужно от вас:`,
     "",
@@ -132,45 +190,62 @@ export const msgChecklist = (m: Manager, venue: string): string =>
     "",
     "Всё можно скинуть одним сообщением или ссылкой на папку. Остальное соберу сама.",
     "",
+    p.link ? `Проверить карточку: ${p.link}` : "",
     sign(m),
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
 /** Скрипт звонка. Цель — не «рассказать про продукт», а выйти из
  *  разговора с данными, фото, прайсом и согласием. */
-export const callScript = (m: Manager, venue: string): { step: string; text: string }[] => [
+export const callScript = (
+  m: Manager,
+  venue: string,
+  p: Pitch,
+): { step: string; text: string }[] => [
   {
     step: "1. Представиться (10 секунд)",
-    text: `Добрый день! Меня зовут ${m.name}, GTR Event — афиша и брони ночного Пхукета. Удобно говорить минуту?`,
+    text: `Добрый день! Меня зовут ${m.name}, GTR Event — афиша и брони ночного Таиланда. Удобно говорить минуту?`,
   },
   {
     step: "2. Зачем звоню (одно предложение)",
-    text: `${venue} уже есть в нашей базе среди 110 площадок острова. Звоню, чтобы довести вашу карточку до рабочего вида и начать присылать вам гостей.`,
+    text: `${venue} уже есть в нашей базе среди ${p.scale.venues} ${plural(p.scale.venues, "площадки", "площадок", "площадок")} в ${p.scale.regions} ${plural(p.scale.regions, "регионе", "регионах", "регионах")}. Звоню, чтобы довести вашу карточку до рабочего вида и начать присылать вам гостей.`,
   },
   {
     step: "3. Что получает площадка",
     text: "Витрина с фото и залами, ваша афиша в календаре острова, бронь столов с предзаказом — заявка падает вашему менеджеру в Telegram, подтверждение одной кнопкой. На время беты бесплатно, без договора и без обязательств.",
   },
   {
-    step: "4. Снять возражение «нам это не нужно»",
+    step: "4. Голосовой помощник (говорить обязательно)",
+    text: "У нас есть голосовой помощник: гость вслух спрашивает, куда пойти сегодня, и получает вашу площадку с программой вечера. Он же отвечает про меню, дресс-код и депозит — вашей смене не приходится повторять одно и то же сто раз за вечер.",
+  },
+  {
+    step: "5. Языки (второй сильный довод)",
+    text: "Приложение целиком работает на английском, русском и тайском. Гость, который не говорит на языке вашей смены, всё равно читает меню и бронирует стол. Вы перестаёте терять людей на языковом барьере — а на Пхукете это едва ли не половина отказов.",
+  },
+  {
+    step: "6. Снять возражение «нам это не нужно»",
     text: "Понимаю. Ничего не меняем в вашей работе: вы просто получаете дополнительные брони. Если за месяц не будет пользы — мы отключаемся, и вы ничего не теряете.",
   },
   {
-    step: "5. Снять возражение «сколько это стоит»",
+    step: "7. Снять возражение «сколько это стоит»",
     text: "Сейчас — ноль. Мы набираем площадки для беты и зарабатываем позже на организации событий, а не на размещении.",
   },
   {
-    step: "6. Забрать данные (главное)",
+    step: "8. Забрать данные (главное)",
     text: NEEDS.filter((n) => ["capacity", "prices", "schedule", "sound"].includes(n.key))
       .map((n) => `— ${n.ask}`)
       .join("\n"),
   },
   {
-    step: "7. Договориться о материалах",
+    step: "9. Договориться о материалах",
     text: "Пришлите, пожалуйста, фото залов и меню с ценами — на WhatsApp или ссылкой на папку. Без фото карточка не продаёт.",
   },
   {
-    step: "8. Закрыть на следующий шаг",
-    text: `Тогда я заведу карточку сегодня и пришлю вам ссылку на проверку. Записываю ваш контакт как основной по событиям? ${sign(m)}`,
+    step: "10. Закрыть на следующий шаг",
+    text: p.link
+      ? `Отправляю вам ссылку на вашу страницу — ${p.link}. Посмотрите и подтвердите данные, дальше я всё соберу. Записываю ваш контакт как основной по событиям? ${sign(m)}`
+      : `Тогда я заведу карточку сегодня и пришлю вам ссылку на проверку. Записываю ваш контакт как основной по событиям? ${sign(m)}`,
   },
 ];
 

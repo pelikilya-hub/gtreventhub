@@ -14,7 +14,8 @@ import { useTranslation } from "react-i18next";
 import { Card, Chip, Eyebrow } from "../ui";
 import { useEffect } from "react";
 import { PH, V, draftTitle } from "../data/app-data";
-import { afishaVenuesFn, listAfishaFn } from "../kv-api";
+import { afishaVenuesFn, listAfishaFn, venueLoadFn, type VenueLoad } from "../kv-api";
+import { bkkToday } from "../afisha-parse";
 
 const WD = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
 const WD_FULL = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
@@ -34,6 +35,16 @@ export function CalendarScreen() {
   useEffect(() => {
     afishaVenuesFn().then((r) => setAfishaVids(r.vids)).catch(() => {});
   }, []);
+  // Занятость: брони площадки по дням. Без неё день выглядел свободным,
+  // когда столы на него уже расписаны.
+  const [load, setLoad] = useState<VenueLoad>({});
+  useEffect(() => {
+    if (!vid) return setLoad({});
+    venueLoadFn({ data: { vid } })
+      .then((r) => setLoad(r.load))
+      .catch(() => setLoad({}));
+  }, [vid]);
+
   useEffect(() => {
     if (!vid) return setAfisha([]);
     listAfishaFn({ data: { vid } })
@@ -41,10 +52,15 @@ export function CalendarScreen() {
       .catch(() => setAfisha([]));
   }, [vid]);
 
-  const [month, setMonth] = useState(7);
-  const [year, setYear] = useState(2026);
+  // Календарь открывается на текущем месяце по островному времени.
+  // Раньше здесь стояли август и 2026-й числами: в сентябре продукт
+  // показывал бы август, а «сегодня» — шестое число независимо от того,
+  // какое оно на самом деле.
+  const [ty, tm, td] = bkkToday().split("-").map(Number);
+  const [month, setMonth] = useState(tm - 1);
+  const [year, setYear] = useState(ty);
   const navigate = useNavigate();
-  const [selDay, setSelDay] = useState(8);
+  const [selDay, setSelDay] = useState(td);
   const [room, setRoom] = useState("all");
   const [dragId, setDragId] = useState<string | null>(null);
   const [lineupArtists, setLineupArtists] = useState<Artist[]>([]);
@@ -101,7 +117,9 @@ export function CalendarScreen() {
   const first = new Date(year, month, 1);
   const offset = (first.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const todayD = year === 2026 && month === 7 ? 6 : -1;
+  // «Сегодня» подсвечивается только в своём месяце — и по Пхукету:
+  // после полуночи по местному в Гринвиче ещё вчера.
+  const todayD = year === ty && month === tm - 1 ? td : -1;
 
   const dayList = allEvents
     .filter((e) => e.day === selDay)
@@ -156,6 +174,10 @@ export function CalendarScreen() {
       oursMonth.filter((e) => e.d === i + 1).length +
       afishaMonth.filter((e) => e.d === i + 1).length,
   );
+  /** Занятость дня месяца: ключ в KV — дата ISO. */
+  const dayLoad = (n: number) =>
+    load[`${year}-${String(month + 1).padStart(2, "0")}-${String(n).padStart(2, "0")}`];
+
   const dSel = new Date(year, month, selDay);
   const statusBg = (e: CalEvent) =>
     e.status === "confirmed"
@@ -500,20 +522,39 @@ export function CalendarScreen() {
                       >
                         {n}
                       </span>
-                      {cellChips.length ? (
-                        <span
-                          className="gtr-mono"
-                          style={{
-                            font: "600 10px/1 'JetBrains Mono',monospace",
-                            color: "rgba(255,255,255,.45)",
-                            background: "rgba(255,255,255,.08)",
-                            borderRadius: 0,
-                            padding: "3px 5px",
-                          }}
-                        >
-                          {cellChips.length}
-                        </span>
-                      ) : null}
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        {/* Занятость: сколько столов на этот день уже
+                            расписано. Без неё день выглядел свободным, и
+                            событие ставили поверх чужих броней. */}
+                        {dayLoad(n) ? (
+                          <span
+                            className="gtr-mono"
+                            title={`${dayLoad(n)!.total} броней · ${dayLoad(n)!.guests} гостей`}
+                            style={{
+                              font: "600 10px/1 'JetBrains Mono',monospace",
+                              color: "#F5A623",
+                              background: "rgba(245,166,35,.16)",
+                              padding: "3px 5px",
+                            }}
+                          >
+                            {dayLoad(n)!.total}
+                          </span>
+                        ) : null}
+                        {cellChips.length ? (
+                          <span
+                            className="gtr-mono"
+                            style={{
+                              font: "600 10px/1 'JetBrains Mono',monospace",
+                              color: "rgba(255,255,255,.45)",
+                              background: "rgba(255,255,255,.08)",
+                              borderRadius: 0,
+                              padding: "3px 5px",
+                            }}
+                          >
+                            {cellChips.length}
+                          </span>
+                        ) : null}
+                      </span>
                     </div>
                     <div style={{ display: "grid", gap: 4 }}>
                       {cellChips.slice(0, 3).map((c) => (
@@ -597,6 +638,37 @@ export function CalendarScreen() {
               {selDay} {t(MONTHS[month]).toUpperCase()} · {t(WD_FULL[dSel.getDay()]).toUpperCase()}
             </Eyebrow>
             <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
+              {/* Занятость дня идёт первой строкой: прежде чем ставить
+                  событие, менеджер должен видеть, сколько столов уже
+                  расписано и на сколько гостей. */}
+              {dayLoad(selDay) ? (
+                <div
+                  style={{
+                    background: "rgba(245,166,35,.1)",
+                    border: "1px solid rgba(245,166,35,.45)",
+                    padding: "10px 12px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span style={{ flex: 1, minWidth: 0, font: "600 12px/1.45 'Golos Text',sans-serif" }}>
+                    {t("Занятость дня")}
+                  </span>
+                  <Chip color="#F5A623">
+                    {dayLoad(selDay)!.total} {t("броней")}
+                  </Chip>
+                  {dayLoad(selDay)!.confirmed ? (
+                    <Chip color="#2ECC71">
+                      {dayLoad(selDay)!.confirmed} {t("подтверждено")}
+                    </Chip>
+                  ) : null}
+                  <Chip color="rgba(255,255,255,.4)">
+                    {dayLoad(selDay)!.guests} {t("гостей")}
+                  </Chip>
+                </div>
+              ) : null}
               {oursDay.map((e) => (
                 <div
                   key={`ours-${e.id}`}

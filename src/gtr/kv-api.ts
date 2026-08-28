@@ -2368,6 +2368,36 @@ export const myBookingsFn = createServerFn({ method: "GET" }).handler(async () =
   return { bookings: mine.sort((a, b) => b.ts - a.ts).slice(0, 30) };
 });
 
+/** Занятость площадки по дням: сколько броней и сколько из них живые.
+ *
+ *  Календарь показывал три слоя — наши события, черновики и афишу, — но не
+ *  показывал брони. Из-за этого день мог выглядеть свободным, когда столы
+ *  на него уже расписаны: менеджер ставил туда событие вслепую. */
+export type VenueLoad = Record<string, { total: number; confirmed: number; guests: number }>;
+
+export const venueLoadFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { vid: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { load: {} as VenueLoad };
+    // Занятость чужой площадки — не наше дело: её видит команда GTR и та
+    // площадка, о которой речь.
+    if (!TEAM.includes(u.role) && u.venueId !== data.vid) return { load: {} as VenueLoad };
+    const keys = await kvListAll(ns, "booking:");
+    const all = (await Promise.all(keys.map((k) => kvGetJson<TableBooking>(ns, k)))).filter(
+      (b): b is TableBooking => Boolean(b) && b!.vid === data.vid && b!.status !== "declined",
+    );
+    const load: VenueLoad = {};
+    for (const b of all) {
+      const day = (load[b.dateIso] ??= { total: 0, confirmed: 0, guests: 0 });
+      day.total++;
+      if (b.status === "confirmed") day.confirmed++;
+      day.guests += Number(b.guests) || 0;
+    }
+    return { load };
+  });
+
 // ---------- фаза B: музыкальный профиль и ИИ-подбор ----------
 
 // ---------- FB-афиши площадки: токен их страницы по магик-ссылке ----------

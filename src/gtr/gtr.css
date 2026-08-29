@@ -5348,3 +5348,173 @@ canvas.gtr-dancer-img {
     padding-right: max(16px, env(safe-area-inset-right));
   }
 }
+
+/* ================================================================== */
+/* Карта: поиск, панель «рядом», порядок остановок                     */
+/* ================================================================== */
+
+/* Строка поиска и переключатель «сегодня». Стоит выше чипов намеренно:
+   найти конкретное заведение хотят чаще, чем перебирать категории. */
+.gtr-map-find {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* Выпадающие совпадения. Абсолютом поверх карты: список не должен
+   раздвигать страницу и утаскивать карту вниз при каждой букве. */
+.gtr-map-hits {
+  position: absolute;
+  /* Выше органов управления Leaflet: у них z-index 1000, и кнопки
+     масштаба протыкали список совпадений насквозь. */
+  z-index: 1200;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 46dvh;
+  overflow-y: auto;
+  background: #0e1013;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.62);
+}
+.gtr-map-hit {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 11px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  text-align: left;
+}
+.gtr-map-hit:last-child { border-bottom: none; }
+.gtr-map-hit:hover { background: rgba(255, 255, 255, 0.05); }
+
+/* Огонёк «сегодня играют» над знаком площадки. Точка, а не второй
+   значок: категория остаётся главной, вечер — надстройка над ней. */
+.gtr-map-live {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  background: #e5231b;
+  border: 1.5px solid #0a0b0d;
+  box-shadow: 0 0 8px rgba(229, 35, 27, 0.9);
+  animation: gtr-live-pulse 2.2s ease-in-out infinite;
+}
+@keyframes gtr-live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+/* Куст, внутри которого сегодня кто-то играет. */
+.gtr-map-cluster.live { border-color: #e5231b; }
+@media (prefers-reduced-motion: reduce) {
+  .gtr-map-live { animation: none; }
+}
+
+/* Панель «рядом». Высота равна карте: два столбца должны кончаться на
+   одной линии, иначе страница выглядит оборванной. */
+.gtr-map-side {
+  height: calc(100dvh - 260px);
+  min-height: 380px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--gtr-card2);
+  overflow: hidden;
+}
+.gtr-map-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.gtr-map-side-list { flex: 1; overflow-y: auto; }
+.gtr-map-side-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.gtr-map-side-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.gtr-map-side-pick:hover { background: rgba(255, 255, 255, 0.05); }
+.gtr-map-side-add {
+  flex: none;
+  width: 34px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--gtr-t2);
+  font: 600 15px/1 "Golos Text", sans-serif;
+  cursor: pointer;
+}
+.gtr-map-side-add:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+
+/* Порядок остановок вечера. */
+.gtr-map-stops {
+  display: grid;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(123, 77, 255, 0.28);
+  background: rgba(123, 77, 255, 0.05);
+}
+.gtr-map-stop-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.gtr-map-stop-n {
+  flex: none;
+  width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  background: #7b4dff;
+  color: #0a0b0d;
+  font: 700 11px/1 "JetBrains Mono", monospace;
+}
+.gtr-map-stop-name {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font: 600 12.5px/1.45 "Golos Text", sans-serif;
+  cursor: pointer;
+  padding: 3px 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gtr-map-stop-name:hover { color: #7b4dff; }
+
+@media (max-width: 860px) {
+  /* Список под картой: на телефоне он не должен занимать целый экран,
+     иначе до нижней панели нужно долго листать. */
+  .gtr-map-side {
+    height: auto;
+    max-height: 52dvh;
+    min-height: 0;
+  }
+  .gtr-map-hits { max-height: 40dvh; }
+}

@@ -1889,6 +1889,40 @@ export const allAfishaFn = createServerFn({ method: "GET" }).handler(async () =>
   return { items: items.slice(0, 60) };
 });
 
+// Слой афиши для карты: у кого сегодня событие, у кого — ближайшее.
+//
+// Карта показывала где заведения стоят, но не где сегодня что-то
+// происходит. Для продукта про ночную жизнь это главный вопрос вечера, и
+// ответ на него у нас уже был — просто не доезжал до карты.
+//
+// Отдаём не события, а сводку по площадкам: на карте нужен значок и
+// подпись, а не полсотни карточек. Так ответ остаётся в пару килобайт
+// даже когда афиша разрастётся.
+export type MapAfisha = {
+  /** id площадок, у которых событие сегодня по острову */
+  today: string[];
+  /** id площадки → дата ближайшего будущего события (YYYY-MM-DD) */
+  next: Record<string, string>;
+};
+
+export const mapAfishaFn = createServerFn({ method: "GET" }).handler(async () => {
+  const ns = await getKvNs();
+  const empty: MapAfisha = { today: [], next: {} };
+  if (!ns) return empty;
+  const { collectCleanAfisha } = await import("./community");
+  const { bkkToday } = await import("./afisha-parse");
+  const today = bkkToday();
+  const items = await collectCleanAfisha(ns);
+  const todaySet = new Set<string>();
+  const next: Record<string, string> = {};
+  for (const e of items) {
+    if (e.dateIso === today) todaySet.add(e.vid);
+    // items уже отсортированы по дате: первая встреченная и есть ближайшая
+    else if (e.dateIso > today && !next[e.vid]) next[e.vid] = e.dateIso;
+  }
+  return { today: [...todaySet], next } satisfies MapAfisha;
+});
+
 // ---------- комьюнити Telegram: канал новостей + группа общения ----------
 
 export const communityCfgFn = createServerFn({ method: "GET" }).handler(async () => {

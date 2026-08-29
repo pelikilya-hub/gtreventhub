@@ -17,9 +17,23 @@
 // пунктир вместо сплошной линии: это не кадастровая граница, и
 // притворяться ею она не должна.
 //
+// Три вещи карта долго не умела, хотя данные для них были.
+//
+// Найти площадку по названию. Больше сотни точек, и единственным способом
+// добраться до конкретной было вспомнить её район и перебрать знаки
+// глазами. Теперь есть строка поиска: она же понимает район и тип.
+//
+// Показать, где сегодня что-то происходит. Продукт про ночную жизнь
+// рисовал, где заведения стоят, — но не где сегодня играют. Афиша у нас
+// была, до карты она не доезжала.
+//
+// Ответить «что рядом со мной». Точка своего положения ставилась, а
+// списка ближайшего не было: расстояние гость прикидывал на глаз по
+// масштабной линейке.
+//
 // Leaflet грузится только в браузере — SSR его не трогает.
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "leaflet/dist/leaflet.css";
 import { addDarkBasemap } from "../map-tiles";
@@ -30,6 +44,8 @@ import { PH, REGIONS, regionName, regionOf, richOf, V } from "../data/app-data";
 import { catOf, MAP_CATS, pinHtml } from "../map-style";
 import { useMyLocation } from "../geo-me";
 import { gpsTracker } from "../gps-track";
+import { mapAfishaFn, type MapAfisha } from "../kv-api";
+import { driveUrl, findVenues, kmLabel, nearestOrder, straightKm, walkable } from "../map-find";
 import { loadRoute, roadRoute, routeLabel, saveRoute, type LatLon, type RoadRoute } from "../evening-route";
 
 type Geo = Record<string, { lat: number; lon: number; src: string }>;
@@ -55,6 +71,28 @@ const SHAPES = shapesRaw as unknown as Record<string, Record<string, Shape>>;
 
 const ALL = "Все";
 
+// Выбор региона и категории переживает перезагрузку. Гость на Самуи
+// открывал карту и каждый раз видел Пхукет: остров по умолчанию —
+// исторический, а не его. Район не запоминаем сознательно: это выбор на
+// один взгляд, и застрявший на «Патонге» фильтр читается как поломка.
+const PREF_KEY = "gtr-map-view";
+type Pref = { region?: string; tag?: string };
+const loadPref = (): Pref => {
+  try {
+    const p = JSON.parse(localStorage.getItem(PREF_KEY) ?? "{}") as Pref;
+    return p && typeof p === "object" ? p : {};
+  } catch {
+    return {};
+  }
+};
+const savePref = (p: Pref) => {
+  try {
+    localStorage.setItem(PREF_KEY, JSON.stringify(p));
+  } catch {
+    /* приватный режим Safari — выбор просто не переживёт перезагрузку */
+  }
+};
+
 export function MapScreen() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -76,7 +114,33 @@ export function MapScreen() {
   const pickRegion = (code: string) => {
     setRegion(code);
     setDistrict(ALL);
+    savePref({ ...loadPref(), region: code });
   };
+  const pickTag = (next: string) => {
+    setTag(next);
+    savePref({ ...loadPref(), tag: next });
+  };
+  useEffect(() => {
+    const p = loadPref();
+    if (p.region && REGIONS[p.region]) setRegion(p.region);
+    if (p.tag) setTag(p.tag);
+  }, []);
+
+  // Поиск по названию, району и типу.
+  const [q, setQ] = useState("");
+  // Афиша: у кого сегодня событие, у кого ближайшее и когда.
+  const [afisha, setAfisha] = useState<MapAfisha | null>(null);
+  const [tonightOnly, setTonightOnly] = useState(false);
+  useEffect(() => {
+    mapAfishaFn()
+      .then(setAfisha)
+      .catch(() => setAfisha(null));
+  }, []);
+  const todaySet = useMemo(() => new Set(afisha?.today ?? []), [afisha]);
+  // Единицы расстояния берём из словаря: интерфейс трёхъязычный, а
+  // «4.7 км» в английской версии — ровно та мелочь, по которой видно,
+  // что перевод делали не до конца.
+  const units = useMemo(() => ({ m: t("м"), km: t("км") }), [t]);
 
   // Своя точка и маршрут вечера. Маршрут собирается на экране «Сегодня» и
   // до сих пор жил только там: на карте острова его не было вовсе.
@@ -84,6 +148,13 @@ export function MapScreen() {
   const [route, setRoute] = useState<string[]>([]);
   const [road, setRoad] = useState<RoadRoute | null>(null);
   useEffect(() => setRoute(loadRoute()), []);
+  const setSavedRoute = useCallback((next: string[] | ((cur: string[]) => string[])) => {
+    setRoute((cur) => {
+      const out = typeof next === "function" ? next(cur) : next;
+      saveRoute(out);
+      return out;
+    });
+  }, []);
 
   // Считаем по тем площадкам, у которых есть координата: показывать в
   // счётчике то, чего на карте нет, — обманывать себя же.
@@ -115,6 +186,78 @@ export function MapScreen() {
     return Object.entries(c).sort((a, b) => b[1] - a[1]);
   }, [onMap, shapes]);
 
+  /** Сколько площадок региона играют сегодня — цифра на переключателе.
+   *  Ноль значит «сегодня тихо», и переключатель тогда не показываем:
+   *  кнопка, которая гарантированно даёт пустой экран, — ловушка. */
+  const tonightN = useMemo(
+    () => onMap.filter((v) => todaySet.has(v.id)).length,
+    [onMap, todaySet],
+  );
+  useEffect(() => {
+    if (tonightOnly && !tonightN) setTonightOnly(false);
+  }, [tonightOnly, tonightN]);
+
+  /** Что реально видно на карте — один список для точек, счётчика и
+   *  панели «рядом». Раньше фильтры считались в трёх местах по-разному. */
+  const visible = useMemo(
+    () =>
+      onMap.filter(
+        (v) =>
+          (tag === ALL || v.tag === tag) &&
+          (district === ALL || v.cluster === district) &&
+          (!tonightOnly || todaySet.has(v.id)),
+      ),
+    [onMap, tag, district, tonightOnly, todaySet],
+  );
+
+  // Поиск идёт по всей базе с координатами, а не по текущему региону:
+  // человек, который ищет «Illuzion», не обязан сперва угадать остров.
+  const hits = useMemo(
+    () => findVenues(q, PH.venues.filter((v) => GEO[v.id])),
+    [q],
+  );
+
+  // Центр карты как точка отсчёта для «рядом», когда геолокации нет.
+  // Расстояние до середины того, на что смотришь, — честный ответ на
+  // «что тут поблизости», и он не требует разрешений.
+  const [center, setCenter] = useState<LatLon>([7.95, 98.34]);
+  const from: LatLon | null = me ? [me.lat, me.lon] : center;
+
+  /** Ближайшие к точке отсчёта — панель рядом с картой. */
+  const nearby = useMemo(() => {
+    if (!from) return [];
+    return visible
+      .map((v) => {
+        const g = GEO[v.id]!;
+        return { v, km: straightKm(from, [g.lat, g.lon]) };
+      })
+      .sort((a, b) => a.km - b.km)
+      .slice(0, 60);
+  }, [visible, from?.[0], from?.[1]]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Подлёт к площадке из поиска или из списка. Зум 17 не случаен: на нём
+  // склейка точек выключена, поэтому у площадки гарантированно есть свой
+  // знак — и попап откроется на нём, а не на кусте из шести соседей.
+  const pending = useRef<string | null>(null);
+  const focusVenue = useCallback(
+    (vid: string) => {
+      const g = GEO[vid];
+      const v = V(vid);
+      if (!g || !L4.current) return;
+      // Площадка в другом регионе — сперва переключаем регион, иначе она
+      // не попадёт в отрисовку и подлёт закончится пустым местом.
+      if (v && regionOf(v) !== region) {
+        setRegion(regionOf(v));
+        setDistrict(ALL);
+      }
+      setTag(ALL);
+      setTonightOnly(false);
+      pending.current = vid;
+      L4.current.map.flyTo([g.lat, g.lon], 17, { duration: 0.8 });
+    },
+    [region],
+  );
+
   useEffect(() => {
     let alive = true;
     void (async () => {
@@ -132,6 +275,12 @@ export function MapScreen() {
       // Свой слой поверх точек: дорога и «я» не должны тонуть под кустами.
       const mine = L.layerGroup().addTo(map);
       L4.current = { map, pins, areas, mine };
+      const track = () => {
+        const c = map.getCenter();
+        setCenter([c.lat, c.lng]);
+      };
+      track();
+      map.on("moveend", track);
       setReady(true);
     })();
     return () => {
@@ -180,6 +329,9 @@ export function MapScreen() {
           direction: "center",
         });
       }
+      // Подлёт к площадке главнее подлёта к району: он только что заказан
+      // человеком, а район — фон, на котором это происходит.
+      if (pending.current) return;
       if (district !== ALL && shapes[district]) {
         map.flyToBounds(L.polygon(shapes[district].rings).getBounds(), {
           padding: [30, 30],
@@ -216,11 +368,10 @@ export function MapScreen() {
         // расстоянии ячейки, а знак с счётчиком занимает 40 точек — при
         // равных значениях кусты садились друг на друга.
         const cell = z >= 15 ? 0 : z >= 13 ? 46 : 56;
-        const shown = onMap.filter((v) => tag === ALL || v.tag === tag);
 
-        type Bucket = { items: typeof shown; x: number; y: number };
+        type Bucket = { items: typeof visible; x: number; y: number };
         const grid = new Map<string, Bucket>();
-        for (const v of shown) {
+        for (const v of visible) {
           const g = GEO[v.id]!;
           const pt = map.latLngToContainerPoint([g.lat, g.lon]);
           const key = cell ? `${Math.round(pt.x / cell)}:${Math.round(pt.y / cell)}` : v.id;
@@ -237,28 +388,53 @@ export function MapScreen() {
             const exact = g.src === "nominatim";
             const dim = district !== ALL && v.cluster !== district;
             const inRoute = route.includes(v.id);
+            const live = todaySet.has(v.id);
+            const soon = afisha?.next[v.id];
             const icon = L.divIcon({
               className: "",
-              html: pinHtml(cat, exact, dim),
+              // Огонёк над знаком: сегодня здесь играют. Он не заменяет
+              // категорию, а надстраивается над ней — заведение остаётся
+              // клубом или пляжем, просто сегодня у него вечер.
+              html: pinHtml(cat, exact, dim) + (live ? `<i class="gtr-map-live"></i>` : ""),
               iconSize: [26, 26],
               iconAnchor: [13, 13],
             });
             const hero = richOf(v.id).hero;
+            const km = from ? straightKm(from, [g.lat, g.lon]) : null;
+            const distLine =
+              km === null
+                ? ""
+                : `<div style="font:600 11px/1 'JetBrains Mono',monospace;color:${walkable(km) ? "#A8E06B" : "rgba(255,255,255,.6)"};margin-bottom:7px">${me ? t("от вас") : t("от центра карты")} · ${kmLabel(km, units)}${walkable(km) ? ` · ${t("пешком")}` : ""}</div>`;
+            const liveLine = live
+              ? `<div style="font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.07em;color:#E5231B;margin-bottom:6px">● ${t("СЕГОДНЯ ИГРАЮТ")}</div>`
+              : soon
+                ? `<div style="font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.07em;color:var(--gtr-t3);margin-bottom:6px">${t("ближайшее")} · ${soon.slice(8, 10)}.${soon.slice(5, 7)}</div>`
+                : "";
             const html = `
-              <div style="width:206px;font-family:'Golos Text',sans-serif">
+              <div style="width:212px;font-family:'Golos Text',sans-serif">
                 ${hero ? `<img src="${hero}" style="width:100%;height:92px;object-fit:cover;display:block;margin-bottom:7px" />` : ""}
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
                   <span style="width:7px;height:7px;background:${cat.color};display:block"></span>
                   <span style="font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.07em;color:${cat.color};text-transform:uppercase">${t(cat.ru)}</span>
                 </div>
                 <div style="font:600 13px/1.45 'Golos Text',sans-serif;color:#fff">${v.name}</div>
-                <div style="font:500 11px/1.5 monospace;color:rgba(255,255,255,.72);margin:3px 0 8px">${v.area}${exact ? "" : ` · ${t("примерно")}`}</div>
+                <div style="font:500 11px/1.5 monospace;color:rgba(255,255,255,.72);margin:3px 0 6px">${v.area}${exact ? "" : ` · ${t("примерно")}`}</div>
+                ${liveLine}${distLine}
                 <button data-vid="${v.id}" class="gtr-map-route" style="font:600 12px/1 'Golos Text',sans-serif;background:${inRoute ? "rgba(123,77,255,.18)" : "transparent"};color:${inRoute ? "#7B4DFF" : "#fff"};border:1px solid ${inRoute ? "#7B4DFF" : "rgba(255,255,255,.25)"};padding:8px 11px;cursor:pointer;width:100%;margin-bottom:6px">${inRoute ? `✓ ${t("В маршруте")}` : `+ ${t("В маршрут вечера")}`}</button>
-                <button data-vid="${v.id}" class="gtr-map-open" style="font:600 12px/1 'Golos Text',sans-serif;background:#E5231B;color:#fff;border:none;padding:8px 11px;cursor:pointer;width:100%">${t("Открыть заведение")} →</button>
+                <div style="display:flex;gap:6px">
+                  <button data-vid="${v.id}" class="gtr-map-open" style="flex:1;font:600 12px/1 'Golos Text',sans-serif;background:#E5231B;color:#fff;border:none;padding:8px 11px;cursor:pointer">${t("Открыть")} →</button>
+                  <a href="${driveUrl(g.lat, g.lon)}" target="_blank" rel="noopener noreferrer" style="flex:1;text-align:center;font:600 12px/1 'Golos Text',sans-serif;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25);padding:8px 11px;text-decoration:none">${t("Доехать")} ↗</a>
+                </div>
               </div>`;
-            L.marker([g.lat, g.lon], { icon, zIndexOffset: dim ? 0 : 400 })
+            const marker = L.marker([g.lat, g.lon], { icon, zIndexOffset: dim ? 0 : live ? 500 : 400 })
               .addTo(pins)
               .bindPopup(html, { className: "gtr-popup" });
+            // Заказанный подлёт: знак только что появился на нужном зуме —
+            // открываем на нём попап и снимаем заказ.
+            if (pending.current === v.id) {
+              pending.current = null;
+              marker.openPopup();
+            }
             continue;
           }
 
@@ -270,11 +446,12 @@ export function MapScreen() {
           const cat = catOf(top);
           const allDim =
             district !== ALL && b.items.every((v) => v.cluster !== district);
+          const liveN = b.items.filter((v) => todaySet.has(v.id)).length;
           const lat = b.items.reduce((s2, v) => s2 + GEO[v.id]!.lat, 0) / b.items.length;
           const lon = b.items.reduce((s2, v) => s2 + GEO[v.id]!.lon, 0) / b.items.length;
           const icon = L.divIcon({
             className: "",
-            html: `<span class="gtr-map-cluster${allDim ? " off" : ""}" style="--c:${cat.color}">
+            html: `<span class="gtr-map-cluster${allDim ? " off" : ""}${liveN ? " live" : ""}" style="--c:${cat.color}">
                      <img src="/brand/emoji4/${cat.sticker}-256.png" alt="" />
                      <b>${b.items.length}</b>
                    </span>`,
@@ -283,6 +460,10 @@ export function MapScreen() {
           });
           L.marker([lat, lon], { icon, zIndexOffset: allDim ? 0 : 300 })
             .addTo(pins)
+            .bindTooltip(
+              liveN ? `${b.items.length} · ${liveN} ${t("сегодня играют")}` : String(b.items.length),
+              { direction: "top", className: "gtr-area-tip" },
+            )
             .on("click", () => map.flyTo([lat, lon], Math.min(17, z + 3), { duration: 0.6 }));
         }
       };
@@ -298,7 +479,7 @@ export function MapScreen() {
     };
     // route в зависимостях: попап показывает «✓ В маршруте» текущим
     // состоянием, поэтому точки перерисовываем и при смене маршрута.
-  }, [ready, tag, district, onMap, t, route]);
+  }, [ready, district, visible, t, route, todaySet, afisha, me, from?.[0], from?.[1]]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Дорога вечера. Считаем от своей точки, если она известна: гость стоит
   // не в первом баре списка, и «сколько ехать» начинается с того места, где
@@ -414,29 +595,105 @@ export function MapScreen() {
       const routeBtn = el.closest?.(".gtr-map-route");
       if (routeBtn) {
         const vid = routeBtn.getAttribute("data-vid");
-        if (vid)
-          setRoute((cur) => {
-            const next = cur.includes(vid) ? cur.filter((x) => x !== vid) : [...cur, vid];
-            saveRoute(next);
-            return next;
-          });
+        if (vid) setSavedRoute((cur) => (cur.includes(vid) ? cur.filter((x) => x !== vid) : [...cur, vid]));
       }
     };
     document.addEventListener("click", h);
     return () => document.removeEventListener("click", h);
-  }, [navigate]);
-
-  const shown = onMap.filter(
-    (v) => (tag === ALL || v.tag === tag) && (district === ALL || v.cluster === district),
-  ).length;
+  }, [navigate, setSavedRoute]);
 
   return (
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
         <h1 className="gtr-oswald gtr-h1">{t("Карта")}</h1>
         <span className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)", letterSpacing: ".12em" }}>
-          {shown} / {onMap.length}
+          {visible.length} / {onMap.length}
         </span>
+      </div>
+
+      {/* Поиск и переключатель «сегодня» — одна строка: два способа
+          сузить сотню точек до той, ради которой сюда пришли. */}
+      <div className="gtr-map-find">
+        <div style={{ position: "relative", flex: 1, minWidth: 180 }}>
+          <input
+            className="gtr-input"
+            style={{ width: "100%", padding: "9px 30px 9px 11px", fontSize: 13 }}
+            placeholder={t("Найти площадку, район или тип…")}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setQ("");
+              if (e.key === "Enter" && hits[0]) {
+                focusVenue(hits[0].id);
+                setQ("");
+              }
+            }}
+          />
+          {q ? (
+            <button
+              aria-label={t("Очистить")}
+              onClick={() => setQ("")}
+              style={{
+                position: "absolute",
+                right: 6,
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "transparent",
+                border: "none",
+                color: "var(--gtr-t3)",
+                cursor: "pointer",
+                font: "500 15px/1 'Golos Text',sans-serif",
+                padding: 4,
+              }}
+            >
+              ✕
+            </button>
+          ) : null}
+          {hits.length ? (
+            <div className="gtr-map-hits">
+              {hits.map((v) => {
+                const cat = catOf(v.tag);
+                return (
+                  <button
+                    key={v.id}
+                    className="gtr-map-hit"
+                    onClick={() => {
+                      focusVenue(v.id);
+                      setQ("");
+                    }}
+                  >
+                    <span style={{ width: 7, height: 7, background: cat.color, display: "block", flex: "none" }} />
+                    <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                      <span style={{ display: "block", font: "600 13px/1.4 'Golos Text',sans-serif", color: "#fff" }}>
+                        {v.name}
+                      </span>
+                      <span
+                        className="gtr-mono"
+                        style={{ display: "block", font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
+                      >
+                        {v.area} · {t(cat.ru)}
+                      </span>
+                    </span>
+                    {todaySet.has(v.id) ? (
+                      <span style={{ font: "700 10px/1 'JetBrains Mono',monospace", color: "#E5231B", flex: "none" }}>
+                        ●
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
+        {tonightN ? (
+          <button
+            className={`gtr-map-chip${tonightOnly ? " on" : ""}`}
+            style={tonightOnly ? { borderColor: "#E5231B" } : undefined}
+            onClick={() => setTonightOnly(!tonightOnly)}
+          >
+            <span style={{ color: "#E5231B" }}>●</span> {t("Сегодня играют")} · {tonightN}
+          </button>
+        ) : null}
       </div>
 
       {/* регионы: Пхукет — исторический дом, остальные подключаются по мере
@@ -473,7 +730,7 @@ export function MapScreen() {
 
       {/* категории: знак и цвет те же, что на точках */}
       <div className="gtr-map-row">
-        <button className={`gtr-map-chip${tag === ALL ? " on" : ""}`} onClick={() => setTag(ALL)}>
+        <button className={`gtr-map-chip${tag === ALL ? " on" : ""}`} onClick={() => pickTag(ALL)}>
           {t("Все категории")}
         </button>
         {tags.map((c) => (
@@ -481,7 +738,7 @@ export function MapScreen() {
             key={c.tag}
             className={`gtr-map-chip${tag === c.tag ? " on" : ""}`}
             style={tag === c.tag ? { borderColor: c.color, color: "#fff" } : undefined}
-            onClick={() => setTag(tag === c.tag ? ALL : c.tag)}
+            onClick={() => pickTag(tag === c.tag ? ALL : c.tag)}
           >
             <img src={`/brand/emoji4/${c.sticker}-256.png`} alt="" className="gtr-map-chip-stk" />
             <span style={{ color: tag === c.tag ? "#fff" : c.color }}>{t(c.ru)}</span>
@@ -551,10 +808,7 @@ export function MapScreen() {
             <button
               className="gtr-btn"
               style={{ padding: "6px 11px", fontSize: 12 }}
-              onClick={() => {
-                setRoute([]);
-                saveRoute([]);
-              }}
+              onClick={() => setSavedRoute([])}
             >
               {t("Очистить")}
             </button>
@@ -566,7 +820,164 @@ export function MapScreen() {
         )}
       </div>
 
-      <div ref={mapRef} className="gtr-map-canvas" />
+      {/* Порядок остановок. Раньше он был порядком добавления и никак не
+          правился: убрать точку можно было только найдя её же на карте. */}
+      {route.length > 1 ? (
+        <div className="gtr-map-stops">
+          {route.map((vid, i) => {
+            const v = V(vid);
+            const g = GEO[vid];
+            const prev = i > 0 ? GEO[route[i - 1]] : null;
+            const leg = prev && g ? straightKm([prev.lat, prev.lon], [g.lat, g.lon]) : null;
+            return (
+              <div key={vid} className="gtr-map-stop-row">
+                <span className="gtr-map-stop-n">{i + 1}</span>
+                <button
+                  className="gtr-map-stop-name"
+                  onClick={() => focusVenue(vid)}
+                  title={t("Показать на карте")}
+                >
+                  {v?.name ?? vid}
+                  {leg !== null ? (
+                    <span className="gtr-mono" style={{ marginLeft: 8, color: "var(--gtr-t3)", fontSize: 11 }}>
+                      +{kmLabel(leg, units)}
+                    </span>
+                  ) : null}
+                </button>
+                <button
+                  className="gtr-btn"
+                  style={{ padding: "3px 7px", fontSize: 12 }}
+                  disabled={i === 0}
+                  aria-label={t("Выше")}
+                  onClick={() =>
+                    setSavedRoute((cur) => {
+                      const n = [...cur];
+                      [n[i - 1], n[i]] = [n[i], n[i - 1]];
+                      return n;
+                    })
+                  }
+                >
+                  ↑
+                </button>
+                <button
+                  className="gtr-btn"
+                  style={{ padding: "3px 7px", fontSize: 12 }}
+                  disabled={i === route.length - 1}
+                  aria-label={t("Ниже")}
+                  onClick={() =>
+                    setSavedRoute((cur) => {
+                      const n = [...cur];
+                      [n[i], n[i + 1]] = [n[i + 1], n[i]];
+                      return n;
+                    })
+                  }
+                >
+                  ↓
+                </button>
+                <button
+                  className="gtr-btn"
+                  style={{ padding: "3px 7px", fontSize: 12, color: "#E5231B" }}
+                  aria-label={t("Убрать")}
+                  onClick={() => setSavedRoute((cur) => cur.filter((x) => x !== vid))}
+                >
+                  ✕
+                </button>
+              </div>
+            );
+          })}
+          <button
+            className="gtr-btn"
+            style={{ padding: "6px 11px", fontSize: 12, justifySelf: "start" }}
+            onClick={() =>
+              setSavedRoute((cur) =>
+                nearestOrder(from, cur, (vid) => {
+                  const g = GEO[vid];
+                  return g ? [g.lat, g.lon] : null;
+                }),
+              )
+            }
+          >
+            {t("Собрать по кратчайшей")}
+          </button>
+        </div>
+      ) : null}
+
+      {/* Карта и список рядом. На телефоне список уходит под карту —
+          gtr-md-stack ломает сетку в один столбец на 860px. */}
+      <div
+        className="gtr-md-stack"
+        style={{ display: "grid", gridTemplateColumns: "1fr 292px", gap: 12, alignItems: "start" }}
+      >
+        <div ref={mapRef} className="gtr-map-canvas" />
+        <div className="gtr-map-side">
+          <div className="gtr-map-side-head">
+            <span className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", letterSpacing: ".12em", color: "var(--gtr-t2)" }}>
+              {me ? t("БЛИЖЕ ВСЕГО К ВАМ") : t("В ЦЕНТРЕ КАРТЫ")}
+            </span>
+            <span className="gtr-mono" style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+              {nearby.length}
+            </span>
+          </div>
+          {nearby.length ? (
+            <div className="gtr-map-side-list">
+              {nearby.map(({ v, km }) => {
+                const cat = catOf(v.tag);
+                const live = todaySet.has(v.id);
+                const inRoute = route.includes(v.id);
+                return (
+                  <div key={v.id} className="gtr-map-side-row">
+                    <button className="gtr-map-side-pick" onClick={() => focusVenue(v.id)}>
+                      <span style={{ width: 6, height: 6, background: cat.color, display: "block", flex: "none" }} />
+                      <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                        <span
+                          style={{
+                            display: "block",
+                            font: "600 12.5px/1.4 'Golos Text',sans-serif",
+                            color: "#fff",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {live ? <span style={{ color: "#E5231B", marginRight: 5 }}>●</span> : null}
+                          {v.name}
+                        </span>
+                        <span
+                          className="gtr-mono"
+                          style={{
+                            display: "block",
+                            font: "500 10.5px/1.5 'JetBrains Mono',monospace",
+                            color: walkable(km) ? "#A8E06B" : "var(--gtr-t3)",
+                          }}
+                        >
+                          {kmLabel(km, units)}
+                          {walkable(km) ? ` · ${t("пешком")}` : ""} · {v.area}
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      className="gtr-map-side-add"
+                      title={inRoute ? t("В маршруте") : t("В маршрут вечера")}
+                      style={inRoute ? { color: "#7B4DFF", borderColor: "#7B4DFF" } : undefined}
+                      onClick={() =>
+                        setSavedRoute((cur) =>
+                          cur.includes(v.id) ? cur.filter((x) => x !== v.id) : [...cur, v.id],
+                        )
+                      }
+                    >
+                      {inRoute ? "✓" : "+"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div style={{ padding: "14px 12px", font: "500 12.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+              {t("Под выбранные фильтры ничего не попало — снимите часть условий.")}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -104,6 +104,10 @@ function extractKeys(): Set<string> {
     ["src/gtr/map-style.ts", /^MAP_CATS$/],
     ["src/gtr/screens/Dash.tsx", /^MONTHS_S$/],
     ["src/routes/gtr/signup.tsx", /^KINDS$/],
+    // Конвейер наполнения: уровни готовности и подписи полей уходят на
+    // экран через t(r.level) и t(f.label) — литералов в t() нет, и без
+    // этой строки список недоделок ушёл бы в прод по-русски.
+    ["src/gtr/venue-fill.ts", /^(FILL_LEVELS|FILL_FIELDS)$/],
   ] as const) {
     const src = readFileSync(join(ROOT, file), "utf8");
     const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);

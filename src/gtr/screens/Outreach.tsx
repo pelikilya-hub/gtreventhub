@@ -4,10 +4,11 @@
 // согласие, что уже собрали. Тексты и скрипт звонка лежат тут же и уже
 // подставлены под имя менеджера — переключаться между заметками,
 // мессенджером и таблицей не нужно.
+import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { loadArtists, PH, REGIONS, V } from "../data/app-data";
+import { loadArtists, PH, REGIONS, regionName, V } from "../data/app-data";
 import {
   callScript,
   msgChecklist,
@@ -20,7 +21,8 @@ import {
   type Manager,
   type Pitch,
 } from "../data/outreach";
-import { createVenueLinkFn, outreachAllFn, outreachSaveFn, type OutreachRow } from "../kv-api";
+import { createVenueLinkFn, outreachAllFn, outreachSaveFn, venueQueueFn, type OutreachRow } from "../kv-api";
+import { FILL_FIELDS, FILL_LEVELS, fillQueue, stepGaps } from "../venue-fill";
 import { useGtr } from "../store";
 import { Card, Chip, Eyebrow } from "../ui";
 
@@ -195,6 +197,192 @@ const copy = async (text: string): Promise<boolean> => {
   }
 };
 
+// ---------- конвейер наполнения ----------
+//
+// Замер по базе: из 354 площадок 56 гость не увидит вовсе, ещё 143 стоят
+// на карте точкой без фото. Реклама на такую базу оплачивает показ
+// половины пустых карточек — поэтому наполнение идёт первым блоком, до
+// писем: писать площадке, чью карточку нельзя показать, рано.
+//
+// Очередь не алфавитная. Площадка, которой не хватает одного поля,
+// стоит пятнадцати минут; площадка с шестью дырами — целого дня. Сверху
+// стоят дешёвые шаги: закрыть одно поле у двадцати выгоднее, чем шесть
+// полей у трёх.
+const GREEN = "#2ECC71";
+const LEVEL_COLOR: Record<string, string> = {
+  "невидима": "#E5231B",
+  "на карте": "#F5A623",
+  "в списке": "#E8C07D",
+  "в витрине": "#A8E06B",
+  "в продаже": GREEN,
+};
+
+function FillPipeline() {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const [data, setData] = useState<Awaited<ReturnType<typeof venueQueueFn>> | null>(null);
+  const [region, setRegion] = useState("all");
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    venueQueueFn()
+      .then(setData)
+      .catch(() => setData(null));
+  }, []);
+
+  const queue = useMemo(() => {
+    if (!data?.ok) return [];
+    return fillQueue(data.rows).filter((r) => region === "all" || r.region === region);
+  }, [data, region]);
+
+  if (!data?.ok) return null;
+  const total = data.rows.length;
+  const ready = (data.summary["в витрине"] ?? 0) + (data.summary["в продаже"] ?? 0);
+
+  return (
+    <Card style={{ padding: 18, marginBottom: 14, display: "grid", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+        <Eyebrow>{t("КОНВЕЙЕР НАПОЛНЕНИЯ")}</Eyebrow>
+        <span className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: GREEN }}>
+          {ready} / {total} {t("готовы к показу")}
+        </span>
+        <span className="gtr-mono" style={{ font: "500 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
+          {t("в очереди")} {fillQueue(data.rows).length}
+        </span>
+      </div>
+
+      {/* Лесенка: где именно застревает база */}
+      <div style={{ display: "flex", gap: 2, height: 10 }}>
+        {FILL_LEVELS.map((lvl) => {
+          const n = data.summary[lvl] ?? 0;
+          return n ? (
+            <span
+              key={lvl}
+              title={`${t(lvl)} · ${n}`}
+              style={{ flex: n, background: LEVEL_COLOR[lvl], display: "block" }}
+            />
+          ) : null;
+        })}
+      </div>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        {FILL_LEVELS.map((lvl) =>
+          data.summary[lvl] ? (
+            <span key={lvl} style={{ font: "500 11.5px/1 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
+              <span style={{ display: "inline-block", width: 7, height: 7, background: LEVEL_COLOR[lvl], marginRight: 5 }} />
+              {t(lvl)} · {data.summary[lvl]}
+            </span>
+          ) : null,
+        )}
+      </div>
+
+      {/* Строка регионов прокручивается, а не переносится: на телефоне
+          перенос съедал три ряда, а последний чип всё равно вылезал на
+          пиксель за край и давал горизонтальный скролл всей странице. */}
+      <div className="gtr-map-row" style={{ marginTop: 0 }}>
+        <button
+          className={`gtr-map-chip${region === "all" ? " on" : ""}`}
+          onClick={() => setRegion("all")}
+        >
+          {t("Все регионы")}
+        </button>
+        {Object.entries(data.byRegion)
+          .sort((a, b) => b[1].total - a[1].total)
+          .map(([code, b]) => (
+            <button
+              key={code}
+              className={`gtr-map-chip${region === code ? " on" : ""}`}
+              onClick={() => setRegion(region === code ? "all" : code)}
+            >
+              {regionName(code, i18n.language)} · {b.ready}/{b.total}
+            </button>
+          ))}
+      </div>
+
+      {/* Смена на сегодня: двадцать штук. Не потому что круглое число, а
+          потому что столько успевает один человек за рабочий день. */}
+      <div style={{ display: "grid", gap: 4 }}>
+        {queue.slice(0, open ? 60 : 20).map((r) => (
+          <div
+            key={r.id}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              flexWrap: "wrap",
+              padding: "7px 10px",
+              background: "var(--gtr-card2)",
+              borderLeft: `2px solid ${LEVEL_COLOR[r.level]}`,
+            }}
+          >
+            <button
+              onClick={() =>
+                navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid: r.id } })
+              }
+              style={{
+                flex: 1,
+                minWidth: 160,
+                textAlign: "left",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                color: "#fff",
+                font: "600 12.5px/1.45 'Golos Text',sans-serif",
+                padding: 0,
+              }}
+            >
+              {r.name}
+              <span className="gtr-mono" style={{ marginLeft: 8, fontSize: 11, color: "var(--gtr-t3)" }}>
+                {r.area}
+              </span>
+            </button>
+            <span
+              className="gtr-mono"
+              style={{ font: "600 10px/1 'JetBrains Mono',monospace", color: LEVEL_COLOR[r.level], letterSpacing: ".06em", textTransform: "uppercase" }}
+            >
+              {t(r.level)}
+            </span>
+            {/* Сегодняшний шаг горит, остальные пробелы приглушены. Иначе
+                менеджер каждый раз соображает, что из списка нужно сейчас,
+                а что подождёт до следующей ступени. */}
+            <span style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+              {r.gaps.map((g) => {
+                const f = FILL_FIELDS.find((x) => x.key === g)!;
+                const now = stepGaps(r.gaps).includes(g);
+                return (
+                  <span
+                    key={g}
+                    title={t(f.why)}
+                    className="gtr-chip"
+                    style={{
+                      border: `1px solid ${now ? "rgba(229,35,27,.55)" : "rgba(255,255,255,.12)"}`,
+                      color: now ? "#FF8B84" : "var(--gtr-t3)",
+                      fontSize: 10.5,
+                      padding: "3px 6px",
+                    }}
+                  >
+                    {t(f.label)}
+                  </span>
+                );
+              })}
+            </span>
+          </div>
+        ))}
+        {!queue.length ? (
+          <div style={{ padding: "14px 4px", font: "500 12.5px/1.5 'Golos Text',sans-serif", color: GREEN }}>
+            {t("В этом регионе всё доведено до витрины.")}
+          </div>
+        ) : null}
+      </div>
+
+      {queue.length > 20 ? (
+        <button className="gtr-btn" style={{ justifySelf: "start", padding: "6px 11px", fontSize: 12 }} onClick={() => setOpen(!open)}>
+          {open ? t("Свернуть до смены") : `${t("Показать ещё")} · ${Math.min(40, queue.length - 20)}`}
+        </button>
+      ) : null}
+    </Card>
+  );
+}
+
 export function OutreachScreen() {
   const { t } = useTranslation();
   const { user } = useGtr();
@@ -271,6 +459,8 @@ export function OutreachScreen() {
   return (
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <Eyebrow style={{ marginBottom: 12 }}>{t("РАБОТА С ПЛОЩАДКАМИ")}</Eyebrow>
+
+      <FillPipeline />
 
       {/* Личный счёт: сколько пройдено и где сейчас узкое место */}
       <Card style={{ padding: 18, marginBottom: 14 }}>

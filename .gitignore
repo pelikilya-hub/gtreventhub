@@ -16,3 +16,4 @@ dist
 
 # изолированные worktree фоновых агентов
 .claude/worktrees/
+scripts/venue-readiness.json

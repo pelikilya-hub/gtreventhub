@@ -11,6 +11,14 @@ export type VenueAfishaEvent = {
   id: string;
   title: string;
   dateIso: string; // YYYY-MM-DD
+  /** Начало, «22:00». Хранится отдельно от даты: у половины источников
+   *  времени нет вовсе, и выдумывать полночь нельзя — «в 00:00» гость
+   *  прочтёт как факт. Пусто значит «не сказано», а не «в полночь». */
+  time?: string;
+  /** Вход как его написали: «500 ฿», «вход свободный». Строкой, а не
+   *  числом: половина площадок пишет «от 500 с депозитом», и приводить
+   *  это к числу — значит терять условие. */
+  price?: string;
   poster?: string; // наш кэш /api/poster?k=… либо внешний URL до кэширования
   posterSrc?: string; // оригинальный URL постера — провенанс и корпус стиля
   url: string;
@@ -560,6 +568,7 @@ const LD_EVENT_TYPES = new Set([
   "foodevent", "theaterevent", "comedyevent", "screeningevent",
 ]);
 
+type LdOffer = { price?: string | number; priceCurrency?: string };
 type LdNode = {
   "@type"?: string | string[];
   "@graph"?: LdNode[];
@@ -567,12 +576,25 @@ type LdNode = {
   startDate?: string;
   url?: string;
   image?: string | string[] | { url?: string } | { url?: string }[];
+  offers?: LdOffer | LdOffer[];
 };
 
 const ldImage = (img: LdNode["image"]): string | undefined => {
   const one = Array.isArray(img) ? img[0] : img;
   if (!one) return undefined;
   return typeof one === "string" ? one : one.url || undefined;
+};
+
+/** Цена входа из offers. Ноль — это «вход свободный», а не «нет данных»:
+ *  разница для гостя принципиальная, и терять её нельзя. */
+const ldPrice = (n: LdNode): string | undefined => {
+  const one = Array.isArray(n.offers) ? n.offers[0] : n.offers;
+  if (!one || one.price === undefined || one.price === null || one.price === "") return undefined;
+  const num = Number(one.price);
+  if (!Number.isFinite(num) || num < 0) return undefined;
+  if (num === 0) return "вход свободный";
+  const cur = String(one.priceCurrency ?? "THB").toUpperCase();
+  return cur === "THB" ? `${num} ฿` : `${num} ${cur}`;
 };
 
 /** Вытащить будущие события из ld+json блоков страницы. Экспорт — для
@@ -598,7 +620,13 @@ export function eventsFromJsonLd(html: string, host: string, pageUrl?: string): 
       String(t).toLowerCase(),
     );
     if (!types.some((t) => LD_EVENT_TYPES.has(t))) continue;
-    const dateIso = String(n.startDate ?? "").slice(0, 10);
+    const start = String(n.startDate ?? "");
+    const dateIso = start.slice(0, 10);
+    // Время в startDate есть почти всегда («2026-08-30T22:00+07:00») и до
+    // сих пор молча срезалось вместе с зоной. Берём часы и минуты как
+    // написано: приводить к нашей зоне нельзя — сайт площадки пишет её
+    // местное время, оно же и есть местное для гостя.
+    const timeLd = start.slice(11, 16);
     const title = decodeEntities(String(n.name ?? "")).replace(/\s+/g, " ").trim().slice(0, 90);
     if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(dateIso) || dateIso < today) continue;
     const img = absImg(ldImage(n.image), base) || undefined;
@@ -606,6 +634,8 @@ export function eventsFromJsonLd(html: string, host: string, pageUrl?: string): 
       id: `ld-${dateIso}-${title.toLowerCase().replace(/[^a-zа-яё0-9]+/gi, "-").slice(0, 40)}`,
       title,
       dateIso,
+      time: /^([01]\d|2[0-3]):[0-5]\d$/.test(timeLd) ? timeLd : undefined,
+      price: ldPrice(n),
       poster: img,
       posterSrc: img,
       url: absImg(n.url, base) || `https://${host}`,
@@ -892,6 +922,7 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
           id: `fb-${e.id}`,
           title: e.name,
           dateIso: String(e.start_time ?? "").slice(0, 10),
+          time: String(e.start_time ?? "").slice(11, 16) || undefined,
           poster: e.cover?.source,
           posterSrc: e.cover?.source,
           url: e.ticket_uri || `https://www.facebook.com/events/${e.id}`,

@@ -1297,6 +1297,13 @@ export function FinanceScreen() {
 }
 
 // ---------- доступы и роли ----------
+
+/** Ширина таблицы прав: колонка названия плюс по 76px на роль.
+ *  Считается, а не пишется числом: ролей стало восемь, и следующая
+ *  добавленная не должна снова сплющить таблицу. Внутри карточки
+ *  overflow:auto — на телефоне таблица скроллится, страницу не рвёт. */
+const ROLE_TABLE_MIN = 260 + ROLES.length * 76;
+
 export function AccessScreen() {
   const { t } = useTranslation();
   const { user } = useGtr();
@@ -1307,11 +1314,13 @@ export function AccessScreen() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr repeat(6, minmax(76px,1fr))",
+            // Число колонок берётся из самого списка ролей. Захардкоженная
+            // шестёрка пережила добавление двух ролей и молча их прятала.
+            gridTemplateColumns: `2fr repeat(${ROLES.length}, minmax(76px,1fr))`,
             gap: 8,
             padding: "13px 20px",
             borderBottom: "1px solid rgba(255,255,255,.08)",
-            minWidth: 640,
+            minWidth: ROLE_TABLE_MIN,
           }}
         >
           <span className="gtr-eyebrow">{t("ПРАВО")}</span>
@@ -1330,12 +1339,12 @@ export function AccessScreen() {
             key={p.key}
             style={{
               display: "grid",
-              gridTemplateColumns: "2fr repeat(6, minmax(76px,1fr))",
+              gridTemplateColumns: `2fr repeat(${ROLES.length}, minmax(76px,1fr))`,
               gap: 8,
               padding: "11px 20px",
               borderBottom: "1px solid rgba(255,255,255,.05)",
               alignItems: "center",
-              minWidth: 640,
+              minWidth: ROLE_TABLE_MIN,
             }}
           >
             <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif" }}>{p.label}</span>

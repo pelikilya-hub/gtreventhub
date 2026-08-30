@@ -55,6 +55,31 @@ function extractKeys(): Set<string> {
     visit(sf);
   }
 
+  // Пустые состояния: <Empty title=… text=… actions={[{ label: … }]} />.
+  // Компонент переводит их сам, поэтому в t() литералы не попадают — а
+  // это самые заметные строки продукта: их читает тот, у кого на экране
+  // больше ничего нет.
+  for (const file of files) {
+    const src = readFileSync(file, "utf8");
+    if (!src.includes("<Empty")) continue;
+    const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const visit = (n: ts.Node) => {
+      const open = ts.isJsxSelfClosingElement(n) ? n : ts.isJsxOpeningElement(n) ? n : null;
+      if (open && open.tagName.getText() === "Empty") {
+        const walk = (x: ts.Node) => {
+          if (ts.isStringLiteral(x) && CYR.test(x.text)) keys.add(x.text);
+          if (ts.isJsxAttribute(x) && x.name.getText() === "title" && x.initializer &&
+              ts.isStringLiteral(x.initializer) && CYR.test(x.initializer.text))
+            keys.add(x.initializer.text);
+          ts.forEachChild(x, walk);
+        };
+        walk(open);
+      }
+      ts.forEachChild(n, visit);
+    };
+    visit(sf);
+  }
+
   // Подписи навигации показываются через t(переменная) — в литерал
   // внутри t() не попадают, достаём их прицельно из самих таблиц.
   const navSrc = readFileSync(join(ROOT, "src/gtr/data/app-data.ts"), "utf8");

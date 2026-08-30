@@ -5,6 +5,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Empty } from "../empty";
+
 import { loadArtists, PH, V, type Artist } from "../data/app-data";
 import { CdmReserve, hasReserve } from "../cdm-booking";
 import { reserveVenues } from "../venue-commerce";
@@ -98,11 +100,17 @@ export function FeedScreen() {
       {!loaded ? (
         <div className="gtr-mono" style={{ padding: 40, color: "var(--gtr-t3)" }}>{t("Загрузка…")}</div>
       ) : !items.length ? (
-        <Card style={{ padding: 24 }}>
-          <div style={{ font: "500 12px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-            {t("Афиши обновляются каждые 6 часов — загляните позже.")}
-          </div>
-        </Card>
+        // Пустая лента — не повод оставлять гостя ни с чем: заведения на
+        // карте и в базе никуда не делись, и вечер собирается по ним.
+        <Empty
+          title="Афиш пока нет"
+          text="Агент собирает программу заведений каждые 6 часов. Пока пусто — посмотрите, что открыто рядом, или загляните в раздел «Сегодня»."
+          actions={[
+            { label: "Что сегодня", to: "tonight", primary: true },
+            { label: "Заведения на карте", to: "map" },
+            { label: "Вся база площадок", to: "base" },
+          ]}
+        />
       ) : (
         byDate.map(([iso, list]) => (
           <div key={iso} style={{ marginBottom: 22 }}>
@@ -819,9 +827,17 @@ export function MyShowsScreen() {
         <Card style={{ padding: "18px 20px", display: "grid", gap: 8, alignContent: "start" }}>
           <Eyebrow>{t("ПОДТВЕРЖДЁННЫЕ ЧЕРЕЗ GTR")} · {accepted.length}</Eyebrow>
           {!accepted.length ? (
-            <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {t("Когда вы примете предложение площадки, оно появится здесь.")}
-            </div>
+            // Артист без предложений — не тупик: профиль и подбор в его
+            // руках, и именно они приводят первое предложение.
+            <Empty
+              compact
+              title="Предложений пока нет"
+              text="Когда вы примете предложение площадки, оно появится здесь. Пока — заполните профиль и посмотрите, каким заведениям подходит ваш стиль."
+              actions={[
+                { label: "Мой профиль", to: "dash", primary: true },
+                { label: "Подбор площадок", to: "aimatch" },
+              ]}
+            />
           ) : (
             accepted.map((o) => (
               <div key={o.id} style={{ border: "1px solid rgba(46,204,113,.35)", padding: "10px 12px" }}>
@@ -836,11 +852,20 @@ export function MyShowsScreen() {
         <Card style={{ padding: "18px 20px", display: "grid", gap: 8, alignContent: "start" }}>
           <Eyebrow>{t("ЗАМЕЧЕНЫ В АФИШАХ")} · {spotted.length}</Eyebrow>
           {!spotted.length ? (
-            <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {me
-                ? t("Агент афиш сканирует сайты площадок каждые 6 часов — как только ваше имя появится в анонсе, оно отобразится тут.")
-                : t("Профиль не привязан к каталогу артистов — напишите команде.")}
-            </div>
+            <Empty
+              compact
+              title={me ? "Ваше имя в афишах ещё не встречалось" : "Профиль не привязан к каталогу"}
+              text={
+                me
+                  ? "Агент сканирует сайты площадок каждые 6 часов — как только ваше имя появится в анонсе, оно отобразится тут."
+                  : "Без карточки в каталоге артистов афиши к вам не привяжутся. Напишите команде — привяжем."
+              }
+              actions={
+                me
+                  ? [{ label: "Афиша Пхукета", to: "feed" }]
+                  : [{ label: "Написать команде", to: "contacts", primary: true }]
+              }
+            />
           ) : (
             spotted.map((e) => (
               <div key={`${e.vid}-${e.id}`} style={{ border: "1px solid rgba(255,255,255,.08)", padding: "10px 12px" }}>

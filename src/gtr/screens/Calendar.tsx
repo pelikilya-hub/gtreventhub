@@ -11,6 +11,8 @@ import {
 } from "../data/app-data";
 import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
+
+import { Empty } from "../empty";
 import { Card, Chip, Eyebrow } from "../ui";
 import { useEffect } from "react";
 import { PH, V, draftTitle } from "../data/app-data";
@@ -711,13 +713,18 @@ export function CalendarScreen() {
                 </div>
               ))}
               {dayList.length === 0 && oursDay.length === 0 && afishaDay.length === 0 ? (
-                <div
-                  style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
-                >
-                  {vid
-                    ? t("Свободный день — добавьте формат из палитры ниже.")
-                    : t("На этот день наших событий нет — создайте в конструкторе.")}
-                </div>
+                // «Создайте в конструкторе» без дороги в конструктор —
+                // совет, а не следующий шаг. Даём кнопку.
+                <Empty
+                  compact
+                  title={vid ? "Свободный день" : "В этот день у нас ничего нет"}
+                  text={
+                    vid
+                      ? "Добавьте формат из палитры ниже или соберите событие целиком в конструкторе."
+                      : "Соберите событие в конструкторе — дата подставится сама."
+                  }
+                  actions={[{ label: "Открыть конструктор", to: "constructor", primary: true }]}
+                />
               ) : (
                 dayList.map((e) => (
                   <div

@@ -674,6 +674,46 @@ async function handleUpdate(ns: KvNs, up: TgUpdate): Promise<Response> {
             await reply(chatId, lines.join("\n"), refButtons.length ? { inline_keyboard: refButtons } : undefined);
             return Response.json({ ok: true });
           }
+          // deep-link входа: t.me/бот?start=login-код. Человек открыл на
+          // сайте «Войти через Telegram», нажал здесь «Запустить» — и мы
+          // кладём в код его chat_id. Сайт в это время опрашивает код и
+          // впускает, как только тот заполнился.
+          //
+          // Почему chat_id, а не ник: ник меняется в два касания и может
+          // достаться другому человеку, когда прежний владелец его
+          // освободит. Привязывать к нику аккаунт — значит однажды отдать
+          // кабинет постороннему.
+          const loginCode = start?.[1]?.match(/^login-(\w{8,64})$/)?.[1];
+          if (loginCode) {
+            const key = `tglogin:${loginCode}`;
+            const pending = await ns.get(key);
+            if (!pending) {
+              await reply(
+                chatId,
+                "Код входа не найден или устарел. Вернитесь на сайт и нажмите «Войти через Telegram» ещё раз.",
+              );
+              return Response.json({ ok: true });
+            }
+            const f = up.message.from;
+            await ns.put(
+              key,
+              JSON.stringify({
+                chatId,
+                at: Date.now(),
+                user: {
+                  id: chatId,
+                  first_name: f?.first_name,
+                  username: f?.username,
+                },
+              }),
+              { expirationTtl: 300 },
+            );
+            await reply(
+              chatId,
+              "✅ <b>Готово — возвращайтесь на сайт.</b>\n\nВход уже открылся в той вкладке, где вы нажали «Войти через Telegram».",
+            );
+            return Response.json({ ok: true, login: "code-filled" });
+          }
           if (start) {
             const email = await ns.get(`tglink:${start[1]}`);
             if (!email) {

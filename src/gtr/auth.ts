@@ -145,9 +145,11 @@ const makeToken = async (user: SessionUser) => {
   return `${payload}.${await sign(payload)}`;
 };
 
-const readToken = async (
+/** Разобрать токен. Возвращает и срок — он нужен, чтобы решить, пора ли
+ *  продлевать сессию. */
+const readTokenFull = async (
   token: string | undefined,
-): Promise<SessionUser | null> => {
+): Promise<{ user: SessionUser; exp: number } | null> => {
   if (!token) return null;
   const [payload, sig] = token.split(".");
   if (!payload || !sig) return null;
@@ -155,12 +157,16 @@ const readToken = async (
   try {
     const data = JSON.parse(unb64url(payload)) as SessionUser & { exp: number };
     if (data.exp < Date.now()) return null;
-    const { exp: _exp, ...user } = data;
-    return user;
+    const { exp, ...user } = data;
+    return { user, exp };
   } catch {
     return null;
   }
 };
+
+const readToken = async (
+  token: string | undefined,
+): Promise<SessionUser | null> => (await readTokenFull(token))?.user ?? null;
 
 /** Подписанный токен сессии наружу.
  *
@@ -249,9 +255,23 @@ const loginCore = async (
     }
     // заявка на роль ещё не одобрена — честно говорим статус
     if (await ns.get(`pending:${email}`)) {
+      await countLogin(`pending${channel}`);
       return {
         ok: false,
         error: "Заявка на рассмотрении у основателя GTR. После одобрения вход откроется с вашим паролем.",
+      };
+    }
+    // Заявку отклонили. Раньше здесь человек проваливался в общий
+    // «неверный email или пароль» — тот же текст, что при опечатке, — и
+    // продолжал перебирать пароли к аккаунту, которого не существует.
+    // Сказать правду дешевле любой переписки: он либо подаст заявку
+    // заново, либо напишет команде.
+    if (await ns.get(`rejected:${email}`)) {
+      await countLogin(`rejected${channel}`);
+      return {
+        ok: false,
+        error:
+          "Заявка на роль отклонена, аккаунта с этим адресом нет. Можно подать заявку заново или написать команде GTR.",
       };
     }
   }
@@ -330,9 +350,27 @@ export const logoutFn = createServerFn({ method: "POST" }).handler(async () => {
   return { ok: true };
 });
 
+/** Кто вошёл — и заодно продление сессии.
+ *
+ *  Эту функцию зовёт загрузчик каждого экрана кабинета, то есть она и
+ *  есть признак «человек пользуется продуктом». Пока продления не было,
+ *  кука жила ровно неделю от входа и не обновлялась ни разу: гость,
+ *  открывающий афишу каждый вечер, всё равно вылетал раз в семь дней и
+ *  видел экран входа без всякой причины. На телефоне это читается как
+ *  «приложение меня разлогинило», и второй раз пароль вспоминают уже не
+ *  все.
+ *
+ *  Продлеваем не на каждый запрос, а когда прошла половина срока. Иначе
+ *  куку пришлось бы переписывать по десять раз за сессию ради того же
+ *  результата — а Set-Cookie на каждом ответе ещё и мешает кэшированию.
+ *
+ *  Неделя бездействия по-прежнему заканчивается выходом: скользящий срок
+ *  продлевает сессию живого человека, а не забытую вкладку. */
 export const sessionFn = createServerFn({ method: "GET" }).handler(async () => {
-  const user = await readToken(getCookie(COOKIE));
-  return { user };
+  const found = await readTokenFull(getCookie(COOKIE));
+  if (!found) return { user: null };
+  if (found.exp - Date.now() < (WEEK * 1000) / 2) await issueSession(found.user);
+  return { user: found.user };
 });
 
 // Экран входа спрашивает, показывать ли демо-подсказки: на стенде с заданным

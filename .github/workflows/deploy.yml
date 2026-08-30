@@ -1,0 +1,81 @@
+# Выкатка прода: мердж в main уезжает в Cloudflare сам.
+#
+# До этого файла деплой был ручной командой из DEPLOY.md, и это стоило
+# ровно того, чего и должно было: 30 августа выяснилось, что в проде
+# крутится сборка от 28-го, а семь смердженных за день работ лежат в
+# main и никуда не едут. Снаружи это выглядит как «ничего не менялось» —
+# самая дорогая разновидность поломки, потому что о ней никто не знает.
+#
+# Сборка та же, что руками: npm run deploy:cf. Внутри — генерация
+# публичных данных, сборка под cloudflare_module, страж check-wrangler
+# (он уронит выкатку, если из конфига пропал биндинг KV, кроны или
+# домен) и собственно wrangler deploy.
+#
+# Без секрета CLOUDFLARE_API_TOKEN в настройках репозитория этот файл
+# безвреден: шаг проверки остановит выкатку с понятным текстом, а не
+# уронит её посреди деплоя.
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches: [main]
+  # Ручной запуск из вкладки Actions — на случай, когда надо
+  # перевыкатить без нового коммита.
+  workflow_dispatch:
+
+# Две выкатки подряд не должны обгонять друг друга: последняя обязана
+# оказаться последней и в проде.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Проверить, что токен задан
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::Нет секрета CLOUDFLARE_API_TOKEN. Settings → Secrets and variables → Actions → New repository secret. Токен — по шаблону «Edit Cloudflare Workers»."
+            exit 1
+          fi
+
+      - run: npm ci
+
+      # Тесты до выкатки, а не после. Красный прод чинится минутами,
+      # но эти минуты гость проводит на чужом сайте.
+      - run: npm test
+
+      - name: Выкатить
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # Идентификатор аккаунта секретом не является — он и так лежит
+          # в DEPLOY.md. Секретом можно переопределить, если аккаунт
+          # сменится.
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || '2e3f6f6ab8e81085ca7022ebeb583868' }}
+        run: npm run deploy:cf
+
+      # Сверка после выкатки: отпечаток сборки в проде обязан стать
+      # свежим. Молчаливо «успешный» деплой, не доехавший до воркера, —
+      # ровно та поломка, из-за которой этот файл и появился.
+      - name: Проверить, что прод обновился
+        run: |
+          sleep 15
+          BUILD=$(curl -sS --max-time 20 -H "User-Agent: deploy-check" https://gtrevent.com/api/version | sed 's/[^0-9]//g')
+          NOW=$(date +%s000)
+          AGE=$(( (NOW - BUILD) / 1000 ))
+          echo "отпечаток сборки в проде: $BUILD, возраст ${AGE}s"
+          if [ "$AGE" -gt 900 ]; then
+            echo "::error::Прод отдаёт сборку старше 15 минут — выкатка не доехала."
+            exit 1
+          fi

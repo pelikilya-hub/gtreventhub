@@ -1787,6 +1787,9 @@ export const signupApplyFn = createServerFn({ method: "POST" })
     };
     await ns.put(`pending:${email}`, JSON.stringify(app));
     await ns.put(`pcode:${code}`, email, { expirationTtl: 60 * 60 * 24 * 30 });
+    // Подал заново после отказа — старый след снимаем сразу. Иначе вход
+    // будет говорить «отклонена», пока новая заявка лежит на столе.
+    await ns.delete(`rejected:${email}`);
     // заявка — владельческое решение: только BOSS-контур, с кнопками
     const { guardInternalChatId, OPS_KEY } = await import("./community");
     const keys = await kvListAll(ns, "user:");
@@ -1845,6 +1848,24 @@ export async function decidePendingCore(
       invitedBy: "apply",
     };
     await ns.put(`user:${app.email}`, JSON.stringify(stored));
+    // Человек мог подавать заявку раньше и получить отказ. Раз теперь
+    // одобрен — след отказа снимаем, иначе вход поздоровается с ним
+    // старой отповедью.
+    await ns.delete(`rejected:${email}`);
+  } else {
+    // След отказа. Без него человек попадал в тупик: заявки уже нет,
+    // аккаунта нет, уведомить его нечем — он подавал через веб и
+    // Telegram не привязывал. На следующей попытке входа он получал
+    // «Неверный email или пароль» — тот же текст, что при опечатке, — и
+    // до бесконечности вспоминал несуществующий пароль.
+    //
+    // Три месяца: столько живёт разумная попытка вернуться. Дальше
+    // запись истекает сама, и человек снова становится незнакомцем.
+    await ns.put(
+      `rejected:${email}`,
+      JSON.stringify({ at: Date.now(), role: app.role }),
+      { expirationTtl: 60 * 60 * 24 * 90 },
+    );
   }
   await ns.delete(`pending:${email}`);
   await ns.delete(`pcode:${app.code}`);

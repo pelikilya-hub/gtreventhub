@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { logoutFn, type SessionUser } from "./auth";
+import { isSyntheticEmail } from "./identity";
 import {
   eventAlerts,
   NAV_ARTIST,
@@ -504,7 +505,11 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                   whiteSpace: "nowrap",
                 }}
               >
-                {user.email}
+                {/* У входа через Telegram или телефон настоящего адреса
+                    нет, и мы выдали служебный — показывать его нельзя:
+                    «tg-77@id.gtrevent.invalid» человек прочтёт как
+                    поломку ровно там, где ищет своё имя. */}
+                {isSyntheticEmail(user.email) ? user.name : user.email}
               </span>
             </span>
           </button>

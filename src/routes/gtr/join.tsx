@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { sessionFn } from "@/gtr/auth";
+import { OWNER_TG } from "@/gtr/community";
 import { inviteInfoFn, joinFn } from "@/gtr/kv-api";
 import { Eyebrow } from "@/gtr/ui";
 
@@ -72,10 +73,28 @@ function JoinPage() {
 
         {!info.ok ? (
           <>
-            <div style={{ font: "600 15px/1.4 'Golos Text',sans-serif" }}>{info.error}</div>
-            <a className="gtr-btn" style={{ textDecoration: "none", justifySelf: "start" }} href="/gtr/login">
-              Ко входу →
-            </a>
+            {/* Человек пришёл по приглашению — он не наш инженер. Внутреннюю
+                причину («Хранилище недоступно») переводим на человеческий и
+                даём, кому написать: без этого приглашение просто теряется. */}
+            <div style={{ font: "600 15px/1.4 'Golos Text',sans-serif" }}>
+              {/^Хранилище/.test(info.error ?? "")
+                ? t("Приглашение сейчас не проверить — база на минуту недоступна. Попробуйте открыть ссылку ещё раз через пару минут.")
+                : t("Приглашение не действует: ссылка устарела или уже использована.")}
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <a
+                className="gtr-btn gtr-btn-red"
+                style={{ textDecoration: "none" }}
+                href={OWNER_TG}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t("Написать команде GTR")} →
+              </a>
+              <a className="gtr-btn" style={{ textDecoration: "none" }} href="/gtr/login">
+                {t("Ко входу")} →
+              </a>
+            </div>
           </>
         ) : (
           <>

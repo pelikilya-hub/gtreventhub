@@ -162,6 +162,16 @@ const readToken = async (
   }
 };
 
+/** Подписанный токен сессии наружу.
+ *
+ *  Нужен файловым роутам — входу формой без скрипта и возврату от
+ *  Google: контекста server-fn там нет, и куку они ставят заголовком
+ *  сами. Второй реализации подписи быть не должно: разойдись она с этой
+ *  хоть в поле exp, и половина сессий станет невалидной молча. */
+export const makeSessionToken = createServerOnlyFn(
+  async (user: SessionUser) => makeToken(user),
+);
+
 // Приглашённый пользователь в KV: сессионные поля + личный пароль
 export type StoredUser = SessionUser & {
   passHash: string;

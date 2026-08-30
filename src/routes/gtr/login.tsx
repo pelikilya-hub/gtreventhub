@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { accessModeFn, formLogin, loginFn, sessionFn } from "@/gtr/auth";
+import { authDoorsFn } from "@/gtr/auth-doors";
+import { AuthDoors } from "@/gtr/auth-doors-ui";
 import { V } from "@/gtr/data/app-data";
 import { Eyebrow } from "@/gtr/ui";
 
@@ -36,7 +38,10 @@ export const Route = createFileRoute("/gtr/login")({
     if (user)
       throw redirect({ to: "/gtr/$screen", params: { screen: "dash" } });
   },
-  loader: async () => await accessModeFn(),
+  // Двери и демо-подсказки едут одним запросом: экран входа должен
+  // отрисоваться сразу целиком, иначе кнопки появляются рывком уже
+  // после того, как человек начал печатать почту.
+  loader: async () => ({ ...(await accessModeFn()), doors: await authDoorsFn() }),
   component: LoginPage,
 });
 
@@ -47,7 +52,11 @@ type DemoHint = { email: string; label: string; ini: string; venue: string };
 
 function LoginPage() {
   const { t } = useTranslation();
-  const { demo, hints } = Route.useLoaderData() as { demo: boolean; hints: DemoHint[] };
+  const { demo, hints, doors } = Route.useLoaderData() as {
+    demo: boolean;
+    hints: DemoHint[];
+    doors: { telegram: boolean; google: boolean; phone: boolean };
+  };
   const navigate = useNavigate();
   // Пригласительная ссылка: /gtr/login?invite=email — поле входа уже заполнено
   const invited =
@@ -199,6 +208,19 @@ function LoginPage() {
               </div>
             </>
           )}
+
+          {/* Двери идут первыми: вход в два касания без пароля — это то,
+              чем воспользуется большинство. Почта с паролем остаётся ниже
+              для команды и для тех, у кого аккаунт с паролем уже есть. */}
+          {doors.telegram || doors.google || doors.phone ? (
+            <>
+              <Eyebrow style={{ marginBottom: 10 }}>{t("ВХОД БЕЗ ПАРОЛЯ")}</Eyebrow>
+              <AuthDoors
+                doors={doors}
+                onDone={() => navigate({ to: "/gtr/$screen", params: { screen: "dash" } })}
+              />
+            </>
+          ) : null}
 
           <Eyebrow style={{ marginBottom: 10 }}>
             {demo ? t("ИЛИ ПО EMAIL И ПАРОЛЮ") : t("ВХОД ПО EMAIL И ПАРОЛЮ")}

@@ -24,6 +24,8 @@ import { Route as ApiBroLearnRouteImport } from './routes/api.bro-learn'
 import { Route as ApiClientLogRouteImport } from './routes/api.client-log'
 import { Route as ApiCommunityDigestRouteImport } from './routes/api.community-digest'
 import { Route as ApiFillDigestRouteImport } from './routes/api.fill-digest'
+import { Route as ApiGoogleAuthRouteImport } from './routes/api.google-auth'
+import { Route as ApiGoogleAuthCallbackRouteImport } from './routes/api.google-auth-callback'
 import { Route as ApiGtrBroGemRouteImport } from './routes/api.gtr-bro-gem'
 import { Route as ApiGtrBroGemtestRouteImport } from './routes/api.gtr-bro-gemtest'
 import { Route as ApiGtrBroSdpRouteImport } from './routes/api.gtr-bro-sdp'
@@ -122,6 +124,16 @@ const ApiCommunityDigestRoute = ApiCommunityDigestRouteImport.update({
 const ApiFillDigestRoute = ApiFillDigestRouteImport.update({
   id: '/api/fill-digest',
   path: '/api/fill-digest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGoogleAuthRoute = ApiGoogleAuthRouteImport.update({
+  id: '/api/google-auth',
+  path: '/api/google-auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGoogleAuthCallbackRoute = ApiGoogleAuthCallbackRouteImport.update({
+  id: '/api/google-auth-callback',
+  path: '/api/google-auth-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiGtrBroGemRoute = ApiGtrBroGemRouteImport.update({
@@ -261,6 +273,8 @@ export interface FileRoutesByFullPath {
   '/api/client-log': typeof ApiClientLogRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/fill-digest': typeof ApiFillDigestRoute
+  '/api/google-auth': typeof ApiGoogleAuthRoute
+  '/api/google-auth-callback': typeof ApiGoogleAuthCallbackRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
   '/api/gtr-bro-gemtest': typeof ApiGtrBroGemtestRoute
   '/api/gtr-bro-sdp': typeof ApiGtrBroSdpRoute
@@ -301,6 +315,8 @@ export interface FileRoutesByTo {
   '/api/client-log': typeof ApiClientLogRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/fill-digest': typeof ApiFillDigestRoute
+  '/api/google-auth': typeof ApiGoogleAuthRoute
+  '/api/google-auth-callback': typeof ApiGoogleAuthCallbackRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
   '/api/gtr-bro-gemtest': typeof ApiGtrBroGemtestRoute
   '/api/gtr-bro-sdp': typeof ApiGtrBroSdpRoute
@@ -343,6 +359,8 @@ export interface FileRoutesById {
   '/api/client-log': typeof ApiClientLogRoute
   '/api/community-digest': typeof ApiCommunityDigestRoute
   '/api/fill-digest': typeof ApiFillDigestRoute
+  '/api/google-auth': typeof ApiGoogleAuthRoute
+  '/api/google-auth-callback': typeof ApiGoogleAuthCallbackRoute
   '/api/gtr-bro-gem': typeof ApiGtrBroGemRoute
   '/api/gtr-bro-gemtest': typeof ApiGtrBroGemtestRoute
   '/api/gtr-bro-sdp': typeof ApiGtrBroSdpRoute
@@ -386,6 +404,8 @@ export interface FileRouteTypes {
     | '/api/client-log'
     | '/api/community-digest'
     | '/api/fill-digest'
+    | '/api/google-auth'
+    | '/api/google-auth-callback'
     | '/api/gtr-bro-gem'
     | '/api/gtr-bro-gemtest'
     | '/api/gtr-bro-sdp'
@@ -426,6 +446,8 @@ export interface FileRouteTypes {
     | '/api/client-log'
     | '/api/community-digest'
     | '/api/fill-digest'
+    | '/api/google-auth'
+    | '/api/google-auth-callback'
     | '/api/gtr-bro-gem'
     | '/api/gtr-bro-gemtest'
     | '/api/gtr-bro-sdp'
@@ -467,6 +489,8 @@ export interface FileRouteTypes {
     | '/api/client-log'
     | '/api/community-digest'
     | '/api/fill-digest'
+    | '/api/google-auth'
+    | '/api/google-auth-callback'
     | '/api/gtr-bro-gem'
     | '/api/gtr-bro-gemtest'
     | '/api/gtr-bro-sdp'
@@ -509,6 +533,8 @@ export interface RootRouteChildren {
   ApiClientLogRoute: typeof ApiClientLogRoute
   ApiCommunityDigestRoute: typeof ApiCommunityDigestRoute
   ApiFillDigestRoute: typeof ApiFillDigestRoute
+  ApiGoogleAuthRoute: typeof ApiGoogleAuthRoute
+  ApiGoogleAuthCallbackRoute: typeof ApiGoogleAuthCallbackRoute
   ApiGtrBroGemRoute: typeof ApiGtrBroGemRoute
   ApiGtrBroGemtestRoute: typeof ApiGtrBroGemtestRoute
   ApiGtrBroSdpRoute: typeof ApiGtrBroSdpRoute
@@ -633,6 +659,20 @@ declare module '@tanstack/react-router' {
       path: '/api/fill-digest'
       fullPath: '/api/fill-digest'
       preLoaderRoute: typeof ApiFillDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/google-auth': {
+      id: '/api/google-auth'
+      path: '/api/google-auth'
+      fullPath: '/api/google-auth'
+      preLoaderRoute: typeof ApiGoogleAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/google-auth-callback': {
+      id: '/api/google-auth-callback'
+      path: '/api/google-auth-callback'
+      fullPath: '/api/google-auth-callback'
+      preLoaderRoute: typeof ApiGoogleAuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/gtr-bro-gem': {
@@ -846,6 +886,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiClientLogRoute: ApiClientLogRoute,
   ApiCommunityDigestRoute: ApiCommunityDigestRoute,
   ApiFillDigestRoute: ApiFillDigestRoute,
+  ApiGoogleAuthRoute: ApiGoogleAuthRoute,
+  ApiGoogleAuthCallbackRoute: ApiGoogleAuthCallbackRoute,
   ApiGtrBroGemRoute: ApiGtrBroGemRoute,
   ApiGtrBroGemtestRoute: ApiGtrBroGemtestRoute,
   ApiGtrBroSdpRoute: ApiGtrBroSdpRoute,

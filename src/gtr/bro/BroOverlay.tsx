@@ -29,7 +29,18 @@ import {
   planOf,
   fmtForecast,
   fmtPull,
+  bkkDate,
 } from "./text";
+import {
+  absorb as absorbOrder,
+  FIELDS,
+  empty as emptyOrder,
+  isCold,
+  missing as missingOrder,
+  QUESTION,
+  recap,
+  type Order,
+} from "./order";
 import { VOICE_LAB_LINES, type PersonaMode } from "./prompt.ru";
 import { chatStale, touchChat } from "./chat-life";
 import { isTeam } from "./roles";
@@ -539,6 +550,10 @@ export function GtrBroOverlay({
   };
   const waitOff = () => setRows((p) => (p.some((r) => r.wait) ? p.filter((r) => !r.wait) : p));
 
+  // Нить брони: что уже сказано про стол. Живёт между репликами —
+  // иначе на «закажи стол» продукт начинает знакомство заново.
+  const orderRef = useRef<Order | null>(null);
+
   const callTool = async (name: string, args: Record<string, unknown>) => {
     const r = await fetch("/api/gtr-bro-tool", {
       method: "POST",
@@ -582,6 +597,63 @@ export function GtrBroOverlay({
 
     const plan = planOf(q);
 
+    // Нить брони. Всё, что человек сказал, впитывается в неё независимо
+    // от того, куда пойдёт эта реплика: «нас четверо» посреди разговора
+    // про афишу — это всё ещё про стол.
+    const now = Date.now();
+    if (plan.kind === "cancel" && orderRef.current) {
+      orderRef.current = null;
+      metric("bro.book.cancel");
+      say("bro", "Понял, бронь отменил. Что дальше?");
+      return;
+    }
+    if (isCold(orderRef.current, now)) orderRef.current = null;
+    const openOrder = orderRef.current;
+    if (plan.kind === "book" || openOrder) {
+      const today = bkkDate(0);
+      const started = openOrder ?? emptyOrder(now);
+      const order = absorbOrder(started, q, today, now);
+      // Открытая бронь не должна проглатывать посторонние вопросы: посреди
+      // разговора про стол человек вправе спросить, кто сегодня играет.
+      // Ведём бронь дальше, только если в реплике что-то для неё нашлось.
+      const moved = FIELDS.some((f) => order[f] !== started[f]);
+      if (plan.kind !== "book" && !moved) {
+        orderRef.current = { ...started, touchedAt: now };
+      } else {
+      const gaps = missingOrder(order);
+      if (gaps.length) {
+        orderRef.current = { ...order, awaiting: gaps[0] };
+        metric(`bro.book.ask.${gaps[0]}`);
+        const known = recap(order);
+        // Повторяем уже собранное вслух: человек должен видеть, что его
+        // услышали, а не гадать, помним ли мы сказанное минуту назад.
+        if (known) say("bro", `Записал: ${known}.`);
+        say("bro", QUESTION[gaps[0]]);
+        return;
+      }
+      orderRef.current = null;
+      metric("bro.book.send");
+      say("bro", `Оформляю: ${recap(order)}. Подтверди — и уйдёт менеджеру.`);
+      const r = await callTool("book_table", {
+        venue: order.venue,
+        table: order.table,
+        dateIso: order.dateIso,
+        guests: order.guests,
+        phone: order.phone,
+        ...(order.slot ? { slot: order.slot } : {}),
+      });
+      if (!r.ok) {
+        // Заявку не приняли — нить не теряем, иначе человек пересказывает
+        // всё заново. Возвращаем её и спрашиваем только спорное поле.
+        orderRef.current = { ...order, venue: undefined, awaiting: "venue", touchedAt: now };
+        say("bro", `Не прошло: ${String(r.error ?? "площадку не нашёл")}. Назови площадку ещё раз.`);
+        return;
+      }
+      setCards((p2) => [{ kind: "venue" as const, data: (r.data ?? {}) as Record<string, unknown> }, ...p2].slice(0, 6));
+      return;
+      }
+    }
+
     // Живые фразы сначала идут в самохостный мозг (Qwen на сервере GTR).
     // Мозг не настроен или упал — молча откатываемся на разбор правилами:
     // деградация, а не отказ.
@@ -602,6 +674,9 @@ export function GtrBroOverlay({
           body: JSON.stringify({
             text: q,
             history,
+            // Что уже собрано по брони: без этого модель спрашивает то,
+            // что человек ей минуту назад сказал.
+            order: orderRef.current ? recap(orderRef.current) : undefined,
             lang: langRef.current,
             personaMode: modeRef.current,
           }),

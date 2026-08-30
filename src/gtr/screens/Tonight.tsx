@@ -12,6 +12,7 @@ import { Card, Chip, Eyebrow, tint, VenueLogo } from "../ui";
 import { useGtr } from "../store";
 import { allAfishaFn, bookTableFn, promptpayCfgFn, type PromptpayCfg, type VenueAfisha } from "../kv-api";
 import { openAppLink } from "../applink";
+import { PosterImg } from "../poster-img";
 import { posterUrl } from "../poster";
 import { PromptpayModal } from "../promptpay-ui";
 import { SwipeToBook } from "../raw-pulse";
@@ -178,16 +179,40 @@ export function TonightScreen({ vid: fromVenue }: { vid?: string } = {}) {
     const v = V(e.vid);
     return (
       <Card key={e.vid + e.id} style={{ padding: 0, overflow: "hidden" }}>
-        <div style={{ position: "relative", aspectRatio: "4/5", overflow: "hidden", background: "#101116" }}>
-            <img
-              src={posterUrl(e.vid, e.id)}
-              alt=""
-              loading="lazy"
-              onError={(ev) => {
-                (ev.currentTarget as HTMLImageElement).style.display = "none";
-              }}
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-            />
+        <div style={{ position: "relative", overflow: "hidden", background: "#101116" }}>
+            <PosterImg src={posterUrl(e.vid, e.id)} />
+            {e.time || e.price ? (
+              <span
+                className="gtr-mono"
+                style={{ position: "absolute", top: 9, right: 9, display: "grid", gap: 3, justifyItems: "end" }}
+              >
+                {e.time ? (
+                  <span
+                    style={{
+                      font: "700 11px/1 'JetBrains Mono',monospace",
+                      background: "rgba(10,11,13,.86)",
+                      border: "1px solid rgba(255,255,255,.2)",
+                      padding: "4px 6px",
+                    }}
+                  >
+                    {e.time}
+                  </span>
+                ) : null}
+                {e.price ? (
+                  <span
+                    style={{
+                      font: "600 10px/1 'JetBrains Mono',monospace",
+                      background: "rgba(10,11,13,.86)",
+                      border: "1px solid rgba(46,204,113,.45)",
+                      color: "#2ECC71",
+                      padding: "4px 6px",
+                    }}
+                  >
+                    {t(e.price)}
+                  </span>
+                ) : null}
+              </span>
+            ) : null}
             {e.artistIds.length ? (
               <span
                 className="gtr-mono"

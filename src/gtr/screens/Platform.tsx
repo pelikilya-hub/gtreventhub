@@ -25,7 +25,9 @@ import {
   type MatchVenue,
   type TableBooking,
 } from "../kv-api";
+import { bkkToday } from "../afisha-parse";
 import { FAMILY_LABEL } from "../match";
+import { PosterImg } from "../poster-img";
 import { posterUrl } from "../poster";
 import type { MusicProfile } from "../spotify";
 import { useGtr } from "../store";
@@ -39,6 +41,8 @@ type FeedItem = {
   vid: string;
   title: string;
   dateIso: string;
+  time?: string;
+  price?: string;
   poster?: string;
   url: string;
   artistIds: string[];
@@ -61,11 +65,26 @@ const label = (s: string) => (
 );
 
 // ---------- ЛЕНТА СОБЫТИЙ ----------
+//
+// Лента была свитком: все события всех дней подряд, сверху вниз. Гость,
+// который планирует субботу, листал через четверг и пятницу; гость,
+// которому нужно «сегодня», видел то же самое. Дат было много, а выбрать
+// день было нечем.
+//
+// Теперь сверху полоса дней с числом событий на каждом: видно и куда
+// идти, и где пусто. Полоса — не украшение, а единственный способ
+// перейти на нужную дату за одно касание.
+//
+// И карточка стала кликабельной по-настоящему. Раньше клик по ней вёл на
+// паспорт площадки — то есть уводил с события, ради которого гость сюда
+// и пришёл. Теперь у карточки два выхода: сама афиша (источник события) и
+// площадка, и оба названы.
 export function FeedScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [items, setItems] = useState<FeedItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [day, setDay] = useState<string>("");
   useEffect(() => {
     allAfishaFn()
       .then((r) => setItems(r.items as FeedItem[]))
@@ -73,20 +92,33 @@ export function FeedScreen() {
       .finally(() => setLoaded(true));
   }, []);
 
-  const byDate = useMemo(() => {
-    const m = new Map<string, FeedItem[]>();
-    for (const e of items) {
-      const list = m.get(e.dateIso) ?? [];
-      list.push(e);
-      m.set(e.dateIso, list);
-    }
-    return [...m.entries()];
+  /** Дни, в которые реально что-то есть, с числом событий. Показывать
+   *  пустые даты незачем: полоса из тридцати нулей прячет те четыре дня,
+   *  где программа действительно стоит. */
+  const days = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const e of items) m.set(e.dateIso, (m.get(e.dateIso) ?? 0) + 1);
+    return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [items]);
 
-  const dateLabel = (iso: string) => {
+  // Открываемся на сегодня, если сегодня есть программа, иначе на
+  // ближайшем дне с событиями: пустой экран на входе — плохая встреча.
+  useEffect(() => {
+    if (day || !days.length) return;
+    const today = bkkToday();
+    setDay(days.find(([d]) => d >= today)?.[0] ?? days[0][0]);
+  }, [days, day]);
+
+  const shown = useMemo(() => items.filter((e) => !day || e.dateIso === day), [items, day]);
+
+  const dayLabel = (iso: string) => {
     const d = new Date(iso + "T00:00:00");
     const wd = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"][d.getDay()];
     return `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, "0")} · ${t(wd)}`;
+  };
+  const wdShort = (iso: string) => {
+    const d = new Date(iso + "T00:00:00");
+    return t(["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"][d.getDay()]);
   };
 
   return (
@@ -97,6 +129,37 @@ export function FeedScreen() {
           {items.length}
         </span>
       </div>
+
+      {/* Полоса дней: где что идёт и куда перейти одним касанием */}
+      {days.length > 1 ? (
+        <div className="gtr-map-row" style={{ marginBottom: 14 }}>
+          <button
+            className={`gtr-map-chip${!day ? " on" : ""}`}
+            onClick={() => setDay("")}
+          >
+            {t("Все дни")} · {items.length}
+          </button>
+          {days.map(([iso, n]) => (
+            <button
+              key={iso}
+              className={`gtr-map-chip${day === iso ? " on" : ""}`}
+              onClick={() => setDay(day === iso ? "" : iso)}
+              style={iso === bkkToday() ? { borderColor: "#E5231B" } : undefined}
+            >
+              <span style={{ display: "grid", justifyItems: "center", gap: 1, lineHeight: 1 }}>
+                <span style={{ font: "600 9.5px/1 'JetBrains Mono',monospace", opacity: 0.6 }}>
+                  {wdShort(iso)}
+                </span>
+                <span style={{ font: "700 13px/1 'JetBrains Mono',monospace" }}>
+                  {Number(iso.slice(8, 10))}
+                </span>
+              </span>
+              <span style={{ opacity: 0.55, marginLeft: 2 }}>{n}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       {!loaded ? (
         <div className="gtr-mono" style={{ padding: 40, color: "var(--gtr-t3)" }}>{t("Загрузка…")}</div>
       ) : !items.length ? (
@@ -112,62 +175,115 @@ export function FeedScreen() {
           ]}
         />
       ) : (
-        byDate.map(([iso, list]) => (
-          <div key={iso} style={{ marginBottom: 22 }}>
-            <Eyebrow style={{ marginBottom: 10 }}>{dateLabel(iso)}</Eyebrow>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill,minmax(210px,1fr))",
-                gap: 12,
-              }}
-            >
-              {list.map((e) => (
-                <Card
-                  key={`${e.vid}-${e.id}`}
-                  hover
-                  style={{ padding: 0, overflow: "hidden" }}
-                  onClick={() =>
-                    navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid: e.vid } })
-                  }
-                >
-                  <div style={{ position: "relative", aspectRatio: "4/5", background: "#101116" }}>
-                    <img
-                      src={posterUrl(e.vid, e.id)}
-                      alt=""
-                      loading="lazy"
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                      onError={(ev) => {
-                        (ev.currentTarget as HTMLImageElement).style.display = "none";
-                      }}
-                    />
+        <>
+          {day ? <Eyebrow style={{ marginBottom: 10 }}>{dayLabel(day)}</Eyebrow> : null}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill,minmax(210px,1fr))",
+              gap: 12,
+            }}
+          >
+            {shown.map((e) => (
+              <Card key={`${e.vid}-${e.id}`} style={{ padding: 0, overflow: "hidden" }}>
+                <div style={{ position: "relative", background: "#101116" }}>
+                  <PosterImg src={posterUrl(e.vid, e.id)} />
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      pointerEvents: "none",
+                      background: "linear-gradient(180deg, transparent 52%, rgba(10,11,13,.96))",
+                    }}
+                  />
+                  {e.artistIds.length ? (
+                    <span style={{ position: "absolute", top: 8, left: 8 }}>
+                      <Chip color={GREEN}>{t("НАШ АРТИСТ")}</Chip>
+                    </span>
+                  ) : null}
+                  {/* Время и цена — то, ради чего афишу и открывают.
+                      Парсер доставал их с самого начала, но модель события
+                      их не хранила, и они терялись по дороге. */}
+                  {e.time || e.price ? (
+                    <span
+                      className="gtr-mono"
+                      style={{ position: "absolute", top: 8, right: 8, display: "grid", gap: 3, justifyItems: "end" }}
+                    >
+                      {e.time ? (
+                        <span
+                          style={{
+                            font: "700 11px/1 'JetBrains Mono',monospace",
+                            background: "rgba(10,11,13,.86)",
+                            border: "1px solid rgba(255,255,255,.2)",
+                            padding: "4px 6px",
+                          }}
+                        >
+                          {e.time}
+                        </span>
+                      ) : null}
+                      {e.price ? (
+                        <span
+                          style={{
+                            font: "600 10px/1 'JetBrains Mono',monospace",
+                            background: "rgba(10,11,13,.86)",
+                            border: "1px solid rgba(46,204,113,.45)",
+                            color: GREEN,
+                            padding: "4px 6px",
+                          }}
+                        >
+                          {t(e.price)}
+                        </span>
+                      ) : null}
+                    </span>
+                  ) : null}
+                  <div style={{ position: "absolute", left: 10, right: 10, bottom: 10, pointerEvents: "none" }}>
+                    <div style={{ font: "600 12.5px/1.45 'Golos Text',sans-serif" }}>{e.title}</div>
                     <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        background: "linear-gradient(180deg, transparent 55%, rgba(10,11,13,.94))",
-                      }}
-                    />
-                    {e.artistIds.length ? (
-                      <span style={{ position: "absolute", top: 8, left: 8 }}>
-                        <Chip color={GREEN}>{t("НАШ АРТИСТ")}</Chip>
-                      </span>
-                    ) : null}
-                    <div style={{ position: "absolute", left: 10, right: 10, bottom: 10 }}>
-                      <div style={{ font: "600 12.5px/1.45 'Golos Text',sans-serif" }}>{e.title}</div>
-                      <div
-                        className="gtr-mono"
-                        style={{ marginTop: 4, font: "500 11px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)" }}
-                      >
-                        {V(e.vid)?.name ?? e.vid}
-                      </div>
+                      className="gtr-mono"
+                      style={{ marginTop: 4, font: "500 11px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)" }}
+                    >
+                      {!day ? `${e.dateIso.slice(8, 10)}.${e.dateIso.slice(5, 7)} · ` : ""}
+                      {V(e.vid)?.name ?? e.vid}
                     </div>
                   </div>
-                </Card>
-              ))}
-            </div>
+                </div>
+                {/* Два выхода, и оба названы. Раньше вся карточка вела на
+                    паспорт площадки — то есть уводила с события, ради
+                    которого гость сюда и пришёл. */}
+                <div style={{ display: "flex", borderTop: "1px solid rgba(255,255,255,.07)" }}>
+                  <button
+                    className="gtr-btn"
+                    style={{ flex: 1, border: "none", padding: "9px 8px", fontSize: 12 }}
+                    onClick={() =>
+                      navigate({ to: "/gtr/$screen", params: { screen: "venueCard" }, search: { vid: e.vid } })
+                    }
+                  >
+                    {t("Заведение")}
+                  </button>
+                  {e.url ? (
+                    <a
+                      className="gtr-btn"
+                      href={e.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        flex: 1,
+                        border: "none",
+                        borderLeft: "1px solid rgba(255,255,255,.07)",
+                        padding: "9px 8px",
+                        fontSize: 12,
+                        textAlign: "center",
+                        textDecoration: "none",
+                      }}
+                    >
+                      {t("Афиша")} ↗
+                    </a>
+                  ) : null}
+                </div>
+              </Card>
+            ))}
           </div>
-        ))
+        </>
       )}
     </div>
   );

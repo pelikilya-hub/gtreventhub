@@ -36,6 +36,7 @@ import {
   type VenueConfirm,
 } from "../kv-api";
 import { catOf, stickerUrl } from "../map-style";
+import { PosterImg } from "../poster-img";
 import { posterUrl } from "../poster";
 import { useVenueContacts } from "../work-contacts";
 import { useGtr } from "../store";
@@ -1190,6 +1191,8 @@ type AfishaEvent = {
   id: string;
   title: string;
   dateIso: string;
+  time?: string;
+  price?: string;
   poster?: string;
   url: string;
   room?: string;
@@ -1349,20 +1352,24 @@ function AfishaBlock({ vid }: { vid: string }) {
                 minWidth: 0,
               }}
             >
-              <img
-                src={`${posterUrl(vid, e.id)}${pRev[e.id] ? `&r=${pRev[e.id]}` : ""}`}
-                alt=""
-                loading="lazy"
-                style={{ width: "100%", aspectRatio: "4/5", objectFit: "cover", background: "#101116" }}
-              />
+              <PosterImg src={`${posterUrl(vid, e.id)}${pRev[e.id] ? `&r=${pRev[e.id]}` : ""}`} />
               <span style={{ padding: "8px 10px", display: "grid", gap: 3 }}>
                 <span
                   className="gtr-mono"
                   style={{ font: "700 11px/1 'JetBrains Mono',monospace", color: "#FF3427" }}
                 >
                   {e.dateIso.slice(5).split("-").reverse().join(".")}
+                  {e.time ? ` · ${e.time}` : ""}
                   {e.room ? ` · ${e.room.toUpperCase()}` : ""}
                 </span>
+                {e.price ? (
+                  <span
+                    className="gtr-mono"
+                    style={{ font: "600 10.5px/1 'JetBrains Mono',monospace", color: GREEN }}
+                  >
+                    {t(e.price)}
+                  </span>
+                ) : null}
                 <span style={{ font: "600 13px/1.45 'Golos Text',sans-serif", color: "#fff" }}>
                   {e.title}
                 </span>

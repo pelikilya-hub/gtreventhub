@@ -25,7 +25,6 @@ import {
   finKpiOf,
   fmtThb,
   GREEN,
-  inqOf,
   PH,
   RED,
   richOf,
@@ -34,6 +33,7 @@ import {
   SPACES_TECH,
   V,
 } from "../data/app-data";
+import { Empty } from "../empty";
 import { useVenueContacts } from "../work-contacts";
 import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow, tint } from "../ui";
@@ -63,8 +63,6 @@ export function InquiriesScreen() {
   const { t } = useTranslation();
   const { user, shared, updateRequest, setDraftGraph, draftsOf } = useGtr();
   const vid = user.venueId || "VEN-0013";
-  const rows = inqOf(vid);
-  const [replied, setReplied] = useState<number[]>([]);
 
   // Входящие запросы организаторов (собраны на витрине, падают со сметой).
   // GTR-админ видит все по сети, роль площадки — свои и назначенные на себя.
@@ -325,87 +323,24 @@ export function InquiriesScreen() {
             </Card>
           ) : null}
 
-          <Card>
-            {/* Архивных заявок по площадке может не быть — это нормальное
-                состояние, а не повод показывать чужие */}
-            {!rows.length ? (
-              <div
-                style={{
-                  padding: "26px 20px",
-                  textAlign: "center",
-                  font: "500 12px/1.6 'Golos Text',sans-serif",
-                  color: "var(--gtr-t2)",
-                }}
-              >
-                {t("История заявок по этой площадке пока не собрана.")}
-                <br />
-                {t("Новые запросы с витрины появятся здесь сразу.")}
-              </div>
-            ) : null}
-            {rows.map(([day, mon, title, meta, budget, sla, status, c, cta], i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  padding: "15px 20px",
-                  borderBottom: "1px solid rgba(255,255,255,.05)",
-                  borderLeft: `2px solid ${c}`,
-                }}
-              >
-                <span style={{ textAlign: "center", flex: "none", width: 40 }}>
-                  <span
-                    className="gtr-mono"
-                    style={{ display: "block", font: "700 17px/1 'JetBrains Mono',monospace" }}
-                  >
-                    {day}
-                  </span>
-                  <span className="gtr-eyebrow" style={{ fontSize: 10 }}>
-                    {mon}
-                  </span>
-                </span>
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <span
-                    style={{ display: "block", font: "600 12.5px/1.45 'Golos Text',sans-serif" }}
-                  >
-                    {title}
-                  </span>
-                  <span
-                    style={{
-                      display: "block",
-                      marginTop: 4,
-                      font: "500 12px/1.5 'Golos Text',sans-serif",
-                      color: "var(--gtr-t2)",
-                    }}
-                  >
-                    {meta}
-                  </span>
-                  <span
-                    className="gtr-mono"
-                    style={{
-                      display: "block",
-                      marginTop: 4,
-                      font: "500 11px/1.45 'JetBrains Mono',monospace",
-                      color: "var(--gtr-t3)",
-                    }}
-                  >
-                    {t("Бюджет:")} {budget} · {sla}
-                  </span>
-                </span>
-                <Chip color={c} style={{ width: 108, textAlign: "center" }}>
-                  {replied.includes(i) ? t("ОТВЕЧЕНО") : status}
-                </Chip>
-                <button
-                  className={`gtr-btn ${cta === "Ответить" && !replied.includes(i) ? "gtr-btn-red" : ""}`}
-                  disabled={!can(user.role, "inquiries.reply")}
-                  onClick={() => setReplied((r) => (r.includes(i) ? r : [...r, i]))}
-                >
-                  {replied.includes(i) ? "Открыть" : cta}
-                </button>
-              </div>
-            ))}
-          </Card>
+          {/* Пока входящих нет — говорим, откуда они приходят, и даём
+              дорогу туда. Раньше здесь стоял демонстрационный список
+              заявок из таблицы в коде: выдуманные строки выглядели как
+              настоящие, а кнопка «Ответить» под ними только меняла свою
+              подпись — ни ответа, ни уведомления, ни следа в базе. */}
+          {!incoming.length ? (
+            <Card>
+              <Empty
+                compact
+                title="Входящих заявок нет"
+                text="Заявки приходят из витрины организатора и из бота: организатор выбирает площадку, собирает смету и отправляет её вам. Каждая падает сюда и дублируется менеджеру в Telegram."
+                actions={[
+                  { label: "Витрина организатора", onClick: () => window.open("/gtr/organizer", "_blank"), primary: true },
+                  { label: "Собрать событие самому", to: "constructor" },
+                ]}
+              />
+            </Card>
+          ) : null}
         </div>
         <Card style={{ alignSelf: "start", padding: 18 }}>
           <Eyebrow style={{ marginBottom: 10 }}>{t("ЧТО БЛОКИРУЕТ БЫСТРЫЙ ОТВЕТ")}</Eyebrow>

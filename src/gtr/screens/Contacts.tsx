@@ -14,6 +14,8 @@ import {
 } from "../data/app-data";
 import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
+
+import { Empty } from "../empty";
 import { Card, Chip, Eyebrow, tint } from "../ui";
 import { openAppLink } from "../applink";
 import { contactsUsersFn, type ContactUser } from "../kv-api";
@@ -192,10 +194,24 @@ export function ContactsScreen() {
       <Card style={{ padding: 10, display: "flex", flexDirection: "column", gap: 6 }}>
         {rows.length ? (
           rows.map((r) => <ContactRow key={r.id} r={r} />)
-        ) : (
+        ) : q.trim() ? (
           <span style={{ padding: 20, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
             {t("Никого не найдено.")}
           </span>
+        ) : (
+          // Пустая вкладка без запроса — это не «не нашлось», а «ещё
+          // некого искать». Разница важна: в первом случае надо править
+          // запрос, во втором — заводить людей.
+          <Empty
+            compact
+            title="Здесь пока никого"
+            text="Команда собирается через приглашения: GTR-админ заводит доступ, человек входит по своему паролю и появляется в этом списке."
+            actions={
+              user.role === "gtr"
+                ? [{ label: "Пригласить в команду", to: "access", primary: true }]
+                : [{ label: "База площадок", to: "base" }]
+            }
+          />
         )}
       </Card>
       {user.role === "gtr" ? (

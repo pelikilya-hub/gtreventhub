@@ -2,6 +2,8 @@
 // Без регистрации — токен из персональной ссылки и есть доступ. Менеджер
 // площадки проверяет вместимость и прайс, оставляет контакт, подтверждает.
 import { createFileRoute } from "@tanstack/react-router";
+
+import { OWNER_TG } from "@/gtr/community";
 import { useState } from "react";
 
 import { venueConfirmSubmitFn, venueFbConnectFn, venueLinkOpenFn } from "@/gtr/kv-api";
@@ -50,6 +52,8 @@ const T: Record<Lang, Record<string, string>> = {
     done: "Thank you! Details confirmed.",
     doneSub: "Our team will be in touch. Update anytime via the same link.",
     bad: "This link is invalid or expired. Ask your GTR contact for a new one.",
+    badWrite: "Message GTR on Telegram",
+    badApp: "Open GTR Event",
     required: "Name and phone are required",
     fail: "Could not save — try again",
   },
@@ -86,6 +90,8 @@ const T: Record<Lang, Record<string, string>> = {
     done: "ขอบคุณ! ยืนยันข้อมูลเรียบร้อย",
     doneSub: "ทีมงานจะติดต่อกลับ แก้ไขได้ทุกเมื่อผ่านลิงก์เดิม",
     bad: "ลิงก์ไม่ถูกต้องหรือหมดอายุ กรุณาขอลิงก์ใหม่จากทีม GTR",
+    badWrite: "ทักทีม GTR ทาง Telegram",
+    badApp: "เปิด GTR Event",
     required: "กรุณากรอกชื่อและโทรศัพท์",
     fail: "บันทึกไม่สำเร็จ ลองอีกครั้ง",
   },
@@ -122,6 +128,8 @@ const T: Record<Lang, Record<string, string>> = {
     done: "Спасибо! Данные подтверждены.",
     doneSub: "Команда свяжется с вами. Обновить можно по той же ссылке.",
     bad: "Ссылка недействительна или истекла. Запросите новую у контакта GTR.",
+    badWrite: "Написать команде GTR в Telegram",
+    badApp: "Открыть GTR Event",
     required: "Имя и телефон обязательны",
     fail: "Не сохранилось — попробуйте ещё раз",
   },
@@ -307,9 +315,31 @@ function VenueConfirmPage() {
         </div>
 
         {!ok ? (
-          <div className="gtr-card" style={{ padding: "26px 24px" }}>
+          // Протухший токен — не повод оставлять площадку в тупике.
+          // «Запросите новую у контакта GTR» без самого контакта — это
+          // стена: ссылку мы прислали в рассылке, человек с той стороны
+          // не знает нас по имени, и писать ему некуда.
+          <div className="gtr-card" style={{ padding: "26px 24px", display: "grid", gap: 14, justifyItems: "start" }}>
             <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
               {t.bad}
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <a
+                className="gtr-btn gtr-btn-red"
+                href={OWNER_TG}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ padding: "9px 14px", fontSize: 13, textDecoration: "none" }}
+              >
+                {t.badWrite} →
+              </a>
+              <a
+                className="gtr-btn"
+                href="/gtr/login"
+                style={{ padding: "9px 14px", fontSize: 13, textDecoration: "none" }}
+              >
+                {t.badApp} →
+              </a>
             </div>
           </div>
         ) : done ? (

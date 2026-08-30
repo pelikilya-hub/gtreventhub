@@ -1130,7 +1130,7 @@
   "src": "osm-nominatim"
  },
  "VEN-PNA-0024": {
-  "lat": 8.0,
+  "lat": 8,
   "lon": 98.81,
   "src": "agent-sweep"
  },
@@ -1543,5 +1543,15 @@
   "lat": 9.56134,
   "lon": 100.02602,
   "src": "site-map"
+ },
+ "VEN-SMU-0019": {
+  "lat": 9.5419095,
+  "lon": 100.0748345,
+  "src": "photon-auto"
+ },
+ "VEN-SMU-0041": {
+  "lat": 9.5710969,
+  "lon": 100.0862486,
+  "src": "photon-auto"
  }
 }

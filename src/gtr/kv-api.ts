@@ -1948,50 +1948,9 @@ export const venueQueueFn = createServerFn({ method: "GET" }).handler(async () =
   // делать: это список наших недоделок, а не витрина.
   if (!me || !["gtr", "pr", "owner", "sales"].includes(me.role)) return empty;
 
-  const { PH, regionOf } = await import("./data/app-data");
-  const { fillLevel, fillSummary, stepCost, venueGaps } = await import("./venue-fill");
-  const geo = (await import("./data/venue-geo.json")).default as Record<string, unknown>;
-  const rich = (await import("./data/rich.json")).default as Record<
-    string,
-    { hero?: string; gallery?: string[] }
-  >;
-
-  const ns = await getKvNs();
-  // Что уже прислали площадки. Без хранилища считаем по одной статике:
-  // очередь станет пессимистичнее, но не соврёт в другую сторону.
-  const confirmed = new Map<string, VenueConfirm>();
-  const photos = new Map<string, number>();
-  if (ns) {
-    for (const k of await kvListAll(ns, "vconfirm:")) {
-      const rec = await kvGetJson<VenueConfirm>(ns, k);
-      if (rec) confirmed.set(k.slice("vconfirm:".length), rec);
-    }
-    for (const k of await kvListAll(ns, "vphoto:")) {
-      const vid = k.slice("vphoto:".length).split(":")[0];
-      photos.set(vid, (photos.get(vid) ?? 0) + 1);
-    }
-  }
-
-  const rows: VenueFillRow[] = PH.venues.map((v) => {
-    const c = confirmed.get(v.id);
-    const r = rich[v.id] ?? {};
-    const gaps = venueGaps(v, {
-      hasGeo: Boolean(geo[v.id]),
-      hero: r.hero,
-      gallery: (r.gallery?.length ?? 0) + (photos.get(v.id) ?? 0),
-      confirmedContact: Boolean(c?.contact?.phone || c?.contact?.email),
-      confirmedCapacity: c?.capacity,
-    });
-    return {
-      id: v.id,
-      name: v.name,
-      region: regionOf(v),
-      area: v.area || "",
-      gaps,
-      level: fillLevel(gaps),
-      cost: stepCost(gaps),
-    };
-  });
+  const { fillSummary } = await import("./venue-fill");
+  const { buildFillRows } = await import("./venue-rows");
+  const rows = await buildFillRows(await getKvNs(), { kvListAll, kvGetJson });
 
   const byRegion: Record<string, { total: number; ready: number }> = {};
   for (const r of rows) {

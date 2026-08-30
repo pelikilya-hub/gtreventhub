@@ -159,21 +159,28 @@ describe("очередь", () => {
 describe("очередь на сервере", () => {
   const kvApi = readFileSync(join(__dirname, "..", "kv-api.ts"), "utf8");
   const fn = kvApi.slice(kvApi.indexOf("export const venueQueueFn"));
+  // Сборка строк переехала в venue-rows.ts: те же цифры нужны и экрану,
+  // и утренней сводке крона, а два расчёта рано или поздно разойдутся.
+  const rows = readFileSync(join(__dirname, "..", "venue-rows.ts"), "utf8");
 
   it("это внутренняя кухня: гостю, артисту и площадке закрыто", () => {
     expect(fn).toContain('["gtr", "pr", "owner", "sales"].includes(me.role)');
   });
 
+  it("экран и крон считают одной сборкой, а не каждый своей", () => {
+    expect(fn).toContain("buildFillRows");
+  });
+
   it("учитывает то, что прислали сами площадки", () => {
-    expect(fn).toContain('kvListAll(ns, "vconfirm:")');
-    expect(fn).toContain('kvListAll(ns, "vphoto:")');
+    expect(rows).toContain('kvListAll(ns, "vconfirm:")');
+    expect(rows).toContain('kvListAll(ns, "vphoto:")');
   });
 
   it("без хранилища считает по статике, а не падает", () => {
     // Локальный режим и минута недоступности KV не должны выключать
     // экран целиком — очередь просто станет пессимистичнее.
-    expect(fn).toContain("if (ns) {");
-    expect(fn).not.toMatch(/if \(!ns\) return empty;[\s\S]{0,80}PH\.venues/);
+    expect(rows).toContain("if (ns) {");
+    expect(rows).not.toMatch(/if \(!ns\) return \[\];[\s\S]{0,80}PH\.venues/);
   });
 });
 

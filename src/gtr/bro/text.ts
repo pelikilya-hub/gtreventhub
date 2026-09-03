@@ -9,6 +9,8 @@
 // Реплики BRO здесь — заготовки в его характере. Они не притворяются
 // ответами модели: факты в них только из результатов инструментов.
 
+import { isBooking, isCancel } from "./order";
+
 export type TextPlan =
   | { kind: "help" }
   | { kind: "greet" }
@@ -21,6 +23,8 @@ export type TextPlan =
   | { kind: "faq"; question: string }
   | { kind: "forecast"; venue: string; date: string }
   | { kind: "pull"; artist: string }
+  | { kind: "book" }
+  | { kind: "cancel" }
   | { kind: "unknown" };
 
 /** Дата на Пхукете (UTC+7) со сдвигом в днях. Часовой пояс телефона
@@ -69,6 +73,11 @@ export const planOf = (raw: string): TextPlan => {
   if (!q) return { kind: "unknown" };
 
   if (/^(help|\?|помощь|команды)$/.test(q)) return { kind: "help" };
+
+  // Бронь идёт раньше всего остального: «забронируй стол в Патонге» — это
+  // заявка, а не поиск площадок по району, и уж точно не знакомство.
+  if (isCancel(raw)) return { kind: "cancel" };
+  if (isBooking(raw)) return { kind: "book" };
   // «привет» и «что умеешь» — это не поиск афиши, это знакомство.
   // \b в JS считает границей только ASCII — для кириллицы конец слова
   // приходится задавать явно, иначе «привет» не матчится вовсе, а «ку»

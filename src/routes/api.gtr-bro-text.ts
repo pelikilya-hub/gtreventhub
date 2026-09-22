@@ -134,6 +134,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
         let body: {
           text?: string;
           history?: { who: string; text: string }[];
+          order?: string;
           lang?: unknown;
           personaMode?: unknown;
         } = {};
@@ -248,6 +249,18 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
           messages.push({
             role: h.who === "bro" ? "assistant" : "user",
             content: String(h.text ?? "").slice(0, 300),
+          });
+        // Открытая бронь: что уже собрано. Хвоста истории для этого мало —
+        // человек сказал «нас четверо» шесть реплик назад, и переспросить
+        // его об этом значит показать, что мы не слушали.
+        const openOrder = String(body.order ?? "").slice(0, 200).trim();
+        if (openOrder)
+          messages.push({
+            role: "system",
+            content:
+              `Сейчас в работе бронь: ${openOrder}. ` +
+              "Это уже известно — не переспрашивай. Спроси ровно одно недостающее поле " +
+              "(площадка, дата, сколько гостей, что за стол, телефон) и ничего больше.",
           });
         messages.push({ role: "user", content: text });
 

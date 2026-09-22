@@ -376,6 +376,23 @@ export const Route = createFileRoute("/api/bro-dev")({
           return json(await runAfishaLlm(ns, limit, Boolean(body.debug)));
         }
 
+        // Сброс отметок разбора афиши — по ключу пульта.
+        //
+        // Пока мозг лежал, прогон писал «проверено, пусто» на каждую
+        // площадку, до которой дошёл: отказ модели был неотличим от
+        // пустого ответа. Каждая такая отметка закрывает площадку на
+        // RECHECK_DAYS, то есть поломка мозга выедала покрытие афиши ещё
+        // десять дней после починки. Сама причина устранена, но ложные
+        // отметки надо чем-то снять.
+        if (action === "pult.afishaReset") {
+          if (String(body.key ?? "") !== (await pultAccessKey()))
+            return json({ ok: false, error: "key" }, 401);
+          const { kvListAll } = await import("../gtr/kv-ns");
+          const keys = await kvListAll(ns, "afishallm:");
+          for (const k of keys) await ns.delete(k);
+          return json({ ok: true, cleared: keys.length });
+        }
+
         // Дымовая проверка по требованию — по ключу пульта.
         //
         // Своё расписание её и так дёргает, но ждать два часа, чтобы

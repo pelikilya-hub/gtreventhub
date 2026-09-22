@@ -20,12 +20,14 @@ const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
 
 /** Сколько площадок берём за прогон.
  *
- *  Каждая — это несколько загрузок страниц плюс инференс на CPU. Два за
- *  прогон при кроне раз в два часа дают полный круг по 59 сайтам за
- *  пару суток, и это осознанный размен: медленно, зато прогон не
- *  упирается ни в лимиты воркера, ни в слоты мозга, которые в это же
- *  время нужны живым гостям. */
-const PER_RUN = 2;
+ *  Цифра была подписана под мозг на CPU: два за прогон, полный круг по
+ *  59 сайтам за пару суток. Мозг переехал на видеокарту, и инференс
+ *  перестал быть узким местом — но слот у карты пока один, и занимать
+ *  его надолго нельзя: в это же время он нужен живым гостям.
+ *
+ *  Поэтому три, а не десять. Поднимать выше стоит после замера реальной
+ *  задержки на карте, а не на глаз. */
+const PER_RUN = 3;
 
 /** Как часто возвращаемся к площадке, где ничего не нашли. Сайты
  *  переделывают, афишу заводят — но не каждую неделю. */
@@ -36,9 +38,13 @@ const RECHECK_DAYS = 10;
  *  витриной без единого события. */
 const PATHS = ["", "/events", "/whats-on", "/calendar", "/afisha", "/программа"];
 
-/** Потолок текста в промпт. Контекст слота 4096 токенов, и в него должны
- *  влезть инструкция, страница и ответ. */
-const TEXT_MAX = 5000;
+/** Потолок текста в промпт.
+ *
+ *  Было 5000 под контекст слота в 4096 токенов. Слот теперь 16384, и
+ *  урезанная до пяти тысяч знаков страница — это выброшенные события с
+ *  её нижней половины. Больше текста за тот же один вызов: платим
+ *  секундами инференса, а не числом запросов. */
+const TEXT_MAX = 14000;
 
 /** Отметка о прогоне по площадке. Живёт отдельно от afishasrc:, чтобы не
  *  трогать бухгалтерию разведчика по ручкам. */
@@ -102,9 +108,15 @@ export async function bestPage(site: string): Promise<{ url: string; text: strin
 
 type Brain = { url?: string; token?: string; model?: string };
 
-/** Спросить свой мозг. Возвращает сырой ответ или пустую строку. */
-async function askBrain(brain: Brain, prompt: string): Promise<string> {
-  if (!brain.url || !brain.token) return "";
+/** Спросить свой мозг.
+ *
+ *  Возвращает строку при ответе и null при отказе — это разные вещи, и
+ *  раньше они были одним. Пустая строка на отказе означала «модель
+ *  посмотрела и ничего не нашла», прогон писал «проверено, пусто» и
+ *  закрывал площадку на RECHECK_DAYS. Мозг лежал с 24.08 — и каждый
+ *  прогон молча вычёркивал по две площадки из покрытия на десять дней. */
+async function askBrain(brain: Brain, prompt: string): Promise<string | null> {
+  if (!brain.url || !brain.token) return null;
   try {
     const r = await fetch(`${brain.url.replace(/\/$/, "")}/v1/chat/completions`, {
       method: "POST",
@@ -122,7 +134,7 @@ async function askBrain(brain: Brain, prompt: string): Promise<string> {
       }),
       signal: AbortSignal.timeout(60_000),
     });
-    if (!r.ok) return "";
+    if (!r.ok) return null;
     const data = (await r.json()) as {
       choices?: { message?: { content?: string; reasoning_content?: string } }[];
     };
@@ -134,7 +146,7 @@ async function askBrain(brain: Brain, prompt: string): Promise<string> {
     const text = String(msg?.content || msg?.reasoning_content || "");
     return text.replace(/<think>[\s\S]*?<\/think>/g, "");
   } catch {
-    return "";
+    return null;
   }
 }
 
@@ -208,6 +220,12 @@ export async function runAfishaLlm(
       brain,
       buildExtractPrompt(page.text.slice(0, TEXT_MAX), today),
     );
+    // Мозг не ответил — площадка НЕ проверена. Отметку не ставим и
+    // прогон прекращаем: следующие упрутся в тот же отказ, а каждая
+    // ложная отметка закрывает площадку на десять дней.
+    if (raw === null) {
+      return { ok: false, reason: "brain-unreachable", venues };
+    }
     // Текст страницы передаём в разбор: без него нечем отличить
     // вычитанное событие от выдуманного.
     const fresh = parseExtracted(raw, { today, url: page.url, host, page: page.text });

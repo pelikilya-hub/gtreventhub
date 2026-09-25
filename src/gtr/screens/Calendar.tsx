@@ -614,7 +614,10 @@ export function CalendarScreen() {
           </Card>
 
           <Card style={{ marginTop: 14, padding: "12px 16px" }}>
-            <Eyebrow style={{ marginBottom: 8 }}>{t("ЗАГРУЗКА МЕСЯЦА")}</Eyebrow>
+            {/* «Загрузка месяца» читалось как «идёт загрузка»: на этом
+                споткнулся даже обходчик экранов, решив, что календарь
+                завис. Речь о занятости — сколько событий в каждый день. */}
+            <Eyebrow style={{ marginBottom: 8 }}>{t("ЗАНЯТОСТЬ ПО ДНЯМ")}</Eyebrow>
             <div style={{ display: "flex", gap: 2, alignItems: "flex-end", height: 34 }}>
               {loadCounts.map((c, i) => (
                 <div

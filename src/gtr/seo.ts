@@ -17,7 +17,15 @@ export type SeoLang = "ru" | "en";
  *  продукта и главная страница домена. */
 export const SEO_PATH: Record<SeoLang, string> = { ru: "/", en: "/en" };
 
-export const canonicalOf = (lang: SeoLang) => `${APP_URL}${SEO_PATH[lang]}`;
+/** Публичные страницы: витрина и открытая афиша. Всё прочее — кабинеты. */
+export type SeoPage = "home" | "afisha";
+export const PAGE_PATH: Record<SeoPage, Record<SeoLang, string>> = {
+  home: SEO_PATH,
+  afisha: { ru: "/afisha", en: "/en/afisha" },
+};
+
+export const canonicalOf = (lang: SeoLang, page: SeoPage = "home") =>
+  `${APP_URL}${PAGE_PATH[page][lang]}`;
 
 /** Обложка для превью в мессенджерах и выдаче. Отдельная картинка 1200×630:
  *  иконка приложения в этой роли обрезается в квадрат и читается как ошибка. */
@@ -52,9 +60,30 @@ export const SEO_COPY: Record<SeoLang, Copy> = {
   },
 };
 
-/** Мета-теги страницы витрины: то, что попадает в выдачу и в превью ссылки. */
-export function seoMeta(lang: SeoLang) {
-  const c = SEO_COPY[lang];
+const AFISHA_COPY: Record<SeoLang, Copy> = {
+  ru: {
+    title: "Афиша Таиланда сегодня: клубы и вечеринки Пхукета, Самуи, Бангкока — GTR Event",
+    description:
+      "Кто играет сегодня и на две недели вперёд: программа клубов, пляжных клубов и баров Пхукета, Самуи, Пангана, Паттайи и Бангкока. Время, вход и постеры с официальных анонсов площадок.",
+    ogTitle: "Афиша ночного Таиланда — кто играет сегодня",
+    ogDescription:
+      "Программа клубов и пляжных клубов на две недели вперёд: время, вход и постеры. Пхукет, Самуи, Панган, Паттайя, Бангкок.",
+    locale: "ru_RU",
+  },
+  en: {
+    title: "Thailand nightlife lineup tonight: Phuket, Samui, Bangkok parties — GTR Event",
+    description:
+      "Who plays tonight and for the next two weeks: clubs, beach clubs and bars in Phuket, Samui, Phangan, Pattaya and Bangkok. Times, entry and posters from the venues' official announcements.",
+    ogTitle: "Thailand nightlife lineup — who plays tonight",
+    ogDescription:
+      "Clubs and beach clubs two weeks ahead: times, entry and posters. Phuket, Samui, Phangan, Pattaya, Bangkok.",
+    locale: "en_US",
+  },
+};
+
+/** Мета-теги публичной страницы: то, что попадает в выдачу и в превью ссылки. */
+export function seoMeta(lang: SeoLang, page: SeoPage = "home") {
+  const c = (page === "afisha" ? AFISHA_COPY : SEO_COPY)[lang];
   const other: SeoLang = lang === "ru" ? "en" : "ru";
   return [
     { title: c.title },
@@ -64,7 +93,7 @@ export function seoMeta(lang: SeoLang) {
     { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1" },
     { property: "og:type", content: "website" },
     { property: "og:site_name", content: "GTR Event" },
-    { property: "og:url", content: canonicalOf(lang) },
+    { property: "og:url", content: canonicalOf(lang, page) },
     { property: "og:locale", content: c.locale },
     { property: "og:locale:alternate", content: SEO_COPY[other].locale },
     { property: "og:title", content: c.ogTitle },
@@ -82,12 +111,12 @@ export function seoMeta(lang: SeoLang) {
 
 /** Канонический адрес и языковые альтернативы. Без hreflang две версии
  *  витрины конкурируют друг с другом в выдаче как дубли. */
-export function seoLinks(lang: SeoLang) {
+export function seoLinks(lang: SeoLang, page: SeoPage = "home") {
   return [
-    { rel: "canonical", href: canonicalOf(lang) },
-    { rel: "alternate", hrefLang: "ru", href: canonicalOf("ru") },
-    { rel: "alternate", hrefLang: "en", href: canonicalOf("en") },
-    { rel: "alternate", hrefLang: "x-default", href: canonicalOf("ru") },
+    { rel: "canonical", href: canonicalOf(lang, page) },
+    { rel: "alternate", hrefLang: "ru", href: canonicalOf("ru", page) },
+    { rel: "alternate", hrefLang: "en", href: canonicalOf("en", page) },
+    { rel: "alternate", hrefLang: "x-default", href: canonicalOf("ru", page) },
   ];
 }
 

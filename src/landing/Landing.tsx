@@ -13,7 +13,7 @@ import { Link } from "@tanstack/react-router";
 import { useRef, type CSSProperties } from "react";
 
 import { APP_URL } from "../gtr/app-url";
-import { SEO_PATH, seoJsonLd, type SeoLang } from "../gtr/seo";
+import { PAGE_PATH, SEO_PATH, seoJsonLd, type SeoLang } from "../gtr/seo";
 import { useLandingFx } from "./fx";
 
 export type LandingStats = { venues: number; artists: number; regions: number };
@@ -21,6 +21,9 @@ export type LandingStats = { venues: number; artists: number; regions: number };
 const T = {
   ru: {
     open: "Открыть приложение",
+    afisha: "Афиша",
+    afishaNow: "Афиша на сегодня",
+    login: "Войти",
     signup: "Создать аккаунт",
     eyebrow: "Ночной Таиланд",
     h1: "Куда пойти сегодня —|знает приложение",
@@ -67,6 +70,9 @@ const T = {
   },
   en: {
     open: "Open the app",
+    afisha: "Lineup",
+    afishaNow: "Tonight's lineup",
+    login: "Sign in",
     signup: "Create an account",
     eyebrow: "Thailand nightlife",
     h1: "The app knows|where to go tonight",
@@ -112,6 +118,11 @@ const T = {
     liveBtn: "Watch the stream",
   },
 } as const;
+
+export const LANDING_T = T;
+
+/** Адрес афиши на языке витрины. */
+export const AFISHA_PATH = PAGE_PATH.afisha;
 
 const REGIONS: [string, string, string][] = [
   ["Пхукет", "Phuket", "phuket"],
@@ -185,30 +196,7 @@ export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats })
         dangerouslySetInnerHTML={{ __html: seoJsonLd(lang, stats) }}
       />
 
-      <header className="lp-top">
-        <div className="lp-wrap lp-top-in">
-          <a className="lp-logo" href={SEO_PATH[lang]} aria-label="GTR Event">
-            <img src="/icon-256.png" alt="" width={28} height={28} />
-            <b>GTR</b>
-            <span>EVENT</span>
-          </a>
-          <span className="lp-chip lp-hide-s" aria-hidden>
-            <i className="lp-dot" />
-            {t.tonight} <b data-clock>--:--</b>
-          </span>
-          <nav>
-            <Link className="lp-btn lp-btn-sm lp-btn-ghost" to={SEO_PATH[other] as "/"} aria-label={t.langSwitch}>
-              <span className="lp-hide-s">{t.langSwitch}</span>
-              <span className="lp-show-s" aria-hidden>
-                {other.toUpperCase()}
-              </span>
-            </Link>
-            <a className="lp-btn lp-btn-sm lp-btn-red" href={app("/gtr/tonight")}>
-              {t.open}
-            </a>
-          </nav>
-        </div>
-      </header>
+      <LpTop lang={lang} altHref={SEO_PATH[other]} />
 
       <main>
         <section className="lp-hero">
@@ -233,10 +221,10 @@ export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats })
             </h1>
             <p className="lp-lead lp-in4">{t.lead}</p>
             <div className="lp-cta lp-in5">
-              <a className="lp-btn lp-btn-red lp-btn-beat" href={app("/gtr/tonight")}>
-                {t.open}
+              <Link className="lp-btn lp-btn-red lp-btn-beat" to={AFISHA_PATH[lang] as "/"}>
+                {t.afishaNow}
                 <Arrow />
-              </a>
+              </Link>
               <a className="lp-btn" href={app("/gtr/signup")}>
                 {t.signup}
               </a>
@@ -364,10 +352,10 @@ export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats })
               {t.ctaP}
             </p>
             <div className="lp-cta" data-rv="">
-              <a className="lp-btn lp-btn-red lp-btn-beat" href={app("/gtr/tonight")}>
-                {t.open}
+              <Link className="lp-btn lp-btn-red lp-btn-beat" to={AFISHA_PATH[lang] as "/"}>
+                {t.afishaNow}
                 <Arrow />
-              </a>
+              </Link>
               <a className="lp-btn" href={app("/gtr/signup")}>
                 {t.signup}
               </a>
@@ -376,18 +364,59 @@ export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats })
         </section>
       </main>
 
-      <footer className="lp-wrap lp-foot">
-        <span className="lp-foot-mark">GTR</span>
-        <span>© GTR Event</span>
-        <span>{t.footRights}</span>
-        <span className="lp-sp">
-          {t.contact}:{" "}
-          <a href="https://t.me/bangtaostyle" rel="noopener">
-            @bangtaostyle
-          </a>
-        </span>
-      </footer>
+      <LpFoot lang={lang} />
     </div>
+  );
+}
+
+export function LpTop({ lang, altHref }: { lang: SeoLang; altHref: string }) {
+  const t = T[lang];
+  const other: SeoLang = lang === "ru" ? "en" : "ru";
+  return (
+    <header className="lp-top">
+      <div className="lp-wrap lp-top-in">
+        <a className="lp-logo" href={SEO_PATH[lang]} aria-label="GTR Event">
+          <img src="/icon-256.png" alt="" width={28} height={28} />
+          <b>GTR</b>
+          <span>EVENT</span>
+        </a>
+        <span className="lp-chip lp-hide-m" aria-hidden>
+          <i className="lp-dot" />
+          {t.tonight} <b data-clock>--:--</b>
+        </span>
+        <nav>
+          <Link className="lp-btn lp-btn-sm lp-btn-ghost" to={altHref as "/"} aria-label={t.langSwitch}>
+            <span className="lp-hide-s">{t.langSwitch}</span>
+            <span className="lp-show-s" aria-hidden>
+              {other.toUpperCase()}
+            </span>
+          </Link>
+          <a className="lp-btn lp-btn-sm lp-btn-ghost lp-hide-s" href={`${APP_URL}/gtr/login`}>
+            {t.login}
+          </a>
+          <Link className="lp-btn lp-btn-sm lp-btn-red" to={AFISHA_PATH[lang] as "/"}>
+            {t.afisha}
+          </Link>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+export function LpFoot({ lang }: { lang: SeoLang }) {
+  const t = T[lang];
+  return (
+    <footer className="lp-wrap lp-foot">
+      <span className="lp-foot-mark">GTR</span>
+      <span>© GTR Event</span>
+      <span>{t.footRights}</span>
+      <span className="lp-sp">
+        {t.contact}:{" "}
+        <a href="https://t.me/bangtaostyle" rel="noopener">
+          @bangtaostyle
+        </a>
+      </span>
+    </footer>
   );
 }
 
@@ -415,7 +444,7 @@ function Stat({ n, label }: { n: number; label: string }) {
   );
 }
 
-function Arrow() {
+export function Arrow() {
   return (
     <svg className="lp-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
       <path d="M5 12h14M13 6l6 6-6 6" />

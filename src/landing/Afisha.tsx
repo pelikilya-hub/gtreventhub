@@ -80,10 +80,17 @@ function dayLabel(iso: string, today: string, lang: SeoLang) {
   const t = T[lang];
   if (iso === today) return t.today;
   if (iso === addDays(today, 1)) return t.tomorrow;
-  const d = new Date(`${iso}T00:00:00Z`);
-  const wd = new Intl.DateTimeFormat(lang === "ru" ? "ru-RU" : "en-GB", { weekday: "short", timeZone: "UTC" }).format(d);
+  const wd = WEEKDAYS[lang][new Date(`${iso}T00:00:00Z`).getUTCDay()];
   return `${wd} ${iso.slice(8, 10)}.${iso.slice(5, 7)}`;
 }
+
+// Свои имена дней, а не Intl: ICU воркера и браузера расходятся в регистре
+// и сокращениях, и подпись, разная на сервере и в клиенте, сломала бы
+// гидрацию — React перерисовал бы всю страницу.
+const WEEKDAYS: Record<SeoLang, string[]> = {
+  ru: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+  en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+};
 
 export function Afisha({ lang, data }: { lang: SeoLang; data: PublicAfisha }) {
   const t = T[lang];

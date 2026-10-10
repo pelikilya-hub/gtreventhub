@@ -6,7 +6,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { sessionFn } from "@/gtr/auth";
 import { publicStatsFn } from "@/gtr/public-stats";
 import { seoLinks, seoMeta } from "@/gtr/seo";
-import { Landing } from "@/landing/Landing";
+import { LANDING_FONTS, Landing } from "@/landing/Landing";
 import landingCss from "@/landing/landing.css?url";
 
 export const Route = createFileRoute("/en")({
@@ -17,7 +17,11 @@ export const Route = createFileRoute("/en")({
   loader: () => publicStatsFn(),
   head: () => ({
     meta: seoMeta("en"),
-    links: [...seoLinks("en"), { rel: "stylesheet", href: landingCss }],
+    links: [
+      ...seoLinks("en"),
+      { rel: "stylesheet", href: landingCss },
+      ...LANDING_FONTS,
+    ],
   }),
   component: () => <Landing lang="en" stats={Route.useLoaderData()} />,
 });

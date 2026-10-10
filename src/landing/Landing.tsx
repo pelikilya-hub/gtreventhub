@@ -10,9 +10,11 @@
 // аккаунт. Кабинеты, контакты площадок и прайсы сюда не попадают: витрина
 // говорит о продукте, а не выкладывает его содержимое наружу.
 import { Link } from "@tanstack/react-router";
+import { useRef, type CSSProperties } from "react";
 
 import { APP_URL } from "../gtr/app-url";
 import { SEO_PATH, seoJsonLd, type SeoLang } from "../gtr/seo";
+import { useLandingFx } from "./fx";
 
 export type LandingStats = { venues: number; artists: number; regions: number };
 
@@ -21,7 +23,7 @@ const T = {
     open: "Открыть приложение",
     signup: "Создать аккаунт",
     eyebrow: "Ночной Таиланд",
-    h1: "Куда пойти сегодня — знает приложение",
+    h1: "Куда пойти сегодня —|знает приложение",
     lead:
       "Живая афиша клубов, пляжных клубов и баров Таиланда: кто играет сегодня, где и во сколько. Бронь стола за пару касаний, маршрут вечера на карте и подбор вечеринок под твою музыку.",
     stVenues: "площадок в базе",
@@ -29,7 +31,7 @@ const T = {
     stRegions: "региона Таиланда",
     stFree: "вход бесплатный",
     whatEyebrow: "Что внутри",
-    whatH: "Вечер собирается сам",
+    whatH: "Вечер|собирается сам",
     feats: [
       ["Афиша на каждый вечер", "Программа площадок собирается автоматически с их официальных источников — сайтов, Facebook и Instagram. Открыл — видишь, кто играет сегодня."],
       ["Бронь стола", "Заявка уходит прямо площадке, ответ — в течение 15 минут. Для заведений с рассадкой выбираешь зону, стол и предзаказ по меню."],
@@ -39,27 +41,35 @@ const T = {
       ["Кабинет площадки", "Заведение ведёт свою афишу, залы и прайс, принимает заявки и брони. Кабинет открывается сразу после подтверждения."],
     ],
     regionsEyebrow: "География",
-    regionsH: "Пять регионов, один вечер",
+    regionsH: "Острова, побережье,|столица",
     regionsP: "База растёт волнами: сначала лучшие площадки региона, потом хвост. Каждая запись — с источником, без выдуманных фактов.",
     installEyebrow: "Установка",
-    installH: "Ставится как приложение, весит как страница",
+    installH: "Ставится как приложение,|весит как страница",
     installP: "Никаких магазинов и обновлений: открываешь адрес в браузере и добавляешь на главный экран. Дальше запускается на весь экран, без адресной строки.",
     steps: [
       ["iPhone", "Открой gtrevent.com в Safari → «Поделиться» → «На экран «Домой»."],
       ["Android", "Открой в Chrome → меню ⋮ → «Установить приложение»."],
       ["Аккаунт", "Заведи профиль — афиша начнёт подстраиваться под твой вкус, откроются бронь и маршрут вечера."],
     ],
-    ctaH: "Открой сегодняшний вечер",
+    ctaH: "Открой|сегодняшний вечер",
     ctaP: "Приложение бесплатное, регистрация занимает минуту.",
     footRights: "Каталог площадок и артистов — собственная база GTR Event.",
     contact: "Связь и сотрудничество",
     langSwitch: "English",
+    scroll: "Листай",
+    tonight: "Пхукет · сейчас",
+    ticker: ["Живая афиша", "Бронь стола", "Маршрут вечера", "Подбор под музыку", "Пхукет", "Самуи", "Панган", "Бангкок", "Паттайя"],
+    liveEyebrow: "Эфир · bangtaostyle.com",
+    liveH: "Кольцо Таиланда|в прямом эфире",
+    liveP: "Экипаж GTR проходит страну по кругу. Трансляция, машина на карте маршрута и чат с экипажем — на bangtaostyle.com.",
+    liveState: "Ждём сигнал",
+    liveBtn: "Смотреть эфир",
   },
   en: {
     open: "Open the app",
     signup: "Create an account",
     eyebrow: "Thailand nightlife",
-    h1: "The app knows where to go tonight",
+    h1: "The app knows|where to go tonight",
     lead:
       "Live lineups from clubs, beach clubs and bars across Thailand: who plays tonight, where and at what time. Table booking in two taps, an evening route on the map and parties matched to your music.",
     stVenues: "venues in the base",
@@ -67,7 +77,7 @@ const T = {
     stRegions: "regions of Thailand",
     stFree: "free to use",
     whatEyebrow: "What's inside",
-    whatH: "The night plans itself",
+    whatH: "The night|plans itself",
     feats: [
       ["Nightly lineups", "Venue programmes are collected automatically from their official sources — websites, Facebook and Instagram. Open the app and see who plays tonight."],
       ["Table booking", "The request goes straight to the venue, answered within 15 minutes. Where seating is mapped, you pick the zone, the table and a pre-order from the menu."],
@@ -77,21 +87,29 @@ const T = {
       ["Venue cabinet", "A venue runs its own lineup, rooms and rates, and receives requests and bookings. The cabinet opens as soon as the venue confirms."],
     ],
     regionsEyebrow: "Geography",
-    regionsH: "Five regions, one night out",
+    regionsH: "Islands, coast,|capital",
     regionsP: "The base grows in waves: the best venues of a region first, the tail after. Every record carries its source — nothing invented.",
     installEyebrow: "Install",
-    installH: "Installs like an app, weighs like a page",
+    installH: "Installs like an app,|weighs like a page",
     installP: "No stores, no updates: open the address in a browser and add it to your home screen. It then runs full screen, with no address bar.",
     steps: [
       ["iPhone", "Open gtrevent.com in Safari → Share → Add to Home Screen."],
       ["Android", "Open in Chrome → menu ⋮ → Install app."],
       ["Account", "Create a profile — the lineup starts matching your taste, booking and the evening route open up."],
     ],
-    ctaH: "Open tonight",
+    ctaH: "Open|tonight",
     ctaP: "The app is free, signing up takes a minute.",
     footRights: "The venue and artist catalogue is GTR Event's own database.",
     contact: "Contact and partnerships",
     langSwitch: "Русский",
+    scroll: "Scroll",
+    tonight: "Phuket · now",
+    ticker: ["Live lineups", "Table booking", "Evening route", "Matched to your music", "Phuket", "Samui", "Phangan", "Bangkok", "Pattaya"],
+    liveEyebrow: "Live · bangtaostyle.com",
+    liveH: "The Thailand ring|live on air",
+    liveP: "The GTR crew drives a full loop of the country. The stream, the car on the route map and the crew chat are on bangtaostyle.com.",
+    liveState: "Standby",
+    liveBtn: "Watch the stream",
   },
 } as const;
 
@@ -104,6 +122,30 @@ const REGIONS: [string, string, string][] = [
   ["Пханг-Нга", "Phang Nga", "phangnga"],
 ];
 
+// Кольцо эфира bangtaostyle.com — тот же порядок, что в его описании.
+const RING: [string, string][] = [
+  ["Пхукет", "Phuket"],
+  ["Самуи", "Samui"],
+  ["Панган", "Phangan"],
+  ["Чиангмай", "Chiang Mai"],
+  ["Аюттхая", "Ayutthaya"],
+  ["Бангкок", "Bangkok"],
+  ["Паттайя", "Pattaya"],
+];
+
+const LIVE_URL = "https://bangtaostyle.com";
+
+// Знак и заголовки первого экрана: без предзагрузки они проявляются
+// с опозданием и герой перескакивает с системного шрифта на фирменный.
+const fontLink = (href: string) =>
+  ({ rel: "preload", as: "font", type: "font/woff2", crossOrigin: "anonymous", href }) as const;
+export const LANDING_FONTS = [
+  fontLink("/fonts/gtr/Trashed.woff2"),
+  fontLink("/fonts/gtr/Unbounded-cyrillic.woff2"),
+  fontLink("/fonts/gtr/Unbounded-latin.woff2"),
+  fontLink("/fonts/gtr/GlitchCity.woff2"),
+];
+
 const ICONS = [
   "M3 6h18v15H3z M8 3v5 M16 3v5 M3 11h18",
   "M4 10h16v2a6 6 0 0 1-12 0z M12 12v6 M8 21h8",
@@ -113,13 +155,29 @@ const ICONS = [
   "M3 21V8l9-5 9 5v13 M9 21v-7h6v7",
 ];
 
+/** «до|после»: вторая часть заголовка — фирменным красным. */
+function Accent({ text }: { text: string }) {
+  const [a, b] = text.split("|");
+  if (b === undefined) return <>{a}</>;
+  return (
+    <>
+      {a} <em>{b}</em>
+    </>
+  );
+}
+
+const plain = (s: string) => s.replace("|", " ");
+const pad = (n: number) => String(n).padStart(2, "0");
+
 export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats }) {
   const t = T[lang];
   const other: SeoLang = lang === "ru" ? "en" : "ru";
   const app = (path: string) => `${APP_URL}${path}`;
+  const root = useRef<HTMLDivElement>(null);
+  useLandingFx(root);
 
   return (
-    <div className="lp">
+    <div className="lp" ref={root}>
       {/* Разметка schema.org: бренд, сайт и приложение одним блоком. */}
       <script
         type="application/ld+json"
@@ -127,66 +185,107 @@ export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats })
         dangerouslySetInnerHTML={{ __html: seoJsonLd(lang, stats) }}
       />
 
-      <header className="lp-wrap lp-top">
-        <a className="lp-logo" href={SEO_PATH[lang]}>
-          <img src="/icon-256.png" alt="" width={30} height={30} />
-          GTR EVENT
-        </a>
-        <nav>
-          <Link className="lp-btn lp-btn-sm" to={SEO_PATH[other] as "/"}>
-            {t.langSwitch}
-          </Link>
-          <a className="lp-btn lp-btn-sm lp-btn-red" href={app("/gtr/tonight")}>
-            {t.open}
+      <header className="lp-top">
+        <div className="lp-wrap lp-top-in">
+          <a className="lp-logo" href={SEO_PATH[lang]} aria-label="GTR Event">
+            <img src="/icon-256.png" alt="" width={28} height={28} />
+            <b>GTR</b>
+            <span>EVENT</span>
           </a>
-        </nav>
+          <span className="lp-chip lp-hide-s" aria-hidden>
+            <i className="lp-dot" />
+            {t.tonight} <b data-clock>--:--</b>
+          </span>
+          <nav>
+            <Link className="lp-btn lp-btn-sm lp-btn-ghost" to={SEO_PATH[other] as "/"} aria-label={t.langSwitch}>
+              <span className="lp-hide-s">{t.langSwitch}</span>
+              <span className="lp-show-s" aria-hidden>
+                {other.toUpperCase()}
+              </span>
+            </Link>
+            <a className="lp-btn lp-btn-sm lp-btn-red" href={app("/gtr/tonight")}>
+              {t.open}
+            </a>
+          </nav>
+        </div>
       </header>
 
       <main>
-        <section className="lp-wrap lp-hero">
-          <div className="lp-mono">{t.eyebrow}</div>
-          <h1>{t.h1}</h1>
-          <p>{t.lead}</p>
-          <div className="lp-cta">
-            <a className="lp-btn lp-btn-red" href={app("/gtr/tonight")}>
-              {t.open}
-            </a>
-            <a className="lp-btn" href={app("/gtr/signup")}>
-              {t.signup}
-            </a>
+        <section className="lp-hero">
+          <div className="lp-hero-bg" aria-hidden>
+            <span className="lp-glow" />
+            <span className="lp-grid-bg" />
+            <span className="lp-laser" />
+          </div>
+          <div className="lp-wrap lp-hero-in">
+            <div className="lp-mono lp-kick lp-in1" data-decode="">
+              <i className="lp-dot" /> {t.eyebrow}
+            </div>
+            {/* Вход — на обёртке: сбой меняет анимацию самого знака и
+                иначе перезапускал бы вход, знак мигал бы пустотой. */}
+            <div className="lp-in2" aria-hidden>
+              <div className="lp-mark" data-text="GTR EVENT">
+                GTR EVENT
+              </div>
+            </div>
+            <h1 className="lp-in3">
+              <Accent text={t.h1} />
+            </h1>
+            <p className="lp-lead lp-in4">{t.lead}</p>
+            <div className="lp-cta lp-in5">
+              <a className="lp-btn lp-btn-red lp-btn-beat" href={app("/gtr/tonight")}>
+                {t.open}
+                <Arrow />
+              </a>
+              <a className="lp-btn" href={app("/gtr/signup")}>
+                {t.signup}
+              </a>
+            </div>
+          </div>
+          <div className="lp-cue lp-mono" aria-hidden>
+            {t.scroll}
+            <i />
           </div>
         </section>
 
+        <div className="lp-ticker" aria-hidden>
+          <div className="lp-ticker-in">
+            {[0, 1].map((k) => (
+              <span key={k}>
+                {t.ticker.map((w) => (
+                  <span key={w}>
+                    {w}
+                    <i>✕</i>
+                  </span>
+                ))}
+              </span>
+            ))}
+          </div>
+        </div>
+
         <section className="lp-wrap">
-          <div className="lp-stats">
+          <div className="lp-stats" data-rv="">
+            <Stat n={stats.venues} label={t.stVenues} />
+            <Stat n={stats.artists} label={t.stArtists} />
+            <Stat n={stats.regions} label={t.stRegions} />
             <div className="lp-stat">
-              <b>{stats.venues}</b>
-              <span className="lp-mono">{t.stVenues}</span>
-            </div>
-            <div className="lp-stat">
-              <b>{stats.artists}</b>
-              <span className="lp-mono">{t.stArtists}</span>
-            </div>
-            <div className="lp-stat">
-              <b>{stats.regions}</b>
-              <span className="lp-mono">{t.stRegions}</span>
-            </div>
-            <div className="lp-stat">
-              <b>0 ฿</b>
+              <b className="lp-num">0 ฿</b>
               <span className="lp-mono">{t.stFree}</span>
             </div>
           </div>
         </section>
 
         <section className="lp-wrap lp-sec">
-          <div className="lp-mono">{t.whatEyebrow}</div>
-          <h2>{t.whatH}</h2>
+          <SecHead eyebrow={t.whatEyebrow} title={t.whatH} />
           <div className="lp-grid">
             {t.feats.map(([h, p], i) => (
-              <article className="lp-card" key={h}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
-                  <path d={ICONS[i]} />
-                </svg>
+              <article className="lp-card" key={h} data-rv="" style={{ "--i": i } as CSSProperties}>
+                <div className="lp-card-top">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+                    <path d={ICONS[i]} />
+                  </svg>
+                  <span className="lp-idx">{pad(i + 1)}</span>
+                </div>
                 <h3>{h}</h3>
                 <p>{p}</p>
               </article>
@@ -194,27 +293,61 @@ export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats })
           </div>
         </section>
 
+        <section className="lp-live">
+          <div className="lp-wrap lp-live-in">
+            <div>
+              <SecHead eyebrow={t.liveEyebrow} title={t.liveH} />
+              <p className="lp-sec-p" data-rv="">
+                {t.liveP}
+              </p>
+              <div className="lp-cta" data-rv="">
+                <a className="lp-btn lp-btn-red" href={LIVE_URL} rel="noopener">
+                  {t.liveBtn}
+                  <Arrow />
+                </a>
+                <span className="lp-chip">
+                  <i className="lp-dot lp-dot-blink" />
+                  {t.liveState}
+                </span>
+              </div>
+            </div>
+            <ol className="lp-ring" data-rv="" aria-label={plain(t.liveH)}>
+              {[...RING, RING[0]].map(([ru, en], i) => (
+                <li key={`${en}${i}`} style={{ "--i": i } as CSSProperties}>
+                  <span className="lp-idx">{pad(i + 1)}</span>
+                  {lang === "ru" ? ru : en}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
         <section className="lp-wrap lp-sec">
-          <div className="lp-mono">{t.regionsEyebrow}</div>
-          <h2>{t.regionsH}</h2>
-          <p>{t.regionsP}</p>
+          <SecHead eyebrow={t.regionsEyebrow} title={t.regionsH} />
+          <p className="lp-sec-p" data-rv="">
+            {t.regionsP}
+          </p>
           <div className="lp-regions">
-            {REGIONS.map(([ru, en]) => (
-              <a className="lp-region" href={app("/gtr/base")} key={en}>
-                {lang === "ru" ? ru : en}
-                <i>{lang === "ru" ? en : ru}</i>
+            {REGIONS.map(([ru, en], i) => (
+              <a className="lp-region" href={app("/gtr/base")} key={en} data-rv="" style={{ "--i": i } as CSSProperties}>
+                <span className="lp-idx">{pad(i + 1)}</span>
+                <b>{lang === "ru" ? ru : en}</b>
+                {lang === "ru" ? <i className="lp-trash">{en}</i> : <i className="lp-mono">{ru}</i>}
+                <Arrow />
               </a>
             ))}
           </div>
         </section>
 
         <section className="lp-wrap lp-sec">
-          <div className="lp-mono">{t.installEyebrow}</div>
-          <h2>{t.installH}</h2>
-          <p>{t.installP}</p>
+          <SecHead eyebrow={t.installEyebrow} title={t.installH} />
+          <p className="lp-sec-p" data-rv="">
+            {t.installP}
+          </p>
           <div className="lp-steps">
-            {t.steps.map(([h, p]) => (
-              <div className="lp-step" key={h}>
+            {t.steps.map(([h, p], i) => (
+              <div className="lp-step" key={h} data-rv="" style={{ "--i": i } as CSSProperties}>
+                <span className="lp-step-n">{i + 1}</span>
                 <b>{h}</b>
                 <p>{p}</p>
               </div>
@@ -222,21 +355,29 @@ export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats })
           </div>
         </section>
 
-        <section className="lp-wrap lp-sec">
-          <h2>{t.ctaH}</h2>
-          <p>{t.ctaP}</p>
-          <div className="lp-cta">
-            <a className="lp-btn lp-btn-red" href={app("/gtr/tonight")}>
-              {t.open}
-            </a>
-            <a className="lp-btn" href={app("/gtr/signup")}>
-              {t.signup}
-            </a>
+        <section className="lp-final">
+          <div className="lp-wrap">
+            <h2 data-rv="" data-decode="">
+              <Accent text={t.ctaH} />
+            </h2>
+            <p className="lp-sec-p" data-rv="">
+              {t.ctaP}
+            </p>
+            <div className="lp-cta" data-rv="">
+              <a className="lp-btn lp-btn-red lp-btn-beat" href={app("/gtr/tonight")}>
+                {t.open}
+                <Arrow />
+              </a>
+              <a className="lp-btn" href={app("/gtr/signup")}>
+                {t.signup}
+              </a>
+            </div>
           </div>
         </section>
       </main>
 
       <footer className="lp-wrap lp-foot">
+        <span className="lp-foot-mark">GTR</span>
         <span>© GTR Event</span>
         <span>{t.footRights}</span>
         <span className="lp-sp">
@@ -247,5 +388,37 @@ export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats })
         </span>
       </footer>
     </div>
+  );
+}
+
+function SecHead({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div className="lp-head" data-rv="">
+      <div className="lp-mono lp-kick" data-decode="">
+        {eyebrow}
+      </div>
+      <h2 data-decode="">
+        <Accent text={title} />
+      </h2>
+    </div>
+  );
+}
+
+function Stat({ n, label }: { n: number; label: string }) {
+  return (
+    <div className="lp-stat">
+      <b className="lp-num" data-count={n}>
+        {n}
+      </b>
+      <span className="lp-mono">{label}</span>
+    </div>
+  );
+}
+
+function Arrow() {
+  return (
+    <svg className="lp-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
   );
 }

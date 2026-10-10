@@ -188,6 +188,14 @@
   src: url(/fonts/gtr/AllAges.woff2) format('woff2');
 }
 
+/* Переход с витрины в приложение — полной загрузкой страницы. Без этой
+   пары (здесь и в landing.css) браузер мигает белым между документами. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
 .gtr-app {
   /* ---- подложка: приглушённый чёрный, не #000 ---- */
   --gtr-bg: #0a0b0d;

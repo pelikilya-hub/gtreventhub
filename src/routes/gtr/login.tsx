@@ -129,8 +129,11 @@ function LoginPage() {
         style={{ left: "78%", animationDelay: "1.4s" }}
       />
 
+      {/* gtr-auth — слой языка bangtaostyle.com: Unbounded в заголовке,
+          срезанный угол у панели, шкала серого красками, а не
+          прозрачностью. Токены сняты с рабочего CSS самого сайта. */}
       <div
-        className="gtr-fade"
+        className="gtr-fade gtr-auth"
         style={{ width: "100%", maxWidth: 420, position: "relative" }}
       >
         <div style={{ textAlign: "center", marginBottom: 26 }}>
@@ -140,10 +143,13 @@ function LoginPage() {
             alt="GTR — Global Transformation Reality"
             style={{ width: "min(340px, 82%)", display: "block", margin: "0 auto" }}
           />
-          <Eyebrow style={{ marginTop: 10 }}>{t("ОПЕРАЦИОННАЯ ПЛАТФОРМА · ПХУКЕТ")}</Eyebrow>
+          <h1 className="gtr-auth-title" style={{ marginTop: 14 }}>
+            {t("Вход в GTR Event")}
+          </h1>
+          <p className="gtr-auth-sub">{t("Операционная платформа · Пхукет")}</p>
         </div>
 
-        <div className="gtr-card" style={{ padding: 24 }}>
+        <div className="gtr-auth-panel gtr-cut">
           {!demo ? null : (
             <>
               <Eyebrow style={{ marginBottom: 12 }}>{t("БЫСТРЫЙ ВХОД · ДЕМО-РОЛИ")}</Eyebrow>
@@ -236,8 +242,12 @@ function LoginPage() {
             }}
             style={{ display: "grid", gap: 10 }}
           >
+            <label className="gtr-auth-label" htmlFor="gtr-email">
+              {t("Почта")}
+            </label>
             <input
-              className="gtr-input"
+              id="gtr-email"
+              className="gtr-auth-input"
               type="email"
               name="email"
               autoComplete="username"
@@ -245,8 +255,12 @@ function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            <label className="gtr-auth-label" htmlFor="gtr-pass" style={{ marginTop: 4 }}>
+              {t("Пароль")}
+            </label>
             <input
-              className="gtr-input"
+              id="gtr-pass"
+              className="gtr-auth-input"
               type="password"
               name="password"
               autoComplete="current-password"
@@ -269,7 +283,7 @@ function LoginPage() {
               </div>
             ) : null}
             <button
-              className="gtr-btn gtr-btn-red"
+              className="gtr-auth-btn gtr-auth-btn-red"
               type="submit"
               disabled={busy}
               style={{ padding: "11px 13px" }}

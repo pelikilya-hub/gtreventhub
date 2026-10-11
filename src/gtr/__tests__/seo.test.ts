@@ -52,6 +52,8 @@ describe("мета витрины", () => {
   it("адреса витрины строятся от APP_URL, а не вписаны руками", () => {
     expect(canonicalOf("ru")).toBe(`${APP_URL}/`);
     expect(canonicalOf("en")).toBe(`${APP_URL}/en`);
+    expect(canonicalOf("ru", "afisha")).toBe(`${APP_URL}/afisha`);
+    expect(canonicalOf("en", "afisha")).toBe(`${APP_URL}/en/afisha`);
     expect(OG_IMAGE.startsWith(APP_URL)).toBe(true);
   });
 
@@ -75,6 +77,8 @@ describe("robots и карта сайта", () => {
     expect(robots).toMatch(/^Disallow: \/gtr\/$/m);
     expect(robots).toMatch(/^Allow: \/\$$/m);
     expect(robots).toMatch(/^Allow: \/en\$$/m);
+    expect(robots).toMatch(/^Allow: \/afisha\$$/m);
+    expect(robots).toMatch(/^Allow: \/en\/afisha\$$/m);
   });
 
   it("краулеры ИИ по-прежнему запрещены поимённо", () => {
@@ -86,18 +90,18 @@ describe("robots и карта сайта", () => {
     expect(robots).toContain(`Sitemap: ${APP_URL}/sitemap.xml`);
   });
 
-  it("в карте сайта только витрина — кабинеты туда не попадают", () => {
+  it("в карте сайта только витрина и афиша — кабинеты туда не попадают", () => {
     const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    expect(locs).toEqual([`${APP_URL}/`, `${APP_URL}/en`]);
+    expect(locs).toEqual([`${APP_URL}/`, `${APP_URL}/en`, `${APP_URL}/afisha`, `${APP_URL}/en/afisha`]);
     // адреса, а не комментарии: в шапке файла /gtr/ упомянут как раз затем,
     // чтобы объяснить, почему его здесь нет
     for (const l of locs) expect(l).not.toContain("/gtr/");
   });
 
-  it("у обеих страниц карты объявлены языковые альтернативы", () => {
-    expect([...sitemap.matchAll(/hreflang="ru"/g)]).toHaveLength(2);
-    expect([...sitemap.matchAll(/hreflang="en"/g)]).toHaveLength(2);
-    expect([...sitemap.matchAll(/hreflang="x-default"/g)]).toHaveLength(2);
+  it("у каждой страницы карты объявлены языковые альтернативы", () => {
+    expect([...sitemap.matchAll(/hreflang="ru"/g)]).toHaveLength(4);
+    expect([...sitemap.matchAll(/hreflang="en"/g)]).toHaveLength(4);
+    expect([...sitemap.matchAll(/hreflang="x-default"/g)]).toHaveLength(4);
   });
 });
 

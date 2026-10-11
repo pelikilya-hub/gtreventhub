@@ -2,7 +2,8 @@
 <!--
   Карта сайта GTR Event.
 
-  В ней ровно то, что мы хотим видеть в выдаче: две языковые версии витрины.
+  В ней ровно то, что мы хотим видеть в выдаче: витрина и открытая афиша,
+  каждая в двух языковых версиях.
   Приложение (/gtr/) сюда не попадает никогда — это кабинеты, а не страницы:
   за ними вход, там контакты площадок, прайсы и переписка.
 -->
@@ -23,5 +24,21 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://gtrevent.com/"/>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://gtrevent.com/afisha</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://gtrevent.com/afisha"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gtrevent.com/en/afisha"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://gtrevent.com/afisha"/>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://gtrevent.com/en/afisha</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://gtrevent.com/afisha"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gtrevent.com/en/afisha"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://gtrevent.com/afisha"/>
+    <changefreq>hourly</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset>

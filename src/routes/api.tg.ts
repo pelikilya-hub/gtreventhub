@@ -91,14 +91,35 @@ const reply = (chatId: number, text: string, markup?: unknown) =>
     ...(markup ? { reply_markup: markup } : {}),
   });
 
-// Пользователь по чату: привязка + карточка аккаунта
-async function userOfChat(ns: KvNs, chatId: number): Promise<StoredUser | { email: string } | null> {
+// Пользователь по чату: привязка плюс живая карточка аккаунта.
+//
+// Раньше здесь был фолбэк: нет карточки — возвращаем { email }. Выглядело
+// безобидно, а означало вот что. Админ удалял уволенного, стиралась
+// только карточка, а привязка tgrev:<chatId> оставалась. Бот находил её,
+// получал объект без поля role — и isStaff, устроенный как «любой, кто
+// не артист», отвечал «да». Уволенный продолжал смотреть заявки и
+// события командными командами, пока кто-нибудь не заметит.
+//
+// Нет карточки — нет человека. Заодно снимаем осиротевшую привязку:
+// иначе она будет находиться при каждом сообщении и жить вечно.
+async function userOfChat(ns: KvNs, chatId: number): Promise<StoredUser | null> {
   const email = await ns.get(`tgrev:${chatId}`);
   if (!email) return null;
-  return (await kvGetJson<StoredUser>(ns, `user:${email}`)) ?? { email };
+  const acc = await kvGetJson<StoredUser>(ns, `user:${email}`);
+  if (acc) return acc;
+  await ns.delete(`tgrev:${chatId}`);
+  await ns.delete(`tg:${email}`);
+  return null;
 }
 
-const isStaff = (u: { role?: string }) => u.role !== "artist";
+/** Служебные роли: перечислены поимённо.
+ *
+ *  Было «все, кроме артиста» — и любая новая роль автоматически
+ *  становилась служебной. Так посетитель и площадка, появившиеся позже,
+ *  молча получили доступ к командным командам бота. Белый список не
+ *  ошибается в эту сторону: незнакомая роль служебной не станет. */
+const STAFF_ROLES = new Set(["gtr", "pr", "owner", "sales", "organizer"]);
+const isStaff = (u: { role?: string }) => STAFF_ROLES.has(String(u.role ?? ""));
 
 // ---------- конкурс инвайтинга ----------
 // Личная инвайт-ссылка на канал ИЛИ на чат: кто по ней вступил — засчитан

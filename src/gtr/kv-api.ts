@@ -219,11 +219,22 @@ export const deleteUserFn = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string }) => d)
   .handler(async ({ data }) => {
     const me = await currentUser();
-    if (me?.role !== "gtr") return { ok: false as const };
+    if (me?.role !== "gtr") return { ok: false as const, error: "Нет прав" };
     const ns = await getKvNs();
-    if (!ns) return { ok: false as const };
-    await ns.delete(`user:${data.email.trim().toLowerCase()}`);
-    return { ok: true as const };
+    if (!ns) return { ok: false as const, error: "Хранилище недоступно" };
+    const email = data.email.trim().toLowerCase();
+    // Себя не удаляем. Админ, стёрший собственный аккаунт, остаётся с
+    // живой кукой до конца недели и теряет доступ молча — в момент, когда
+    // уже не сможет его вернуть.
+    if (email === me.email.toLowerCase())
+      return { ok: false as const, error: "Нельзя удалить собственный аккаунт" };
+    // Раньше стиралась одна карточка user:<email>, а привязка Telegram,
+    // подписки на push и индексы входов оставались жить. Уволенный
+    // продолжал ходить в боте со служебными правами и получать
+    // уведомления команды.
+    const { purgeAccount } = await import("./identity");
+    const { removed } = await purgeAccount(ns, email);
+    return { ok: true as const, removed: removed.length };
   });
 
 // Менеджеры для назначения заявок: доступно всем ролям площадок

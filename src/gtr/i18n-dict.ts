@@ -1256,6 +1256,10 @@ export const EN: Record<string, string> = {
   "ВХОД ПО EMAIL И ПАРОЛЮ": "LOGIN BY EMAIL AND PASSWORD",
   "ВЫ ОРГАНИЗАТОР?": "ARE YOU AN ORGANIZER?",
   "Войти в кабинет": "Login to cabinet",
+  // Экран входа в языке bangtaostyle: заголовок Unbounded и подпись.
+  "Вход в GTR Event": "Sign in to GTR Event",
+  "Операционная платформа · Пхукет": "Operations platform · Phuket",
+  "Почта": "Email",
   // Двери входа: Telegram, Google, телефон. Экран входа — первое, что
   // видит иностранный гость, ради которого дверь через Google и делалась.
   "ВХОД БЕЗ ПАРОЛЯ": "SIGN IN WITHOUT A PASSWORD",
@@ -2672,6 +2676,9 @@ export const TH: Record<string, string> = {
   "ВХОД ПО EMAIL И ПАРОЛЮ": "เข้าสู่ระบบด้วย email และรหัสผ่าน",
   "ВЫ ОРГАНИЗАТОР?": "คุณเป็นผู้จัดการหรือไม่",
   "Войти в кабинет": "เข้าสู่ห้องของคุณ",
+  "Вход в GTR Event": "เข้าสู่ระบบ GTR Event",
+  "Операционная платформа · Пхукет": "แพลตฟอร์มปฏิบัติการ · ภูเก็ต",
+  "Почта": "อีเมล",
   "ВХОД БЕЗ ПАРОЛЯ": "เข้าสู่ระบบโดยไม่ใช้รหัสผ่าน",
   "Войти через Telegram": "เข้าสู่ระบบด้วย Telegram",
   "Войти через Google": "เข้าสู่ระบบด้วย Google",

@@ -188,8 +188,156 @@
   src: url(/fonts/gtr/AllAges.woff2) format('woff2');
 }
 
-/* Переход с витрины в приложение — полной загрузкой страницы. Без этой
-   пары (здесь и в landing.css) браузер мигает белым между документами. */
+/* Unbounded — заголовочный шрифт bangtaostyle.com.
+   Там он стоит в --display, и это единственное крупное отличие двух
+   систем: всё остальное — фон #0a0b0d, красный #e5231b, Golos Text,
+   JetBrains Mono и нулевые радиусы — у нас уже совпадает. Пока он
+   работает только на дверях входа (см. .gtr-auth ниже). */
+@font-face {
+  font-family: 'Unbounded';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/fonts/gtr/Unbounded-700-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Unbounded';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/fonts/gtr/Unbounded-700-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ---------- двери входа: язык bangtaostyle.com ----------
+
+   Токены сняты с рабочего CSS самого сайта, а не придуманы по
+   скриншоту. Два продукта оказались роднёй: фон, красный, Golos Text,
+   JetBrains Mono и отсутствие скруглений там ровно наши. Разного три
+   вещи, и они здесь:
+
+     · заголовки набраны Unbounded, а не Oswald;
+     · у панелей срезан угол — --cut: 10px;
+     · серый задан шкалой красок (#c9cbd0 / #8a8d93 / #55585e), а не
+       прозрачностью белого: на тёмном фоне это даёт ровный тон без
+       просвечивающей подложки.
+
+   Слой намеренно ограничен экранами входа. Переводить на него весь
+   продукт — отдельное решение и отдельная работа: Oswald держит
+   полторы сотни экранов, и менять его походя, в правке про
+   авторизацию, нельзя. */
+.gtr-auth {
+  --bts-bg: #0a0b0d;
+  --bts-bg-2: #0f1013;
+  --bts-raised: #1e1e22;
+  --bts-ink: #fff;
+  --bts-ink-2: #c9cbd0;
+  --bts-ink-3: #8a8d93;
+  --bts-ink-4: #55585e;
+  --bts-line: #ffffff17;
+  --bts-line-2: #ffffff2b;
+  --bts-red: #e5231b;
+  --bts-red-2: #ff3427;
+  --bts-red-dim: #e5231b24;
+  --bts-cut: 10px;
+  --bts-ease: cubic-bezier(0.2, 0.75, 0.25, 1);
+  color: var(--bts-ink-2);
+}
+
+/* Срезанный угол — подпись системы. Делаем маской, а не псевдо-
+   элементом с поворотом: маска режет и фон, и рамку одним контуром, и
+   ничего не надо подгонять под цвет подложки. */
+.gtr-auth .gtr-cut {
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--bts-cut)) 0,
+    100% var(--bts-cut),
+    100% 100%,
+    var(--bts-cut) 100%,
+    0 calc(100% - var(--bts-cut))
+  );
+}
+
+.gtr-auth .gtr-auth-title {
+  font-family: 'Unbounded', 'Golos Text', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--bts-ink);
+  /* Unbounded заметно шире Oswald: тот же кегль занимает больше места,
+     и на 390px заголовок из двух слов уезжал в три строки. */
+  font-size: clamp(19px, 6vw, 26px);
+  line-height: 1.12;
+  margin: 0;
+}
+
+.gtr-auth .gtr-auth-sub {
+  font: 500 13px/1.5 'Golos Text', system-ui, sans-serif;
+  color: var(--bts-ink-3);
+  margin: 6px 0 0;
+}
+
+.gtr-auth .gtr-auth-panel {
+  background: var(--bts-bg-2);
+  border: 1px solid var(--bts-line);
+  padding: 22px 20px;
+}
+
+.gtr-auth .gtr-auth-label {
+  display: block;
+  font: 600 10px/1 'JetBrains Mono', monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bts-ink-4);
+  margin-bottom: 7px;
+}
+
+.gtr-auth .gtr-auth-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bts-bg);
+  border: 1px solid var(--bts-line-2);
+  border-radius: 0;
+  padding: 12px 13px;
+  font: 500 15px/1.2 'Golos Text', system-ui, sans-serif;
+  color: var(--bts-ink);
+  transition: border-color 0.18s var(--bts-ease), box-shadow 0.18s var(--bts-ease);
+  /* 15px, а не меньше: Safari на iOS приближает страницу при фокусе на
+     поле с кеглем ниже 16px, и экран входа прыгает. 15 с Golos Text по
+     высоте строчной равен 16 у системного, зума уже не вызывает. */
+}
+.gtr-auth .gtr-auth-input::placeholder { color: var(--bts-ink-4); }
+.gtr-auth .gtr-auth-input:focus {
+  outline: none;
+  border-color: var(--bts-red);
+  box-shadow: 0 0 0 3px var(--bts-red-dim);
+}
+
+.gtr-auth .gtr-auth-btn {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--bts-line-2);
+  background: var(--bts-raised);
+  color: var(--bts-ink);
+  border-radius: 0;
+  padding: 13px 14px;
+  font: 600 13px/1 'Golos Text', system-ui, sans-serif;
+  cursor: pointer;
+  transition: background 0.18s var(--bts-ease), border-color 0.18s var(--bts-ease);
+}
+.gtr-auth .gtr-auth-btn:hover:not(:disabled) { border-color: var(--bts-line-2); background: #26262b; }
+.gtr-auth .gtr-auth-btn:disabled { opacity: 0.5; cursor: default; }
+
+.gtr-auth .gtr-auth-btn-red {
+  background: var(--bts-red);
+  border-color: var(--bts-red);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.gtr-auth .gtr-auth-btn-red:hover:not(:disabled) { background: var(--bts-red-2); border-color: var(--bts-red-2); }
+
+
 @media (prefers-reduced-motion: no-preference) {
   @view-transition {
     navigation: auto;

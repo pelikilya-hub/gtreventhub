@@ -175,6 +175,56 @@ export const unlinkIdentity = async (
   return { ok: true };
 };
 
+/** Убрать человека целиком: аккаунт и все следы, по которым он ещё мог
+ *  бы войти или что-то получить.
+ *
+ *  «Удалить работника» раньше означало ровно одно: стереть user:<email>.
+ *  Всё остальное оставалось жить, и последствия были хуже, чем кажется.
+ *
+ *  Привязка Telegram работала в обе стороны: tg:<email> и tgrev:<chatId>.
+ *  Бот опознаёт человека по второй, и карточку аккаунта он при этом не
+ *  требовал — уволенный продолжал ходить в боте со служебными правами.
+ *  Теперь обе записи снимаются здесь, а бот отдельно перестал пускать
+ *  тех, у кого аккаунта уже нет.
+ *
+ *  Подписки на push продолжали приходить: человек уволился, а
+ *  уведомления команды падали ему на телефон.
+ *
+ *  Индексы входов (ident:) продолжали указывать на стёртый аккаунт.
+ *  Смертельного в этом нет — вход по осиротевшему индексу заводит нового
+ *  гостя, — но мусор копится, и однажды он совпадёт с чужим адресом.
+ *
+ *  Возвращаем список снятых ключей: удаление человека — операция,
+ *  которую надо уметь предъявить, а не выполнить молча. */
+export const purgeAccount = async (
+  ns: KvNs,
+  email: string,
+): Promise<{ removed: string[] }> => {
+  const key = email.trim().toLowerCase();
+  const acc = await kvGetJson<StoredUserWithIdentities>(ns, `user:${key}`);
+  const removed: string[] = [];
+  const drop = async (k: string) => {
+    await ns.delete(k);
+    removed.push(k);
+  };
+
+  // Telegram: сначала читаем чат, иначе обратную запись уже не найти.
+  const chatId = await ns.get(`tg:${key}`);
+  if (chatId) await drop(`tgrev:${chatId}`);
+  await drop(`tg:${key}`);
+
+  for (const i of acc?.identities ?? []) await drop(identKey(i.provider, i.subject));
+  if (acc?.phone) await drop(phoneKey(acc.phone));
+
+  // Личные хвосты: уведомления, музыкальный профиль, текст приглашения,
+  // следы заявки на роль.
+  for (const p of ["push", "pushfeed", "mprofile", "invitemsg", "pending", "rejected"])
+    await drop(`${p}:${key}`);
+
+  await drop(`user:${key}`);
+  return { removed };
+};
+
 // ---------- вход через провайдера ----------
 
 export type ProviderProfile = {

@@ -29,7 +29,7 @@ export type PublicAfisha = {
    *  не разошлись в дате и разметка не перерисовывалась при гидрации. */
   today: string;
   events: PublicEvent[];
-  regions: Record<string, { ru: string; en: string }>;
+  regions: Record<string, { ru: string; en: string; th: string }>;
 };
 
 /** Горизонт ленты: на столько вперёд у площадок реально есть анонсы. */
@@ -89,6 +89,7 @@ async function buildAfisha(today: string): Promise<PublicAfisha> {
     regions[region] ??= {
       ru: regionName(region, "ru"),
       en: regionName(region, "en"),
+      th: regionName(region, "th"),
     };
     events.push({
       id: `${e.vid}:${e.id}`,

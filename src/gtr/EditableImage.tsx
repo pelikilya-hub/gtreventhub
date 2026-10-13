@@ -1,4 +1,5 @@
 import { useRef, useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 
 import { DEFAULT_PHOTO, photoFilter, photoTransform, useContent, type PhotoEdit } from "./content";
 import { ImpulseArt } from "./impulse";
@@ -21,6 +22,7 @@ export function EditableImage({
   overlay?: CSSProperties["background"]; // затемняющий градиент поверх
   rounded?: number;
 }) {
+  const { t } = useTranslation();
   const { editMode, contentOf, setHero, resetHero } = useContent();
   const [open, setOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -118,7 +120,7 @@ export function EditableImage({
             >
               <path d="M12 20h9 M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
             </svg>
-            Фото
+            {t("Фото")}
           </button>
 
           {open ? (
@@ -201,6 +203,7 @@ function PhotoPanel({
   onReset: () => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       onClick={(e) => e.stopPropagation()}
@@ -224,7 +227,7 @@ function PhotoPanel({
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <Eyebrow>РЕДАКТИРОВАНИЕ ФОТО</Eyebrow>
+        <Eyebrow>{t("РЕДАКТИРОВАНИЕ ФОТО")}</Eyebrow>
         <button
           onClick={onClose}
           style={{
@@ -241,12 +244,12 @@ function PhotoPanel({
       </div>
 
       <button className="gtr-btn gtr-btn-red" style={{ width: "100%" }} onClick={onPick}>
-        Заменить фото…
+        {t("Заменить фото…")}
       </button>
 
-      <Eyebrow style={{ fontSize: 10, marginTop: 2 }}>КАДР</Eyebrow>
+      <Eyebrow style={{ fontSize: 10, marginTop: 2 }}>{t("КАДР")}</Eyebrow>
       <Slider
-        label="Зум"
+        label={t("Зум")}
         value={photo.scale}
         min={1}
         max={3}
@@ -255,7 +258,7 @@ function PhotoPanel({
         onChange={(v) => onChange({ scale: v })}
       />
       <Slider
-        label="Сдвиг X"
+        label={t("Сдвиг X")}
         value={photo.x}
         min={-50}
         max={50}
@@ -263,7 +266,7 @@ function PhotoPanel({
         onChange={(v) => onChange({ x: v })}
       />
       <Slider
-        label="Сдвиг Y"
+        label={t("Сдвиг Y")}
         value={photo.y}
         min={-50}
         max={50}
@@ -271,9 +274,9 @@ function PhotoPanel({
         onChange={(v) => onChange({ y: v })}
       />
 
-      <Eyebrow style={{ fontSize: 10, marginTop: 2 }}>ЭКСПОЗИЦИЯ</Eyebrow>
+      <Eyebrow style={{ fontSize: 10, marginTop: 2 }}>{t("ЭКСПОЗИЦИЯ")}</Eyebrow>
       <Slider
-        label="Яркость"
+        label={t("Яркость")}
         value={photo.brightness}
         min={40}
         max={160}
@@ -281,7 +284,7 @@ function PhotoPanel({
         onChange={(v) => onChange({ brightness: v })}
       />
       <Slider
-        label="Контраст"
+        label={t("Контраст")}
         value={photo.contrast}
         min={40}
         max={160}
@@ -289,7 +292,7 @@ function PhotoPanel({
         onChange={(v) => onChange({ contrast: v })}
       />
       <Slider
-        label="Насыщенность"
+        label={t("Насыщенность")}
         value={photo.saturate}
         min={0}
         max={200}
@@ -297,7 +300,7 @@ function PhotoPanel({
         onChange={(v) => onChange({ saturate: v })}
       />
       <Slider
-        label="Тёплость"
+        label={t("Тёплость")}
         value={photo.temp}
         min={-100}
         max={100}
@@ -305,7 +308,7 @@ function PhotoPanel({
       />
 
       <button className="gtr-btn" style={{ width: "100%", marginTop: 2 }} onClick={onReset}>
-        Сбросить к исходному
+        {t("Сбросить к исходному")}
       </button>
     </div>
   );

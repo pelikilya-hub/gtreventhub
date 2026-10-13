@@ -222,11 +222,11 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
     for (const a of problemAlerts) {
       const k = `${a.severity}|${a.title}|${a.reason}`;
       if (!seenRef.current.has(k)) {
-        toast(`${STATUS_LABEL[a.severity]}: ${a.title}`, {
-          description: a.reason,
+        toast(`${t(STATUS_LABEL[a.severity])}: ${t(a.title)}`, {
+          description: a.reason ? t(a.reason) : a.reason,
           style: { borderLeft: `3px solid ${STATUS_COLOR[a.severity]}` },
           action: {
-            label: "Открыть",
+            label: t("Открыть"),
             onClick: () => go("constructor"),
           },
         });
@@ -284,7 +284,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
               {alarm ? (
                 <span
                   className="gtr-mono gtr-presence"
-                  title={`${problemCount} требует внимания`}
+                  title={t("{{n}} требует внимания", { n: problemCount })}
                   style={{
                     font: "700 11px/1 'JetBrains Mono',monospace",
                     color: "#fff",
@@ -428,7 +428,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                   <span
                     key={p.id}
                     className="gtr-presence"
-                    title={`${p.roleLabel} · ${p.name}`}
+                    title={`${t(String(p.roleLabel))} · ${p.name}`}
                     style={{
                       width: 24,
                       height: 24,

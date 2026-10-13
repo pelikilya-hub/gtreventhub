@@ -84,6 +84,37 @@ if (!i18n.isInitialized) {
   });
 }
 
+// Словарь данных площадок (описания, музыка, часы, инфраструктура) —
+// отдельными файлами по языку: это сотня килобайт текста, и тащить её в
+// общий бандл ради русскоязычного гостя незачем. Файл подгружается вместе
+// с ленивым кодом экрана (см. lazyScreen в shell.tsx), поэтому к гидрации
+// перевод уже на месте. На сервере грузим оба языка: он рисует страницы
+// гостям с разными языками.
+const DATA_DICT: Record<"en" | "th", () => Promise<{ default: Record<string, string> }>> = {
+  en: () => import("./data/i18n/venues.en.json"),
+  th: () => import("./data/i18n/venues.th.json"),
+};
+const dataLoaded = new Map<string, Promise<void>>();
+const loadDataDict = (lang: "en" | "th") => {
+  let p = dataLoaded.get(lang);
+  if (!p) {
+    p = DATA_DICT[lang]()
+      .then((m) => {
+        i18n.addResourceBundle(lang, "translation", m.default, true, false);
+      })
+      .catch(() => {
+        // нет сети — покажем исходный текст, следующая попытка при смене экрана
+        dataLoaded.delete(lang);
+      });
+    dataLoaded.set(lang, p);
+  }
+  return p;
+};
+export const ensureDataDict = (lang: string = i18n.language): Promise<void> => {
+  if (typeof window === "undefined") return Promise.all([loadDataDict("en"), loadDataDict("th")]).then(() => {});
+  return lang === "en" || lang === "th" ? loadDataDict(lang) : Promise.resolve();
+};
+
 export const setUiLang = (lang: UiLang) => {
   try {
     localStorage.setItem(LANG_KEY, lang);
@@ -95,7 +126,8 @@ export const setUiLang = (lang: UiLang) => {
   } catch {
     // cookie запрещены — сервер будет брать язык браузера
   }
-  void i18n.changeLanguage(lang);
+  // словарь данных — до смены языка, чтобы экран не мигнул русским
+  void ensureDataDict(lang).finally(() => void i18n.changeLanguage(lang));
 };
 
 export default i18n;

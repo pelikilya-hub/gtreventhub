@@ -9,6 +9,7 @@
 // сразу после 5 секунд или при закрытии карточки — ни секунды лишнего
 // доступа сверх честного назначения кнопки.
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import genreBpmRaw from "../data/genre-bpm.json";
 
@@ -60,7 +61,7 @@ export function classifyVibe(
 }
 
 type Phase = "idle" | "listening" | "result" | "error";
-type Refined = { ru: string; group: string; bpm: number | null };
+type Refined = { ru: string; en: string; group: string; bpm: number | null };
 
 // Те же 5 секунд уходят и на сервер: Gemini слушает запись и называет
 // жанр из нашего словаря точнее, чем прикидка по темпу. Локальный ответ
@@ -80,14 +81,25 @@ async function refineByEar(blob: Blob, mime: string): Promise<Refined | null> {
     body: JSON.stringify({ mime, data: b64 }),
   });
   if (!r.ok) return null;
-  const d = (await r.json()) as { ok: boolean; ru?: string; group?: string; bpm?: number | null };
+  const d = (await r.json()) as { ok: boolean; ru?: string; en?: string; group?: string; bpm?: number | null };
   if (!d.ok || !d.ru) return null;
-  return { ru: d.ru, group: d.group ?? "", bpm: d.bpm ?? null };
+  return { ru: d.ru, en: d.en ?? "", group: d.group ?? "", bpm: d.bpm ?? null };
+}
+
+// Подпись вайба для экрана. Логику classifyVibe не трогаем: она отдаёт
+// русскую строку (база + необязательный уточняющий хвост в скобках),
+// а здесь хвост отделяется и обе части идут через словарь.
+const VIBE_TAILS = [" (бас-хаус)", " (жёсткий, индастриал)"];
+function vibeLabel(ru: string, t: (k: string) => string): string {
+  const tail = VIBE_TAILS.find((x) => ru.endsWith(x));
+  if (!tail) return t(ru);
+  return `${t(ru.slice(0, -tail.length))} (${t(tail.slice(2, -1))})`;
 }
 
 const REC_MIMES = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
 
 export function VibeCheck({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t, i18n } = useTranslation();
   const [phase, setPhase] = useState<Phase>("idle");
   const [result, setResult] = useState<VibeResult | null>(null);
   const [refined, setRefined] = useState<Refined | null>(null);
@@ -145,7 +157,7 @@ export function VibeCheck({ open, onClose }: { open: boolean; onClose: () => voi
     } catch {
       void ctx.close().catch(() => {});
       ctxRef.current = null;
-      setErrMsg("Нет доступа к микрофону — разреши в настройках браузера");
+      setErrMsg(t("Нет доступа к микрофону — разреши в настройках браузера"));
       setPhase("error");
       return;
     }
@@ -267,34 +279,34 @@ export function VibeCheck({ open, onClose }: { open: boolean; onClose: () => voi
   if (!open) return null;
 
   return (
-    <div className="gtr-vibe" role="dialog" aria-label="Вайб-чек">
+    <div className="gtr-vibe" role="dialog" aria-label={t("Вайб-чек")}>
       <div className="gtr-vibe-card">
-        <button className="gtr-vibe-close" onClick={onClose} aria-label="Закрыть">
+        <button className="gtr-vibe-close" onClick={onClose} aria-label={t("Закрыть")}>
           ×
         </button>
         {phase === "idle" && (
           <>
-            <div className="gtr-vibe-title">Вайб-чек</div>
+            <div className="gtr-vibe-title">{t("Вайб-чек")}</div>
             <div className="gtr-vibe-sub">
-              Направь телефон на колонки — за 5 секунд прикинем темп и вайб
+              {t("Направь телефон на колонки — за 5 секунд прикинем темп и вайб")}
             </div>
             <button className="gtr-vibe-btn" onClick={() => void listen()}>
-              Слушать
+              {t("Слушать")}
             </button>
           </>
         )}
         {phase === "listening" && (
           <>
             <div className="gtr-vibe-ring" aria-hidden />
-            <div className="gtr-vibe-title">Слушаю…</div>
+            <div className="gtr-vibe-title">{t("Слушаю…")}</div>
           </>
         )}
         {phase === "error" && (
           <>
-            <div className="gtr-vibe-title">Не вышло</div>
+            <div className="gtr-vibe-title">{t("Не вышло")}</div>
             <div className="gtr-vibe-sub">{errMsg}</div>
             <button className="gtr-vibe-btn" onClick={() => void listen()}>
-              Попробовать снова
+              {t("Попробовать снова")}
             </button>
           </>
         )}
@@ -303,17 +315,21 @@ export function VibeCheck({ open, onClose }: { open: boolean; onClose: () => voi
             <div className="gtr-vibe-bpm">{refined?.bpm ?? result.bpm ?? "—"}</div>
             {(refined?.bpm ?? result.bpm) ? <div className="gtr-vibe-bpm-label">BPM</div> : null}
             <div className="gtr-vibe-tag">
-              {refined ? `${refined.ru}${refined.group ? ` · ${refined.group}` : ""}` : result.vibe.ru}
+              {refined
+                ? `${i18n.language !== "ru" && refined.en ? refined.en : refined.ru}${refined.group ? ` · ${t(refined.group)}` : ""}`
+                : vibeLabel(result.vibe.ru, t)}
             </div>
             <div className="gtr-vibe-src">
-              {refined
-                ? "распознано по звуку"
-                : refining
-                  ? "уточняю жанр по звуку…"
-                  : "прикидка по темпу"}
+              {t(
+                refined
+                  ? "распознано по звуку"
+                  : refining
+                    ? "уточняю жанр по звуку…"
+                    : "прикидка по темпу",
+              )}
             </div>
             <button className="gtr-vibe-btn ghost" onClick={() => void listen()}>
-              Ещё раз
+              {t("Ещё раз")}
             </button>
           </>
         )}

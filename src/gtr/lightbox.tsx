@@ -1,6 +1,7 @@
 // Полноэкранный просмотр фото: свайпы и safe-area для iOS, стрелки и
 // клавиатура для десктопа. Без библиотек — один оверлей на портале стилей.
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export function GtrLightbox({
   images,
@@ -13,6 +14,7 @@ export function GtrLightbox({
   onClose: () => void;
   credit?: string;
 }) {
+  const { t } = useTranslation();
   const [i, setI] = useState(index);
   const [drag, setDrag] = useState(0);
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -65,7 +67,7 @@ export function GtrLightbox({
         style={{ transform: drag ? `translateX(${drag}px)` : undefined }}
         onClick={(e) => e.stopPropagation()}
       />
-      <button className="gtr-lightbox-x" onClick={onClose} aria-label="Закрыть">
+      <button className="gtr-lightbox-x" onClick={onClose} aria-label={t("Закрыть")}>
         ✕
       </button>
       {images.length > 1 ? (
@@ -77,7 +79,7 @@ export function GtrLightbox({
               e.stopPropagation();
               prev();
             }}
-            aria-label="Назад"
+            aria-label={t("Назад")}
           >
             ‹
           </button>
@@ -88,7 +90,7 @@ export function GtrLightbox({
               e.stopPropagation();
               next();
             }}
-            aria-label="Вперёд"
+            aria-label={t("Вперёд")}
           >
             ›
           </button>

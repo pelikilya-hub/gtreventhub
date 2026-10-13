@@ -210,7 +210,7 @@ export function PrivateScreen() {
                     className="gtr-mono"
                     style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "rgba(255,255,255,.7)", marginTop: 3 }}
                   >
-                    {venue.area}
+                    {t(String(venue.area ?? ""))}
                     {v.rating ? ` · ★ ${v.rating}/${v.ratingOf} (${v.reviews})` : ""}
                     {v.stars ? ` · ${v.stars}★` : ""}
                   </div>

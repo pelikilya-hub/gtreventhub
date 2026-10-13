@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   AMBER,
+  genreLabel,
   GREEN,
   isPerformer,
   loadArtists,
@@ -90,7 +91,8 @@ function ContactRow({ r }: { r: Row }) {
 }
 
 export function ContactsScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   const { user } = useGtr();
   const [users, setUsers] = useState<ContactUser[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
@@ -111,7 +113,7 @@ export function ContactsScreen() {
         .map((u) => ({
           id: u.email,
           name: u.name,
-          sub: `${u.roleLabel} · ${u.email}`,
+          sub: `${t(String(u.roleLabel))} · ${u.email}`,
           color: RED,
           tg: (u as { tgNick?: string }).tgNick,
           email: u.email,
@@ -122,7 +124,7 @@ export function ContactsScreen() {
         .map((u) => ({
           id: u.email,
           name: u.name,
-          sub: `Организатор${u.teamOf ? ` · команда ${u.teamOf}` : ""} · ${u.email}`,
+          sub: `${t("Организатор")}${u.teamOf ? ` · ${t("команда {{name}}", { name: u.teamOf })}` : ""} · ${u.email}`,
           color: "#7B4DFF",
           tg: (u as { tgNick?: string }).tgNick,
           email: u.email,
@@ -131,7 +133,8 @@ export function ContactsScreen() {
       list = artists.map((a) => ({
         id: a.id,
         name: a.name,
-        sub: `${(a.styles || []).slice(0, 2).join(" · ") || a.role} · ${a.prio || "—"}`,
+        // жанры — через дерево жанров, роль — из EN/RU-версии базы
+        sub: `${(a.styles || []).slice(0, 2).map((s) => genreLabel(s, lang)).join(" · ") || String((lang === "ru" && a.roleRu) || a.role)} · ${a.prio || "—"}`,
         color: a.prio === "A" ? GREEN : a.prio === "B" ? AMBER : "rgba(255,255,255,.35)",
         phone: a.phone,
         wa: a.wa,
@@ -150,7 +153,7 @@ export function ContactsScreen() {
       }));
     if (qq) list = list.filter((r) => `${r.name} ${r.sub}`.toLowerCase().includes(qq));
     return list.slice(0, 120);
-  }, [tab, users, artists, q]);
+  }, [tab, users, artists, q, t, lang]);
 
   const TABS: [Tab, string, number][] = [
     ["team", t("Команда"), users.filter((u) => u.role !== "artist" && u.role !== "organizer").length],

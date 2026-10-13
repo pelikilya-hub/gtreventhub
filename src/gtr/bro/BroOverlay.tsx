@@ -9,6 +9,7 @@
 // не доходит.
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { broLogFn } from "../kv-api";
 import { appendPartial, sealLine, type BoardRow } from "./board";
@@ -169,6 +170,7 @@ export function GtrBroOverlay({
   provider?: VoiceProvider;
   onNavigate: (route: string, entityId?: string) => void;
 }) {
+  const { t } = useTranslation();
   const [state, setState] = useState<BroState>("idle");
   const [detail, setDetail] = useState<string>();
   const [level, setLevel] = useState(0);
@@ -298,7 +300,7 @@ export function GtrBroOverlay({
             metric("bro.lane.stable");
             setRows((p) => [
               ...p.slice(-60),
-              { who: "sys" as const, text: "голосовой канал сбоит — включаю стабильную полосу", done: true },
+              { who: "sys" as const, text: t("голосовой канал сбоит — включаю стабильную полосу"), done: true },
             ]);
             // Перезапуск после того, как begin() текущей сессии отпустит
             // замок starting — иначе вторая попытка молча проглотится.
@@ -482,16 +484,16 @@ export function GtrBroOverlay({
     const liveMini = ses.current !== null && !["closed", "idle", "error"].includes(state);
     return (
       <div className="gtr-bro-pill-wrap">
-        <button className="gtr-bro-pill" onClick={() => setMini(false)} aria-label="Развернуть BRO">
+        <button className="gtr-bro-pill" onClick={() => setMini(false)} aria-label={t("Развернуть BRO")}>
           <span
             className={`gtr-bro-pill-dot${liveMini ? " on" : ""}`}
             style={{ transform: `scale(${0.8 + level * 1.2})` }}
           />
-          <span className="gtr-bro-pill-t">BRO · {STATE_RU[state]}</span>
+          <span className="gtr-bro-pill-t">BRO · {t(STATE_RU[state])}</span>
         </button>
         <button
           className="gtr-bro-pill-x"
-          aria-label="Завершить разговор"
+          aria-label={t("Завершить разговор")}
           onClick={() => {
             stop();
             setMini(false);
@@ -523,7 +525,7 @@ export function GtrBroOverlay({
     setHolding(false);
     if (live) ses.current?.holdEnd();
   };
-  const err = state === "error" ? (ERROR_RU[detail ?? ""] ?? "Не получилось. Попробуй ещё раз.") : null;
+  const err = state === "error" ? t(ERROR_RU[detail ?? ""] ?? "Не получилось. Попробуй ещё раз.") : null;
 
   const say = (who: Row["who"], text: string) => {
     touchChat();
@@ -591,7 +593,7 @@ export function GtrBroOverlay({
         .slice(-6)
         .map((r) => ({ who: r.who, text: r.text }));
       try {
-        waitOn("думаю…");
+        waitOn(t("думаю…"));
         // Полторы минуты ожидания на телефоне неотличимы от зависания.
         // Тридцати секунд хватает живому ответу, а всё что дольше —
         // это уже не разговор, и по правилам мы ответим быстрее.
@@ -775,22 +777,22 @@ export function GtrBroOverlay({
 
   return (
     <div className="gtr-bro" role="dialog" aria-modal="true" aria-label="GTR BRO">
-      <button className="gtr-bro-scrim" aria-label="Закрыть" onClick={onClose} />
+      <button className="gtr-bro-scrim" aria-label={t("Закрыть")} onClick={onClose} />
 
       <div className="gtr-bro-sheet">
         <BroSmoke />
         <div className="gtr-bro-head">
           <span className="gtr-bro-eyebrow">GTR BRO</span>
           <span className={`gtr-bro-state s-${state}`}>
-            {STATE_RU[state]}
+            {t(STATE_RU[state])}
             {state === "closed" && detail ? ` · ${detail}` : ""}
           </span>
           {laneStable && (
-            <span className="gtr-bro-lane" title="Голосовой провайдер недоступен — работает резервный канал">
-              резерв
+            <span className="gtr-bro-lane" title={t("Голосовой провайдер недоступен — работает резервный канал")}>
+              {t("резерв")}
             </span>
           )}
-          <button className="gtr-bro-x" onClick={onClose} aria-label="Закрыть">
+          <button className="gtr-bro-x" onClick={onClose} aria-label={t("Закрыть")}>
             ✕
           </button>
         </div>
@@ -802,7 +804,7 @@ export function GtrBroOverlay({
         {chatView ? (
           <div className="gtr-bro-chat" ref={dosRef} aria-live="polite">
             {rows.filter((r) => r.who !== "sys").length === 0 ? (
-              <div className="gtr-bro-chat-empty">Напиши сообщение или нажми знак ниже</div>
+              <div className="gtr-bro-chat-empty">{t("Напиши сообщение или нажми знак ниже")}</div>
             ) : null}
             {rows
               .filter((r) => r.who !== "sys")
@@ -815,7 +817,7 @@ export function GtrBroOverlay({
           </div>
         ) : (
           <div className="gtr-bro-dos" ref={dosRef} aria-live="polite">
-            <div className="gtr-bro-dos-h">GTR-BRO/9000 · ЭФИР · {STATE_RU[state]}</div>
+            <div className="gtr-bro-dos-h">GTR-BRO/9000 · {t("ЭФИР")} · {t(STATE_RU[state])}</div>
             {rows.map((r, i) => (
               <div key={i} className={`gtr-bro-dos-l ${r.who}`}>
                 {r.who === "user" ? "> " : r.who === "bro" ? "BRO: " : "· "}
@@ -842,15 +844,15 @@ export function GtrBroOverlay({
             className={chatView ? "gtr-bro-sayin" : "gtr-bro-cmd"}
             value={cmd}
             onChange={(e) => setCmd(e.target.value)}
-            placeholder={chatView ? "Напиши сообщение" : "что сегодня в патонге"}
+            placeholder={chatView ? t("Напиши сообщение") : t("что сегодня в патонге")}
             autoCapitalize={chatView ? "sentences" : "off"}
             autoCorrect={chatView ? "on" : "off"}
             spellCheck={chatView}
             enterKeyHint="send"
-            aria-label="Сообщение для BRO"
+            aria-label={t("Сообщение для BRO")}
           />
           {chatView ? (
-            <button className="gtr-bro-saygo" type="submit" aria-label="Отправить" disabled={!cmd.trim()}>
+            <button className="gtr-bro-saygo" type="submit" aria-label={t("Отправить")} disabled={!cmd.trim()}>
               ↑
             </button>
           ) : (
@@ -864,13 +866,13 @@ export function GtrBroOverlay({
           {(isTeam(role) ? QUICK_TEAM : QUICK_GUEST).map((q) => {
             const onClick = () => (q.action === "vibecheck" ? setVibeOpen(true) : void runText(q.q ?? ""));
             return q.tile ? (
-              <button key={q.t} className="gtr-bro-q art" onClick={onClick} aria-label={q.t}>
+              <button key={q.t} className="gtr-bro-q art" onClick={onClick} aria-label={t(q.t)}>
                 <img src={q.tile} alt="" loading="lazy" draggable={false} />
               </button>
             ) : (
               <button key={q.t} className="gtr-bro-q" onClick={onClick}>
                 <Stk name={q.icon} size={30} x2 />
-                <span>{q.t}</span>
+                <span>{t(q.t)}</span>
               </button>
             );
           })}
@@ -890,7 +892,7 @@ export function GtrBroOverlay({
             onPointerCancel={ptt ? pttUp : undefined}
             onContextMenu={(e) => e.preventDefault()}
             onClick={ptt ? undefined : () => (live ? stop() : void begin(voice, mode))}
-            aria-label={ptt ? "Зажми и говори" : live ? "Остановить" : "Начать разговор"}
+            aria-label={t(ptt ? "Зажми и говори" : live ? "Остановить" : "Начать разговор")}
           >
             <img src="/bro/ptt.webp" alt="" aria-hidden draggable={false} />
           </button>
@@ -900,7 +902,7 @@ export function GtrBroOverlay({
               (ptt && !live && !busy) ? { visibility: "hidden" } : undefined
             }
           >
-            {ptt
+            {t(ptt
               ? live
                 ? holding
                   ? "говори — отпусти, и отвечу"
@@ -918,7 +920,7 @@ export function GtrBroOverlay({
                   : "слушаю"
                 : busy
                   ? "секунду"
-                  : "нажми и говори"}
+                  : "нажми и говори")}
           </div>
         </div>
 
@@ -939,7 +941,7 @@ export function GtrBroOverlay({
           <button
             className={`gtr-bro-bbtn${muted ? " off" : ""}`}
             disabled={!live}
-            aria-label={muted ? "Микрофон выключен — включить" : "Микрофон включён — выключить"}
+            aria-label={t(muted ? "Микрофон выключен — включить" : "Микрофон включён — выключить")}
             onClick={() => {
               const next = !muted;
               setMuted(next);
@@ -950,7 +952,7 @@ export function GtrBroOverlay({
           </button>
           <button
             className={`gtr-bro-bbtn${chatView ? "" : " on"}`}
-            aria-label={chatView ? "Открыть табло" : "Вернуться в чат"}
+            aria-label={t(chatView ? "Открыть табло" : "Вернуться в чат")}
             onClick={() => {
               const next = !chatView;
               setChatView(next);
@@ -965,12 +967,12 @@ export function GtrBroOverlay({
           </button>
           <button
             className={`gtr-bro-bbtn${tune ? " on" : ""}`}
-            aria-label="Настройки"
+            aria-label={t("Настройки")}
             onClick={() => setTune((v) => !v)}
           >
             <img src="/bro/btn-tune.webp" alt="" draggable={false} />
           </button>
-          <button className="gtr-bro-bbtn" disabled={!live} aria-label="Стоп" onClick={stop}>
+          <button className="gtr-bro-bbtn" disabled={!live} aria-label={t("Стоп")} onClick={stop}>
             <img src="/bro/btn-stop.webp" alt="" draggable={false} />
           </button>
         </div>
@@ -979,7 +981,7 @@ export function GtrBroOverlay({
 
         {tune && (
           <div className="gtr-bro-tune">
-            <div className="gtr-bro-tune-t">Громкость голоса</div>
+            <div className="gtr-bro-tune-t">{t("Громкость голоса")}</div>
             <div className="gtr-bro-chips">
               {([1, 2, 3, 4, 6] as const).map((g) => (
                 <button
@@ -993,12 +995,12 @@ export function GtrBroOverlay({
                     metric("bro.gain." + g);
                   }}
                 >
-                  {g === GAIN_MIN ? "как есть" : g === GAIN_MAX ? "макс" : `×${g}`}
-                  <i>{g === GAIN_MAX ? "для клуба" : g >= 3 ? "громко" : "тихо"}</i>
+                  {g === GAIN_MIN ? t("как есть") : g === GAIN_MAX ? t("макс") : `×${g}`}
+                  <i>{t(g === GAIN_MAX ? "для клуба" : g >= 3 ? "громко" : "тихо")}</i>
                 </button>
               ))}
             </div>
-            <div className="gtr-bro-tune-t">Управление</div>
+            <div className="gtr-bro-tune-t">{t("Управление")}</div>
             <div className="gtr-bro-chips">
               {[
                 [false, "Рация", "держишь — говоришь"],
@@ -1016,13 +1018,13 @@ export function GtrBroOverlay({
                     }
                   }}
                 >
-                  {name as string}
-                  <i>{note as string}</i>
+                  {t(name as string)}
+                  <i>{t(note as string)}</i>
                 </button>
               ))}
             </div>
 
-            <div className="gtr-bro-tune-t">Язык</div>
+            <div className="gtr-bro-tune-t">{t("Язык")}</div>
             <div className="gtr-bro-chips">
               {([
                 ["ru", "Русский", "как писали"],
@@ -1044,12 +1046,12 @@ export function GtrBroOverlay({
                   }}
                 >
                   {name}
-                  <i>{note}</i>
+                  <i>{t(note)}</i>
                 </button>
               ))}
             </div>
 
-            <div className="gtr-bro-tune-t">Характер</div>
+            <div className="gtr-bro-tune-t">{t("Характер")}</div>
             <div className="gtr-bro-chips">
               {MODES.map(([id, name, note]) => (
                 <button
@@ -1061,13 +1063,13 @@ export function GtrBroOverlay({
                     if (live) void begin(voice, id);
                   }}
                 >
-                  {name}
-                  <i>{note}</i>
+                  {t(name)}
+                  <i>{t(note)}</i>
                 </button>
               ))}
             </div>
 
-            <div className="gtr-bro-tune-t">Голос</div>
+            <div className="gtr-bro-tune-t">{t("Голос")}</div>
             <div className="gtr-bro-chips">
               {VOICES.map(([id, name]) => (
                 <button
@@ -1079,7 +1081,7 @@ export function GtrBroOverlay({
                     if (live) void begin(id, mode);
                   }}
                 >
-                  {name}
+                  {t(name)}
                 </button>
               ))}
             </div>
@@ -1088,10 +1090,10 @@ export function GtrBroOverlay({
               <>
                 <div className="gtr-bro-tune-t">Voice Lab</div>
                 <div className="gtr-bro-note">
-                  Пять одинаковых реплик выбранным голосом — сравнивается голос, а не текст.
+                  {t("Пять одинаковых реплик выбранным голосом — сравнивается голос, а не текст.")}
                 </div>
                 <button className="gtr-bro-btn" disabled={lab && live} onClick={() => void runLab()}>
-                  Прогнать {VOICES.find(([v]) => v === voice)?.[1]}
+                  {t("Прогнать {{voice}}", { voice: t(VOICES.find(([v]) => v === voice)?.[1] ?? "") })}
                 </button>
               </>
             )}
@@ -1100,9 +1102,9 @@ export function GtrBroOverlay({
       </div>
 
       {ask && (
-        <div className="gtr-bro-confirm" role="alertdialog" aria-label="Подтверждение">
+        <div className="gtr-bro-confirm" role="alertdialog" aria-label={t("Подтверждение")}>
           <div className="gtr-bro-confirm-box">
-            <div className="gtr-bro-confirm-t">Подтверди действие</div>
+            <div className="gtr-bro-confirm-t">{t("Подтверди действие")}</div>
             <div className="gtr-bro-confirm-s">{ask.summary}</div>
             <div className="gtr-bro-bar">
               <button
@@ -1112,7 +1114,7 @@ export function GtrBroOverlay({
                   setAsk(null);
                 }}
               >
-                Отмена
+                {t("Отмена")}
               </button>
               <button
                 className="gtr-bro-btn go"
@@ -1121,7 +1123,7 @@ export function GtrBroOverlay({
                   setAsk(null);
                 }}
               >
-                Да, делаем
+                {t("Да, делаем")}
               </button>
             </div>
           </div>
@@ -1148,6 +1150,7 @@ function BroCardView({
   onNavigate: (route: string, entityId?: string) => void;
   onSay?: (who: "bro" | "sys", text: string) => void;
 }) {
+  const { t } = useTranslation();
   const d = card.data as Record<string, unknown>;
 
   if (card.kind === "taxi") {
@@ -1155,12 +1158,12 @@ function BroCardView({
     // маршрут с уже поставленной точкой.
     return (
       <div className="gtr-bro-card">
-        <div className="gtr-bro-card-k">Такси → {String(d.venue ?? "")}</div>
-        <div className="gtr-bro-card-n">{String(d.area ?? "")} · точка назначения уже в ссылке</div>
+        <div className="gtr-bro-card-k">{t("Такси")} → {String(d.venue ?? "")}</div>
+        <div className="gtr-bro-card-n">{String(d.area ?? "")} · {t("точка назначения уже в ссылке")}</div>
         <div className="gtr-bro-taxirow">
           <a className="gtr-bro-btn go" href={String(d.grab ?? "#")} target="_blank" rel="noreferrer">Grab</a>
           <a className="gtr-bro-btn go" href={String(d.bolt ?? "#")} target="_blank" rel="noreferrer">Bolt</a>
-          <a className="gtr-bro-btn" href={String(d.maps ?? "#")} target="_blank" rel="noreferrer">Карта</a>
+          <a className="gtr-bro-btn" href={String(d.maps ?? "#")} target="_blank" rel="noreferrer">{t("Карта")}</a>
         </div>
       </div>
     );
@@ -1189,7 +1192,7 @@ function BroCardView({
     const who = String(d.artist ?? d.name ?? "");
     return (
       <div className="gtr-bro-card">
-        <div className="gtr-bro-card-k">Слушать · {who}</div>
+        <div className="gtr-bro-card-k">{t("Слушать")} · {who}</div>
         {d.role ? <div className="gtr-bro-card-n">{String(d.role)}</div> : null}
         <div className="gtr-bro-taxirow">
           {rows.slice(0, 3).map((l) => (
@@ -1212,7 +1215,7 @@ function BroCardView({
     // Единственная дверь для пишущих действий из текстовой петли.
     return (
       <div className="gtr-bro-card">
-        <div className="gtr-bro-card-k">Подтверди действие</div>
+        <div className="gtr-bro-card-k">{t("Подтверди действие")}</div>
         <div className="gtr-bro-card-t">{String(d.summary ?? "")}</div>
         <div className="gtr-bro-card-n">{JSON.stringify(d.args ?? {}).slice(0, 140)}</div>
         <div className="gtr-bro-taxirow">
@@ -1237,15 +1240,15 @@ function BroCardView({
                       : `Не вышло: ${res?.error ?? "ошибка"}`,
                   );
                 } catch {
-                  onSay?.("sys", "подтверждение не дошло до сервера");
+                  onSay?.("sys", t("подтверждение не дошло до сервера"));
                 }
               })();
             }}
           >
-            Да, делаем
+            {t("Да, делаем")}
           </button>
-          <button className="gtr-bro-btn" onClick={() => onSay?.("sys", "действие отменено")}>
-            Отмена
+          <button className="gtr-bro-btn" onClick={() => onSay?.("sys", t("действие отменено"))}>
+            {t("Отмена")}
           </button>
         </div>
       </div>
@@ -1256,7 +1259,7 @@ function BroCardView({
     const legs = (d.legs as Record<string, unknown>[] | undefined) ?? [];
     return (
       <div className="gtr-bro-card">
-        <div className="gtr-bro-card-k">Маршрут вечера</div>
+        <div className="gtr-bro-card-k">{t("Маршрут вечера")}</div>
         {legs.map((l, i) => (
           <div key={i} className="gtr-bro-leg">
             <b>{String(l.arrive_hour).padStart(2, "0")}:00</b> {String(l.venue)}
@@ -1275,13 +1278,13 @@ function BroCardView({
       {Boolean(d.title) && card.kind === "event" && <div className="gtr-bro-card-t">{String(d.title)}</div>}
       <div className="gtr-bro-card-m">
         {d.start_at ? <span>{String(d.start_at)}</span> : null}
-        {typeof d.distance_km === "number" ? <span>{d.distance_km} км</span> : null}
-        <span className={`gtr-bro-verif v-${verif}`}>{VERIF_RU[verif] ?? verif}</span>
+        {typeof d.distance_km === "number" ? <span>{d.distance_km} {t("км")}</span> : null}
+        <span className={`gtr-bro-verif v-${verif}`}>{VERIF_RU[verif] ? t(VERIF_RU[verif]) : verif}</span>
       </div>
       {/* Наличие мест и цену мы не знаем — так и пишем, чтобы человек не
           приехал к закрытой двери с нашей уверенностью в кармане. */}
       {d.availability_status === "unknown" && (
-        <div className="gtr-bro-card-n">места и цену уточняем у площадки</div>
+        <div className="gtr-bro-card-n">{t("места и цену уточняем у площадки")}</div>
       )}
     </button>
   );

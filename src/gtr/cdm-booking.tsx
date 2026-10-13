@@ -288,7 +288,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
         </div>
         <span className="gtr-mono" style={{ font: "500 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
           {sentId}
-          {cartTotal ? ` · предзаказ ${thb(cartTotal)}` : ""}
+          {cartTotal ? ` · ${t("предзаказ")} ${thb(cartTotal)}` : ""}
         </span>
       </Card>
     );
@@ -353,7 +353,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                         letterSpacing: ".1em",
                       }}
                     >
-                      ВЫБРАНО
+                      {t("ВЫБРАНО")}
                     </span>
                   ) : null}
                 </div>

@@ -137,7 +137,7 @@ function IntakeWizard({
           }}
         >
           {t("Несколько вопросов, чтобы собрать событие без казусов — площадка")} {v.name}
-          {cap ? ` · вместимость ${cap}` : ""}.
+          {cap ? t(" · вместимость {{cap}}", { cap }) : ""}.
         </div>
 
         <Card style={{ padding: 22 }}>
@@ -157,7 +157,7 @@ function IntakeWizard({
                   font: `${format === f ? 600 : 500} 12px/1 'Golos Text',sans-serif`,
                 }}
               >
-                {f}
+                {t(f)}
               </button>
             ))}
           </div>
@@ -178,7 +178,7 @@ function IntakeWizard({
               <span
                 style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}
               >
-                {hint}
+                {t(hint)}
               </span>
             </div>
           ) : null}
@@ -217,7 +217,8 @@ function IntakeWizard({
             className="gtr-btn gtr-btn-red"
             style={{ width: "100%", marginTop: 20, padding: "12px 13px" }}
             disabled={!format}
-            onClick={() => onDone({ title: format, date, guests, budget })}
+            // Название по умолчанию — на языке интерфейса: его видит и правит сам организатор
+            onClick={() => onDone({ title: t(format), date, guests, budget })}
           >
             {t("Собрать событие в конструкторе →")}
           </button>
@@ -330,7 +331,7 @@ function PickVenue({ onPick }: { onPick: (vid: string) => void }) {
                 font: `${cluster === label ? 600 : 500} 11px/1 'Golos Text',sans-serif`,
               }}
             >
-              {label} · {n}
+              {label === "Все" ? t("Все") : label} · {n}
             </button>
           ))}
         </div>
@@ -399,7 +400,7 @@ function VenueTile({ v, onPick }: { v: Venue; onPick: () => void }) {
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             <Chip color="rgba(255,255,255,.6)">{(v.tag ?? "").toUpperCase()}</Chip>
             {rate ? (
-              <Chip color={RATE_COLOR[rate.kind]}>{RATE_LABEL[rate.kind].toUpperCase()}</Chip>
+              <Chip color={RATE_COLOR[rate.kind]}>{t(RATE_LABEL[rate.kind]).toUpperCase()}</Chip>
             ) : null}
           </div>
         </div>
@@ -421,8 +422,8 @@ function VenueTile({ v, onPick }: { v: Venue; onPick: () => void }) {
             style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
           >
             {rate
-              ? `${firm ? "аренда от" : "ориентир"} ${fmtThb(rate.amount)}`
-              : "аренда по запросу"}
+              ? `${firm ? t("аренда от") : t("ориентир")} ${fmtThb(rate.amount)}`
+              : t("аренда по запросу")}
           </span>
           <span className="gtr-btn gtr-btn-red" style={{ padding: "6px 11px", fontSize: 12 }}>
             {t("Собрать →")}

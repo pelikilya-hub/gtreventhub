@@ -12,7 +12,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { APP_URL } from "../gtr/app-url";
 import type { SeoLang } from "../gtr/seo";
 import type { PublicAfisha, PublicEvent } from "./afisha-data";
-import { AFISHA_PATH, Arrow, LpFoot, LpTop } from "./Landing";
+import { Arrow, LpFoot, LpTop } from "./Landing";
 import { useLandingFx } from "./fx";
 
 const T = {
@@ -52,6 +52,24 @@ const T = {
     ctaP: "In the app a table is two taps away, and the lineup adapts to your taste.",
     signup: "Create an account",
   },
+  th: {
+    eyebrow: "โปรแกรม · ประเทศไทย",
+    h1: "ใครเล่น|คืนนี้",
+    lead: "โปรแกรมคลับ บีชคลับ และบาร์ล่วงหน้าสองสัปดาห์ รวบรวมจากประกาศทางการของแต่ละร้าน อัปเดตทุกสองชั่วโมง",
+    all: "ทั้งหมด",
+    allDays: "ทุกวัน",
+    today: "คืนนี้",
+    tomorrow: "พรุ่งนี้",
+    book: "จองโต๊ะ",
+    source: "ประกาศของร้าน",
+    noTime: "รอยืนยันเวลา",
+    emptyH: "วันนี้ยังไม่มีอีเวนต์ประกาศ",
+    emptyP: "โปรแกรมรวบรวมจากเว็บไซต์และโซเชียลของร้าน ลองดูวันอื่น หรือเปิดแอปเพื่อดูปาร์ตี้ที่ตรงกับเพลงที่คุณชอบ",
+    count: (n: number) => `${n} อีเวนต์`,
+    ctaH: "จองโต๊ะ วางเส้นทาง|และเพลงที่คุณชอบ",
+    ctaP: "ในแอปจองโต๊ะได้ในไม่กี่แตะ และโปรแกรมจะปรับตามรสนิยมของคุณ",
+    signup: "สร้างบัญชี",
+  },
 } as const;
 
 function plural(n: number, forms: [string, string, string]) {
@@ -90,6 +108,7 @@ function dayLabel(iso: string, today: string, lang: SeoLang) {
 const WEEKDAYS: Record<SeoLang, string[]> = {
   ru: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
   en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  th: ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."],
 };
 
 export function Afisha({ lang, data }: { lang: SeoLang; data: PublicAfisha }) {
@@ -128,7 +147,7 @@ export function Afisha({ lang, data }: { lang: SeoLang; data: PublicAfisha }) {
         // Собрано из наших данных и JSON.stringify — экранирование «</» ниже.
         dangerouslySetInnerHTML={{ __html: eventsJsonLd(data.events, lang, regionLabel) }}
       />
-      <LpTop lang={lang} altHref={AFISHA_PATH[lang === "ru" ? "en" : "ru"]} />
+      <LpTop lang={lang} page="afisha" />
 
       <main>
         <section className="lp-wrap lp-af-head">

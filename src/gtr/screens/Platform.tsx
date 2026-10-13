@@ -341,7 +341,7 @@ export function AiMatchScreen() {
       const r = await contactTeamFn({
         data: { text: `[ИИ-подбор · лист ожидания Spotify] ${user.email} · роль ${user.role}` },
       });
-      setState(r.ok ? t("Вы в списке раннего доступа") : (r.reason ?? "…"));
+      setState(r.ok ? t("Вы в списке раннего доступа") : t(r.reason ?? "…"));
     } catch {
       setState(t("Сервер недоступен"));
     }
@@ -639,7 +639,7 @@ export function CommunityScreen() {
       const r = await contactTeamFn({
         data: { text: `[Комьюнити · заявка на вступление] ${user.name} · ${user.email} · роль ${user.role}` },
       });
-      setState(r.ok ? t("Заявка у команды — ответ придёт в Telegram") : (r.reason ?? "…"));
+      setState(r.ok ? t("Заявка у команды — ответ придёт в Telegram") : t(r.reason ?? "…"));
     } catch {
       setState(t("Сервер недоступен"));
     }
@@ -690,7 +690,7 @@ export function VisasScreen() {
       const r = await contactTeamFn({
         data: { text: `[Визы · запрос помощи] ${user.name} · ${user.email} — нужна консультация по визе/work permit` },
       });
-      setState(r.ok ? t("Запрос у команды — ответ придёт в Telegram") : (r.reason ?? "…"));
+      setState(r.ok ? t("Запрос у команды — ответ придёт в Telegram") : t(r.reason ?? "…"));
     } catch {
       setState(t("Сервер недоступен"));
     }
@@ -776,7 +776,7 @@ export function PromoScreen({ vid: fromVenue }: { vid?: string } = {}) {
         setState(t("Заявка отправлена — подтверждение придёт от команды"));
         setNote("");
         await loadBookings();
-      } else setState(r.reason ?? "…");
+      } else setState(t(r.reason ?? "…"));
     } catch {
       setState(t("Сервер недоступен"));
     }
@@ -883,7 +883,7 @@ export function PromoScreen({ vid: fromVenue }: { vid?: string } = {}) {
                 {b.zone || b.tableType ? (
                   <span className="gtr-mono" style={{ font: "500 11px/1.45 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
                     {[b.zone, b.tableType].filter(Boolean).join(" · ")}
-                    {b.deposit ? ` · депозит ${b.deposit.toLocaleString("ru-RU")} THB` : ""}
+                    {b.deposit ? ` · ${t("депозит")} ${b.deposit.toLocaleString("ru-RU")} THB` : ""}
                   </span>
                 ) : null}
                 {b.preorder?.length ? (

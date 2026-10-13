@@ -62,7 +62,7 @@ const NoAccess = ({ what }: { what: string }) => {
       {t("Доступ ограничен")}
     </div>
     <div style={{ font: "500 12px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-      {t("Для вашей роли раздел «")}{what}{t("» закрыт матрицей прав. Запросите доступ у GTR-админа — раздел «Доступы и роли».")}
+      {t("Для вашей роли раздел «")}{what}{t("» закрыт для вашей роли. Запросите доступ у GTR-админа — раздел «Доступы и роли».")}
     </div>
   </Card>
   );
@@ -786,7 +786,7 @@ export function SpacesScreen() {
           : [
               {
                 id: "none",
-                name: "Залы не нормализованы",
+                name: "Залы ещё не заведены",
                 type: "—",
                 sqm: "",
                 capTheatre: "",
@@ -1947,7 +1947,7 @@ export function AdminScreen() {
         {[
           [t("ПЛОЩАДОК"), PH.meta.total, "#fff"],
           [t("ЗАЛОВ"), PH.meta.spaces, "#fff"],
-          [t("КОНТАКТОВ P0/P1"), PH.meta.contacts, AMBER],
+          [t("ПРИОРИТЕТНЫХ КОНТАКТОВ"), PH.meta.contacts, AMBER],
           [t("КАРАНТИН"), quar.length, RED],
         ].map(([l, v2, c]) => (
           <Card key={String(l)} style={{ padding: "16px 18px" }}>

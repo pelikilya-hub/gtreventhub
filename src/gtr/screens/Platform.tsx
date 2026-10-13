@@ -374,7 +374,7 @@ export function AiMatchScreen() {
           </select>
         </div>
         <div className="gtr-mono" style={{ font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 12 }}>
-          {t("Вектор площадки: музыка, концепция и корпус её афиш. Верифицированные артисты и артисты с медиа — выше.")}
+          {t("Подборка под стиль площадки: её музыка, концепция и прошлые афиши. Проверенные артисты и артисты с видео — выше.")}
         </div>
         <div style={{ display: "grid", gap: 8 }}>
           {(res.artists ?? []).map((a, i) => (

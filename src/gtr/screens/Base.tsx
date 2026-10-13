@@ -1273,7 +1273,7 @@ function AfishaBlock({ vid }: { vid: string }) {
         ) : null}
         {style?.colors.length ? (
           <span
-            title={t("Стиль площадки · корпус {{n}} афиш", { n: style.posters })}
+            title={t("Стиль площадки · {{n}} афиш", { n: style.posters })}
             style={{ display: "flex", gap: 3, alignItems: "center" }}
           >
             {style.colors.slice(0, 6).map((c) => (
@@ -1437,7 +1437,7 @@ function AfishaBlock({ vid }: { vid: string }) {
         </div>
       ) : (
         <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-          {t("Источник этой площадки ещё не подключён — собираем Café del Mar и Illuzion, дальше расширяем.")}
+          {t("Анонсов этой площадки пока нет — они появятся, как только площадка их опубликует.")}
         </span>
       )}
     </Card>

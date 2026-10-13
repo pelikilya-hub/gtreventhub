@@ -194,7 +194,7 @@ export function DashScreen() {
       ],
       actions: [
         { title: t("Собрать программу в конструкторе"), cta: t("Конструктор"), go: "constructor" },
-        { title: t("Прислать матрицу вместимости и net-ставки"), cta: t("Залы и прайс"), go: "spaces" },
+        { title: t("Прислать вместимость залов и нетто-ставки"), cta: t("Залы и прайс"), go: "spaces" },
         { title: t("Загрузить презентацию приватной аренды и комиссию"), cta: t("Финансы"), go: "finance" },
       ],
       mainTitle: t("Залы и техника площадки"),
@@ -288,7 +288,7 @@ export function DashScreen() {
           ))
         ) : (
           <div className="gtr-dash-row">
-            <span className="gtr-dash-row-t">{t("Залы не нормализованы")}</span>
+            <span className="gtr-dash-row-t">{t("Залы ещё не заведены")}</span>
           </div>
         )}
       </section>

@@ -44,19 +44,22 @@ const Title = ({ children }: { children: string }) => (
   </h1>
 );
 
-const NoAccess = ({ what }: { what: string }) => (
+const NoAccess = ({ what }: { what: string }) => {
+  const { t } = useTranslation();
+  return (
   <Card style={{ maxWidth: 520, margin: "60px auto", padding: 28, textAlign: "center" }}>
     <div
       className="gtr-oswald"
       style={{ font: "600 15.5px/1.2 var(--display)", marginBottom: 10 }}
     >
-      {i18n.t("Доступ ограничен")}
+      {t("Доступ ограничен")}
     </div>
     <div style={{ font: "500 12px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-      {i18n.t("Для вашей роли раздел «")}{what}{i18n.t("» закрыт матрицей прав. Запросите доступ у GTR-админа — раздел «Доступы и роли».")}
+      {t("Для вашей роли раздел «")}{what}{t("» закрыт матрицей прав. Запросите доступ у GTR-админа — раздел «Доступы и роли».")}
     </div>
   </Card>
-);
+  );
+};
 
 // ---------- заявки организаторов ----------
 export function InquiriesScreen() {

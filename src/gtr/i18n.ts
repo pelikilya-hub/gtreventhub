@@ -16,14 +16,12 @@ export const UI_LANGS: [UiLang, string][] = [
 ];
 
 // Первый визит — язык телефона решает: тайцу тайский, русскому русский,
-// остальному миру английский. Явный выбор в настройках весит больше и
-// живёт в localStorage; определение срабатывает только пока выбора нет.
-const detect = (): UiLang => {
-  if (typeof navigator === "undefined") return "ru";
-  const langs = [navigator.language, ...(navigator.languages ?? [])].map((l) =>
-    String(l || "").toLowerCase(),
-  );
-  for (const l of langs) {
+// остальному миру английский. Явный выбор весит больше и живёт в
+// localStorage и в cookie: cookie нужна серверу, чтобы первая же
+// страница пришла на языке гостя, а не на русском с переключением.
+export const pickLang = (langs: string[]): UiLang => {
+  for (const raw of langs) {
+    const l = String(raw || "").trim().toLowerCase();
     if (l.startsWith("ru") || l.startsWith("be") || l.startsWith("uk") || l.startsWith("kk"))
       return "ru";
     if (l.startsWith("th")) return "th";
@@ -32,11 +30,39 @@ const detect = (): UiLang => {
   return "en";
 };
 
-const stored = (): UiLang => {
-  if (typeof localStorage === "undefined") return "ru";
-  const v = localStorage.getItem("gtr-lang");
-  return v === "en" || v === "th" || v === "ru" ? v : detect();
+const isLang = (v: unknown): v is UiLang => v === "en" || v === "th" || v === "ru";
+
+const detect = (): UiLang => {
+  if (typeof navigator === "undefined") return "ru";
+  return pickLang([navigator.language, ...(navigator.languages ?? [])]);
 };
+
+/** Язык, который выбрал бы сам гость: явный выбор, затем язык телефона. */
+export const preferredLang = (): UiLang => {
+  if (typeof localStorage === "undefined") return "ru";
+  try {
+    const v = localStorage.getItem(LANG_KEY);
+    if (isLang(v)) return v;
+  } catch {
+    // приватный режим
+  }
+  const c = typeof document !== "undefined" ? document.cookie.match(/(?:^|; )gtr-lang=(ru|en|th)/) : null;
+  return c ? (c[1] as UiLang) : detect();
+};
+
+// Стартовый язык в браузере — тот, на котором сервер отрисовал страницу
+// (атрибут data-lang у корня приложения). Иначе гидрация видела бы
+// русскую разметку под английским словарём, React перерисовывал бы всё
+// дерево, а гость видел мелькание русского текста.
+const initial = (): UiLang => {
+  if (typeof document !== "undefined") {
+    const ssr = document.querySelector<HTMLElement>(".gtr-app[data-lang]")?.dataset.lang;
+    if (isLang(ssr)) return ssr;
+  }
+  return preferredLang();
+};
+
+const LANG_KEY = "gtr-lang";
 
 if (!i18n.isInitialized) {
   void i18n.use(initReactI18next).init({
@@ -44,7 +70,7 @@ if (!i18n.isInitialized) {
       en: { translation: EN },
       th: { translation: TH },
     },
-    lng: stored(),
+    lng: initial(),
     // Запасной язык — «ru», то есть сам ключ: русский текст и есть ключ
     // словаря. Объектная форма с отдельным запасным для тайского ломала
     // разрешение переводов целиком — меню переставало переводиться, —
@@ -60,9 +86,14 @@ if (!i18n.isInitialized) {
 
 export const setUiLang = (lang: UiLang) => {
   try {
-    localStorage.setItem("gtr-lang", lang);
+    localStorage.setItem(LANG_KEY, lang);
   } catch {
     // приватный режим — язык доживёт до конца сессии
+  }
+  try {
+    document.cookie = `${LANG_KEY}=${lang}; path=/; max-age=31536000; samesite=lax`;
+  } catch {
+    // cookie запрещены — сервер будет брать язык браузера
   }
   void i18n.changeLanguage(lang);
 };

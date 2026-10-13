@@ -201,12 +201,14 @@ export function Afisha({ lang, data }: { lang: SeoLang; data: PublicAfisha }) {
                   <article className="lp-ev" key={e.id} style={{ "--i": Math.min(i, 8) } as CSSProperties}>
                     <div className="lp-ev-img">
                       <Poster src={e.poster} venue={e.venue} eager={i < 4} />
-                      {e.price && <span className="lp-ev-price">{e.price}</span>}
                     </div>
                     <div className="lp-ev-body">
+                      {/* время и вход — под афишей, а не поверх: в углах
+                          постера обычно и стоят дата и имена */}
                       <div className="lp-mono lp-ev-meta">
                         <span className="lp-ev-time">{e.time ?? t.noTime}</span>
-                        <span>{regionLabel(e.region)}</span>
+                        {e.price && <span className="lp-ev-price">{e.price}</span>}
+                        <span className="lp-ev-region">{regionLabel(e.region)}</span>
                       </div>
                       <h3>{e.title}</h3>
                       <div className="lp-ev-venue">{e.venue}</div>
@@ -269,15 +271,22 @@ function Poster({ src, venue, eager }: { src: string; venue: string; eager: bool
       </div>
     );
   }
+  // Афиша целиком: вписываем, а не обрезаем. Площадки шлют квадраты,
+  // сторис и горизонтальные обложки — в рамке 4:5 через cover у них
+  // пропадали края с датой и именами. Поля закрывает размытая копия.
   return (
-    <img
-      ref={ref}
-      src={src}
-      alt=""
-      loading={eager ? "eager" : "lazy"}
-      decoding="async"
-      onError={() => setFailed(true)}
-    />
+    <>
+      <img className="lp-ev-bg" src={src} alt="" aria-hidden loading={eager ? "eager" : "lazy"} decoding="async" />
+      <img
+        ref={ref}
+        className="lp-ev-poster"
+        src={src}
+        alt=""
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
+        onError={() => setFailed(true)}
+      />
+    </>
   );
 }
 

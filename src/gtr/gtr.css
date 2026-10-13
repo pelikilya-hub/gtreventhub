@@ -268,7 +268,10 @@
   }
 }
 
-.gtr-app {
+/* .gtr-portal — тот же набор токенов для слоёв, вынесенных порталом в body:
+   шторки и окна живут вне .gtr-app и иначе теряют цвета темы */
+.gtr-app,
+.gtr-portal {
   /* ---- подложка: приглушённый чёрный, не #000 ---- */
   --gtr-bg: #0a0b0d;
   --gtr-side: #0c0d10;
@@ -5652,4 +5655,153 @@ canvas.gtr-dancer-img {
   }
   .gtr-stats:has(> .gtr-stat:nth-child(3):last-child) .gtr-stat { padding-right: 8px; }
   .gtr-stats:has(> .gtr-stat:nth-child(3):last-child) .gtr-stat + .gtr-stat { padding-left: 12px; }
+}
+
+/* ============================================================
+   Афиша «Сегодня»: шапка вечера, сетка постеров, площадки, шторка брони.
+   Постер всегда целиком (PosterImg вписывает его в рамку 4:5 с размытой
+   подложкой), рамка у всех карточек одна — сетка не прыгает.
+   ============================================================ */
+.gtr-af { max-width: 1240px; margin: 0 auto; }
+.gtr-af-head { padding: clamp(6px, 2vw, 20px) 0 clamp(14px, 2vw, 22px); }
+.gtr-af-kick { font: 600 11px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--gtr-red); }
+.gtr-af-h1 {
+  margin: 10px 0 0;
+  font: 800 clamp(40px, 7vw, 88px)/.92 var(--display);
+  letter-spacing: -.035em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  animation: gtr-af-rise .6s var(--ease) both;
+}
+.gtr-af-sub { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 14px; font: 500 15px/1.4 var(--text); color: var(--gtr-t2); }
+.gtr-af-sub b { color: var(--gtr-t1); font-weight: 700; }
+.gtr-af-sub span:first-letter { text-transform: uppercase; }
+
+.gtr-af-days { position: sticky; top: var(--top-h, 0px); z-index: 5; margin: 0 calc(-1 * var(--gtr-pad)) 22px; padding: 10px var(--gtr-pad); background: linear-gradient(#0a0b0dee 70%, #0a0b0d00); }
+.gtr-af-days .gtr-map-row { margin: 0; align-items: center; }
+.gtr-af-days .gtr-map-chip, .gtr-af-kinds .gtr-map-chip { padding: 9px 13px; font-size: 13px; }
+.gtr-af-day-n { font: 600 11px/1 var(--mono); color: var(--gtr-t3); }
+.gtr-map-chip.on .gtr-af-day-n { color: #fff; }
+.gtr-af-date { width: auto; min-width: 176px; padding: 8px 10px; font-size: 13px; color-scheme: dark; }
+.gtr-af-kinds { margin: 0 0 16px; }
+
+.gtr-af-only { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 0; margin-bottom: 8px; border-bottom: 1px solid var(--gtr-border); }
+.gtr-af-only-name { font: 600 15px/1.3 var(--text); flex: 1; min-width: 0; }
+
+/* сетка афиш: две колонки на телефоне, дальше по ширине */
+.gtr-af-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 22px 16px; }
+.gtr-af-ev { --i: 0; display: flex; flex-direction: column; min-width: 0; animation: gtr-af-rise .55s var(--ease) both; animation-delay: calc(var(--i) * 45ms); }
+.gtr-af-ev-img { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; overflow: hidden; }
+.gtr-af-ev-img > span:first-child img { transition: transform .6s var(--ease); }
+.gtr-af-ev-img:hover > span:first-child img:last-child { transform: scale(1.03); }
+.gtr-af-ev-body { display: flex; flex-direction: column; flex: 1; padding-top: 12px; min-width: 0; }
+.gtr-af-ev-title {
+  margin: 0;
+  font: 700 15px/1.25 var(--display);
+  text-transform: uppercase;
+  letter-spacing: -.01em;
+  overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.gtr-af-ev-venue { margin: 6px 0 0; padding: 0; border: 0; background: none; color: var(--gtr-t2); font: 500 13px/1.35 var(--text); text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.gtr-af-ev-venue span { color: var(--gtr-t3); }
+.gtr-af-ev-venue:hover { color: var(--gtr-t1); }
+.gtr-af-ev-act { display: flex; gap: 8px; margin-top: auto; padding-top: 12px; }
+.gtr-af-ev-act .gtr-btn { flex: 1; justify-content: center; padding: 11px 10px; font-size: 11px; }
+.gtr-af-route { flex: none; width: 40px; border: 1px solid var(--gtr-border2, rgba(255, 255, 255, .16)); background: rgba(255, 255, 255, .04); color: var(--gtr-t1); font: 600 18px/1 var(--text); cursor: pointer; transition: border-color .2s, color .2s, background .2s; }
+.gtr-af-route.on { border-color: #2ecc71; color: #2ecc71; background: rgba(46, 204, 113, .1); }
+.gtr-af-skel { aspect-ratio: 4 / 5; background: linear-gradient(100deg, #121318 30%, #1a1b21 50%, #121318 70%) 0 0 / 300% 100%; animation: gtr-af-shine 1.4s linear infinite; }
+.gtr-af-empty { margin: 0; padding: 14px 0; font: 500 15px/1.5 var(--text); color: var(--gtr-t3); border-bottom: 1px solid var(--gtr-border); }
+
+/* площадки */
+.gtr-af-venues { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 22px 16px; }
+.gtr-af-venue { --i: 0; display: flex; flex-direction: column; min-width: 0; animation: gtr-af-rise .55s var(--ease) both; animation-delay: calc(var(--i) * 45ms); }
+.gtr-af-venue-shot { display: block; width: 100%; padding: 0; border: 0; cursor: pointer; background: repeating-linear-gradient(135deg, rgba(255, 255, 255, .028) 0 2px, transparent 2px 9px), linear-gradient(160deg, #17181c, #0c0d10); }
+.gtr-af-venue-shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.gtr-af-venue-shot:hover img { transform: scale(1.045); }
+.gtr-af-venue-fade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10, 11, 13, .5) 0%, rgba(10, 11, 13, 0) 30%, rgba(10, 11, 13, 0) 50%, rgba(10, 11, 13, .92) 100%); }
+.gtr-af-venue-name { position: absolute; left: 14px; right: 14px; bottom: 12px; display: flex; align-items: flex-end; gap: 10px; text-align: left; }
+.gtr-af-venue-name b { flex: 1; min-width: 0; font: 800 18px/1.05 var(--display); text-transform: uppercase; letter-spacing: -.01em; color: #fff; text-shadow: 0 1px 12px rgba(0, 0, 0, .55); overflow-wrap: anywhere; }
+.gtr-af-venue-hours { display: inline-flex; align-items: center; gap: 6px; flex: none; font: 600 11px/1 var(--mono); color: #2ecc71; white-space: nowrap; }
+.gtr-af-venue-body { padding-top: 12px; }
+.gtr-af-venue-line { font: 500 13.5px/1.45 var(--text); color: var(--gtr-t2); }
+.gtr-af-venue-best { margin-top: 6px; font: 500 13px/1.45 var(--text); color: #f5a623; }
+.gtr-af-venue-act { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.gtr-af-venue-act .gtr-btn { padding: 10px 12px; font-size: 11px; text-decoration: none; }
+.gtr-af-venue-act .gtr-af-route { height: 36px; }
+.gtr-af-more { display: flex; justify-content: center; width: 100%; margin-top: 22px; padding: 14px; font-size: 12px; }
+
+/* маршрут вечера */
+.gtr-af-route-bar { padding: 14px 0 16px; margin-bottom: 26px; border-top: 1px solid var(--gtr-border); border-bottom: 1px solid var(--gtr-border); }
+.gtr-af-route-list { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.gtr-af-route-act { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.gtr-af-route-act a { text-decoration: none; }
+.gtr-af-gps { display: inline-flex; align-items: center; gap: 6px; font: 600 11px/1 var(--mono); color: var(--gtr-red); }
+.gtr-af-gps i { width: 7px; height: 7px; border-radius: 50%; background: var(--gtr-red); animation: pulse 1s infinite; }
+.gtr-af-note { margin-top: 10px; font: 500 13px/1.45 var(--text); color: var(--gtr-t2); }
+.gtr-af-note-red { color: #ff5b4d; }
+.gtr-af-note-ok { color: #2ecc71; }
+
+/* шторка брони: снизу на телефоне, по центру на компьютере */
+.gtr-af-sheet-scrim { position: fixed; inset: 0; z-index: 280; display: flex; align-items: flex-end; justify-content: center; background: rgba(6, 7, 9, .78); animation: gtr-af-fade .2s ease both; }
+.gtr-af-sheet {
+  width: min(520px, 100%);
+  max-height: 92dvh;
+  overflow: auto;
+  padding: 20px 20px calc(22px + env(safe-area-inset-bottom));
+  background: #0e0f12;
+  border-top: 2px solid var(--gtr-red);
+  animation: gtr-af-up .32s var(--ease) both;
+}
+.gtr-af-sheet-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
+.gtr-af-sheet-title { margin-top: 8px; font: 800 22px/1.05 var(--display); text-transform: uppercase; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.gtr-af-sheet-sub { margin-top: 6px; font: 500 14px/1.4 var(--text); color: var(--gtr-t2); }
+.gtr-af-sheet-x { margin-left: auto; flex: none; width: 40px; height: 40px; border: 1px solid var(--gtr-border); background: none; color: var(--gtr-t1); font-size: 16px; cursor: pointer; }
+.gtr-af-sheet-form { display: grid; gap: 14px; }
+.gtr-af-field { display: grid; gap: 7px; }
+.gtr-af-field > span { font: 600 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--gtr-t3); }
+.gtr-af-field .gtr-input { width: 100%; font-size: 16px; padding: 12px; }
+.gtr-af-guests { display: flex; align-items: center; gap: 18px; }
+.gtr-af-guests button { width: 44px; height: 44px; border: 1px solid var(--gtr-border); background: rgba(255, 255, 255, .04); color: #fff; font: 600 20px/1 var(--text); cursor: pointer; }
+.gtr-af-guests b { min-width: 28px; text-align: center; font: 700 22px/1 var(--mono); }
+@media (min-width: 861px) {
+  .gtr-af-days { top: 0; }
+  .gtr-af-sheet-scrim { align-items: center; }
+  .gtr-af-sheet { border: 1px solid var(--gtr-border); border-top: 2px solid var(--gtr-red); }
+}
+
+@keyframes gtr-af-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes gtr-af-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes gtr-af-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gtr-af-shine { to { background-position: -300% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .gtr-af-h1, .gtr-af-ev, .gtr-af-venue, .gtr-af-sheet, .gtr-af-sheet-scrim { animation: none; }
+  .gtr-af-skel { animation: none; }
+}
+
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
+  .gtr-af-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 12px; }
+  .gtr-af-ev-title { font-size: 13.5px; }
+  .gtr-af-ev-venue { font-size: 12.5px; }
+  .gtr-af-ev-act .gtr-btn { padding: 10px 6px; font-size: 10px; letter-spacing: .06em; }
+  .gtr-af-route { width: 36px; }
+  .gtr-af-venues { grid-template-columns: 1fr; }
+}
+.gtr-af-ev-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 8px; font: 700 12px/1 var(--mono); letter-spacing: .03em; }
+.gtr-af-ev-time { color: var(--gtr-red); }
+.gtr-af-ev-price { color: #2ecc71; }
+.gtr-af-ev-ours { padding: 3px 5px; background: var(--gtr-red); color: #fff; font-size: 10px; letter-spacing: .1em; }
+
+/* Живость всех кабинетов: разделы проявляются при входе на экран лесенкой.
+   Только opacity и transform — композитор, без перерисовки текста. */
+.gtr-dash > *,
+.gtr-boss-grid > * {
+  animation: gtr-af-rise .5s var(--ease) both;
+}
+.gtr-dash > :nth-child(2), .gtr-boss-grid > :nth-child(2) { animation-delay: 60ms; }
+.gtr-dash > :nth-child(3), .gtr-boss-grid > :nth-child(3) { animation-delay: 120ms; }
+.gtr-dash > :nth-child(4), .gtr-boss-grid > :nth-child(4) { animation-delay: 180ms; }
+.gtr-dash > :nth-child(n + 5), .gtr-boss-grid > :nth-child(n + 5) { animation-delay: 240ms; }
+@media (prefers-reduced-motion: reduce) {
+  .gtr-dash > *, .gtr-boss-grid > * { animation: none; }
 }

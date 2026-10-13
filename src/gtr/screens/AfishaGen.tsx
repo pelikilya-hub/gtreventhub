@@ -64,7 +64,7 @@ const loadImg = (src: string) =>
     im.src = src;
   });
 
-// перенос заголовка по ширине
+// перенос по ширине — все слова, без молчаливого обрезания хвоста
 const wrap = (ctx: CanvasRenderingContext2D, text: string, maxW: number) => {
   const words = text.split(/\s+/).filter(Boolean);
   const lines: string[] = [];
@@ -77,7 +77,37 @@ const wrap = (ctx: CanvasRenderingContext2D, text: string, maxW: number) => {
     } else cur = probe;
   }
   if (cur) lines.push(cur);
-  return lines.slice(0, 3);
+  return lines;
+};
+
+// Подбор кегля: уменьшаем, пока текст не встанет в maxLines строк и ни
+// одна строка не шире поля. Раньше заголовок резался до трёх строк, а
+// подзаголовок не переносился вовсе и уходил за край афиши.
+const fitText = (
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  font: (fs: number) => string,
+  start: number,
+  min: number,
+  maxW: number,
+  maxLines: number,
+) => {
+  let fs = start;
+  for (; fs >= min; fs -= 4) {
+    ctx.font = font(fs);
+    const lines = wrap(ctx, text, maxW);
+    if (lines.length <= maxLines && lines.every((l) => ctx.measureText(l).width <= maxW))
+      return { fs, lines };
+  }
+  // Не влезло и на минимальном кегле: строк не больше maxLines, остаток
+  // собираем в последнюю — fillText с maxWidth сожмёт её по ширине, но
+  // ни одного слова не потеряет.
+  fs = min;
+  ctx.font = font(fs);
+  const all = wrap(ctx, text, maxW);
+  const lines = all.slice(0, maxLines - 1);
+  lines.push(all.slice(maxLines - 1).join(" "));
+  return { fs, lines: lines.filter(Boolean) };
 };
 
 export function AfishaGenScreen() {
@@ -244,60 +274,77 @@ export function AfishaGenScreen() {
     ctx.font = "600 26px 'JetBrains Mono', monospace";
     ctx.fillStyle = "rgba(255,255,255,.66)";
     const vn = (venue?.name ?? "").toUpperCase();
-    ctx.fillText(vn, w - M - ctx.measureText(vn).width, M + 3);
+    const vnMax = w - M * 2 - ctx.measureText("GTR EVENT").width - 60;
+    const vnW = Math.min(ctx.measureText(vn).width, vnMax);
+    ctx.fillText(vn, w - M - vnW, M + 3, vnMax);
 
+    const maxW = w - M * 2;
+    const alignX = (lw: number) => (variant === 2 ? (w - lw) / 2 : M);
+
+    // замеряем все строки заранее: блок обязан встать между шапкой и подвалом
+    const titleFit = fitText(ctx, big, (fs) => `800 ${fs}px Unbounded, sans-serif`, size === "story" ? 128 : 116, 44, maxW, 4);
+    const smallFit = small
+      ? fitText(ctx, small, (fs) => `700 ${fs}px Unbounded, sans-serif`, 38, 26, maxW, 2)
+      : null;
+    const sub = subtitle.trim();
+    const subFit = sub ? fitText(ctx, sub, (fs) => `500 ${fs}px 'Golos Text', sans-serif`, 32, 22, maxW, 2) : null;
+    const chipH = dateLabel ? 62 + 34 : 0;
+    const blockH =
+      chipH +
+      titleFit.lines.length * titleFit.fs * 1.06 +
+      10 +
+      (smallFit ? smallFit.lines.length * smallFit.fs * 1.3 + 14 : 0) +
+      (subFit ? subFit.lines.length * subFit.fs * 1.4 : 0);
+    const top = M + 90; // под шапкой
+    const bottom = h - M - 96; // над подвалом
     const centerY = variant === 2;
-    const anchorY = centerY ? h * 0.42 : size === "story" ? h * 0.62 : h * 0.56;
-    let y = anchorY;
+    const anchorY = centerY ? (h - blockH) / 2 : size === "story" ? h * 0.62 : h * 0.56;
+    let y = Math.max(top, Math.min(anchorY, bottom - blockH));
 
     // дата-чип
     if (dateLabel) {
       ctx.font = "700 34px 'JetBrains Mono', monospace";
-      const tw = ctx.measureText(dateLabel).width;
-      const chX = variant === 0 ? M : variant === 1 ? M : (w - tw - 56) / 2;
+      const tw = Math.min(ctx.measureText(dateLabel).width, maxW - 56);
+      const chX = variant === 2 ? (w - tw - 56) / 2 : M;
       ctx.fillStyle = accent;
       ctx.fillRect(chX, y, tw + 56, 62);
       ctx.fillStyle = lumOf(accent) > 0.62 ? "#101114" : "#FFFFFF";
-      ctx.fillText(dateLabel, chX + 28, y + 15);
-      y += 62 + 34;
+      ctx.fillText(dateLabel, chX + 28, y + 15, tw);
+      y += chipH;
     }
 
     // главный заголовок
-    let fs = size === "story" ? 128 : 116;
-    ctx.font = `800 ${fs}px Unbounded, sans-serif`;
-    let lines = wrap(ctx, big, w - M * 2);
-    while (lines.length > 2 && fs > 72) {
-      fs -= 10;
-      ctx.font = `800 ${fs}px Unbounded, sans-serif`;
-      lines = wrap(ctx, big, w - M * 2);
-    }
+    ctx.font = `800 ${titleFit.fs}px Unbounded, sans-serif`;
     ctx.fillStyle = white;
     ctx.shadowColor = "rgba(0,0,0,.45)";
     ctx.shadowBlur = 26;
-    for (const ln of lines) {
-      const lw = ctx.measureText(ln).width;
-      const lx = variant === 2 ? (w - lw) / 2 : M;
-      ctx.fillText(ln, lx, y);
-      y += fs * 1.06;
+    for (const ln of titleFit.lines) {
+      const lw = Math.min(ctx.measureText(ln).width, maxW);
+      ctx.fillText(ln, alignX(lw), y, maxW);
+      y += titleFit.fs * 1.06;
     }
     ctx.shadowBlur = 0;
     y += 10;
 
     // подзаголовок (название события при выбранном артисте)
-    if (small) {
-      ctx.font = "700 38px Unbounded, sans-serif";
+    if (smallFit) {
+      ctx.font = `700 ${smallFit.fs}px Unbounded, sans-serif`;
       ctx.fillStyle = accent;
-      const lw = ctx.measureText(small).width;
-      ctx.fillText(small, variant === 2 ? (w - lw) / 2 : M, y);
-      y += 62;
+      for (const ln of smallFit.lines) {
+        const lw = Math.min(ctx.measureText(ln).width, maxW);
+        ctx.fillText(ln, alignX(lw), y, maxW);
+        y += smallFit.fs * 1.3;
+      }
+      y += 14;
     }
-    if (subtitle.trim()) {
-      ctx.font = "500 32px 'Golos Text', sans-serif";
+    if (subFit) {
+      ctx.font = `500 ${subFit.fs}px 'Golos Text', sans-serif`;
       ctx.fillStyle = "rgba(255,255,255,.78)";
-      const st = subtitle.trim();
-      const lw = ctx.measureText(st).width;
-      ctx.fillText(st, variant === 2 ? (w - lw) / 2 : M, y);
-      y += 48;
+      for (const ln of subFit.lines) {
+        const lw = Math.min(ctx.measureText(ln).width, maxW);
+        ctx.fillText(ln, alignX(lw), y, maxW);
+        y += subFit.fs * 1.4;
+      }
     }
 
     // подвал: площадка · район + линия
@@ -306,7 +353,7 @@ export function AfishaGenScreen() {
     ctx.font = "600 27px 'JetBrains Mono', monospace";
     ctx.fillStyle = "rgba(255,255,255,.85)";
     const foot = [venue?.name, venue?.area].filter(Boolean).join(" · ").toUpperCase();
-    ctx.fillText(foot, M, h - M - 34);
+    ctx.fillText(foot, M, h - M - 34, w - M * 2);
 
     setRendering(false);
   }, [size, bg, palette, accent, dark, artist, title, subtitle, dateLabel, variant, venue]);
@@ -402,16 +449,13 @@ export function AfishaGenScreen() {
         <h1 className="gtr-oswald gtr-h1">{t("Генератор афиш")}</h1>
         {style ? (
           <span
-            title={`Корпус стиля: ${style.posters} афиш`}
             style={{ display: "flex", gap: 3, alignItems: "center" }}
           >
             {palette.slice(0, 6).map((c) => (
               <span key={c} style={{ width: 11, height: 11, background: c }} />
             ))}
           </span>
-        ) : (
-          <Chip color="rgba(255,255,255,.4)">{t("СТИЛЬ: БРЕНД GTR (корпуса площадки пока нет)")}</Chip>
-        )}
+        ) : null}
       </div>
 
       <div
@@ -611,17 +655,6 @@ export function AfishaGenScreen() {
                   </button>
                 ))}
               </div>
-              {!bgOptions.length ? (
-                <div
-                  style={{
-                    marginTop: 6,
-                    font: "500 12px/1.5 'Golos Text',sans-serif",
-                    color: "var(--gtr-t3)",
-                  }}
-                >
-                  {t("У площадки пока нет корпуса афиш — фон соберётся из палитры. Выберите артиста с меткой «МЕДИА», чтобы взять его hero-кадр.")}
-                </div>
-              ) : null}
             </div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               <button className="gtr-btn gtr-btn-red" onClick={download} disabled={rendering}>

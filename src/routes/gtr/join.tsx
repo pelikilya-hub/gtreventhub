@@ -37,7 +37,7 @@ function JoinPage() {
     try {
       const r = await joinFn({ data: { code, name, email, password } });
       if (r.ok) navigate({ to: "/gtr/$screen", params: { screen: "dash" } });
-      else setErr(r.error ?? t("Не получилось"));
+      else setErr(r.error ? t(r.error) : t("Не получилось"));
     } catch {
       setErr(t("Сервер недоступен"));
     } finally {
@@ -69,7 +69,7 @@ function JoinPage() {
       >
         <div className="gtr-laser" style={{ top: 0, ["--gtr-run" as string]: "160px" }} />
         <img src="/brand/GTR_horizontal_dark.svg" alt="GTR" style={{ height: 36, width: "auto", justifySelf: "start" }} />
-        <Eyebrow>ПРИГЛАШЕНИЕ В GTR EVENT</Eyebrow>
+        <Eyebrow>{t("ПРИГЛАШЕНИЕ В GTR EVENT")}</Eyebrow>
 
         {!info.ok ? (
           <>
@@ -135,7 +135,7 @@ function JoinPage() {
               disabled={busy || !name.trim() || !email.trim() || password.length < 6}
               onClick={submit}
             >
-              Создать аккаунт и войти →
+              {t("Создать аккаунт и войти →")}
             </button>
             {err ? (
               <div style={{ font: "500 11px/1.4 'Golos Text',sans-serif", color: "#FF5B4D" }}>{err}</div>
@@ -144,7 +144,7 @@ function JoinPage() {
               className="gtr-mono"
               style={{ font: "500 9px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
             >
-              Уже есть аккаунт? <a href="/gtr/login" style={{ color: "inherit" }}>Войти</a>
+              {t("Уже есть аккаунт?")} <a href="/gtr/login" style={{ color: "inherit" }}>{t("Войти")}</a>
             </div>
           </>
         )}

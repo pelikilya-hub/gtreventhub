@@ -47,11 +47,11 @@ function SignupPage() {
       if (kind === "visitor") {
         const r = await signupVisitorFn({ data: { name, email, password } });
         if (r.ok) navigate({ to: "/gtr/$screen", params: { screen: "feed" } });
-        else setErr(r.error ?? t("Не получилось"));
+        else setErr(r.error ? t(r.error) : t("Не получилось"));
       } else {
         const r = await signupApplyFn({ data: { name, email, password, kind, about } });
         if (r.ok) setApplied(true);
-        else setErr(r.error ?? t("Не получилось"));
+        else setErr(r.error ? t(r.error) : t("Не получилось"));
       }
     } catch {
       setErr(t("Сервер недоступен"));

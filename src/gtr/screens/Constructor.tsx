@@ -24,6 +24,7 @@ import {
   packagesOf,
   presetsFor,
   draftTitle,
+  genreLabel,
   RATE_COLOR,
   RATE_LABEL,
   TIER_LABEL,
@@ -70,6 +71,122 @@ import { getPrefsFn, sendOfferFn } from "../kv-api";
 import { plural } from "../plural";
 import { Card, Chip, Dot, Eyebrow, Icon, tint } from "../ui";
 
+// ---------- перевод данных события при выводе ----------
+// Узлы графа, пресеты, проверки и смета хранятся по-русски: это данные, по
+// ним ищутся поля (ЗАЛ, ЦЕНА_THB, КАРТОЧКА), и переводить их при записи
+// нельзя — английский интерфейс сломал бы смету и проверки. Переводим только
+// на экране: целиком по словарю, затем по шаблонам с числами и именами,
+// затем по частям через « · », « / » и запятую («304 м² · 220 театр»).
+type TFn = (key: string, opts?: Record<string, unknown>) => string;
+const CYR = /[А-Яа-яЁё]/;
+const MONTHS_GEN = [
+  "января", "февраля", "марта", "апреля", "мая", "июня",
+  "июля", "августа", "сентября", "октября", "ноября", "декабря",
+];
+const MONTHS_NOM = [
+  "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+  "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
+];
+
+/** t() с подстановкой переменных и для непереведённого ключа: с
+ *  parseMissingKeyHandler i18next отдаёт сырой ключ вместе с {{n}}. */
+export const fillT = (t: TFn, key: string, vars: Record<string, string | number>): string =>
+  String(t(key, vars)).replace(/{{(\w+)}}/g, (_, k: string) => String(vars[k] ?? ""));
+
+// [шаблон строки данных, ключ словаря, имена групп]. Группы сами
+// переводятся рекурсивно — в них бывают «Зона», названия статусов.
+const DATA_PATTERNS: [RegExp, string, string[]][] = [
+  [/^(\d[\d\s.,]*) гостей$/, "{{n}} гостей", ["n"]],
+  [/^до (\d[\d\s.,]*) гостей$/, "до {{n}} гостей", ["n"]],
+  [/^До (\d[\d\s.,]*) гостей$/, "До {{n}} гостей", ["n"]],
+  [/^(\d[\d\s.,]*) м²$/, "{{n}} м²", ["n"]],
+  [/^(\d[\d\s.,]*) театр$/, "{{n}} театр", ["n"]],
+  [/^(\d[\d\s.,]*) коктейль$/, "{{n}} коктейль", ["n"]],
+  [/^(\d[\d\s.,]*) места$/, "{{n}} места", ["n"]],
+  [/^(\d[\d\s.,]*) стоя$/, "{{n}} стоя", ["n"]],
+  [/^(\d+)-й этаж$/, "{{n}}-й этаж", ["n"]],
+  [/^Слот (\d.*)$/, "Слот {{time}}", ["time"]],
+  [/^Начало в (.+)$/, "Начало в {{time}}", ["time"]],
+  [/^ПРИО (.+)$/, "ПРИО {{p}}", ["p"]],
+  [/^Арт-дирекшн: (.+)$/, "Арт-дирекшн: {{v}}", ["v"]],
+  [/^(.+) — отмечено участником$/, "{{s}} — отмечено участником", ["s"]],
+  [/^Цена подрядчика «(.+)» не зафиксирована$/, "Цена подрядчика «{{name}}» не зафиксирована", ["name"]],
+  [
+    /^Ожидается (\d+) гостей при вместимости ~(\d+)\. Выберите зал побольше или уменьшите список\.$/,
+    "Ожидается {{n}} гостей при вместимости ~{{cap}}. Выберите зал побольше или уменьшите список.",
+    ["n", "cap"],
+  ],
+  [/^Смета (.+) превышает бюджет (.+)\.$/, "Смета {{quote}} превышает бюджет {{budget}}.", ["quote", "budget"]],
+  [/^Ставка «(.+)» — ориентир GTR, нужен запрос площадке$/, "Ставка «{{name}}» — ориентир GTR, нужен запрос площадке", ["name"]],
+  [
+    /^«(.+)» — ставка за (.+), в смете учтён один\. Задайте длительность события$/,
+    "«{{name}}» — ставка за {{unit}}, в смете учтён один. Задайте длительность события",
+    ["name", "unit"],
+  ],
+  [/^Ставка аренды «(.+)» — по запросу$/, "Ставка аренды «{{name}}» — по запросу", ["name"]],
+  [/^Цена позиции: (.+) — нужен запрос подрядчику$/, "Цена позиции: {{name}} — нужен запрос подрядчику", ["name"]],
+  [/^Цена подрядчика: (.+)$/, "Цена подрядчика: {{name}}", ["name"]],
+  [/^«(.+)» — цена по нижней границе вилки, нужен пакет$/, "«{{name}}» — цена по нижней границе вилки, нужен пакет", ["name"]],
+  // история события
+  [/^Добавлен блок «(.+)»$/, "Добавлен блок «{{name}}»", ["name"]],
+  [/^Из брифа добавлено блоков: (\d+)$/, "Из брифа добавлено блоков: {{n}}", ["n"]],
+  [/^Отправлено площадке · смета (.+)$/, "Отправлено площадке · смета {{sum}}", ["sum"]],
+  [/^«(.+)» откреплён от зала$/, "«{{name}}» откреплён от зала", ["name"]],
+  [/^«(.+)» → (.+)$/, "«{{name}}» → {{room}}", ["name", "room"]],
+  [/^«(.+)»: (.+)$/, "«{{name}}»: {{status}}", ["name", "status"]],
+  [/^(.+) — копия$/, "{{name}} — копия", ["name"]],
+];
+
+/** Перевод строки данных события на язык интерфейса. Неизвестное
+ *  (названия площадок, имена, ввод пользователя) возвращается как есть. */
+export const trData = (t: TFn, lang: string, s?: string | null): string => {
+  const raw = s ?? "";
+  if (!raw || lang.startsWith("ru") || !CYR.test(raw)) return raw;
+  const whole = String(t(raw));
+  if (whole !== raw) return whole;
+  const tr = (x: string) => trData(t, lang, x);
+  for (const [re, key, names] of DATA_PATTERNS) {
+    const m = raw.match(re);
+    if (!m) continue;
+    const vars: Record<string, string> = {};
+    names.forEach((n, i) => (vars[n] = tr(m[i + 1])));
+    return fillT(t, key, vars);
+  }
+  // «8 августа 2026» → «8 August 2026»
+  const d = raw.match(/^(\d{1,2}) ([а-я]+)( \d{4})?$/);
+  if (d && MONTHS_GEN.includes(d[2]))
+    return `${d[1]} ${t(MONTHS_NOM[MONTHS_GEN.indexOf(d[2])])}${d[3] ?? ""}`;
+  for (const sep of [" · ", " / ", ", "])
+    if (raw.includes(sep)) return raw.split(sep).map(tr).join(sep);
+  return raw;
+};
+
+/** Хук-обёртка: tr(строка данных) на текущем языке. */
+export function useTrData() {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language || "ru";
+  return (s?: string | null) => trData(t as TFn, lang, s);
+}
+
+/** Подпись варианта брифа (вайба): у брифа свои английские подписи,
+ *  тайский берётся из словаря, а без него — английский. */
+export function useBriefLabel() {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language || "ru";
+  return (ru?: string, en?: string): string => {
+    if (!ru) return "";
+    if (lang.startsWith("ru")) return ru;
+    if (lang.startsWith("th")) {
+      const th = String(t(ru));
+      if (th !== ru) return th;
+    }
+    return en || String(t(ru));
+  };
+}
+
+/** Жанры для TH — английские: тайцы читают жанры по-английски. */
+export const genreLang = (lang: string) => (lang.startsWith("ru") ? "ru" : "en");
+
 const VENDOR_KINDS: NodeKind[] = ["sound", "light", "decor", "content"];
 const RIDER_LABEL: Record<string, string> = {
   dj: "DJ-сет",
@@ -108,7 +225,10 @@ export function ConstructorScreen({
   intake?: EventIntake;
   onSubmitted?: (requestId: string) => void;
 } = {}) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const tr = useTrData();
+  const briefLabel = useBriefLabel();
+  const gl = genreLang(i18n.language || "ru");
   const { user, peers, shared, myDrafts, draftOf, draftsOf, createDraft, setDraftGraph, updateDraft, addRequest } =
     useGtr();
   const navigate = useNavigate();
@@ -206,7 +326,7 @@ export function ConstructorScreen({
   ) => {
     const id = `n${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
     const finalFields: [string, string][] = room
-      ? [...fields.filter((f) => f[0] !== "ЗАЛ"), [t("ЗАЛ"), room.title]]
+      ? [...fields.filter((f) => f[0] !== "ЗАЛ"), ["ЗАЛ", room.title]]
       : fields;
     mutate((gr) => {
       const roomNode = room ? gr.nodes.find((n) => n.id === room.id) : undefined;
@@ -280,13 +400,14 @@ export function ConstructorScreen({
       "artist",
       a.name,
       [(a.styles || []).slice(0, 2).join(" · "), a.tier].filter(Boolean).join(" · ") || a.role,
-      a.prio ? `ПРИО ${a.prio}` : t("АРТИСТ"),
+      // Поля — данные графа: ключи по-русски, их читают смета и проверки
+      a.prio ? `ПРИО ${a.prio}` : "АРТИСТ",
       [
-        [t("СТИЛИ"), (a.styles || []).join(", ") || "—"],
-        [t("УРОВЕНЬ"), a.tier || a.cat || "—"],
-        [t("РАЙДЕР"), a.rider ? RIDER_LABEL[a.rider] || a.rider : "—"],
-        [t("КОНТАКТ"), a.email || a.wa || a.phone || a.mgmt || "по запросу"],
-        [t("КАРТОЧКА"), a.id],
+        ["СТИЛИ", (a.styles || []).join(", ") || "—"],
+        ["УРОВЕНЬ", a.tier || a.cat || "—"],
+        ["РАЙДЕР", a.rider ? RIDER_LABEL[a.rider] || a.rider : "—"],
+        ["КОНТАКТ", a.email || a.wa || a.phone || a.mgmt || "по запросу"],
+        ["КАРТОЧКА", a.id],
       ],
       true,
     );
@@ -310,7 +431,7 @@ export function ConstructorScreen({
     const specs = modulesFromBrief(briefFormat, briefAnswers);
     const fresh = specs.filter((m) => !g.nodes.some((n) => sameModule(n, m)));
     if (!fresh.length) {
-      toast("Все блоки из брифа уже в событии");
+      toast(t("Все блоки из брифа уже в событии"));
       return;
     }
     mutate((gr) => {
@@ -330,8 +451,8 @@ export function ConstructorScreen({
         log: pushLog(gr, `Из брифа добавлено блоков: ${fresh.length}`),
       };
     });
-    toast(`Добавлено блоков: ${fresh.length}`, {
-      description: "Заполните подрядчиков и цены — блоки помечены как черновые",
+    toast(fillT(t, "Добавлено блоков: {{n}}", { n: fresh.length }), {
+      description: t("Заполните подрядчиков и цены — блоки помечены как черновые"),
     });
   };
 
@@ -421,7 +542,7 @@ export function ConstructorScreen({
                 >
                   <span style={{ flex: 1, minWidth: 0 }}>
                     <span style={{ display: "block", fontWeight: 600, fontSize: 12 }}>
-                      {draftTitle(d)}
+                      {tr(draftTitle(d))}
                     </span>
                     <span
                       className="gtr-mono"
@@ -611,22 +732,22 @@ export function ConstructorScreen({
         title: draftTitle(draft),
         venue: v.name || vid,
         area: [v.type, v.area].filter(Boolean).join(" · "),
-        when: slotNode?.sub || slotNode?.title || "дата уточняется",
-        guests: draft.guests || "",
-        vibe: eventVibe?.label,
+        when: tr(slotNode?.sub || slotNode?.title || "дата уточняется"),
+        guests: tr(draft.guests || ""),
+        vibe: eventVibe ? briefLabel(eventVibe.label, eventVibe.labelEn) : undefined,
         coverArt,
         heroImg: rich?.hero,
         rooms: g.nodes
           .filter((n) => n.kind === "room")
-          .map((n) => ({ name: n.title, meta: n.sub || "" })),
+          .map((n) => ({ name: tr(n.title), meta: tr(n.sub || "") })),
         artists: g.nodes
           .filter((n) => n.kind === "artist")
-          .map((n) => ({ name: n.title, sub: n.sub || "", badge: n.badge || "АРТИСТ" })),
+          .map((n) => ({ name: n.title, sub: tr(n.sub || ""), badge: tr(n.badge || "АРТИСТ") })),
         modules: g.nodes
           .filter((n) =>
             ["promo", "decor", "interactive", "gear", "content", "sound", "light"].includes(n.kind),
           )
-          .map((n) => ({ kind: n.kind, title: n.title, sub: n.sub || "" })),
+          .map((n) => ({ kind: n.kind, title: tr(n.title), sub: tr(n.sub || "") })),
         quote,
         tiers: tierPlans(g, vid),
       }),
@@ -637,34 +758,35 @@ export function ConstructorScreen({
   };
 
   const exportQuote = () => {
-    const when = g.nodes.find((n) => n.kind === "slot")?.sub || "дата уточняется";
+    const when = tr(g.nodes.find((n) => n.kind === "slot")?.sub || "дата уточняется");
     const rooms =
       g.nodes
         .filter((n) => n.kind === "room")
-        .map((n) => n.title)
+        .map((n) => tr(n.title))
         .join(", ") || "—";
     const no = `GTR-${vid.replace("VEN-", "")}-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}`;
     const win = window.open("", "_blank", "width=900,height=1100");
 
     if (!win) {
+      // Текстовая смета уходит клиенту — на языке интерфейса
       const body = [
-        `GTR EVENT · Предложение по событию № ${no}`,
-        `Площадка: ${v.name}`,
-        `Залы: ${rooms}`,
-        `Когда: ${when}`,
+        `GTR EVENT · ${fillT(t, "Предложение по событию № {{no}}", { no })}`,
+        `${t("Площадка:")} ${v.name}`,
+        `${t("Залы:")} ${rooms}`,
+        `${t("Когда:")} ${when}`,
         ``,
         ...quote.lines.map(
           (l) =>
-            `  ${l.label} — ${l.amount ? fmtThb(l.amount) : "по запросу"}  (${l.note}; ${RATE_LABEL[l.kind]})`,
+            `  ${tr(l.label)} — ${l.amount ? fmtThb(l.amount) : t("по запросу")}  (${tr(l.note)}; ${t(RATE_LABEL[l.kind])})`,
         ),
         ``,
-        `Подытог: ${fmtThb(quote.subtotal)}`,
-        `Комиссия GTR ${quote.commissionPct}%: ${fmtThb(quote.commission)}`,
-        `ИТОГО: ${fmtThb(quote.total)}`,
+        `${t("Подытог")}: ${fmtThb(quote.subtotal)}`,
+        `${fillT(t, "Комиссия GTR · {{pct}}%", { pct: quote.commissionPct })}: ${fmtThb(quote.commission)}`,
+        `${t("ИТОГО")}: ${fmtThb(quote.total)}`,
         quote.missing.length
-          ? `\nТребует уточнения:\n${quote.missing.map((m) => "  · " + m).join("\n")}`
+          ? `\n${t("Требует уточнения:")}\n${quote.missing.map((m) => "  · " + tr(m)).join("\n")}`
           : ``,
-        `\nОценка, THB. Точные ставки подтверждаются площадкой и подрядчиками.`,
+        `\n${t("Оценка, THB. Точные ставки подтверждаются площадкой и подрядчиками.")}`,
       ].join("\n");
       const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
       const a = document.createElement("a");
@@ -672,8 +794,8 @@ export function ConstructorScreen({
       a.download = `${no}.txt`;
       a.click();
       URL.revokeObjectURL(a.href);
-      toast("Печать заблокирована браузером — смета скачана текстом", {
-        description: "Разрешите всплывающие окна, чтобы получить PDF.",
+      toast(t("Печать заблокирована браузером — смета скачана текстом"), {
+        description: t("Разрешите всплывающие окна, чтобы получить PDF."),
       });
       return;
     }
@@ -730,18 +852,18 @@ export function ConstructorScreen({
     })
       .then((r) => {
         if (r.ok) {
-          toast("Менеджер GTR уведомлён в Telegram");
+          toast(t("Менеджер GTR уведомлён в Telegram"));
         } else if (r.reason === "not-configured") {
-          toast("Заявка принята, Telegram не подключён", {
-            description: "Уведомление не ушло: " + r.detail,
+          toast(t("Заявка принята, Telegram не подключён"), {
+            description: t("Уведомление не ушло:") + " " + t(r.detail),
           });
         } else {
-          toast("Заявка принята, уведомление не доставлено", { description: r.detail });
+          toast(t("Заявка принята, уведомление не доставлено"), { description: t(r.detail) });
         }
       })
       .catch(() =>
-        toast("Заявка принята, уведомление не доставлено", {
-          description: "Сервер уведомлений недоступен",
+        toast(t("Заявка принята, уведомление не доставлено"), {
+          description: t("Сервер уведомлений недоступен"),
         }),
       );
   };
@@ -776,7 +898,7 @@ export function ConstructorScreen({
           >
             <Eyebrow>{t("КУДА СТАВИМ")}</Eyebrow>
             <div style={{ font: "600 14px/1.45 'Golos Text',sans-serif" }}>
-              «{placing.title}{t("» — в какой зал или зону?")}
+              «{tr(placing.title)}{t("» — в какой зал или зону?")}
             </div>
             <div style={{ display: "grid", gap: 6 }}>
               {g.nodes
@@ -801,7 +923,7 @@ export function ConstructorScreen({
                   >
                     <span style={{ flex: 1, textAlign: "left" }}>
                       <span style={{ display: "block", fontWeight: 600, fontSize: 12.5 }}>
-                        {r.title}
+                        {tr(r.title)}
                       </span>
                       <span
                         style={{
@@ -811,7 +933,7 @@ export function ConstructorScreen({
                           color: "rgba(255,255,255,.4)",
                         }}
                       >
-                        {r.badge === "ЗОНА" ? "зона площадки" : r.sub || "зал"}
+                        {r.badge === "ЗОНА" ? t("зона площадки") : tr(r.sub) || t("зал")}
                       </span>
                     </span>
                     <span
@@ -865,7 +987,7 @@ export function ConstructorScreen({
           {t("Конструктор события")}
         </h1>
         <Chip color="rgba(255,255,255,.5)">{v.name ?? vid}</Chip>
-        <Chip color={STAGE_COLOR[stage]}>{STAGE_LABEL[stage].toUpperCase()}</Chip>
+        <Chip color={STAGE_COLOR[stage]}>{t(STAGE_LABEL[stage]).toUpperCase()}</Chip>
         {eventVibe?.colors ? (
           <span
             className="gtr-mono"
@@ -891,7 +1013,7 @@ export function ConstructorScreen({
                 background: `linear-gradient(120deg, ${eventVibe.colors[0]}, ${eventVibe.colors[1]})`,
               }}
             />
-            {eventVibe.label.toUpperCase()}
+            {briefLabel(eventVibe.label, eventVibe.labelEn).toUpperCase()}
           </span>
         ) : null}
         <Chip
@@ -900,7 +1022,7 @@ export function ConstructorScreen({
         >
           {health.clean
             ? t("СОБЫТИЕ В ПОРЯДКЕ")
-            : `${health.problems + health.delays} ПРОБЛЕМ · ${health.warns} ВНИМАНИЕ`}
+            : `${fillT(t, "{{count}} ПРОБЛЕМ", { count: health.problems + health.delays })} · ${fillT(t, "{{count}} ВНИМАНИЕ", { count: health.warns })}`}
         </Chip>
         {linkFrom ? <Chip color={GREEN}>{t("СВЯЗЬ: выберите левый порт целевого блока")}</Chip> : null}
         <button
@@ -918,7 +1040,7 @@ export function ConstructorScreen({
             title={t("Вернуться к списку залов")}
             onClick={() => setOpenRoom(null)}
           >
-            ← {t("Все залы")} · {openRoomNode.title}
+            ← {t("Все залы")} · {tr(openRoomNode.title)}
           </button>
         ) : roomNodes.length ? (
           <Chip color="rgba(255,255,255,.45)">
@@ -955,7 +1077,7 @@ export function ConstructorScreen({
             {peers.map((p) => (
               <span
                 key={p.id}
-                title={`${p.roleLabel} · ${p.name}`}
+                title={`${tr(p.roleLabel)} · ${p.name}`}
                 className="gtr-presence"
                 style={{
                   width: 22,
@@ -1096,11 +1218,11 @@ export function ConstructorScreen({
                   kind,
                   label,
                   "Заполните данные блока",
-                  t("НОВОЕ"),
+                  "НОВОЕ",
                   [
-                    [t("ТИП"), K[0]],
-                    [t("СТАТУС"), "Черновик"],
-                    [t("ИСТОЧНИК"), "—"],
+                    ["ТИП", K[0]],
+                    ["СТАТУС", "Черновик"],
+                    ["ИСТОЧНИК", "—"],
                   ],
                   VENDOR_KINDS.includes(kind),
                 );
@@ -1134,7 +1256,7 @@ export function ConstructorScreen({
                     >
                       <Icon d={K[3]} size={13} />
                     </span>
-                    <span style={{ flex: 1 }}>{label}</span>
+                    <span style={{ flex: 1 }}>{tr(label)}</span>
                     <span
                       className="gtr-mono"
                       style={{
@@ -1152,7 +1274,7 @@ export function ConstructorScreen({
                       <input
                         className="gtr-input"
                         style={{ padding: "7px 9px", fontSize: 13 }}
-                        placeholder={artBase ? "Поиск по 312 артистам…" : "Загрузка базы…"}
+                        placeholder={artBase ? t("Поиск по 312 артистам…") : t("Загрузка базы…")}
                         value={artQ}
                         onChange={(e) => setArtQ(e.target.value)}
                       />
@@ -1160,9 +1282,10 @@ export function ConstructorScreen({
                         <div
                           className="gtr-eyebrow"
                           style={{ fontSize: 10, marginTop: 2, color: eventVibe?.colors?.[0] }}
-                          title={(eventVibe?.styles ?? []).join(" · ")}
+                          title={(eventVibe?.styles ?? []).map((st) => genreLabel(st, gl)).join(" · ")}
                         >
-                          {t("ПОД ВАЙБ ·")} {(eventVibe?.styles ?? []).slice(0, 2).join(", ")}
+                          {t("ПОД ВАЙБ ·")}{" "}
+                          {(eventVibe?.styles ?? []).slice(0, 2).map((st) => genreLabel(st, gl)).join(", ")}
                         </div>
                       ) : null}
                       {vibeMatches.map((a) => (
@@ -1230,7 +1353,7 @@ export function ConstructorScreen({
                           >
                             <span style={{ flex: 1, minWidth: 0 }}>
                               <span style={{ display: "block", fontWeight: 600, fontSize: 13 }}>
-                                {p.title}
+                                {tr(p.title)}
                               </span>
                               <span
                                 style={{
@@ -1240,7 +1363,7 @@ export function ConstructorScreen({
                                   color: "rgba(255,255,255,.4)",
                                 }}
                               >
-                                {added ? "уже в графе" : p.sub}
+                                {added ? t("уже в графе") : tr(p.sub)}
                               </span>
                             </span>
                             {p.fromBase ? (
@@ -1275,7 +1398,7 @@ export function ConstructorScreen({
                             className="gtr-eyebrow"
                             style={{ fontSize: 10, marginTop: 2, color: "rgba(255,255,255,.45)" }}
                           >
-                            {grp}
+                            {tr(grp)}
                           </div>
                           {equipItems
                             .filter((e) => e.group === grp)
@@ -1293,10 +1416,10 @@ export function ConstructorScreen({
                                           kind,
                                           e.name,
                                           e.spec,
-                                          e.price ? t("ПОЗИЦИЯ") : t("ЗАПРОС"),
+                                          e.price ? "ПОЗИЦИЯ" : "ЗАПРОС",
                                           [
-                                            [t("ГРУППА"), e.group],
-                                            [t("ЦЕНА"), equipPrice(e)],
+                                            ["ГРУППА", e.group],
+                                            ["ЦЕНА", equipPrice(e)],
                                             // цену в расчёт кладём только когда она есть:
                                             // ноль в ЦЕНА_THB смета приняла бы за твёрдую цифру
                                             ...(e.price
@@ -1305,10 +1428,10 @@ export function ConstructorScreen({
                                                   string,
                                                 ][])
                                               : []),
-                                            [t("СТАТУС ЦЕНЫ"), RATE_LABEL[e.kind]],
-                                            [t("ПОДРЯДЧИК"), e.vendor || "не назначен"],
-                                            [t("КОНТАКТ"), e.contact || "—"],
-                                            [t("ИСТОЧНИК"), e.source || "—"],
+                                            ["СТАТУС ЦЕНЫ", RATE_LABEL[e.kind]],
+                                            ["ПОДРЯДЧИК", e.vendor || "не назначен"],
+                                            ["КОНТАКТ", e.contact || "—"],
+                                            ["ИСТОЧНИК", e.source || "—"],
                                           ],
                                           true,
                                         )
@@ -1318,7 +1441,7 @@ export function ConstructorScreen({
                                     <span
                                       style={{ display: "block", fontWeight: 600, fontSize: 13 }}
                                     >
-                                      {e.name}
+                                      {tr(e.name)}
                                     </span>
                                     <span
                                       style={{
@@ -1328,7 +1451,7 @@ export function ConstructorScreen({
                                         color: added ? "rgba(255,255,255,.4)" : RATE_COLOR[e.kind],
                                       }}
                                     >
-                                      {added ? "уже в графе" : equipPrice(e)}
+                                      {added ? t("уже в графе") : tr(equipPrice(e))}
                                     </span>
                                   </span>
                                 </button>
@@ -1362,14 +1485,14 @@ export function ConstructorScreen({
                                     kind,
                                     p.package,
                                     `${vd.name} · ${p.system}`,
-                                    t("ПАКЕТ"),
+                                    "ПАКЕТ",
                                     [
-                                      [t("ПОДРЯДЧИК"), vd.name],
-                                      [t("ЦЕНА"), packagePrice(p)],
+                                      ["ПОДРЯДЧИК", vd.name],
+                                      ["ЦЕНА", packagePrice(p)],
                                       ["ЦЕНА_THB", String(p.price)],
-                                      [t("ПРОВЕРЕНО"), p.verified || "не подтверждена"],
-                                      [t("КОНТАКТ"), p.contact || vd.contact || "—"],
-                                      [t("ИСТОЧНИК"), p.source || vd.source || "—"],
+                                      ["ПРОВЕРЕНО", p.verified || "не подтверждена"],
+                                      ["КОНТАКТ", p.contact || vd.contact || "—"],
+                                      ["ИСТОЧНИК", p.source || vd.source || "—"],
                                     ],
                                     true,
                                   )
@@ -1377,7 +1500,7 @@ export function ConstructorScreen({
                               >
                                 <span style={{ flex: 1, minWidth: 0 }}>
                                   <span style={{ display: "block", fontWeight: 600, fontSize: 13 }}>
-                                    {p.package}
+                                    {tr(p.package)}
                                   </span>
                                   <span
                                     style={{
@@ -1387,7 +1510,7 @@ export function ConstructorScreen({
                                       color: K[1],
                                     }}
                                   >
-                                    {packagePrice(p)}
+                                    {tr(packagePrice(p))}
                                     {p.verified ? (
                                       <span style={{ color: GREEN, marginLeft: 6 }}>
                                         ✓ {p.verified}
@@ -1403,7 +1526,7 @@ export function ConstructorScreen({
                                         color: "rgba(255,255,255,.4)",
                                       }}
                                     >
-                                      {p.note}
+                                      {tr(p.note)}
                                     </span>
                                   ) : null}
                                 </span>
@@ -1418,12 +1541,12 @@ export function ConstructorScreen({
                                     kind,
                                     vd.name,
                                     vd.meta,
-                                    t("ЗАПРОС"),
+                                    "ЗАПРОС",
                                     [
-                                      [t("ПОДРЯДЧИК"), vd.name],
-                                      [t("ЦЕНА"), vd.price || "по запросу"],
-                                      [t("КОНТАКТ"), vd.contact || "—"],
-                                      [t("ИСТОЧНИК"), vd.source || "—"],
+                                      ["ПОДРЯДЧИК", vd.name],
+                                      ["ЦЕНА", vd.price || "по запросу"],
+                                      ["КОНТАКТ", vd.contact || "—"],
+                                      ["ИСТОЧНИК", vd.source || "—"],
                                     ],
                                     true,
                                   )
@@ -1431,7 +1554,7 @@ export function ConstructorScreen({
                               >
                                 <span style={{ flex: 1, minWidth: 0 }}>
                                   <span style={{ display: "block", fontWeight: 600, fontSize: 13 }}>
-                                    {vd.meta}
+                                    {tr(vd.meta)}
                                   </span>
                                   <span
                                     style={{
@@ -1441,7 +1564,7 @@ export function ConstructorScreen({
                                       color: "rgba(255,255,255,.4)",
                                     }}
                                   >
-                                    {vd.price || "цена по запросу"}
+                                    {vd.price ? tr(vd.price) : t("цена по запросу")}
                                   </span>
                                 </span>
                               </button>
@@ -1564,7 +1687,7 @@ export function ConstructorScreen({
                 >
                   {/* индикатор статуса узла */}
                   <span
-                    title={`${STATUS_LABEL[st.status]}${st.reason ? " · " + st.reason : ""}`}
+                    title={`${t(STATUS_LABEL[st.status])}${st.reason ? " · " + tr(st.reason) : ""}`}
                     style={{
                       position: "absolute",
                       top: -6,
@@ -1601,7 +1724,7 @@ export function ConstructorScreen({
                         color: K[1],
                       }}
                     >
-                      {K[0]}
+                      {tr(K[0])}
                     </span>
                     {n.badge ? (
                       <span
@@ -1615,11 +1738,11 @@ export function ConstructorScreen({
                           padding: "3px 5px",
                         }}
                       >
-                        {n.badge}
+                        {tr(n.badge)}
                       </span>
                     ) : null}
                   </div>
-                  <div style={{ font: "600 12px/1.25 'Golos Text',sans-serif" }}>{n.title}</div>
+                  <div style={{ font: "600 12px/1.25 'Golos Text',sans-serif" }}>{tr(n.title)}</div>
                   <div
                     style={{
                       marginTop: 4,
@@ -1627,7 +1750,7 @@ export function ConstructorScreen({
                       color: "rgba(255,255,255,.45)",
                     }}
                   >
-                    {n.sub}
+                    {tr(n.sub)}
                   </div>
 
                   {/* Закрытый зал: что к нему прикреплено — значками, а не
@@ -1662,7 +1785,7 @@ export function ConstructorScreen({
                             return (
                               <span
                                 key={kid.kind}
-                                title={`${KK[0]}${cnt > 1 ? ` · ${cnt}` : ""}`}
+                                title={`${tr(KK[0])}${cnt > 1 ? ` · ${cnt}` : ""}`}
                                 style={{
                                   display: "inline-flex",
                                   alignItems: "center",
@@ -1793,7 +1916,7 @@ export function ConstructorScreen({
                     color: selKind[1],
                   }}
                 >
-                  {selKind[0]}
+                  {tr(selKind[0])}
                 </span>
                 <button
                   className="gtr-btn"
@@ -1817,15 +1940,17 @@ export function ConstructorScreen({
                   {t("Удалить блок")}
                 </button>
               </div>
+              {/* Значения показываем на языке интерфейса; правка сохраняет
+                  то, что ввёл человек, — как любой пользовательский ввод */}
               <input
                 className="gtr-input"
-                value={selNode.title}
+                value={tr(selNode.title)}
                 onChange={(e) => updateSel({ title: e.target.value })}
                 style={{ marginBottom: 7 }}
               />
               <input
                 className="gtr-input"
-                value={selNode.sub}
+                value={tr(selNode.sub)}
                 onChange={(e) => updateSel({ sub: e.target.value })}
                 style={{ marginBottom: 10 }}
               />
@@ -1837,11 +1962,11 @@ export function ConstructorScreen({
                 {selNode.fields.map(([k, val], i) =>
                   k === "ЦЕНА_THB" || k === "ИСТОЧНИК" ? null : (
                   <div key={`${k}-${i}`}>
-                    <Eyebrow style={{ fontSize: 10, marginBottom: 3 }}>{k}</Eyebrow>
+                    <Eyebrow style={{ fontSize: 10, marginBottom: 3 }}>{tr(k)}</Eyebrow>
                     <input
                       className="gtr-input"
                       style={{ padding: "7px 10px", fontSize: 13 }}
-                      value={val}
+                      value={tr(val)}
                       onChange={(e) =>
                         updateSel({
                           fields: selNode.fields.map((f, j) =>
@@ -1893,7 +2018,7 @@ export function ConstructorScreen({
                                   fields: room
                                     ? [
                                         ...n.fields.filter((f) => f[0] !== "ЗАЛ"),
-                                        [t("ЗАЛ"), room.title] as [string, string],
+                                        ["ЗАЛ", room.title] as [string, string],
                                       ]
                                     : n.fields.filter((f) => f[0] !== "ЗАЛ"),
                                 }
@@ -1914,7 +2039,7 @@ export function ConstructorScreen({
                       .filter((n) => n.kind === "room")
                       .map((r) => (
                         <option key={r.id} value={r.id}>
-                          {r.badge === "ЗОНА" ? `Зона · ${r.title}` : r.title}
+                          {r.badge === "ЗОНА" ? `${t("Зона")} · ${tr(r.title)}` : tr(r.title)}
                         </option>
                       ))}
                   </select>
@@ -1996,7 +2121,7 @@ export function ConstructorScreen({
                             flex: "none",
                           }}
                         />
-                        {STATUS_LABEL[s]}
+                        {t(STATUS_LABEL[s])}
                       </button>
                     );
                   })}
@@ -2017,7 +2142,7 @@ export function ConstructorScreen({
                       color: "var(--gtr-t3)",
                     }}
                   >
-                    {t("Авто:")} {nodeStatus(selNode).reason || "—"}
+                    {t("Авто:")} {tr(nodeStatus(selNode).reason) || "—"}
                   </div>
                 )}
               </div>
@@ -2042,7 +2167,7 @@ export function ConstructorScreen({
                         flex: "none",
                       }}
                     >
-                      {K[0]}
+                      {tr(K[0])}
                     </span>
                     <span
                       style={{
@@ -2050,7 +2175,7 @@ export function ConstructorScreen({
                         color: nodes.length ? "#fff" : "rgba(255,255,255,.35)",
                       }}
                     >
-                      {nodes.length ? nodes.map((n) => n.title).join(", ") : "Не назначен"}
+                      {nodes.length ? nodes.map((n) => tr(n.title)).join(", ") : t("Не назначен")}
                     </span>
                   </div>
                 );
@@ -2074,7 +2199,9 @@ export function ConstructorScreen({
                   color: budget ? "#FFD166" : "var(--gtr-t3)",
                 }}
               >
-                {budget ? `≈ ฿${budget.toLocaleString("ru-RU")} и выше` : "—"}
+                {budget
+                  ? fillT(t, "≈ ฿{{n}} и выше", { n: budget.toLocaleString("ru-RU") })
+                  : "—"}
               </span>
             </div>
           </Card>
@@ -2130,7 +2257,7 @@ export function ConstructorScreen({
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {l.label}
+                          {tr(l.label)}
                         </span>
                         <span
                           className="gtr-mono"
@@ -2139,7 +2266,7 @@ export function ConstructorScreen({
                             color: "var(--gtr-t3)",
                           }}
                         >
-                          {l.note}
+                          {tr(l.note)}
                         </span>
                       </span>
                       <span
@@ -2153,7 +2280,7 @@ export function ConstructorScreen({
                         {/* Точка провенанса: подтверждённая цена, ориентир
                             или запрос — видно прямо в строке сметы */}
                         <span
-                          title={RATE_LABEL[l.kind]}
+                          title={t(RATE_LABEL[l.kind])}
                           style={{
                             width: 6,
                             height: 6,
@@ -2169,7 +2296,7 @@ export function ConstructorScreen({
                             color: l.amount ? "#fff" : "var(--gtr-t3)",
                           }}
                         >
-                          {l.amount ? fmtThb(l.amount) : "по запросу"}
+                          {l.amount ? fmtThb(l.amount) : t("по запросу")}
                         </span>
                       </span>
                     </div>
@@ -2186,7 +2313,7 @@ export function ConstructorScreen({
                 >
                   <Row label={t("Подытог")} value={fmtThb(quote.subtotal)} />
                   <Row
-                    label={`Комиссия GTR · ${quote.commissionPct}%`}
+                    label={fillT(t, "Комиссия GTR · {{pct}}%", { pct: quote.commissionPct })}
                     value={fmtThb(quote.commission)}
                     accent="#FFD166"
                   />
@@ -2220,7 +2347,10 @@ export function ConstructorScreen({
                     }}
                   >
                     {t("Оценка (THB). Точные ставки подтверждает площадка и подрядчики")}
-                    {quote.missing.length ? ` · уточнить: ${quote.missing.length}` : ""}.
+                    {quote.missing.length
+                      ? fillT(t, " · уточнить: {{n}}", { n: quote.missing.length })
+                      : ""}
+                    .
                   </div>
                 ) : null}
               </>
@@ -2260,7 +2390,7 @@ export function ConstructorScreen({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {nodeById(l.from)?.title ?? "?"} → {nodeById(l.to)?.title ?? "?"}
+                    {tr(nodeById(l.from)?.title) || "?"} → {tr(nodeById(l.to)?.title) || "?"}
                   </span>
                   <button
                     className="gtr-btn"
@@ -2296,9 +2426,9 @@ export function ConstructorScreen({
                     color: STATUS_COLOR[health.verdict],
                   }}
                 >
-                  {health.problems ? `${health.problems} ПРОБ` : ""}{" "}
-                  {health.delays ? `${health.delays} ЗАДЕРЖ` : ""}{" "}
-                  {health.warns ? `${health.warns} ВНИМ` : ""}
+                  {health.problems ? fillT(t, "{{n}} ПРОБ", { n: health.problems }) : ""}{" "}
+                  {health.delays ? fillT(t, "{{n}} ЗАДЕРЖ", { n: health.delays }) : ""}{" "}
+                  {health.warns ? fillT(t, "{{n}} ВНИМ", { n: health.warns }) : ""}
                 </span>
               ) : (
                 <span
@@ -2350,7 +2480,7 @@ export function ConstructorScreen({
                     <Dot color={STATUS_COLOR[a.severity]} />
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>
-                        {a.title}
+                        {tr(a.title)}
                         {a.nodeId ? (
                           <span style={{ color: STATUS_COLOR[a.severity], fontWeight: 600 }}>
                             {" "}
@@ -2365,7 +2495,7 @@ export function ConstructorScreen({
                           color: "var(--gtr-t2)",
                         }}
                       >
-                        {a.reason}
+                        {tr(a.reason)}
                       </div>
                     </div>
                   </div>
@@ -2422,7 +2552,7 @@ export function ConstructorScreen({
                         textDecoration: qq.ok ? "line-through" : "none",
                       }}
                     >
-                      {qq.q}
+                      {t(qq.q)}
                       {!qq.required ? (
                         <span style={{ color: "var(--gtr-t3)", fontWeight: 500 }}> {t("· опц.")}</span>
                       ) : null}
@@ -2435,7 +2565,7 @@ export function ConstructorScreen({
                           color: "var(--gtr-t3)",
                         }}
                       >
-                        {qq.hint}
+                        {t(qq.hint)}
                       </div>
                     ) : null}
                   </div>
@@ -2449,7 +2579,7 @@ export function ConstructorScreen({
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <Eyebrow>{t("СТАТУС И ИСТОРИЯ")}</Eyebrow>
               <Chip color={STAGE_COLOR[stage]} style={{ marginLeft: "auto" }}>
-                {STAGE_LABEL[stage].toUpperCase()}
+                {t(STAGE_LABEL[stage]).toUpperCase()}
               </Chip>
             </div>
 
@@ -2482,8 +2612,8 @@ export function ConstructorScreen({
                 }}
               >
                 {stage === "draft"
-                  ? "Соберите событие и отправьте площадке для утверждения."
-                  : "Запрос у площадки. Событие можно продолжать редактировать."}
+                  ? t("Соберите событие и отправьте площадке для утверждения.")
+                  : t("Запрос у площадки. Событие можно продолжать редактировать.")}
               </div>
             )}
             {stage === "approved" ? (
@@ -2526,7 +2656,7 @@ export function ConstructorScreen({
                           minWidth: 0,
                         }}
                       >
-                        <b style={{ color: "#fff", fontWeight: 600 }}>{e.actor}</b> · {e.action}
+                        <b style={{ color: "#fff", fontWeight: 600 }}>{tr(e.actor)}</b> · {tr(e.action)}
                       </span>
                     </div>
                   ))}
@@ -2565,6 +2695,9 @@ function Row({ label, value, accent }: { label: string; value: string; accent?: 
 
 // Кнопка-артист в палитре конструктора: добавляет узел артиста в граф
 function ArtistPick({ a, color, onAdd }: { a: Artist; color: string; onAdd: () => void }) {
+  const { i18n } = useTranslation();
+  const tr = useTrData();
+  const gl = genreLang(i18n.language || "ru");
   return (
     <button className="gtr-pal-btn" style={{ padding: "7px 9px" }} onClick={onAdd}>
       <span style={{ flex: 1, minWidth: 0 }}>
@@ -2577,7 +2710,7 @@ function ArtistPick({ a, color, onAdd }: { a: Artist; color: string; onAdd: () =
             color: "rgba(255,255,255,.4)",
           }}
         >
-          {(a.styles || []).slice(0, 2).join(" · ") || a.role}
+          {(a.styles || []).slice(0, 2).map((st) => genreLabel(st, gl)).join(" · ") || a.role}
         </span>
         {a.tier ? (
           <span
@@ -2588,7 +2721,7 @@ function ArtistPick({ a, color, onAdd }: { a: Artist; color: string; onAdd: () =
               color,
             }}
           >
-            {a.tier}
+            {tr(a.tier)}
           </span>
         ) : null}
       </span>
@@ -2614,12 +2747,18 @@ function BriefPanel({
   onBuild: () => void;
   onClose: () => void;
 }) {
+  const { t: tUi, i18n } = useTranslation();
+  const uiLang = i18n.language || "ru";
+  // По умолчанию бриф на языке интерфейса (для тайского — английский
+  // с тайскими подписями из словаря); явный выбор RU/EN запоминается.
   const [lang, setLang] = useState<BriefLang>(() => {
     try {
-      return window.localStorage.getItem("gtr-brief-lang") === "en" ? "en" : "ru";
+      const saved = window.localStorage.getItem("gtr-brief-lang");
+      if (saved === "en" || saved === "ru") return saved;
     } catch {
-      return "ru";
+      // приватный режим
     }
+    return uiLang.startsWith("ru") ? "ru" : "en";
   });
   const switchLang = (l: BriefLang) => {
     setLang(l);
@@ -2629,7 +2768,14 @@ function BriefPanel({
       // приватный режим — язык просто не сохранится
     }
   };
-  const t = (ru: string, en?: string) => (lang === "en" && en ? en : ru);
+  const t = (ru: string, en?: string) => {
+    if (lang !== "en") return ru;
+    if (uiLang.startsWith("th")) {
+      const th = String(tUi(ru));
+      if (th !== ru) return th;
+    }
+    return en || ru;
+  };
 
   const qs = visibleQuestions(format, answers);
   const prog = briefProgress(format, answers);
@@ -2647,7 +2793,7 @@ function BriefPanel({
           className="gtr-mono"
           style={{ font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
-          {format || t("формат не задан", "format not set")} ·{" "}
+          {(format && t(format, String(tUi(format)))) || t("формат не задан", "format not set")} ·{" "}
           {t("вопросы подстраиваются под ответы", "questions adapt to your answers")}
         </span>
         <div style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center" }}>
@@ -3014,7 +3160,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
                   className="gtr-oswald"
                   style={{ font: "600 12px/1 var(--cond)", letterSpacing: ".04em" }}
                 >
-                  {TIER_LABEL[plan.tier]}
+                  {t(TIER_LABEL[plan.tier])}
                 </span>
                 <span
                   className="gtr-mono"
@@ -3030,7 +3176,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
                   color: "var(--gtr-t3)",
                 }}
               >
-                {TIER_NOTE[plan.tier]}
+                {t(TIER_NOTE[plan.tier])}
               </div>
               <div style={{ display: "grid", gap: 3, marginTop: 7 }}>
                 {plan.picks.map((pick) => (
@@ -3181,14 +3327,14 @@ function OfferPanel({
         applyOffer(r.offer);
         setMsg(
           r.tgDirect
-            ? "Отправлено артисту в Telegram — кнопки Принять/Отклонить уже у него."
+            ? t("Отправлено артисту в Telegram — кнопки Принять/Отклонить уже у него.")
             : r.hasAccount
-              ? "Предложение в кабинете артиста. Telegram не привязан — продублируйте вручную."
-              : "Сохранено. У артиста пока нет аккаунта — пригласите его в «Доступы и роли», предложение дождётся.",
+              ? t("Предложение в кабинете артиста. Telegram не привязан — продублируйте вручную.")
+              : t("Сохранено. У артиста пока нет аккаунта — пригласите его в «Доступы и роли», предложение дождётся."),
         );
-      } else setMsg(r.error ?? "Не получилось");
+      } else setMsg(r.error ? t(r.error) : t("Не получилось"));
     } catch {
-      setMsg("Сервер недоступен (локальный режим)");
+      setMsg(t("Сервер недоступен (локальный режим)"));
     } finally {
       setBusy(false);
     }
@@ -3213,10 +3359,10 @@ function OfferPanel({
             color: OFFER_COLOR[existing.status],
           }}
         >
-          {OFFER_LABEL[existing.status].toUpperCase()}
+          {t(OFFER_LABEL[existing.status]).toUpperCase()}
           {existing.decidedTs
             ? ` · ${new Date(existing.decidedTs).toLocaleDateString("ru-RU")}`
-            : ` · ждём ответа`}
+            : ` · ${t("ждём ответа")}`}
           {existing.fee ? ` · ${existing.fee}` : ""}
         </div>
       ) : (

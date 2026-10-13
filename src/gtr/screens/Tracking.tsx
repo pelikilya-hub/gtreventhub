@@ -355,7 +355,7 @@ export function TrackingScreen() {
                         {V(vid).name}
                       </div>
                       {arrivalTime && (
-                        <div style={{ font: "500 11px/1 monospace", opacity: 0.7 }}>{t("в")} {arrivalTime}</div>
+                        <div style={{ font: "500 11px/1 monospace", opacity: 0.7 }}>{t("в {{time}}", { time: arrivalTime })}</div>
                       )}
                     </div>
                   </div>

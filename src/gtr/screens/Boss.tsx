@@ -403,7 +403,7 @@ function TasksBlock({ users, me }: { users: PublicUser[]; me: string }) {
               {tk.title}
               <small>
                 {tk.assigneeName}
-                {tk.due ? ` · ${t("до")} ${tk.due}` : ""} · {ST[tk.status][0]}
+                {tk.due ? ` · ${t("до {{date}}", { date: tk.due })}` : ""} · {ST[tk.status][0]}
               </small>
             </span>
             {tk.status === "new" ? (

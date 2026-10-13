@@ -56,6 +56,13 @@ jobs:
       # но эти минуты гость проводит на чужом сайте.
       - run: npm test
 
+      # Причина отказа должна быть видна там, где её можно прочитать.
+      #
+      # Полный лог прогона GitHub отдаёт с отдельного хоста, и не всякий
+      # клиент до него добирается — разбор первой же неудачи упёрся
+      # ровно в это. Поэтому вывод wrangler ловим в файл и при отказе
+      # выносим хвост в аннотацию: она видна и в API, и на странице
+      # прогона, и в письме о падении.
       - name: Выкатить
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -63,7 +70,22 @@ jobs:
           # в DEPLOY.md. Секретом можно переопределить, если аккаунт
           # сменится.
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || '2e3f6f6ab8e81085ca7022ebeb583868' }}
-        run: npm run deploy:cf
+        run: |
+          set -o pipefail
+          if npm run deploy:cf 2>&1 | tee /tmp/deploy.log; then
+            exit 0
+          fi
+          echo "### Выкатка упала" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          tail -n 60 /tmp/deploy.log >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          # В аннотацию — только строки, похожие на причину, и каждая
+          # отдельным сообщением: перевод строки внутри ::error:: его
+          # обрывает, поэтому многострочный текст туда не положить.
+          grep -iE "error|✘|✗|denied|unauthoriz|forbidden|permission|\[code: ?[0-9]+\]" /tmp/deploy.log \
+            | tail -n 12 \
+            | while IFS= read -r line; do echo "::error::${line}"; done
+          exit 1
 
       # Сверка после выкатки: отпечаток сборки в проде обязан стать
       # свежим. Молчаливо «успешный» деплой, не доехавший до воркера, —

@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { toast } from "sonner";
 
 import { logoutFn, type SessionUser } from "./auth";
@@ -65,24 +65,45 @@ import {
   VisasScreen,
 } from "./screens/Platform";
 
-const ArtistsScreen = lazy(() =>
-  import("./screens/Artists").then((m) => ({ default: m.ArtistsScreen })),
-);
-const OutreachScreen = lazy(() =>
-  import("./screens/Outreach").then((m) => ({ default: m.OutreachScreen })),
-);
-const DraftsScreen = lazy(() =>
-  import("./screens/Drafts").then((m) => ({ default: m.DraftsScreen })),
-);
-const VendorsScreen = lazy(() =>
-  import("./screens/Vendors").then((m) => ({ default: m.VendorsScreen })),
-);
-const MapScreen = lazy(() =>
-  import("./screens/MapScreen").then((m) => ({ default: m.MapScreen })),
-);
-const AfishaGenScreen = lazy(() =>
-  import("./screens/AfishaGen").then((m) => ({ default: m.AfishaGenScreen })),
-);
+// Ленивые экраны. Код экрана подтягивается ДО перехода (см. go), а
+// обёртка рисует уже загруженный экран напрямую: голый React.lazy
+// приостанавливается даже на готовом модуле, и посреди смены сцены
+// мигала заглушка Suspense.
+type AnyScreen = ComponentType<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+function lazyScreen<M>(load: () => Promise<M>, pick: (m: M) => AnyScreen) {
+  let ready: AnyScreen | null = null;
+  const preload = () =>
+    load().then((m) => {
+      ready = pick(m);
+      return { default: ready };
+    });
+  const Lazy = lazy(preload);
+  const Screen = (props: Record<string, unknown>) => {
+    const C = ready;
+    return C ? <C {...props} /> : <Lazy {...props} />;
+  };
+  return Object.assign(Screen, { preload });
+}
+
+const ArtistsScreen = lazyScreen(() => import("./screens/Artists"), (m) => m.ArtistsScreen);
+const OutreachScreen = lazyScreen(() => import("./screens/Outreach"), (m) => m.OutreachScreen);
+const DraftsScreen = lazyScreen(() => import("./screens/Drafts"), (m) => m.DraftsScreen);
+const VendorsScreen = lazyScreen(() => import("./screens/Vendors"), (m) => m.VendorsScreen);
+const MapScreen = lazyScreen(() => import("./screens/MapScreen"), (m) => m.MapScreen);
+const AfishaGenScreen = lazyScreen(() => import("./screens/AfishaGen"), (m) => m.AfishaGenScreen);
+
+const LAZY = {
+  artists: ArtistsScreen,
+  outreach: OutreachScreen,
+  drafts: DraftsScreen,
+  vendors: VendorsScreen,
+  map: MapScreen,
+  afishagen: AfishaGenScreen,
+};
+// hasOwn, а не LAZY[id]: среди экранов есть «constructor», и обычный
+// доступ по ключу нашёл бы Object.prototype.constructor.
+const preloadScreen = (id: ScreenId) =>
+  Object.hasOwn(LAZY, id) ? LAZY[id as keyof typeof LAZY].preload().catch(() => {}) : undefined;
 
 export type GtrSearch = { vid?: string; artist?: string; draft?: string };
 
@@ -92,21 +113,13 @@ function LangSwitch({ style }: { style?: import("react").CSSProperties }) {
   const { i18n: i } = useTranslation();
   const cur = (i.language as UiLang) || "ru";
   return (
-    <div style={{ display: "inline-flex", border: "1px solid rgba(255,255,255,.16)", ...style }}>
+    <div className="gtr-lang" style={style} role="group" aria-label="Language">
       {UI_LANGS.map(([code]) => (
         <button
           key={code}
+          type="button"
           onClick={() => setUiLang(code)}
           aria-pressed={cur === code}
-          style={{
-            padding: "6px 9px",
-            cursor: "pointer",
-            font: "700 11px/1 'JetBrains Mono',monospace",
-            letterSpacing: ".08em",
-            border: "none",
-            background: cur === code ? "#E5231B" : "transparent",
-            color: cur === code ? "#fff" : "rgba(255,255,255,.55)",
-          }}
         >
           {code.toUpperCase()}
         </button>
@@ -141,29 +154,6 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
   // Мобильное меню: на узком экране сайдбар живёт как выезжающая панель
   const [navOpen, setNavOpen] = useState(false);
 
-  // Поворот телефона: на переходе портрет↔ландшафт раскладка
-  // перекомпоновывается, и раньше это был резкий скачок. Ловим смену
-  // ориентации и на полсекунды включаем класс — по нему CSS проигрывает
-  // мягкий перевод сцены, а не рывок. Строчку закрываем ещё и на resize:
-  // на части Android orientationchange приходит без matchMedia-события.
-  const [rotating, setRotating] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(orientation: landscape)");
-    let timer = 0;
-    const pulse = () => {
-      setRotating(true);
-      window.clearTimeout(timer);
-      timer = window.setTimeout(() => setRotating(false), 520);
-    };
-    mq.addEventListener?.("change", pulse);
-    window.addEventListener("orientationchange", pulse);
-    return () => {
-      mq.removeEventListener?.("change", pulse);
-      window.removeEventListener("orientationchange", pulse);
-      window.clearTimeout(timer);
-    };
-  }, []);
-
   // GTR BRO: центральная кнопка GTR — активатор голоса. Флаг спрашиваем
   // один раз: пока фича выключена, кнопка работает как раньше и никому
   // ничего не обещает.
@@ -195,8 +185,14 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
     return () => window.removeEventListener("gtr:bro-open", open);
   }, []);
 
-  const go = (id: ScreenId) => {
+  // Переход на экран: сначала код экрана (если он ленивый), потом смена
+  // сцены — так переход не показывает заглушку загрузки посередине.
+  // Ждём не дольше 1,2 с: на плохой сети лучше показать заглушку, чем
+  // не реагировать на нажатие.
+  const go = async (id: ScreenId) => {
     setNavOpen(false);
+    const p = preloadScreen(id);
+    if (p) await Promise.race([p, new Promise((r) => setTimeout(r, 1200))]);
     navigate({ to: "/gtr/$screen", params: { screen: id } });
   };
 
@@ -321,21 +317,11 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
   );
 
   return (
-    <div className={`gtr-shell ${navOpen ? "nav-open" : ""}${rotating ? " gtr-rotating" : ""}`}>
+    <div className={`gtr-shell ${navOpen ? "nav-open" : ""}`}>
       {/* живой фон с кодом: сцена раздела проявляется из матрицы глифов */}
       <GtrCodeBackdrop src={sceneFor(screen, user.venueId, search.vid)} />
       {/* ---------- мобильная шапка ---------- */}
       <header className="gtr-topbar">
-        <button
-          className="gtr-burger"
-          aria-label={t("Меню")}
-          aria-expanded={navOpen}
-          onClick={() => setNavOpen((v) => !v)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
         {/* Логотипу разрешено ужиматься, переключателю языка — нет: на
             узком телефоне переполняться должна картинка, а не кнопки,
             по которым человек попадает пальцем. */}
@@ -349,8 +335,19 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
             содержимое: в списке заявок кнопки и текст уходили под него.
             В шапке места ровно на то, что нужно на ходу, — играть,
             следующий трек и что сейчас звучит. */}
+        <span className="gtr-topbar-sp" />
         <GtrPlayerBar />
-        <LangSwitch style={{ marginLeft: "auto", flex: "none" }} />
+        <LangSwitch />
+        <button
+          className="gtr-burger"
+          aria-label={t("Меню")}
+          aria-expanded={navOpen}
+          onClick={() => setNavOpen((v) => !v)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </header>
 
       {/* ---------- сайдбар ---------- */}
@@ -515,11 +512,10 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
         <div key={screen} className="gtr-screenin">
         <Suspense
           fallback={
-            <div
-              style={{ padding: 60, textAlign: "center", color: "rgba(255,255,255,.4)" }}
-              className="gtr-mono"
-            >
-              {t("Загрузка…")}
+            // Пустое место высотой с экран, а не надпись по центру: надпись
+            // мигала посреди перехода и сдвигала раскладку при подмене.
+            <div role="status" style={{ minHeight: "70vh" }}>
+              <span className="sr-only">{t("Загрузка…")}</span>
             </div>
           }
         >

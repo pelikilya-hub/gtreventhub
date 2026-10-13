@@ -82,18 +82,20 @@
   @view-transition {
     navigation: auto;
   }
+  /* те же кривые, что у смены экрана в приложении (gtr.css): один
+     переход на весь продукт, только transform и opacity */
   ::view-transition-old(root) {
-    animation: lpVtOut 0.32s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+    animation: lpVtOut 0.18s cubic-bezier(0.4, 0, 1, 1) both;
   }
   ::view-transition-new(root) {
-    animation: lpVtIn 0.42s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+    animation: lpVtIn 0.34s cubic-bezier(0.2, 0.75, 0.25, 1) both;
   }
 }
 @keyframes lpVtOut {
-  to { opacity: 0; filter: blur(6px); transform: scale(0.985); }
+  to { opacity: 0; transform: translateY(-10px); }
 }
 @keyframes lpVtIn {
-  from { opacity: 0; filter: blur(8px); transform: scale(1.015); }
+  from { opacity: 0; transform: translateY(14px); }
 }
 
 /* ---------- основа ---------- */

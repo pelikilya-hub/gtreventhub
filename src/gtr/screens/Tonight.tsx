@@ -14,6 +14,7 @@ import { bkkToday } from "../afisha-parse";
 import { Chip, VenueLogo } from "../ui";
 import { useGtr } from "../store";
 import { allAfishaFn, bookTableFn, promptpayCfgFn, type PromptpayCfg, type VenueAfisha } from "../kv-api";
+import { ticketEventsFn, type PublicTicketEvent } from "../tickets";
 import { openAppLink } from "../applink";
 import { PosterImg } from "../poster-img";
 import { posterUrl } from "../poster";
@@ -65,6 +66,7 @@ export function TonightScreen({ vid: fromVenue }: { vid?: string } = {}) {
   const { user } = useGtr();
   const navigate = useNavigate();
   const [items, setItems] = useState<FeedItem[]>([]);
+  const [tix, setTix] = useState<PublicTicketEvent[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [route, setRoute] = useState<string[]>([]);
   const [book, setBook] = useState<{ vid: string; title?: string } | null>(null);
@@ -86,6 +88,7 @@ export function TonightScreen({ vid: fromVenue }: { vid?: string } = {}) {
       .catch(() => {})
       .finally(() => setLoaded(true));
     promptpayCfgFn().then((r) => setPpCfg(r.cfg)).catch(() => {});
+    ticketEventsFn().then((r) => setTix(r.items)).catch(() => {});
     setRoute(loadRoute());
   }, []);
 
@@ -454,6 +457,37 @@ export function TonightScreen({ vid: fromVenue }: { vid?: string } = {}) {
               {t("Точность")}: ±{Math.round(currentLocation.accuracy)} {t("м")}
             </div>
           ) : null}
+        </section>
+      ) : null}
+
+      {/* билеты в продаже: события, на которые можно купить вход прямо здесь */}
+      {tix.length && !only ? (
+        <section className="gtr-dash-sec">
+          <h2 className="gtr-dash-h">{t("Билеты в продаже")}</h2>
+          <div className="gtr-af-tix">
+            {tix.map((x, i) => (
+              <button
+                key={x.id}
+                className="gtr-af-tix-card"
+                style={{ "--i": Math.min(i, 10) } as CSSProperties}
+                onClick={() => navigate({ to: "/gtr/t/$id", params: { id: x.id } })}
+              >
+                {x.poster ? <PosterImg src={x.poster} alt={x.title} /> : <span className="gtr-tix-poster gtr-tix-poster-empty">GTR</span>}
+                <span className="gtr-af-ev-meta">
+                  <span className="gtr-af-ev-time">
+                    {new Date(`${x.dateIso}T12:00:00Z`).toLocaleDateString(dayLocale, { day: "numeric", month: "short", timeZone: "UTC" })}
+                    {x.time ? ` · ${x.time}` : ""}
+                  </span>
+                  <span className="gtr-af-ev-price">฿{x.price.toLocaleString("en-US")}</span>
+                </span>
+                <span className="gtr-af-ev-title">{x.title}</span>
+                {x.venueName ? <span className="gtr-af-ev-venue">{x.venueName}</span> : null}
+                <span className="gtr-btn gtr-btn-red gtr-af-tix-buy">
+                  {x.left > 0 ? t("Купить билет") : t("билеты закончились")}
+                </span>
+              </button>
+            ))}
+          </div>
         </section>
       ) : null}
 

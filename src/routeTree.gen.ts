@@ -54,6 +54,8 @@ import { Route as GtrOrganizerRouteImport } from './routes/gtr/organizer'
 import { Route as GtrSignupRouteImport } from './routes/gtr/signup'
 import { Route as GtrVRouteImport } from './routes/gtr/v'
 import { Route as ThAfishaRouteImport } from './routes/th_.afisha'
+import { Route as GtrOIdRouteImport } from './routes/gtr/o.$id'
+import { Route as GtrTIdRouteImport } from './routes/gtr/t.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -280,6 +282,16 @@ const ThAfishaRoute = ThAfishaRouteImport.update({
   path: '/th/afisha',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GtrOIdRoute = GtrOIdRouteImport.update({
+  id: '/o/$id',
+  path: '/o/$id',
+  getParentRoute: () => GtrRouteRoute,
+} as any)
+const GtrTIdRoute = GtrTIdRouteImport.update({
+  id: '/t/$id',
+  path: '/t/$id',
+  getParentRoute: () => GtrRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -327,6 +339,8 @@ export interface FileRoutesByFullPath {
   '/gtr/v': typeof GtrVRoute
   '/th/afisha': typeof ThAfishaRoute
   '/gtr/': typeof GtrIndexRoute
+  '/gtr/o/$id': typeof GtrOIdRoute
+  '/gtr/t/$id': typeof GtrTIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -373,6 +387,8 @@ export interface FileRoutesByTo {
   '/gtr/v': typeof GtrVRoute
   '/th/afisha': typeof ThAfishaRoute
   '/gtr': typeof GtrIndexRoute
+  '/gtr/o/$id': typeof GtrOIdRoute
+  '/gtr/t/$id': typeof GtrTIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -421,6 +437,8 @@ export interface FileRoutesById {
   '/gtr/v': typeof GtrVRoute
   '/th_/afisha': typeof ThAfishaRoute
   '/gtr/': typeof GtrIndexRoute
+  '/gtr/o/$id': typeof GtrOIdRoute
+  '/gtr/t/$id': typeof GtrTIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -470,6 +488,8 @@ export interface FileRouteTypes {
     | '/gtr/v'
     | '/th/afisha'
     | '/gtr/'
+    | '/gtr/o/$id'
+    | '/gtr/t/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -516,6 +536,8 @@ export interface FileRouteTypes {
     | '/gtr/v'
     | '/th/afisha'
     | '/gtr'
+    | '/gtr/o/$id'
+    | '/gtr/t/$id'
   id:
     | '__root__'
     | '/'
@@ -563,6 +585,8 @@ export interface FileRouteTypes {
     | '/gtr/v'
     | '/th_/afisha'
     | '/gtr/'
+    | '/gtr/o/$id'
+    | '/gtr/t/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -923,6 +947,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ThAfishaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gtr/o/$id': {
+      id: '/gtr/o/$id'
+      path: '/o/$id'
+      fullPath: '/gtr/o/$id'
+      preLoaderRoute: typeof GtrOIdRouteImport
+      parentRoute: typeof GtrRouteRoute
+    }
+    '/gtr/t/$id': {
+      id: '/gtr/t/$id'
+      path: '/t/$id'
+      fullPath: '/gtr/t/$id'
+      preLoaderRoute: typeof GtrTIdRouteImport
+      parentRoute: typeof GtrRouteRoute
+    }
   }
 }
 
@@ -934,6 +972,8 @@ interface GtrRouteRouteChildren {
   GtrSignupRoute: typeof GtrSignupRoute
   GtrVRoute: typeof GtrVRoute
   GtrIndexRoute: typeof GtrIndexRoute
+  GtrOIdRoute: typeof GtrOIdRoute
+  GtrTIdRoute: typeof GtrTIdRoute
 }
 
 const GtrRouteRouteChildren: GtrRouteRouteChildren = {
@@ -944,6 +984,8 @@ const GtrRouteRouteChildren: GtrRouteRouteChildren = {
   GtrSignupRoute: GtrSignupRoute,
   GtrVRoute: GtrVRoute,
   GtrIndexRoute: GtrIndexRoute,
+  GtrOIdRoute: GtrOIdRoute,
+  GtrTIdRoute: GtrTIdRoute,
 }
 
 const GtrRouteRouteWithChildren = GtrRouteRoute._addFileChildren(

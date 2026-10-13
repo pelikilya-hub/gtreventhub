@@ -20,11 +20,30 @@ export const getKvNs = async (): Promise<KvNs | null> => {
     // строкой, чтобы vite и tsc не пытались найти модуль на диске
     const name = "cloudflare:workers";
     const m = (await import(/* @vite-ignore */ name)) as { env?: Record<string, unknown> };
-    return (m.env?.GTR_KV as KvNs | undefined) ?? null;
+    return (m.env?.GTR_KV as KvNs | undefined) ?? devKv();
   } catch {
-    return null;
+    return devKv();
   }
 };
+
+// Хранилище в памяти — только для локальной разработки и только по явному
+// флагу GTR_DEV_KV=1: так можно пройти продажу билета или бронь целиком на
+// своей машине. В боевой сборке import.meta.env.DEV ложно, и ветка
+// вырезается целиком.
+let devStore: Map<string, string> | null = null;
+function devKv(): KvNs | null {
+  if (!import.meta.env.DEV || typeof process === "undefined" || !process.env.GTR_DEV_KV) return null;
+  const m = (devStore ??= new Map());
+  return {
+    get: async (k) => m.get(k) ?? null,
+    put: async (k, v) => void m.set(k, v),
+    delete: async (k) => void m.delete(k),
+    list: async ({ prefix = "" } = {}) => ({
+      keys: [...m.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })),
+      list_complete: true,
+    }),
+  };
+}
 
 export const kvGetJson = async <T>(ns: KvNs, key: string): Promise<T | null> => {
   const raw = await ns.get(key);

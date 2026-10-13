@@ -549,7 +549,7 @@ export function BossCabinet() {
     for (const d of shared.drafts.slice(0, 40))
       items.push({
         ts: d.updated,
-        text: `${draftTitle(d)} — ${t(STAGE_LABEL[d.graph.stage ?? "draft"])}${d.owner ? ` · ${d.owner.split("@")[0]}` : ""}`,
+        text: `${t(draftTitle(d))} — ${t(STAGE_LABEL[d.graph.stage ?? "draft"])}${d.owner ? ` · ${d.owner.split("@")[0]}` : ""}`,
         color: STAGE_COLOR[d.graph.stage ?? "draft"],
       });
     for (const r of reqs.slice(0, 30))
@@ -716,7 +716,7 @@ export function BossCabinet() {
           {money.top.map(({ d, q }) => (
             <div key={d.id} className="gtr-dash-row">
               <span className="gtr-dash-row-t">
-                {draftTitle(d)}
+                {t(draftTitle(d))}
                 <small>{V(d.venueId).name}</small>
               </span>
               <span className="gtr-dash-row-v" style={{ color: GREEN }}>
@@ -752,7 +752,7 @@ export function BossCabinet() {
                   {(d.dateIso ?? "").slice(5).replace("-", ".")}
                 </span>
                 <span className="gtr-dash-row-t">
-                  {draftTitle(d)}
+                  {t(draftTitle(d))}
                   <small>{V(d.venueId).name}</small>
                 </span>
               </div>

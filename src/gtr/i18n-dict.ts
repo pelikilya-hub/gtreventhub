@@ -2944,6 +2944,7 @@ export const EN: Record<string, string> = {
   "Залы ещё не заведены": "Rooms not set up yet",
   "ПРИОРИТЕТНЫХ КОНТАКТОВ": "PRIORITY CONTACTS",
   "Прислать вместимость залов и нетто-ставки": "Send room capacities and net rates",
+  "Гость": "Guest",
 };
 
 export const TH: Record<string, string> = {
@@ -5881,4 +5882,5 @@ export const TH: Record<string, string> = {
   "Залы ещё не заведены": "ยังไม่ได้ตั้งค่าห้อง",
   "ПРИОРИТЕТНЫХ КОНТАКТОВ": "ผู้ติดต่อสำคัญ",
   "Прислать вместимость залов и нетто-ставки": "ส่งความจุของห้องและราคาเน็ต",
+  "Гость": "แขก",
 };

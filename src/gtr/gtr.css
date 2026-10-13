@@ -840,9 +840,9 @@
   border-radius: 0;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
-  font: 700 11.5px/1.2 var(--display);
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
+  font: 500 13px/1.25 var(--text);
+  letter-spacing: 0;
+  text-transform: none;
   background: transparent;
   color: var(--gtr-t3);
   text-align: left;
@@ -1153,29 +1153,24 @@
     height: var(--top-h);
     padding: 0 14px;
     padding-top: var(--safe-t);
-    /* шапка — одна строка: бургер, логотип, языки. Перенос превратил бы
+    /* шапка — одна строка, как .top у bangtaostyle.com: знак слева,
+       плеер и языки справа, бургер у правого края. Перенос превратил бы
        её в две строки и сдвинул весь экран вниз */
     flex-wrap: nowrap;
     min-width: 0;
   }
   .gtr-topbar > * { min-width: 0; }
   .gtr-burger { flex: none; }
-  /* стекло шапки — отдельным слоем, чтобы уходило в ноль книзу: контент
-     подныривает под неё, а не упирается в кромку */
+  .gtr-topbar-sp { flex: 1; min-width: 0; }
+  /* плотная подложка без размытия: на телефоне backdrop-filter на
+     закреплённой шапке пересчитывается каждый кадр прокрутки */
   .gtr-topbar::after {
     content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background: linear-gradient(
-      180deg,
-      rgba(10, 11, 13, 0.96) 0%,
-      rgba(10, 11, 13, 0.88) 58%,
-      rgba(10, 11, 13, 0) 100%
-    );
-    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 100%);
-    mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 100%);
+    background: rgba(10, 11, 13, 0.92);
   }
   /* нижняя грань шапки — полоса света, гаснущая к краям, как у навигации */
   .gtr-topbar::before {
@@ -1201,9 +1196,10 @@
     gap: 4px;
     width: 44px;
     height: 44px;
+    margin-right: -10px;
     place-content: center;
     background: transparent;
-    border: 1px solid var(--gtr-border2);
+    border: 0;
     cursor: pointer;
     padding: 0;
   }
@@ -1251,10 +1247,12 @@
     padding: 0 0 6px;
   }
   .gtr-side-head > .gtr-neon { display: none; }
+  /* на листе меню разделы — заголовки, как .sheet a у эталона */
   .gtr-sidebar .gtr-nav-item {
     padding: 12px 0;
-    font-size: 22px;
+    font: 700 22px/1.15 var(--display);
     letter-spacing: -0.015em;
+    text-transform: uppercase;
     gap: 14px;
   }
   .gtr-sidebar .gtr-nav-item > svg { display: none; }
@@ -2125,13 +2123,35 @@
   }
 }
 
-/* ---------- игровая плавность: переход экрана как смена сцены ---------- */
-@keyframes gtrscreenin {
-  from { opacity: 0; transform: translateY(14px) scale(0.988); filter: blur(7px); }
-  to { opacity: 1; transform: none; filter: none; }
+/* ---------- переход экрана: один механизм на весь продукт ----------
+   Смену экрана ведёт View Transitions (роутер: defaultViewTransition, а
+   между витриной и приложением — @view-transition выше). Шапка, док,
+   меню и фон с кодом получают свои имена и стоят на месте; растворяется
+   только полотно экрана: старое уходит вверх и гаснет, новое поднимается
+   снизу. Только transform и opacity — никакого размытия на весь экран
+   (прежний blur(7px) на каждом переходе стоил кадров на телефоне).
+   Прежняя анимация .gtr-screenin при монтировании и «поворот как смена
+   сцены» убраны: второй механизм поверх этого давал двойное движение. */
+.gtr-topbar { view-transition-name: gtr-top; }
+.gtr-tabbar { view-transition-name: gtr-dock; }
+.gtr-codebg { view-transition-name: gtr-bg; }
+@media (min-width: 861px) { .gtr-sidebar { view-transition-name: gtr-side; } }
+::view-transition-group(gtr-top),
+::view-transition-group(gtr-dock),
+::view-transition-group(gtr-side) { animation: none; }
+::view-transition-old(gtr-top), ::view-transition-new(gtr-top),
+::view-transition-old(gtr-dock), ::view-transition-new(gtr-dock),
+::view-transition-old(gtr-side), ::view-transition-new(gtr-side) { animation: none; }
+::view-transition-old(gtr-top), ::view-transition-old(gtr-dock), ::view-transition-old(gtr-side) { display: none; }
+::view-transition-old(gtr-bg), ::view-transition-new(gtr-bg) { animation-duration: .6s; }
+::view-transition-old(root) { animation: gtrSceneOut .18s cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: gtrSceneIn .34s cubic-bezier(.2, .75, .25, 1) both; }
+@keyframes gtrSceneOut { to { opacity: 0; transform: translateY(-10px); } }
+@keyframes gtrSceneIn { from { opacity: 0; transform: translateY(14px); } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 }
 .gtr-screenin {
-  animation: gtrscreenin 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
   /* Экран не имеет права утащить страницу вбок.
      Замер на телефоне 390px: паспорт площадки уезжал на 109px, финансы и
      GTR-админ на 140, залы на 82, заявки на 21. Снаружи это выглядит так,
@@ -2155,24 +2175,10 @@
   overflow-x: clip;
 }
 html { -webkit-tap-highlight-color: transparent; }
+/* текст только для экранного диктора */
+.gtr-app .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .gtr-app { touch-action: manipulation; }
 
-/* ---------- поворот телефона: перекомпоновка как смена сцены ----------
-   Переход портрет↔ландшафт менял раскладку скачком. Класс gtr-rotating
-   вешается на полсекунды из шелла на смене ориентации — контент проявляется
-   тем же языком, что и переход между экранами, а не рвётся на глазах.
-   Фон, шапка и навигация не трогаются: анимируется только полотно. */
-@keyframes gtrrotatein {
-  from { opacity: 0.45; transform: scale(0.986); filter: blur(5px); }
-  to { opacity: 1; transform: none; filter: none; }
-}
-.gtr-shell.gtr-rotating .gtr-main {
-  animation: gtrrotatein 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
-  will-change: transform, filter, opacity;
-}
-@media (prefers-reduced-motion: reduce) {
-  .gtr-shell.gtr-rotating .gtr-main { animation: none; }
-}
 
 /* ---------- мобильная игровая графика (тест: iPhone 12 Pro Max) ---------- */
 @media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
@@ -2195,11 +2201,6 @@ html { -webkit-tap-highlight-color: transparent; }
   .gtr-nav-item:active { transform: scale(0.96); }
   .gtr-card-hover:active { transform: scale(0.975); }
 
-  /* шапка — тяжёлое стекло (fixed: производительности не мешает) */
-  .gtr-topbar::after {
-    -webkit-backdrop-filter: blur(18px) saturate(1.25);
-    backdrop-filter: blur(18px) saturate(1.25);
-  }
   /* разделы проявляются каскадом сверху вниз */
   .nav-open .gtr-sidebar .gtr-nav-item {
     animation: gtrnavin 0.42s cubic-bezier(0.32, 0.72, 0, 1) both;
@@ -2220,7 +2221,6 @@ html { -webkit-tap-highlight-color: transparent; }
   to { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .gtr-screenin,
   .nav-open .gtr-sidebar .gtr-nav-item { animation: none; }
 }
 
@@ -2328,6 +2328,18 @@ html { -webkit-tap-highlight-color: transparent; }
    светил блюром сквозь содержимое и налезал на него — в списке заявок под
    ним пропадали и кнопки, и текст. Полоска в шапке даёт то же, что нужно
    на ходу (играть, следующий, что звучит), и не отнимает у экрана ничего. */
+/* переключатель языка — строка из трёх букв, как у эталона: включённый
+   язык белый с красной чертой снизу, остальные приглушены. Без рамки и
+   без заливки — в шапке не должно быть трёх коробок подряд. */
+.gtr-lang { display: inline-flex; flex: none; gap: 2px; }
+.gtr-lang button {
+  min-width: 34px; height: 34px; padding: 0 6px; border: 0; background: none; cursor: pointer;
+  font: 600 12px/1 var(--mono); letter-spacing: .08em; color: var(--gtr-t3);
+  box-shadow: inset 0 -2px 0 transparent; transition: color .2s, box-shadow .2s;
+}
+.gtr-lang button:hover { color: var(--gtr-t1); }
+.gtr-lang button[aria-pressed="true"] { color: #fff; box-shadow: inset 0 -2px 0 var(--gtr-red); }
+
 .gtr-playbar { display: none; }
 
 @media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
@@ -2434,14 +2446,14 @@ html { -webkit-tap-highlight-color: transparent; }
     height: 30px;
     display: grid;
     place-items: center;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--gtr-t3);
     background: transparent;
-    border: 1px solid var(--gtr-border2);
+    border: 0;
     cursor: pointer;
     padding: 0;
-    transition: transform 0.14s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: transform 0.14s cubic-bezier(0.32, 0.72, 0, 1), color 0.2s;
   }
-  .gtr-next-btn:active { transform: scale(0.92); }
+  .gtr-next-btn:active { transform: scale(0.92); color: #fff; }
 
   /* пульс музыки красит световую грань шапки, а не рамку */
   .gtr-topbar::before {
@@ -3222,7 +3234,7 @@ html { -webkit-tap-highlight-color: transparent; }
    этом в избытке, поэтому по горизонтали ничего не режем. */
 @media (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-topbar { --top-h: calc(48px + var(--safe-t)); }
-  .gtr-burger { width: 38px; height: 38px; }
+  .gtr-burger { height: 38px; }
   .gtr-main { padding-top: 8px; }
 
   .gtr-hero-tall {

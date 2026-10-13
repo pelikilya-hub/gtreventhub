@@ -4,6 +4,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 export const EN: Record<string, string> = {
+  "Событий пока нет": "No events yet",
+  "Заявок пока нет": "No requests yet",
+  "Мои заявки площадкам": "My requests to venues",
+  "Заявки на мне": "Requests assigned to me",
+  "Пайплайн по месяцам": "Pipeline by month",
+  "Настройки": "Settings",
+  "Язык предложений": "Offer language",
   // --- комьюнити ---
   "КОМЬЮНИТИ GTR": "GTR COMMUNITY",
   "Новости острова и живой чат — вся тусовка в одном месте": "Island news and a live chat — the whole party crowd in one place",
@@ -1447,6 +1454,13 @@ export const EN: Record<string, string> = {
 };
 
 export const TH: Record<string, string> = {
+  "Событий пока нет": "ยังไม่มีงาน",
+  "Заявок пока нет": "ยังไม่มีคำขอ",
+  "Мои заявки площадкам": "คำขอของฉันถึงสถานที่",
+  "Заявки на мне": "คำขอที่มอบหมายให้ฉัน",
+  "Пайплайн по месяцам": "ไปป์ไลน์รายเดือน",
+  "Настройки": "ตั้งค่า",
+  "Язык предложений": "ภาษาของข้อเสนอ",
   // --- комьюнити ---
   "КОМЬЮНИТИ GTR": "คอมมูนิตี้ GTR",
   "Новости острова и живой чат — вся тусовка в одном месте": "ข่าวทั่วเกาะและแชทสด — ชาวปาร์ตี้รวมกันที่เดียว",

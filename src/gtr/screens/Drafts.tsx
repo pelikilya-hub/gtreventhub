@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 
 import { draftDecideFn, draftsFn, type ArtistDraftRow, type VenueDraftRow } from "../kv-api";
 import { Card, Chip, Eyebrow } from "../ui";
+import { fillT } from "./Constructor";
 
 const GREEN = "#2ECC71";
 const AMBER = "#F5A623";
@@ -19,8 +20,8 @@ function noteText(note: string, t: (k: string, o?: Record<string, unknown>) => s
   const m = note.match(/^Площадка принята как (\S+?)(?:, событий перенесено: (\d+))?$/);
   if (m)
     return (
-      t("Площадка принята как {{id}}", { id: m[1] }) +
-      (m[2] ? t(", событий перенесено: {{n}}", { n: m[2] }) : "")
+      fillT(t, "Площадка принята как {{id}}", { id: m[1] }) +
+      (m[2] ? fillT(t, ", событий перенесено: {{n}}", { n: m[2] }) : "")
     );
   return note ? t(note) : "";
 }

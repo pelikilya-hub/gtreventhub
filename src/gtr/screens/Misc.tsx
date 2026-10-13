@@ -32,6 +32,7 @@ import {
   SPACES,
   SPACES_TECH,
   V,
+  readinessLabel,
 } from "../data/app-data";
 import { Empty } from "../empty";
 import { useVenueContacts } from "../work-contacts";
@@ -854,7 +855,7 @@ export function SpacesScreen() {
       <Card style={{ padding: 20 }}>
         <Eyebrow style={{ marginBottom: 10 }}>{t("ТЕХНИКА И ИНФРАСТРУКТУРА")}</Eyebrow>
         <div style={{ font: "500 12px/1.7 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-          {SPACES_TECH[vid] ? t(SPACES_TECH[vid]) : (v.facilities ?? t("Данные уточняются у площадки."))}
+          {SPACES_TECH[vid] ? t(SPACES_TECH[vid]) : v.facilities ? t(String(v.facilities)) : t("Данные уточняются у площадки.")}
         </div>
       </Card>
     </div>
@@ -974,7 +975,7 @@ export function VenueScreen() {
                     color: "var(--gtr-t2)",
                   }}
                 >
-                  {String(val)}
+                  {t(String(val))}
                 </span>
               </div>
             ))}
@@ -2021,8 +2022,8 @@ export function AdminScreen() {
                   {x.readiness?.state} · {t(String(x.area ?? ""))}
                 </span>
               </span>
-              <Chip color={x.readiness?.state === "Бронируемая" ? GREEN : AMBER}>
-                {(x.readiness?.state ?? "").toUpperCase()}
+              <Chip color={x.readiness?.state === "Bookable" ? GREEN : AMBER}>
+                {t(readinessLabel(x.readiness?.state)).toUpperCase()}
               </Chip>
             </div>
           ))}

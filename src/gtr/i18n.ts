@@ -64,8 +64,22 @@ const initial = (): UiLang => {
 
 const LANG_KEY = "gtr-lang";
 
+// Постобработчик: строки, которых нет в словаре интерфейса, ищем в словаре
+// данных площадок. Так t(описание площадки) работает так же, как t(кнопка),
+// и язык берётся у того экземпляра, что рисует (на сервере — клон запроса).
+const dataPost = {
+  type: "postProcessor" as const,
+  name: "gtr-data",
+  process(value: string, key: string | string[], _opts: unknown, translator: { language?: string }) {
+    const k = Array.isArray(key) ? key[0] : key;
+    if (typeof value !== "string" || value !== k) return value;
+    return tData(value, translator?.language ?? i18n.language);
+  },
+};
+
 if (!i18n.isInitialized) {
-  void i18n.use(initReactI18next).init({
+  void i18n.use(initReactI18next).use(dataPost).init({
+    postProcess: ["gtr-data"],
     resources: {
       en: { translation: EN },
       th: { translation: TH },
@@ -85,34 +99,68 @@ if (!i18n.isInitialized) {
 }
 
 // Словарь данных площадок (описания, музыка, часы, инфраструктура) —
-// отдельными файлами по языку: это сотня килобайт текста, и тащить её в
-// общий бандл ради русскоязычного гостя незачем. Файл подгружается вместе
-// с ленивым кодом экрана (см. lazyScreen в shell.tsx), поэтому к гидрации
-// перевод уже на месте. На сервере грузим оба языка: он рисует страницы
-// гостям с разными языками.
+// отдельными файлами по языку: это больше сотни килобайт текста, и
+// тащить их в общий бандл ради русскоязычного гостя незачем. Ключ —
+// FNV-1a от исходной строки (иначе каждая длинная русская фраза лежала бы
+// в файле дважды). Файл подгружается вместе с ленивым кодом экрана (см.
+// lazyScreen в shell.tsx), поэтому к гидрации перевод уже на месте. На
+// сервере грузим оба языка: он рисует страницы гостям с разными языками.
 const DATA_DICT: Record<"en" | "th", () => Promise<{ default: Record<string, string> }>> = {
   en: () => import("./data/i18n/venues.en.json"),
   th: () => import("./data/i18n/venues.th.json"),
 };
+const dataDict: Partial<Record<"en" | "th", Record<string, string>>> = {};
 const dataLoaded = new Map<string, Promise<void>>();
-const loadDataDict = (lang: "en" | "th") => {
-  let p = dataLoaded.get(lang);
+// Промис с полем status: React.use() читает его и не приостанавливает
+// отрисовку, если словарь уже загружен (иначе смена языка мигала бы).
+type Thenable = Promise<void> & { status?: "pending" | "fulfilled" };
+const loadDataDict = (lang: "en" | "th"): Thenable => {
+  let p = dataLoaded.get(lang) as Thenable | undefined;
   if (!p) {
-    p = DATA_DICT[lang]()
+    const np: Thenable = DATA_DICT[lang]()
       .then((m) => {
-        i18n.addResourceBundle(lang, "translation", m.default, true, false);
+        dataDict[lang] = m.default;
       })
       .catch(() => {
         // нет сети — покажем исходный текст, следующая попытка при смене экрана
         dataLoaded.delete(lang);
+      })
+      .finally(() => {
+        np.status = "fulfilled";
       });
+    np.status = "pending";
+    p = np;
     dataLoaded.set(lang, p);
   }
   return p;
 };
+const READY: Thenable = Object.assign(Promise.resolve(), { status: "fulfilled" as const });
+
+/** Готовность словаря данных для языка — стабильный промис для React.use(). */
+export const dataDictReady = (lang: string = i18n.language): Thenable =>
+  lang === "en" || lang === "th" ? loadDataDict(lang) : READY;
 export const ensureDataDict = (lang: string = i18n.language): Promise<void> => {
-  if (typeof window === "undefined") return Promise.all([loadDataDict("en"), loadDataDict("th")]).then(() => {});
+  if (typeof window === "undefined")
+    return Promise.all([loadDataDict("en"), loadDataDict("th")]).then(() => {});
   return lang === "en" || lang === "th" ? loadDataDict(lang) : Promise.resolve();
+};
+
+/** FNV-1a 32 бит по кодам символов — та же функция, что собирает словарь. */
+export const dataKey = (s: string): string => {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+};
+
+/** Перевод строки из данных площадки на язык интерфейса. Нет перевода —
+ *  исходная строка: лучше честный русский, чем пустое место. */
+export const tData = (text: unknown, lang: string = i18n.language): string => {
+  const s = typeof text === "string" ? text : text == null ? "" : String(text);
+  if (!s || (lang !== "en" && lang !== "th")) return s;
+  return dataDict[lang]?.[dataKey(s.trim())] ?? s;
 };
 
 export const setUiLang = (lang: UiLang) => {

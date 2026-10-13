@@ -1072,7 +1072,7 @@ export function ConstructorScreen({
                 border: "1px solid rgba(229,35,27,.6)",
               }}
             >
-              {user.initials}
+              {tr(user.initials)}
             </span>
             {peers.map((p) => (
               <span

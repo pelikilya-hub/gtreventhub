@@ -13,7 +13,7 @@ import {
 } from "../data/app-data";
 import { GtrProvider, useGtr } from "../store";
 import type { SessionUser } from "../auth";
-import { ConstructorScreen, type EventIntake } from "./Constructor";
+import { ConstructorScreen, fillT, type EventIntake } from "./Constructor";
 import { Card, Chip, Eyebrow, Icon } from "../ui";
 
 // Гость-организатор: не залогинен, работает через общий стор (запросы падают
@@ -137,7 +137,7 @@ function IntakeWizard({
           }}
         >
           {t("Несколько вопросов, чтобы собрать событие без казусов — площадка")} {v.name}
-          {cap ? t(" · вместимость {{cap}}", { cap }) : ""}.
+          {cap ? fillT(t, " · вместимость {{cap}}", { cap }) : ""}.
         </div>
 
         <Card style={{ padding: 22 }}>

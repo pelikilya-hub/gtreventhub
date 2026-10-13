@@ -17,6 +17,7 @@ import {
   richOf,
   SPACES,
   V,
+  readinessLabel,
 } from "../data/app-data";
 import { CdmReserve, zonesOfSpace, hasReserve } from "../cdm-booking";
 import { Card, Chip, Eyebrow, Field, tint, TrashTitle, VenueLogo } from "../ui";
@@ -402,7 +403,7 @@ export function BaseScreen() {
                 {isTeam ? (
                   <Chip color={confColor(x.confidence)}>{(x.confidence ?? "—").toUpperCase()}</Chip>
                 ) : null}
-                {x.readiness?.state === "Бронируемая" ? (
+                {x.readiness?.state === "Bookable" ? (
                   <Chip color={GREEN}>{t("БРОНИРУЕМАЯ")}</Chip>
                 ) : null}
                 {confirms[x.id]?.status === "confirmed" ? (
@@ -522,7 +523,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               <>
                 <Chip color={confColor(v.confidence)}>{t("ДОСТОВЕРНОСТЬ:")} {(v.confidence ?? "—").toUpperCase()}</Chip>
                 {R ? (
-                  <Chip color={R.state === "Бронируемая" ? GREEN : AMBER}>{R.state.toUpperCase()}</Chip>
+                  <Chip color={R.state === "Bookable" ? GREEN : AMBER}>{t(readinessLabel(R.state)).toUpperCase()}</Chip>
                 ) : null}
               </>
             ) : null}
@@ -617,7 +618,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             <Card reveal style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>{t("ЧЕМ ЗАНЯТЬСЯ ЗДЕСЬ")}</Eyebrow>
               <div style={{ font: "500 12.5px/1.65 'Golos Text',sans-serif", color: "var(--gtr-t1)" }}>
-                {v.concept || v.events || v.facilities}
+                {t(String(v.concept || v.events || v.facilities || ""))}
               </div>
               <div
                 style={{
@@ -629,10 +630,10 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               >
                 {(
                   [
-                    [t("ЧАСЫ"), night.hours || t("уточняем")],
-                    [t("ВХОД"), night.entry || t("по ситуации")],
-                    [t("ЛУЧШИЕ ВЕЧЕРА"), night.best || t("смотри афишу")],
-                    [t("ЗВУК"), v.music],
+                    [t("ЧАСЫ"), night.hours ? t(night.hours) : t("уточняем")],
+                    [t("ВХОД"), night.entry ? t(night.entry) : t("по ситуации")],
+                    [t("ЛУЧШИЕ ВЕЧЕРА"), night.best ? t(night.best) : t("смотри афишу")],
+                    [t("ЗВУК"), v.music ? t(String(v.music)) : undefined],
                   ] as [string, string | undefined][]
                 )
                   .filter(([, val]) => val)
@@ -730,7 +731,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             ]
               .filter(([, val]) => val)
               .map(([k, val]) => (
-                <Field key={k} k={k} v={String(val)} />
+                <Field key={k} k={k} v={t(String(val))} />
               ))}
           </Card>
 

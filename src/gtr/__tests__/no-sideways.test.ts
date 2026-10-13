@@ -98,3 +98,22 @@ describe("подписи не притворяются состоянием", ()
     expect(dict).not.toContain("MONTH LOAD");
   });
 });
+
+describe("выкатка способна запуститься", () => {
+  it("wrangler объявлен в зависимостях, а не ожидается глобально", () => {
+    // 13.10.2026 первая выкатка, дошедшая до шага деплоя, упала с
+    // exit code 127: команда не найдена. На машине владельца wrangler
+    // стоял глобально, на раннере GitHub — взяться неоткуда.
+    const pkg = JSON.parse(readFileSync(join(__dirname, "..", "..", "..", "package.json"), "utf8"));
+    const dev = pkg.devDependencies ?? {};
+    expect(dev.wrangler, "wrangler не в devDependencies").toBeTruthy();
+    // Точная версия, а не диапазон: выкатка должна быть воспроизводимой,
+    // а не зависеть от того, что вышло сегодня утром.
+    expect(dev.wrangler).toMatch(/^\d+\.\d+\.\d+$/);
+  });
+
+  it("команда выкатки зовёт его из проекта", () => {
+    const pkg = JSON.parse(readFileSync(join(__dirname, "..", "..", "..", "package.json"), "utf8"));
+    expect(pkg.scripts["deploy:cf"]).toContain("wrangler deploy");
+  });
+});

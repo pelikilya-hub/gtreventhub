@@ -106,14 +106,12 @@ export function eventDeckDocument({
 <base href="${origin}/">
 <title>GTR · ${esc(title)}</title>
 <style>
-@font-face{font-family:'Oswald';font-weight:700;src:url(/fonts/gtr/Oswald-700-cyrillic.woff2) format('woff2');unicode-range:U+0400-045F}
-@font-face{font-family:'Oswald';font-weight:700;src:url(/fonts/gtr/Oswald-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF}
-@font-face{font-family:'Golos Text';font-weight:400;src:url(/fonts/gtr/GolosText-400-cyrillic.woff2) format('woff2');unicode-range:U+0400-045F}
-@font-face{font-family:'Golos Text';font-weight:400;src:url(/fonts/gtr/GolosText-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF}
-@font-face{font-family:'Golos Text';font-weight:600;src:url(/fonts/gtr/GolosText-600-cyrillic.woff2) format('woff2');unicode-range:U+0400-045F}
-@font-face{font-family:'Golos Text';font-weight:600;src:url(/fonts/gtr/GolosText-600-latin.woff2) format('woff2');unicode-range:U+0000-00FF}
-@font-face{font-family:'JetBrains Mono';font-weight:500;src:url(/fonts/gtr/JetBrainsMono-500-cyrillic.woff2) format('woff2');unicode-range:U+0400-045F}
-@font-face{font-family:'JetBrains Mono';font-weight:500;src:url(/fonts/gtr/JetBrainsMono-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF}
+@font-face{font-family:'Unbounded';font-weight:500 900;src:url(/fonts/g/unbounded-cyrillic-13.woff2) format('woff2');unicode-range:U+0400-045F}
+@font-face{font-family:'Unbounded';font-weight:500 900;src:url(/fonts/g/unbounded-latin-15.woff2) format('woff2');unicode-range:U+0000-00FF}
+@font-face{font-family:'Golos Text';font-weight:400 700;src:url(/fonts/g/golos-text-cyrillic-1.woff2) format('woff2');unicode-range:U+0400-045F}
+@font-face{font-family:'Golos Text';font-weight:400 700;src:url(/fonts/g/golos-text-latin-3.woff2) format('woff2');unicode-range:U+0000-00FF}
+@font-face{font-family:'JetBrains Mono';font-weight:400 700;src:url(/fonts/g/jetbrains-mono-cyrillic-5.woff2) format('woff2');unicode-range:U+0400-045F}
+@font-face{font-family:'JetBrains Mono';font-weight:400 700;src:url(/fonts/g/jetbrains-mono-latin-7.woff2) format('woff2');unicode-range:U+0000-00FF}
 @font-face{font-family:'Trashed GTR';src:url(/fonts/gtr/Trashed.woff2) format('woff2')}
 *{margin:0;padding:0;box-sizing:border-box}
 @page{size:A4 landscape;margin:0}
@@ -126,7 +124,7 @@ html,body{background:#0A0B0D;color:#EAEAEA;font:14px/1.5 'Golos Text',sans-serif
   color:#8A8D93;letter-spacing:.2em}
 .eyebrow{font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.22em;
   text-transform:uppercase;color:#E5231B;margin-bottom:7mm}
-h2{font:700 34px/0.95 'Oswald',sans-serif;text-transform:uppercase;
+h2{font:800 29px/0.95 'Unbounded',sans-serif;text-transform:uppercase;
   letter-spacing:-.02em;margin-bottom:8mm}
 .impulse{position:absolute;width:4px;top:-5%;bottom:-5%;background:#E5231B;opacity:.85}
 /* обложка */
@@ -135,7 +133,7 @@ h2{font:700 34px/0.95 'Oswald',sans-serif;text-transform:uppercase;
 .cover .shade{position:absolute;inset:0;
   background:linear-gradient(0deg,#0A0B0Df0 18%,#0A0B0D55 55%,#0A0B0D22)}
 .cover .brand{position:absolute;top:12mm;left:18mm;height:15mm}
-.cover h1{position:relative;font:400 62px/0.95 'Trashed GTR','Oswald',sans-serif;
+.cover h1{position:relative;font:400 62px/0.95 'Trashed GTR','Unbounded',sans-serif;
   max-width:75%;text-wrap:balance}
 .cover h1 b{color:#E5231B;font-weight:400}
 .cover .meta{position:relative;margin-top:6mm;font:500 12px/1.7 'JetBrains Mono',monospace;color:#c9cbd0}
@@ -173,7 +171,7 @@ h2{font:700 34px/0.95 'Oswald',sans-serif;text-transform:uppercase;
 .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:8mm}
 .tier{border:1px solid #ffffff1c;padding:7mm;background:#0F1013}
 .tier.hot{border-color:#E5231B;background:#E5231B12}
-.tname{font:700 15px/1 'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.05em}
+.tname{font:700 13px/1 'Unbounded',sans-serif;text-transform:uppercase;letter-spacing:.05em}
 .tsum{font:500 26px/1 'JetBrains Mono',monospace;margin:4mm 0 2mm;color:#fff}
 .tier.hot .tsum{color:#FF3427}
 .tnote{font:400 10.5px/1.5 'Golos Text',sans-serif;color:#9a9da3;margin-bottom:4mm;min-height:12mm}

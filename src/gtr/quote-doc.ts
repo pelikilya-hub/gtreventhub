@@ -76,22 +76,23 @@ export function quoteDocument({
   return `<!doctype html><html lang="ru"><head><base href="${origin}/"><meta charset="utf-8">
 <title>${esc(no)} · ${esc(venue)}</title>
 <style>
-@font-face{font-family:Oswald;font-weight:600;src:url(/fonts/gtr/Oswald-600-cyrillic.woff2) format('woff2');font-display:swap}
-@font-face{font-family:Oswald;font-weight:700;src:url(/fonts/gtr/Oswald-700-cyrillic.woff2) format('woff2');font-display:swap}
-@font-face{font-family:'Golos Text';font-weight:400;src:url(/fonts/gtr/GolosText-400-cyrillic.woff2) format('woff2');font-display:swap}
-@font-face{font-family:'Golos Text';font-weight:500;src:url(/fonts/gtr/GolosText-500-cyrillic.woff2) format('woff2');font-display:swap}
-@font-face{font-family:'JetBrains Mono';font-weight:500;src:url(/fonts/gtr/JetBrainsMono-500-cyrillic.woff2) format('woff2');font-display:swap}
+@font-face{font-family:'Unbounded';font-weight:500 900;src:url(/fonts/g/unbounded-cyrillic-13.woff2) format('woff2');font-display:swap;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-weight:400 700;src:url(/fonts/g/golos-text-cyrillic-1.woff2) format('woff2');font-display:swap;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-weight:400 700;src:url(/fonts/g/golos-text-latin-3.woff2) format('woff2');font-display:swap;unicode-range:U+0000-00FF,U+2000-206F,U+2122}
+@font-face{font-family:'JetBrains Mono';font-weight:400 700;src:url(/fonts/g/jetbrains-mono-cyrillic-5.woff2) format('woff2');font-display:swap;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'JetBrains Mono';font-weight:400 700;src:url(/fonts/g/jetbrains-mono-latin-7.woff2) format('woff2');font-display:swap;unicode-range:U+0000-00FF,U+2000-206F,U+2122}
+@font-face{font-family:'Unbounded';font-weight:500 900;src:url(/fonts/g/unbounded-latin-15.woff2) format('woff2');font-display:swap;unicode-range:U+0000-00FF,U+2000-206F,U+2122}
 *{box-sizing:border-box}
 body{margin:0;padding:32px 34px;background:#fff;color:#111;
   font:400 12px/1.55 'Golos Text',system-ui,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 header{display:flex;justify-content:space-between;align-items:flex-start;
   border-bottom:2px solid #E5231B;padding-bottom:12px;margin-bottom:18px}
-.brand{font:700 22px/1 Oswald,sans-serif;letter-spacing:.02em}
+.brand{font:800 19px/1 'Unbounded',sans-serif;letter-spacing:.02em}
 .brand span{color:#E5231B}
 .sub{font:500 9.5px/1.4 'JetBrains Mono',monospace;color:#666;margin-top:4px;letter-spacing:.06em}
 .doc{text-align:right;font:500 10px/1.5 'JetBrains Mono',monospace;color:#444}
-.doc b{display:block;font:700 13px/1.3 Oswald,sans-serif;color:#111;letter-spacing:.04em}
-h1{font:700 17px/1.25 Oswald,sans-serif;margin:0 0 3px}
+.doc b{display:block;font:700 11.5px/1.3 'Unbounded',sans-serif;color:#111;letter-spacing:.04em}
+h1{font:700 15px/1.25 'Unbounded',sans-serif;margin:0 0 3px}
 .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 20px;
   border:1px solid #E3E3E3;border-radius:6px;padding:12px 14px}
 .meta div{display:flex;flex-direction:column;gap:2px}
@@ -111,10 +112,10 @@ td{padding:9px 8px;border-bottom:1px solid #F0F0F0;vertical-align:top}
 .tot{margin-left:auto;width:290px;margin-top:12px}
 .tot div{display:flex;justify-content:space-between;padding:5px 8px;font-size:11.5px}
 .tot .fin{border-top:2px solid #111;margin-top:5px;padding-top:9px;
-  font:700 15px/1 Oswald,sans-serif;letter-spacing:.02em}
+  font:700 13px/1 'Unbounded',sans-serif;letter-spacing:.02em}
 .tot .amt2{font:500 12px/1.4 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
 .warn{margin-top:22px;border-left:2px solid #E5231B;padding:2px 0 2px 13px}
-.warn h2{font:600 11px/1 Oswald,sans-serif;letter-spacing:.09em;text-transform:uppercase;margin:0 0 7px}
+.warn h2{font:600 10px/1 'Unbounded',sans-serif;letter-spacing:.09em;text-transform:uppercase;margin:0 0 7px}
 .warn ul{margin:0;padding-left:15px}
 .warn li{font-size:11px;color:#444;margin-bottom:3px}
 footer{margin-top:26px;padding-top:11px;border-top:1px solid #E3E3E3;

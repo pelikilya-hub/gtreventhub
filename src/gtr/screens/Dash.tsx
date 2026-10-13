@@ -466,7 +466,7 @@ export function DashScreen() {
           >
             <h1
               className="gtr-oswald"
-              style={{ font: "700 30px/1.05 Oswald,sans-serif", letterSpacing: ".02em", margin: 0 }}
+              style={{ font: "700 25.5px/1.05 var(--display)", letterSpacing: ".02em", margin: 0 }}
             >
               {d.name}
             </h1>
@@ -593,7 +593,7 @@ export function DashScreen() {
           <div
             className="gtr-oswald"
             style={{
-              font: "600 14px/1 Oswald,sans-serif",
+              font: "600 14px/1 var(--cond)",
               padding: "16px 20px",
               borderBottom: "1px solid rgba(255,255,255,.05)",
             }}
@@ -703,7 +703,7 @@ export function DashScreen() {
             borderBottom: "1px solid rgba(255,255,255,.05)",
           }}
         >
-          <div className="gtr-oswald" style={{ font: "600 14px/1 Oswald,sans-serif" }}>
+          <div className="gtr-oswald" style={{ font: "600 14px/1 var(--cond)" }}>
             {d.mainTitle}
           </div>
           <button className="gtr-btn" onClick={() => go(d.mainGo)}>
@@ -907,7 +907,7 @@ function SalesCabinet() {
             <Eyebrow>{user.role === "organizer" ? t("КАБИНЕТ ОРГАНИЗАТОРА") : t("КАБИНЕТ EVENT SALES")}</Eyebrow>
             <h1
               className="gtr-oswald"
-              style={{ font: "700 28px/1.05 Oswald,sans-serif", letterSpacing: ".02em", margin: "8px 0 0" }}
+              style={{ font: "700 24px/1.05 var(--display)", letterSpacing: ".02em", margin: "8px 0 0" }}
             >
               {user.name}
             </h1>
@@ -1504,7 +1504,7 @@ function ArtistCabinet() {
             <Eyebrow>{t("КАБИНЕТ АРТИСТА")}</Eyebrow>
             <h1
               className="gtr-oswald"
-              style={{ font: "700 28px/1.05 Oswald,sans-serif", letterSpacing: ".02em", margin: "8px 0 0" }}
+              style={{ font: "700 24px/1.05 var(--display)", letterSpacing: ".02em", margin: "8px 0 0" }}
             >
               {user.name}
             </h1>
@@ -1952,7 +1952,7 @@ function VisitorCabinet() {
                     </span>
                   ) : null}
                   <div style={{ position: "absolute", left: 9, right: 9, bottom: 8 }}>
-                    <div style={{ font: "600 12.5px/1.25 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".04em" }}>{e.title.slice(0, 44)}</div>
+                    <div style={{ font: "600 12.5px/1.25 var(--cond)", textTransform: "uppercase", letterSpacing: ".04em" }}>{e.title.slice(0, 44)}</div>
                     <div className="gtr-mono" style={{ marginTop: 3, font: "500 10px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.65)" }}>
                       {e.dateIso.slice(8, 10)}.{e.dateIso.slice(5, 7)} · {V(e.vid)?.name?.slice(0, 20)}
                     </div>
@@ -2003,7 +2003,7 @@ function VisitorCabinet() {
                     </span>
                   ) : null}
                   <div style={{ position: "absolute", left: 9, right: 9, bottom: 8 }}>
-                    <div style={{ font: "700 12px/1.2 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".03em" }}>{a.name}</div>
+                    <div style={{ font: "600 12px/1.2 var(--cond)", textTransform: "uppercase", letterSpacing: ".03em" }}>{a.name}</div>
                     <div className="gtr-mono" style={{ marginTop: 3, font: "500 10px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {a.where || a.styles.map((g) => genreLabel(g, i18n.language)).join(" · ")}
                     </div>
@@ -2021,7 +2021,7 @@ function VisitorCabinet() {
           <img src="/brand/stickers/headphones.png" alt="" aria-hidden style={{ position: "absolute", right: -8, bottom: -10, width: 74, opacity: 0.85, transform: "rotate(-8deg)" }} />
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span className="gtr-eq" aria-hidden><span /><span /><span /><span /></span>
-            <span style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Мой вкус")}</span>
+            <span style={{ font: "600 13px/1.2 var(--cond)", textTransform: "uppercase" }}>{t("Мой вкус")}</span>
             {mp ? <Chip color="#2ECC71">{t("СОБРАН")}</Chip> : null}
           </div>
           <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>
@@ -2032,12 +2032,12 @@ function VisitorCabinet() {
         </Card>
         <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("map")}>
           <img src="/brand/stickers/map.png" alt="" aria-hidden style={{ position: "absolute", right: -8, bottom: -10, width: 74, opacity: 0.85, transform: "rotate(6deg)" }} />
-          <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Карта")}</div>
+          <div style={{ font: "600 13px/1.2 var(--cond)", textTransform: "uppercase" }}>{t("Карта")}</div>
           <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>{t("Весь остров точками")}</div>
         </Card>
         <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("promo")}>
           <img src="/brand/stickers/champagne.png" alt="" aria-hidden style={{ position: "absolute", right: -8, bottom: -10, width: 74, opacity: 0.85, transform: "rotate(-6deg)" }} />
-          <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Стол на вечер")}</div>
+          <div style={{ font: "600 13px/1.2 var(--cond)", textTransform: "uppercase" }}>{t("Стол на вечер")}</div>
           <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>{t("Бронь в пару касаний")}</div>
         </Card>
       </div>
@@ -2078,7 +2078,7 @@ function VisitorCabinet() {
           onClick={() => window.dispatchEvent(new CustomEvent("gtr:bro-open"))}>
           <img src="/raw-pulse/handle-logo.webp" alt="" aria-hidden style={{ position: "absolute", right: -6, bottom: -8, width: 66, opacity: 0.8 }} />
           <Eyebrow style={{ fontSize: 10, marginBottom: 8 }}>{t("BRO СЕГОДНЯ")}</Eyebrow>
-          <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase", paddingRight: 54 }}>{t("Спроси, куда пойти")}</div>
+          <div style={{ font: "600 13px/1.2 var(--cond)", textTransform: "uppercase", paddingRight: 54 }}>{t("Спроси, куда пойти")}</div>
           <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 54 }}>
             {t("Подберёт вечер под твой вкус, забронирует стол, переведёт официанту — просто спроси.")}
           </div>
@@ -2093,7 +2093,7 @@ function VisitorCabinet() {
             onClick={() => go(u.screen as ScreenId)}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Stk name={u.icon as StkName} size={26} />
-              <span style={{ font: "700 12.5px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t(u.title)}</span>
+              <span style={{ font: "600 12.5px/1.2 var(--cond)", textTransform: "uppercase" }}>{t(u.title)}</span>
             </div>
             <div style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{t(u.text)}</div>
             <span className="gtr-mono" style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".08em" }}>

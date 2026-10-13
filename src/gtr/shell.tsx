@@ -51,8 +51,8 @@ import { TrackingScreen } from "./screens/Tracking";
 import { PhrasesScreen } from "./screens/Phrases";
 import { ScreenErrorBoundary } from "./error-boundary";
 import { UpdateGate } from "./update-gate";
-import { useDeviceTilt } from "./motion";
 import { GtrDancer } from "./dancer";
+import { GtrCodeBackdrop, sceneFor } from "./code-backdrop";
 import { GtrPlayerBar } from "./player";
 import { broFlagsFn } from "./kv-api";
 
@@ -194,7 +194,6 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
     window.addEventListener("gtr:bro-open", open);
     return () => window.removeEventListener("gtr:bro-open", open);
   }, []);
-  useDeviceTilt(); // гироскоп: наклон телефона двигает атмосферный свет
 
   const go = (id: ScreenId) => {
     setNavOpen(false);
@@ -278,7 +277,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
   const NavGroup = ({ label, items }: { label: string; items: typeof NAV_VENUE }) => (
     <div style={{ marginBottom: 18 }}>
       <Eyebrow style={{ padding: "0 11px", marginBottom: 8 }}>{label}</Eyebrow>
-      <div style={{ display: "grid", gap: 2 }}>
+      <div style={{ display: "grid", gap: 0 }}>
         {items.map(([id, title, icon, badge]) => {
           const on = screen === id || (id === "base" && screen === "venueCard");
           const alarm = id === "constructor" && problemCount > 0;
@@ -323,10 +322,8 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
 
   return (
     <div className={`gtr-shell ${navOpen ? "nav-open" : ""}${rotating ? " gtr-rotating" : ""}`}>
-      {/* атмосфера вечеринки: дрейфующий рассеянный свет за всем контентом */}
-      <div className="gtr-atmo" aria-hidden>
-        <span /><span /><span /><span />
-      </div>
+      {/* живой фон с кодом: сцена раздела проявляется из матрицы глифов */}
+      <GtrCodeBackdrop src={sceneFor(screen, user.venueId, search.vid)} />
       {/* ---------- мобильная шапка ---------- */}
       <header className="gtr-topbar">
         <button
@@ -355,8 +352,6 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
         <GtrPlayerBar />
         <LangSwitch style={{ marginLeft: "auto", flex: "none" }} />
       </header>
-      {/* скрим всегда в DOM: видимость через CSS-фейд, чтобы меню не моргало */}
-      <div className="gtr-scrim" aria-hidden={!navOpen} onClick={() => setNavOpen(false)} />
 
       {/* ---------- сайдбар ---------- */}
       <aside className="gtr-sidebar">
@@ -382,10 +377,9 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
             display: "flex",
             alignItems: "center",
             gap: 9,
-            padding: "8px 9px",
+            padding: "8px 0 14px",
             borderRadius: 0,
-            border: "1px solid #E5231B",
-            background: "rgba(229,35,27,.14)",
+            borderBottom: "1px solid rgba(229,35,27,.45)",
             marginBottom: 18,
           }}
         >
@@ -398,7 +392,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              font: "700 11px/1 Oswald,sans-serif",
+              font: "600 11px/1 var(--cond)",
               background: "#E5231B",
             }}
           >
@@ -445,7 +439,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      font: "700 10px/1 Oswald,sans-serif",
+                      font: "600 10px/1 var(--cond)",
                       background: "rgba(46,204,113,.18)",
                       border: "1px solid rgba(46,204,113,.5)",
                       color: "#2ECC71",

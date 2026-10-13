@@ -345,7 +345,7 @@ function VenueConfirmPage() {
         ) : done ? (
           <div className="gtr-card" style={{ padding: "34px 26px", textAlign: "center" }}>
             <div style={{ fontSize: 44, marginBottom: 10 }}>✅</div>
-            <div style={{ font: "700 18px/1.3 Oswald,sans-serif", textTransform: "uppercase" }}>
+            <div style={{ font: "700 15.5px/1.3 var(--display)", textTransform: "uppercase" }}>
               {t.done}
             </div>
             <div
@@ -364,7 +364,7 @@ function VenueConfirmPage() {
               <Eyebrow style={{ marginBottom: 8 }}>{t.eyebrow}</Eyebrow>
               <div
                 className="gtr-oswald"
-                style={{ font: "700 24px/1.15 Oswald,sans-serif", textTransform: "uppercase" }}
+                style={{ font: "700 20.5px/1.15 var(--display)", textTransform: "uppercase" }}
               >
                 {info.name}
               </div>
@@ -582,7 +582,7 @@ function VenueConfirmPage() {
               className="gtr-btn gtr-btn-primary"
               disabled={busy}
               onClick={submit}
-              style={{ padding: "14px 18px", font: "700 13px/1 Oswald,sans-serif", letterSpacing: ".08em" }}
+              style={{ padding: "14px 18px", font: "600 13px/1 var(--cond)", letterSpacing: ".08em" }}
             >
               {busy ? "…" : t.submit}
             </button>

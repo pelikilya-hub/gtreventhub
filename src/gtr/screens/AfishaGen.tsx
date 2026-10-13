@@ -161,7 +161,7 @@ export function AfishaGenScreen() {
 
     try {
       await Promise.all([
-        document.fonts.load("700 120px Oswald"),
+        document.fonts.load("800 120px Unbounded"),
         document.fonts.load("600 34px 'JetBrains Mono'"),
         document.fonts.load("500 36px 'Golos Text'"),
       ]);
@@ -264,11 +264,11 @@ export function AfishaGenScreen() {
 
     // главный заголовок
     let fs = size === "story" ? 128 : 116;
-    ctx.font = `700 ${fs}px Oswald, sans-serif`;
+    ctx.font = `800 ${fs}px Unbounded, sans-serif`;
     let lines = wrap(ctx, big, w - M * 2);
     while (lines.length > 2 && fs > 72) {
       fs -= 10;
-      ctx.font = `700 ${fs}px Oswald, sans-serif`;
+      ctx.font = `800 ${fs}px Unbounded, sans-serif`;
       lines = wrap(ctx, big, w - M * 2);
     }
     ctx.fillStyle = white;
@@ -285,7 +285,7 @@ export function AfishaGenScreen() {
 
     // подзаголовок (название события при выбранном артисте)
     if (small) {
-      ctx.font = "600 44px Oswald, sans-serif";
+      ctx.font = "700 38px Unbounded, sans-serif";
       ctx.fillStyle = accent;
       const lw = ctx.measureText(small).width;
       ctx.fillText(small, variant === 2 ? (w - lw) / 2 : M, y);
@@ -492,8 +492,8 @@ export function AfishaGenScreen() {
               ) : null}
               {artist ? (
                 <button
-                  className="gtr-btn"
-                  style={{ marginTop: 6, padding: "4px 8px", fontSize: 12 }}
+                  className="gtr-btn gtr-btn-sm"
+                  style={{ marginTop: 6 }}
                   onClick={() => {
                     setArtistId("");
                     setBg("");

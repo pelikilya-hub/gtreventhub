@@ -125,7 +125,7 @@ function IntakeWizard({
         <Eyebrow>{t("ШАГ 1 · ПАРАМЕТРЫ СОБЫТИЯ")}</Eyebrow>
         <h1
           className="gtr-oswald"
-          style={{ font: "700 26px/1.1 Oswald,sans-serif", margin: "10px 0 6px" }}
+          style={{ font: "700 22px/1.1 var(--display)", margin: "10px 0 6px" }}
         >
           {t("Расскажите о событии")}
         </h1>
@@ -300,7 +300,7 @@ function PickVenue({ onPick }: { onPick: (vid: string) => void }) {
           <Eyebrow>{t("СОБЕРИТЕ СОБЫТИЕ НА ПХУКЕТЕ")}</Eyebrow>
           <h1
             className="gtr-oswald"
-            style={{ font: "700 30px/1.05 Oswald,sans-serif", margin: "10px 0 8px" }}
+            style={{ font: "700 25.5px/1.05 var(--display)", margin: "10px 0 8px" }}
           >
             {t("Выберите площадку")}
           </h1>
@@ -498,7 +498,7 @@ function DoneScreen({ vid, reqId, onAgain }: { vid: string; reqId: string; onAga
             </div>
             <h1
               className="gtr-oswald"
-              style={{ font: "700 24px/1.1 Oswald,sans-serif", margin: "0 0 10px" }}
+              style={{ font: "700 20.5px/1.1 var(--display)", margin: "0 0 10px" }}
             >
               {t("Запрос отправлен площадке")}
             </h1>

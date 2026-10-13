@@ -299,7 +299,7 @@ export const SectionHead = ({
       />
       <div
         className="gtr-oswald"
-        style={{ font: "600 14px/1 Oswald,sans-serif", letterSpacing: ".05em" }}
+        style={{ font: "600 14px/1 var(--cond)", letterSpacing: ".05em" }}
       >
         {title}
       </div>

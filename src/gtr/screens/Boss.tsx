@@ -613,7 +613,7 @@ export function BossCabinet() {
             <h1
               style={{
                 margin: "6px 0 2px",
-                font: "700 30px/1 'Oswald','Golos Text',sans-serif",
+                font: "700 25.5px/1 var(--display)",
                 letterSpacing: ".02em",
                 textTransform: "uppercase",
               }}
@@ -631,7 +631,7 @@ export function BossCabinet() {
                 <span style={{ font: mono(8, 600), color: "rgba(255,255,255,.4)", letterSpacing: ".12em" }}>
                   {l}
                 </span>
-                <span style={{ font: "700 17px/1.1 'Oswald',sans-serif", color: "#fff" }}>{v2}</span>
+                <span style={{ font: "700 14.5px/1.1 var(--display)", color: "#fff" }}>{v2}</span>
                 <span style={{ font: mono(8), color: "rgba(255,255,255,.35)" }}>{n}</span>
               </div>
             ))}
@@ -651,7 +651,7 @@ export function BossCabinet() {
           </div>
           {/* афиша сегодня */}
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ font: "700 22px/1 'Oswald',sans-serif", color: "#fff" }}>{digest.events.total}</span>
+            <span style={{ font: "700 18.5px/1 var(--display)", color: "#fff" }}>{digest.events.total}</span>
             <span style={{ font: "500 12px/1.4 'Golos Text',sans-serif", color: "rgba(255,255,255,.7)" }}>
               {t("событий в")} {digest.events.venues} {t("заведениях сегодня")}
               {digest.events.withArtist ? ` · ${digest.events.withArtist} ${t("с нашими артистами")}` : ""}
@@ -1482,7 +1482,7 @@ function SprintBlock({ go }: { go: (s: ScreenId) => void }) {
         </button>
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-        <span style={{ font: "700 26px/1 'Oswald',sans-serif", color: confirmed.length ? GREEN : "#fff" }}>
+        <span style={{ font: "700 22px/1 var(--display)", color: confirmed.length ? GREEN : "#fff" }}>
           {confirmed.length}
         </span>
         <span style={{ font: mono(11, 600), color: "rgba(255,255,255,.45)" }}>/ {SPRINT_GOAL} {t("площадок")}</span>

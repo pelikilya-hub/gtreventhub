@@ -181,7 +181,7 @@ function LoginPage() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        font: "700 9.5px/1 Oswald,sans-serif",
+                        font: "600 9.5px/1 var(--cond)",
                         color: "#fff",
                         background:
                           email === d.email

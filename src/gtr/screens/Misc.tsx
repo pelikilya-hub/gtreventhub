@@ -48,7 +48,7 @@ const NoAccess = ({ what }: { what: string }) => (
   <Card style={{ maxWidth: 520, margin: "60px auto", padding: 28, textAlign: "center" }}>
     <div
       className="gtr-oswald"
-      style={{ font: "600 18px/1.2 Oswald,sans-serif", marginBottom: 10 }}
+      style={{ font: "600 15.5px/1.2 var(--display)", marginBottom: 10 }}
     >
       {i18n.t("Доступ ограничен")}
     </div>
@@ -183,7 +183,7 @@ export function InquiriesScreen() {
               <div
                 className="gtr-oswald"
                 style={{
-                  font: "600 13px/1 Oswald,sans-serif",
+                  font: "600 13px/1 var(--cond)",
                   padding: "13px 20px",
                   borderBottom: "1px solid rgba(255,255,255,.05)",
                   color: "#2ECC71",
@@ -521,7 +521,7 @@ function RequestsKanban({
               <span
                 className="gtr-oswald"
                 style={{
-                  font: "600 12px/1 Oswald,sans-serif",
+                  font: "600 12px/1 var(--cond)",
                   letterSpacing: ".08em",
                   textTransform: "uppercase",
                 }}
@@ -914,7 +914,7 @@ export function VenueScreen() {
           >
             <h2
               className="gtr-oswald"
-              style={{ font: "700 26px/1.05 Oswald,sans-serif", margin: 0 }}
+              style={{ font: "700 22px/1.05 var(--display)", margin: 0 }}
             >
               {v.name}
             </h2>
@@ -1248,7 +1248,7 @@ export function FinanceScreen() {
         <div
           className="gtr-oswald"
           style={{
-            font: "600 14px/1 Oswald,sans-serif",
+            font: "600 14px/1 var(--cond)",
             padding: "16px 20px",
             borderBottom: "1px solid rgba(255,255,255,.05)",
           }}
@@ -1955,7 +1955,7 @@ export function AdminScreen() {
           <div
             className="gtr-oswald"
             style={{
-              font: "600 14px/1 Oswald,sans-serif",
+              font: "600 14px/1 var(--cond)",
               padding: "15px 20px",
               borderBottom: "1px solid rgba(255,255,255,.05)",
             }}
@@ -2017,7 +2017,7 @@ export function AdminScreen() {
           <div
             className="gtr-oswald"
             style={{
-              font: "600 14px/1 Oswald,sans-serif",
+              font: "600 14px/1 var(--cond)",
               padding: "15px 20px",
               borderBottom: "1px solid rgba(255,255,255,.05)",
             }}

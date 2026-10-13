@@ -102,14 +102,14 @@ function DishModal({
         ) : null}
         <div style={{ padding: "16px 18px", display: "grid", gap: 10 }}>
           <div style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
-            <span style={{ flex: 1, font: "700 15px/1.25 'Golos Text',sans-serif" }}>{item.name}</span>
+            <span style={{ flex: 1, font: "700 15px/1.25 'Golos Text',sans-serif" }}>{t(item.name)}</span>
             <span className="gtr-mono" style={{ font: "700 13px/1 'JetBrains Mono',monospace", color: GREEN }}>
               {price ? thb(price) : t("по рынку")}
-              {item.unit ? <span style={{ color: "var(--gtr-t3)" }}> / {item.unit}</span> : null}
+              {item.unit ? <span style={{ color: "var(--gtr-t3)" }}> / {t(item.unit)}</span> : null}
             </span>
           </div>
           {item.desc ? (
-            <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{item.desc}</div>
+            <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{t(item.desc)}</div>
           ) : null}
           {item.opts?.length ? (
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -124,7 +124,7 @@ function DishModal({
                       : undefined
                   }
                 >
-                  {o.l} · {o.p.toLocaleString("ru-RU")}
+                  {t(o.l)} · {o.p.toLocaleString("ru-RU")}
                 </button>
               ))}
             </div>
@@ -281,14 +281,14 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
       <Card className="gtr-fade" style={{ padding: "22px 24px", display: "grid", gap: 10, justifyItems: "start" }}>
         <Chip color={GREEN}>{t("ЗАЯВКА УЛЕТЕЛА")}</Chip>
         <div style={{ font: "700 15px/1.5 'Golos Text',sans-serif" }}>
-          {zone?.name} · {table?.name} · {dateIso} {slot}
+          {t(zone?.name ?? "")} · {t(table?.name ?? "")} · {dateIso} {slot}
         </div>
         <div style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
           {t("Менеджер площадки и команда GTR получили бронь в Telegram — подтверждение придёт одной кнопкой. Статус смотрите в «Мои брони».")}
         </div>
         <span className="gtr-mono" style={{ font: "500 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
           {sentId}
-          {cartTotal ? ` · предзаказ ${thb(cartTotal)}` : ""}
+          {cartTotal ? ` · ${t("предзаказ")} ${thb(cartTotal)}` : ""}
         </span>
       </Card>
     );
@@ -298,7 +298,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
       {/* ШАГ 1 · зона */}
       <div>
         <Eyebrow style={{ marginBottom: 8 }}>
-          {t("ШАГ 1 · ЗОНА")} {zone ? `· ${zone.name.toUpperCase()}` : ""}
+          {t("ШАГ 1 · ЗОНА")} {zone ? `· ${t(zone.name).toUpperCase()}` : ""}
         </Eyebrow>
         <div
           className="gtr-cdm-zones"
@@ -353,17 +353,17 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                         letterSpacing: ".1em",
                       }}
                     >
-                      ВЫБРАНО
+                      {t("ВЫБРАНО")}
                     </span>
                   ) : null}
                 </div>
                 <div style={{ padding: "9px 11px" }}>
-                  <div style={{ font: "700 12.5px/1.2 'Golos Text',sans-serif" }}>{z.name}</div>
+                  <div style={{ font: "700 12.5px/1.2 'Golos Text',sans-serif" }}>{t(z.name)}</div>
                   <div
                     className="gtr-mono"
                     style={{ marginTop: 4, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
-                    {z.hours}
+                    {t(z.hours ?? "")}
                   </div>
                 </div>
               </div>
@@ -375,7 +375,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
             className="gtr-fade"
             style={{ marginTop: 8, font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}
           >
-            {zone.desc} <span style={{ color: "var(--gtr-t3)" }}>{zone.best}.</span>
+            {t(zone.desc ?? "")} <span style={{ color: "var(--gtr-t3)" }}>{t(zone.best ?? "")}.</span>
           </div>
         ) : null}
       </div>
@@ -384,7 +384,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
       {zone ? (
         <div className="gtr-fade">
           <Eyebrow style={{ marginBottom: 8 }}>
-            {t("ШАГ 2 · СТОЛ")} {table ? `· ${table.name.toUpperCase()}` : `· ${zoneTables.length}`}
+            {t("ШАГ 2 · СТОЛ")} {table ? `· ${t(table.name).toUpperCase()}` : `· ${zoneTables.length}`}
           </Eyebrow>
           <div style={{ display: "grid", gap: 8 }}>
             {zoneTables.map((tb) => {
@@ -415,7 +415,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                   />
                   <div style={{ padding: "9px 11px 9px 0", minWidth: 0 }}>
                     <div style={{ display: "flex", gap: 8, alignItems: "baseline", flexWrap: "wrap" }}>
-                      <span style={{ font: "700 12.5px/1.2 'Golos Text',sans-serif" }}>{tb.name}</span>
+                      <span style={{ font: "700 12.5px/1.2 'Golos Text',sans-serif" }}>{t(tb.name)}</span>
                       <span className="gtr-mono" style={{ font: "500 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}>
                         {t("до")} {tb.pax}
                         {tb.extraPax ? `+${tb.extraPax}` : ""} {t("чел.")}
@@ -435,7 +435,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                         связный текст. Показываем то, что есть. */}
                     {on && (tb.includes?.length || tb.desc) ? (
                       <div className="gtr-fade" style={{ marginTop: 6, font: "500 12px/1.55 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-                        {tb.includes?.length ? tb.includes.join(" · ") : tb.desc}
+                        {tb.includes?.length ? tb.includes.map((x) => t(x)).join(" · ") : t(tb.desc ?? "")}
                       </div>
                     ) : null}
                   </div>
@@ -528,7 +528,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                   style={{ display: "flex", gap: 8, alignItems: "center", border: "1px solid rgba(46,204,113,.25)", padding: "6px 10px" }}
                 >
                   <span style={{ flex: 1, font: "600 13px/1.45 'Golos Text',sans-serif" }}>
-                    {l.name}
+                    {t(l.name)}
                     {l.opt ? <span style={{ color: "var(--gtr-t3)" }}> · {l.opt}</span> : null}
                   </span>
                   <span className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
@@ -561,7 +561,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                     onClick={() => setSecId(s.id)}
                     style={s.id === secId ? { borderColor: RED, color: "#fff", background: "rgba(229,35,27,.18)" } : undefined}
                   >
-                    {s.name}
+                    {t(s.name)}
                   </button>
                 ))}
               </div>
@@ -578,7 +578,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                           margin: "4px 0 6px",
                         }}
                       >
-                        {g.name}
+                        {t(g.name)}
                         {"ru" in g && g.ru !== g.name ? <span style={{ color: "var(--gtr-t3)" }}> · {g.ru}</span> : null}
                       </div>
                       {(g.items as MenuItem[]).map((it) => {
@@ -607,7 +607,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
                               <span style={{ width: 44, height: 34, flexShrink: 0, background: "rgba(255,255,255,.04)" }} />
                             )}
                             <span style={{ flex: 1, minWidth: 0, font: "600 13px/1.45 'Golos Text',sans-serif" }}>
-                              {it.name}
+                              {t(it.name)}
                               {inCart ? <Chip color={GREEN}> ×{inCart}</Chip> : null}
                             </span>
                             <span className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
@@ -660,7 +660,7 @@ export function CdmReserve({ vid, compact }: { vid: string; compact?: boolean })
           >
             <div style={{ flex: 1, minWidth: 200 }}>
               <div style={{ font: "700 12.5px/1.45 'Golos Text',sans-serif" }}>
-                {zone?.name} · {table.name}
+                {t(zone?.name ?? "")} · {t(table.name)}
               </div>
               <div className="gtr-mono" style={{ marginTop: 4, font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}>
                 {dateIso || "—"} · {slot || "—"} · {guests} {t("чел.")}

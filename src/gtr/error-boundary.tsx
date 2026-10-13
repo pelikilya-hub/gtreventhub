@@ -10,6 +10,8 @@
 // перезагружая приложение.
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
+import i18n from "./i18n";
+
 type Props = { children: ReactNode; where: string; detailed?: boolean };
 type State = { err: Error | null; stack?: string };
 
@@ -43,11 +45,12 @@ export class ScreenErrorBoundary extends Component<Props, State> {
             marginBottom: 12,
           }}
         >
-          РАЗДЕЛ УПАЛ · {this.props.where.toUpperCase()}
+          {i18n.t("РАЗДЕЛ УПАЛ ·")} {this.props.where.toUpperCase()}
         </div>
         <div style={{ font: "500 14px/1.6 'Golos Text',sans-serif", marginBottom: 16 }}>
-          Экран не отрисовался. Остальное приложение работает — вернись назад или
-          перезапусти раздел.
+          {i18n.t(
+            "Экран не отрисовался. Остальное приложение работает — вернись назад или перезапусти раздел.",
+          )}
         </div>
         {this.props.detailed ? (
           <pre
@@ -66,7 +69,7 @@ export class ScreenErrorBoundary extends Component<Props, State> {
           </pre>
         ) : null}
         <button className="gtr-btn gtr-btn-red" onClick={() => this.setState({ err: null })}>
-          Перезапустить раздел
+          {i18n.t("Перезапустить раздел")}
         </button>
       </div>
     );

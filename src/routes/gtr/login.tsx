@@ -333,16 +333,6 @@ function LoginPage() {
           </button>
         </div>
 
-        <div
-          style={{
-            marginTop: 14,
-            textAlign: "center",
-            font: "500 10.5px/1.5 'JetBrains Mono',monospace",
-            color: "rgba(255,255,255,.35)",
-          }}
-        >
-          {t("Сессия — httpOnly cookie, подпись HMAC-SHA256 · роли и права — на сервере")}
-        </div>
       </div>
     </div>
   );

@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import {
   EQUIPMENT,
   equipOf,
-  equipPrice,
   fmtThb,
   KINDS,
+  unitLabel,
   RATE_COLOR,
   RATE_LABEL,
   VENDOR_CAT_LABEL,
@@ -27,6 +27,13 @@ const CATS: [Cat, string][] = [
   ["gear", "Оборудование"],
   ["interactive", "Интерактив"],
 ];
+
+// Подписи цены из каталога («฿4 000–31 000 / день», «по запросу»):
+// сумма остаётся как есть, единица и «по запросу» — через словарь
+const priceText = (s: string, t: (k: string) => string) => {
+  const i = s.lastIndexOf(" / ");
+  return i < 0 ? t(s) : `${s.slice(0, i)} / ${t(s.slice(i + 3))}`;
+};
 
 export function VendorsScreen() {
   const { t } = useTranslation();
@@ -61,18 +68,22 @@ export function VendorsScreen() {
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 6 }}>
         <h1 className="gtr-oswald gtr-h1">
           {cat === "gear"
-            ? "Каталог оборудования"
+            ? t("Каталог оборудования")
             : cat === "interactive"
-              ? "Каталог интерактива"
-              : "Каталог подрядчиков"}
+              ? t("Каталог интерактива")
+              : t("Каталог подрядчиков")}
         </h1>
         <span
           className="gtr-mono"
           style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
         >
           {isEquip
-            ? `${equipRows.length} позиций · цену уточняем запросом`
-            : `${rows.length} подрядчиков · ${totalPackages} позиций с ценой · ${EQUIPMENT.length} в каталоге оборудования`}
+            ? t("{{n}} позиций · цену уточняем запросом", { n: equipRows.length })
+            : t("{{n}} подрядчиков · {{p}} позиций с ценой · {{e}} в каталоге оборудования", {
+                n: rows.length,
+                p: totalPackages,
+                e: EQUIPMENT.length,
+              })}
         </span>
       </div>
 
@@ -91,7 +102,7 @@ export function VendorsScreen() {
               font: `${cat === k ? 600 : 500} 11px/1 'Golos Text',sans-serif`,
             }}
           >
-            {label}
+            {t(label)}
           </button>
         ))}
       </div>
@@ -140,7 +151,7 @@ export function VendorsScreen() {
                     {v.name}
                   </span>
                   <Chip color={K[1]} style={{ marginTop: 4 }}>
-                    {VENDOR_CAT_LABEL[v.category].toUpperCase()}
+                    {t(VENDOR_CAT_LABEL[v.category]).toUpperCase()}
                   </Chip>
                 </span>
               </div>
@@ -151,7 +162,7 @@ export function VendorsScreen() {
                   minHeight: 33,
                 }}
               >
-                {v.meta}
+                {t(v.meta)}
               </div>
               <div
                 style={{
@@ -167,7 +178,7 @@ export function VendorsScreen() {
                   className="gtr-mono"
                   style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                 >
-                  {v.packages.length ? `${v.packages.length} позиций` : "прайс по запросу"}
+                  {v.packages.length ? t("{{n}} позиций", { n: v.packages.length }) : t("прайс по запросу")}
                 </span>
                 <span
                   className="gtr-mono"
@@ -176,7 +187,7 @@ export function VendorsScreen() {
                     color: v.priceFrom ? "#fff" : "var(--gtr-t3)",
                   }}
                 >
-                  {v.priceFrom ? `от ${fmtThb(v.priceFrom)}` : v.price}
+                  {v.priceFrom ? t("от {{price}}", { price: fmtThb(v.priceFrom) }) : priceText(v.price, t)}
                 </span>
               </div>
             </Card>
@@ -188,7 +199,10 @@ export function VendorsScreen() {
 }
 
 function EquipCard({ e, kind }: { e: EquipItem; kind: "gear" | "interactive" }) {
+  const { t } = useTranslation();
   const K = KINDS[kind];
+  // «฿4 000 / день» либо «по запросу / день» — как equipPrice, но с переводом
+  const price = `${e.price ? fmtThb(e.price) : t("по запросу")} / ${t(unitLabel(e.unit))}`;
   return (
     <Card style={{ padding: "16px 18px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
@@ -208,10 +222,10 @@ function EquipCard({ e, kind }: { e: EquipItem; kind: "gear" | "interactive" }) 
         </span>
         <span style={{ flex: 1, minWidth: 0 }}>
           <span style={{ display: "block", font: "600 13.5px/1.45 'Golos Text',sans-serif" }}>
-            {e.name}
+            {t(e.name)}
           </span>
           <Chip color={K[1]} style={{ marginTop: 4 }}>
-            {e.group.toUpperCase()}
+            {t(e.group).toUpperCase()}
           </Chip>
         </span>
       </div>
@@ -222,7 +236,7 @@ function EquipCard({ e, kind }: { e: EquipItem; kind: "gear" | "interactive" }) 
           minHeight: 33,
         }}
       >
-        {e.spec}
+        {t(e.spec)}
       </div>
       <div
         style={{
@@ -239,7 +253,7 @@ function EquipCard({ e, kind }: { e: EquipItem; kind: "gear" | "interactive" }) 
           className="gtr-mono"
           style={{ font: "600 11px/1.45 'JetBrains Mono',monospace", color: RATE_COLOR[e.kind] }}
         >
-          {RATE_LABEL[e.kind].toUpperCase()}
+          {t(RATE_LABEL[e.kind]).toUpperCase()}
         </span>
         <span
           className="gtr-mono"
@@ -249,14 +263,14 @@ function EquipCard({ e, kind }: { e: EquipItem; kind: "gear" | "interactive" }) 
             textAlign: "right",
           }}
         >
-          {equipPrice(e)}
+          {price}
         </span>
       </div>
       <div
         className="gtr-mono"
         style={{ marginTop: 7, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
       >
-        {e.vendor ? `${e.vendor} · ${e.contact}` : "подрядчик не назначен"}
+        {e.vendor ? `${e.vendor}${e.contact ? ` · ${t(e.contact)}` : ""}` : t("подрядчик не назначен")}
       </div>
     </Card>
   );
@@ -278,7 +292,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
       >
         <div className="gtr-beam" />
         <div style={{ position: "relative" }}>
-          <Eyebrow>{VENDOR_CAT_LABEL[v.category].toUpperCase()}</Eyebrow>
+          <Eyebrow>{t(VENDOR_CAT_LABEL[v.category]).toUpperCase()}</Eyebrow>
           <div
             style={{
               display: "flex",
@@ -317,10 +331,10 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
               color: "var(--gtr-t2)",
             }}
           >
-            {v.meta}
+            {t(v.meta)}
           </div>
           <div style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
-            {v.contact ? <Chip color="rgba(255,255,255,.55)">{v.contact}</Chip> : null}
+            {v.contact ? <Chip color="rgba(255,255,255,.55)">{t(v.contact)}</Chip> : null}
             {site ? (
               <a
                 className="gtr-btn"
@@ -346,7 +360,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
               borderBottom: "1px solid rgba(255,255,255,.05)",
             }}
           >
-            {t("Прайс-лист ·")} {v.packages.length} {t("позиций")}
+            {t("Прайс-лист")} · {t("{{n}} позиций", { n: v.packages.length })}
           </div>
           <div
             style={{
@@ -368,7 +382,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
                     alignSelf: "center",
                   }}
                 >
-                  {p.system.toUpperCase()}
+                  {t(p.system).toUpperCase()}
                 </span>
                 <span
                   style={{
@@ -378,7 +392,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
                     alignSelf: "center",
                   }}
                 >
-                  {p.package}
+                  {t(p.package)}
                 </span>
                 <span
                   className="gtr-mono"
@@ -392,7 +406,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
                   }}
                 >
                   {fmtThb(p.price)}{" "}
-                  <span style={{ color: "var(--gtr-t3)", fontWeight: 500 }}>/ {p.unit}</span>
+                  <span style={{ color: "var(--gtr-t3)", fontWeight: 500 }}>/ {t(unitLabel(p.unit))}</span>
                 </span>
               </div>
             ))}
@@ -402,7 +416,10 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
         <Card style={{ padding: 20 }}>
           <Eyebrow style={{ marginBottom: 8 }}>{t("ПРАЙС")}</Eyebrow>
           <div style={{ font: "500 12px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-            {t("Стоимость — по запросу (")}{v.price}{t("). Свяжитесь напрямую:")} {v.contact || "см. источник"}.
+            {t("Стоимость — по запросу ({{price}}). Свяжитесь напрямую: {{contact}}.", {
+              price: priceText(v.price, t),
+              contact: v.contact ? t(v.contact) : t("см. источник"),
+            })}
           </div>
         </Card>
       )}
@@ -415,7 +432,9 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
           color: "var(--gtr-t3)",
         }}
       >
-        {t("Данные из вендор-пакета GTR (официальные источники подрядчиков). Подрядчик доступен в конструкторе события — категория «")}{VENDOR_CAT_LABEL[v.category]}».
+        {t("Данные из вендор-пакета GTR (официальные источники подрядчиков). Подрядчик доступен в конструкторе события — категория «{{cat}}».", {
+          cat: t(VENDOR_CAT_LABEL[v.category]),
+        })}
       </div>
     </div>
   );

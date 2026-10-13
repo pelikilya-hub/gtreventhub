@@ -149,6 +149,16 @@ const { _note: _regionsNote, ...regionsClean } = regionsRaw as unknown as Record
 >;
 export const REGIONS = regionsClean as Record<string, RegionInfo>;
 /** Имя региона на языке интерфейса; ru — язык по умолчанию продукта. */
+/** Состояние готовности к бронированию: в данных оно по-английски, на экран
+ *  идёт русский ключ словаря (дальше его переводит t()). */
+const READINESS_RU: Record<string, string> = {
+  Bookable: "Бронируемая",
+  "Request to book": "Бронь по запросу",
+  "Research / onboarding": "Подключается",
+};
+export const readinessLabel = (state: string | undefined): string =>
+  state ? (READINESS_RU[state] ?? state) : "";
+
 export const regionName = (code: string, lang: string): string => {
   const r = REGIONS[code];
   if (!r) return code;
@@ -2810,8 +2820,11 @@ const capFirst = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
  *  которых в дереве нет и быть не должно. */
 export const genreLabel = (raw: string, lang = "ru") => {
   const key = raw.trim().toLowerCase();
+  // Точная подпись — первой: дерево жанров сводит общие слова к ближайшему
+  // узлу, и «Хаус» в английской версии читался как Deep House, «Техно» —
+  // как Melodic Techno. Для вывода нужна та подпись, что стоит у артиста.
+  if (lang !== "ru" && GENRE_EN[key]) return GENRE_EN[key];
   const id = resolveGenre(raw);
   if (id) return genreName(id, lang);
-  if (lang !== "ru" && GENRE_EN[key]) return GENRE_EN[key];
   return capFirst(raw.trim());
 };

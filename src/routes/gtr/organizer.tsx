@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 
 // Публичная витрина организатора — без авторизации (гость)
 const OrganizerScreen = lazy(() =>
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/gtr/organizer")({
 });
 
 function OrganizerPage() {
+  const { t } = useTranslation();
   return (
     <Suspense
       fallback={
@@ -18,7 +20,7 @@ function OrganizerPage() {
           className="gtr-mono"
           style={{ padding: 60, textAlign: "center", color: "rgba(255,255,255,.4)" }}
         >
-          Загрузка витрины…
+          {t("Загрузка витрины…")}
         </div>
       }
     >

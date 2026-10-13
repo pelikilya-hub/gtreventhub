@@ -267,7 +267,7 @@ export function TrackingScreen() {
             <div>
               <div style={{ color: "var(--gtr-t3)", marginBottom: 2 }}>{t("Расстояние")}</div>
               <div style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "#7B4DFF" }}>
-                {stats.distanceTraveled}м
+                {stats.distanceTraveled} {t("м")}
               </div>
             </div>
             <div>
@@ -279,7 +279,7 @@ export function TrackingScreen() {
             <div>
               <div style={{ color: "var(--gtr-t3)", marginBottom: 2 }}>{t("Час/место")}</div>
               <div style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "#7B4DFF" }}>
-                {stats.avgTimePerVenue}м
+                {stats.avgTimePerVenue} {t("мин")}
               </div>
             </div>
           </div>
@@ -290,7 +290,7 @@ export function TrackingScreen() {
           )}
           {currentLocation && (
             <div style={{ marginTop: 10, color: "#7B4DFF", fontSize: 11, fontFamily: "monospace" }}>
-              Точность: ±{Math.round(currentLocation.accuracy)}м
+              {t("Точность")}: ±{Math.round(currentLocation.accuracy)} {t("м")}
             </div>
           )}
         </Card>
@@ -355,7 +355,7 @@ export function TrackingScreen() {
                         {V(vid).name}
                       </div>
                       {arrivalTime && (
-                        <div style={{ font: "500 11px/1 monospace", opacity: 0.7 }}>в {arrivalTime}</div>
+                        <div style={{ font: "500 11px/1 monospace", opacity: 0.7 }}>{t("в {{time}}", { time: arrivalTime })}</div>
                       )}
                     </div>
                   </div>

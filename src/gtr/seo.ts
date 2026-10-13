@@ -11,17 +11,20 @@
 // внутренности продукта.
 import { APP_URL } from "./app-url";
 
-export type SeoLang = "ru" | "en";
+export type SeoLang = "ru" | "en" | "th";
 
 /** Языки витрины и их адреса. Русский живёт в корне — это домашний язык
  *  продукта и главная страница домена. */
-export const SEO_PATH: Record<SeoLang, string> = { ru: "/", en: "/en" };
+export const SEO_PATH: Record<SeoLang, string> = { ru: "/", en: "/en", th: "/th" };
+
+/** Все языки витрины в порядке, в котором их объявляем поисковику. */
+export const SEO_LANGS: SeoLang[] = ["ru", "en", "th"];
 
 /** Публичные страницы: витрина и открытая афиша. Всё прочее — кабинеты. */
 export type SeoPage = "home" | "afisha";
 export const PAGE_PATH: Record<SeoPage, Record<SeoLang, string>> = {
   home: SEO_PATH,
-  afisha: { ru: "/afisha", en: "/en/afisha" },
+  afisha: { ru: "/afisha", en: "/en/afisha", th: "/th/afisha" },
 };
 
 export const canonicalOf = (lang: SeoLang, page: SeoPage = "home") =>
@@ -58,6 +61,15 @@ export const SEO_COPY: Record<SeoLang, Copy> = {
       "Tonight's lineup, table booking, an evening route on the map and parties matched to your music. Phuket, Samui, Phangan, Pattaya, Bangkok.",
     locale: "en_US",
   },
+  th: {
+    title: "GTR Event — ไนท์ไลฟ์ไทย: โปรแกรมปาร์ตี้ จองโต๊ะ ศิลปิน",
+    description:
+      "คืนนี้ไปไหนดี: โปรแกรมสดจากคลับและบีชคลับในภูเก็ต สมุย พะงัน พัทยา และกรุงเทพฯ จองโต๊ะได้ในไม่กี่แตะ และ AI ช่วยเลือกปาร์ตี้ตามเพลงที่คุณชอบ",
+    ogTitle: "GTR Event — ไนท์ไลฟ์ทั่วไทยในแอปเดียว",
+    ogDescription:
+      "โปรแกรมทุกคืน จองโต๊ะ เส้นทางเที่ยวบนแผนที่ และปาร์ตี้ที่ตรงกับเพลงที่คุณชอบ ภูเก็ต สมุย พะงัน พัทยา กรุงเทพฯ",
+    locale: "th_TH",
+  },
 };
 
 const AFISHA_COPY: Record<SeoLang, Copy> = {
@@ -79,12 +91,21 @@ const AFISHA_COPY: Record<SeoLang, Copy> = {
       "Clubs and beach clubs two weeks ahead: times, entry and posters. Phuket, Samui, Phangan, Pattaya, Bangkok.",
     locale: "en_US",
   },
+  th: {
+    title: "โปรแกรมปาร์ตี้คืนนี้: คลับภูเก็ต สมุย กรุงเทพฯ — GTR Event",
+    description:
+      "ใครเล่นคืนนี้และอีกสองสัปดาห์ข้างหน้า: โปรแกรมคลับ บีชคลับ และบาร์ในภูเก็ต สมุย พะงัน พัทยา และกรุงเทพฯ เวลา ค่าเข้า และโปสเตอร์จากประกาศของร้านเอง",
+    ogTitle: "โปรแกรมไนท์ไลฟ์ไทย — ใครเล่นคืนนี้",
+    ogDescription:
+      "โปรแกรมคลับและบีชคลับล่วงหน้าสองสัปดาห์: เวลา ค่าเข้า และโปสเตอร์ ภูเก็ต สมุย พะงัน พัทยา กรุงเทพฯ",
+    locale: "th_TH",
+  },
 };
 
 /** Мета-теги публичной страницы: то, что попадает в выдачу и в превью ссылки. */
 export function seoMeta(lang: SeoLang, page: SeoPage = "home") {
   const c = (page === "afisha" ? AFISHA_COPY : SEO_COPY)[lang];
-  const other: SeoLang = lang === "ru" ? "en" : "ru";
+  const others = SEO_LANGS.filter((l) => l !== lang);
   return [
     { title: c.title },
     { name: "description", content: c.description },
@@ -95,7 +116,7 @@ export function seoMeta(lang: SeoLang, page: SeoPage = "home") {
     { property: "og:site_name", content: "GTR Event" },
     { property: "og:url", content: canonicalOf(lang, page) },
     { property: "og:locale", content: c.locale },
-    { property: "og:locale:alternate", content: SEO_COPY[other].locale },
+    ...others.map((l) => ({ property: "og:locale:alternate", content: SEO_COPY[l].locale })),
     { property: "og:title", content: c.ogTitle },
     { property: "og:description", content: c.ogDescription },
     { property: "og:image", content: OG_IMAGE },
@@ -116,6 +137,7 @@ export function seoLinks(lang: SeoLang, page: SeoPage = "home") {
     { rel: "canonical", href: canonicalOf(lang, page) },
     { rel: "alternate", hrefLang: "ru", href: canonicalOf("ru", page) },
     { rel: "alternate", hrefLang: "en", href: canonicalOf("en", page) },
+    { rel: "alternate", hrefLang: "th", href: canonicalOf("th", page) },
     { rel: "alternate", hrefLang: "x-default", href: canonicalOf("ru", page) },
   ];
 }

@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 
 import {
   calPaletteOf,
+  genreLabel,
   loadArtists,
   MONTHS,
   roomsOf,
@@ -18,12 +19,17 @@ import { useEffect } from "react";
 import { PH, V, draftTitle } from "../data/app-data";
 import { afishaVenuesFn, listAfishaFn, venueLoadFn, type VenueLoad } from "../kv-api";
 import { bkkToday } from "../afisha-parse";
+import { fillT, genreLang, useTrData } from "./Constructor";
 
 const WD = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
 const WD_FULL = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
 
 export function CalendarScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // Залы, форматы палитры и программа площадки — данные по-русски,
+  // переводим при выводе
+  const tr = useTrData();
+  const gl = genreLang(i18n.language || "ru");
   const { user, shared, setEvents } = useGtr();
   // Режим: «наши события» (по умолчанию для штаба) или календарь площадки
   const [scope, setScope] = useState<string>(user.venueId || "ours");
@@ -317,7 +323,7 @@ export function CalendarScreen() {
                           setRoom("all");
                           setPickOpen(false);
                         }}
-                        title={hasFeed ? "Афиши подключены" : undefined}
+                        title={hasFeed ? t("Афиши подключены") : undefined}
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -403,7 +409,7 @@ export function CalendarScreen() {
                 }}
               >
                 <span style={{ width: 7, height: 7, borderRadius: 0, background: color }} />
-                {label}
+                {tr(label)}
               </button>
             ),
           )}
@@ -531,7 +537,10 @@ export function CalendarScreen() {
                         {dayLoad(n) ? (
                           <span
                             className="gtr-mono"
-                            title={`${dayLoad(n)!.total} броней · ${dayLoad(n)!.guests} гостей`}
+                            title={fillT(t, "{{n}} броней · {{g}} гостей", {
+                              n: dayLoad(n)!.total,
+                              g: dayLoad(n)!.guests,
+                            })}
                             style={{
                               font: "600 10px/1 'JetBrains Mono',monospace",
                               color: "#F5A623",
@@ -591,7 +600,7 @@ export function CalendarScreen() {
                               whiteSpace: "nowrap",
                             }}
                           >
-                            {c.title}
+                            {tr(c.title)}
                           </span>
                         </div>
                       ))}
@@ -686,7 +695,7 @@ export function CalendarScreen() {
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                     <span style={{ flex: 1, font: "600 12px/1.45 'Golos Text',sans-serif" }}>
-                      {e.title}
+                      {tr(e.title)}
                     </span>
                     <Chip color="#E5231B">{t("НАШЕ")}</Chip>
                   </div>
@@ -698,7 +707,7 @@ export function CalendarScreen() {
                       color: "var(--gtr-t2)",
                     }}
                   >
-                    {V(e.venueId)?.name ?? "Площадка не выбрана"}
+                    {V(e.venueId)?.name ?? t("Площадка не выбрана")}
                   </div>
                   <button
                     className="gtr-btn"
@@ -750,7 +759,7 @@ export function CalendarScreen() {
                         }}
                       />
                       <span style={{ flex: 1, font: "600 12px/1.45 'Golos Text',sans-serif" }}>
-                        {e.title}
+                        {tr(e.title)}
                       </span>
                       <Chip
                         color={
@@ -776,7 +785,7 @@ export function CalendarScreen() {
                         color: "var(--gtr-t2)",
                       }}
                     >
-                      {e.start}–{e.end} · {roomName(e.room)}
+                      {e.start}–{e.end} · {tr(roomName(e.room))}
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>
                       <button
@@ -888,7 +897,7 @@ export function CalendarScreen() {
                       }}
                     />
                     <span style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{ display: "block", fontWeight: 600 }}>{title}</span>
+                      <span style={{ display: "block", fontWeight: 600 }}>{tr(title)}</span>
                       <span
                         style={{
                           display: "block",
@@ -897,7 +906,7 @@ export function CalendarScreen() {
                           color: "rgba(255,255,255,.4)",
                         }}
                       >
-                        {start}–{end} · {meta}
+                        {start}–{end} · {tr(meta)}
                       </span>
                     </span>
                   <span style={{ color: "rgba(255,255,255,.4)", fontWeight: 700 }}>+</span>
@@ -929,7 +938,8 @@ export function CalendarScreen() {
                         color: "rgba(255,255,255,.4)",
                       }}
                     >
-                      {(a.styles || []).slice(0, 2).join(" · ")} {t("· из лайнапа")}
+                      {(a.styles || []).slice(0, 2).map((st) => genreLabel(st, gl)).join(" · ")}{" "}
+                      {t("· из лайнапа")}
                     </span>
                   </span>
                   <span

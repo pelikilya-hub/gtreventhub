@@ -85,7 +85,12 @@ function RootShell({ children }: { children: ReactNode }) {
   // витрина под lang="ru" читалась бы русским синтезатором и конкурировала
   // бы в выдаче с русской версией как дубль.
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const lang = path === "/en" || path.startsWith("/en/") ? "en" : "ru";
+  const lang =
+    path === "/en" || path.startsWith("/en/")
+      ? "en"
+      : path === "/th" || path.startsWith("/th/")
+        ? "th"
+        : "ru";
   return (
     <html lang={lang} style={{ background: "#0A0B0D" }}>
       <head>

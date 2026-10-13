@@ -32,11 +32,18 @@ import {
   SPACES,
   SPACES_TECH,
   V,
+  readinessLabel,
 } from "../data/app-data";
 import { Empty } from "../empty";
 import { useVenueContacts } from "../work-contacts";
 import { useGtr } from "../store";
 import { Card, Chip, Dot, Eyebrow, tint } from "../ui";
+
+/** Подпись из данных вида «Illuzion Phuket · официальная галерея»: каждая
+ *  часть переводится отдельно — имена и цифры остаются как есть (у них нет
+ *  ключа в словаре), служебные слова уходят в перевод. */
+const tParts = (t: (k: string) => string, s?: string) =>
+  s ? s.split(" · ").map((part) => t(part)).join(" · ") : "";
 
 const Title = ({ children }: { children: string }) => (
   <h1 className="gtr-oswald gtr-h1" style={{ marginBottom: 16 }}>
@@ -55,7 +62,7 @@ const NoAccess = ({ what }: { what: string }) => {
       {t("Доступ ограничен")}
     </div>
     <div style={{ font: "500 12px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-      {t("Для вашей роли раздел «")}{what}{t("» закрыт матрицей прав. Запросите доступ у GTR-админа — раздел «Доступы и роли».")}
+      {t("Для вашей роли раздел «")}{what}{t("» закрыт для вашей роли. Запросите доступ у GTR-админа — раздел «Доступы и роли».")}
     </div>
   </Card>
   );
@@ -162,7 +169,7 @@ export function InquiriesScreen() {
                 color: view === v ? "#fff" : "rgba(255,255,255,.55)",
               }}
             >
-              {label}
+              {t(label)}
             </button>
           ))}
         </span>
@@ -275,7 +282,7 @@ export function InquiriesScreen() {
                   >
                     {r.lines.slice(0, 5).map((l, j) => (
                       <Chip key={j} color="rgba(255,255,255,.5)">
-                        {l.label}
+                        {t(l.label)}
                       </Chip>
                     ))}
                     <AssignControl r={r} />
@@ -348,11 +355,11 @@ export function InquiriesScreen() {
         <Card style={{ alignSelf: "start", padding: 18 }}>
           <Eyebrow style={{ marginBottom: 10 }}>{t("ЧТО БЛОКИРУЕТ БЫСТРЫЙ ОТВЕТ")}</Eyebrow>
           <div style={{ display: "grid", gap: 10 }}>
-            {blockers.map(([t, d, c]) => (
-              <div key={String(t)} style={{ display: "flex", gap: 9 }}>
+            {blockers.map(([h, d, c]) => (
+              <div key={String(h)} style={{ display: "flex", gap: 9 }}>
                 <Dot color={String(c)} />
                 <div>
-                  <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>{t}</div>
+                  <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>{t(String(h))}</div>
                   <div
                     style={{
                       marginTop: 3,
@@ -360,7 +367,7 @@ export function InquiriesScreen() {
                       color: "var(--gtr-t3)",
                     }}
                   >
-                    {d}
+                    {t(String(d))}
                   </div>
                 </div>
               </div>
@@ -389,13 +396,13 @@ function InviteLinks() {
         setLink(full);
         try {
           await navigator.clipboard.writeText(full);
-          setMsg("Скопирована");
+          setMsg(t("Скопирована"));
         } catch {
-          setMsg("Скопируйте вручную");
+          setMsg(t("Скопируйте вручную"));
         }
-      } else setMsg(r.error ?? "Не получилось");
+      } else setMsg(t(r.error ?? "Не получилось"));
     } catch {
-      setMsg("Сервер недоступен");
+      setMsg(t("Сервер недоступен"));
     }
   };
   return (
@@ -422,7 +429,7 @@ function InviteLinks() {
               color: role === r ? "#fff" : "rgba(255,255,255,.6)",
             }}
           >
-            {label}
+            {t(label)}
           </button>
         ))}
         <button className="gtr-btn" style={{ padding: "8px 12px" }} onClick={make}>
@@ -529,7 +536,7 @@ function RequestsKanban({
                   textTransform: "uppercase",
                 }}
               >
-                {label}
+                {t(label)}
               </span>
               <span
                 className="gtr-mono"
@@ -607,15 +614,15 @@ function KanbanCard({
         clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)",
       }}
     >
-      <div style={{ font: "600 12px/1.45 'Golos Text',sans-serif" }}>{r.title || "Заявка"}</div>
+      <div style={{ font: "600 12px/1.45 'Golos Text',sans-serif" }}>{r.title || t("Заявка")}</div>
       <div
         className="gtr-mono"
         style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
       >
         {isAdmin ? `${r.venueName} · ` : ""}
-        {r.organizerName || "организатор"}
+        {r.organizerName || t("организатор")}
         {r.date ? ` · ${r.date}` : ""}
-        {r.guests ? ` · ${r.guests} гостей` : ""}
+        {r.guests ? ` · ${r.guests} ${t("гостей")}` : ""}
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
         <span
@@ -650,7 +657,7 @@ function KanbanCard({
           <button
             className="gtr-btn"
             style={{ padding: "4px 9px", fontSize: 13 }}
-            title={`В «${KANBAN_COLS[idx - 1][1]}»`}
+            title={t("В «{{col}}»", { col: t(KANBAN_COLS[idx - 1][1]) })}
             onClick={() => onMove(r, prev)}
           >
             ←
@@ -660,7 +667,7 @@ function KanbanCard({
           <button
             className="gtr-btn"
             style={{ padding: "4px 9px", fontSize: 13 }}
-            title={`В «${KANBAN_COLS[idx + 1][1]}»`}
+            title={t("В «{{col}}»", { col: t(KANBAN_COLS[idx + 1][1]) })}
             onClick={() => onMove(r, next)}
           >
             →
@@ -779,7 +786,7 @@ export function SpacesScreen() {
           : [
               {
                 id: "none",
-                name: "Залы не нормализованы",
+                name: "Залы ещё не заведены",
                 type: "—",
                 sqm: "",
                 capTheatre: "",
@@ -802,7 +809,7 @@ export function SpacesScreen() {
           >
             <span>
               <span style={{ display: "block", font: "600 12.5px/1.45 'Golos Text',sans-serif" }}>
-                {x.name}
+                {t(String(x.name))}
               </span>
               <span
                 style={{
@@ -812,20 +819,20 @@ export function SpacesScreen() {
                   color: "var(--gtr-t3)",
                 }}
               >
-                {[x.type, x.notes].filter(Boolean).join(" · ")}
+                {[x.type, x.notes].filter(Boolean).map((s) => t(String(s))).join(" · ")}
               </span>
             </span>
             <span className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace" }}>
-              {x.sqm ? `${x.sqm} м²` : "—"}
+              {x.sqm ? `${x.sqm} ${t("м²")}` : "—"}
             </span>
             <span
               className="gtr-mono"
               style={{ font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
             >
               {x.capCocktail
-                ? `${x.capCocktail} коктейль`
+                ? `${x.capCocktail} ${t("коктейль")}`
                 : x.capTheatre
-                  ? `${x.capTheatre} театр`
+                  ? `${x.capTheatre} ${t("театр")}`
                   : "—"}
             </span>
             <span>
@@ -838,7 +845,7 @@ export function SpacesScreen() {
                       : RED
                 }
               >
-                {String(x.bookable || "—").toUpperCase()}
+                {t(String(x.bookable || "—")).toUpperCase()}
               </Chip>
             </span>
           </div>
@@ -848,7 +855,7 @@ export function SpacesScreen() {
       <Card style={{ padding: 20 }}>
         <Eyebrow style={{ marginBottom: 10 }}>{t("ТЕХНИКА И ИНФРАСТРУКТУРА")}</Eyebrow>
         <div style={{ font: "500 12px/1.7 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-          {SPACES_TECH[vid] ?? v.facilities ?? "Данные уточняются у площадки."}
+          {SPACES_TECH[vid] ? t(SPACES_TECH[vid]) : v.facilities ? t(String(v.facilities)) : t("Данные уточняются у площадки.")}
         </div>
       </Card>
     </div>
@@ -922,9 +929,9 @@ export function VenueScreen() {
               {v.name}
             </h2>
             <Chip color={v.verified ? GREEN : AMBER}>
-              {v.verified ? `ПРОВЕРЕНО ${v.verified}` : t("НЕ ВЕРИФИЦИРОВАНО")}
+              {v.verified ? `${t("ПРОВЕРЕНО")} ${v.verified}` : t("НЕ ВЕРИФИЦИРОВАНО")}
             </Chip>
-            {rich.badge ? <Chip color="#FFD166">{rich.badge}</Chip> : null}
+            {rich.badge ? <Chip color="#FFD166">{t(rich.badge)}</Chip> : null}
           </div>
           <div
             style={{
@@ -933,7 +940,7 @@ export function VenueScreen() {
               color: "var(--gtr-t2)",
             }}
           >
-            {v.type} · {v.area} · {v.district}
+            {t(String(v.type ?? ""))} · {t(String(v.area ?? ""))} · {v.district}
           </div>
         </div>
       </Card>
@@ -968,7 +975,7 @@ export function VenueScreen() {
                     color: "var(--gtr-t2)",
                   }}
                 >
-                  {String(val)}
+                  {t(String(val))}
                 </span>
               </div>
             ))}
@@ -977,9 +984,9 @@ export function VenueScreen() {
         <Card style={{ padding: 18, alignSelf: "start" }}>
           <Eyebrow style={{ marginBottom: 10 }}>{t("ИСТОЧНИКИ")}</Eyebrow>
           {[
-            ["Официальный сайт", v.website || v.source || "—", v.website || v.source ? GREEN : RED],
-            ["Галерея / фото", "только официальная галерея", AMBER],
-            ["Instagram", v.social || "не указан", v.social ? AMBER : "rgba(255,255,255,.3)"],
+            [t("Официальный сайт"), v.website || v.source || "—", v.website || v.source ? GREEN : RED],
+            [t("Галерея / фото"), t("только официальная галерея"), AMBER],
+            ["Instagram", v.social || t("не указан"), v.social ? AMBER : "rgba(255,255,255,.3)"],
             [
               "Telegram",
               v.telegram ? (
@@ -987,11 +994,11 @@ export function VenueScreen() {
                   {v.telegram.replace(/^https:\/\/t\.me\//, "@")}
                 </a>
               ) : (
-                "не указан"
+                t("не указан")
               ),
               v.telegram ? GREEN : "rgba(255,255,255,.3)",
             ],
-            ["Телефон", v.phone || ct?.phone || "—", v.phone || ct?.phone ? GREEN : RED],
+            [t("Телефон"), v.phone || ct?.phone || "—", v.phone || ct?.phone ? GREEN : RED],
           ].map(([k, val, c]) => (
             <div
               key={String(k)}
@@ -1032,10 +1039,10 @@ export function VenueScreen() {
             <>
               <Eyebrow style={{ margin: "14px 0 8px" }}>{t("ЧЕК-ЛИСТ ·")} {R.score}/100</Eyebrow>
               {[
-                ["Контакт подтверждён", R.contactVerified === "Yes" ? GREEN : AMBER],
-                ["Прайс-лист", /Missing/i.test(R.rate) ? RED : GREEN],
-                ["Договор / комиссия", /Missing/i.test(R.contract) ? RED : GREEN],
-                ["Права на фото", AMBER],
+                [t("Контакт подтверждён"), R.contactVerified === "Yes" ? GREEN : AMBER],
+                [t("Прайс-лист"), /Missing/i.test(R.rate) ? RED : GREEN],
+                [t("Договор / комиссия"), /Missing/i.test(R.contract) ? RED : GREEN],
+                [t("Права на фото"), AMBER],
               ].map(([k, c]) => (
                 <div
                   key={String(k)}
@@ -1058,7 +1065,7 @@ export function VenueScreen() {
 
       {rich.gallery?.length ? (
         <Card style={{ padding: 18, marginBottom: 16 }}>
-          <Eyebrow style={{ marginBottom: 10 }}>{t("ОФИЦИАЛЬНАЯ ГАЛЕРЕЯ ·")} {rich.credit}</Eyebrow>
+          <Eyebrow style={{ marginBottom: 10 }}>{t("ОФИЦИАЛЬНАЯ ГАЛЕРЕЯ ·")} {tParts(t, rich.credit)}</Eyebrow>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
             {rich.gallery.slice(0, 8).map((src) => (
               <img
@@ -1112,7 +1119,7 @@ export function VenueScreen() {
                       marginBottom: 5,
                     }}
                   >
-                    {date}
+                    {tParts(t, date)}
                   </div>
                   <div style={{ font: "600 12px/1.45 'Golos Text',sans-serif" }}>{title}</div>
                   <div
@@ -1122,9 +1129,9 @@ export function VenueScreen() {
                       color: "var(--gtr-t3)",
                     }}
                   >
-                    {meta}
+                    {tParts(t, meta)}
                   </div>
-                  {badge ? <Chip color={GREEN}>{badge}</Chip> : null}
+                  {badge ? <Chip color={GREEN}>{t(badge)}</Chip> : null}
                 </div>
               </Card>
             ))}
@@ -1137,7 +1144,7 @@ export function VenueScreen() {
                 color: "var(--gtr-t2)",
               }}
             >
-              {rich.artistsNote}
+              {t(rich.artistsNote)}
             </div>
           ) : null}
         </Card>
@@ -1160,7 +1167,7 @@ export function VenueScreen() {
 export function FinanceScreen() {
   const { t } = useTranslation();
   const { user } = useGtr();
-  if (!can(user.role, "finance.view")) return <NoAccess what="Финансы" />;
+  if (!can(user.role, "finance.view")) return <NoAccess what={t("Финансы")} />;
 
   const vid = user.venueId || "VEN-0013";
   const v = V(vid);
@@ -1171,34 +1178,34 @@ export function FinanceScreen() {
     [
       "Прайс-лист",
       rateMissing
-        ? "Не опубликован — организатор не видит расчёт"
-        : "Опубликован в источнике площадки",
+        ? t("Не опубликован — организатор не видит расчёт")
+        : t("Опубликован в источнике площадки"),
       rateMissing ? t("НЕТ") : "OK",
       rateMissing ? RED : GREEN,
     ],
     [
       "Договор с платформой",
-      R && !/Missing/i.test(R.contract) ? "Согласован" : "Не согласован — блокирует «подтверждено»",
-      R && !/Missing/i.test(R.contract) ? "ОК" : t("НЕТ"),
+      R && !/Missing/i.test(R.contract) ? t("Согласован") : t("Не согласован — блокирует «подтверждено»"),
+      R && !/Missing/i.test(R.contract) ? "OK" : t("НЕТ"),
       R && !/Missing/i.test(R.contract) ? GREEN : RED,
     ],
     [
       "Условия оплаты",
-      R && !/Missing/i.test(R.payment) ? "Определены" : "Не определены",
-      R && !/Missing/i.test(R.payment) ? "ОК" : t("НЕТ"),
+      R && !/Missing/i.test(R.payment) ? t("Определены") : t("Не определены"),
+      R && !/Missing/i.test(R.payment) ? "OK" : t("НЕТ"),
       R && !/Missing/i.test(R.payment) ? GREEN : RED,
     ],
     [
       "Метод доступности",
-      R?.avail || "Ручной запрос",
-      /Manual|Proposal|enquiry/i.test(R?.avail || "Вручную") ? t("ВРУЧНУЮ") : "ОК",
+      R?.avail || t("Ручной запрос"),
+      /Manual|Proposal|enquiry/i.test(R?.avail || "Manual") ? t("ВРУЧНУЮ") : "OK",
       /Manual|Proposal|enquiry/i.test(R?.avail || "Вручную") ? AMBER : GREEN,
     ],
-    ["Права на фото", R?.photo || "Только официальная галерея", t("ОГРАНИЧЕНО"), AMBER],
+    ["Права на фото", R?.photo || t("Только официальная галерея"), t("ОГРАНИЧЕНО"), AMBER],
     [
       "Тех-райдер",
-      R?.rider || "Не опубликован",
-      /Published/i.test(R?.rider || "") ? "ОК" : t("ЧАСТИЧНО"),
+      R?.rider || t("Не опубликован"),
+      /Published/i.test(R?.rider || "") ? "OK" : t("ЧАСТИЧНО"),
       /Published/i.test(R?.rider || "") ? GREEN : AMBER,
     ],
   ];
@@ -1229,7 +1236,7 @@ export function FinanceScreen() {
               borderColor: color === RED ? "rgba(229,35,27,.35)" : undefined,
             }}
           >
-            <Eyebrow>{label}</Eyebrow>
+            <Eyebrow>{t(label)}</Eyebrow>
             <div
               className="gtr-mono"
               style={{
@@ -1238,10 +1245,10 @@ export function FinanceScreen() {
                 color,
               }}
             >
-              {value}
+              {t(value)}
             </div>
             <div style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {note}
+              {t(note)}
             </div>
           </Card>
         ))}
@@ -1273,7 +1280,7 @@ export function FinanceScreen() {
             <span
               style={{ flex: "none", width: 190, font: "600 12px/1.45 'Golos Text',sans-serif" }}
             >
-              {label}
+              {t(label)}
             </span>
             <span
               style={{
@@ -1292,7 +1299,7 @@ export function FinanceScreen() {
       <Card style={{ padding: 20, borderColor: "rgba(229,35,27,.3)" }}>
         <Eyebrow style={{ marginBottom: 8, color: "#E5231B" }}>{t("ГЛАВНЫЙ БЛОКЕР")}</Eyebrow>
         <div style={{ font: "500 12px/1.7 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-          {finBlockerOf(vid)}
+          {t(finBlockerOf(vid))}
         </div>
       </Card>
     </div>
@@ -1333,7 +1340,7 @@ export function AccessScreen() {
               className="gtr-eyebrow"
               style={{ textAlign: "center", color: id === user.role ? "#E5231B" : undefined }}
             >
-              {label}
+              {t(label)}
             </span>
           ))}
         </div>
@@ -1350,7 +1357,7 @@ export function AccessScreen() {
               minWidth: ROLE_TABLE_MIN,
             }}
           >
-            <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif" }}>{p.label}</span>
+            <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif" }}>{t(p.label)}</span>
             {ROLES.map(([id]) => (
               <span key={id} style={{ textAlign: "center" }}>
                 <span
@@ -1385,7 +1392,7 @@ export function AccessScreen() {
         }}
       >
         {t("Права применяются на сервере при входе и в интерфейсе (кнопки/разделы). Ваша роль:")}{" "}
-        {user.roleLabel}.
+        {t(user.roleLabel)}.
       </div>
     </div>
   );
@@ -1406,9 +1413,9 @@ function TgPanel() {
     try {
       const r = await tgLinkFn();
       if (r.ok) setLink(r.link);
-      else setMsg(r.error ?? "Не получилось");
+      else setMsg(t(r.error ?? "Не получилось"));
     } catch {
-      setMsg("Сервер недоступен");
+      setMsg(t("Сервер недоступен"));
     }
   };
   return (
@@ -1443,7 +1450,7 @@ function TgPanel() {
         </>
       ) : (
         <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-          {tg ? "Бот не активирован." : "Проверяем статус…"}
+          {tg ? t("Бот не активирован.") : t("Проверяем статус…")}
         </span>
       )}
       {msg ? <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "#FF5B4D" }}>{msg}</span> : null}
@@ -1559,7 +1566,7 @@ function TeamPanel() {
   // Сброс пароля. Старый показать нельзя — он не хранится, только хэш.
   // Поэтому админ не «смотрит» пароль, а выдаёт новый и передаёт человеку.
   const resetPassword = async (u: PublicUser) => {
-    if (!confirm(`Задать новый пароль для ${u.email}? Старый перестанет работать.`)) return;
+    if (!confirm(t("Задать новый пароль для {{email}}? Старый перестанет работать.", { email: u.email }))) return;
     const pw = newPassword();
     setBusy(true);
     setMsg(null);
@@ -1567,11 +1574,17 @@ function TeamPanel() {
       const r = await setUserPasswordFn({ data: { email: u.email, password: pw } });
       setMsg(
         r.ok
-          ? { ok: true, text: `Новый пароль для ${u.email}: ${pw} — передайте его лично и попросите сменить.` }
-          : { ok: false, text: r.error ?? "Не получилось" },
+          ? {
+              ok: true,
+              text: t("Новый пароль для {{email}}: {{pw}} — передайте его лично и попросите сменить.", {
+                email: u.email,
+                pw,
+              }),
+            }
+          : { ok: false, text: t(r.error ?? "Не получилось") },
       );
     } catch {
-      setMsg({ ok: false, text: "Сервер недоступен" });
+      setMsg({ ok: false, text: t("Сервер недоступен") });
     } finally {
       setBusy(false);
     }
@@ -1615,7 +1628,7 @@ function TeamPanel() {
       if (r.ok) {
         setMsg({
           ok: true,
-          text: `Менеджер приглашён. Вход: ${r.user.email} / пароль, который вы задали.`,
+          text: t("Менеджер приглашён. Вход: {{email}} / пароль, который вы задали.", { email: r.user.email }),
         });
         setName("");
         setEmail("");
@@ -1627,10 +1640,10 @@ function TeamPanel() {
         setArtQ("");
         refresh();
       } else {
-        setMsg({ ok: false, text: r.error ?? "Не получилось" });
+        setMsg({ ok: false, text: t(r.error ?? "Не получилось") });
       }
     } catch {
-      setMsg({ ok: false, text: "Сервер недоступен" });
+      setMsg({ ok: false, text: t("Сервер недоступен") });
     } finally {
       setBusy(false);
     }
@@ -1668,7 +1681,7 @@ function TeamPanel() {
               color: role === r ? "#fff" : "rgba(255,255,255,.6)",
             }}
           >
-            {label}
+            {t(label)}
           </button>
         ))}
       </div>
@@ -1695,7 +1708,7 @@ function TeamPanel() {
               <input
                 className="gtr-input"
                 style={{ maxWidth: 360, padding: "8px 11px", fontSize: 12 }}
-                placeholder={artBase ? "Карточка артиста в базе — поиск по имени…" : "Загрузка базы артистов…"}
+                placeholder={artBase ? t("Карточка артиста в базе — поиск по имени…") : t("Загрузка базы артистов…")}
                 value={artQ}
                 onChange={(e) => setArtQ(e.target.value)}
               />
@@ -1817,12 +1830,12 @@ function TeamPanel() {
           onClick={invite}
         >
           {role === "artist"
-            ? "Пригласить артиста"
+            ? t("Пригласить артиста")
             : role === "owner"
-              ? "Пригласить площадку"
+              ? t("Пригласить площадку")
               : role === "organizer"
-                ? "Пригласить организатора"
-                : "Пригласить менеджера"}
+                ? t("Пригласить организатора")
+                : t("Пригласить менеджера")}
         </button>
         {msg ? (
           <span
@@ -1867,7 +1880,7 @@ function TeamPanel() {
                   className="gtr-mono"
                   style={{ display: "block", font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                 >
-                  {u.email} · {u.roleLabel}
+                  {u.email} · {t(u.roleLabel)}
                   {u.artistId ? (
                     <a
                       href={`/gtr/artists?artist=${u.artistId}`}
@@ -1878,7 +1891,7 @@ function TeamPanel() {
                   ) : u.venueId ? (
                     ` · ${V(u.venueId).name ?? u.venueId}`
                   ) : (
-                    " · вся сеть"
+                    ` · ${t("вся сеть")}`
                   )}
                 </span>
               </span>
@@ -1894,7 +1907,7 @@ function TeamPanel() {
                 className="gtr-btn"
                 style={{ padding: "5px 9px", fontSize: 12, color: "#E5231B" }}
                 onClick={() => {
-                  if (confirm(`Удалить доступ ${u.email}?`))
+                  if (confirm(t("Удалить доступ {{email}}?", { email: u.email })))
                     deleteUserFn({ data: { email: u.email } }).then(refresh);
                 }}
               >
@@ -1915,7 +1928,7 @@ export function AdminScreen() {
   const { t } = useTranslation();
   const { user } = useGtr();
   const navigate = useNavigate();
-  if (!can(user.role, "network.manage")) return <NoAccess what="GTR-админ" />;
+  if (!can(user.role, "network.manage")) return <NoAccess what={t("GTR-админ")} />;
 
   const quar = PH.venues.filter(
     (x) => x.confidence === "Low" || /verify|Closed/i.test(x.status || ""),
@@ -1934,7 +1947,7 @@ export function AdminScreen() {
         {[
           [t("ПЛОЩАДОК"), PH.meta.total, "#fff"],
           [t("ЗАЛОВ"), PH.meta.spaces, "#fff"],
-          ["КОНТАКТОВ P0/P1", PH.meta.contacts, AMBER],
+          [t("ПРИОРИТЕТНЫХ КОНТАКТОВ"), PH.meta.contacts, AMBER],
           [t("КАРАНТИН"), quar.length, RED],
         ].map(([l, v2, c]) => (
           <Card key={String(l)} style={{ padding: "16px 18px" }}>
@@ -2006,11 +2019,11 @@ export function AdminScreen() {
                     color: "var(--gtr-t3)",
                   }}
                 >
-                  {x.readiness?.state} · {x.area}
+                  {x.readiness?.state} · {t(String(x.area ?? ""))}
                 </span>
               </span>
-              <Chip color={x.readiness?.state === "Бронируемая" ? GREEN : AMBER}>
-                {(x.readiness?.state ?? "").toUpperCase()}
+              <Chip color={x.readiness?.state === "Bookable" ? GREEN : AMBER}>
+                {t(readinessLabel(x.readiness?.state)).toUpperCase()}
               </Chip>
             </div>
           ))}

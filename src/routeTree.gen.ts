@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AfishaRouteImport } from './routes/afisha'
 import { Route as EnRouteImport } from './routes/en'
 import { Route as GtrRouteRouteImport } from './routes/gtr/route'
+import { Route as ThRouteImport } from './routes/th'
 import { Route as ApiAfishaRouteImport } from './routes/api.afisha'
 import { Route as ApiAfishaLlmRouteImport } from './routes/api.afisha-llm'
 import { Route as ApiAfishaSendRouteImport } from './routes/api.afisha-send'
@@ -52,6 +53,7 @@ import { Route as GtrLoginRouteImport } from './routes/gtr/login'
 import { Route as GtrOrganizerRouteImport } from './routes/gtr/organizer'
 import { Route as GtrSignupRouteImport } from './routes/gtr/signup'
 import { Route as GtrVRouteImport } from './routes/gtr/v'
+import { Route as ThAfishaRouteImport } from './routes/th_.afisha'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -71,6 +73,11 @@ const EnRoute = EnRouteImport.update({
 const GtrRouteRoute = GtrRouteRouteImport.update({
   id: '/gtr',
   path: '/gtr',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThRoute = ThRouteImport.update({
+  id: '/th',
+  path: '/th',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAfishaRoute = ApiAfishaRouteImport.update({
@@ -268,12 +275,18 @@ const GtrVRoute = GtrVRouteImport.update({
   path: '/v',
   getParentRoute: () => GtrRouteRoute,
 } as any)
+const ThAfishaRoute = ThAfishaRouteImport.update({
+  id: '/th_/afisha',
+  path: '/th/afisha',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/gtr': typeof GtrRouteRouteWithChildren
   '/afisha': typeof AfishaRoute
   '/en': typeof EnRoute
+  '/th': typeof ThRoute
   '/api/afisha': typeof ApiAfishaRoute
   '/api/afisha-llm': typeof ApiAfishaLlmRoute
   '/api/afisha-send': typeof ApiAfishaSendRoute
@@ -312,12 +325,14 @@ export interface FileRoutesByFullPath {
   '/gtr/organizer': typeof GtrOrganizerRoute
   '/gtr/signup': typeof GtrSignupRoute
   '/gtr/v': typeof GtrVRoute
+  '/th/afisha': typeof ThAfishaRoute
   '/gtr/': typeof GtrIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/afisha': typeof AfishaRoute
   '/en': typeof EnRoute
+  '/th': typeof ThRoute
   '/api/afisha': typeof ApiAfishaRoute
   '/api/afisha-llm': typeof ApiAfishaLlmRoute
   '/api/afisha-send': typeof ApiAfishaSendRoute
@@ -356,6 +371,7 @@ export interface FileRoutesByTo {
   '/gtr/organizer': typeof GtrOrganizerRoute
   '/gtr/signup': typeof GtrSignupRoute
   '/gtr/v': typeof GtrVRoute
+  '/th/afisha': typeof ThAfishaRoute
   '/gtr': typeof GtrIndexRoute
 }
 export interface FileRoutesById {
@@ -364,6 +380,7 @@ export interface FileRoutesById {
   '/gtr': typeof GtrRouteRouteWithChildren
   '/afisha': typeof AfishaRoute
   '/en': typeof EnRoute
+  '/th': typeof ThRoute
   '/api/afisha': typeof ApiAfishaRoute
   '/api/afisha-llm': typeof ApiAfishaLlmRoute
   '/api/afisha-send': typeof ApiAfishaSendRoute
@@ -402,6 +419,7 @@ export interface FileRoutesById {
   '/gtr/organizer': typeof GtrOrganizerRoute
   '/gtr/signup': typeof GtrSignupRoute
   '/gtr/v': typeof GtrVRoute
+  '/th_/afisha': typeof ThAfishaRoute
   '/gtr/': typeof GtrIndexRoute
 }
 export interface FileRouteTypes {
@@ -411,6 +429,7 @@ export interface FileRouteTypes {
     | '/gtr'
     | '/afisha'
     | '/en'
+    | '/th'
     | '/api/afisha'
     | '/api/afisha-llm'
     | '/api/afisha-send'
@@ -449,12 +468,14 @@ export interface FileRouteTypes {
     | '/gtr/organizer'
     | '/gtr/signup'
     | '/gtr/v'
+    | '/th/afisha'
     | '/gtr/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/afisha'
     | '/en'
+    | '/th'
     | '/api/afisha'
     | '/api/afisha-llm'
     | '/api/afisha-send'
@@ -493,6 +514,7 @@ export interface FileRouteTypes {
     | '/gtr/organizer'
     | '/gtr/signup'
     | '/gtr/v'
+    | '/th/afisha'
     | '/gtr'
   id:
     | '__root__'
@@ -500,6 +522,7 @@ export interface FileRouteTypes {
     | '/gtr'
     | '/afisha'
     | '/en'
+    | '/th'
     | '/api/afisha'
     | '/api/afisha-llm'
     | '/api/afisha-send'
@@ -538,6 +561,7 @@ export interface FileRouteTypes {
     | '/gtr/organizer'
     | '/gtr/signup'
     | '/gtr/v'
+    | '/th_/afisha'
     | '/gtr/'
   fileRoutesById: FileRoutesById
 }
@@ -546,6 +570,7 @@ export interface RootRouteChildren {
   GtrRouteRoute: typeof GtrRouteRouteWithChildren
   AfishaRoute: typeof AfishaRoute
   EnRoute: typeof EnRoute
+  ThRoute: typeof ThRoute
   ApiAfishaRoute: typeof ApiAfishaRoute
   ApiAfishaLlmRoute: typeof ApiAfishaLlmRoute
   ApiAfishaSendRoute: typeof ApiAfishaSendRoute
@@ -578,6 +603,7 @@ export interface RootRouteChildren {
   ApiVillaCheckRoute: typeof ApiVillaCheckRoute
   ApiVphotoRoute: typeof ApiVphotoRoute
   EnAfishaRoute: typeof EnAfishaRoute
+  ThAfishaRoute: typeof ThAfishaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -608,6 +634,13 @@ declare module '@tanstack/react-router' {
       path: '/gtr'
       fullPath: '/gtr'
       preLoaderRoute: typeof GtrRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/th': {
+      id: '/th'
+      path: '/th'
+      fullPath: '/th'
+      preLoaderRoute: typeof ThRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/afisha': {
@@ -883,6 +916,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GtrVRouteImport
       parentRoute: typeof GtrRouteRoute
     }
+    '/th_/afisha': {
+      id: '/th_/afisha'
+      path: '/th/afisha'
+      fullPath: '/th/afisha'
+      preLoaderRoute: typeof ThAfishaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -915,6 +955,7 @@ const rootRouteChildren: RootRouteChildren = {
   GtrRouteRoute: GtrRouteRouteWithChildren,
   AfishaRoute: AfishaRoute,
   EnRoute: EnRoute,
+  ThRoute: ThRoute,
   ApiAfishaRoute: ApiAfishaRoute,
   ApiAfishaLlmRoute: ApiAfishaLlmRoute,
   ApiAfishaSendRoute: ApiAfishaSendRoute,
@@ -947,6 +988,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiVillaCheckRoute: ApiVillaCheckRoute,
   ApiVphotoRoute: ApiVphotoRoute,
   EnAfishaRoute: EnAfishaRoute,
+  ThAfishaRoute: ThAfishaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

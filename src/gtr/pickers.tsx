@@ -87,7 +87,7 @@ export function GtrCalendar({
           ‹
         </button>
         <span className="gtr-cal-title">
-          {MONTHS[m]} <b>{y}</b>
+          {t(MONTHS[m])} <b>{y}</b>
         </span>
         <button type="button" className="gtr-cal-nav" onClick={() => nav(1)} aria-label={t("Следующий месяц")}>
           ›
@@ -95,7 +95,7 @@ export function GtrCalendar({
       </div>
       <div className="gtr-cal-grid gtr-cal-week">
         {WEEKDAYS.map((w) => (
-          <span key={w}>{w}</span>
+          <span key={w}>{t(w)}</span>
         ))}
       </div>
       <div className="gtr-cal-grid">
@@ -134,6 +134,7 @@ export function GtrCapacity({
   onChange: (guests: number) => void;
   max?: number;
 }) {
+  const { t } = useTranslation();
   const pct = Math.min(100, Math.max(0, ((value - 10) / (max - 10)) * 100));
   return (
     <div style={{ display: "grid", gap: 10 }}>
@@ -149,7 +150,7 @@ export function GtrCapacity({
           {value || "—"}
         </span>
         <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-          {value ? "гостей — под это число подберутся площадки и залы" : "гостей: сдвиньте регулятор"}
+          {value ? t("гостей — под это число подберутся площадки и залы") : t("гостей: сдвиньте регулятор")}
         </span>
       </div>
       <input

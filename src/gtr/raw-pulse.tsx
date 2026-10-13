@@ -2,6 +2,7 @@
 // Геометрия везде острые срезанные углы (var(--gtr-cut)) — капсулы из
 // эталонного кита сознательно не используются, см. gtr.css.
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 const vibrate = (pattern: number | number[]) => {
   if (typeof navigator !== "undefined" && navigator.vibrate) {
@@ -82,10 +83,10 @@ const HANDLE = 52;
 const THRESHOLD = 0.72; // порог подтверждения по спеке RAW PULSE 9.1
 
 export function SwipeToBook({
-  label = "ПРОВЕДИ ДЛЯ БРОНИ →",
-  desktopLabel = "ЗАБРОНИРОВАТЬ СТОЛ",
-  sendingLabel = "ОТПРАВЛЯЕМ…",
-  doneLabel = "✓ СТОЛ ЗАБРОНИРОВАН",
+  label: labelProp,
+  desktopLabel: desktopLabelProp,
+  sendingLabel: sendingLabelProp,
+  doneLabel: doneLabelProp,
   onConfirm,
   disabled,
 }: {
@@ -96,6 +97,12 @@ export function SwipeToBook({
   onConfirm: () => Promise<{ ok: boolean; reason?: string }>;
   disabled?: boolean;
 }) {
+  // Подписи по умолчанию идут через перевод; переданные снаружи — как есть
+  const { t } = useTranslation();
+  const label = labelProp ?? t("ПРОВЕДИ ДЛЯ БРОНИ →");
+  const desktopLabel = desktopLabelProp ?? t("ЗАБРОНИРОВАТЬ СТОЛ");
+  const sendingLabel = sendingLabelProp ?? t("ОТПРАВЛЯЕМ…");
+  const doneLabel = doneLabelProp ?? t("✓ СТОЛ ЗАБРОНИРОВАН");
   const trackRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<HTMLDivElement>(null);
@@ -241,12 +248,12 @@ export function SwipeToBook({
         setPopKey((n) => n + 1);
         setStatus("done");
       } else {
-        setError(r.reason || "Не удалось забронировать — попробуйте ещё раз");
+        setError(r.reason ? t(r.reason) : t("Не удалось забронировать — попробуйте ещё раз"));
         setStatus("idle");
         springTo(0);
       }
     } catch {
-      setError("Сервер недоступен — попробуйте ещё раз");
+      setError(t("Сервер недоступен — попробуйте ещё раз"));
       setStatus("idle");
       springTo(0);
     }
@@ -309,7 +316,7 @@ export function SwipeToBook({
 // ---------- Hold-to-confirm ----------
 
 export function HoldToConfirm({
-  label = "УДЕРЖИВАЙ",
+  label: labelProp,
   doneLabel = "✓",
   durationMs = 850,
   onConfirm,
@@ -321,6 +328,8 @@ export function HoldToConfirm({
   onConfirm: () => void;
   locked?: boolean;
 }) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("УДЕРЖИВАЙ");
   const R = 34;
   const C = 2 * Math.PI * R;
   const [pct, setPct] = useState(0);

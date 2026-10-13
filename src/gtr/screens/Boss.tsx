@@ -106,22 +106,22 @@ function BossHeadCard({ head, onSaved }: { head: BossHead | null; onSaved: (h: B
   const [preview, setPreview] = useState<"day" | "night" | null>(null);
   const put = async (slot: "day" | "night", file?: File | null) => {
     if (!file) return;
-    setBusy("готовлю снимок…");
+    setBusy(t("готовлю снимок…"));
     try {
       const dataUrl = await shrinkToPng(file);
       const r = await saveBossHeadFn({ data: { [slot]: dataUrl } });
       if (r.ok) {
         const next = { ...(head ?? {}), [slot]: dataUrl };
         onSaved(next);
-        setBusy("сохранено");
-      } else setBusy(r.reason ?? "не вышло");
+        setBusy(t("сохранено"));
+      } else setBusy(r.reason ? t(r.reason) : t("не вышло"));
     } catch {
-      setBusy("файл не читается — нужен PNG с прозрачным фоном");
+      setBusy(t("файл не читается — нужен PNG с прозрачным фоном"));
     }
     setTimeout(() => setBusy(""), 4000);
   };
   const drop = async (slot: "day" | "night") => {
-    setBusy("убираю…");
+    setBusy(t("убираю…"));
     const r = await saveBossHeadFn({ data: { [slot]: null } });
     if (r.ok) {
       const next = { ...(head ?? {}) };
@@ -176,18 +176,18 @@ function BossHeadCard({ head, onSaved }: { head: BossHead | null; onSaved: (h: B
         <Eyebrow>{t("ПОРТРЕТ В ЭМБЛЕМЕ · ДЕНЬ И НОЧЬ")}</Eyebrow>
         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
           <span style={{ font: mono(8.5), color: "rgba(255,255,255,.4)" }}>
-            {t("сейчас на острове:")} {isDaylight() ? "день" : "ночь"}
+            {t("сейчас на острове:")} {isDaylight() ? t("день") : t("ночь")}
           </span>
           <button className="gtr-btn" onClick={() => setPreview(preview === "day" ? "night" : "day")}>
-            {preview === null ? "Примерить" : preview === "day" ? "Показать ночь" : "Показать день"}
+            {preview === null ? t("Примерить") : preview === "day" ? t("Показать ночь") : t("Показать день")}
           </button>
         </div>
       </div>
       <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
         <BossHead3D head={head} size={132} force={preview} />
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, flex: 1, minWidth: 260 }}>
-          {slot("day", t("ДЕНЬ · 06–18"), "прозрачные очки, дневной свет")}
-          {slot("night", t("НОЧЬ · 18–06"), "тёмные очки, клубный свет")}
+          {slot("day", t("ДЕНЬ · 06–18"), t("прозрачные очки, дневной свет"))}
+          {slot("night", t("НОЧЬ · 18–06"), t("тёмные очки, клубный свет"))}
         </div>
       </div>
       {busy ? <span style={{ font: mono(10), color: "var(--gtr-t3)" }}>{busy}</span> : null}
@@ -215,9 +215,9 @@ export function PushPanel() {
     setMsg("");
     try {
       if (!("serviceWorker" in navigator) || !("PushManager" in window))
-        throw new Error("браузер не поддерживает Push");
+        throw new Error(t("браузер не поддерживает Push"));
       const perm = await Notification.requestPermission();
-      if (perm !== "granted") throw new Error("разрешение не выдано");
+      if (perm !== "granted") throw new Error(t("разрешение не выдано"));
       const reg = await navigator.serviceWorker.register("/sw.js");
       await navigator.serviceWorker.ready;
       const sub =
@@ -227,21 +227,25 @@ export function PushPanel() {
           applicationServerKey: b64ToU8(VAPID_PUBLIC_KEY),
         }));
       const r = await pushSubscribeFn({ data: { sub: sub.toJSON() as never } });
-      if (!r.ok) throw new Error("сервер не принял подписку");
+      if (!r.ok) throw new Error(t("сервер не принял подписку"));
       setDevices(r.devices ?? 1);
       setState("on");
-      setMsg("Подписка активна");
+      setMsg(t("Подписка активна"));
     } catch (e) {
       setState("err");
-      setMsg(e instanceof Error ? e.message : "не получилось");
+      setMsg(e instanceof Error ? e.message : t("не получилось"));
     }
-  }, []);
+  }, [t]);
 
   const test = useCallback(async () => {
     setMsg("…");
     const r = await pushTestFn();
-    setMsg(r.ok ? `Отправлено (${r.sent} устр.)` : `Не вышло: ${r.reason}`);
-  }, []);
+    setMsg(
+      r.ok
+        ? t("Отправлено ({{n}} устр.)", { n: r.sent })
+        : t("Не вышло: {{reason}}", { reason: r.reason ? t(String(r.reason)) : "" }),
+    );
+  }, [t]);
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -392,30 +396,30 @@ function TasksBlock({ users, me }: { users: PublicUser[]; me: string }) {
             <span className="gtr-dash-row-t">{t("Открытых задач нет.")}</span>
           </div>
         ) : null}
-        {open.map((t) => (
-          <div key={t.id} className="gtr-dash-row">
-            <Dot color={ST[t.status][1]} />
+        {open.map((tk) => (
+          <div key={tk.id} className="gtr-dash-row">
+            <Dot color={ST[tk.status][1]} />
             <span className="gtr-dash-row-t">
-              {t.title}
+              {tk.title}
               <small>
-                {t.assigneeName}
-                {t.due ? ` · до ${t.due}` : ""} · {ST[t.status][0]}
+                {tk.assigneeName}
+                {tk.due ? ` · ${t("до {{date}}", { date: tk.due })}` : ""} · {ST[tk.status][0]}
               </small>
             </span>
-            {t.status === "new" ? (
-              <button className="gtr-btn gtr-btn-sm" onClick={() => move(t, "doing")}>
-                В работу
+            {tk.status === "new" ? (
+              <button className="gtr-btn gtr-btn-sm" onClick={() => move(tk, "doing")}>
+                {t("В работу")}
               </button>
             ) : (
-              <button className="gtr-btn gtr-btn-sm" onClick={() => move(t, "done")}>
-                Готово
+              <button className="gtr-btn gtr-btn-sm" onClick={() => move(tk, "done")}>
+                {t("Готово")}
               </button>
             )}
             <button
               className="gtr-btn gtr-btn-sm"
               style={{ opacity: 0.5 }}
-              onClick={() => remove(t.id)}
-              title="Удалить"
+              onClick={() => remove(tk.id)}
+              title={t("Удалить")}
             >
               ✕
             </button>
@@ -444,9 +448,9 @@ function BroadcastBlock() {
     if (!text.trim()) return;
     setNote("…");
     const r = await broadcastFn({ data: { text, audience: aud } });
-    setNote(r.ok ? `Доставлено: ${r.sent}` : "не вышло");
+    setNote(r.ok ? t("Доставлено: {{n}}", { n: r.sent }) : t("не вышло"));
     if (r.ok) setText("");
-  }, [text, aud]);
+  }, [text, aud, t]);
   const AUD: [typeof aud, string][] = [
     ["all", t("ВСЕМ")],
     ["team", t("КОМАНДЕ")],
@@ -545,28 +549,37 @@ export function BossCabinet() {
     for (const d of shared.drafts.slice(0, 40))
       items.push({
         ts: d.updated,
-        text: `${draftTitle(d)} — ${STAGE_LABEL[d.graph.stage ?? "draft"]}${d.owner ? ` · ${d.owner.split("@")[0]}` : ""}`,
+        text: `${t(draftTitle(d))} — ${t(STAGE_LABEL[d.graph.stage ?? "draft"])}${d.owner ? ` · ${d.owner.split("@")[0]}` : ""}`,
         color: STAGE_COLOR[d.graph.stage ?? "draft"],
       });
     for (const r of reqs.slice(0, 30))
       items.push({
         ts: r.ts,
-        text: `Заявка: ${r.title || r.venueName}${r.assigneeName ? ` → ${r.assigneeName}` : ""} · ${r.status}`,
+        text: t("Заявка: {{title}}", { title: r.title || r.venueName }) +
+          `${r.assigneeName ? ` → ${r.assigneeName}` : ""} · ${t(REQ_STATUS_LABEL[r.status] ?? r.status)}`,
         color: AMBER,
       });
     for (const o of shared.offers.slice(0, 30))
-      items.push({ ts: o.ts, text: `Оффер ${o.artistName} · ${o.venueName} · ${o.status}`, color: "#7B4DFF" });
+      items.push({
+        ts: o.ts,
+        text: `${t("Оффер {{artist}}", { artist: o.artistName })} · ${o.venueName} · ${t(OFFER_STATUS_LABEL[o.status] ?? o.status)}`,
+        color: "#7B4DFF",
+      });
     for (const u2 of users.slice(0, 20))
-      items.push({ ts: u2.created, text: `Новый участник: ${u2.name} (${u2.roleLabel})`, color: GREEN });
+      items.push({
+        ts: u2.created,
+        text: t("Новый участник: {{name}} ({{role}})", { name: u2.name, role: t(String(u2.roleLabel)) }),
+        color: GREEN,
+      });
     // сидовые записи без реального времени (ts≈0) в ленту не попадают
     return items.filter((x) => x.ts > 1e12).sort((a, b) => b.ts - a.ts).slice(0, 12);
-  }, [shared.drafts, reqs, shared.offers, users]);
+  }, [shared.drafts, reqs, shared.offers, users, t]);
 
   const fmtAgo = (ts: number) => {
     const m = Math.max(1, Math.round((Date.now() - ts) / 60000));
-    if (m < 60) return `${m}м`;
+    if (m < 60) return t("{{n}}м", { n: m });
     const h = Math.round(m / 60);
-    return h < 48 ? `${h}ч` : `${Math.round(h / 24)}д`;
+    return h < 48 ? t("{{n}}ч", { n: h }) : t("{{n}}д", { n: Math.round(h / 24) });
   };
 
   // Сводка дня: живые сигналы за сегодняшние сутки (Пхукет, UTC+7). Афиша —
@@ -695,7 +708,7 @@ export function BossCabinet() {
             <div key={st} className="gtr-dash-row">
               <Dot color={STAGE_COLOR[st as keyof typeof STAGE_COLOR] ?? "#888"} />
               <span className="gtr-dash-row-t">
-                {STAGE_LABEL[st as keyof typeof STAGE_LABEL] ?? st} · {x.n}
+                {t(STAGE_LABEL[st as keyof typeof STAGE_LABEL] ?? st)} · {x.n}
               </span>
               <span className="gtr-dash-row-v">{fmtThb(x.sum)}</span>
             </div>
@@ -703,7 +716,7 @@ export function BossCabinet() {
           {money.top.map(({ d, q }) => (
             <div key={d.id} className="gtr-dash-row">
               <span className="gtr-dash-row-t">
-                {draftTitle(d)}
+                {t(draftTitle(d))}
                 <small>{V(d.venueId).name}</small>
               </span>
               <span className="gtr-dash-row-v" style={{ color: GREEN }}>
@@ -739,7 +752,7 @@ export function BossCabinet() {
                   {(d.dateIso ?? "").slice(5).replace("-", ".")}
                 </span>
                 <span className="gtr-dash-row-t">
-                  {draftTitle(d)}
+                  {t(draftTitle(d))}
                   <small>{V(d.venueId).name}</small>
                 </span>
               </div>
@@ -815,8 +828,15 @@ const PENDING_ROLE_LABEL: Record<string, string> = {
   pr: "PR-директор", owner: "Площадка", sales: "Event-продажи",
   gtr: "Команда GTR", artist: "Артист", organizer: "Организатор", visitor: "Посетитель",
 };
+// Статусы заявок и офферов для живой ленты — ключи перевода, t() при выводе
+const REQ_STATUS_LABEL: Record<string, string> = {
+  new: "новая", seen: "в разборе", accepted: "принята", declined: "отклонена",
+};
+const OFFER_STATUS_LABEL: Record<string, string> = {
+  sent: "отправлен", accepted: "принят", declined: "отклонён",
+};
 function PendingCard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [items, setItems] = useState<PendingApp[]>([]);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState("");
@@ -828,12 +848,25 @@ function PendingCard() {
   useEffect(load, [load]);
   const decide = async (email: string, approve: boolean) => {
     setBusy(email);
+    const app = items.find((x) => x.email === email);
     try {
       const r = await pendingDecideFn({ data: { email, approve } });
-      setNote(r.note);
+      // Итог сервера собран по-русски с именем — для успеха пишем свой
+      // переведённый текст, для отказов переводим известные причины.
+      setNote(
+        r.ok && app
+          ? approve
+            ? t("✅ {{name}} ({{email}}) — роль «{{role}}» одобрена", {
+                name: app.name,
+                email: app.email,
+                role: t(PENDING_ROLE_LABEL[app.role] ?? app.role),
+              })
+            : t("❌ Заявка {{name}} ({{email}}) отклонена", { name: app.name, email: app.email })
+          : t(String(r.note)),
+      );
       load();
     } catch {
-      setNote("Сервер недоступен");
+      setNote(t("Сервер недоступен"));
     } finally {
       setBusy("");
     }
@@ -853,10 +886,10 @@ function PendingCard() {
           <span className="gtr-dash-row-t">
             {a.name}
             <span style={{ color: RED, marginLeft: 8, font: mono(11, 700) }}>
-              {PENDING_ROLE_LABEL[a.role]?.toUpperCase()}
+              {PENDING_ROLE_LABEL[a.role] ? t(PENDING_ROLE_LABEL[a.role]).toUpperCase() : null}
             </span>
             <small>
-              {a.email} · {new Date(a.created).toLocaleDateString("ru-RU")}
+              {a.email} · {new Date(a.created).toLocaleDateString(i18n.language === "th" ? "th-TH" : i18n.language === "en" ? "en-GB" : "ru-RU")}
               {a.about ? ` · «${a.about}»` : ""}
             </small>
           </span>
@@ -908,7 +941,7 @@ function CommunityCard() {
       .catch(() => {});
   }, []);
   const save = async () => {
-    setState("Проверяю канал и группу у Telegram…");
+    setState(t("Проверяю канал и группу у Telegram…"));
     try {
       const r = await setCommunityCfgFn({ data: { channelUrl, chatUrl } });
       if (r.ok) {
@@ -916,21 +949,23 @@ function CommunityCard() {
         setChatTitle(r.cfg.chatTitle);
         setState(
           r.notes.length
-            ? r.notes.join(" · ")
-            : `✓ Привязано: ${[r.cfg.channelTitle, r.cfg.chatTitle].filter(Boolean).join(" + ") || "пока пусто"}`,
+            ? r.notes.map((n) => t(String(n))).join(" · ")
+            : t("✓ Привязано: {{what}}", {
+                what: [r.cfg.channelTitle, r.cfg.chatTitle].filter(Boolean).join(" + ") || t("пока пусто"),
+              }),
         );
-      } else setState(r.reason ?? "…");
+      } else setState(r.reason ? t(String(r.reason)) : "…");
     } catch {
-      setState("Сервер недоступен");
+      setState(t("Сервер недоступен"));
     }
   };
   const activate = async () => {
-    setState("Обновляю вебхук бота (конкурс)…");
+    setState(t("Обновляю вебхук бота (конкурс)…"));
     try {
       const r = await tgActivateFn();
-      setState(r.ok ? `✓ Вебхук обновлён · @${r.bot}` : r.error);
+      setState(r.ok ? `${t("✓ Вебхук обновлён")} · @${r.bot}` : t(String(r.error)));
     } catch {
-      setState("Сервер недоступен");
+      setState(t("Сервер недоступен"));
     }
   };
   const post = async (
@@ -939,32 +974,32 @@ function CommunityCard() {
   ) => {
     setState(
       kind === "digest"
-        ? "Собираю дайджест вечера…"
+        ? t("Собираю дайджест вечера…")
         : kind === "contest"
-          ? "Публикую конкурс…"
+          ? t("Публикую конкурс…")
           : kind === "moved"
-            ? "Объявляю о переезде и закрепляю пост…"
+            ? t("Объявляю о переезде и закрепляю пост…")
             : kind === "poll"
-              ? "Публикую опрос…"
-              : "Отправляю приглашение…",
+              ? t("Публикую опрос…")
+              : t("Отправляю приглашение…"),
     );
     try {
       const r = await communityPostFn({ data: { kind, target } });
-      setState(r.ok ? "✓ Опубликовано" : r.reason);
+      setState(r.ok ? t("✓ Опубликовано") : t(String(r.reason)));
     } catch {
-      setState("Сервер недоступен");
+      setState(t("Сервер недоступен"));
     }
   };
   // Ссылки, живущие не в коде, а в настройках Telegram: описание бота,
   // кнопка меню, команды, описания канала и чата. Отчёт построчный —
   // часть вызовов Telegram отклоняет по правам, и это надо видеть.
   const relink = async () => {
-    setState("Обновляю ссылки в Telegram…");
+    setState(t("Обновляю ссылки в Telegram…"));
     try {
       const r = await tgRelinkFn();
-      setState(r.steps.length ? r.steps.join("\n") : r.reason || "Telegram не ответил");
+      setState(r.steps.length ? r.steps.join("\n") : r.reason ? t(String(r.reason)) : t("Telegram не ответил"));
     } catch {
-      setState("Сервер недоступен");
+      setState(t("Сервер недоступен"));
     }
   };
   const copyInvite = async () => {
@@ -973,12 +1008,12 @@ function CommunityCard() {
       setInviteText(r.text);
       try {
         await navigator.clipboard.writeText(r.text);
-        setState("✓ Текст приглашения скопирован — шли кому угодно");
+        setState(t("✓ Текст приглашения скопирован — шли кому угодно"));
       } catch {
-        setState("Текст ниже — скопируй вручную");
+        setState(t("Текст ниже — скопируй вручную"));
       }
     } catch {
-      setState("Сервер недоступен");
+      setState(t("Сервер недоступен"));
     }
   };
   return (
@@ -986,10 +1021,10 @@ function CommunityCard() {
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
         <Eyebrow>{t("КОМЬЮНИТИ TELEGRAM · НОВОСТИ И ОБЩЕНИЕ")}</Eyebrow>
         <Chip color={channelTitle ? GREEN : AMBER}>
-          {channelTitle ? `КАНАЛ · ${channelTitle.toUpperCase()}` : t("КАНАЛ НЕ ПРИВЯЗАН")}
+          {channelTitle ? `${t("КАНАЛ")} · ${channelTitle.toUpperCase()}` : t("КАНАЛ НЕ ПРИВЯЗАН")}
         </Chip>
         <Chip color={chatTitle ? GREEN : AMBER}>
-          {chatTitle ? `ЧАТ · ${chatTitle.toUpperCase()}` : t("ЧАТ НЕ ПРИВЯЗАН")}
+          {chatTitle ? `${t("ЧАТ")} · ${chatTitle.toUpperCase()}` : t("ЧАТ НЕ ПРИВЯЗАН")}
         </Chip>
       </div>
       {channelTitle && chatTitle ? null : (
@@ -1114,29 +1149,29 @@ function ThreadsCard() {
   }, []);
 
   const save = async () => {
-    setState("Проверяю токен у Threads…");
+    setState(t("Проверяю токен у Threads…"));
     try {
       const r = await setThreadsFn({ data: { token } });
       if (r.ok) {
         setWho(r.username);
         setDaysLeft(60);
         setToken("");
-        setState(`✓ Подключён профиль @${r.username}`);
-      } else setState(r.reason ?? "…");
+        setState(`${t("✓ Подключён профиль")} @${r.username}`);
+      } else setState(r.reason ? t(String(r.reason)) : "…");
     } catch {
-      setState("Сервер недоступен");
+      setState(t("Сервер недоступен"));
     }
   };
 
   const test = async () => {
-    setState("Публикую проверочный пост…");
+    setState(t("Публикую проверочный пост…"));
     try {
       const r = await threadsPostFn({
         data: { text: "GTR Event — афиша ночного Пхукета. Проверка связи." },
       });
-      setState(r.ok ? "✓ Пост опубликован — проверь профиль" : (r.reason ?? "…"));
+      setState(r.ok ? t("✓ Пост опубликован — проверь профиль") : r.reason ? t(String(r.reason)) : "…");
     } catch {
-      setState("Сервер недоступен");
+      setState(t("Сервер недоступен"));
     }
   };
 
@@ -1197,37 +1232,39 @@ function MetaCard() {
     metaFeedFn().then((r) => setFeed(r.items.slice(0, 6))).catch(() => {});
   }, []);
   const exchange = async () => {
-    setState("Обмениваю токены на долгоживущие…");
+    setState(t("Обмениваю токены на долгоживущие…"));
     try {
       const r = await metaExchangeFn({ data: { appId, appSecret } });
-      setState((r.ok ? "✓ " : "") + r.note);
+      setState((r.ok ? "✓ " : "") + t(String(r.note)));
       if (r.ok) setAppSecret("");
     } catch {
-      setState("Сервер недоступен");
+      setState(t("Сервер недоступен"));
     }
   };
   const save = async () => {
-    setState("Проверяю токен у Meta…");
+    setState(t("Проверяю токен у Meta…"));
     try {
       const r = await setMetaCfgFn({ data: { token } });
       if (r.ok) {
         setConnected(true);
         setPageName(r.pageName ?? "");
         setIgUser(r.igUser ?? "");
-        setState(`✓ Страница «${r.pageName}» подключена${r.igUser ? ` · IG @${r.igUser}` : ""}`);
+        setState(
+          t("✓ Страница «{{page}}» подключена", { page: r.pageName }) + (r.igUser ? ` · IG @${r.igUser}` : ""),
+        );
         setToken("");
-      } else setState(r.reason ?? "…");
+      } else setState(r.reason ? t(String(r.reason)) : "…");
     } catch {
-      setState("Сервер недоступен");
+      setState(t("Сервер недоступен"));
     }
   };
   const sync = async () => {
-    setState("Забираю публикации…");
+    setState(t("Забираю публикации…"));
     try {
       const r = await metaSyncFn();
-      setState(r.ok ? `✓ Подтянуто публикаций: ${r.count}` : (r.reason ?? "…"));
+      setState(r.ok ? t("✓ Подтянуто публикаций: {{n}}", { n: r.count }) : r.reason ? t(String(r.reason)) : "…");
     } catch {
-      setState("Сервер недоступен");
+      setState(t("Сервер недоступен"));
     }
   };
   return (
@@ -1235,7 +1272,7 @@ function MetaCard() {
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
         <Eyebrow>{t("META · СТРАНИЦА FACEBOOK / INSTAGRAM")}</Eyebrow>
         <Chip color={connected ? GREEN : AMBER}>
-          {connected ? `ПОДКЛЮЧЕНА${pageName ? ` · ${pageName.toUpperCase()}` : ""}` : t("НЕ ПОДКЛЮЧЕНА")}
+          {connected ? `${t("ПОДКЛЮЧЕНА")}${pageName ? ` · ${pageName.toUpperCase()}` : ""}` : t("НЕ ПОДКЛЮЧЕНА")}
         </Chip>
         {igUser ? <Chip color="#7B4DFF">IG @{igUser}</Chip> : null}
       </div>
@@ -1317,7 +1354,7 @@ function MetaCard() {
                   textOverflow: "ellipsis",
                 }}
               >
-                {f.page}: {f.text || "медиа-публикация"}
+                {f.page}: {f.text || t("медиа-публикация")}
               </span>
             </a>
           ))}
@@ -1350,10 +1387,10 @@ function PromptpayCard() {
     setState("…");
     try {
       const r = await setPromptpayCfgFn({ data: { id, name } });
-      setState(r.ok ? "✓ Сохранено — QR-оплата включена во всех бронях" : (r.reason ?? "…"));
+      setState(r.ok ? t("✓ Сохранено — QR-оплата включена во всех бронях") : r.reason ? t(String(r.reason)) : "…");
       if (r.ok) setSaved(id);
     } catch {
-      setState("Сервер недоступен");
+      setState(t("Сервер недоступен"));
     }
   };
   return (

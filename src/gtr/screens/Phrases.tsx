@@ -50,12 +50,19 @@ const loadVoice = (): Voice => {
   }
 };
 
+// Подпись фразы на языке интерфейса: в данных есть RU и EN версии
+// (тайская строка — для официанта, её показываем отдельно)
+const capOf = (x: { ru: string; en: string }, lang: string) => (lang === "ru" ? x.ru : x.en);
+// Название раздела: у разделов есть и тайская версия
+const groupName = (g: Group, lang: string) => (lang === "ru" ? g.ru : lang === "th" ? g.th : g.en);
+
 // ---------- карточка на весь экран ----------
 /** То, ради чего экран и сделан: официант читает с расстояния вытянутой
  *  руки, в клубном полумраке. Поэтому тайская строка крупная и на светлом
  *  фоне — тёмная тема продукта здесь мешает, а не помогает. */
 function Show({ item, voice, onClose }: { item: Item; voice: Voice; onClose: () => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const ru = i18n.language === "ru";
   const th = voice === "f" ? item.thF : item.thM;
   return (
     <div
@@ -106,10 +113,19 @@ function Show({ item, voice, onClose }: { item: Item; voice: Voice; onClose: () 
           textAlign: "center",
         }}
       >
-        <div style={{ font: "500 15px/1.5 'Golos Text',sans-serif", color: "rgba(0,0,0,.7)" }}>
-          {item.ru}
-        </div>
-        <div style={{ marginTop: 5, font: "500 14px/1.5 'Golos Text',sans-serif", color: "rgba(0,0,0,.45)" }}>
+        {/* русскую подпись видит только русскоязычный гость; английская — всем */}
+        {ru ? (
+          <div style={{ font: "500 15px/1.5 'Golos Text',sans-serif", color: "rgba(0,0,0,.7)" }}>
+            {item.ru}
+          </div>
+        ) : null}
+        <div
+          style={{
+            marginTop: ru ? 5 : 0,
+            font: ru ? "500 14px/1.5 'Golos Text',sans-serif" : "500 15px/1.5 'Golos Text',sans-serif",
+            color: ru ? "rgba(0,0,0,.45)" : "rgba(0,0,0,.7)",
+          }}
+        >
           {item.en}
         </div>
       </div>
@@ -124,7 +140,8 @@ function Show({ item, voice, onClose }: { item: Item; voice: Voice; onClose: () 
 }
 
 export function PhrasesScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   const [voice, setVoice] = useState<Voice>(loadVoice);
   const [groupId, setGroupId] = useState(BOOK.groups[0]?.id ?? "");
   const [open, setOpen] = useState<Item | null>(null);
@@ -146,7 +163,7 @@ export function PhrasesScreen() {
     const hits: { group: Group; item: Item }[] = [];
     for (const g of BOOK.groups)
       for (const it of g.items)
-        if (`${it.ru} ${it.en}`.toLowerCase().includes(needle)) hits.push({ group: g, item: it });
+        if (`${it.ru} ${it.en} ${it.thM} ${it.thF}`.toLowerCase().includes(needle)) hits.push({ group: g, item: it });
     return hits;
   }, [q]);
 
@@ -165,7 +182,7 @@ export function PhrasesScreen() {
         borderColor: g.critical ? "rgba(229,35,27,.35)" : undefined,
       }}
     >
-      <span style={{ display: "block", font: "600 14px/1.4 'Golos Text',sans-serif" }}>{it.ru}</span>
+      <span style={{ display: "block", font: "600 14px/1.4 'Golos Text',sans-serif" }}>{capOf(it, lang)}</span>
       <span
         lang="th"
         style={{ display: "block", marginTop: 4, font: "500 14px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}
@@ -176,7 +193,8 @@ export function PhrasesScreen() {
         <span
           style={{ display: "block", marginTop: 5, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
         >
-          {it.note}
+          {/* пояснения к фразам в данных только по-русски — перевод из словаря */}
+          {t(it.note)}
         </span>
       ) : null}
     </button>
@@ -250,7 +268,7 @@ export function PhrasesScreen() {
                 onClick={() => setGroupId(g.id)}
                 aria-pressed={g.id === group.id}
               >
-                {g.ru}
+                {groupName(g, lang)}
                 {g.critical ? <span style={{ color: RED }}> ●</span> : null}
               </button>
             ))}
@@ -270,7 +288,7 @@ export function PhrasesScreen() {
                 maxWidth: 60 + "ch",
               }}
             >
-              {group.note}
+              {t(group.note)}
             </div>
           ) : null}
 

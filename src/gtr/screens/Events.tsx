@@ -9,6 +9,7 @@ import {
   computeQuote,
   draftTitle,
   fmtThb,
+  genreLabel,
   PH,
   RATE_COLOR,
   rateOf,
@@ -28,6 +29,7 @@ import { Card, Chip, Eyebrow, tint } from "../ui";
 import { GtrCalendar, GtrCapacity, humanDate } from "../pickers";
 import { ImpulseArt } from "../impulse";
 import { venueConfirmsFn, type VenueConfirm } from "../kv-api";
+import { fillT, genreLang, useBriefLabel, useTrData } from "./Constructor";
 
 const FORMATS = [
   "Клубная ночь",
@@ -41,6 +43,8 @@ const FORMATS = [
 
 export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
   const { t } = useTranslation();
+  const tr = useTrData();
+  const briefLabel = useBriefLabel();
   const { user, myDrafts, createDraft, deleteDraft } = useGtr();
   const navigate = useNavigate();
 
@@ -109,7 +113,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
           style={{ marginLeft: "auto", padding: "9px 15px" }}
           onClick={() => setCreating((x) => !x)}
         >
-          {creating ? "Отмена" : "+ Новое событие"}
+          {creating ? t("Отмена") : t("+ Новое событие")}
         </button>
       </div>
 
@@ -161,7 +165,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
               }}
             >
               <span style={{ width: 7, height: 7, borderRadius: 0, background: color }} />
-              {s === "all" ? "Все" : STAGE_LABEL[s]}
+              {s === "all" ? t("Все") : t(STAGE_LABEL[s])}
               <span className="gtr-mono" style={{ fontSize: 11, opacity: 0.6 }}>
                 {counts[s] ?? 0}
               </span>
@@ -175,8 +179,8 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
         <Card style={{ padding: "30px 24px", textAlign: "center" }}>
           <div style={{ font: "500 12.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
             {scoped.length
-              ? "Под фильтр ничего не подошло."
-              : "Событий пока нет. Создайте первое — площадка, зал и слот подставятся из базы."}
+              ? t("Под фильтр ничего не подошло.")
+              : t("Событий пока нет. Создайте первое — площадка, зал и слот подставятся из базы.")}
           </div>
         </Card>
       ) : (
@@ -229,9 +233,9 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                   style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}
                 >
                   <span style={{ font: "600 14px/1.45 'Golos Text',sans-serif" }}>
-                    {draftTitle(d)}
+                    {tr(draftTitle(d))}
                   </span>
-                  <Chip color={STAGE_COLOR[st]}>{STAGE_LABEL[st].toUpperCase()}</Chip>
+                  <Chip color={STAGE_COLOR[st]}>{t(STAGE_LABEL[st]).toUpperCase()}</Chip>
                   {vibe?.colors ? (
                     <span
                       className="gtr-mono"
@@ -256,7 +260,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                           background: `linear-gradient(120deg, ${vibe.colors[0]}, ${vibe.colors[1]})`,
                         }}
                       />
-                      {vibe.label.toUpperCase()}
+                      {briefLabel(vibe.label, vibe.labelEn).toUpperCase()}
                     </span>
                   ) : null}
                   <span
@@ -267,7 +271,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                       color: quote.total ? "#fff" : "var(--gtr-t3)",
                     }}
                   >
-                    {quote.total ? fmtThb(quote.total) : "смета пуста"}
+                    {quote.total ? fmtThb(quote.total) : t("смета пуста")}
                   </span>
                 </div>
 
@@ -288,7 +292,7 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                   <span>{t("артистов:")} {artists}</span>
                   <span>{t("подрядчиков:")} {vendors}</span>
                   {d.date ? <span>{d.date}</span> : null}
-                  {d.guests ? <span>{d.guests} {t("гостей")}</span> : null}
+                  {d.guests ? <span>{tr(d.guests)} {t("гостей")}</span> : null}
                 </div>
 
                 <div
@@ -306,7 +310,9 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                   >
                     {d.author || "GTR"}
                     {isAdmin && d.owner ? ` (${d.owner})` : ""}
-                    {d.updated ? ` · изменено ${new Date(d.updated).toLocaleDateString("ru-RU")}` : ""}
+                    {d.updated
+                      ? ` · ${t("изменено")} ${new Date(d.updated).toLocaleDateString("ru-RU")}`
+                      : ""}
                   </span>
                   <button
                     className="gtr-btn"
@@ -316,7 +322,8 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                       createDraft({
                         venueId: d.venueId,
                         format: d.format,
-                        title: `${draftTitle(d)} — копия`,
+                        // название копии — на языке того, кто её создаёт
+                        title: fillT(t, "{{name}} — копия", { name: tr(draftTitle(d)) }),
                         guests: d.guests,
                         graph: structuredClone(d.graph),
                         brief: { ...d.brief },
@@ -330,7 +337,13 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
                     style={{ padding: "5px 10px", fontSize: 12, color: "#E5231B" }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm(`Удалить событие «${draftTitle(d)}»? Отменить будет нельзя.`))
+                      if (
+                        confirm(
+                          fillT(t, "Удалить событие «{{name}}»? Отменить будет нельзя.", {
+                            name: tr(draftTitle(d)),
+                          }),
+                        )
+                      )
                         deleteDraft(d.id);
                     }}
                   >
@@ -486,7 +499,10 @@ function NewEvent({
     brief?: BriefAnswers;
   }) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const tr = useTrData();
+  const briefLabel = useBriefLabel();
+  const gl = genreLang(i18n.language || "ru");
   // ownVenue приходит и из паспорта площадки — тогда он есть и у админа
   const [venueId, setVenueId] = useState(ownVenue || "");
   const [presetId, setPresetId] = useState<string | "blank" | "">("");
@@ -633,12 +649,12 @@ function NewEvent({
                     color: on ? "#fff" : "rgba(255,255,255,.85)",
                   }}
                 >
-                  {p.title}
+                  {tr(p.title)}
                 </span>
                 <span
                   style={{ font: "500 12px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
                 >
-                  {p.desc}
+                  {tr(p.desc)}
                 </span>
                 <span
                   className="gtr-mono"
@@ -647,7 +663,7 @@ function NewEvent({
                     color: on ? "#2ECC71" : "rgba(255,255,255,.35)",
                   }}
                 >
-                  {p.format} {t("· зал + слот +")} {blocks} {t("блоков")}
+                  {tr(p.format)} {t("· зал + слот +")} {blocks} {t("блоков")}
                 </span>
               </button>
             );
@@ -697,7 +713,7 @@ function NewEvent({
                     color: on ? "#fff" : "rgba(255,255,255,.6)",
                   }}
                 >
-                  {f}
+                  {tr(f)}
                 </button>
               );
             })}
@@ -708,7 +724,7 @@ function NewEvent({
       {/* дата и время: полноценный календарь вместо текстового поля */}
       <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 18 }}>
         <div style={{ display: "grid", gap: 8, alignContent: "start" }}>
-          <Step n={next()} title={t("Дата")} note={dateIso ? humanDate(dateIso) : "необязательно"} />
+          <Step n={next()} title={t("Дата")} note={dateIso ? humanDate(dateIso) : t("необязательно")} />
           <GtrCalendar value={dateIso} onChange={setDateIso} />
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", maxWidth: 340 }}>
             {TIME_SLOTS.map((t) => {
@@ -737,7 +753,7 @@ function NewEvent({
 
         {/* вместимость: регулятор вместо свободного текста */}
         <div style={{ display: "grid", gap: 8, alignContent: "start", minWidth: 0 }}>
-          <Step n={next()} title={t("Вместимость")} note="фильтрует подбор площадки" />
+          <Step n={next()} title={t("Вместимость")} note={t("фильтрует подбор площадки")} />
           <GtrCapacity value={guests} onChange={setGuests} />
         </div>
       </div>
@@ -747,7 +763,11 @@ function NewEvent({
         <Step
           n={next()}
           title={t("Площадка")}
-          note={canChoose ? `${venues.length} подходит` : "закреплена за кабинетом"}
+          note={
+            canChoose
+              ? fillT(t, "{{n}} подходит", { n: venues.length })
+              : t("закреплена за кабинетом")
+          }
         />
         {picked ? (
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -758,7 +778,9 @@ function NewEvent({
               style={{ font: "500 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
             >
               {picked.type} · {picked.area}
-              {picked.capacity ? ` · до ${capOf(picked.capacity)} гостей` : ""}
+              {picked.capacity
+                ? ` · ${fillT(t, "до {{n}} гостей", { n: capOf(picked.capacity) })}`
+                : ""}
             </span>
             {pickedCapShort ? (
               <Chip color="#F5A623">{t("МАЛА ДЛЯ")} {guests}</Chip>
@@ -843,7 +865,7 @@ function NewEvent({
                         }}
                       >
                         {isTeam ? `${v.id} · ` : ""}{v.type || "—"} · {v.cluster || v.area}
-                        {cap ? ` · до ${cap}` : ""}
+                        {cap ? ` · ${fillT(t, "до {{n}}", { n: cap })}` : ""}
                       </span>
                       {cRate?.amount ? (
                         <span
@@ -855,7 +877,7 @@ function NewEvent({
                           }}
                         >
                           ✓ {fmtThb(cRate.amount)}
-                          {cRate.unit !== "событие" ? ` / ${cRate.unit}` : ""} {t("· площадка")}
+                          {cRate.unit !== "событие" ? ` / ${t(cRate.unit)}` : ""} {t("· площадка")}
                         </span>
                       ) : rate ? (
                         <span
@@ -867,7 +889,7 @@ function NewEvent({
                           }}
                         >
                           {fmtThb(rate.amount)}
-                          {rate.unit !== "событие" ? ` / ${rate.unit}` : ""}
+                          {rate.unit !== "событие" ? ` / ${t(rate.unit)}` : ""}
                           {rate.kind === "gtr-estimate" ? " ~" : ""}
                         </span>
                       ) : null}
@@ -922,7 +944,7 @@ function NewEvent({
           <Step
             n={next()}
             title={t("Залы и зоны")}
-            note="сюда будут закрепляться артисты, интерактив и оборудование"
+            note={t("сюда будут закрепляться артисты, интерактив и оборудование")}
           />
           {venueRooms.length ? (
             <div
@@ -958,7 +980,7 @@ function NewEvent({
                       {r.name}
                     </span>
                     <span className="gtr-mono" style={{ font: "500 11px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.4)" }}>
-                      {r.sub}
+                      {tr(r.sub)}
                     </span>
                   </button>
                 );
@@ -966,7 +988,7 @@ function NewEvent({
             </div>
           ) : (
             <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {t("Залы этой площадки ещё не нормализованы в базе — событие соберётся по площадке целиком, зоны можно включить ниже.")}
+              {t("У площадки пока нет отдельных залов — событие соберётся на всю площадку, зоны можно включить ниже.")}
             </span>
           )}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -989,7 +1011,7 @@ function NewEvent({
                   }}
                 >
                   {on ? "✓ " : "+ "}
-                  {z}
+                  {tr(z)}
                 </button>
               );
             })}
@@ -1000,7 +1022,11 @@ function NewEvent({
       {/* вайб пресета: направление и музыкальные стили */}
       {preset && vibeQ ? (
         <div style={{ display: "grid", gap: 8 }}>
-          <Step n={next()} title={vibeQ.q} note="задаёт палитру и музыкальные стили" />
+          <Step
+            n={next()}
+            title={briefLabel(vibeQ.q, vibeQ.qEn)}
+            note={t("задаёт палитру и музыкальные стили")}
+          />
           <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
             {vibeQ.options.map((o) => {
               const on = vibeId === o.id;
@@ -1009,7 +1035,7 @@ function NewEvent({
                 <button
                   key={o.id}
                   onClick={() => setVibeId(on ? "" : o.id)}
-                  title={(o.styles ?? []).join(" · ")}
+                  title={(o.styles ?? []).map((st) => genreLabel(st, gl)).join(" · ")}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -1033,7 +1059,7 @@ function NewEvent({
                     }}
                   />
                   <span>
-                    {o.label}
+                    {briefLabel(o.label, o.labelEn)}
                     <span
                       style={{
                         display: "block",
@@ -1042,7 +1068,7 @@ function NewEvent({
                         color: on ? "rgba(255,255,255,.75)" : "rgba(255,255,255,.35)",
                       }}
                     >
-                      {(o.styles ?? []).slice(0, 3).join(" · ")}
+                      {(o.styles ?? []).slice(0, 3).map((st) => genreLabel(st, gl)).join(" · ")}
                     </span>
                   </span>
                 </button>
@@ -1054,16 +1080,16 @@ function NewEvent({
 
       {/* название */}
       <div style={{ display: "grid", gap: 8 }}>
-        <Step n={next()} title={t("Название")} note="необязательно" />
+        <Step n={next()} title={t("Название")} note={t("необязательно")} />
         <input
           className="gtr-input"
           style={{ padding: "8px 11px", fontSize: 12 }}
           placeholder={
             preset
-              ? `${preset.title} · ${picked?.name ?? ""}`
+              ? `${tr(preset.title)} · ${picked?.name ?? ""}`
               : format
-                ? `${format} · ${picked?.name ?? ""}`
-                : "Например: Открытие сезона"
+                ? `${tr(format)} · ${picked?.name ?? ""}`
+                : t("Например: Открытие сезона")
           }
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -1085,10 +1111,10 @@ function NewEvent({
         {!ready ? (
           <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
             {!venueId
-              ? "Выберите площадку"
+              ? t("Выберите площадку")
               : preset && vibeQ && !vibeId
-                ? "Выберите вайб"
-                : "Выберите сценарий или формат"}
+                ? t("Выберите вайб")
+                : t("Выберите сценарий или формат")}
           </span>
         ) : null}
       </div>

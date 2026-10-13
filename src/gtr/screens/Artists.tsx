@@ -5,6 +5,7 @@ import {
   AMBER,
   ENTITY_KIND_LABEL,
   entityColor,
+  genreLabel,
   GREEN,
   isPerformer,
   loadArtists,
@@ -54,16 +55,17 @@ const LABEL_LOGOS = labelLogosRaw as Record<string, LabelLogo>;
 // Встроенные плееры сняты (виджеты сервисов разнобойные) — вместо них
 // прямая ссылка на музыку. Spotify — основной инструмент: прямой профиль,
 // если известен; SoundCloud — для локальной сцены; остальным — Spotify-поиск.
-const playerLink = (p: ArtistPlayer, spFallback?: string): { url: string; label: string } => {
+// svc — название сервиса (бренд, не переводится); подпись «Музыка» переводится при выводе
+const playerLink = (p: ArtistPlayer, spFallback?: string): { url: string; svc?: string } => {
   // Spotify-фолбэк годится, только если это прямой профиль артиста.
   // Поисковая выдача — не музыка: жмёшь «Музыка», а попадаешь в список.
   // Прямая ссылка Deezer или Mixcloud честнее любого поиска.
   const spDirect = spFallback && /open\.spotify\.com\/artist\//.test(spFallback) ? spFallback : undefined;
-  if (p.kind === "spotify") return { url: `https://open.spotify.com/artist/${p.ref}`, label: "Музыка · Spotify" };
-  if (p.kind === "sc") return { url: p.ref, label: "Музыка · SoundCloud" };
-  if (p.kind === "mixcloud") return { url: `https://www.mixcloud.com${p.ref}`, label: "Музыка · Mixcloud" };
-  if (p.kind === "deezer") return { url: `https://www.deezer.com/artist/${p.ref}`, label: "Музыка · Deezer" };
-  return spDirect ? { url: spDirect, label: "Музыка · Spotify" } : { url: `https://www.deezer.com/artist/${p.ref}`, label: "Музыка" };
+  if (p.kind === "spotify") return { url: `https://open.spotify.com/artist/${p.ref}`, svc: "Spotify" };
+  if (p.kind === "sc") return { url: p.ref, svc: "SoundCloud" };
+  if (p.kind === "mixcloud") return { url: `https://www.mixcloud.com${p.ref}`, svc: "Mixcloud" };
+  if (p.kind === "deezer") return { url: `https://www.deezer.com/artist/${p.ref}`, svc: "Deezer" };
+  return spDirect ? { url: spDirect, svc: "Spotify" } : { url: `https://www.deezer.com/artist/${p.ref}` };
 };
 
 // Группы базы — служебные английские метки; посетителю показываем
@@ -106,8 +108,19 @@ const LINKS: [keyof Artist, string][] = [
   ["web", "Сайт"],
 ];
 
+// Роль записи: в базе есть английская (role) и русская (roleRu) версии —
+// русскому интерфейсу русскую, остальным английскую
+const roleOf = (a: Artist, lang: string) =>
+  String((lang === "ru" && a.roleRu) || a.role || "");
+
+// Жанры приходят русскими строками — на витрину через дерево жанров
+// (для тайского тоже английские названия: так их читают на сцене)
+const stylesOf = (a: Artist, lang: string, n?: number) =>
+  (a.styles || []).slice(0, n).map((s) => genreLabel(s, lang));
+
 export function ArtistsScreen({ artistId }: { artistId?: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   const [base, setBase] = useState<ArtistBase | null>(null);
   const [q, setQ] = useState("");
   // Исполнители и контрагенты — разные сущности и разные задачи, поэтому
@@ -163,7 +176,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
         if (style !== "all" && !(a.styles || []).includes(style)) return false;
         if (
           qq &&
-          !`${a.name} ${a.role} ${(a.styles || []).join(" ")}`
+          !`${a.name} ${a.role} ${roleOf(a, lang)} ${(a.styles || []).join(" ")} ${stylesOf(a, lang).join(" ")}`
             .toLowerCase()
             .includes(qq)
         )
@@ -174,7 +187,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
         (a, b) =>
           rank(a.prio) - rank(b.prio) || a.name.localeCompare(b.name, "ru"),
       );
-  }, [base, q, scope, kind, pool, style]);
+  }, [base, q, scope, kind, pool, style, lang]);
 
   if (!base)
     return (
@@ -286,7 +299,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
           placeholder={
             scope === "performers"
               ? t("Поиск по имени и стилю…")
-              : "Поиск по названию и роли…"
+              : t("Поиск по названию и роли…")
           }
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -308,7 +321,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
             )
             .map(([k, l]) => (
               <option key={k} value={k}>
-                {l}
+                {t(l)}
               </option>
             ))}
         </select>
@@ -320,7 +333,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
         >
           {Object.entries(POOL_LABEL).map(([k, l]) => (
             <option key={k} value={k}>
-              {l}{" "}
+              {t(l)}{" "}
               {k !== "all" && base.meta.byGroup[k]
                 ? `· ${base.meta.byGroup[k]}`
                 : ""}
@@ -353,7 +366,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                 font: "500 12px/1 'Golos Text',sans-serif",
               }}
             >
-              {s === "all" ? t("Все стили") : `${s} · ${n}`}
+              {s === "all" ? t("Все стили") : `${genreLabel(String(s), lang)} · ${n}`}
             </button>
           ),
         )}
@@ -431,7 +444,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                       textTransform: "uppercase",
                     }}
                   >
-                    {ENTITY_KIND_LABEL[a.kind] ?? a.kind}
+                    {ENTITY_KIND_LABEL[a.kind] ? t(ENTITY_KIND_LABEL[a.kind]) : a.kind}
                   </span>
                 </div>
                 {photo ? (
@@ -518,7 +531,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                     textOverflow: "ellipsis",
                   }}
                 >
-                  {(a.styles || []).slice(0, 3).join(" · ") || a.role}
+                  {stylesOf(a, lang, 3).join(" · ") || roleOf(a, lang)}
                 </div>
                 <div
                   className="gtr-mono"
@@ -527,7 +540,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                     color: "var(--gtr-t3)",
                   }}
                 >
-                  {a.tier || a.cat} · {a.base || "—"}
+                  {a.tier ? t(a.tier) : a.cat} · {a.baseRu || a.base ? t(String(a.baseRu || a.base)) : "—"}
                 </div>
               </div>
             </Card>
@@ -560,7 +573,8 @@ function ArtistCard({
   live?: { live: boolean; kind: string; url?: string };
   onBack: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   const { user, shared, setLineup } = useGtr();
   const navigate = useNavigate();
   // Режим посетителя: страница артиста как для фаната — без букинга,
@@ -738,7 +752,7 @@ function ArtistCard({
           {PHOTOS[a.id] ? (
             <img
               src={PHOTOS[a.id].photo}
-              alt={`Фото: ${a.name}`}
+              alt={t("Фото: {{name}}", { name: a.name })}
               style={{
                 width: 124,
                 height: 124,
@@ -754,7 +768,7 @@ function ArtistCard({
             <LetterMark name={a.name} size={124} cut={12} />
           )}
           <div style={{ minWidth: 0, flex: 1 }}>
-            <Eyebrow>{a.catRu ? String(a.catRu) : a.cat}</Eyebrow>
+            <Eyebrow>{a.catRu ? t(String(a.catRu)) : a.cat}</Eyebrow>
             <div
               style={{
                 display: "flex",
@@ -785,7 +799,7 @@ function ArtistCard({
               ) : null}
               {!fanView || flags.verified ? (
                 <span
-                  title={user.role === "gtr" ? "Нажмите, чтобы переключить" : undefined}
+                  title={user.role === "gtr" ? t("Нажмите, чтобы переключить") : undefined}
                   onClick={user.role === "gtr" ? () => toggleFlag("verified") : undefined}
                   style={{ cursor: user.role === "gtr" ? "pointer" : "default", display: "inline-flex" }}
                 >
@@ -796,7 +810,7 @@ function ArtistCard({
               ) : null}
               {!fanView ? (
                 <span
-                  title={user.role === "gtr" ? "Нажмите, чтобы переключить" : undefined}
+                  title={user.role === "gtr" ? t("Нажмите, чтобы переключить") : undefined}
                   onClick={user.role === "gtr" ? () => toggleFlag("workPermit") : undefined}
                   style={{ cursor: user.role === "gtr" ? "pointer" : "default", display: "inline-flex" }}
                 >
@@ -813,7 +827,7 @@ function ArtistCard({
                 color: "var(--gtr-t2)",
               }}
             >
-              {a.role}
+              {roleOf(a, lang)}
             </div>
             {bio ? (
               <div
@@ -838,7 +852,8 @@ function ArtistCard({
                   color: "var(--gtr-t3)",
                 }}
               >
-                {String(a.relRu || a.rel)}
+                {/* примечание о маршруте букинга: в базе есть RU и EN версии */}
+                {String((lang === "ru" && a.relRu) || a.rel)}
               </div>
             ) : null}
             {a.labels?.length ? (
@@ -881,7 +896,7 @@ function ArtistCard({
             >
               {(a.styles || []).map((s) => (
                 <Chip key={s} color="rgba(255,255,255,.55)">
-                  {s}
+                  {genreLabel(s, lang)}
                 </Chip>
               ))}
             </div>
@@ -952,7 +967,7 @@ function ArtistCard({
                           openAppLink(pl.url);
                         }}
                       >
-                        ♪ {pl.label} ↗
+                        ♪ {t("Музыка")}{pl.svc ? ` · ${pl.svc}` : ""} ↗
                       </a>
                     );
                   })()
@@ -978,13 +993,13 @@ function ArtistCard({
                     href={url}
                     target="_blank"
                     rel="noreferrer"
-                    title={search ? "Поиск по сервису — прямой записи пока нет" : undefined}
+                    title={search ? t("Поиск по сервису — прямой записи пока нет") : undefined}
                     onClick={(e) => {
                       e.preventDefault();
                       openAppLink(url);
                     }}
                   >
-                    {label}{search ? " · поиск" : ""} ↗
+                    {t(label)}{search ? ` · ${t("поиск")}` : ""} ↗
                   </a>
                 );
               })}
@@ -1081,7 +1096,7 @@ function ArtistCard({
             <GtrLightbox
               images={extras.photos}
               index={galleryLb}
-              credit={`Фото: ${a.name}`}
+              credit={t("Фото: {{name}}", { name: a.name })}
               onClose={() => setGalleryLb(null)}
             />
           ) : null}
@@ -1097,15 +1112,16 @@ function ArtistCard({
           <Eyebrow style={{ marginBottom: 10 }}>{t("КОНТАКТ И БУКИНГ")}</Eyebrow>
           {(
             [
-              ["Статус", String(a.statusRu || a.status || "—"), false],
-              ["Менеджмент", String(a.mgmtRu || a.mgmt || "—"), false],
-              ["База", String(a.baseRu || a.base || "—"), false],
+              // статус и база — справочные значения базы, переводятся словарём
+              ["Статус", a.statusRu || a.status ? t(String(a.statusRu || a.status)) : "—", false],
+              ["Менеджмент", String((lang === "ru" && a.mgmtRu) || a.mgmt || "—"), false],
+              ["База", a.baseRu || a.base ? t(String(a.baseRu || a.base)) : "—", false],
               ["Телефон", a.phone || "—", true],
               ["Email", a.email || "—", true],
               ["Верифицировано", a.verified || "—", true],
             ] as [string, string, boolean][]
           ).map(([k, v, mono]) => (
-            <Field key={k} k={k} v={v} mono={mono} />
+            <Field key={k} k={t(k)} v={v} mono={mono} />
           ))}
           {a.evidence ? (
             <div
@@ -1115,31 +1131,31 @@ function ArtistCard({
                 color: "var(--gtr-t3)",
               }}
             >
-              {String(a.evidenceRu || a.evidence)}
+              {String((lang === "ru" && a.evidenceRu) || a.evidence)}
             </div>
           ) : null}
         </Card>
 
         <Card style={{ padding: 18 }}>
           <Eyebrow style={{ marginBottom: 10 }}>
-            {t("РАЙДЕР")} · {rider ? rider.label.toUpperCase() : t("НЕ ПРИМЕНЯЕТСЯ")}
+            {t("РАЙДЕР")} · {rider ? t(rider.label).toUpperCase() : t("НЕ ПРИМЕНЯЕТСЯ")}
           </Eyebrow>
           {rider ? (
             <>
               <SubHead color="#22D3C7" style={{ margin: "8px 0 7px" }}>
                 {t("Технический")}
               </SubHead>
-              {rider.tech.map((t) => (
-                <Li key={t} color="#22D3C7">
-                  {t}
+              {rider.tech.map((line) => (
+                <Li key={line} color="#22D3C7">
+                  {t(line)}
                 </Li>
               ))}
               <SubHead color="#FFD166" style={{ margin: "14px 0 7px" }}>
                 {t("Гостеприимство")}
               </SubHead>
-              {rider.hosp.map((t) => (
-                <Li key={t} color="#FFD166">
-                  {t}
+              {rider.hosp.map((line) => (
+                <Li key={line} color="#FFD166">
+                  {t(line)}
                 </Li>
               ))}
             </>
@@ -1150,7 +1166,7 @@ function ArtistCard({
                 color: "var(--gtr-t3)",
               }}
             >
-              {t("Для этой записи шаблон райдера GTR не назначен.")}
+              {t("Райдер для этого артиста пока не заполнен.")}
             </div>
           )}
         </Card>
@@ -1194,7 +1210,7 @@ function ArtistCard({
               {(a.styles || []).length ? (
                 (a.styles || []).map((s, i, arr) => (
                   <div key={s} style={{ marginBottom: 10 }}>
-                    <div style={{ font: "600 12px/1.2 'Golos Text',sans-serif", marginBottom: 5 }}>{t(s)}</div>
+                    <div style={{ font: "600 12px/1.2 'Golos Text',sans-serif", marginBottom: 5 }}>{genreLabel(s, lang)}</div>
                     <div style={{ height: 5, background: "rgba(255,255,255,.07)" }}>
                       <span
                         className="gtr-genrebar"
@@ -1219,7 +1235,7 @@ function ArtistCard({
               <Eyebrow style={{ marginBottom: 10 }}>{t("СТАТУС И ДОСТИЖЕНИЯ")}</Eyebrow>
               {a.tier && a.tier !== "—" ? <Field k={t("Статус сцены")} v={t(a.tier)} /> : null}
               {a.group ? <Field k={t("Сцена")} v={t(GROUP_FAN[a.group] ?? a.group)} /> : null}
-              {String(a.baseRu || a.base || "") ? <Field k={t("База")} v={String(a.baseRu || a.base)} /> : null}
+              {String(a.baseRu || a.base || "") ? <Field k={t("База")} v={t(String(a.baseRu || a.base))} /> : null}
               {flags.verified ? <Field k={t("Верификация")} v={t("Подтверждён командой GTR ✓")} /> : null}
               {P?.sets?.length ? <Field k={t("Сеты в профиле")} v={String(P.sets.length)} mono /> : null}
               {playedVenues.length ? <Field k={t("Площадки")} v={String(playedVenues.length)} mono /> : null}
@@ -1258,7 +1274,7 @@ function ArtistCard({
                           {x.name}
                         </div>
                         <div className="gtr-mono" style={{ marginTop: 2, font: "500 7.5px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {(x.styles || []).slice(0, 2).join(" · ")}
+                          {stylesOf(x, lang, 2).join(" · ")}
                         </div>
                       </div>
                     </div>

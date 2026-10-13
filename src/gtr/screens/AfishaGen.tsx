@@ -399,14 +399,14 @@ export function AfishaGenScreen() {
         const j = (await res.json()) as { ok?: boolean; personal?: boolean; reason?: string };
         if (j.ok) {
           setTgState("ok");
-          setTgMsg(j.personal ? "Ушло вам в Telegram" : "Ушло в общий канал");
+          setTgMsg(j.personal ? t("Ушло вам в Telegram") : t("Ушло в общий канал"));
         } else {
           setTgState("err");
-          setTgMsg(j.reason ?? "не отправилось");
+          setTgMsg(j.reason ? t(j.reason) : t("не отправилось"));
         }
       } catch {
         setTgState("err");
-        setTgMsg("сеть");
+        setTgMsg(t("сеть"));
       }
       setTimeout(() => setTgState("idle"), 4000);
     }, "image/png");
@@ -423,7 +423,7 @@ export function AfishaGenScreen() {
     );
 
   const bgOptions: { key: string; src: string; label: string }[] = [
-    ...(artistHero ? [{ key: "artist", src: artistHero, label: "Hero артиста" }] : []),
+    ...(artistHero ? [{ key: "artist", src: artistHero, label: t("Hero артиста") }] : []),
     ...corpus.map((c) => ({ key: c.id, src: c.poster, label: c.title })),
   ];
 
@@ -467,7 +467,7 @@ export function AfishaGenScreen() {
           <Card style={{ padding: "16px 18px", display: "grid", gap: 12 }}>
             <Eyebrow>{t("БРИФ")}</Eyebrow>
             <div>
-              {label("Площадка")}
+              {label(t("Площадка"))}
               <select
                 className="gtr-input"
                 value={vid}
@@ -486,7 +486,7 @@ export function AfishaGenScreen() {
               </select>
             </div>
             <div>
-              {label("Артист")}
+              {label(t("Артист"))}
               <input
                 className="gtr-input"
                 placeholder={t("Поиск по 312…")}
@@ -548,7 +548,7 @@ export function AfishaGenScreen() {
               ) : null}
             </div>
             <div>
-              {label("Название события")}
+              {label(t("Название события"))}
               <input
                 className="gtr-input"
                 placeholder="Full Moon Party"
@@ -558,7 +558,7 @@ export function AfishaGenScreen() {
             </div>
             <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <div>
-                {label("Дата")}
+                {label(t("Дата"))}
                 <input
                   className="gtr-input"
                   type="date"
@@ -567,7 +567,7 @@ export function AfishaGenScreen() {
                 />
               </div>
               <div>
-                {label("Время")}
+                {label(t("Время"))}
                 <input
                   className="gtr-input"
                   type="time"
@@ -577,7 +577,7 @@ export function AfishaGenScreen() {
               </div>
             </div>
             <div>
-              {label("Строка лайнапа / формат")}
+              {label(t("Строка лайнапа / формат"))}
               <input
                 className="gtr-input"
                 placeholder="Support: DJ … · Dress code: white"
@@ -600,7 +600,7 @@ export function AfishaGenScreen() {
                   }}
                   onClick={() => setSize(s)}
                 >
-                  {SIZES[s].label}
+                  {t(SIZES[s].label)}
                 </button>
               ))}
               {VARIANTS.map((v, i) => (
@@ -613,12 +613,13 @@ export function AfishaGenScreen() {
                   }}
                   onClick={() => setVariant(i)}
                 >
-                  {v}
+                  {/* «Афиша» здесь — стиль макета (постер), а не раздел приложения */}
+                  {v === "Афиша" ? t("Афиша", { context: "style" }) : t(v)}
                 </button>
               ))}
             </div>
             <div>
-              {label("Фон")}
+              {label(t("Фон"))}
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 <button
                   onClick={() => setBg("")}
@@ -671,12 +672,12 @@ export function AfishaGenScreen() {
                 }
               >
                 {tgState === "busy"
-                  ? "Отправляю…"
+                  ? t("Отправляю…")
                   : tgState === "ok"
                     ? `✓ ${tgMsg}`
                     : tgState === "err"
                       ? `⚠ ${tgMsg}`
-                      : "В Telegram →"}
+                      : t("В Telegram →")}
               </button>
             </div>
           </Card>

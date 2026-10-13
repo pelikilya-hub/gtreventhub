@@ -17,6 +17,7 @@ import {
   richOf,
   SPACES,
   V,
+  readinessLabel,
 } from "../data/app-data";
 import { CdmReserve, zonesOfSpace, hasReserve } from "../cdm-booking";
 import { Card, Chip, Eyebrow, Field, tint, TrashTitle, VenueLogo } from "../ui";
@@ -41,6 +42,12 @@ import { posterUrl } from "../poster";
 import { useVenueContacts } from "../work-contacts";
 import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
+
+/** Подпись из данных вида «Площадка · официальный сайт»: каждая часть
+ *  переводится отдельно — имена остаются как есть (ключа у них нет),
+ *  служебные слова уходят в перевод. */
+const tParts = (t: (k: string) => string, s?: string) =>
+  s ? s.split(" · ").map((part) => t(part)).join(" · ") : "";
 
 const confColor = (c: string) => (c === "High" ? GREEN : c === "Medium" ? AMBER : RED);
 const isQuar = (x: { confidence: string; status?: string }) =>
@@ -386,7 +393,7 @@ export function BaseScreen() {
                   color: "var(--gtr-t2)",
                 }}
               >
-                {x.type} · {x.area}
+                {t(String(x.type ?? ""))} · {t(String(x.area ?? ""))}
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {/* Достоверность источника — только команде GTR. Клиенту
@@ -396,7 +403,7 @@ export function BaseScreen() {
                 {isTeam ? (
                   <Chip color={confColor(x.confidence)}>{(x.confidence ?? "—").toUpperCase()}</Chip>
                 ) : null}
-                {x.readiness?.state === "Бронируемая" ? (
+                {x.readiness?.state === "Bookable" ? (
                   <Chip color={GREEN}>{t("БРОНИРУЕМАЯ")}</Chip>
                 ) : null}
                 {confirms[x.id]?.status === "confirmed" ? (
@@ -492,7 +499,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             {/* Внутренний id площадки — только команде. Гостю показываем
                 район, а не «VEN-0061»: это наш служебный код, не его дело. */}
             {isTeam ? `${v.id} · ` : ""}
-            {(v.cluster ?? v.area ?? "").toUpperCase()}
+            {t(String(v.cluster ?? v.area ?? "")).toUpperCase()}
           </Eyebrow>
           <div
             style={{
@@ -516,7 +523,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               <>
                 <Chip color={confColor(v.confidence)}>{t("ДОСТОВЕРНОСТЬ:")} {(v.confidence ?? "—").toUpperCase()}</Chip>
                 {R ? (
-                  <Chip color={R.state === "Бронируемая" ? GREEN : AMBER}>{R.state.toUpperCase()}</Chip>
+                  <Chip color={R.state === "Bookable" ? GREEN : AMBER}>{t(readinessLabel(R.state)).toUpperCase()}</Chip>
                 ) : null}
               </>
             ) : null}
@@ -531,7 +538,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               color: "var(--gtr-t2)",
             }}
           >
-            {v.type} · {v.area} · {v.district}
+            {t(String(v.type ?? ""))} · {t(String(v.area ?? ""))} · {v.district}
           </div>
           <div
             style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 14 }}
@@ -568,7 +575,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 className="gtr-mono"
                 style={{ font: "700 12px/1 'JetBrains Mono',monospace", color: GREEN }}
               >
-                {t("аренда")} {fmtThb(cRate.amount)} / {cRate.unit} {t("· подтверждено площадкой")}
+                {t("аренда")} {fmtThb(cRate.amount)} / {t(String(cRate.unit))} {t("· подтверждено площадкой")}
               </span>
             ) : commercial && rate ? (
               <span
@@ -579,8 +586,8 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 }}
               >
                 {rate.amount
-                  ? `аренда ${fmtThb(rate.amount)} / ${rate.unit}`
-                  : "аренда по запросу"}
+                  ? `${t("аренда")} ${fmtThb(rate.amount)} / ${t(rate.unit)}`
+                  : t("аренда по запросу")}
               </span>
             ) : null}
           </div>
@@ -593,7 +600,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 color: "var(--gtr-t3)",
               }}
             >
-              {t("фото:")} {rich.credit}
+              {t("фото:")} {tParts(t, rich.credit)}
             </div>
           ) : null}
         </div>
@@ -611,7 +618,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             <Card reveal style={{ padding: 18 }}>
               <Eyebrow style={{ marginBottom: 10 }}>{t("ЧЕМ ЗАНЯТЬСЯ ЗДЕСЬ")}</Eyebrow>
               <div style={{ font: "500 12.5px/1.65 'Golos Text',sans-serif", color: "var(--gtr-t1)" }}>
-                {v.concept || v.events || v.facilities}
+                {t(String(v.concept || v.events || v.facilities || ""))}
               </div>
               <div
                 style={{
@@ -623,10 +630,10 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               >
                 {(
                   [
-                    [t("ЧАСЫ"), night.hours || t("уточняем")],
-                    [t("ВХОД"), night.entry || t("по ситуации")],
-                    [t("ЛУЧШИЕ ВЕЧЕРА"), night.best || t("смотри афишу")],
-                    [t("ЗВУК"), v.music],
+                    [t("ЧАСЫ"), night.hours ? t(night.hours) : t("уточняем")],
+                    [t("ВХОД"), night.entry ? t(night.entry) : t("по ситуации")],
+                    [t("ЛУЧШИЕ ВЕЧЕРА"), night.best ? t(night.best) : t("смотри афишу")],
+                    [t("ЗВУК"), v.music ? t(String(v.music)) : undefined],
                   ] as [string, string | undefined][]
                 )
                   .filter(([, val]) => val)
@@ -715,7 +722,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
               [
                 t("ВМЕСТИМОСТЬ"),
                 confirm?.status === "confirmed" && confirm.capacity
-                  ? `${confirm.capacity} · подтверждено площадкой`
+                  ? `${confirm.capacity} · ${t("подтверждено площадкой")}`
                   : v.capacity,
               ],
               [t("МУЗЫКА"), v.music],
@@ -724,7 +731,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             ]
               .filter(([, val]) => val)
               .map(([k, val]) => (
-                <Field key={k} k={k} v={String(val)} />
+                <Field key={k} k={k} v={t(String(val))} />
               ))}
           </Card>
 
@@ -792,9 +799,9 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                         }}
                       >
                         {[
-                          s.sqm && `${s.sqm} м²`,
-                          s.capTheatre && `${s.capTheatre} театр`,
-                          s.capCocktail && `${s.capCocktail} коктейль`,
+                          s.sqm && `${s.sqm} ${t("м²")}`,
+                          s.capTheatre && `${s.capTheatre} ${t("театр")}`,
+                          s.capCocktail && `${s.capCocktail} ${t("коктейль")}`,
                         ]
                           .filter(Boolean)
                           .join(" · ") || (zs.length ? zs.map((z) => z.hours).join(" · ") : "—")}
@@ -890,7 +897,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 <GtrLightbox
                   images={rich.gallery}
                   index={lightbox}
-                  credit={rich.credit}
+                  credit={tParts(t, rich.credit)}
                   onClose={() => setLightbox(null)}
                 />
               ) : null}
@@ -928,7 +935,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 <GtrLightbox
                   images={vphotos}
                   index={vpLightbox}
-                  credit="Фото загружены площадкой"
+                  credit={t("Фото загружены площадкой")}
                   onClose={() => setVpLightbox(null)}
                 />
               ) : null}
@@ -960,7 +967,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     ? `${fmtThb(cRate.amount)} / ${cRate.unit}`
                     : rate!.amount
                       ? `${fmtThb(rate!.amount)} / ${rate!.unit}`
-                      : "по запросу"}
+                      : t("по запросу")}
                 </div>
                 <div
                   className="gtr-mono"
@@ -973,12 +980,12 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                   }}
                 >
                   {cRate
-                    ? `Подтверждено площадкой${
+                    ? `${t("Подтверждено площадкой")}${
                         confirm?.confirmedAt
                           ? " · " + new Date(confirm.confirmedAt).toLocaleDateString("ru-RU")
                           : ""
                       }`
-                    : RATE_LABEL[rate!.kind]}
+                    : t(RATE_LABEL[rate!.kind])}
                 </div>
                 {(cRate ? cRate.covers : rate!.covers) ? (
                   <div
@@ -988,7 +995,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                       color: "var(--gtr-t2)",
                     }}
                   >
-                    {cRate ? cRate.covers : rate!.covers}
+                    {t(String(cRate ? cRate.covers : rate!.covers))}
                   </div>
                 ) : null}
                 {confirm?.status === "confirmed" && confirm.contact ? (
@@ -1015,7 +1022,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
             <Eyebrow style={{ marginBottom: 10 }}>{t("ИСТОЧНИКИ И КОНТАКТ")}</Eyebrow>
             {[
               [
-                "Официальный сайт",
+                t("Официальный сайт"),
                 (() => {
                   const u = v.website || v.source;
                   return u ? (
@@ -1033,7 +1040,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 })(),
                 v.website || v.source ? GREEN : RED,
               ],
-              ["Instagram", v.social || "не указан", v.social ? AMBER : "rgba(255,255,255,.3)"],
+              ["Instagram", v.social || t("не указан"), v.social ? AMBER : "rgba(255,255,255,.3)"],
               [
                 "Telegram",
                 v.telegram ? (
@@ -1041,17 +1048,17 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     {v.telegram.replace(/^https:\/\/t\.me\//, "@")}
                   </a>
                 ) : (
-                  "не указан"
+                  t("не указан")
                 ),
                 v.telegram ? GREEN : "rgba(255,255,255,.3)",
               ],
               [
-                "Телефон",
+                t("Телефон"),
                 (() => {
-                  const t = v.phone || ct?.phone;
-                  return t ? (
-                    <a href={`tel:${String(t).replace(/[^+\d]/g, "")}`} style={{ color: "inherit" }}>
-                      {t}
+                  const tel = v.phone || ct?.phone;
+                  return tel ? (
+                    <a href={`tel:${String(tel).replace(/[^+\d]/g, "")}`} style={{ color: "inherit" }}>
+                      {tel}
                     </a>
                   ) : (
                     "—"
@@ -1064,8 +1071,8 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                 v.email || ct?.email || "—",
                 v.email || ct?.email ? GREEN : "rgba(255,255,255,.3)",
               ],
-              ["Тип источника", v.sourceType, GREEN],
-              ["Верифицировано", v.verified || "—", v.verified ? GREEN : RED],
+              [t("Тип источника"), v.sourceType, GREEN],
+              [t("Верифицировано"), v.verified || "—", v.verified ? GREEN : RED],
             ].map(([k, val, c]) => (
               <Field
                 key={String(k)}
@@ -1120,7 +1127,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                     }}
                   />
                   <span style={{ flex: 1, font: "500 13px/1.5 'Golos Text',sans-serif" }}>
-                    {k}
+                    {t(String(k))}
                   </span>
                   <span
                     className="gtr-mono"
@@ -1157,7 +1164,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                         flex: "none",
                       }}
                     >
-                      {date}
+                      {tParts(t, date)}
                     </span>
                     <span style={{ flex: 1 }}>
                       <span
@@ -1172,7 +1179,7 @@ export function VenueCardScreen({ vid }: { vid?: string }) {
                           color: "var(--gtr-t3)",
                         }}
                       >
-                        {meta}
+                        {tParts(t, meta)}
                       </span>
                     </span>
                   </div>
@@ -1226,7 +1233,7 @@ function AfishaBlock({ vid }: { vid: string }) {
       const dataUrl = await shrinkPoster(file);
       const r = await afishaPosterFn({ data: { vid, id, dataUrl } });
       if (r.ok) setPRev((m) => ({ ...m, [id]: (m[id] ?? 0) + 1 }));
-      else setMNote(String(r.reason));
+      else setMNote(t(String(r.reason)));
     } catch {
       setMNote(t("Не получилось прочитать картинку"));
     } finally {
@@ -1266,7 +1273,7 @@ function AfishaBlock({ vid }: { vid: string }) {
         ) : null}
         {style?.colors.length ? (
           <span
-            title={`Стиль площадки · корпус ${style.posters} афиш`}
+            title={t("Стиль площадки · {{n}} афиш", { n: style.posters })}
             style={{ display: "flex", gap: 3, alignItems: "center" }}
           >
             {style.colors.slice(0, 6).map((c) => (
@@ -1289,7 +1296,7 @@ function AfishaBlock({ vid }: { vid: string }) {
               }
             }}
           >
-            {busy ? "Собираю…" : "⟳ Обновить"}
+            {busy ? t("Собираю…") : `⟳ ${t("Обновить")}`}
           </button>
         ) : null}
       </div>
@@ -1315,9 +1322,9 @@ function AfishaBlock({ vid }: { vid: string }) {
               const r = await afishaAddFn({ data: { vid, title: mTitle, dateIso: mDate } }).catch(() => null);
               if (r?.ok) {
                 setMTitle("");
-                setMNote("✓ добавлено");
+                setMNote(`✓ ${t("добавлено")}`);
                 await load();
-              } else setMNote(r && "reason" in r ? String(r.reason) : "ошибка");
+              } else setMNote(r && "reason" in r ? t(String(r.reason)) : t("ошибка"));
               setTimeout(() => setMNote(""), 3000);
             }}
           >
@@ -1430,7 +1437,7 @@ function AfishaBlock({ vid }: { vid: string }) {
         </div>
       ) : (
         <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-          {t("Источник этой площадки ещё не подключён — собираем Café del Mar и Illuzion, дальше расширяем.")}
+          {t("Анонсов этой площадки пока нет — они появятся, как только площадка их опубликует.")}
         </span>
       )}
     </Card>
@@ -1488,7 +1495,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
           <Chip
             color={st === "confirmed" ? GREEN : st === "opened" ? AMBER : "rgba(255,255,255,.5)"}
           >
-            {st === "confirmed" ? "✓ ПОДТВЕРЖДЕНО" : st === "opened" ? t("ОТКРЫТО") : t("ОТПРАВЛЕНО")}
+            {st === "confirmed" ? `✓ ${t("ПОДТВЕРЖДЕНО")}` : st === "opened" ? t("ОТКРЫТО") : t("ОТПРАВЛЕНО")}
           </Chip>
         ) : null}
       </div>
@@ -1502,7 +1509,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
         {t("Персональная ссылка для менеджера площадки: без регистрации проверит вместимость и прайс, оставит контакт и подтвердит. EN / TH / RU.")}
       </div>
       <button className="gtr-btn" disabled={busy} onClick={make}>
-        {busy ? "…" : link ? "Новая ссылка" : "Создать ссылку"}
+        {busy ? "…" : link ? t("Новая ссылка") : t("Создать ссылку")}
       </button>
       {link ? (
         <>
@@ -1515,7 +1522,7 @@ function VenueLinkBlock({ vid, confirm }: { vid: string; confirm: VenueConfirm |
               wordBreak: "break-all",
             }}
           >
-            {copied ? "Скопировано · " : ""}
+            {copied ? `${t("Скопировано")} · ` : ""}
             {link}
           </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>

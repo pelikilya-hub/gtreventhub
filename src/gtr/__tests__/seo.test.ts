@@ -16,7 +16,7 @@ const ROOT = join(__dirname, "..", "..", "..");
 const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
 
 describe("мета витрины", () => {
-  for (const lang of ["ru", "en"] as const) {
+  for (const lang of ["ru", "en", "th"] as const) {
     it(`${lang}: заголовок и описание в пределах, которые выдача не режет`, () => {
       const c = SEO_COPY[lang];
       // Google показывает ~60 знаков заголовка и ~160 описания. Длиннее —
@@ -41,11 +41,11 @@ describe("мета витрины", () => {
       expect(by("property", "og:url").content).toBe(canonicalOf(lang));
     });
 
-    it(`${lang}: канонический адрес и обе языковые альтернативы`, () => {
+    it(`${lang}: канонический адрес и все языковые альтернативы`, () => {
       const links = seoLinks(lang);
       expect(links.find((l) => l.rel === "canonical")?.href).toBe(canonicalOf(lang));
       const alt = links.filter((l) => l.rel === "alternate").map((l) => l.hrefLang);
-      expect(alt).toEqual(["ru", "en", "x-default"]);
+      expect(alt).toEqual(["ru", "en", "th", "x-default"]);
     });
   }
 
@@ -54,6 +54,8 @@ describe("мета витрины", () => {
     expect(canonicalOf("en")).toBe(`${APP_URL}/en`);
     expect(canonicalOf("ru", "afisha")).toBe(`${APP_URL}/afisha`);
     expect(canonicalOf("en", "afisha")).toBe(`${APP_URL}/en/afisha`);
+    expect(canonicalOf("th")).toBe(`${APP_URL}/th`);
+    expect(canonicalOf("th", "afisha")).toBe(`${APP_URL}/th/afisha`);
     expect(OG_IMAGE.startsWith(APP_URL)).toBe(true);
   });
 
@@ -79,6 +81,8 @@ describe("robots и карта сайта", () => {
     expect(robots).toMatch(/^Allow: \/en\$$/m);
     expect(robots).toMatch(/^Allow: \/afisha\$$/m);
     expect(robots).toMatch(/^Allow: \/en\/afisha\$$/m);
+    expect(robots).toMatch(/^Allow: \/th\$$/m);
+    expect(robots).toMatch(/^Allow: \/th\/afisha\$$/m);
   });
 
   it("краулеры ИИ по-прежнему запрещены поимённо", () => {
@@ -92,16 +96,24 @@ describe("robots и карта сайта", () => {
 
   it("в карте сайта только витрина и афиша — кабинеты туда не попадают", () => {
     const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    expect(locs).toEqual([`${APP_URL}/`, `${APP_URL}/en`, `${APP_URL}/afisha`, `${APP_URL}/en/afisha`]);
+    expect(locs).toEqual([
+      `${APP_URL}/`,
+      `${APP_URL}/en`,
+      `${APP_URL}/th`,
+      `${APP_URL}/afisha`,
+      `${APP_URL}/en/afisha`,
+      `${APP_URL}/th/afisha`,
+    ]);
     // адреса, а не комментарии: в шапке файла /gtr/ упомянут как раз затем,
     // чтобы объяснить, почему его здесь нет
     for (const l of locs) expect(l).not.toContain("/gtr/");
   });
 
   it("у каждой страницы карты объявлены языковые альтернативы", () => {
-    expect([...sitemap.matchAll(/hreflang="ru"/g)]).toHaveLength(4);
-    expect([...sitemap.matchAll(/hreflang="en"/g)]).toHaveLength(4);
-    expect([...sitemap.matchAll(/hreflang="x-default"/g)]).toHaveLength(4);
+    expect([...sitemap.matchAll(/hreflang="ru"/g)]).toHaveLength(6);
+    expect([...sitemap.matchAll(/hreflang="en"/g)]).toHaveLength(6);
+    expect([...sitemap.matchAll(/hreflang="th"/g)]).toHaveLength(6);
+    expect([...sitemap.matchAll(/hreflang="x-default"/g)]).toHaveLength(6);
   });
 });
 

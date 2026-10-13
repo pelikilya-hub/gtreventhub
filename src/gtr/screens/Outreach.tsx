@@ -332,7 +332,7 @@ function FillPipeline() {
             >
               {r.name}
               <span className="gtr-mono" style={{ marginLeft: 8, fontSize: 11, color: "var(--gtr-t3)" }}>
-                {r.area}
+                {t(String(r.area ?? ""))}
               </span>
             </button>
             <span
@@ -450,7 +450,7 @@ export function OutreachScreen() {
 
   const hit = async (text: string, label: string) => {
     const ok = await copy(text);
-    setCopied(ok ? label : "не скопировалось — выдели вручную");
+    setCopied(ok ? label : t("не скопировалось — выдели вручную"));
     window.setTimeout(() => setCopied(""), 2200);
   };
 
@@ -479,7 +479,7 @@ export function OutreachScreen() {
                 padding: "9px 12px",
               }}
             >
-              {label} · {stats[key] ?? 0}
+              {t(label)} · {stats[key] ?? 0}
             </button>
           ))}
         </div>
@@ -538,7 +538,7 @@ export function OutreachScreen() {
                     className="gtr-mono"
                     style={{ display: "block", font: "500 12px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
                   >
-                    {v.area} · {v.type}
+                    {t(String(v.area ?? ""))} · {t(String(v.type ?? ""))}
                     {r?.owner ? ` · ${r.owner}` : ""}
                   </span>
                 </span>
@@ -546,7 +546,7 @@ export function OutreachScreen() {
                   className="gtr-mono"
                   style={{ font: "700 12px/1 'JetBrains Mono',monospace", color: STAGE_COLOR[st] }}
                 >
-                  {STAGES.find(([k]) => k === st)?.[1]}
+                  {t(STAGES.find(([k]) => k === st)?.[1] ?? "")}
                 </span>
               </button>
 
@@ -598,7 +598,7 @@ export function OutreachScreen() {
                           color: st === key ? "#fff" : "var(--gtr-t2)",
                         }}
                       >
-                        {label}
+                        {t(label)}
                       </button>
                     ))}
                   </div>
@@ -632,7 +632,7 @@ export function OutreachScreen() {
                           >
                             <span style={{ color: done ? "#2ECC71" : "var(--gtr-t3)" }}>{done ? "✓" : "○"}</span>
                             <span style={{ flex: 1 }}>
-                              <span style={{ font: "600 12.5px/1.5 'Golos Text',sans-serif" }}>{n.title}</span>
+                              <span style={{ font: "600 12.5px/1.5 'Golos Text',sans-serif" }}>{t(n.title)}</span>
                               <span
                                 style={{
                                   display: "block",
@@ -640,7 +640,7 @@ export function OutreachScreen() {
                                   color: "var(--gtr-t3)",
                                 }}
                               >
-                                {n.why}
+                                {t(n.why)}
                               </span>
                             </span>
                           </button>
@@ -657,7 +657,7 @@ export function OutreachScreen() {
                         <input
                           key={k}
                           className="gtr-input"
-                          placeholder={`${k}: ссылка или заметка`}
+                          placeholder={`${t(k)}: ${t("ссылка или заметка")}`}
                           defaultValue={r?.links?.[k] ?? ""}
                           onBlur={(e) => {
                             const val = e.target.value.trim();

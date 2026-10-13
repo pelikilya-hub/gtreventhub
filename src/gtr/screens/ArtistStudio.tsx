@@ -101,6 +101,8 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
   const [saved, setSaved] = useState(false);
   const [teamMsg, setTeamMsg] = useState("");
   const [teamState, setTeamState] = useState("");
+  // доставлено ли — флагом, а не по тексту: текст статуса переводится
+  const [teamOk, setTeamOk] = useState(false);
 
   const load = () =>
     artistExtrasFn({ data: { artistId } })
@@ -166,7 +168,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
     if (!f) return;
     if (f.size > 16_000_000) {
       setBusy("");
-      alert("Видео больше 16 МБ — сожмите (рекомендация: 10–15 секунд, 720p).");
+      alert(t("Видео больше 16 МБ — сожмите (рекомендация: 10–15 секунд, 720p)."));
       return;
     }
     setBusy("video");
@@ -192,15 +194,17 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
 
   const sendTeam = async () => {
     if (!teamMsg.trim()) return;
+    setTeamOk(false);
     setTeamState("…");
     try {
       const r = await contactTeamFn({ data: { text: teamMsg } });
       if (r.ok) {
         setTeamMsg("");
-        setTeamState(`Доставлено команде (${r.delivered})`);
-      } else setTeamState(r.reason ?? "не отправилось");
+        setTeamOk(true);
+        setTeamState(t("Доставлено команде ({{n}})", { n: r.delivered }));
+      } else setTeamState(r.reason ? t(r.reason) : t("не отправилось"));
     } catch {
-      setTeamState("сервер недоступен");
+      setTeamState(t("сервер недоступен"));
     }
     setTimeout(() => setTeamState(""), 4000);
   };
@@ -247,7 +251,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
             {label(lbl.toUpperCase())}
             <input
               className="gtr-input"
-              placeholder={ph}
+              placeholder={t(ph)}
               value={links[k] ?? ""}
               onChange={(e) => setLinks((l) => ({ ...l, [k]: e.target.value }))}
             />
@@ -258,7 +262,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
           disabled={busy === "profile"}
           onClick={() => saveProfile({ bio, links })}
         >
-          {busy === "profile" ? "Сохраняю…" : "Сохранить профиль"}
+          {busy === "profile" ? t("Сохраняю…") : t("Сохранить профиль")}
         </button>
       </Card>
 
@@ -275,7 +279,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
               />
             ) : null}
             <label className="gtr-btn" style={{ cursor: "pointer" }}>
-              {busy === "avatar" ? "…" : avatar ? "Заменить аватар" : "Загрузить аватар"}
+              {busy === "avatar" ? "…" : avatar ? t("Заменить аватар") : t("Загрузить аватар")}
               <input
                 type="file"
                 accept="image/*"
@@ -287,7 +291,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
               />
             </label>
             <label className="gtr-btn" style={{ cursor: "pointer" }}>
-              {busy === "video" ? "Загружаю видео…" : heroVideo ? "Заменить hero-видео" : "Hero-видео (mp4, до 16 МБ)"}
+              {busy === "video" ? t("Загружаю видео…") : heroVideo ? t("Заменить hero-видео") : t("Hero-видео (mp4, до 16 МБ)")}
               <input
                 type="file"
                 accept="video/mp4,video/quicktime,video/webm"
@@ -301,7 +305,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
             {heroVideo ? <Chip color={GREEN}>{t("ВИДЕО В ПРОФИЛЕ")}</Chip> : null}
           </div>
           <div>
-            {label(`ФОТО · ${photos.length}/8`)}
+            {label(`${t("ФОТО")} · ${photos.length}/8`)}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {photos.map((src) => (
                 <span key={src} style={{ position: "relative" }}>
@@ -354,7 +358,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
 
         {/* ---------- сеты ---------- */}
         <Card style={{ padding: "16px 20px", display: "grid", gap: 8 }}>
-          <Eyebrow>{t("МОИ СЕТЫ ·")} {sets.length}/12</Eyebrow>
+          <Eyebrow>{t("МОИ СЕТЫ")} · {sets.length}/12</Eyebrow>
           {sets.map((sSet, i) => (
             <div key={`${sSet.url}-${i}`} style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <span style={{ flex: 1, minWidth: 0, font: "500 13px/1.45 'Golos Text',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -418,7 +422,7 @@ export function ArtistStudio({ artistId }: { artistId: string }) {
               {t("Отправить команде")}
             </button>
             {teamState ? (
-              <span className="gtr-mono" style={{ font: "500 11px/1.45 'JetBrains Mono',monospace", color: teamState.startsWith("Доставлено") ? GREEN : "var(--gtr-t3)" }}>
+              <span className="gtr-mono" style={{ font: "500 11px/1.45 'JetBrains Mono',monospace", color: teamOk ? GREEN : "var(--gtr-t3)" }}>
                 {teamState}
               </span>
             ) : null}

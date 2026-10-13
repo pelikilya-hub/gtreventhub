@@ -9,9 +9,22 @@ import { useTranslation } from "react-i18next";
 
 import { draftDecideFn, draftsFn, type ArtistDraftRow, type VenueDraftRow } from "../kv-api";
 import { Card, Chip, Eyebrow } from "../ui";
+import { fillT } from "./Constructor";
 
 const GREEN = "#2ECC71";
 const AMBER = "#F5A623";
+
+// Сервер отвечает по-русски; переводим известные ответы, а единственный
+// составной — «Площадка принята как VEN-9xxx, событий перенесено: N» — разбираем.
+function noteText(note: string, t: (k: string, o?: Record<string, unknown>) => string): string {
+  const m = note.match(/^Площадка принята как (\S+?)(?:, событий перенесено: (\d+))?$/);
+  if (m)
+    return (
+      fillT(t, "Площадка принята как {{id}}", { id: m[1] }) +
+      (m[2] ? fillT(t, ", событий перенесено: {{n}}", { n: m[2] }) : "")
+    );
+  return note ? t(note) : "";
+}
 
 export function DraftsScreen() {
   const { t } = useTranslation();
@@ -36,13 +49,13 @@ export function DraftsScreen() {
     setBusy(slug);
     try {
       const r = await draftDecideFn({ data: { kind, slug, approve } });
-      setNote(r.note ?? "");
+      setNote(noteText(r.note ?? "", t));
       // Список перечитываем целиком: решение по одной карточке может
       // сдвинуть очередь, а угадывать новое состояние на клиенте — путь
       // к расхождению с сервером.
       load();
     } catch {
-      setNote("Сервер недоступен");
+      setNote(t("Сервер недоступен"));
     } finally {
       setBusy("");
       window.setTimeout(() => setNote(""), 3000);

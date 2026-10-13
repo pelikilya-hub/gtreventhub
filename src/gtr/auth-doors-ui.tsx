@@ -52,6 +52,13 @@ export function AuthDoors({ doors, onDone }: { doors: Doors; onDone: () => void 
   // рованного компонента и попытается впустить уже ушедшего человека.
   useEffect(() => () => { if (poll.current) clearInterval(poll.current); }, []);
 
+  // Сервер дописывает к причине остаток попыток («Код не совпал. Осталось
+  // попыток: 2») — переводим обе части по отдельности, иначе ключ не найдётся.
+  const trError = (e: string) => {
+    const m = /^(.*)\. Осталось попыток: (\d+)$/.exec(e);
+    return m ? `${t(m[1])}. ${t("Осталось попыток: {{n}}", { n: m[2] })}` : t(e);
+  };
+
   const startTelegram = async () => {
     setError(null);
     setBusy("tg");
@@ -238,7 +245,7 @@ export function AuthDoors({ doors, onDone }: { doors: Doors; onDone: () => void 
         </div>
       ) : null}
 
-      {error ? <Err text={t(error)} /> : null}
+      {error ? <Err text={trError(error)} /> : null}
     </div>
   );
 }

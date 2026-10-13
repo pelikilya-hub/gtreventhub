@@ -10,10 +10,10 @@
 // аккаунт. Кабинеты, контакты площадок и прайсы сюда не попадают: витрина
 // говорит о продукте, а не выкладывает его содержимое наружу.
 import { Link } from "@tanstack/react-router";
-import { useRef, type CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 
 import { APP_URL } from "../gtr/app-url";
-import { PAGE_PATH, SEO_PATH, seoJsonLd, type SeoLang } from "../gtr/seo";
+import { PAGE_PATH, SEO_LANGS, SEO_PATH, seoJsonLd, type SeoLang } from "../gtr/seo";
 import { useLandingFx } from "./fx";
 
 export type LandingStats = { venues: number; artists: number; regions: number };
@@ -58,7 +58,7 @@ const T = {
     ctaP: "Приложение бесплатное, регистрация занимает минуту.",
     footRights: "Каталог площадок и артистов — собственная база GTR Event.",
     contact: "Связь и сотрудничество",
-    langSwitch: "English",
+    langSwitch: "Русский",
     scroll: "Листай",
     tonight: "Пхукет · сейчас",
     ticker: ["Живая афиша", "Бронь стола", "Маршрут вечера", "Подбор под музыку", "Пхукет", "Самуи", "Панган", "Бангкок", "Паттайя"],
@@ -107,7 +107,7 @@ const T = {
     ctaP: "The app is free, signing up takes a minute.",
     footRights: "The venue and artist catalogue is GTR Event's own database.",
     contact: "Contact and partnerships",
-    langSwitch: "Русский",
+    langSwitch: "English",
     scroll: "Scroll",
     tonight: "Phuket · now",
     ticker: ["Live lineups", "Table booking", "Evening route", "Matched to your music", "Phuket", "Samui", "Phangan", "Bangkok", "Pattaya"],
@@ -117,6 +117,55 @@ const T = {
     liveState: "Standby",
     liveBtn: "Watch the stream",
   },
+  th: {
+    open: "เปิดแอป",
+    afisha: "โปรแกรม",
+    afishaNow: "โปรแกรมคืนนี้",
+    login: "เข้าสู่ระบบ",
+    signup: "สร้างบัญชี",
+    eyebrow: "ไนท์ไลฟ์ไทย",
+    h1: "คืนนี้ไปไหนดี —|แอปรู้",
+    lead:
+      "โปรแกรมสดจากคลับ บีชคลับ และบาร์ทั่วไทย: ใครเล่นคืนนี้ ที่ไหน กี่โมง จองโต๊ะได้ในไม่กี่แตะ วางเส้นทางเที่ยวบนแผนที่ และเลือกปาร์ตี้ตามเพลงที่คุณชอบ",
+    stVenues: "สถานที่ในฐานข้อมูล",
+    stArtists: "ศิลปินพร้อมเพลง",
+    stRegions: "ภูมิภาคของไทย",
+    stFree: "ใช้ฟรี",
+    whatEyebrow: "มีอะไรในแอป",
+    whatH: "ค่ำคืน|ที่วางแผนเองได้",
+    feats: [
+      ["โปรแกรมทุกคืน", "โปรแกรมของแต่ละร้านรวบรวมอัตโนมัติจากช่องทางทางการ — เว็บไซต์ Facebook และ Instagram เปิดแอปก็เห็นทันทีว่าคืนนี้ใครเล่น"],
+      ["จองโต๊ะ", "คำขอส่งตรงถึงร้าน ตอบกลับภายใน 15 นาที ร้านที่มีผังที่นั่ง เลือกโซน โต๊ะ และสั่งเมนูล่วงหน้าได้"],
+      ["ตรงกับเพลงที่คุณชอบ", "เชื่อม Spotify หรือเลือกแนวเพลงที่ชอบ แอปจะหาปาร์ตี้ที่เล่นแนวของคุณ ไม่ใช่แค่ที่โฆษณาดังที่สุด"],
+      ["เส้นทางเที่ยวคืนนี้", "เลือกไว้หลายที่ แล้วได้เส้นทางบนแผนที่เรียงตามลำดับ พร้อมเช็กอินและแต้มจากรีวิว"],
+      ["ศิลปิน", "รวมดีเจและนักดนตรี: เล่นแนวไหน เคยเล่นที่ไหน ลิงก์เพลงและคลิป รู้ก่อนว่าคุ้มที่จะไปไหม"],
+      ["แดชบอร์ดสำหรับร้าน", "ร้านจัดการโปรแกรม ห้อง และราคาเอง รับคำขอและการจองได้ แดชบอร์ดเปิดใช้ทันทีหลังยืนยันร้าน"],
+    ],
+    regionsEyebrow: "พื้นที่",
+    regionsH: "เกาะ ชายฝั่ง|และเมืองหลวง",
+    regionsP: "ฐานข้อมูลเติบโตเป็นระลอก: เริ่มจากร้านเด่นของแต่ละพื้นที่ แล้วค่อยขยาย ทุกข้อมูลมีแหล่งอ้างอิง ไม่มีการแต่งเติม",
+    installEyebrow: "ติดตั้ง",
+    installH: "ติดตั้งเหมือนแอป|เบาเหมือนเว็บ",
+    installP: "ไม่ต้องผ่านสโตร์ ไม่ต้องอัปเดต: เปิดลิงก์ในเบราว์เซอร์แล้วเพิ่มไปที่หน้าจอหลัก จากนั้นเปิดได้เต็มจอ ไม่มีแถบที่อยู่",
+    steps: [
+      ["iPhone", "เปิด gtrevent.com ใน Safari → แชร์ → เพิ่มไปยังหน้าจอโฮม"],
+      ["Android", "เปิดใน Chrome → เมนู ⋮ → ติดตั้งแอป"],
+      ["บัญชี", "สร้างโปรไฟล์ — โปรแกรมจะปรับตามรสนิยมของคุณ และเปิดใช้การจองกับเส้นทางเที่ยวคืนนี้"],
+    ],
+    ctaH: "เปิด|คืนนี้ของคุณ",
+    ctaP: "แอปใช้ฟรี สมัครใช้เวลาแค่นาทีเดียว",
+    footRights: "ฐานข้อมูลสถานที่และศิลปินเป็นของ GTR Event เอง",
+    contact: "ติดต่อและร่วมงาน",
+    langSwitch: "ภาษาไทย",
+    scroll: "เลื่อนลง",
+    tonight: "ภูเก็ต · ตอนนี้",
+    ticker: ["โปรแกรมสด", "จองโต๊ะ", "เส้นทางเที่ยว", "ตรงกับเพลงที่ชอบ", "ภูเก็ต", "สมุย", "พะงัน", "กรุงเทพฯ", "พัทยา"],
+    liveEyebrow: "ไลฟ์ · bangtaostyle.com",
+    liveH: "วงรอบประเทศไทย|ถ่ายทอดสด",
+    liveP: "ทีม GTR ขับรถวนรอบประเทศ ดูไลฟ์ รถบนแผนที่เส้นทาง และแชตกับทีมได้ที่ bangtaostyle.com",
+    liveState: "รอสัญญาณ",
+    liveBtn: "ดูไลฟ์",
+  },
 } as const;
 
 export const LANDING_T = T;
@@ -124,24 +173,25 @@ export const LANDING_T = T;
 /** Адрес афиши на языке витрины. */
 export const AFISHA_PATH = PAGE_PATH.afisha;
 
-const REGIONS: [string, string, string][] = [
-  ["Пхукет", "Phuket", "phuket"],
-  ["Самуи", "Samui", "samui"],
-  ["Панган", "Phangan", "phangan"],
-  ["Паттайя", "Pattaya", "pattaya"],
-  ["Бангкок", "Bangkok", "bangkok"],
-  ["Пханг-Нга", "Phang Nga", "phangnga"],
+// [ru, en, th, код]
+const REGIONS: [string, string, string, string][] = [
+  ["Пхукет", "Phuket", "ภูเก็ต", "phuket"],
+  ["Самуи", "Samui", "เกาะสมุย", "samui"],
+  ["Панган", "Phangan", "เกาะพะงัน", "phangan"],
+  ["Паттайя", "Pattaya", "พัทยา", "pattaya"],
+  ["Бангкок", "Bangkok", "กรุงเทพฯ", "bangkok"],
+  ["Пханг-Нга", "Phang Nga", "พังงา", "phangnga"],
 ];
 
 // Кольцо эфира bangtaostyle.com — тот же порядок, что в его описании.
-const RING: [string, string][] = [
-  ["Пхукет", "Phuket"],
-  ["Самуи", "Samui"],
-  ["Панган", "Phangan"],
-  ["Чиангмай", "Chiang Mai"],
-  ["Аюттхая", "Ayutthaya"],
-  ["Бангкок", "Bangkok"],
-  ["Паттайя", "Pattaya"],
+const RING: [string, string, string][] = [
+  ["Пхукет", "Phuket", "ภูเก็ต"],
+  ["Самуи", "Samui", "สมุย"],
+  ["Панган", "Phangan", "พะงัน"],
+  ["Чиангмай", "Chiang Mai", "เชียงใหม่"],
+  ["Аюттхая", "Ayutthaya", "อยุธยา"],
+  ["Бангкок", "Bangkok", "กรุงเทพฯ"],
+  ["Паттайя", "Pattaya", "พัทยา"],
 ];
 
 const LIVE_URL = "https://bangtaostyle.com";
@@ -182,7 +232,6 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats }) {
   const t = T[lang];
-  const other: SeoLang = lang === "ru" ? "en" : "ru";
   const app = (path: string) => `${APP_URL}${path}`;
   const root = useRef<HTMLDivElement>(null);
   useLandingFx(root);
@@ -196,7 +245,7 @@ export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats })
         dangerouslySetInnerHTML={{ __html: seoJsonLd(lang, stats) }}
       />
 
-      <LpTop lang={lang} altHref={SEO_PATH[other]} />
+      <LpTop lang={lang} page="home" />
 
       <main>
         <section className="lp-hero">
@@ -300,10 +349,10 @@ export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats })
               </div>
             </div>
             <ol className="lp-ring" data-rv="" aria-label={plain(t.liveH)}>
-              {[...RING, RING[0]].map(([ru, en], i) => (
+              {[...RING, RING[0]].map(([ru, en, th], i) => (
                 <li key={`${en}${i}`} style={{ "--i": i } as CSSProperties}>
                   <span className="lp-idx">{pad(i + 1)}</span>
-                  {lang === "ru" ? ru : en}
+                  {{ ru, en, th }[lang]}
                 </li>
               ))}
             </ol>
@@ -316,11 +365,11 @@ export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats })
             {t.regionsP}
           </p>
           <div className="lp-regions">
-            {REGIONS.map(([ru, en], i) => (
+            {REGIONS.map(([ru, en, th], i) => (
               <a className="lp-region" href={app("/gtr/base")} key={en} data-rv="" style={{ "--i": i } as CSSProperties}>
                 <span className="lp-idx">{pad(i + 1)}</span>
-                <b>{lang === "ru" ? ru : en}</b>
-                {lang === "ru" ? <i className="lp-trash">{en}</i> : <i className="lp-mono">{ru}</i>}
+                <b>{{ ru, en, th }[lang]}</b>
+                {lang === "en" ? <i className="lp-mono">{th}</i> : <i className="lp-trash">{en}</i>}
                 <Arrow />
               </a>
             ))}
@@ -369,9 +418,21 @@ export function Landing({ lang, stats }: { lang: SeoLang; stats: LandingStats })
   );
 }
 
-export function LpTop({ lang, altHref }: { lang: SeoLang; altHref: string }) {
+export function LpTop({ lang, page }: { lang: SeoLang; page: "home" | "afisha" }) {
   const t = T[lang];
-  const other: SeoLang = lang === "ru" ? "en" : "ru";
+  // Явный выбор английской или тайской витрины запоминаем для приложения:
+  // гость, пришедший на /th, после регистрации должен попасть в тайский
+  // интерфейс, а не в русский по умолчанию. Русский корень открывают все
+  // подряд, поэтому он выбор не записывает.
+  useEffect(() => {
+    if (lang === "ru") return;
+    try {
+      document.cookie = `gtr-lang=${lang}; path=/; max-age=31536000; samesite=lax`;
+      localStorage.setItem("gtr-lang", lang);
+    } catch {
+      // cookie и хранилище запрещены — приложение возьмёт язык телефона
+    }
+  }, [lang]);
   return (
     <header className="lp-top">
       <div className="lp-wrap lp-top-in">
@@ -385,12 +446,20 @@ export function LpTop({ lang, altHref }: { lang: SeoLang; altHref: string }) {
           {t.tonight} <b data-clock>--:--</b>
         </span>
         <nav>
-          <Link className="lp-btn lp-btn-sm lp-btn-ghost" to={altHref as "/"} aria-label={t.langSwitch}>
-            <span className="lp-hide-s">{t.langSwitch}</span>
-            <span className="lp-show-s" aria-hidden>
-              {other.toUpperCase()}
-            </span>
-          </Link>
+          {SEO_LANGS.filter((l) => l !== lang).map((l) => (
+            <Link
+              key={l}
+              className="lp-btn lp-btn-sm lp-btn-ghost"
+              to={PAGE_PATH[page][l] as "/"}
+              hrefLang={l}
+              aria-label={T[l].langSwitch}
+            >
+              <span className="lp-hide-s">{T[l].langSwitch}</span>
+              <span className="lp-show-s" aria-hidden>
+                {l.toUpperCase()}
+              </span>
+            </Link>
+          ))}
           <a className="lp-btn lp-btn-sm lp-btn-ghost lp-hide-s" href={`${APP_URL}/gtr/login`}>
             {t.login}
           </a>

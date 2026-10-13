@@ -1,11 +1,11 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
+import { Suspense, use, useEffect, useMemo, type ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
 
 import gtrCss from "@/gtr/gtr.css?url";
 import { ContentProvider } from "@/gtr/content";
 import { installZoom } from "@/gtr/zoom";
-import i18n, { preferredLang, setUiLang } from "@/gtr/i18n";
+import i18n, { dataDictReady, ensureDataDict, preferredLang, setUiLang } from "@/gtr/i18n";
 import { ssrUiLang } from "@/gtr/i18n-lang";
 
 export const Route = createFileRoute("/gtr")({
@@ -21,7 +21,12 @@ export const Route = createFileRoute("/gtr")({
     ],
     links: [{ rel: "stylesheet", href: gtrCss }],
   }),
-  loader: () => ({ lang: ssrUiLang() }),
+  // Словари данных площадок — до отрисовки: на сервере оба языка, в
+  // браузере при переходе — язык гостя.
+  loader: async () => {
+    await ensureDataDict();
+    return { lang: ssrUiLang() };
+  },
   component: GtrLayout,
 });
 
@@ -59,10 +64,22 @@ function GtrLayout() {
   return (
     <I18nextProvider i18n={inst}>
       <div className="gtr-app" data-lang={lang} style={{ minHeight: "100vh" }}>
-        <ContentProvider>
-          <Outlet />
-        </ContentProvider>
+        <Suspense fallback={null}>
+          <DataGate lang={lang}>
+            <ContentProvider>
+              <Outlet />
+            </ContentProvider>
+          </DataGate>
+        </Suspense>
       </div>
     </I18nextProvider>
   );
+}
+
+// Шлюз словаря данных: в браузере ждём словарь языка гостя. При гидрации
+// React держит серверную разметку, пока он грузится, и перевод описаний
+// площадок совпадает с серверным — без расхождения и мигания.
+function DataGate({ lang, children }: { lang: string; children: ReactNode }) {
+  if (typeof window !== "undefined") use(dataDictReady(i18n.language || lang) as Promise<void>);
+  return <>{children}</>;
 }

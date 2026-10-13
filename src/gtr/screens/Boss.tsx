@@ -19,6 +19,7 @@ import {
 import { BossHead3D, isDaylight, type BossHead } from "../boss-head";
 import { useGtr } from "../store";
 import { useTranslation } from "react-i18next";
+import { TicketsAdmin } from "./Tickets";
 import { Card, Chip, Dot, Eyebrow, Icon, StkBtn, tint } from "../ui";
 import {
   allAfishaFn,
@@ -643,6 +644,8 @@ export function BossCabinet() {
       </div>
 
       <PendingCard />
+
+      <TicketsAdmin />
 
       <div className="gtr-boss-grid">
         <SprintBlock go={go} />

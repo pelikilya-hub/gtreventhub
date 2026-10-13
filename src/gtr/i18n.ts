@@ -93,7 +93,11 @@ if (!i18n.isInitialized) {
     keySeparator: false,
     nsSeparator: false,
     interpolation: { escapeValue: false },
-    parseMissingKeyHandler: (key) => key, // русский ключ и есть перевод по умолчанию
+    // Без parseMissingKeyHandler: i18next и так отдаёт русский ключ, когда
+    // перевода нет, — но уже с подстановкой {{n}} и с постобработкой.
+    // Обработчик срабатывал последним и затирал результат голым ключом:
+    // русская версия показывала «{{n}} ПРОБЛЕМ», а словарь данных не
+    // применялся вовсе.
     returnEmptyString: false,
   });
 }

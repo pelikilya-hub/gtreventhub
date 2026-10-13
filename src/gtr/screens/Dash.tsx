@@ -24,7 +24,6 @@ import { useTranslation } from "react-i18next";
 import { ArtistStudio } from "./ArtistStudio";
 import "../i18n";
 import { Card, Chip, Eyebrow, Stk, TrashTitle, type StkName } from "../ui";
-import { ImpulseArt } from "../impulse";
 import {
   allAfishaFn,
   communityCfgFn,
@@ -566,64 +565,113 @@ function ArtistCabinet() {
     }
   };
 
+  const declined = mine.filter((o) => o.status === "declined").length;
+  // фото для шапки берём из общей базы артистов; файл грузится отдельно,
+  // чтобы не утяжелять бандл кабинета
+  const [heroImg, setHeroImg] = useState("");
+  useEffect(() => {
+    const id = user.artistId;
+    if (!id) return;
+    let alive = true;
+    import("../data/artist-photos.json")
+      .then((m) => {
+        const rec = (m.default as { photos?: Record<string, { photo?: string; photoMed?: string }> }).photos?.[id];
+        if (alive && rec) setHeroImg(rec.photoMed || rec.photo || "");
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [user.artistId]);
+
+  // Кабинет артиста: сначала то, ради чего заходят, — предложения и
+  // выступления; эфир одной строкой; анкета (о себе, ссылки, медиа, сеты)
+  // свёрнута ниже. Пояснения «как работает кнопка эфира» и служебные
+  // строки (email, код карточки) из шапки ушли.
   return (
-    <div style={{ maxWidth: 980, margin: "0 auto" }}>
-      {/* профиль */}
-      <div
-        className="gtr-card"
-        style={{ position: "relative", overflow: "hidden", padding: "24px 26px", marginBottom: 18 }}
-      >
-        <div
-          aria-hidden="true"
-          style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: "34%", opacity: 0.5 }}
-        >
-          <ImpulseArt seed={user.artistId || user.email} density={0.8} />
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "linear-gradient(90deg, var(--gtr-graphite, #17171A), transparent 55%)",
-            }}
-          />
-        </div>
-        <div className="gtr-laser" style={{ top: 0, ["--gtr-run" as string]: "170px" }} />
-        <div style={{ position: "relative", display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
-          <span className="gtr-lettermark" style={{ width: 74, height: 74, fontSize: 34 }}>
-            {user.initials}
-          </span>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <Eyebrow>{t("КАБИНЕТ АРТИСТА")}</Eyebrow>
-            <h1
-              className="gtr-oswald"
-              style={{ font: "700 24px/1.05 var(--display)", letterSpacing: ".02em", margin: "8px 0 0" }}
-            >
-              {user.name}
-            </h1>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginTop: 9 }}>
-              <Chip color="#7B4DFF">{t(user.roleLabel).toUpperCase()}</Chip>
-              {user.artistId ? <Chip color="rgba(255,255,255,.5)">{user.artistId}</Chip> : null}
-              <span
-                className="gtr-mono"
-                style={{ font: "500 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-              >
-                {user.email}
+    <div className="gtr-dash">
+      <section className={heroImg ? "gtr-dash-hero" : "gtr-dash-head"}>
+        {heroImg ? <img src={heroImg} alt="" className="gtr-dash-hero-img" /> : null}
+        <div className={heroImg ? "gtr-dash-hero-in" : undefined}>
+          <Eyebrow>{t("КАБИНЕТ АРТИСТА")}</Eyebrow>
+          <h1 className="gtr-dash-name">{user.name}</h1>
+          <div className="gtr-dash-sub">
+            {onAir ? (
+              <span className="gtr-live-chip">
+                <span className="gtr-live-dot" /> {t("В ЭФИРЕ")}
               </span>
-            </div>
+            ) : (
+              <Chip color="#7B4DFF">{t(user.roleLabel).toUpperCase()}</Chip>
+            )}
           </div>
+        </div>
+      </section>
+
+      <div className="gtr-stats">
+        <div className="gtr-stat">
+          <b style={{ color: open.length ? AMBER : "#fff" }}>{open.length}</b>
+          <span>{t("Предложения")}</span>
+        </div>
+        <div className="gtr-stat">
+          <b style={{ color: accepted.length ? GREEN : "#fff" }}>{accepted.length}</b>
+          <span>{t("Мои выступления")}</span>
+        </div>
+        <div className="gtr-stat">
+          <b>{declined}</b>
+          <span>{t("Отклонено")}</span>
         </div>
       </div>
 
-      {/* Эфир: зелёная кнопка в каталоге артистов */}
-      <Card style={{ padding: "16px 20px", marginBottom: 18, display: "grid", gap: 9 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <Eyebrow>{t("ПРЯМОЙ ЭФИР")}</Eyebrow>
-          {onAir ? (
-            <span className="gtr-live-chip">
-              <span className="gtr-live-dot" /> {t("В ЭФИРЕ")}
-            </span>
-          ) : null}
-        </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+      <section className="gtr-dash-sec">
+        <h2 className="gtr-dash-h">{t("Предложения")}</h2>
+        {open.length ? (
+          open.map((o) => (
+            <div key={o.id} className="gtr-dash-row">
+              <span className="gtr-dash-row-t">
+                {o.venueName}
+                {o.date ? ` · ${o.date}` : ""}
+                <small>
+                  {o.fee ? o.fee : t("условия обсуждаются")} {t("· от")} {o.fromName}
+                </small>
+              </span>
+              <button className="gtr-btn gtr-btn-red" onClick={() => decide(o.id, true)}>
+                {t("✓ Принять")}
+              </button>
+              <button className="gtr-btn gtr-btn-ghost" onClick={() => decide(o.id, false)}>
+                {t("Отклонить")}
+              </button>
+            </div>
+          ))
+        ) : (
+          <div className="gtr-dash-row">
+            <span className="gtr-dash-row-t">{t("Новых предложений нет")}</span>
+          </div>
+        )}
+      </section>
+
+      <section className="gtr-dash-sec">
+        <h2 className="gtr-dash-h">{t("Мои выступления")}</h2>
+        {accepted.length ? (
+          accepted.map((o) => (
+            <div key={o.id} className="gtr-dash-row">
+              <span className="gtr-dash-row-t">
+                {o.venueName}
+                <small>{o.date || t("дата уточняется")}</small>
+              </span>
+              {o.fee ? <span className="gtr-dash-row-v">{o.fee}</span> : null}
+            </div>
+          ))
+        ) : (
+          <div className="gtr-dash-row">
+            <span className="gtr-dash-row-t">{t("Подтверждённых выступлений пока нет.")}</span>
+          </div>
+        )}
+      </section>
+
+      {/* эфир — одна строка: ссылка и кнопка */}
+      <section className="gtr-dash-sec">
+        <h2 className="gtr-dash-h">{t("Прямой эфир")}</h2>
+        <div className="gtr-dash-row">
           <input
             className="gtr-input"
             style={{ flex: "1 1 220px", minWidth: 0 }}
@@ -635,151 +683,41 @@ function ArtistCabinet() {
             {onAir ? t("Завершить эфир") : t("Я в эфире")}
           </button>
         </div>
-        <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-          {t("Кнопка в каталоге станет зелёной, зрители перейдут прямо в эфир. Автоотключение через 4 часа. Из Telegram: «Я в эфире» на клавиатуре бота.")}
-        </span>
-      </Card>
+      </section>
 
-      {/* Telegram */}
-      <Card style={{ padding: "16px 20px", marginBottom: 18, display: "grid", gap: 9 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <Eyebrow>TELEGRAM</Eyebrow>
-          {tg?.linked ? (
-            <Chip color={GREEN}>{t("ПРИВЯЗАН — ПРЕДЛОЖЕНИЯ ПРИХОДЯТ В ЧАТ")}</Chip>
-          ) : tg?.bot ? (
-            <>
-              <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-                {t("Привяжите чат — предложения будут приходить с кнопками «Принять / Отклонить».")}
-              </span>
-              {tgLink ? (
-                <a
-                  className="gtr-btn gtr-btn-red"
-                  style={{ textDecoration: "none" }}
-                  href={tgLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    openAppLink(tgLink);
-                  }}
-                >
-                  {t("Открыть @")}{tg.bot} {t("и привязать ↗")}
-                </a>
-              ) : (
-                <button className="gtr-btn" onClick={linkTg}>
-                  {t("Привязать Telegram")}
-                </button>
-              )}
-            </>
-          ) : (
-            <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {t("Бот GTR ещё не активирован администратором.")}
-            </span>
-          )}
-          {tgMsg ? (
-            <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "#FF5B4D" }}>{tgMsg}</span>
-          ) : null}
-        </div>
-      </Card>
-
-      {/* предложения */}
-      {user.artistId ? <ArtistStudio artistId={user.artistId} /> : null}
-
-      <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 18 }}>
-        <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
-          <Eyebrow>{t("ПРЕДЛОЖЕНИЯ ·")} {open.length}</Eyebrow>
-          {open.length ? (
-            open.map((o) => (
-              <div
-                key={o.id}
-                style={{
-                  display: "grid",
-                  gap: 8,
-                  padding: "12px 13px",
-                  background: "var(--gtr-card2)",
-                  border: "1px solid rgba(255,255,255,.09)",
-                  borderLeft: `2px solid ${OFFER_COLOR[o.status]}`,
+      {/* анкета, медиа и Telegram — свёрнуты */}
+      <details className="gtr-dash-sec gtr-dash-more">
+        <summary className="gtr-dash-h">{t("Профиль и медиа")}</summary>
+        {tg?.bot && !tg.linked ? (
+          <div className="gtr-dash-row">
+            <span className="gtr-dash-row-t">Telegram</span>
+            {tgLink ? (
+              <a
+                className="gtr-btn gtr-btn-red"
+                style={{ textDecoration: "none" }}
+                href={tgLink}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  openAppLink(tgLink);
                 }}
               >
-                <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>
-                  {o.venueName}
-                  {o.date ? ` · ${o.date}` : ""}
-                </div>
-                <div
-                  className="gtr-mono"
-                  style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-                >
-                  {o.fee ? `${t("условия")}: ${o.fee}` : t("условия обсуждаются")}
-                  {o.note ? ` · ${o.note}` : ""} {t("· от")} {o.fromName}
-                </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button className="gtr-btn gtr-btn-red" style={{ padding: "8px 14px" }} onClick={() => decide(o.id, true)}>
-                    {t("✓ Принять")}
-                  </button>
-                  <button className="gtr-btn" style={{ padding: "8px 14px" }} onClick={() => decide(o.id, false)}>
-                    {t("Отклонить")}
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <span style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {t("Новых предложений нет. Когда площадка позовёт вас в событие, оно появится здесь")}
-              {tg?.linked ? t(" и в Telegram") : ""}.
-            </span>
-          )}
-        </Card>
-
-        <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
-          <Eyebrow>{t("МОИ ВЫСТУПЛЕНИЯ ·")} {accepted.length}</Eyebrow>
-          {accepted.length ? (
-            accepted.map((o) => (
-              <div
-                key={o.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "10px 12px",
-                  background: "var(--gtr-card2)",
-                  border: "1px solid rgba(255,255,255,.09)",
-                  borderLeft: `2px solid ${GREEN}`,
-                }}
-              >
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ display: "block", font: "600 12px/1.45 'Golos Text',sans-serif" }}>
-                    {o.venueName}
-                  </span>
-                  <span
-                    className="gtr-mono"
-                    style={{ display: "block", marginTop: 2, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-                  >
-                    {o.date || t("дата уточняется")}
-                    {o.fee ? ` · ${o.fee}` : ""}
-                  </span>
-                </span>
-                <Chip color={GREEN}>{t(OFFER_LABEL.accepted).toUpperCase()}</Chip>
-              </div>
-            ))
-          ) : (
-            <span style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {t("Подтверждённых выступлений пока нет.")}
-            </span>
-          )}
-          {mine.some((o) => o.status === "declined") ? (
-            <span
-              className="gtr-mono"
-              style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-            >
-              {t("отклонённых:")} {mine.filter((o) => o.status === "declined").length}
-            </span>
-          ) : null}
-        </Card>
-      </div>
+                {t("Открыть @")}{tg.bot} {t("и привязать ↗")}
+              </a>
+            ) : (
+              <button className="gtr-btn" onClick={linkTg}>
+                {t("Привязать Telegram")}
+              </button>
+            )}
+            {tgMsg ? <small style={{ color: "#FF5B4D" }}>{tgMsg}</small> : null}
+          </div>
+        ) : null}
+        {user.artistId ? <ArtistStudio artistId={user.artistId} /> : null}
+      </details>
     </div>
   );
 }
-
 
 // Ссылка-приглашение в приложение: генерируется сервером, копируется в буфер.
 // Организатор зовёт в свою команду, менеджер и админ — в состав GTR.
@@ -993,7 +931,6 @@ function VisitorCabinet() {
           />
         )}
         <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(180deg, rgba(10,11,13,0) 18%, rgba(10,11,13,.45) 58%, rgba(10,11,13,.8) 100%)" }} />
-        <div className="gtr-laser" style={{ ["--gtr-run" as string]: "340px", zIndex: 1 }} />
         <div className="gtr-hero-edge-in gtr-hero-tall">
             <div className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "rgba(255,255,255,.75)", letterSpacing: ".16em", marginBottom: 10 }}>
               {headliner
@@ -1011,7 +948,7 @@ function VisitorCabinet() {
                   : t("Остров открыт — собери свой вечер: клубы, пляжные вечеринки, живая музыка")}
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button className="gtr-btn-wow" onClick={() => (headliner ? openEvent(headliner) : go("tonight"))}>
+              <button className="gtr-btn gtr-btn-red gtr-btn-wow" onClick={() => (headliner ? openEvent(headliner) : go("tonight"))}>
                 {headliner ? t("Смотреть событие") : t("Выбрать вечер")} →
               </button>
               {headliner ? (
@@ -1141,7 +1078,6 @@ function VisitorCabinet() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 12, marginBottom: 16 }}>
         {/* сводка дня — из реальной афиши, без выдумок */}
         <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("tonight")}>
-          <div className="gtr-laser" aria-hidden />
           <Eyebrow style={{ fontSize: 10, marginBottom: 8 }}>{t("НОВОСТИ ВЕЧЕРА")}</Eyebrow>
           {island.events ? (
             <>
@@ -1176,27 +1112,8 @@ function VisitorCabinet() {
         </Card>
       </div>
 
-      {/* что нового в приложении: реально выпущенные опции */}
-      <Eyebrow style={{ marginBottom: 10 }}>{t("ЧТО НОВОГО В ПРИЛОЖЕНИИ")}</Eyebrow>
-      <div className="gtr-hscroll" style={{ marginBottom: 18 }}>
-        {appUpdates.updates.map((u) => (
-          <Card key={u.id} hover style={{ padding: "14px 16px", width: 208, display: "grid", gap: 7, alignContent: "start" }}
-            onClick={() => go(u.screen as ScreenId)}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Stk name={u.icon as StkName} size={26} />
-              <span style={{ font: "600 12.5px/1.2 var(--cond)", textTransform: "uppercase" }}>{t(u.title)}</span>
-            </div>
-            <div style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{t(u.text)}</div>
-            <span className="gtr-mono" style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".08em" }}>
-              {u.dateIso.slice(8, 10)}.{u.dateIso.slice(5, 7)}
-            </span>
-          </Card>
-        ))}
-      </div>
-
       {community.channelUrl || community.chatUrl ? (
         <Card style={{ padding: "16px 18px", marginBottom: 16, position: "relative", overflow: "hidden" }}>
-          <div className="gtr-laser" aria-hidden />
           <Eyebrow style={{ marginBottom: 8 }}>{t("КОМЬЮНИТИ GTR")}</Eyebrow>
           <div style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", marginBottom: 10 }}>
             {t("Новости острова и живой чат — вся тусовка в одном месте")}
@@ -1233,10 +1150,23 @@ function VisitorCabinet() {
         </Card>
       ) : null}
 
-      {/* язык приложения переехал в шапку (LangSwitch в shell) */}
-      <Card style={{ padding: "12px 16px", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-        <PushPanel />
-      </Card>
+      {/* Новое в приложении и уведомления — свёрнуто внизу: это не то,
+          ради чего гость открывает кабинет вечером. */}
+      <details className="gtr-dash-sec gtr-dash-more">
+        <summary className="gtr-dash-h">{t("Что нового и уведомления")}</summary>
+        {appUpdates.updates.map((u) => (
+          <button key={u.id} type="button" className="gtr-dash-row gtr-dash-link" onClick={() => go(u.screen as ScreenId)}>
+            <Stk name={u.icon as StkName} size={26} />
+            <span className="gtr-dash-row-t">
+              {t(u.title)}
+              <small>{t(u.text)}</small>
+            </span>
+          </button>
+        ))}
+        <div className="gtr-dash-settings" style={{ marginTop: 14 }}>
+          <PushPanel />
+        </div>
+      </details>
     </div>
   );
 }

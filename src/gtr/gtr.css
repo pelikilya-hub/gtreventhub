@@ -1567,8 +1567,16 @@
 .gtr-boss-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 0 clamp(28px, 4vw, 56px);
+  align-items: start;
 }
+/* шапка BOSS: эмблема-портрет слева, имя и действия справа */
+.gtr-boss-head { display: flex; align-items: center; gap: clamp(16px, 3vw, 36px); flex-wrap: wrap; }
+.gtr-boss-head .gtr-dash-name { font-size: clamp(28px, 4.6vw, 56px); }
+/* свёрнутые интеграции: блоки идут столбцом с воздухом */
+.gtr-boss-integr { display: grid; gap: 14px; padding-top: 6px; }
+/* три цифры (кабинет артиста) — три колонки и на телефоне */
+.gtr-stats:has(> .gtr-stat:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-boss-grid { grid-template-columns: 1fr; }
   .gtr-boss-kpis { margin-left: 0; }
@@ -5595,6 +5603,7 @@ canvas.gtr-dancer-img {
 }
 .gtr-dash-sec { margin-bottom: clamp(28px, 4vw, 44px); }
 .gtr-dash-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.gtr-dash-sec-head > .gtr-btn, .gtr-dash-sec-head > .gtr-dash-row-v { flex: none; white-space: nowrap; }
 .gtr-dash-h {
   margin: 0 0 6px;
   font: 800 clamp(20px, 2.4vw, 28px)/1 var(--display);
@@ -5638,4 +5647,9 @@ canvas.gtr-dancer-img {
   .gtr-dash-row { flex-wrap: wrap; row-gap: 8px; }
   .gtr-dash-row > .gtr-btn { flex: none; }
   .gtr-dash-link .gtr-dash-row-t { flex-basis: 100%; }
+  .gtr-stats:has(> .gtr-stat:nth-child(3):last-child) .gtr-stat:nth-child(3) {
+    padding-left: 12px; border-left: 1px solid var(--gtr-border); border-top: 0;
+  }
+  .gtr-stats:has(> .gtr-stat:nth-child(3):last-child) .gtr-stat { padding-right: 8px; }
+  .gtr-stats:has(> .gtr-stat:nth-child(3):last-child) .gtr-stat + .gtr-stat { padding-left: 12px; }
 }

@@ -190,10 +190,7 @@ function BossHeadCard({ head, onSaved }: { head: BossHead | null; onSaved: (h: B
           {slot("night", t("НОЧЬ · 18–06"), "тёмные очки, клубный свет")}
         </div>
       </div>
-      <span style={{ font: mono(8.5), color: "rgba(255,255,255,.4)" }}>
-        {t("Нужен PNG с уже вырезанным фоном — прозрачность и есть объём: по её краю строится контровой свет. Высота ужимается до 640 px прямо в браузере.")}
-        {busy ? ` · ${busy}` : ""}
-      </span>
+      {busy ? <span style={{ font: mono(10), color: "var(--gtr-t3)" }}>{busy}</span> : null}
     </Card>
   );
 }
@@ -351,14 +348,12 @@ function TasksBlock({ users, me }: { users: PublicUser[]; me: string }) {
   };
 
   return (
-    <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Eyebrow>{t("ЗАДАЧИ КОМАНДЫ")}</Eyebrow>
-        <span style={{ font: mono(9), color: "rgba(255,255,255,.4)" }}>
-          {open.length} {t("откр.")}
-        </span>
+    <section className="gtr-dash-sec">
+      <div className="gtr-dash-sec-head">
+        <h2 className="gtr-dash-h">{t("ЗАДАЧИ КОМАНДЫ")}</h2>
+        <span className="gtr-dash-row-v">{open.length}</span>
       </div>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+      <div className="gtr-dash-row" style={{ flexWrap: "wrap", gap: 8 }}>
         <input
           className="gtr-input"
           style={{ flex: "2 1 160px", minWidth: 0 }}
@@ -391,28 +386,21 @@ function TasksBlock({ users, me }: { users: PublicUser[]; me: string }) {
           {t("Поставить")}
         </button>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 250, overflowY: "auto" }}>
+      <div>
         {open.length === 0 ? (
-          <span style={{ font: golos(11), color: "var(--gtr-t3)" }}>{t("Открытых задач нет.")}</span>
+          <div className="gtr-dash-row">
+            <span className="gtr-dash-row-t">{t("Открытых задач нет.")}</span>
+          </div>
         ) : null}
         {open.map((t) => (
-          <div
-            key={t.id}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "7px 9px",
-              border: "1px solid rgba(255,255,255,.09)",
-              borderLeft: `3px solid ${ST[t.status][1]}`,
-            }}
-          >
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: "block", font: golos(11.5, 600), color: "#fff" }}>{t.title}</span>
-              <span style={{ font: mono(8.5), color: "rgba(255,255,255,.4)" }}>
+          <div key={t.id} className="gtr-dash-row">
+            <Dot color={ST[t.status][1]} />
+            <span className="gtr-dash-row-t">
+              {t.title}
+              <small>
                 {t.assigneeName}
                 {t.due ? ` · до ${t.due}` : ""} · {ST[t.status][0]}
-              </span>
+              </small>
             </span>
             {t.status === "new" ? (
               <button className="gtr-btn gtr-btn-sm" onClick={() => move(t, "doing")}>
@@ -434,15 +422,15 @@ function TasksBlock({ users, me }: { users: PublicUser[]; me: string }) {
           </div>
         ))}
         {done.map((t) => (
-          <div key={t.id} style={{ display: "flex", gap: 8, padding: "4px 9px", opacity: 0.45 }}>
+          <div key={t.id} className="gtr-dash-row" style={{ opacity: 0.45 }}>
             <Dot color={GREEN} />
-            <span style={{ font: golos(10.5), textDecoration: "line-through" }}>
+            <span className="gtr-dash-row-t" style={{ fontWeight: 500, textDecoration: "line-through" }}>
               {t.title} — {t.assigneeName}
             </span>
           </div>
         ))}
       </div>
-    </Card>
+    </section>
   );
 }
 
@@ -594,250 +582,227 @@ export function BossCabinet() {
     };
   }, [afisha, users, shared.drafts, reqs]);
 
-  const kpis: [string, string, string][] = [
-    [t("ПАЙПЛАЙН"), fmtThb(money.total), "все сметы"],
-    ["КОМИССИЯ GTR", fmtThb(money.commission), "заложено"],
-    [t("СОБЫТИЯ"), String(shared.drafts.length), `${upcoming.length} впереди`],
-    [t("ЗАЯВКИ"), String(reqOpen.length), "открытых"],
-    [t("КОМАНДА"), String(users.length), "аккаунтов"],
-  ];
+  const reqCount = (k: string) => reqs.filter((r) => r.status === k).length;
 
+  // Кабинет BOSS в общем языке кабинетов: имя и эмблема, четыре главные
+  // цифры, дальше рабочие разделы строками. Интеграции (портрет, PromptPay,
+  // Telegram-комьюнити, Meta, Threads) нужны редко — они свёрнуты в конце.
   return (
-    <div className="gtr-boss" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {/* -------- шапка BOSS -------- */}
-      <Card style={{ padding: 0, overflow: "hidden" }}>
-        <div className="gtr-boss-hero">
-          <BossHead3D head={head} />
-          <div style={{ flex: 1, minWidth: 220, padding: "16px 0" }}>
-            <Eyebrow style={{ color: RED }}>{t("КОНТРОЛЬ ОПЕРАЦИИ · GTR EVENT")}</Eyebrow>
-            <h1
-              style={{
-                margin: "6px 0 2px",
-                font: "700 30px/1 'Oswald','Golos Text',sans-serif",
-                letterSpacing: ".02em",
-                textTransform: "uppercase",
-              }}
-            >
-              {user.name}
-            </h1>
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <Chip color={RED}>BOSS</Chip>
-              <span style={{ font: mono(9.5), color: "rgba(255,255,255,.45)" }}>{user.email}</span>
-            </div>
-          </div>
-          <div className="gtr-boss-kpis">
-            {kpis.map(([l, v2, n]) => (
-              <div key={l} className="gtr-boss-kpi">
-                <span style={{ font: mono(8, 600), color: "rgba(255,255,255,.4)", letterSpacing: ".12em" }}>
-                  {l}
-                </span>
-                <span style={{ font: "700 17px/1.1 'Oswald',sans-serif", color: "#fff" }}>{v2}</span>
-                <span style={{ font: mono(8), color: "rgba(255,255,255,.35)" }}>{n}</span>
-              </div>
-            ))}
+    <div className="gtr-dash gtr-boss">
+      <section className="gtr-dash-head gtr-boss-head">
+        <BossHead3D head={head} />
+        <div style={{ minWidth: 0, flex: "1 1 260px" }}>
+          <Eyebrow>{t("КАБИНЕТ BOSS")}</Eyebrow>
+          <h1 className="gtr-dash-name">{user.name}</h1>
+          <div className="gtr-dash-cta">
+            <button className="gtr-btn gtr-btn-red" onClick={() => go("events")}>
+              {t("Все события →")}
+            </button>
+            <button className="gtr-btn" onClick={() => go("inquiries")}>
+              {t("Канбан →")}
+            </button>
+            <button className="gtr-btn" onClick={() => go("admin")}>
+              {t("Управление →")}
+            </button>
           </div>
         </div>
-      </Card>
+      </section>
+
+      <div className="gtr-stats">
+        <div className="gtr-stat">
+          <b className="long">{fmtThb(money.total)}</b>
+          <span>{t("ПАЙПЛАЙН")}</span>
+        </div>
+        <div className="gtr-stat">
+          <b className="long" style={{ color: money.commission ? GREEN : undefined }}>
+            {fmtThb(money.commission)}
+          </b>
+          <span>{t("КОМИССИЯ GTR")}</span>
+        </div>
+        <div className="gtr-stat">
+          <b>{shared.drafts.length}</b>
+          <span>{t("СОБЫТИЯ")}</span>
+        </div>
+        <div className="gtr-stat">
+          <b style={{ color: reqOpen.length ? AMBER : undefined }}>{reqOpen.length}</b>
+          <span>{t("ЗАЯВКИ")}</span>
+        </div>
+      </div>
+
+      <PendingCard />
 
       <div className="gtr-boss-grid">
         <SprintBlock go={go} />
-        {/* -------- сводка дня: что произошло на платформе за сегодня -------- */}
-        <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Eyebrow>{t("СВОДКА ДНЯ")}</Eyebrow>
+
+        {/* сводка дня: что произошло на платформе за сегодня */}
+        <section className="gtr-dash-sec">
+          <div className="gtr-dash-sec-head">
+            <h2 className="gtr-dash-h">{t("СВОДКА ДНЯ")}</h2>
             <button className="gtr-btn gtr-btn-sm" onClick={() => go("tonight")}>
               {t("Афиша →")}
             </button>
           </div>
-          {/* афиша сегодня */}
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ font: "700 22px/1 'Oswald',sans-serif", color: "#fff" }}>{digest.events.total}</span>
-            <span style={{ font: "500 12px/1.4 'Golos Text',sans-serif", color: "rgba(255,255,255,.7)" }}>
-              {t("событий в")} {digest.events.venues} {t("заведениях сегодня")}
-              {digest.events.withArtist ? ` · ${digest.events.withArtist} ${t("с нашими артистами")}` : ""}
+          <div className="gtr-dash-row">
+            <span className="gtr-dash-row-t">
+              {digest.events.total} {t("событий в")} {digest.events.venues} {t("заведениях сегодня")}
+              {digest.events.withArtist ? (
+                <small>
+                  {digest.events.withArtist} {t("с нашими артистами")}
+                </small>
+              ) : null}
             </span>
           </div>
-          {/* в каких заведениях есть мероприятия — топ по числу событий */}
-          {digest.events.byVenue.length ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <span style={{ font: mono(8, 600), color: "rgba(255,255,255,.4)", letterSpacing: ".12em" }}>
-                {t("ЗАВЕДЕНИЯ С СОБЫТИЯМИ")}
+          {digest.events.byVenue.slice(0, 5).map((b) => (
+            <button
+              key={b.vid}
+              className="gtr-dash-row gtr-dash-link"
+              onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "base" }, search: { vid: b.vid } })}
+            >
+              <span className="gtr-dash-row-t">{V(b.vid)?.name ?? b.vid}</span>
+              <span className="gtr-dash-row-v" style={{ color: GREEN }}>
+                {b.count}
               </span>
-              {digest.events.byVenue.slice(0, 5).map((b) => (
-                <button
-                  key={b.vid}
-                  onClick={() => navigate({ to: "/gtr/$screen", params: { screen: "base" }, search: { vid: b.vid } })}
-                  style={{ display: "flex", justifyContent: "space-between", gap: 8, padding: "3px 0", background: "none", border: "none", color: "inherit", cursor: "pointer", textAlign: "left" }}
-                >
-                  <span style={{ font: "500 12px/1.4 'Golos Text',sans-serif", color: "rgba(255,255,255,.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {V(b.vid)?.name ?? b.vid}
-                  </span>
-                  <span style={{ font: mono(10, 600), color: GREEN }}>{b.count}</span>
-                </button>
-              ))}
+            </button>
+          ))}
+          {digest.signups.total || digest.newDrafts || digest.newReqs ? (
+            <div className="gtr-dash-row" style={{ flexWrap: "wrap", gap: 6 }}>
+              {([
+                [t("площадки"), digest.signups.venues],
+                [t("организаторы"), digest.signups.organizers],
+                [t("артисты"), digest.signups.artists],
+                [t("черновики"), digest.newDrafts],
+                [t("заявки"), digest.newReqs],
+              ] as [string, number][])
+                .filter(([, n]) => n > 0)
+                .map(([label, n]) => (
+                  <Chip key={label} color={GREEN}>
+                    +{n} {label}
+                  </Chip>
+                ))}
             </div>
-          ) : (
-            <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "rgba(255,255,255,.5)" }}>
-              {t("На сегодня событий в афише пока нет.")}
-            </span>
-          )}
-          {/* регистрации и активность за сегодня */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 2 }}>
-            {([
-              [t("площадки"), digest.signups.venues],
-              [t("организаторы"), digest.signups.organizers],
-              [t("артисты"), digest.signups.artists],
-              [t("черновики"), digest.newDrafts],
-              [t("заявки"), digest.newReqs],
-            ] as [string, number][])
-              .filter(([, n]) => n > 0)
-              .map(([label, n]) => (
-                <Chip key={label} color={GREEN}>+{n} {label}</Chip>
-              ))}
-            {digest.signups.total === 0 && digest.newDrafts === 0 && digest.newReqs === 0 ? (
-              <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "rgba(255,255,255,.45)" }}>
-                {t("Новых регистраций и заявок сегодня ещё не было.")}
-              </span>
-            ) : null}
-          </div>
-        </Card>
-        {/* -------- деньги -------- */}
-        <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Eyebrow>{t("ДЕНЬГИ И СМЕТЫ")}</Eyebrow>
+          ) : null}
+        </section>
+
+        {/* деньги: сумма смет по стадиям и три крупнейшие */}
+        <section className="gtr-dash-sec">
+          <div className="gtr-dash-sec-head">
+            <h2 className="gtr-dash-h">{t("ДЕНЬГИ И СМЕТЫ")}</h2>
             <button className="gtr-btn gtr-btn-sm" onClick={() => go("events")}>
               {t("Все события →")}
             </button>
           </div>
           {[...money.byStage.entries()].map(([st, x]) => (
-            <div key={st} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div key={st} className="gtr-dash-row">
               <Dot color={STAGE_COLOR[st as keyof typeof STAGE_COLOR] ?? "#888"} />
-              <span style={{ flex: 1, font: golos(11) }}>
+              <span className="gtr-dash-row-t">
                 {STAGE_LABEL[st as keyof typeof STAGE_LABEL] ?? st} · {x.n}
               </span>
-              <span style={{ font: mono(10.5, 600), color: "#fff" }}>{fmtThb(x.sum)}</span>
+              <span className="gtr-dash-row-v">{fmtThb(x.sum)}</span>
             </div>
           ))}
-          <div style={{ borderTop: "1px solid rgba(255,255,255,.08)", paddingTop: 8 }}>
-            {money.top.map(({ d, q }) => (
-              <div key={d.id} style={{ display: "flex", gap: 8, padding: "3px 0" }}>
-                <span style={{ flex: 1, font: golos(10.5), color: "rgba(255,255,255,.75)" }}>
-                  {draftTitle(d)} · {V(d.venueId).name}
-                </span>
-                <span style={{ font: mono(10, 600), color: GREEN }}>{fmtThb(q.total)}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
+          {money.top.map(({ d, q }) => (
+            <div key={d.id} className="gtr-dash-row">
+              <span className="gtr-dash-row-t">
+                {draftTitle(d)}
+                <small>{V(d.venueId).name}</small>
+              </span>
+              <span className="gtr-dash-row-v" style={{ color: GREEN }}>
+                {fmtThb(q.total)}
+              </span>
+            </div>
+          ))}
+        </section>
 
-        {/* -------- задачи -------- */}
-        <TasksBlock users={users} me={user.email} />
-
-        {/* -------- заявки + события -------- */}
-        <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Eyebrow>{t("ЗАЯВКИ И БЛИЖАЙШЕЕ")}</Eyebrow>
+        {/* заявки по статусам и ближайшие даты */}
+        <section className="gtr-dash-sec">
+          <div className="gtr-dash-sec-head">
+            <h2 className="gtr-dash-h">{t("ЗАЯВКИ И БЛИЖАЙШЕЕ")}</h2>
             <button className="gtr-btn gtr-btn-sm" onClick={() => go("inquiries")}>
               {t("Канбан →")}
             </button>
           </div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {(
-              [
-                ["new", t("НОВЫЕ"), RED],
-                ["seen", t("В РАЗБОРЕ"), AMBER],
-                ["accepted", t("ПРИНЯТЫ"), GREEN],
-              ] as const
-            ).map(([k, l, c]) => (
-              <span
-                key={k}
-                style={{
-                  font: mono(9, 600),
-                  color: c,
-                  border: `1px solid ${tint(c, 0.4)}`,
-                  padding: "4px 8px",
-                }}
-              >
-                {l} {reqs.filter((r) => r.status === k).length}
-              </span>
-            ))}
+          <div className="gtr-dash-row" style={{ flexWrap: "wrap", gap: 6 }}>
+            <Chip color={RED}>
+              {t("НОВЫЕ")} {reqCount("new")}
+            </Chip>
+            <Chip color={AMBER}>
+              {t("В РАЗБОРЕ")} {reqCount("seen")}
+            </Chip>
+            <Chip color={GREEN}>
+              {t("ПРИНЯТЫ")} {reqCount("accepted")}
+            </Chip>
           </div>
           {upcoming.length ? (
             upcoming.map((d) => (
-              <div key={d.id} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span style={{ font: mono(9.5, 600), color: RED, width: 46 }}>
+              <div key={d.id} className="gtr-dash-row">
+                <span className="gtr-dash-row-v" style={{ color: RED, width: 46 }}>
                   {(d.dateIso ?? "").slice(5).replace("-", ".")}
                 </span>
-                <span style={{ flex: 1, font: golos(11) }}>
+                <span className="gtr-dash-row-t">
                   {draftTitle(d)}
-                  <span style={{ color: "rgba(255,255,255,.4)" }}> · {V(d.venueId).name}</span>
+                  <small>{V(d.venueId).name}</small>
                 </span>
               </div>
             ))
           ) : (
-            <span style={{ font: golos(11), color: "var(--gtr-t3)" }}>{t("Ближайших дат нет.")}</span>
-          )}
-        </Card>
-
-        {/* -------- команда + лента -------- */}
-        <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Eyebrow>{t("КОМАНДА · ЖИВАЯ ЛЕНТА")}</Eyebrow>
-            <button className="gtr-btn gtr-btn-sm" onClick={() => go("admin")}>
-              {t("Управление →")}
-            </button>
-          </div>
-          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-            {users.slice(0, 8).map((u2) => (
-              <span
-                key={u2.email}
-                title={`${u2.name} · ${u2.roleLabel}`}
-                style={{
-                  font: mono(8.5, 700),
-                  border: "1px solid rgba(255,255,255,.15)",
-                  padding: "4px 7px",
-                  color: "rgba(255,255,255,.75)",
-                }}
-              >
-                {u2.initials}
-              </span>
-            ))}
-            {users.length > 8 ? (
-              <span style={{ font: mono(9), color: "rgba(255,255,255,.4)", alignSelf: "center" }}>
-                +{users.length - 8}
-              </span>
-            ) : null}
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 5, maxHeight: 190, overflowY: "auto" }}>
-            {feed.map((f, i) => (
-              <div key={i} style={{ display: "flex", gap: 7, alignItems: "baseline" }}>
-                <Dot color={f.color} />
-                <span style={{ flex: 1, font: golos(10.5), color: "rgba(255,255,255,.75)" }}>{f.text}</span>
-                <span style={{ font: mono(8), color: "rgba(255,255,255,.3)" }}>{fmtAgo(f.ts)}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* -------- связь + уведомления -------- */}
-        <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10, gridColumn: "1 / -1" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-            <Eyebrow>{t("СВЯЗЬ И УВЕДОМЛЕНИЯ")}</Eyebrow>
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <TgChip />
-              <PushPanel />
+            <div className="gtr-dash-row">
+              <span className="gtr-dash-row-t">{t("Ближайших дат нет.")}</span>
             </div>
-          </div>
-          <BroadcastBlock />
-        </Card>
+          )}
+        </section>
 
-        <PendingCard />
-        <BossHeadCard head={head} onSaved={(h) => setHead(h)} />
-        <PromptpayCard />
-        <CommunityCard />
-        <MetaCard />
-        <ThreadsCard />
+        <TasksBlock users={users} me={user.email} />
+
+        {/* команда и живая лента действий */}
+        <section className="gtr-dash-sec">
+          <div className="gtr-dash-sec-head">
+            <h2 className="gtr-dash-h">{t("КОМАНДА · ЖИВАЯ ЛЕНТА")}</h2>
+            <span className="gtr-dash-row-v">{users.length}</span>
+          </div>
+          {feed.length ? (
+            feed.slice(0, 8).map((f, i) => (
+              <div key={i} className="gtr-dash-row">
+                <Dot color={f.color} />
+                <span className="gtr-dash-row-t" style={{ fontWeight: 500, fontSize: 14 }}>
+                  {f.text}
+                </span>
+                <span className="gtr-dash-row-v" style={{ color: "var(--gtr-t4)" }}>
+                  {fmtAgo(f.ts)}
+                </span>
+              </div>
+            ))
+          ) : (
+            <div className="gtr-dash-row">
+              <span className="gtr-dash-row-t">{t("Пока тихо")}</span>
+            </div>
+          )}
+        </section>
+
+        {/* рассылка: Telegram + push одной строкой */}
+        <section className="gtr-dash-sec">
+          <div className="gtr-dash-sec-head">
+            <h2 className="gtr-dash-h">{t("СВЯЗЬ И УВЕДОМЛЕНИЯ")}</h2>
+          </div>
+          <div className="gtr-dash-row" style={{ flexWrap: "wrap", gap: 8 }}>
+            <TgChip />
+            <PushPanel />
+          </div>
+          <div style={{ paddingTop: 14 }}>
+            <BroadcastBlock />
+          </div>
+        </section>
       </div>
+
+      <details className="gtr-dash-sec gtr-dash-more gtr-boss-more">
+        <summary className="gtr-dash-h">{t("Интеграции и оплаты")}</summary>
+        <div className="gtr-boss-integr">
+          <PromptpayCard />
+          <CommunityCard />
+          <MetaCard />
+          <ThreadsCard />
+          <BossHeadCard head={head} onSaved={(h) => setHead(h)} />
+        </div>
+      </details>
     </div>
   );
 }
@@ -873,72 +838,49 @@ function PendingCard() {
       setBusy("");
     }
   };
+  // пустой блок не показываем: о новых заявках напомнит Telegram
+  if (!items.length && !note) return null;
   return (
-    <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10, gridColumn: "1 / -1" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-        <Eyebrow>{t("ЗАЯВКИ НА РОЛИ · ПОДТВЕРЖДЕНИЕ BOSS")}</Eyebrow>
-        <span style={{ font: mono(9.5, 700), color: items.length ? RED : "rgba(255,255,255,.35)" }}>
+    <section className="gtr-dash-sec">
+      <div className="gtr-dash-sec-head">
+        <h2 className="gtr-dash-h">{t("Заявки на роли")}</h2>
+        <span className="gtr-dash-row-v" style={{ color: items.length ? RED : undefined }}>
           {items.length}
         </span>
       </div>
-      {items.length ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {items.map((a) => (
-            <div
-              key={a.email}
-              style={{
-                display: "flex",
-                gap: 10,
-                alignItems: "center",
-                flexWrap: "wrap",
-                border: "1px solid rgba(255,255,255,.1)",
-                padding: "9px 11px",
-              }}
-            >
-              <div style={{ flex: "1 1 220px", minWidth: 0 }}>
-                <div style={{ font: golos(11.5, 700) }}>
-                  {a.name}
-                  <span style={{ color: RED, marginLeft: 8, font: mono(9, 700) }}>
-                    {PENDING_ROLE_LABEL[a.role]?.toUpperCase()}
-                  </span>
-                </div>
-                <div style={{ font: mono(9), color: "rgba(255,255,255,.45)", marginTop: 2 }}>
-                  {a.email} · {new Date(a.created).toLocaleDateString("ru-RU")}
-                </div>
-                {a.about ? (
-                  <div style={{ font: golos(10.5), color: "rgba(255,255,255,.6)", marginTop: 3 }}>«{a.about}»</div>
-                ) : null}
-              </div>
-              {/* решение по заявке — знак и есть кнопка: подтверждение
-                  нашей галочкой, отказ словом, чтобы их нельзя было
-                  перепутать в спешке */}
-              <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                <StkBtn
-                  name="check"
-                  tone="ok"
-                  disabled={busy === a.email}
-                  onClick={() => void decide(a.email, true)}
-                >
-                  {t("Принять")}
-                </StkBtn>
-                <button
-                  className="gtr-btn gtr-btn-sm"
-                  disabled={busy === a.email}
-                  onClick={() => void decide(a.email, false)}
-                >
-                  {t("Отклонить")}
-                </button>
-              </div>
-            </div>
-          ))}
+      {items.map((a) => (
+        <div key={a.email} className="gtr-dash-row">
+          <span className="gtr-dash-row-t">
+            {a.name}
+            <span style={{ color: RED, marginLeft: 8, font: mono(11, 700) }}>
+              {PENDING_ROLE_LABEL[a.role]?.toUpperCase()}
+            </span>
+            <small>
+              {a.email} · {new Date(a.created).toLocaleDateString("ru-RU")}
+              {a.about ? ` · «${a.about}»` : ""}
+            </small>
+          </span>
+          {/* решение по заявке — знак и есть кнопка: подтверждение
+              нашей галочкой, отказ словом, чтобы их нельзя было
+              перепутать в спешке */}
+          <StkBtn name="check" tone="ok" disabled={busy === a.email} onClick={() => void decide(a.email, true)}>
+            {t("Принять")}
+          </StkBtn>
+          <button
+            className="gtr-btn gtr-btn-sm"
+            disabled={busy === a.email}
+            onClick={() => void decide(a.email, false)}
+          >
+            {t("Отклонить")}
+          </button>
         </div>
-      ) : (
-        <span style={{ font: golos(11), color: "var(--gtr-t3)" }}>
-          {t("Новых заявок нет. Артисты, организаторы, площадки и кандидаты в команду появятся здесь и в Telegram.")}
-        </span>
-      )}
-      {note ? <span style={{ font: golos(10.5), color: "rgba(255,255,255,.6)" }}>{note}</span> : null}
-    </Card>
+      ))}
+      {note ? (
+        <div className="gtr-dash-row">
+          <span className="gtr-dash-row-t" style={{ fontWeight: 500, color: "var(--gtr-t2)" }}>{note}</span>
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -1050,12 +992,14 @@ function CommunityCard() {
           {chatTitle ? `ЧАТ · ${chatTitle.toUpperCase()}` : t("ЧАТ НЕ ПРИВЯЗАН")}
         </Chip>
       </div>
-      <div
-        className="gtr-mono"
-        style={{ font: "500 11px/1.6 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 10 }}
-      >
-        {t("1) создай публичный канал (новости) и группу (чат) · 2) добавь бота @Gtrcom1_bot админом в оба · 3) вставь ссылки t.me и привяжи. Дайджест вечера уходит в канал сам — каждый день в 17:00.")}
-      </div>
+      {channelTitle && chatTitle ? null : (
+        <div
+          className="gtr-mono"
+          style={{ font: "500 11px/1.6 'JetBrains Mono',monospace", color: "var(--gtr-t3)", marginBottom: 10 }}
+        >
+          {t("1) создай публичный канал (новости) и группу (чат) · 2) добавь бота @Gtrcom1_bot админом в оба · 3) вставь ссылки t.me и привяжи. Дайджест вечера уходит в канал сам — каждый день в 17:00.")}
+        </div>
+      )}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
         <input
           className="gtr-input"
@@ -1226,8 +1170,7 @@ function ThreadsCard() {
         className="gtr-mono"
         style={{ marginTop: 8, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
       >
-        {state ||
-          "Вечерний дайджест уходит в Threads вместе с Telegram. Лимит поста — 500 знаков, разметки нет: текст режется по строкам, а не по буквам. Токен живёт 60 дней."}
+        {state}
       </div>
     </Card>
   );
@@ -1339,8 +1282,7 @@ function MetaCard() {
         className="gtr-mono"
         style={{ marginTop: 8, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
       >
-        {state ||
-          "Токен проверяется живым запросом к Meta: подхватываем страницу, её IG Business и последние публикации. Инструкция по выдаче токена — в Telegram."}
+        {state}
       </div>
       {feed.length ? (
         <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
@@ -1443,8 +1385,7 @@ function PromptpayCard() {
         className="gtr-mono"
         style={{ marginTop: 8, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t2)" }}
       >
-        {state ||
-          "Гость сканирует QR в своём банке — деньги приходят напрямую на этот реквизит. Кнопка оплаты появляется в брони раздела «Сегодня» сразу после сохранения."}
+        {state}
       </div>
     </Card>
   );
@@ -1467,76 +1408,50 @@ function SprintBlock({ go }: { go: (s: ScreenId) => void }) {
   const sent = list.length;
   const opened = list.filter((c) => c.status === "opened" || c.status === "confirmed").length;
   const confirmed = list.filter((c) => c.status === "confirmed");
-  const bySender = new Map<string, number>();
-  for (const c of list) bySender.set(c.sentBy, (bySender.get(c.sentBy) ?? 0) + 1);
   const pct = Math.min(100, Math.round((confirmed.length / SPRINT_GOAL) * 100));
   const last = [...confirmed]
     .sort((a, b) => (b.confirmedAt ?? 0) - (a.confirmedAt ?? 0))
     .slice(0, 3);
   return (
-    <Card style={{ padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Eyebrow style={{ color: RED }}>{t("ЦЕЛЬ НЕДЕЛИ · ПОДТВЕРЖДЁННЫЕ ПРАЙСЫ")}</Eyebrow>
+    <section className="gtr-dash-sec">
+      <div className="gtr-dash-sec-head">
+        <h2 className="gtr-dash-h">{t("Цель недели")}</h2>
         <button className="gtr-btn gtr-btn-sm" onClick={() => go("base")}>
           {t("К базе →")}
         </button>
       </div>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-        <span style={{ font: "700 26px/1 'Oswald',sans-serif", color: confirmed.length ? GREEN : "#fff" }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "8px 0 12px" }}>
+        <span style={{ font: "400 clamp(34px, 4vw, 52px)/1 var(--glitch)", color: confirmed.length ? GREEN : "#fff" }}>
           {confirmed.length}
         </span>
-        <span style={{ font: mono(11, 600), color: "rgba(255,255,255,.45)" }}>/ {SPRINT_GOAL} {t("площадок")}</span>
+        <span style={{ font: mono(12, 600), color: "var(--gtr-t3)" }}>
+          / {SPRINT_GOAL} {t("площадок")}
+        </span>
       </div>
-      <div style={{ height: 6, background: "rgba(255,255,255,.08)" }}>
-        <div
-          style={{
-            width: `${pct}%`,
-            height: "100%",
-            background: GREEN,
-            transition: "width .4s",
-          }}
-        />
+      <div style={{ height: 4, background: "rgba(255,255,255,.08)" }}>
+        <div style={{ width: `${pct}%`, height: "100%", background: GREEN, transition: "width .4s" }} />
       </div>
-      <div style={{ display: "flex", gap: 12 }}>
+      <div className="gtr-dash-row" style={{ flexWrap: "wrap", gap: 14 }}>
         {[
-          [t("ОТПРАВЛЕНО"), sent, "rgba(255,255,255,.6)"],
+          [t("ОТПРАВЛЕНО"), sent, "var(--gtr-t2)"],
           [t("ОТКРЫТО"), opened, AMBER],
           [t("ПОДТВЕРЖДЕНО"), confirmed.length, GREEN],
         ].map(([l, n, c]) => (
-          <span key={l as string} style={{ font: mono(9.5, 600), color: c as string }}>
+          <span key={l as string} style={{ font: mono(11, 600), color: c as string }}>
             {l}: {n}
           </span>
         ))}
       </div>
-      {last.length ? (
-        <div style={{ display: "grid", gap: 5 }}>
-          {last.map((c) => (
-            <div key={c.vid} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-              <Dot color={GREEN} />
-              <span style={{ flex: 1, minWidth: 0, font: golos(10.5), overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {V(c.vid)?.name ?? c.vid}
-                {c.rate?.amount ? ` · ${fmtThb(c.rate.amount)}` : ""}
-              </span>
-              <span style={{ font: mono(9), color: "rgba(255,255,255,.4)" }}>
-                {c.sentBy.split("@")[0]}
-              </span>
-            </div>
-          ))}
+      {last.map((c) => (
+        <div key={c.vid} className="gtr-dash-row">
+          <Dot color={GREEN} />
+          <span className="gtr-dash-row-t">
+            {V(c.vid)?.name ?? c.vid}
+            <small>{c.sentBy.split("@")[0]}</small>
+          </span>
+          {c.rate?.amount ? <span className="gtr-dash-row-v">{fmtThb(c.rate.amount)}</span> : null}
         </div>
-      ) : (
-        <div style={{ font: golos(10.5), color: "rgba(255,255,255,.4)" }}>
-          {t("Отправляйте площадкам ссылки подтверждения из паспорта — каждое подтверждение появится здесь.")}
-        </div>
-      )}
-      {bySender.size ? (
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          {[...bySender.entries()].map(([e, n]) => (
-            <span key={e} style={{ font: mono(9), color: "rgba(255,255,255,.45)" }}>
-              {e.split("@")[0]}: {n}
-            </span>
-          ))}
-        </div>
-      ) : null}
-    </Card>
+      ))}
+    </section>
   );
 }

@@ -457,7 +457,7 @@ export function ConstructorScreen({
       <div style={{ maxWidth: 620, margin: "60px auto" }}>
         <Card style={{ padding: "34px 32px", display: "grid", gap: 14 }}>
           <Eyebrow>{t("КОНСТРУКТОР СОБЫТИЯ")}</Eyebrow>
-          <h1 className="gtr-oswald" style={{ font: "700 24px/1.2 Oswald,sans-serif", margin: 0 }}>
+          <h1 className="gtr-oswald" style={{ font: "700 20.5px/1.2 var(--display)", margin: 0 }}>
             {t("На площадке «")}{v.name ?? vid}{t("» пока нет событий")}
           </h1>
           <p style={{ margin: 0, color: "var(--gtr-t2)", font: "500 13px/1.6 'Golos Text',sans-serif" }}>
@@ -945,7 +945,7 @@ export function ConstructorScreen({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                font: "700 10px/1 Oswald,sans-serif",
+                font: "600 10px/1 var(--cond)",
                 background: "rgba(229,35,27,.2)",
                 border: "1px solid rgba(229,35,27,.6)",
               }}
@@ -964,7 +964,7 @@ export function ConstructorScreen({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  font: "700 10px/1 Oswald,sans-serif",
+                  font: "600 10px/1 var(--cond)",
                   background: "rgba(46,204,113,.16)",
                   border: "1px solid rgba(46,204,113,.5)",
                   color: "#2ECC71",
@@ -2200,7 +2200,7 @@ export function ConstructorScreen({
                       borderTop: "1px solid rgba(255,255,255,.08)",
                     }}
                   >
-                    <span className="gtr-oswald" style={{ font: "700 13px/1 Oswald,sans-serif" }}>
+                    <span className="gtr-oswald" style={{ font: "600 13px/1 var(--cond)" }}>
                       {t("ИТОГО")}
                     </span>
                     <span
@@ -3012,7 +3012,7 @@ function TierCompare({ graph, venueId }: { graph: Graph; venueId: string }) {
               >
                 <span
                   className="gtr-oswald"
-                  style={{ font: "700 12px/1 Oswald,sans-serif", letterSpacing: ".04em" }}
+                  style={{ font: "600 12px/1 var(--cond)", letterSpacing: ".04em" }}
                 >
                   {TIER_LABEL[plan.tier]}
                 </span>

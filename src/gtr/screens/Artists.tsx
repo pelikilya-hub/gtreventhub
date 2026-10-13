@@ -400,7 +400,7 @@ export function ArtistsScreen({ artistId }: { artistId?: string }) {
                       position: "absolute",
                       right: 14,
                       bottom: 2,
-                      font: "700 52px/1 Oswald,sans-serif",
+                      font: "700 44px/1 var(--display)",
                       color: "rgba(255,255,255,.07)",
                       letterSpacing: ".04em",
                       userSelect: "none",
@@ -1254,7 +1254,7 @@ function ArtistCard({
                       ) : null}
                       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 55%, rgba(10,11,13,.94))" }} />
                       <div style={{ position: "absolute", left: 8, right: 8, bottom: 7 }}>
-                        <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".03em" }}>
+                        <div style={{ font: "600 13px/1.2 var(--cond)", textTransform: "uppercase", letterSpacing: ".03em" }}>
                           {x.name}
                         </div>
                         <div className="gtr-mono" style={{ marginTop: 2, font: "500 7.5px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>

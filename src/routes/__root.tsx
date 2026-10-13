@@ -59,16 +59,19 @@ export const Route = createRootRoute({
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
       // Шрифты подгружались по мере надобности, и текст перерисовывался по
       // очереди: сначала системный, потом гротеск, потом моно — на телефоне
-      // это читалось как наложение трёх шрифтов. Четыре начертания, которые
-      // держат почти весь текст, забираем сразу, до первой отрисовки.
+      // это читалось как наложение трёх шрифтов. Пять файлов, которые
+      // держат почти весь текст (переменные начертания — один файл на все
+      // веса), забираем сразу, до первой отрисовки.
       { rel: "preload", as: "font", type: "font/woff2", crossOrigin: "anonymous",
-        href: "/fonts/gtr/GolosText-500-cyrillic.woff2" },
+        href: "/fonts/g/golos-text-cyrillic-1.woff2" },
       { rel: "preload", as: "font", type: "font/woff2", crossOrigin: "anonymous",
-        href: "/fonts/gtr/GolosText-600-cyrillic.woff2" },
+        href: "/fonts/g/golos-text-latin-3.woff2" },
       { rel: "preload", as: "font", type: "font/woff2", crossOrigin: "anonymous",
-        href: "/fonts/gtr/JetBrainsMono-500-cyrillic.woff2" },
+        href: "/fonts/g/jetbrains-mono-cyrillic-5.woff2" },
       { rel: "preload", as: "font", type: "font/woff2", crossOrigin: "anonymous",
-        href: "/fonts/gtr/Oswald-600-cyrillic.woff2" },
+        href: "/fonts/g/unbounded-cyrillic-13.woff2" },
+      { rel: "preload", as: "font", type: "font/woff2", crossOrigin: "anonymous",
+        href: "/fonts/k/fira-sans-condensed-cyrillic-1.woff2" },
     ],
   }),
   shellComponent: RootShell,

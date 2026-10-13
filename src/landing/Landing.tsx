@@ -152,8 +152,8 @@ const fontLink = (href: string) =>
   ({ rel: "preload", as: "font", type: "font/woff2", crossOrigin: "anonymous", href }) as const;
 export const LANDING_FONTS = [
   fontLink("/fonts/gtr/Trashed.woff2"),
-  fontLink("/fonts/gtr/Unbounded-cyrillic.woff2"),
-  fontLink("/fonts/gtr/Unbounded-latin.woff2"),
+  fontLink("/fonts/g/unbounded-cyrillic-13.woff2"),
+  fontLink("/fonts/g/unbounded-latin-15.woff2"),
   fontLink("/fonts/gtr/GlitchCity.woff2"),
 ];
 

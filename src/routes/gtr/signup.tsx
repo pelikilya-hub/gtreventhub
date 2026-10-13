@@ -101,7 +101,7 @@ function SignupPage() {
                 color: "inherit",
               }}
             >
-              <div style={{ font: "700 12px/1.2 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".04em" }}>
+              <div style={{ font: "600 12px/1.2 var(--cond)", textTransform: "uppercase", letterSpacing: ".04em" }}>
                 {t(title)}
               </div>
               <div style={{ marginTop: 3, font: "500 10px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>

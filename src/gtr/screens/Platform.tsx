@@ -426,7 +426,7 @@ export function AiMatchScreen() {
               <span key={c} style={{ width: 22, height: 6, background: c }} />
             ))}
           </div>
-          <div style={{ font: "700 16px/1.45 Oswald,sans-serif", textTransform: "uppercase" }}>
+          <div style={{ font: "600 16px/1.45 var(--cond)", textTransform: "uppercase" }}>
             {t("Подбор событий под ваш музыкальный вкус")}
           </div>
           <div style={{ font: "500 12px/1.65 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
@@ -651,7 +651,7 @@ export function CommunityScreen() {
         {user.role === "visitor" ? " · PRO" : ""}
       </h1>
       <Card style={{ padding: "24px 26px", display: "grid", gap: 12 }}>
-        <div style={{ font: "700 16px/1.45 Oswald,sans-serif", textTransform: "uppercase" }}>
+        <div style={{ font: "600 16px/1.45 var(--cond)", textTransform: "uppercase" }}>
           {user.role === "artist" ? t("Локальная сцена Пхукета") : t("Закрытые афтерпати и своя тусовка")}
         </div>
         <div style={{ font: "500 12px/1.65 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>

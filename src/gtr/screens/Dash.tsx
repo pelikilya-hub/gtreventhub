@@ -18,14 +18,12 @@ import {
   type EventStage,
   type ScreenId,
 } from "../data/app-data";
-import { useVenueContacts } from "../work-contacts";
 import { useGtr } from "../store";
 import { FAMILY_LABEL } from "../match";
 import { useTranslation } from "react-i18next";
 import { ArtistStudio } from "./ArtistStudio";
 import "../i18n";
-import { Card, Chip, Dot, Eyebrow, Icon, Ring, Stk, TrashTitle, type StkName } from "../ui";
-import { ImpulseArt } from "../impulse";
+import { Card, Chip, Eyebrow, Stk, TrashTitle, type StkName } from "../ui";
 import {
   allAfishaFn,
   communityCfgFn,
@@ -43,12 +41,15 @@ import { openAppLink } from "../applink";
 import { posterUrl } from "../poster";
 import { genreLabel, OFFER_COLOR, OFFER_LABEL } from "../data/app-data";
 import { pickHeadliner, islandDigest, loudness } from "../guest-digest";
-import { eventsToday, phuketDayStart } from "../daily-digest";
 import appUpdates from "../data/app-updates.json";
 
-type Action = [string, string, string, ScreenId, string, string];
-type Kpi = [string, string | number, string, string, string];
-type SideRow = { title: string; desc: string; meta: string; color: string };
+// Кабинет площадки — медийная сцена, а не панель приборов: снимок места,
+// одна строка крупных цифр, три действия и список залов. Пояснения под
+// цифрами, второй чек-лист, лазеры поверх шапки и служебные строки
+// («проверено», «фото: web», источники базы) из кабинета ушли — их
+// место в паспорте площадки, а не на первом экране.
+type Action = { title: string; cta: string; go: ScreenId; vid?: string };
+type Kpi = [label: string, value: string | number, suffix: string, color: string];
 type MainRow = {
   title: string;
   desc: string;
@@ -63,34 +64,20 @@ type DashData = {
   name: string;
   type: string;
   area: string;
-  capacity: string;
   state: string;
   stateColor: string;
-  verified: string;
-  heroImg?: string;
-  heroCredit?: string;
-  heroBadge?: string;
-  ringLabel: string;
-  ringValue: number;
-  ringNote: string;
-  ringCta: string;
-  ringGo: ScreenId;
-  ringItems: [string, string][];
+  heroImg: string;
   kpis: Kpi[];
   actions: Action[];
   mainTitle: string;
   mainCta: string;
   mainGo: ScreenId;
   mainRows: MainRow[];
-  sideTitle: string;
-  sideRows: SideRow[];
 };
 
 export function DashScreen() {
   const { t } = useTranslation();
   const { user, shared } = useGtr();
-  // Контакты приходят с сервера и только команде — в бандле их больше нет.
-  const venueContact = useVenueContacts();
   const navigate = useNavigate();
   const go = (s: ScreenId, vid?: string) =>
     navigate({ to: "/gtr/$screen", params: { screen: s }, search: vid ? { vid } : undefined });
@@ -123,60 +110,19 @@ export function DashScreen() {
       name: t("Сеть площадок Пхукета"),
       type: t("97 объектов · 30 залов"),
       area: t("Патонг · Банг Тао · Камала · Карон · Май Кхао · Старый город"),
-      capacity: t("Обновлено 06.08.2026"),
       state: t("ОПЕРАЦИОННАЯ БАЗА v3"),
       stateColor: GREEN,
-      verified: t("ИСТОЧНИКИ: ОФИЦИАЛЬНЫЕ САЙТЫ"),
-      ringLabel: t("ПОКРЫТИЕ БАЗЫ"),
-      ringValue: pct,
-      ringNote: `${high} ${t("площадок с высокой достоверностью источника из")} ${PH.venues.length}`,
-      ringCta: t("Открыть реестр"),
-      ringGo: "base",
-      ringItems: [
-        [t("Кабинеты активированы: 2"), GREEN],
-        [t("Приглашения отправлены: 2"), AMBER],
-        [`${t("Карантин источников")}: ${quar.length}`, RED],
-        [`${t("Контакты P0/P1")}: ${PH.meta.contacts}`, AMBER],
-      ],
+      heroImg: "/venues/VEN-0002-hero.jpg",
       kpis: [
-        [t("ПЛОЩАДОК В БАЗЕ"), PH.meta.total, "", "#fff", t("97 сущностей, включая группы")],
-        [t("НОРМАЛИЗОВАННЫХ ЗАЛОВ"), PH.meta.spaces, "", "#fff", t("Отдельно бронируемые зоны")],
-        [t("ГОТОВЫ К КАТАЛОГУ"), "1", "/10", GREEN, t("Place Coworking · готовность 85")],
-        [t("КАРАНТИН"), quar.length, "", RED, t("Скрыты из каталога организаторов")],
+        [t("ПЛОЩАДОК В БАЗЕ"), PH.meta.total, "", "#fff"],
+        [t("НОРМАЛИЗОВАННЫХ ЗАЛОВ"), PH.meta.spaces, "", "#fff"],
+        [t("ПОКРЫТИЕ БАЗЫ"), pct, "%", GREEN],
+        [t("КАРАНТИН"), quar.length, "", RED],
       ],
       actions: [
-        [
-          t("Illuzion Group — коммерческое партнёрство"),
-          t("Нет презентации приватной аренды, комиссии, правил промоутеров и тех-райдера"),
-          t("Открыть карточку"),
-          "venueCard",
-          "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z",
-          RED,
-        ],
-        [
-          t("Отельные площадки — импорт всех залов"),
-          t("Нужны названия комнат, м², сетапы, пакеты и AV от команд продаж"),
-          t("Залы и прайс"),
-          "spaces",
-          "M3 21V8l9-5 9 5v13",
-          RED,
-        ],
-        [
-          t("Марины — выездные обследования"),
-          t("Зоны, электричество, парковка, разрешения, шум, морские ограничения"),
-          t("Площадки Таиланд"),
-          "base",
-          "M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z",
-          AMBER,
-        ],
-        [
-          t("Place Coworking — быстрый пилот bookable"),
-          t("Живой календарь, депозит, отмена, комиссия"),
-          t("Доступы"),
-          "access",
-          "M7 11V7a5 5 0 0 1 10 0v4 M5 11h14v10H5z",
-          AMBER,
-        ],
+        { title: t("Illuzion Group — коммерческое партнёрство"), cta: t("Открыть карточку"), go: "venueCard", vid: "VEN-0013" },
+        { title: t("Отельные площадки — импорт всех залов"), cta: t("Залы и прайс"), go: "spaces" },
+        { title: t("Марины — выездные обследования"), cta: t("Площадки Таиланд"), go: "base" },
       ],
       mainTitle: t("Готовность площадок"),
       mainCta: t("Весь реестр"),
@@ -187,7 +133,7 @@ export function DashScreen() {
         .slice(0, 5)
         .map((x) => ({
           title: x.name,
-          desc: `${x.type} · ${x.area}`,
+          desc: x.area,
           value: String(x.readiness?.score ?? "—"),
           status: (x.readiness?.state ?? "").toUpperCase(),
           color:
@@ -198,13 +144,6 @@ export function DashScreen() {
                 : "rgba(255,255,255,.45)",
           vid: x.id,
         })),
-      sideTitle: t("ОЧЕРЕДЬ ИССЛЕДОВАНИЙ · P0 / P1"),
-      sideRows: PH.research.slice(0, 6).map((r) => ({
-        title: `${r.cluster} — ${r.task}`,
-        desc: r.missing,
-        meta: r.priority,
-        color: r.priority === "P0" ? RED : AMBER,
-      })),
     };
   } else if (user.role === "owner") {
     d = {
@@ -212,87 +151,30 @@ export function DashScreen() {
       name: v.name,
       type: v.type,
       area: `${v.area} · ${v.district}`,
-      capacity: t("1 645 м² · 3 event-пространства"),
       state: t("БРОНИРУЕМАЯ"),
       stateColor: GREEN,
-      verified: `${t("ПРОВЕРЕНО")} ${v.verified || ""}`,
-      heroImg: rich.hero,
-      heroCredit: rich.credit,
-      ringLabel: t("ГОТОВНОСТЬ К КАТАЛОГУ"),
-      ringValue: R?.score ?? 85,
-      ringNote: t("Единственная площадка базы со статусом «Бронируемая»"),
-      ringCta: t("Открыть паспорт"),
-      ringGo: "venue",
-      ringItems: [
-        [t("Опубликован прайс THB/час"), GREEN],
-        [t("Контакт подтверждён"), GREEN],
-        [t("Живой календарь — подключить"), AMBER],
-        [t("Комиссия и депозит — согласовать"), AMBER],
-      ],
+      heroImg: rich.hero || `/venues/${vid}-hero.jpg`,
       kpis: [
-        [t("EVENT-ПРОСТРАНСТВ"), sp.length || 3, "", "#fff", t("1-й, 4-й и 6-й этажи")],
-        [
-          t("ЗАНЯТО В АВГУСТЕ"),
-          shared.events.filter((e) => e.venueId === vid).length,
-          "/31",
-          "#fff",
-          t("По текущей программе"),
-        ],
-        [t("ОТКРЫТЫХ ЗАЯВОК"), "3", "", AMBER, t("2 требуют ответа сегодня")],
-        [t("ГОТОВНОСТЬ"), R?.score ?? 85, "/100", GREEN, t("Бронируемая")],
+        [t("EVENT-ПРОСТРАНСТВ"), sp.length || 3, "", "#fff"],
+        [t("ЗАНЯТО В АВГУСТЕ"), shared.events.filter((e) => e.venueId === vid).length, "/31", "#fff"],
+        [t("ОТКРЫТЫХ ЗАЯВОК"), "3", "", AMBER],
+        [t("ГОТОВНОСТЬ"), R?.score ?? 85, "/100", GREEN],
       ],
       actions: [
-        [
-          t("Подключить живой календарь"),
-          t("Сейчас доступность подтверждается вручную — организаторы ждут ответ"),
-          t("Календарь"),
-          "calendar",
-          "M3 6h18v15H3z M8 3v5 M16 3v5",
-          AMBER,
-        ],
-        [
-          t("Согласовать комиссию и депозит"),
-          t("В «Готовности к бронированию» договор и условия оплаты — нет"),
-          t("Финансы"),
-          "finance",
-          "M3 7h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
-          RED,
-        ],
-        [
-          t("Загрузить фото с правами"),
-          t("Права на фото: только официальная галерея — нужны материалы с разрешением"),
-          t("Паспорт"),
-          "venue",
-          "M4 7h4l2-2h4l2 2h4v13H4z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
-          AMBER,
-        ],
-        [
-          t("Ответить на 3 заявки"),
-          t("Средний ответ по площадке влияет на позицию в каталоге"),
-          t("Заявки"),
-          "inquiries",
-          "M4 4h16v12H9l-5 4z",
-          RED,
-        ],
+        { title: t("Ответить на 3 заявки"), cta: t("Заявки"), go: "inquiries" },
+        { title: t("Подключить живой календарь"), cta: t("Календарь"), go: "calendar" },
+        { title: t("Согласовать комиссию и депозит"), cta: t("Финансы"), go: "finance" },
       ],
       mainTitle: t("Event-пространства"),
       mainCta: t("Прайс и сетапы"),
       mainGo: "spaces",
       mainRows: sp.map((x) => ({
         title: x.name,
-        desc: [x.type, x.notes].filter(Boolean).join(" · "),
+        desc: x.type || "",
         value: (x.currency as string) || t("THB / час"),
         status: String(x.bookable || "").toUpperCase(),
         color: GREEN,
       })),
-      sideTitle: t("ЧЕК-ЛИСТ ГОТОВНОСТИ"),
-      sideRows: [
-        [t("Прайс-лист"), t("Опубликованная ставка THB/час, пакеты — уточнить"), t("ЕСТЬ"), GREEN],
-        [t("Доступность"), t("Метод: ручной запрос → перевести на календарь"), t("СДЕЛАТЬ"), AMBER],
-        [t("Договор и комиссия"), t("Нет в «Готовности к бронированию»"), t("СДЕЛАТЬ"), RED],
-        [t("Права на фото"), t("Только официальная галерея"), t("СДЕЛАТЬ"), AMBER],
-        [t("Тех-райдер"), t("Не опубликован"), t("СДЕЛАТЬ"), AMBER],
-      ].map(([title, desc, meta, color]) => ({ title, desc, meta, color })),
     };
   } else {
     const vEvCount = shared.events.filter((e) => e.venueId === vid).length;
@@ -301,467 +183,115 @@ export function DashScreen() {
       name: v.name,
       type: v.type,
       area: v.area,
-      capacity: v.capacity,
       state: t("БРОНЬ ПО ЗАПРОСУ"),
       stateColor: AMBER,
-      verified: `${t("ПРОВЕРЕНО")} ${v.verified || ""}`,
-      heroImg: rich.hero,
-      heroCredit: rich.credit,
-      heroBadge: rich.badge,
-      ringLabel: t("ГОТОВНОСТЬ К КАТАЛОГУ"),
-      ringValue: R?.score ?? 58,
-      ringNote: [v.type, v.area, v.capacity ? `${t("до")} ${t(String(v.capacity))} ${t("гостей")}`.replace(`${t("до")} ${t("до")}`, t("до")) : ""]
-        .filter(Boolean)
-        .join(" · "),
-      ringCta: t("Открыть паспорт"),
-      ringGo: "venue",
-      ringItems: [
-        [t("Площадка и контакт верифицированы"), v.verified ? GREEN : AMBER],
-        [t("Залы нормализованы частично"), sp.length ? AMBER : RED],
-        [t("Прайс-лист отсутствует"), RED],
-        [t("Договор и комиссия отсутствуют"), RED],
-      ],
+      heroImg: rich.hero || `/venues/${vid}-hero.jpg`,
       kpis: [
-        [
-          t("ЗАЛОВ В БАЗЕ"),
-          sp.length || "—",
-          "",
-          "#fff",
-          sp.length
-            ? sp
-                .map((x) => x.name)
-                .slice(0, 3)
-                .join(" · ")
-            : t("Залы не нормализованы"),
-        ],
-        [
-          t("СОБЫТИЙ В КАЛЕНДАРЕ"),
-          vEvCount || "—",
-          "",
-          "#fff",
-          vEvCount ? t("По программе площадки") : t("Пока не запланировано"),
-        ],
-        [t("ЗАЯВОК ОТ ОРГАНИЗАТОРОВ"), "5", "", AMBER, t("3 в статусе SLA")],
-        [t("ГОТОВНОСТЬ"), R?.score ?? 58, "/100", AMBER, t("Бронь по запросу")],
+        [t("ЗАЛОВ В БАЗЕ"), sp.length || "—", "", "#fff"],
+        [t("СОБЫТИЙ В КАЛЕНДАРЕ"), vEvCount || "—", "", "#fff"],
+        [t("ЗАЯВОК ОТ ОРГАНИЗАТОРОВ"), "5", "", AMBER],
+        [t("ГОТОВНОСТЬ"), R?.score ?? 58, "/100", AMBER],
       ],
       actions: [
-        [
-          t("Прислать матрицу вместимости и net-ставки"),
-          t("Прайс-листа в «Готовности к бронированию» нет; без него нет расчёта для организатора"),
-          t("Залы и прайс"),
-          "spaces",
-          "M3 7h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
-          RED,
-        ],
-        [
-          t("Загрузить презентацию приватной аренды и комиссию"),
-          t("Нет презентации, комиссии, правил промоутеров и тех-райдера в очереди исследований"),
-          t("Финансы"),
-          "finance",
-          "M13 3H7v18h11V8z M13 3v5h5",
-          RED,
-        ],
-        [
-          t("Нормализовать залы и вместимость"),
-          t("Данные по залам не подтверждены публично — нужны цифры от площадки"),
-          t("Залы и прайс"),
-          "spaces",
-          "M3 21V8l9-5 9 5v13",
-          AMBER,
-        ],
-        [
-          t("Собрать программу в конструкторе"),
-          t("Начните с площадки и добавьте артистов, подрядчиков и промо"),
-          t("Конструктор"),
-          "constructor",
-          "M5 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z M19 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z M7 8h6a3 3 0 0 1 3 3v3",
-          AMBER,
-        ],
+        { title: t("Собрать программу в конструкторе"), cta: t("Конструктор"), go: "constructor" },
+        { title: t("Прислать матрицу вместимости и net-ставки"), cta: t("Залы и прайс"), go: "spaces" },
+        { title: t("Загрузить презентацию приватной аренды и комиссию"), cta: t("Финансы"), go: "finance" },
       ],
       mainTitle: t("Залы и техника площадки"),
       mainCta: t("Открыть залы"),
       mainGo: "spaces",
       mainRows: sp.map((x) => ({
         title: x.name,
-        desc: [
-          x.type,
-          x.sqm && `${x.sqm} ${t("м²")}`,
-          x.capTheatre && `${x.capTheatre} ${t("театр")}`,
-          x.capCocktail && `${x.capCocktail} ${t("коктейль")}`,
-        ]
+        desc: [x.sqm && `${x.sqm} ${t("м²")}`, x.capCocktail && `${x.capCocktail} ${t("коктейль")}`]
           .filter(Boolean)
           .join(" · "),
         value: x.sqm ? `${x.sqm} ${t("м²")}` : "—",
         status: String(x.bookable || "").toUpperCase(),
         color: AMBER,
       })),
-      sideTitle: t("ЧТО ЗАПРОШЕНО GTR"),
-      sideRows: [
-        [t("Матрица вместимости"), t("Полная матрица сетапов по каждому залу"), "P0", RED],
-        [t("Net-ставки"), t("Нетто-ставки и партнёрские пакеты"), "P0", RED],
-        [t("Права на фото"), t("Official gallery only — нужны материалы с разрешением"), "P1", AMBER],
-        [t("AV и тех-райдер"), t("Свет, звук, экраны, схема подключения"), "P1", AMBER],
-      ].map(([title, desc, meta, color]) => ({ title, desc, meta, color })),
     };
   }
 
-  const contact = venueContact(vid);
-
   return (
-    <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-      {/* ---------- hero ---------- */}
-      <div
-        className="gtr-card"
-        style={{
-          position: "relative",
-          overflow: "hidden",
-          padding: "26px 28px",
-          marginBottom: 18,
-          minHeight: 148,
-        }}
-      >
-        {d.heroImg ? (
-          <>
-            <img
-              src={d.heroImg}
-              alt={d.name}
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                opacity: 0.34,
-              }}
-              loading="lazy"
-            />
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "linear-gradient(90deg,#0A0B0Dee,#0A0B0D66)",
-              }}
-            />
-          </>
-        ) : null}
-        <div className="gtr-beam" />
-        <div className="gtr-glowbar" style={{ left: "62%" }} />
-        <div className="gtr-glowbar" style={{ left: "84%", animationDelay: "1.2s" }} />
-        {/* сканирующие лазеры поверх шапки */}
-        <div className="gtr-laser" style={{ top: 0, ["--gtr-run" as string]: "210px" }} />
-        <div
-          className="gtr-laser"
-          style={{ top: 0, animationDelay: "2.6s", opacity: 0.6, ["--gtr-run" as string]: "210px" }}
-        />
-        <div style={{ position: "relative" }}>
+    <div className="gtr-dash">
+      {/* ---------- сцена: снимок места от края до края ---------- */}
+      <section className="gtr-dash-hero">
+        <img src={d.heroImg} alt="" className="gtr-dash-hero-img" />
+        <div className="gtr-dash-hero-in">
           <Eyebrow>{d.kicker}</Eyebrow>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 14,
-              flexWrap: "wrap",
-              marginTop: 10,
-            }}
-          >
-            <h1
-              className="gtr-oswald"
-              style={{ font: "700 30px/1.05 Oswald,sans-serif", letterSpacing: ".02em", margin: 0 }}
-            >
-              {d.name}
-            </h1>
+          <h1 className="gtr-dash-name">{d.name}</h1>
+          <div className="gtr-dash-sub">
             <Chip color={d.stateColor}>{d.state}</Chip>
-            <Chip color="rgba(255,255,255,.5)">{d.verified}</Chip>
-            {d.heroBadge ? <Chip color="#FFD166">{t(d.heroBadge)}</Chip> : null}
-          </div>
-          <div
-            style={{
-              marginTop: 10,
-              font: "500 12.5px/1.5 'Golos Text',sans-serif",
-              color: "var(--gtr-t2)",
-            }}
-          >
-            {d.type} · {d.area}
-          </div>
-          <div
-            className="gtr-mono"
-            style={{
-              marginTop: 6,
-              font: "500 12px/1.5 'JetBrains Mono',monospace",
-              color: "var(--gtr-t3)",
-            }}
-          >
-            {t(d.capacity)}
-            {contact?.phone ? ` · ${contact.phone}` : ""}
-            {d.heroCredit ? ` · ${t("фото")}: ${t(d.heroCredit)}` : ""}
+            <span>
+              {d.type} · {d.area}
+            </span>
           </div>
         </div>
+      </section>
+
+      {/* ---------- одна строка крупных цифр ---------- */}
+      <div className="gtr-stats">
+        {d.kpis.map(([label, value, suffix, color]) => (
+          <div key={label} className="gtr-stat">
+            <b style={{ color }}>
+              {value}
+              {suffix ? <small>{suffix}</small> : null}
+            </b>
+            <span>{label}</span>
+          </div>
+        ))}
       </div>
 
-      {/* ---------- кольцо + KPI ---------- */}
-      <div
-        className="gtr-md-stack"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(300px,380px) 1fr",
-          gap: 18,
-          marginBottom: 18,
-        }}
-      >
-        <Card style={{ padding: 22, display: "flex", gap: 18, alignItems: "center" }}>
-          <Ring value={d.ringValue} />
-          <div style={{ minWidth: 0 }}>
-            <Eyebrow>{d.ringLabel}</Eyebrow>
-            <div
-              style={{
-                margin: "8px 0 10px",
-                font: "500 13px/1.5 'Golos Text',sans-serif",
-                color: "var(--gtr-t2)",
-              }}
+      {/* ---------- три действия ---------- */}
+      <section className="gtr-dash-sec">
+        <h2 className="gtr-dash-h">{t("Приоритетные действия")}</h2>
+        {d.actions.map((a, i) => (
+          <div key={a.title} className="gtr-dash-row">
+            <span className="gtr-dash-row-t">{a.title}</span>
+            <button
+              className={`gtr-btn${i === 0 ? " gtr-btn-red" : ""}`}
+              onClick={() => go(a.go, a.vid)}
             >
-              {d.ringNote}
-            </div>
-            <div style={{ display: "grid", gap: 6 }}>
-              {d.ringItems.map(([t, c]) => (
-                <div
-                  key={t}
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    alignItems: "flex-start",
-                    font: "500 13px/1.5 'Golos Text',sans-serif",
-                  }}
-                >
-                  <Dot color={c} /> <span style={{ color: "var(--gtr-t2)" }}>{t}</span>
-                </div>
-              ))}
-            </div>
-            <button className="gtr-btn" style={{ marginTop: 12 }} onClick={() => go(d.ringGo)}>
-              {d.ringCta}
+              {a.cta}
             </button>
           </div>
-        </Card>
+        ))}
+      </section>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 12 }}>
-          {d.kpis.map(([label, value, suffix, color, note]) => (
-            <Card key={t(label)} hover style={{ padding: "16px 18px" }}>
-              <Eyebrow>{label}</Eyebrow>
-              <div style={{ marginTop: 10 }}>
-                <span
-                  className="gtr-mono"
-                  style={{ font: "700 26px/1 'JetBrains Mono',monospace", color }}
-                >
-                  {value}
-                </span>
-                {suffix ? (
-                  <span
-                    className="gtr-mono"
-                    style={{
-                      font: "600 13px/1 'JetBrains Mono',monospace",
-                      color: "var(--gtr-t3)",
-                    }}
-                  >
-                    {suffix}
-                  </span>
-                ) : null}
-              </div>
-              <div
-                style={{
-                  marginTop: 8,
-                  font: "500 12px/1.5 'Golos Text',sans-serif",
-                  color: "var(--gtr-t3)",
-                }}
-              >
-                {t(note)}
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* ---------- действия + сайд ---------- */}
-      <div
-        className="gtr-md-stack"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr minmax(280px,330px)",
-          gap: 18,
-          marginBottom: 18,
-        }}
-      >
-        <Card>
-          <div
-            className="gtr-oswald"
-            style={{
-              font: "600 14px/1 Oswald,sans-serif",
-              padding: "16px 20px",
-              borderBottom: "1px solid rgba(255,255,255,.05)",
-            }}
-          >
-            {t("Приоритетные действия")}
-          </div>
-          {d.actions.map(([title, desc, cta, goTo, icon, c], i) => (
-            <div
-              key={title}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 13,
-                padding: "14px 20px",
-                borderBottom: "1px solid rgba(255,255,255,.05)",
-                borderLeft: `2px solid ${c}`,
-              }}
-            >
-              <span
-                style={{
-                  width: 32,
-                  height: 32,
-                  flex: "none",
-                  borderRadius: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: c,
-                  background: c === RED ? "rgba(229,35,27,.14)" : "rgba(245,166,35,.13)",
-                }}
-              >
-                <Icon d={icon} size={16} />
-              </span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: "block", font: "600 12.5px/1.45 'Golos Text',sans-serif" }}>
-                  {title}
-                </span>
-                <span
-                  style={{
-                    display: "block",
-                    marginTop: 4,
-                    font: "500 13px/1.5 'Golos Text',sans-serif",
-                    color: "var(--gtr-t2)",
-                  }}
-                >
-                  {desc}
-                </span>
-              </span>
-              <button
-                className={`gtr-btn ${i === 0 ? "gtr-btn-red" : ""}`}
-                onClick={() => go(goTo, goTo === "venueCard" ? "VEN-0013" : undefined)}
-              >
-                {cta}
-              </button>
-            </div>
-          ))}
-        </Card>
-
-        <Card style={{ alignSelf: "start" }}>
-          <div style={{ padding: "16px 18px", borderBottom: "1px solid rgba(255,255,255,.05)" }}>
-            <Eyebrow>{d.sideTitle}</Eyebrow>
-          </div>
-          <div style={{ padding: "8px 18px 14px" }}>
-            {d.sideRows.map((r) => (
-              <div
-                key={r.title}
-                style={{
-                  display: "flex",
-                  gap: 9,
-                  padding: "9px 0",
-                  borderBottom: "1px solid rgba(255,255,255,.04)",
-                }}
-              >
-                <Dot color={r.color} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>{r.title}</div>
-                  <div
-                    style={{
-                      marginTop: 3,
-                      font: "500 12px/1.5 'Golos Text',sans-serif",
-                      color: "var(--gtr-t3)",
-                    }}
-                  >
-                    {r.desc}
-                  </div>
-                </div>
-                <span
-                  className="gtr-mono"
-                  style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: r.color }}
-                >
-                  {r.meta}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
-
-      {/* ---------- основная секция ---------- */}
-      <Card>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid rgba(255,255,255,.05)",
-          }}
-        >
-          <div className="gtr-oswald" style={{ font: "600 14px/1 Oswald,sans-serif" }}>
-            {d.mainTitle}
-          </div>
-          <button className="gtr-btn" onClick={() => go(d.mainGo)}>
+      {/* ---------- залы / площадки ---------- */}
+      <section className="gtr-dash-sec">
+        <div className="gtr-dash-sec-head">
+          <h2 className="gtr-dash-h">{d.mainTitle}</h2>
+          <button className="gtr-btn gtr-btn-ghost" onClick={() => go(d.mainGo)}>
             {d.mainCta}
           </button>
         </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))",
-            gap: 12,
-            padding: 18,
-          }}
-        >
-          {(d.mainRows.length
-            ? d.mainRows
-            : [
-                {
-                  title: t("Залы не нормализованы"),
-                  desc: t("Импорт залов в очереди исследований"),
-                  value: "—",
-                  status: t("ТРЕБУЕТ ДАННЫХ"),
-                  color: RED,
-                },
-              ]
-          ).map((r) => (
-            <Card
+        {d.mainRows.length ? (
+          d.mainRows.map((r) => (
+            <button
               key={r.title}
-              hover
-              style={{ background: "var(--gtr-card2)", padding: "14px 16px" }}
+              type="button"
+              className="gtr-dash-row gtr-dash-link"
               onClick={r.vid ? () => go("venueCard", r.vid) : () => go(d.mainGo)}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>{r.title}</div>
-                <div
-                  className="gtr-mono"
-                  style={{
-                    font: "700 13px/1.2 'JetBrains Mono',monospace",
-                    color: "var(--gtr-t2)",
-                  }}
-                >
-                  {r.value}
-                </div>
-              </div>
-              <div
-                style={{
-                  margin: "6px 0 9px",
-                  font: "500 12px/1.5 'Golos Text',sans-serif",
-                  color: "var(--gtr-t3)",
-                }}
-              >
-                {r.desc}
-              </div>
-              {r.status ? <Chip color={r.color}>{t(r.status)}</Chip> : null}
-            </Card>
-          ))}
-        </div>
-      </Card>
+              <span className="gtr-dash-row-t">
+                {r.title}
+                {r.desc ? <small>{r.desc}</small> : null}
+              </span>
+              {/* статус — короткая метка; адреса и длинные пометки из базы
+                  («ILLUZIONPHUKET.COM/VIP-…») на первом экране не показываем */}
+              {r.status && r.status.length <= 24 && !/[./]/.test(r.status) ? (
+                <Chip color={r.color}>{t(r.status)}</Chip>
+              ) : null}
+              <span className="gtr-dash-row-v">{r.value}</span>
+            </button>
+          ))
+        ) : (
+          <div className="gtr-dash-row">
+            <span className="gtr-dash-row-t">{t("Залы не нормализованы")}</span>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
@@ -783,17 +313,9 @@ function SalesCabinet() {
   const v = V(user.venueId);
   // Язык, на котором уходят предложения артистам (Telegram)
   const [prefLang, setPrefLang] = useState<"ru" | "en" | "th">("ru");
-  const [afisha, setAfisha] = useState<{ vid: string; dateIso: string; artistIds: string[] }[]>([]);
   useEffect(() => {
     getPrefsFn().then((r) => setPrefLang(r.prefLang)).catch(() => {});
-    allAfishaFn().then((r) => setAfisha(r.items)).catch(() => {});
   }, []);
-  // Пульс рынка: сколько событий на острове сегодня и где — организатору
-  // это ориентир, где живёт спрос. Считаем по пхукетским суткам.
-  const marketToday = useMemo(() => {
-    const iso = new Date(phuketDayStart(Date.now()) + 12 * 3600_000).toISOString().slice(0, 10);
-    return eventsToday(afisha, iso);
-  }, [afisha]);
 
   const rows = useMemo(
     () =>
@@ -809,18 +331,6 @@ function SalesCabinet() {
   const commission = rows.reduce((s, r) => s + r.quote.commission, 0);
   const inWork = rows.filter((r) => r.stage !== "approved").length;
   const approved = rows.filter((r) => r.stage === "approved").length;
-
-  const stages = (["draft", "sent", "approved"] as const).map((st) => {
-    const list = rows.filter((r) => r.stage === st);
-    return { st, count: list.length, sum: list.reduce((s, r) => s + r.quote.total, 0) };
-  });
-  const maxStage = Math.max(1, ...stages.map((x) => x.count));
-
-  const todayIso = new Date().toISOString().slice(0, 10);
-  const upcoming = rows
-    .filter((r) => r.d.dateIso && r.d.dateIso >= todayIso)
-    .sort((a, b) => (a.d.dateIso! < b.d.dateIso! ? -1 : 1))
-    .slice(0, 4);
 
   // Пайплайн по месяцам: полгода вперёд от текущего
   const months = useMemo(() => {
@@ -854,572 +364,152 @@ function SalesCabinet() {
     )
     .slice(0, 4);
 
-  const kpis: [string, string, string, string][] = [
-    [t("В РАБОТЕ"), String(inWork), inWork ? t("черновики и отправленные") : t("создайте первое событие"), "#fff"],
-    [t("СОГЛАСОВАНО"), String(approved), approved ? t("подтверждённые события") : t("пока нет"), approved ? GREEN : "#fff"],
-    [t("ПАЙПЛАЙН"), pipeline ? fmtThb(pipeline) : "—", t("сумма смет кабинета"), "#fff"],
+  const kpis: [string, string, string][] = [
+    [t("В РАБОТЕ"), String(inWork), "#fff"],
+    [t("СОГЛАСОВАНО"), String(approved), approved ? GREEN : "#fff"],
+    [t("ПАЙПЛАЙН"), pipeline ? fmtThb(pipeline) : "—", "#fff"],
     // Комиссия GTR — внутренняя выручка; клиенту-организатору не показываем
     ...(isTeam
-      ? ([[t("КОМИССИЯ GTR"), commission ? fmtThb(commission) : "—", t("с текущего пайплайна"), commission ? GREEN : "#fff"]] as [
-          string,
-          string,
-          string,
-          string,
-        ][])
+      ? ([[t("КОМИССИЯ GTR"), commission ? fmtThb(commission) : "—", commission ? GREEN : "#fff"]] as [string, string, string][])
       : []),
   ];
 
+  const openDraft = (id: string) =>
+    navigate({ to: "/gtr/$screen", params: { screen: "constructor" }, search: { draft: id } });
+
+  // Кабинет продаж и организатора — та же сцена, что у площадки: имя и
+  // два главных действия, строка цифр, события и заявки строками, пайплайн.
+  // Пульс рынка (он на «Сегодня»), воронка (дублировала цифры), мини-
+  // календарь (есть экран календаря) и служебные пояснения ушли; настройки
+  // свернуты вниз — к ним возвращаются раз в жизни.
   return (
-    <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-      {/* ---------- профиль менеджера ---------- */}
-      <div
-        className="gtr-card"
-        style={{ position: "relative", overflow: "hidden", padding: "24px 26px", marginBottom: 18 }}
-      >
-        <div
-          aria-hidden="true"
-          style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: "34%", opacity: 0.5 }}
-        >
-          <ImpulseArt seed={user.email} density={0.8} />
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "linear-gradient(90deg, var(--gtr-graphite, #17171A), transparent 55%)",
-            }}
-          />
+    <div className="gtr-dash">
+      <section className="gtr-dash-head">
+        <Eyebrow>{user.role === "organizer" ? t("КАБИНЕТ ОРГАНИЗАТОРА") : t("КАБИНЕТ EVENT SALES")}</Eyebrow>
+        <h1 className="gtr-dash-name">{user.name}</h1>
+        <div className="gtr-dash-sub">
+          <Chip color={AMBER}>{t(user.roleLabel).toUpperCase()}</Chip>
+          {v.name ? <span>{v.name}</span> : null}
         </div>
-        <div className="gtr-laser" style={{ top: 0, ["--gtr-run" as string]: "170px" }} />
-        <div
-          className="gtr-md-stack"
-          style={{
-            position: "relative",
-            display: "grid",
-            gridTemplateColumns: "auto 1fr auto",
-            gap: 20,
-            alignItems: "center",
-          }}
-        >
-          <span className="gtr-lettermark" style={{ width: 74, height: 74, fontSize: 34 }}>
-            {user.initials}
-          </span>
-          <div style={{ minWidth: 0 }}>
-            <Eyebrow>{user.role === "organizer" ? t("КАБИНЕТ ОРГАНИЗАТОРА") : t("КАБИНЕТ EVENT SALES")}</Eyebrow>
-            <h1
-              className="gtr-oswald"
-              style={{ font: "700 28px/1.05 Oswald,sans-serif", letterSpacing: ".02em", margin: "8px 0 0" }}
-            >
-              {user.name}
-            </h1>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginTop: 9 }}>
-              <Chip color={AMBER}>{t(user.roleLabel).toUpperCase()}</Chip>
-              {v.name ? <Chip color="rgba(255,255,255,.5)">{v.name.toUpperCase()}</Chip> : null}
-              <span
-                className="gtr-mono"
-                style={{ font: "500 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-              >
-                {user.email} {t("· событий:")} {rows.length}
-              </span>
-            </div>
-          </div>
-          <div style={{ display: "grid", gap: 8, alignContent: "center" }}>
-            <button
-              className="gtr-btn gtr-btn-red"
-              style={{ padding: "10px 16px" }}
-              onClick={() => go("events", { vid: user.venueId || "new" })}
-            >
-              {t("+ Новое событие")}
-            </button>
-            <button className="gtr-btn" style={{ padding: "9px 16px" }} onClick={() => go("events")}>
-              {t("Мои события →")}
-            </button>
-            {isTeam ? <InviteLinkButton /> : null}
-          </div>
+        <div className="gtr-dash-cta">
+          <button className="gtr-btn gtr-btn-red" onClick={() => go("events", { vid: user.venueId || "new" })}>
+            {t("+ Новое событие")}
+          </button>
+          <button className="gtr-btn" onClick={() => go("events")}>
+            {t("Мои события →")}
+          </button>
+          {isTeam ? <InviteLinkButton /> : null}
         </div>
-      </div>
+      </section>
 
-      {/* ---------- настройки: push, Telegram, язык предложений ---------- */}
-      <Card style={{ padding: "14px 18px", marginBottom: 14, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <Eyebrow>{t("НАСТРОЙКИ")}</Eyebrow>
-        <TgChip />
-        <PushPanel />
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 7, marginLeft: "auto" }}>
-          <span className="gtr-mono" style={{ font: "600 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".1em" }}>
-            {t("ЯЗЫК ПРЕДЛОЖЕНИЙ")}
-          </span>
-          <select
-            className="gtr-input"
-            style={{ padding: "7px 10px", width: "auto" }}
-            value={prefLang}
-            onChange={(e) => {
-              const v2 = e.target.value as "ru" | "en" | "th";
-              setPrefLang(v2);
-              setPrefsFn({ data: { prefLang: v2 } }).catch(() => {});
-            }}
-          >
-            <option value="ru">{t("Русский")}</option>
-            <option value="en">English</option>
-            <option value="th">ไทย</option>
-          </select>
-        </span>
-        {/* язык приложения переехал в шапку (LangSwitch в shell) */}
-      </Card>
-
-      {/* ---------- KPI кабинета ---------- */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))",
-          gap: 12,
-          marginBottom: 18,
-        }}
-      >
-        {kpis.map(([label, value, note, color]) => (
-          <Card key={label} style={{ padding: "16px 18px", display: "grid", gap: 7 }}>
-            <Eyebrow style={{ fontSize: 10 }}>{label}</Eyebrow>
-            <span
-              className="gtr-mono"
-              style={{
-                font: "700 24px/1 'JetBrains Mono',monospace",
-                color,
-                fontVariantNumeric: "tabular-nums",
-                overflowWrap: "anywhere",
-              }}
-            >
-              {value}
-            </span>
-            <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {note}
-            </span>
-          </Card>
+      <div className="gtr-stats">
+        {kpis.map(([label, value, color]) => (
+          <div key={label} className="gtr-stat">
+            <b className={value.length > 5 ? "long" : undefined} style={{ color }}>{value}</b>
+            <span>{label}</span>
+          </div>
         ))}
       </div>
 
-      {/* ---------- пульс рынка: афиша острова сегодня ---------- */}
-      <Card style={{ padding: "16px 20px", marginBottom: 18, position: "relative", overflow: "hidden" }}>
-        <div className="gtr-laser" aria-hidden />
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
-          <Eyebrow>{t("ПУЛЬС РЫНКА · СЕГОДНЯ")}</Eyebrow>
-          <button className="gtr-btn gtr-btn-sm" onClick={() => go("tonight")}>{t("Афиша →")}</button>
+      <section className="gtr-dash-sec">
+        <div className="gtr-dash-sec-head">
+          <h2 className="gtr-dash-h">{t("Мои события")}</h2>
+          <button className="gtr-btn gtr-btn-ghost" onClick={() => go("events")}>
+            {t("Все →")}
+          </button>
         </div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
-          <span className="gtr-mono" style={{ font: "700 24px/1 'JetBrains Mono',monospace", color: "#fff" }}>{marketToday.total}</span>
-          <span style={{ font: "500 13px/1.4 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-            {t("событий в")} {marketToday.venues} {t("заведениях сегодня")}
-          </span>
-        </div>
-        {marketToday.byVenue.length ? (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-            {marketToday.byVenue.slice(0, 6).map((b) => (
-              <Chip key={b.vid} color="rgba(255,255,255,.5)">{(V(b.vid)?.name ?? b.vid)} · {b.count}</Chip>
-            ))}
-          </div>
+        {latest.length ? (
+          latest.map(({ d, quote, stage }) => (
+            <button key={d.id} type="button" className="gtr-dash-row gtr-dash-link" onClick={() => openDraft(d.id)}>
+              <span className="gtr-dash-row-t">
+                {t(draftTitle(d))}
+                <small>
+                  {V(d.venueId).name ?? d.venueId}
+                  {d.date ? ` · ${d.date}` : ""}
+                </small>
+              </span>
+              <Chip color={STAGE_COLOR[stage]}>{t(STAGE_LABEL[stage]).toUpperCase()}</Chip>
+              <span className="gtr-dash-row-v">{quote.total ? fmtThb(quote.total) : "—"}</span>
+            </button>
+          ))
         ) : (
-          <div style={{ marginTop: 8, font: "500 12.5px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-            {t("На сегодня событий в афише пока нет.")}
+          <div className="gtr-dash-row">
+            <span className="gtr-dash-row-t">{t("Событий пока нет")}</span>
           </div>
         )}
-      </Card>
+      </section>
 
-      {/* ---------- воронка + пайплайн по месяцам ---------- */}
-      <div
-        className="gtr-md-stack"
-        style={{ display: "grid", gridTemplateColumns: "minmax(280px,1fr) 1.4fr", gap: 18, marginBottom: 18 }}
-      >
-        <Card style={{ padding: "18px 20px", display: "grid", gap: 12, alignContent: "start" }}>
-          <Eyebrow>{t("ВОРОНКА СОБЫТИЙ")}</Eyebrow>
-          {stages.map(({ st, count, sum }) => (
-            <div key={st} style={{ display: "grid", gap: 5 }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                <Dot color={STAGE_COLOR[st]} />
-                <span style={{ font: "600 13px/1 'Golos Text',sans-serif" }}>{t(STAGE_LABEL[st])}</span>
-                <span
-                  className="gtr-mono"
-                  style={{ font: "700 12px/1 'JetBrains Mono',monospace", color: "#fff" }}
-                >
-                  {count}
-                </span>
-                <span
-                  className="gtr-mono"
-                  style={{
-                    marginLeft: "auto",
-                    font: "500 12px/1 'JetBrains Mono',monospace",
-                    color: "var(--gtr-t3)",
-                  }}
-                >
-                  {sum ? fmtThb(sum) : "—"}
-                </span>
-              </div>
-              <div style={{ height: 8, background: "rgba(255,255,255,.06)" }}>
-                <div
-                  style={{
-                    height: "100%",
-                    width: `${(count / maxStage) * 100}%`,
-                    background: STAGE_COLOR[st],
-                    clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 100%, 0 100%)",
-                    transition: "width .4s",
-                  }}
-                />
-              </div>
+      <section className="gtr-dash-sec">
+        <div className="gtr-dash-sec-head">
+          <h2 className="gtr-dash-h">{user.role === "organizer" ? t("Мои заявки площадкам") : t("Заявки на мне")}</h2>
+          <button className="gtr-btn gtr-btn-ghost" onClick={() => go("inquiries")}>
+            {t("Все заявки →")}
+          </button>
+        </div>
+        {myRequests.length ? (
+          myRequests.map((r) => (
+            <div key={r.id} className="gtr-dash-row">
+              <span className="gtr-dash-row-t">
+                {r.title || t("Заявка")}
+                <small>
+                  {r.venueName} · {r.date || t("дата не указана")}
+                  {r.guests ? ` · ${r.guests} ${t("гостей")}` : ""}
+                </small>
+              </span>
+              <Chip color={r.status === "accepted" ? GREEN : AMBER}>
+                {r.status === "accepted" ? t("ПРИНЯТА") : t("В РАБОТЕ")}
+              </Chip>
+              <span className="gtr-dash-row-v">{fmtThb(r.quoteTotal)}</span>
             </div>
-          ))}
-          <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-            {t("Стадию события меняет конструктор: черновик → отправлено → согласовано.")}
-          </span>
-        </Card>
-
-        <Card style={{ padding: "18px 20px", display: "grid", gap: 12, alignContent: "start" }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <Eyebrow>{t("ПАЙПЛАЙН ПО МЕСЯЦАМ")}</Eyebrow>
-            <span
-              className="gtr-mono"
-              style={{ marginLeft: "auto", font: "500 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-            >
-              {t("суммы смет с датой события")}
-            </span>
+          ))
+        ) : (
+          <div className="gtr-dash-row">
+            <span className="gtr-dash-row-t">{t("Заявок пока нет")}</span>
           </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${months.length},1fr)`,
-              gap: 10,
-              alignItems: "end",
-              height: 130,
-            }}
-          >
+        )}
+      </section>
+
+      {/* столбики только когда у событий есть даты — пустой график не нужен */}
+      {months.some((m) => m.sum) ? (
+        <section className="gtr-dash-sec">
+          <h2 className="gtr-dash-h">{t("Пайплайн по месяцам")}</h2>
+          <div className="gtr-dash-bars">
             {months.map((m) => (
-              <div key={m.key} style={{ display: "grid", gap: 6, alignContent: "end", height: "100%" }}>
-                <span
-                  className="gtr-mono"
-                  style={{
-                    font: "600 10px/1 'JetBrains Mono',monospace",
-                    color: m.sum ? "#fff" : "var(--gtr-t3)",
-                    textAlign: "center",
-                    overflowWrap: "anywhere",
-                  }}
-                >
-                  {m.sum ? `฿${Math.round(m.sum / 1000).toLocaleString("ru-RU")}k` : ""}
-                </span>
-                <div
-                  style={{
-                    height: Math.max(3, (m.sum / maxMonth) * 88),
-                    background: m.sum
-                      ? "linear-gradient(180deg, var(--gtr-red-hot,#FF3427), var(--gtr-red,#E5231B))"
-                      : "rgba(255,255,255,.07)",
-                    clipPath: "polygon(0 4px, calc(100% - 4px) 0, 100% 100%, 0 100%)",
-                  }}
-                  title={m.count ? `${m.count} ${t("соб.")} · ${fmtThb(m.sum)}` : t("нет событий")}
-                />
-                <span
-                  className="gtr-mono"
-                  style={{
-                    font: "500 11px/1 'JetBrains Mono',monospace",
-                    color: "var(--gtr-t3)",
-                    textAlign: "center",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {m.label}
-                  {m.count ? ` · ${m.count}` : ""}
-                </span>
+              <div key={m.key} className="gtr-dash-bar" title={m.count ? `${m.count} · ${fmtThb(m.sum)}` : undefined}>
+                <b>{m.sum ? `฿${Math.round(m.sum / 1000).toLocaleString("ru-RU")}k` : ""}</b>
+                <i style={{ height: `${Math.max(3, (m.sum / maxMonth) * 100)}%`, opacity: m.sum ? 1 : 0.25 }} />
+                <span>{m.label}</span>
               </div>
             ))}
           </div>
-        </Card>
-      </div>
+        </section>
+      ) : null}
 
-      {/* ---------- календарь кабинета + заявки на мне ---------- */}
-      <div
-        className="gtr-md-stack"
-        style={{ display: "grid", gridTemplateColumns: "minmax(300px,380px) 1fr", gap: 18, marginBottom: 18 }}
-      >
-        <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
-          <Eyebrow>{t("КАЛЕНДАРЬ КАБИНЕТА")}</Eyebrow>
-          <CabinetMonth
-            rows={rows}
-            onOpen={(id) =>
-              navigate({ to: "/gtr/$screen", params: { screen: "constructor" }, search: { draft: id } })
-            }
-          />
-        </Card>
-        <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Eyebrow>{user.role === "organizer" ? t("МОИ ЗАЯВКИ ПЛОЩАДКАМ") : t("ЗАЯВКИ НА МНЕ")}</Eyebrow>
-            <button
-              className="gtr-btn"
-              style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 12 }}
-              onClick={() => go("inquiries")}
+      {/* настройки — свернуты: Telegram, push и язык предложений артистам */}
+      <details className="gtr-dash-sec gtr-dash-more">
+        <summary className="gtr-dash-h">{t("Настройки")}</summary>
+        <div className="gtr-dash-settings">
+          <TgChip />
+          <PushPanel />
+          <label className="gtr-dash-row">
+            <span className="gtr-dash-row-t">{t("Язык предложений")}</span>
+            <select
+              className="gtr-input"
+              style={{ padding: "7px 10px", width: "auto" }}
+              value={prefLang}
+              onChange={(e) => {
+                const v2 = e.target.value as "ru" | "en" | "th";
+                setPrefLang(v2);
+                setPrefsFn({ data: { prefLang: v2 } }).catch(() => {});
+              }}
             >
-              {t("Все заявки →")}
-            </button>
-          </div>
-          {myRequests.length ? (
-            myRequests.map((r) => (
-              <div
-                key={r.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "9px 11px",
-                  border: "1px solid rgba(255,255,255,.08)",
-                  borderLeft: `2px solid ${r.status === "accepted" ? GREEN : AMBER}`,
-                  background: "var(--gtr-card2)",
-                  flexWrap: "wrap",
-                }}
-              >
-                <span style={{ flex: 1, minWidth: 160 }}>
-                  <span style={{ display: "block", font: "600 13px/1.45 'Golos Text',sans-serif" }}>
-                    {r.title || t("Заявка")}
-                  </span>
-                  <span
-                    className="gtr-mono"
-                    style={{ display: "block", marginTop: 2, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-                  >
-                    {r.venueName} · {r.date || t("дата не указана")} · {r.guests || "—"} {t("гостей ·")}{" "}
-                    {r.organizerName || t("организатор")}
-                  </span>
-                </span>
-                <span
-                  className="gtr-mono"
-                  style={{ font: "700 13px/1 'JetBrains Mono',monospace", color: "#2ECC71" }}
-                >
-                  {fmtThb(r.quoteTotal)}
-                </span>
-                <Chip color={r.status === "accepted" ? GREEN : AMBER}>
-                  {r.status === "accepted" ? t("ПРИНЯТА") : t("В РАБОТЕ")}
-                </Chip>
-              </div>
-            ))
-          ) : (
-            <span style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {user.role === "organizer"
-                ? t("Заявок пока нет. Соберите событие в конструкторе и отправьте запрос площадке — статус будет виден здесь.")
-                : t("Назначенных заявок нет. Возьмите заявку на себя в разделе «Заявки организаторов» — она появится здесь, а в Telegram-канал GTR уйдёт уведомление.")}
-            </span>
-          )}
-        </Card>
-      </div>
-
-      {/* ---------- ближайшие + мои события ---------- */}
-      <div
-        className="gtr-md-stack"
-        style={{ display: "grid", gridTemplateColumns: "minmax(280px,1fr) 1.4fr", gap: 18 }}
-      >
-        <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
-          <Eyebrow>{t("БЛИЖАЙШИЕ СОБЫТИЯ")}</Eyebrow>
-          {upcoming.length ? (
-            upcoming.map(({ d }) => (
-              <button
-                key={d.id}
-                className="gtr-pal-btn"
-                style={{ padding: "9px 11px" }}
-                onClick={() =>
-                  navigate({
-                    to: "/gtr/$screen",
-                    params: { screen: "constructor" },
-                    search: { draft: d.id },
-                  })
-                }
-              >
-                <span
-                  className="gtr-mono"
-                  style={{
-                    flex: "none",
-                    font: "700 12px/1.45 'JetBrains Mono',monospace",
-                    color: "var(--gtr-red)",
-                    border: "1px solid rgba(229,35,27,.45)",
-                    padding: "5px 7px",
-                    textAlign: "center",
-                    minWidth: 46,
-                  }}
-                >
-                  {d.date ? d.date.split(" · ")[0] : d.dateIso}
-                </span>
-                <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                  <span style={{ display: "block", fontWeight: 600, fontSize: 13 }}>
-                    {t(draftTitle(d))}
-                  </span>
-                  <span
-                    style={{
-                      display: "block",
-                      marginTop: 2,
-                      font: "500 11px/1.45 'JetBrains Mono',monospace",
-                      color: "rgba(255,255,255,.4)",
-                    }}
-                  >
-                    {V(d.venueId).name ?? d.venueId}
-                    {d.date?.includes("·") ? ` · ${d.date.split(" · ")[1]}` : ""}
-                    {d.guests ? ` · ${d.guests} ${t("гостей")}` : ""}
-                  </span>
-                </span>
-              </button>
-            ))
-          ) : (
-            <span style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {t("Дат впереди нет. Укажите дату в мастере события или в слоте конструктора — событие появится здесь и в пайплайне по месяцам.")}
-            </span>
-          )}
-        </Card>
-
-        <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Eyebrow>{t("МОИ СОБЫТИЯ")}</Eyebrow>
-            <button
-              className="gtr-btn"
-              style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 12 }}
-              onClick={() => go("events")}
-            >
-              {t("Все →")}
-            </button>
-          </div>
-          {latest.length ? (
-            latest.map(({ d, quote, stage }) => (
-              <button
-                key={d.id}
-                className="gtr-pal-btn"
-                style={{ padding: "10px 12px", position: "relative", overflow: "hidden" }}
-                onClick={() =>
-                  navigate({
-                    to: "/gtr/$screen",
-                    params: { screen: "constructor" },
-                    search: { draft: d.id },
-                  })
-                }
-              >
-                <span
-                  aria-hidden="true"
-                  style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 8 }}
-                >
-                  <ImpulseArt seed={d.id} density={0.35} />
-                </span>
-                <span style={{ flex: 1, minWidth: 0, textAlign: "left", paddingLeft: 10 }}>
-                  <span style={{ display: "block", fontWeight: 600, fontSize: 12 }}>
-                    {t(draftTitle(d))}
-                  </span>
-                  <span
-                    style={{
-                      display: "block",
-                      marginTop: 3,
-                      font: "500 11px/1.45 'JetBrains Mono',monospace",
-                      color: "rgba(255,255,255,.4)",
-                    }}
-                  >
-                    {V(d.venueId).name ?? d.venueId}
-                    {d.date ? ` · ${d.date}` : ""}
-                  </span>
-                </span>
-                <span
-                  className="gtr-mono"
-                  style={{
-                    flex: "none",
-                    font: "600 10px/1 'JetBrains Mono',monospace",
-                    color: STAGE_COLOR[stage],
-                    border: `1px solid ${STAGE_COLOR[stage]}55`,
-                    padding: "4px 7px",
-                  }}
-                >
-                  {t(STAGE_LABEL[stage]).toUpperCase()}
-                </span>
-                <span
-                  className="gtr-mono"
-                  style={{ flex: "none", font: "700 13px/1 'JetBrains Mono',monospace", color: quote.total ? "#fff" : "var(--gtr-t3)" }}
-                >
-                  {quote.total ? fmtThb(quote.total) : "—"}
-                </span>
-              </button>
-            ))
-          ) : (
-            <span style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {t("В кабинете пока пусто. Нажмите «")}{t("+ Новое событие")}{t("» — мастер проведёт по шагам: сценарий, дата, вместимость, площадка.")}
-            </span>
-          )}
-        </Card>
-      </div>
-    </div>
-  );
-}
-
-
-// Месяц кабинета: дни с событиями менеджера подсвечены, клик открывает событие
-function CabinetMonth({
-  rows,
-  onOpen,
-}: {
-  rows: { d: import("../data/app-data").EventDraft }[];
-  onOpen: (draftId: string) => void;
-}) {
-  const { t } = useTranslation();
-  const now = new Date();
-  const [ym, setYm] = useState<[number, number]>([now.getFullYear(), now.getMonth()]);
-  const [y, m] = ym;
-  const monthNames = [
-    t("Январь"), t("Февраль"), t("Март"), t("Апрель"), t("Май"), t("Июнь"),
-    t("Июль"), t("Август"), t("Сентябрь"), t("Октябрь"), t("Ноябрь"), t("Декабрь"),
-  ];
-  const shift = (new Date(y, m, 1).getDay() + 6) % 7;
-  const days = new Date(y, m + 1, 0).getDate();
-  const byDay = new Map<number, { id: string; title: string }[]>();
-  for (const { d } of rows) {
-    if (!d.dateIso) continue;
-    const [yy, mm, dd] = d.dateIso.split("-").map(Number);
-    if (yy === y && mm === m + 1)
-      byDay.set(dd, [...(byDay.get(dd) ?? []), { id: d.id, title: draftTitle(d) }]);
-  }
-  const todayKey =
-    now.getFullYear() === y && now.getMonth() === m ? now.getDate() : -1;
-
-  return (
-    <div className="gtr-cal" style={{ maxWidth: "none", border: "none", padding: 0, clipPath: "none", background: "transparent" }}>
-      <div className="gtr-cal-head">
-        <button type="button" className="gtr-cal-nav" onClick={() => {
-          const p = new Date(y, m - 1, 1);
-          setYm([p.getFullYear(), p.getMonth()]);
-        }}>
-          ‹
-        </button>
-        <span className="gtr-cal-title">
-          {monthNames[m]} <b>{y}</b>
-        </span>
-        <button type="button" className="gtr-cal-nav" onClick={() => {
-          const n = new Date(y, m + 1, 1);
-          setYm([n.getFullYear(), n.getMonth()]);
-        }}>
-          ›
-        </button>
-      </div>
-      <div className="gtr-cal-grid gtr-cal-week">
-        {[t("ПН"), t("ВТ"), t("СР"), t("ЧТ"), t("ПТ"), t("СБ"), t("ВС")].map((w) => (
-          <span key={w}>{w}</span>
-        ))}
-      </div>
-      <div className="gtr-cal-grid">
-        {Array.from({ length: shift }, (_, i) => (
-          <span key={`x${i}`} />
-        ))}
-        {Array.from({ length: days }, (_, i) => {
-          const d = i + 1;
-          const evs = byDay.get(d);
-          return (
-            <button
-              key={d}
-              type="button"
-              className={`gtr-cal-day${evs ? " on" : ""}${d === todayKey ? " today" : ""}`}
-              title={evs?.map((e) => e.title).join("\n")}
-              style={evs ? undefined : { cursor: "default" }}
-              onClick={() => evs && onOpen(evs[0].id)}
-            >
-              {d}
-              {evs && evs.length > 1 ? (
-                <span style={{ position: "absolute", fontSize: 7, marginLeft: 2 }}>{evs.length}</span>
-              ) : null}
-            </button>
-          );
-        })}
-      </div>
-      <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-        {t("Красные дни — ваши события; клик открывает конструктор.")}
-      </span>
+              <option value="ru">{t("Русский")}</option>
+              <option value="en">English</option>
+              <option value="th">ไทย</option>
+            </select>
+          </label>
+        </div>
+      </details>
     </div>
   );
 }
@@ -1475,64 +565,113 @@ function ArtistCabinet() {
     }
   };
 
+  const declined = mine.filter((o) => o.status === "declined").length;
+  // фото для шапки берём из общей базы артистов; файл грузится отдельно,
+  // чтобы не утяжелять бандл кабинета
+  const [heroImg, setHeroImg] = useState("");
+  useEffect(() => {
+    const id = user.artistId;
+    if (!id) return;
+    let alive = true;
+    import("../data/artist-photos.json")
+      .then((m) => {
+        const rec = (m.default as { photos?: Record<string, { photo?: string; photoMed?: string }> }).photos?.[id];
+        if (alive && rec) setHeroImg(rec.photoMed || rec.photo || "");
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [user.artistId]);
+
+  // Кабинет артиста: сначала то, ради чего заходят, — предложения и
+  // выступления; эфир одной строкой; анкета (о себе, ссылки, медиа, сеты)
+  // свёрнута ниже. Пояснения «как работает кнопка эфира» и служебные
+  // строки (email, код карточки) из шапки ушли.
   return (
-    <div style={{ maxWidth: 980, margin: "0 auto" }}>
-      {/* профиль */}
-      <div
-        className="gtr-card"
-        style={{ position: "relative", overflow: "hidden", padding: "24px 26px", marginBottom: 18 }}
-      >
-        <div
-          aria-hidden="true"
-          style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: "34%", opacity: 0.5 }}
-        >
-          <ImpulseArt seed={user.artistId || user.email} density={0.8} />
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "linear-gradient(90deg, var(--gtr-graphite, #17171A), transparent 55%)",
-            }}
-          />
-        </div>
-        <div className="gtr-laser" style={{ top: 0, ["--gtr-run" as string]: "170px" }} />
-        <div style={{ position: "relative", display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
-          <span className="gtr-lettermark" style={{ width: 74, height: 74, fontSize: 34 }}>
-            {user.initials}
-          </span>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <Eyebrow>{t("КАБИНЕТ АРТИСТА")}</Eyebrow>
-            <h1
-              className="gtr-oswald"
-              style={{ font: "700 28px/1.05 Oswald,sans-serif", letterSpacing: ".02em", margin: "8px 0 0" }}
-            >
-              {user.name}
-            </h1>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginTop: 9 }}>
-              <Chip color="#7B4DFF">{t(user.roleLabel).toUpperCase()}</Chip>
-              {user.artistId ? <Chip color="rgba(255,255,255,.5)">{user.artistId}</Chip> : null}
-              <span
-                className="gtr-mono"
-                style={{ font: "500 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-              >
-                {user.email}
+    <div className="gtr-dash">
+      <section className={heroImg ? "gtr-dash-hero" : "gtr-dash-head"}>
+        {heroImg ? <img src={heroImg} alt="" className="gtr-dash-hero-img" /> : null}
+        <div className={heroImg ? "gtr-dash-hero-in" : undefined}>
+          <Eyebrow>{t("КАБИНЕТ АРТИСТА")}</Eyebrow>
+          <h1 className="gtr-dash-name">{user.name}</h1>
+          <div className="gtr-dash-sub">
+            {onAir ? (
+              <span className="gtr-live-chip">
+                <span className="gtr-live-dot" /> {t("В ЭФИРЕ")}
               </span>
-            </div>
+            ) : (
+              <Chip color="#7B4DFF">{t(user.roleLabel).toUpperCase()}</Chip>
+            )}
           </div>
+        </div>
+      </section>
+
+      <div className="gtr-stats">
+        <div className="gtr-stat">
+          <b style={{ color: open.length ? AMBER : "#fff" }}>{open.length}</b>
+          <span>{t("Предложения")}</span>
+        </div>
+        <div className="gtr-stat">
+          <b style={{ color: accepted.length ? GREEN : "#fff" }}>{accepted.length}</b>
+          <span>{t("Мои выступления")}</span>
+        </div>
+        <div className="gtr-stat">
+          <b>{declined}</b>
+          <span>{t("Отклонено")}</span>
         </div>
       </div>
 
-      {/* Эфир: зелёная кнопка в каталоге артистов */}
-      <Card style={{ padding: "16px 20px", marginBottom: 18, display: "grid", gap: 9 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <Eyebrow>{t("ПРЯМОЙ ЭФИР")}</Eyebrow>
-          {onAir ? (
-            <span className="gtr-live-chip">
-              <span className="gtr-live-dot" /> {t("В ЭФИРЕ")}
-            </span>
-          ) : null}
-        </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+      <section className="gtr-dash-sec">
+        <h2 className="gtr-dash-h">{t("Предложения")}</h2>
+        {open.length ? (
+          open.map((o) => (
+            <div key={o.id} className="gtr-dash-row">
+              <span className="gtr-dash-row-t">
+                {o.venueName}
+                {o.date ? ` · ${o.date}` : ""}
+                <small>
+                  {o.fee ? o.fee : t("условия обсуждаются")} {t("· от")} {o.fromName}
+                </small>
+              </span>
+              <button className="gtr-btn gtr-btn-red" onClick={() => decide(o.id, true)}>
+                {t("✓ Принять")}
+              </button>
+              <button className="gtr-btn gtr-btn-ghost" onClick={() => decide(o.id, false)}>
+                {t("Отклонить")}
+              </button>
+            </div>
+          ))
+        ) : (
+          <div className="gtr-dash-row">
+            <span className="gtr-dash-row-t">{t("Новых предложений нет")}</span>
+          </div>
+        )}
+      </section>
+
+      <section className="gtr-dash-sec">
+        <h2 className="gtr-dash-h">{t("Мои выступления")}</h2>
+        {accepted.length ? (
+          accepted.map((o) => (
+            <div key={o.id} className="gtr-dash-row">
+              <span className="gtr-dash-row-t">
+                {o.venueName}
+                <small>{o.date || t("дата уточняется")}</small>
+              </span>
+              {o.fee ? <span className="gtr-dash-row-v">{o.fee}</span> : null}
+            </div>
+          ))
+        ) : (
+          <div className="gtr-dash-row">
+            <span className="gtr-dash-row-t">{t("Подтверждённых выступлений пока нет.")}</span>
+          </div>
+        )}
+      </section>
+
+      {/* эфир — одна строка: ссылка и кнопка */}
+      <section className="gtr-dash-sec">
+        <h2 className="gtr-dash-h">{t("Прямой эфир")}</h2>
+        <div className="gtr-dash-row">
           <input
             className="gtr-input"
             style={{ flex: "1 1 220px", minWidth: 0 }}
@@ -1544,151 +683,41 @@ function ArtistCabinet() {
             {onAir ? t("Завершить эфир") : t("Я в эфире")}
           </button>
         </div>
-        <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-          {t("Кнопка в каталоге станет зелёной, зрители перейдут прямо в эфир. Автоотключение через 4 часа. Из Telegram: «Я в эфире» на клавиатуре бота.")}
-        </span>
-      </Card>
+      </section>
 
-      {/* Telegram */}
-      <Card style={{ padding: "16px 20px", marginBottom: 18, display: "grid", gap: 9 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <Eyebrow>TELEGRAM</Eyebrow>
-          {tg?.linked ? (
-            <Chip color={GREEN}>{t("ПРИВЯЗАН — ПРЕДЛОЖЕНИЯ ПРИХОДЯТ В ЧАТ")}</Chip>
-          ) : tg?.bot ? (
-            <>
-              <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-                {t("Привяжите чат — предложения будут приходить с кнопками «Принять / Отклонить».")}
-              </span>
-              {tgLink ? (
-                <a
-                  className="gtr-btn gtr-btn-red"
-                  style={{ textDecoration: "none" }}
-                  href={tgLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    openAppLink(tgLink);
-                  }}
-                >
-                  {t("Открыть @")}{tg.bot} {t("и привязать ↗")}
-                </a>
-              ) : (
-                <button className="gtr-btn" onClick={linkTg}>
-                  {t("Привязать Telegram")}
-                </button>
-              )}
-            </>
-          ) : (
-            <span style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {t("Бот GTR ещё не активирован администратором.")}
-            </span>
-          )}
-          {tgMsg ? (
-            <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "#FF5B4D" }}>{tgMsg}</span>
-          ) : null}
-        </div>
-      </Card>
-
-      {/* предложения */}
-      {user.artistId ? <ArtistStudio artistId={user.artistId} /> : null}
-
-      <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 18 }}>
-        <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
-          <Eyebrow>{t("ПРЕДЛОЖЕНИЯ ·")} {open.length}</Eyebrow>
-          {open.length ? (
-            open.map((o) => (
-              <div
-                key={o.id}
-                style={{
-                  display: "grid",
-                  gap: 8,
-                  padding: "12px 13px",
-                  background: "var(--gtr-card2)",
-                  border: "1px solid rgba(255,255,255,.09)",
-                  borderLeft: `2px solid ${OFFER_COLOR[o.status]}`,
+      {/* анкета, медиа и Telegram — свёрнуты */}
+      <details className="gtr-dash-sec gtr-dash-more">
+        <summary className="gtr-dash-h">{t("Профиль и медиа")}</summary>
+        {tg?.bot && !tg.linked ? (
+          <div className="gtr-dash-row">
+            <span className="gtr-dash-row-t">Telegram</span>
+            {tgLink ? (
+              <a
+                className="gtr-btn gtr-btn-red"
+                style={{ textDecoration: "none" }}
+                href={tgLink}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  openAppLink(tgLink);
                 }}
               >
-                <div style={{ font: "600 13px/1.45 'Golos Text',sans-serif" }}>
-                  {o.venueName}
-                  {o.date ? ` · ${o.date}` : ""}
-                </div>
-                <div
-                  className="gtr-mono"
-                  style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-                >
-                  {o.fee ? `${t("условия")}: ${o.fee}` : t("условия обсуждаются")}
-                  {o.note ? ` · ${o.note}` : ""} {t("· от")} {o.fromName}
-                </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button className="gtr-btn gtr-btn-red" style={{ padding: "8px 14px" }} onClick={() => decide(o.id, true)}>
-                    {t("✓ Принять")}
-                  </button>
-                  <button className="gtr-btn" style={{ padding: "8px 14px" }} onClick={() => decide(o.id, false)}>
-                    {t("Отклонить")}
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <span style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {t("Новых предложений нет. Когда площадка позовёт вас в событие, оно появится здесь")}
-              {tg?.linked ? t(" и в Telegram") : ""}.
-            </span>
-          )}
-        </Card>
-
-        <Card style={{ padding: "18px 20px", display: "grid", gap: 10, alignContent: "start" }}>
-          <Eyebrow>{t("МОИ ВЫСТУПЛЕНИЯ ·")} {accepted.length}</Eyebrow>
-          {accepted.length ? (
-            accepted.map((o) => (
-              <div
-                key={o.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "10px 12px",
-                  background: "var(--gtr-card2)",
-                  border: "1px solid rgba(255,255,255,.09)",
-                  borderLeft: `2px solid ${GREEN}`,
-                }}
-              >
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ display: "block", font: "600 12px/1.45 'Golos Text',sans-serif" }}>
-                    {o.venueName}
-                  </span>
-                  <span
-                    className="gtr-mono"
-                    style={{ display: "block", marginTop: 2, font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-                  >
-                    {o.date || t("дата уточняется")}
-                    {o.fee ? ` · ${o.fee}` : ""}
-                  </span>
-                </span>
-                <Chip color={GREEN}>{t(OFFER_LABEL.accepted).toUpperCase()}</Chip>
-              </div>
-            ))
-          ) : (
-            <span style={{ font: "500 13px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {t("Подтверждённых выступлений пока нет.")}
-            </span>
-          )}
-          {mine.some((o) => o.status === "declined") ? (
-            <span
-              className="gtr-mono"
-              style={{ font: "500 11px/1.5 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-            >
-              {t("отклонённых:")} {mine.filter((o) => o.status === "declined").length}
-            </span>
-          ) : null}
-        </Card>
-      </div>
+                {t("Открыть @")}{tg.bot} {t("и привязать ↗")}
+              </a>
+            ) : (
+              <button className="gtr-btn" onClick={linkTg}>
+                {t("Привязать Telegram")}
+              </button>
+            )}
+            {tgMsg ? <small style={{ color: "#FF5B4D" }}>{tgMsg}</small> : null}
+          </div>
+        ) : null}
+        {user.artistId ? <ArtistStudio artistId={user.artistId} /> : null}
+      </details>
     </div>
   );
 }
-
 
 // Ссылка-приглашение в приложение: генерируется сервером, копируется в буфер.
 // Организатор зовёт в свою команду, менеджер и админ — в состав GTR.
@@ -1902,7 +931,6 @@ function VisitorCabinet() {
           />
         )}
         <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(180deg, rgba(10,11,13,0) 18%, rgba(10,11,13,.45) 58%, rgba(10,11,13,.8) 100%)" }} />
-        <div className="gtr-laser" style={{ ["--gtr-run" as string]: "340px", zIndex: 1 }} />
         <div className="gtr-hero-edge-in gtr-hero-tall">
             <div className="gtr-mono" style={{ font: "600 12px/1 'JetBrains Mono',monospace", color: "rgba(255,255,255,.75)", letterSpacing: ".16em", marginBottom: 10 }}>
               {headliner
@@ -1920,7 +948,7 @@ function VisitorCabinet() {
                   : t("Остров открыт — собери свой вечер: клубы, пляжные вечеринки, живая музыка")}
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button className="gtr-btn-wow" onClick={() => (headliner ? openEvent(headliner) : go("tonight"))}>
+              <button className="gtr-btn gtr-btn-red gtr-btn-wow" onClick={() => (headliner ? openEvent(headliner) : go("tonight"))}>
                 {headliner ? t("Смотреть событие") : t("Выбрать вечер")} →
               </button>
               {headliner ? (
@@ -1952,7 +980,7 @@ function VisitorCabinet() {
                     </span>
                   ) : null}
                   <div style={{ position: "absolute", left: 9, right: 9, bottom: 8 }}>
-                    <div style={{ font: "600 12.5px/1.25 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".04em" }}>{e.title.slice(0, 44)}</div>
+                    <div style={{ font: "600 12.5px/1.25 var(--cond)", textTransform: "uppercase", letterSpacing: ".04em" }}>{e.title.slice(0, 44)}</div>
                     <div className="gtr-mono" style={{ marginTop: 3, font: "500 10px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.65)" }}>
                       {e.dateIso.slice(8, 10)}.{e.dateIso.slice(5, 7)} · {V(e.vid)?.name?.slice(0, 20)}
                     </div>
@@ -2003,7 +1031,7 @@ function VisitorCabinet() {
                     </span>
                   ) : null}
                   <div style={{ position: "absolute", left: 9, right: 9, bottom: 8 }}>
-                    <div style={{ font: "700 12px/1.2 Oswald,sans-serif", textTransform: "uppercase", letterSpacing: ".03em" }}>{a.name}</div>
+                    <div style={{ font: "600 12px/1.2 var(--cond)", textTransform: "uppercase", letterSpacing: ".03em" }}>{a.name}</div>
                     <div className="gtr-mono" style={{ marginTop: 3, font: "500 10px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.6)", textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {a.where || a.styles.map((g) => genreLabel(g, i18n.language)).join(" · ")}
                     </div>
@@ -2021,7 +1049,7 @@ function VisitorCabinet() {
           <img src="/brand/stickers/headphones.png" alt="" aria-hidden style={{ position: "absolute", right: -8, bottom: -10, width: 74, opacity: 0.85, transform: "rotate(-8deg)" }} />
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span className="gtr-eq" aria-hidden><span /><span /><span /><span /></span>
-            <span style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Мой вкус")}</span>
+            <span style={{ font: "600 13px/1.2 var(--cond)", textTransform: "uppercase" }}>{t("Мой вкус")}</span>
             {mp ? <Chip color="#2ECC71">{t("СОБРАН")}</Chip> : null}
           </div>
           <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>
@@ -2032,12 +1060,12 @@ function VisitorCabinet() {
         </Card>
         <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("map")}>
           <img src="/brand/stickers/map.png" alt="" aria-hidden style={{ position: "absolute", right: -8, bottom: -10, width: 74, opacity: 0.85, transform: "rotate(6deg)" }} />
-          <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Карта")}</div>
+          <div style={{ font: "600 13px/1.2 var(--cond)", textTransform: "uppercase" }}>{t("Карта")}</div>
           <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>{t("Весь остров точками")}</div>
         </Card>
         <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("promo")}>
           <img src="/brand/stickers/champagne.png" alt="" aria-hidden style={{ position: "absolute", right: -8, bottom: -10, width: 74, opacity: 0.85, transform: "rotate(-6deg)" }} />
-          <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t("Стол на вечер")}</div>
+          <div style={{ font: "600 13px/1.2 var(--cond)", textTransform: "uppercase" }}>{t("Стол на вечер")}</div>
           <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 62 }}>{t("Бронь в пару касаний")}</div>
         </Card>
       </div>
@@ -2050,7 +1078,6 @@ function VisitorCabinet() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 12, marginBottom: 16 }}>
         {/* сводка дня — из реальной афиши, без выдумок */}
         <Card hover style={{ padding: "16px 18px", position: "relative", overflow: "hidden" }} onClick={() => go("tonight")}>
-          <div className="gtr-laser" aria-hidden />
           <Eyebrow style={{ fontSize: 10, marginBottom: 8 }}>{t("НОВОСТИ ВЕЧЕРА")}</Eyebrow>
           {island.events ? (
             <>
@@ -2078,34 +1105,15 @@ function VisitorCabinet() {
           onClick={() => window.dispatchEvent(new CustomEvent("gtr:bro-open"))}>
           <img src="/raw-pulse/handle-logo.webp" alt="" aria-hidden style={{ position: "absolute", right: -6, bottom: -8, width: 66, opacity: 0.8 }} />
           <Eyebrow style={{ fontSize: 10, marginBottom: 8 }}>{t("BRO СЕГОДНЯ")}</Eyebrow>
-          <div style={{ font: "700 13px/1.2 Oswald,sans-serif", textTransform: "uppercase", paddingRight: 54 }}>{t("Спроси, куда пойти")}</div>
+          <div style={{ font: "600 13px/1.2 var(--cond)", textTransform: "uppercase", paddingRight: 54 }}>{t("Спроси, куда пойти")}</div>
           <div style={{ marginTop: 7, font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", paddingRight: 54 }}>
             {t("Подберёт вечер под твой вкус, забронирует стол, переведёт официанту — просто спроси.")}
           </div>
         </Card>
       </div>
 
-      {/* что нового в приложении: реально выпущенные опции */}
-      <Eyebrow style={{ marginBottom: 10 }}>{t("ЧТО НОВОГО В ПРИЛОЖЕНИИ")}</Eyebrow>
-      <div className="gtr-hscroll" style={{ marginBottom: 18 }}>
-        {appUpdates.updates.map((u) => (
-          <Card key={u.id} hover style={{ padding: "14px 16px", width: 208, display: "grid", gap: 7, alignContent: "start" }}
-            onClick={() => go(u.screen as ScreenId)}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Stk name={u.icon as StkName} size={26} />
-              <span style={{ font: "700 12.5px/1.2 Oswald,sans-serif", textTransform: "uppercase" }}>{t(u.title)}</span>
-            </div>
-            <div style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>{t(u.text)}</div>
-            <span className="gtr-mono" style={{ font: "500 10px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)", letterSpacing: ".08em" }}>
-              {u.dateIso.slice(8, 10)}.{u.dateIso.slice(5, 7)}
-            </span>
-          </Card>
-        ))}
-      </div>
-
       {community.channelUrl || community.chatUrl ? (
         <Card style={{ padding: "16px 18px", marginBottom: 16, position: "relative", overflow: "hidden" }}>
-          <div className="gtr-laser" aria-hidden />
           <Eyebrow style={{ marginBottom: 8 }}>{t("КОМЬЮНИТИ GTR")}</Eyebrow>
           <div style={{ font: "500 13px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t2)", marginBottom: 10 }}>
             {t("Новости острова и живой чат — вся тусовка в одном месте")}
@@ -2142,10 +1150,23 @@ function VisitorCabinet() {
         </Card>
       ) : null}
 
-      {/* язык приложения переехал в шапку (LangSwitch в shell) */}
-      <Card style={{ padding: "12px 16px", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-        <PushPanel />
-      </Card>
+      {/* Новое в приложении и уведомления — свёрнуто внизу: это не то,
+          ради чего гость открывает кабинет вечером. */}
+      <details className="gtr-dash-sec gtr-dash-more">
+        <summary className="gtr-dash-h">{t("Что нового и уведомления")}</summary>
+        {appUpdates.updates.map((u) => (
+          <button key={u.id} type="button" className="gtr-dash-row gtr-dash-link" onClick={() => go(u.screen as ScreenId)}>
+            <Stk name={u.icon as StkName} size={26} />
+            <span className="gtr-dash-row-t">
+              {t(u.title)}
+              <small>{t(u.text)}</small>
+            </span>
+          </button>
+        ))}
+        <div className="gtr-dash-settings" style={{ marginTop: 14 }}>
+          <PushPanel />
+        </div>
+      </details>
     </div>
   );
 }

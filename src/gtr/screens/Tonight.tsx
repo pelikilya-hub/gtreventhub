@@ -366,7 +366,7 @@ export function TonightScreen({ vid: fromVenue }: { vid?: string } = {}) {
             <span
               className="gtr-oswald"
               style={{
-                font: "700 18px/1.1 Oswald,sans-serif",
+                font: "700 15.5px/1.1 var(--display)",
                 letterSpacing: ".005em",
                 textTransform: "uppercase",
                 textShadow: "0 1px 12px rgba(0,0,0,.55)",

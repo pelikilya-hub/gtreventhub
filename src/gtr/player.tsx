@@ -1,7 +1,9 @@
 // Плеер GTR SOUND: первые треки BOSS в футере мобильной версии.
 // Один <audio> живёт в оболочке и переживает навигацию между экранами.
 // Web Audio AnalyserNode слушает бас и пишет уровень в CSS-переменную
-// --gtr-pulse на корне — атмосфера и скин плеера дышат в ритм музыки.
+// --gtr-pulse — атмосфера и скин плеера дышат в ритм музыки. Переменная
+// пишется только тем, кто её читает (атмосфера, шапка, кнопка, танцор):
+// запись на :root каждый кадр перерисовывала весь документ.
 // Эквалайзер и прогресс двигаются напрямую через refs в rAF (без ререндеров).
 import { useEffect, useRef, useState } from "react";
 
@@ -27,6 +29,19 @@ export function GtrPlayerBar() {
   const barsRef = useRef<(HTMLSpanElement | null)[]>([]);
   const progressRef = useRef<HTMLDivElement | null>(null);
   const wantPlayRef = useRef(false);
+  // потребители --gtr-pulse; список обновляется раз в 2 с — экраны
+  // монтируются лениво, танцор появляется позже плеера
+  const pulseRef = useRef<{ els: HTMLElement[]; at: number }>({ els: [], at: 0 });
+  const PULSE_TARGETS = ".gtr-codebg-kick, .gtr-topbar, .gtr-play-btn, .gtr-dancer-pulse";
+  const writePulse = (v: string) => {
+    const now = performance.now();
+    const c = pulseRef.current;
+    if (now - c.at > 2000) {
+      c.at = now;
+      c.els = Array.from(document.querySelectorAll<HTMLElement>(PULSE_TARGETS));
+    }
+    for (const el of c.els) el.style.setProperty("--gtr-pulse", v);
+  };
 
   // состояние воспроизведения нужно не только панели: от него выходит и
   // уходит танцор. Отдаём его в корень документа — так въезд и уход
@@ -78,7 +93,7 @@ export function GtrPlayerBar() {
       bass = bass / (10 * 255);
       levelRef.current += (bass - levelRef.current) * 0.3;
       const lvl = Math.max(0, Math.min(1, (levelRef.current - 0.28) * 1.9));
-      document.documentElement.style.setProperty("--gtr-pulse", lvl.toFixed(3));
+      writePulse(lvl.toFixed(3));
 
       // Темп трека из тех же данных, что и пульс. Удар — момент, когда
       // быстрая огибающая баса пробивает медленную с запасом; между
@@ -140,7 +155,7 @@ export function GtrPlayerBar() {
   };
   const stopLoop = () => {
     cancelAnimationFrame(rafRef.current);
-    document.documentElement.style.setProperty("--gtr-pulse", "0");
+    writePulse("0");
     barsRef.current.forEach((el) => {
       if (el) el.style.transform = "scaleY(0.15)";
     });
@@ -181,7 +196,7 @@ export function GtrPlayerBar() {
   useEffect(() => {
     return () => {
       cancelAnimationFrame(rafRef.current);
-      document.documentElement.style.removeProperty("--gtr-pulse");
+      for (const el of pulseRef.current.els) el.style.removeProperty("--gtr-pulse");
       void ctxRef.current?.close().catch(() => {});
     };
   }, []);

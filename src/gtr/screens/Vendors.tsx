@@ -305,7 +305,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
             </span>
             <h1
               className="gtr-oswald"
-              style={{ font: "700 26px/1.05 Oswald,sans-serif", margin: 0 }}
+              style={{ font: "700 22px/1.05 var(--display)", margin: 0 }}
             >
               {v.name}
             </h1>
@@ -341,7 +341,7 @@ function VendorCard({ v, onBack }: { v: CatalogVendor; onBack: () => void }) {
           <div
             className="gtr-oswald"
             style={{
-              font: "600 14px/1 Oswald,sans-serif",
+              font: "600 14px/1 var(--cond)",
               padding: "15px 20px",
               borderBottom: "1px solid rgba(255,255,255,.05)",
             }}

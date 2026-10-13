@@ -1,166 +1,92 @@
 /* GTR Event — тема и анимации из дизайн-хендоффа */
-/* cyrillic */
-@font-face {
-  font-family: 'Golos Text';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(/fonts/gtr/GolosText-400-cyrillic.woff2) format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* latin */
-@font-face {
-  font-family: 'Golos Text';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(/fonts/gtr/GolosText-400-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Golos Text';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url(/fonts/gtr/GolosText-500-cyrillic.woff2) format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* latin */
-@font-face {
-  font-family: 'Golos Text';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url(/fonts/gtr/GolosText-500-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Golos Text';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url(/fonts/gtr/GolosText-600-cyrillic.woff2) format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* latin */
-@font-face {
-  font-family: 'Golos Text';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url(/fonts/gtr/GolosText-600-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Golos Text';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url(/fonts/gtr/GolosText-700-cyrillic.woff2) format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* latin */
-@font-face {
-  font-family: 'Golos Text';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url(/fonts/gtr/GolosText-700-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url(/fonts/gtr/JetBrainsMono-500-cyrillic.woff2) format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* latin */
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url(/fonts/gtr/JetBrainsMono-500-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url(/fonts/gtr/JetBrainsMono-600-cyrillic.woff2) format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* latin */
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url(/fonts/gtr/JetBrainsMono-600-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url(/fonts/gtr/JetBrainsMono-700-cyrillic.woff2) format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* latin */
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url(/fonts/gtr/JetBrainsMono-700-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Oswald';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url(/fonts/gtr/Oswald-600-cyrillic.woff2) format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* latin */
-@font-face {
-  font-family: 'Oswald';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url(/fonts/gtr/Oswald-600-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Oswald';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url(/fonts/gtr/Oswald-700-cyrillic.woff2) format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* latin */
-@font-face {
-  font-family: 'Oswald';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url(/fonts/gtr/Oswald-700-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
+
+/* ---------- шрифты: одна система с bangtaostyle.com ----------
+   Те же самохостящиеся субсеты (OFL), что у эталона, файл в файл:
+   public/fonts/g — Unbounded (display), Golos Text (текст), JetBrains Mono
+   (моно), Rubik Glitch (кириллический глитч); public/fonts/k — Fira Sans
+   Condensed для узких прописных подписей. Переменные начертания: один файл на
+   весь диапазон веса, вместо четырёх по 400/500/600/700. Google Fonts не
+   подключаем — шрифт должен приезжать с нашего домена и из нашего кэша. */
+/* Golos Text · cyrillic-ext */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url(/fonts/g/golos-text-cyrillic-ext-0.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+/* Golos Text · cyrillic */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url(/fonts/g/golos-text-cyrillic-1.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+/* Golos Text · latin-ext */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url(/fonts/g/golos-text-latin-ext-2.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* Golos Text · latin */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url(/fonts/g/golos-text-latin-3.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* JetBrains Mono · cyrillic-ext */
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url(/fonts/g/jetbrains-mono-cyrillic-ext-4.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+/* JetBrains Mono · cyrillic */
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url(/fonts/g/jetbrains-mono-cyrillic-5.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+/* JetBrains Mono · latin-ext */
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url(/fonts/g/jetbrains-mono-latin-ext-6.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* JetBrains Mono · latin */
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url(/fonts/g/jetbrains-mono-latin-7.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* Rubik Glitch · cyrillic-ext */
+@font-face { font-family: 'Rubik Glitch'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url(/fonts/g/rubik-glitch-cyrillic-ext-8.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+/* Rubik Glitch · cyrillic */
+@font-face { font-family: 'Rubik Glitch'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url(/fonts/g/rubik-glitch-cyrillic-9.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+/* Rubik Glitch · latin-ext */
+@font-face { font-family: 'Rubik Glitch'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url(/fonts/g/rubik-glitch-latin-ext-10.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* Rubik Glitch · latin */
+@font-face { font-family: 'Rubik Glitch'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url(/fonts/g/rubik-glitch-latin-11.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* Unbounded · cyrillic-ext */
+@font-face { font-family: 'Unbounded'; font-style: normal; font-weight: 500 900; font-display: swap;
+  src: url(/fonts/g/unbounded-cyrillic-ext-12.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+/* Unbounded · cyrillic */
+@font-face { font-family: 'Unbounded'; font-style: normal; font-weight: 500 900; font-display: swap;
+  src: url(/fonts/g/unbounded-cyrillic-13.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+/* Unbounded · latin-ext */
+@font-face { font-family: 'Unbounded'; font-style: normal; font-weight: 500 900; font-display: swap;
+  src: url(/fonts/g/unbounded-latin-ext-14.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* Unbounded · latin */
+@font-face { font-family: 'Unbounded'; font-style: normal; font-weight: 500 900; font-display: swap;
+  src: url(/fonts/g/unbounded-latin-15.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* Fira Sans Condensed · узкие прописные подписи · cyrillic-ext */
+@font-face { font-family: 'Fira Sans Condensed'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url(/fonts/k/fira-sans-condensed-cyrillic-ext-0.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+/* Fira Sans Condensed · cyrillic */
+@font-face { font-family: 'Fira Sans Condensed'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url(/fonts/k/fira-sans-condensed-cyrillic-1.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+/* Fira Sans Condensed · latin-ext */
+@font-face { font-family: 'Fira Sans Condensed'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url(/fonts/k/fira-sans-condensed-latin-ext-2.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* Fira Sans Condensed · latin */
+@font-face { font-family: 'Fira Sans Condensed'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url(/fonts/k/fira-sans-condensed-latin-3.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
 /* ---------- декоративные шрифты GTR (самохостинг) ---------- */
 /* Trashed — единственный с кириллицей: русские заголовки */
@@ -188,26 +114,24 @@
   src: url(/fonts/gtr/AllAges.woff2) format('woff2');
 }
 
-/* Unbounded — заголовочный шрифт bangtaostyle.com.
-   Там он стоит в --display, и это единственное крупное отличие двух
-   систем: всё остальное — фон #0a0b0d, красный #e5231b, Golos Text,
-   JetBrains Mono и нулевые радиусы — у нас уже совпадает. Пока он
-   работает только на дверях входа (см. .gtr-auth ниже). */
-@font-face {
-  font-family: 'Unbounded';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url(/fonts/gtr/Unbounded-700-cyrillic.woff2) format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-@font-face {
-  font-family: 'Unbounded';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url(/fonts/gtr/Unbounded-700-latin.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+/* ---------- токены: один язык с bangtaostyle.com ----------
+   Значения сняты с live-hub/app/hub.css эталона. Имена --gtr-* остаются:
+   на них держатся 5 700 строк стилей и инлайны экранов, переименовывать
+   их — работа без пользы. Шрифтовые токены и токены клавиш — общие с
+   эталоном по именам (--display, --text, --mono), чтобы код
+   можно было переносить между продуктами без перевода. */
+:root {
+  --display: 'Unbounded', 'Golos Text', system-ui, sans-serif;
+  --text: 'Golos Text', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --cond: 'Fira Sans Condensed', 'Roboto Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --glitch: 'Glitch GTR', 'Rubik Glitch', 'Unbounded', sans-serif;
+  --ease: cubic-bezier(0.2, 0.75, 0.25, 1);
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  /* верхняя панель и нижний док: от них считают высоту сцены */
+  --top-h: calc(60px + var(--safe-t));
+  --dock-h: calc(56px + var(--safe-b));
 }
 
 /* ---------- двери входа: язык bangtaostyle.com ----------
@@ -223,10 +147,10 @@
        прозрачностью белого: на тёмном фоне это даёт ровный тон без
        просвечивающей подложки.
 
-   Слой намеренно ограничен экранами входа. Переводить на него весь
-   продукт — отдельное решение и отдельная работа: Oswald держит
-   полторы сотни экранов, и менять его походя, в правке про
-   авторизацию, нельзя. */
+   С этапа 1 перестройки (docs/design-debt.md) тот же язык носит весь
+   продукт: токены ниже совпадают с --gtr-* у .gtr-app, а Oswald из
+   продукта ушёл. Слой дверей оставлен как есть, чтобы экран входа не
+   перевёрстывать дважды — он переедет на общие классы на этапе 3. */
 .gtr-auth {
   --bts-bg: #0a0b0d;
   --bts-bg-2: #0f1013;
@@ -364,18 +288,22 @@
   /* ---- линии: волосяные, видимые, без мягкости ---- */
   --gtr-border: rgba(255, 255, 255, 0.09);
   --gtr-border2: rgba(255, 255, 255, 0.17);
-  /* ---- текст: три ступени, каждая проходит контраст AA ----
-     Было .55 и .33 — второстепенный текст давал 5.3:1, а служебный 2.5:1
-     при норме 4.5:1, то есть подписи и эйлброу физически не читались на
-     солнце и на плохих экранах. Ступени подняты и разведены заново:
-     15.7:1 / 8.5:1 / 5.3:1 — иерархия та же, но дно теперь выше нормы. */
-  --gtr-t1: #eaeaea;
-  --gtr-t2: rgba(234, 234, 234, 0.72);
-  --gtr-t3: rgba(234, 234, 234, 0.55);
+  /* ---- текст: четыре ступени, шкала красок bangtaostyle.com ----
+     Серый задан краской, а не прозрачностью белого: на тёмном фоне это
+     ровный тон без просвечивающей подложки. Контраст к фону #0a0b0d:
+     #fff 19.6:1, #c9cbd0 12.3:1, #8a8d93 5.6:1 — все выше нормы AA 4.5:1;
+     #55585e (2.6:1) — только для декоративных индексов и разделителей,
+     текстом его не набираем. */
+  --gtr-t1: #ffffff;
+  --gtr-t2: #c9cbd0;
+  --gtr-t3: #8a8d93;
+  --gtr-t4: #55585e;
+  --gtr-red-dim: rgba(229, 35, 27, 0.14);
+  --gtr-red-glow: rgba(255, 52, 39, 0.45);
 
   /* ---- геометрия: 90 градусов, никаких скруглений ---- */
   --gtr-r: 0px;
-  --gtr-cut: 9px;
+  --gtr-cut: 10px;
   --gtr-cut-s: 6px;
   --gtr-hair: 1px;
 
@@ -385,7 +313,7 @@
   --gtr-z-modal: 40;
   --gtr-z-grain: 60;
 
-  font-family: "Golos Text", system-ui, sans-serif;
+  font-family: var(--text);
   background: var(--gtr-bg);
   color: var(--gtr-t1);
   -webkit-font-smoothing: antialiased;
@@ -431,20 +359,26 @@
 .gtr-app *::-webkit-scrollbar-thumb:hover { background: var(--gtr-red); }
 .gtr-app *::-webkit-scrollbar-track { background: transparent; }
 
-/* ---------- типографика ---------- */
-.gtr-oswald { font-family: "Oswald", "Golos Text", sans-serif; text-transform: uppercase; }
+/* ---------- типографика ----------
+   Display — Unbounded (заголовки, как у эталона); текст — Golos Text;
+   служебные строки — JetBrains Mono; короткие узкие прописные подписи —
+   Fira Sans Condensed. Oswald из продукта убран: класс .gtr-oswald остался
+   именем для «узкой прописной подписи» и теперь ведёт на конденсированный
+   шрифт эталона — он той же природы. */
+.gtr-oswald { font-family: var(--cond); font-weight: 600; text-transform: uppercase; }
+.gtr-display { font-family: var(--display); font-weight: 700; text-transform: uppercase; letter-spacing: -0.02em; }
 .gtr-mono {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-family: var(--mono);
   font-variant-numeric: tabular-nums;
 }
 
 /* макро-заголовок: тесный трекинг, сжатый интерлиньяж */
 .gtr-macro {
-  font-family: "Oswald", sans-serif;
-  font-weight: 700;
-  font-size: clamp(2rem, 5.5vw, 4.75rem);
-  line-height: 0.86;
-  letter-spacing: -0.035em;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.7rem, 4.6vw, 3.8rem);
+  line-height: 0.92;
+  letter-spacing: -0.025em;
   text-transform: uppercase;
   text-wrap: balance;
 }
@@ -624,107 +558,24 @@
 }
 .gtr-presence { animation: gtrpulse 2s ease-out infinite; }
 
-/* ---------- атмосфера вечеринки: рассеивание и воздух ---------- */
-/* Дрейфующие пятна клубного света за всем контентом: тяжёлый blur,
-   screen-блендинг, медленные несинхронные орбиты — дым и лучи в зале. */
-.gtr-atmo {
-  position: fixed;
-  inset: -30px; /* запас, чтобы параллакс не оголял края */
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-  /* сенсоры движения: наклон телефона ведёт свет за собой */
-  transform: translate3d(var(--gtr-tilt-x, 0px), var(--gtr-tilt-y, 0px), 0);
-}
-/* Рассеивание даёт сам многоступенчатый градиент, а не filter: blur().
-   Раньше поверх и без того мягкого radial-gradient висел blur(90px) на
-   четырёх больших слоях — GPU пересчитывал размытие каждый кадр, и весь
-   продукт держал 31 fps даже в полном покое. Без blur — те же 60 fps и
-   более мягкий, глубже рассеянный свет (замер: 31 → 60 fps). */
-.gtr-atmo span {
-  position: absolute;
-  width: 44vmax;
-  height: 44vmax;
-  border-radius: 50%;
-  mix-blend-mode: screen;
-  will-change: transform;
-  opacity: 0.62;
-}
-.gtr-atmo span:nth-child(1) {
-  left: -12vmax;
-  top: -10vmax;
-  background: radial-gradient(
-    circle,
-    rgba(229, 35, 27, 0.3) 0%,
-    rgba(229, 35, 27, 0.19) 26%,
-    rgba(229, 35, 27, 0.09) 46%,
-    rgba(229, 35, 27, 0.03) 64%,
-    transparent 78%
-  );
-  animation: gtrdrift1 34s ease-in-out infinite;
-}
-.gtr-atmo span:nth-child(2) {
-  right: -16vmax;
-  top: 8vmax;
-  background: radial-gradient(
-    circle,
-    rgba(123, 77, 255, 0.25) 0%,
-    rgba(123, 77, 255, 0.16) 26%,
-    rgba(123, 77, 255, 0.08) 46%,
-    rgba(123, 77, 255, 0.025) 64%,
-    transparent 78%
-  );
-  animation: gtrdrift2 44s ease-in-out infinite;
-}
-.gtr-atmo span:nth-child(3) {
-  left: 18vmax;
-  bottom: -18vmax;
-  background: radial-gradient(
-    circle,
-    rgba(245, 166, 35, 0.19) 0%,
-    rgba(245, 166, 35, 0.12) 28%,
-    rgba(245, 166, 35, 0.055) 48%,
-    rgba(245, 166, 35, 0.02) 66%,
-    transparent 78%
-  );
-  animation: gtrdrift3 39s ease-in-out infinite;
-}
-.gtr-atmo span:nth-child(4) {
-  right: 10vmax;
-  bottom: -8vmax;
-  width: 30vmax;
-  height: 30vmax;
-  background: radial-gradient(
-    circle,
-    rgba(0, 190, 255, 0.14) 0%,
-    rgba(0, 190, 255, 0.09) 28%,
-    rgba(0, 190, 255, 0.04) 48%,
-    rgba(0, 190, 255, 0.015) 66%,
-    transparent 78%
-  );
-  animation: gtrdrift1 52s ease-in-out infinite reverse;
-}
-@keyframes gtrdrift1 {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  33% { transform: translate3d(9vmax, 6vmax, 0) scale(1.15); }
-  66% { transform: translate3d(-4vmax, 10vmax, 0) scale(0.92); }
-}
-@keyframes gtrdrift2 {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  40% { transform: translate3d(-11vmax, 7vmax, 0) scale(0.88); }
-  70% { transform: translate3d(-3vmax, -6vmax, 0) scale(1.12); }
-}
-@keyframes gtrdrift3 {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  45% { transform: translate3d(7vmax, -9vmax, 0) scale(1.18); }
-  75% { transform: translate3d(-8vmax, -2vmax, 0) scale(0.95); }
-}
+/* ---------- живой фон с кодом (src/gtr/code-backdrop.tsx) ----------
+   Под всем приложением — сцена bangtaostyle.com: снимок площадки,
+   проявленный из матрицы красно-белых глифов. Десктоп рисует его на одном
+   холсте, телефон — одной картинкой на сцену. Поверх — тень, чтобы текст
+   читался первым, и красный ореол, который дышит с басом (--gtr-pulse,
+   пишет плеер прямо сюда; только opacity — без filter и blend). */
+.gtr-codebg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: var(--gtr-bg); }
+.gtr-codebg canvas { display: block; }
+.gtr-codebg-still { position: absolute; inset: 0; background: var(--gtr-bg) center / cover no-repeat; opacity: 0; transition: opacity 1.2s var(--ease); }
+.gtr-codebg-still.on { opacity: 1; }
+.gtr-codebg-shade { position: absolute; inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, rgba(10, 11, 13, .25), rgba(10, 11, 13, .82) 72%),
+              linear-gradient(180deg, rgba(10, 11, 13, .55), transparent 25%, transparent 75%, rgba(10, 11, 13, .7)); }
+.gtr-codebg-kick { position: absolute; inset: 0; opacity: calc(var(--gtr-pulse, 0) * .5);
+  background: radial-gradient(80% 70% at 50% 60%, transparent 45%, rgba(229, 35, 27, .45) 100%); }
 
-/* контент — поверх атмосферы */
+/* контент — поверх фона */
 .gtr-main, .gtr-sidebar { position: relative; z-index: 1; }
-.gtr-main {
-  transform: translate3d(calc(var(--gtr-tilt-x, 0px) * -0.22), calc(var(--gtr-tilt-y, 0px) * -0.22), 0);
-}
 
 /* ---------- дизайнерский слой 2: музыка в движении ---------- */
 
@@ -829,12 +680,9 @@
    гаснущая к краям — тот же приём, что у нижней панели. Продукт должен
    читаться единой световой средой, а не сборкой прямоугольников. */
 .gtr-card {
-  background: linear-gradient(
-    180deg,
-    rgba(20, 21, 26, 0.86) 0%,
-    rgba(15, 16, 20, 0.62) 48%,
-    rgba(12, 13, 17, 0.32) 100%
-  );
+  /* как .panel у эталона: содержимое лежит на живом фоне сквозь мягкое
+     тёмное стекло, без рамки и без светящейся кромки в покое */
+  background: linear-gradient(180deg, rgba(10, 11, 13, 0.74), rgba(10, 11, 13, 0.52));
   border: none;
   border-radius: var(--gtr-r);
   position: relative;
@@ -848,14 +696,7 @@
   height: 1px;
   pointer-events: none;
   z-index: 1;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.04) 9%,
-    rgba(255, 255, 255, 0.15) 50%,
-    rgba(255, 255, 255, 0.04) 91%,
-    transparent 100%
-  );
+  background: transparent;
   transition: background 0.18s ease;
 }
 /* срез верхнего правого угла — фирменная фаска */
@@ -985,22 +826,28 @@
   text-overflow: ellipsis;
   vertical-align: bottom;
 }
+/* Пункт меню — строка листа bangtaostyle.com (.sheet a): заголовочный
+   шрифт прописными, волосяная линия снизу, без подложек и рамок; активный
+   раздел горит красным. Иконка остаётся служебной меткой слева. */
 .gtr-nav-item {
   display: flex;
   align-items: center;
   gap: 11px;
   width: 100%;
-  padding: 10px 12px;
+  padding: 11px 11px;
   border: none;
-  border-left: 2px solid transparent;
+  border-bottom: 1px solid var(--gtr-border);
   border-radius: 0;
   cursor: pointer;
-  transition: background 0.18s, color 0.18s, border-color 0.18s, letter-spacing 0.18s;
-  font: 500 12px/1.25 "Golos Text", sans-serif;
+  transition: color 0.2s, border-color 0.2s;
+  font: 500 13px/1.25 var(--text);
+  letter-spacing: 0;
+  text-transform: none;
   background: transparent;
-  color: rgba(234, 234, 234, 0.55);
+  color: var(--gtr-t3);
   text-align: left;
 }
+.gtr-nav-item > svg { color: var(--gtr-t4); transition: color 0.2s; }
 /* Подпись пункта: длинное имя раздела не имеет права выдавливать счётчик
    за край колонки. «Площадки Таиланд · 354» и «Заявки организаторов»
    длиннее прежних подписей, и без этих трёх строк счётчик уезжал за
@@ -1013,19 +860,10 @@
 }
 /* Счётчик и тревожный значок не сжимаются никогда */
 .gtr-nav-item > .gtr-mono { flex: none; }
-.gtr-nav-item:hover {
-  background: rgba(255, 255, 255, 0.045);
-  color: var(--gtr-t1);
-  border-left-color: rgba(229, 35, 27, 0.5);
-  letter-spacing: 0.02em;
-}
-.gtr-nav-item.on {
-  font-weight: 600;
-  background: linear-gradient(90deg, rgba(229, 35, 27, 0.22), transparent 70%);
-  color: #fff;
-  border-left-color: var(--gtr-red);
-  box-shadow: 0 0 18px -6px rgba(229, 35, 27, 0.8);
-}
+.gtr-nav-item:hover { color: var(--gtr-t1); border-bottom-color: var(--gtr-border2); }
+.gtr-nav-item:hover > svg { color: var(--gtr-t2); }
+.gtr-nav-item.on { color: var(--gtr-red-hot); border-bottom-color: rgba(229, 35, 27, 0.45); }
+.gtr-nav-item.on > svg { color: var(--gtr-red-hot); }
 
 .gtr-input {
   width: 100%;
@@ -1209,7 +1047,6 @@
   .gtr-neon,
   .gtr-glowbar,
   .gtr-presence,
-  .gtr-atmo span,
   .gtr-genrebar,
   .gtr-genrebar::after,
   .gtr-eq span,
@@ -1223,11 +1060,11 @@
 
 /* ---------- заголовок раздела ---------- */
 .gtr-h1 {
-  font-family: "Oswald", sans-serif;
-  font-weight: 700;
-  font-size: clamp(1.55rem, 2.5vw, 2.3rem);
-  line-height: 0.9;
-  letter-spacing: -0.02em;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.35rem, 2.2vw, 2rem);
+  line-height: 0.96;
+  letter-spacing: -0.025em;
   text-transform: uppercase;
   margin: 0;
 }
@@ -1266,7 +1103,7 @@
      «3», а рамка карточки профиля уходила за край панели. */
   box-sizing: border-box;
   flex: none;
-  background: var(--gtr-side);
+  background: rgba(10, 11, 13, 0.72);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
   padding: 20px 14px;
   display: flex;
@@ -1286,13 +1123,12 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: var(--gtr-side);
+  background: rgba(10, 11, 13, 0.9);
   margin: 0 -14px 0;
   padding: 0 14px 10px;
 }
 .gtr-main { flex: 1; min-width: 0; --gtr-pad: 30px; padding: 22px var(--gtr-pad) 40px; }
 .gtr-topbar { display: none; }
-.gtr-scrim { display: none; }
 
 /* ---------- мобильный каркас ---------- */
 /* Мобильная оболочка включается не только по ширине. Телефон, повёрнутый
@@ -1313,31 +1149,28 @@
     z-index: var(--gtr-z-panel);
     background: none;
     border-bottom: none;
-    padding: 10px 14px;
-    padding-top: calc(10px + env(safe-area-inset-top));
-    /* шапка — одна строка: бургер, логотип, языки. Перенос превратил бы
+    box-sizing: border-box;
+    height: var(--top-h);
+    padding: 0 14px;
+    padding-top: var(--safe-t);
+    /* шапка — одна строка, как .top у bangtaostyle.com: знак слева,
+       плеер и языки справа, бургер у правого края. Перенос превратил бы
        её в две строки и сдвинул весь экран вниз */
     flex-wrap: nowrap;
     min-width: 0;
   }
   .gtr-topbar > * { min-width: 0; }
   .gtr-burger { flex: none; }
-  /* стекло шапки — отдельным слоем, чтобы уходило в ноль книзу: контент
-     подныривает под неё, а не упирается в кромку */
+  .gtr-topbar-sp { flex: 1; min-width: 0; }
+  /* плотная подложка без размытия: на телефоне backdrop-filter на
+     закреплённой шапке пересчитывается каждый кадр прокрутки */
   .gtr-topbar::after {
     content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background: linear-gradient(
-      180deg,
-      rgba(10, 11, 13, 0.96) 0%,
-      rgba(10, 11, 13, 0.88) 58%,
-      rgba(10, 11, 13, 0) 100%
-    );
-    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 100%);
-    mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 100%);
+    background: rgba(10, 11, 13, 0.92);
   }
   /* нижняя грань шапки — полоса света, гаснущая к краям, как у навигации */
   .gtr-topbar::before {
@@ -1363,9 +1196,10 @@
     gap: 4px;
     width: 44px;
     height: 44px;
+    margin-right: -10px;
     place-content: center;
     background: transparent;
-    border: 1px solid var(--gtr-border2);
+    border: 0;
     cursor: pointer;
     padding: 0;
   }
@@ -1380,44 +1214,55 @@
   .nav-open .gtr-burger span:nth-child(2) { opacity: 0; }
   .nav-open .gtr-burger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
+  /* Меню — лист на весь экран под шапкой, как .sheet у bangtaostyle.com:
+     крупные заголовки-разделы один под другим с волосяными линиями, без
+     выезжающей панели и рамок. Шапка остаётся сверху, бургер в ней
+     превращается в крест и закрывает лист. Стекла на листе нет: на
+     телефоне backdrop-filter во весь экран стоит кадров, фон и так тёмный. */
   .gtr-sidebar {
     position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    z-index: var(--gtr-z-modal);
-    width: min(300px, 85vw);
-    height: 100dvh;
-    transform: translateX(-105%);
-    transition: transform 0.24s cubic-bezier(0.2, 0.75, 0.25, 1);
-    box-shadow: 14px 0 40px rgba(0, 0, 0, 0.55);
-    /* Отступ под вырез несёт закреплённая шапка, а не сама панель:
-       у панели он прокручивался вместе с содержимым, и логотип с
-       профилем уезжали под системные часы. */
-    padding-top: 0;
-    padding-bottom: calc(14px + env(safe-area-inset-bottom));
-  }
-  .gtr-side-head {
-    padding-top: calc(14px + env(safe-area-inset-top));
-    box-shadow: 0 10px 18px -14px #000;
-  }
-  .nav-open .gtr-sidebar { transform: none; }
-
-  /* скрим всегда в DOM и фейдится opacity: резкое появление blur-слоя
-     читалось как «моргание» меню */
-  .gtr-scrim {
-    display: block;
-    position: fixed;
-    inset: 0;
-    z-index: calc(var(--gtr-z-modal) - 1);
-    background: rgba(0, 0, 0, 0.55);
+    inset: var(--top-h) 0 0 0;
+    z-index: calc(var(--gtr-z-panel) - 1);
+    width: auto;
+    height: auto;
+    padding: 10px 20px calc(16px + env(safe-area-inset-bottom));
+    background: #08080a;
+    border-right: 0;
     opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease), visibility 0s 0.3s;
   }
-  .nav-open .gtr-scrim {
+  .nav-open .gtr-sidebar {
     opacity: 1;
-    pointer-events: auto;
+    visibility: visible;
+    transform: none;
+    transition: opacity 0.4s var(--ease), transform 0.45s var(--ease), visibility 0s;
+  }
+  /* на листе логотип не нужен — он уже в шапке; остаются языки и профиль */
+  .gtr-side-head {
+    position: static;
+    background: none;
+    margin: 0;
+    padding: 0 0 6px;
+  }
+  .gtr-side-head > .gtr-neon { display: none; }
+  /* на листе меню разделы — заголовки, как .sheet a у эталона */
+  .gtr-sidebar .gtr-nav-item {
+    padding: 12px 0;
+    font: 700 22px/1.15 var(--display);
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
+    gap: 14px;
+  }
+  .gtr-sidebar .gtr-nav-item > svg { display: none; }
+  .gtr-sidebar .gtr-eyebrow { padding-inline: 0 !important; }
+  /* пока лист открыт, шапка над ним плотная: сквозь её нижний градиент
+     просвечивал фон с кодом полосой */
+  .nav-open .gtr-topbar::after {
+    background: #08080a;
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 
   .gtr-main {
@@ -1503,14 +1348,14 @@
 /* ---------- применение декоративных шрифтов ---------- */
 /* Глитч-леттеринг лого: латиница читаема, в тему лазеров и стробоскопа */
 .gtr-logo {
-  font-family: "Glitch GTR", "Oswald", sans-serif;
+  font-family: var(--glitch);
   font-weight: 400;
   letter-spacing: 0.05em;
 }
 /* Рваный трафарет для ЛАТИНСКИХ имён: артисты, площадки.
-   Русские заголовки остаются на Oswald — кириллицы в Trashed нет. */
+   Русские заголовки идут в Unbounded — кириллицы в Trashed нет. */
 .gtr-trash {
-  font-family: "Trashed GTR", "Oswald", sans-serif;
+  font-family: "Trashed GTR", var(--display);
   font-weight: 400;
   letter-spacing: 0.01em;
 }
@@ -1519,13 +1364,13 @@
   font-weight: 400;
   letter-spacing: 0.02em;
 }
-/* буква-значок вместо фото: панк-нашивка All Ages, кириллица из Oswald */
+/* буква-значок вместо фото: панк-нашивка All Ages, кириллица из Trashed */
 .gtr-lettermark {
   display: flex;
   align-items: center;
   justify-content: center;
   flex: none;
-  font-family: "AllAges GTR", "Oswald", sans-serif;
+  font-family: "AllAges GTR", "Trashed GTR", var(--display);
   color: var(--gtr-t1);
   background: linear-gradient(135deg, rgba(229, 35, 27, 0.28), rgba(229, 35, 27, 0.06) 60%);
   border: 1px solid rgba(229, 35, 27, 0.35);
@@ -1556,7 +1401,7 @@
 .gtr-cal-title {
   flex: 1;
   text-align: center;
-  font: 600 13px/1 Oswald, sans-serif;
+  font: 600 13px/1 var(--cond);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -1722,8 +1567,16 @@
 .gtr-boss-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 0 clamp(28px, 4vw, 56px);
+  align-items: start;
 }
+/* шапка BOSS: эмблема-портрет слева, имя и действия справа */
+.gtr-boss-head { display: flex; align-items: center; gap: clamp(16px, 3vw, 36px); flex-wrap: wrap; }
+.gtr-boss-head .gtr-dash-name { font-size: clamp(28px, 4.6vw, 56px); }
+/* свёрнутые интеграции: блоки идут столбцом с воздухом */
+.gtr-boss-integr { display: grid; gap: 14px; padding-top: 6px; }
+/* три цифры (кабинет артиста) — три колонки и на телефоне */
+.gtr-stats:has(> .gtr-stat:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   .gtr-boss-grid { grid-template-columns: 1fr; }
   .gtr-boss-kpis { margin-left: 0; }
@@ -2278,13 +2131,35 @@
   }
 }
 
-/* ---------- игровая плавность: переход экрана как смена сцены ---------- */
-@keyframes gtrscreenin {
-  from { opacity: 0; transform: translateY(14px) scale(0.988); filter: blur(7px); }
-  to { opacity: 1; transform: none; filter: none; }
+/* ---------- переход экрана: один механизм на весь продукт ----------
+   Смену экрана ведёт View Transitions (роутер: defaultViewTransition, а
+   между витриной и приложением — @view-transition выше). Шапка, док,
+   меню и фон с кодом получают свои имена и стоят на месте; растворяется
+   только полотно экрана: старое уходит вверх и гаснет, новое поднимается
+   снизу. Только transform и opacity — никакого размытия на весь экран
+   (прежний blur(7px) на каждом переходе стоил кадров на телефоне).
+   Прежняя анимация .gtr-screenin при монтировании и «поворот как смена
+   сцены» убраны: второй механизм поверх этого давал двойное движение. */
+.gtr-topbar { view-transition-name: gtr-top; }
+.gtr-tabbar { view-transition-name: gtr-dock; }
+.gtr-codebg { view-transition-name: gtr-bg; }
+@media (min-width: 861px) { .gtr-sidebar { view-transition-name: gtr-side; } }
+::view-transition-group(gtr-top),
+::view-transition-group(gtr-dock),
+::view-transition-group(gtr-side) { animation: none; }
+::view-transition-old(gtr-top), ::view-transition-new(gtr-top),
+::view-transition-old(gtr-dock), ::view-transition-new(gtr-dock),
+::view-transition-old(gtr-side), ::view-transition-new(gtr-side) { animation: none; }
+::view-transition-old(gtr-top), ::view-transition-old(gtr-dock), ::view-transition-old(gtr-side) { display: none; }
+::view-transition-old(gtr-bg), ::view-transition-new(gtr-bg) { animation-duration: .6s; }
+::view-transition-old(root) { animation: gtrSceneOut .18s cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: gtrSceneIn .34s cubic-bezier(.2, .75, .25, 1) both; }
+@keyframes gtrSceneOut { to { opacity: 0; transform: translateY(-10px); } }
+@keyframes gtrSceneIn { from { opacity: 0; transform: translateY(14px); } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 }
 .gtr-screenin {
-  animation: gtrscreenin 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
   /* Экран не имеет права утащить страницу вбок.
      Замер на телефоне 390px: паспорт площадки уезжал на 109px, финансы и
      GTR-админ на 140, залы на 82, заявки на 21. Снаружи это выглядит так,
@@ -2306,41 +2181,32 @@
      всю ширину через width:100vw с отрицательными полями, и после
      подрезки их полоса по-прежнему ровно 390px. */
   overflow-x: clip;
+  /* Подрезка идёт по краю экрана, а не по полю колонки: обёртка заходит
+     под поля .gtr-main и возвращает их себе внутрь. Иначе clip отрезал
+     любой блок «от края до края» по полю — снимки и карточки на телефоне
+     стояли с отступом 14 px вместо выхода к кромке. */
+  margin-inline: calc(-1 * var(--gtr-pad, 0px));
+  padding-inline: var(--gtr-pad, 0px);
 }
 html { -webkit-tap-highlight-color: transparent; }
+/* текст только для экранного диктора */
+.gtr-app .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .gtr-app { touch-action: manipulation; }
 
-/* ---------- поворот телефона: перекомпоновка как смена сцены ----------
-   Переход портрет↔ландшафт менял раскладку скачком. Класс gtr-rotating
-   вешается на полсекунды из шелла на смене ориентации — контент проявляется
-   тем же языком, что и переход между экранами, а не рвётся на глазах.
-   Фон, шапка и навигация не трогаются: анимируется только полотно. */
-@keyframes gtrrotatein {
-  from { opacity: 0.45; transform: scale(0.986); filter: blur(5px); }
-  to { opacity: 1; transform: none; filter: none; }
-}
-.gtr-shell.gtr-rotating .gtr-main {
-  animation: gtrrotatein 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
-  will-change: transform, filter, opacity;
-}
-@media (prefers-reduced-motion: reduce) {
-  .gtr-shell.gtr-rotating .gtr-main { animation: none; }
-}
 
 /* ---------- мобильная игровая графика (тест: iPhone 12 Pro Max) ---------- */
 @media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
   /* перф: blur на скроллящихся карточках роняет кадры —
      на мобиле карточки плотные и мгновенные, стекло уходит на fixed-слои */
   .gtr-app .gtr-card {
-    background: rgba(15, 16, 19, 0.93);
+    background: rgba(10, 11, 13, 0.8);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-  /* атмосфера легче: два орба вместо четырёх — стабильные кадры */
-  .gtr-atmo span { opacity: 0.55; }
-  .gtr-atmo span:nth-child(3),
-  .gtr-atmo span:nth-child(4) { display: none; }
-
+  /* зерно и развёртка во весь экран на телефоне пересобирают страницу
+     каждый кадр (mix-blend-mode) — как и эталон, на тач-экранах их нет */
+  .gtr-app::before,
+  .gtr-app::after { display: none; }
   /* тач-физика: всё нажимаемое отвечает пружинным сжатием */
   .gtr-btn,
   .gtr-card-hover,
@@ -2349,30 +2215,7 @@ html { -webkit-tap-highlight-color: transparent; }
   .gtr-nav-item:active { transform: scale(0.96); }
   .gtr-card-hover:active { transform: scale(0.975); }
 
-  /* шапка — тяжёлое стекло (fixed: производительности не мешает) */
-  .gtr-topbar::after {
-    -webkit-backdrop-filter: blur(18px) saturate(1.25);
-    backdrop-filter: blur(18px) saturate(1.25);
-  }
-  /* дровер меню — пружинный выезд. Стекла на движущейся панели НЕТ:
-     backdrop-filter + анимация transform мерцает на iOS (панель «моргала»).
-     Вместо него — плотный клубный градиент и красная световая кромка. */
-  .gtr-sidebar {
-    background:
-      radial-gradient(120% 60% at 100% 0%, rgba(229, 35, 27, 0.14), transparent 55%),
-      linear-gradient(168deg, #14151a 0%, #0c0d10 46%, #16090a 100%);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    border-right: 1px solid rgba(229, 35, 27, 0.32);
-    box-shadow: 14px 0 44px rgba(0, 0, 0, 0.6), 1px 0 14px rgba(229, 35, 27, 0.18);
-    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-  }
-  .gtr-scrim {
-    background: rgba(0, 0, 0, 0.42);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
-  }
-  /* пункты меню выезжают каскадом, как игровое меню паузы */
+  /* разделы проявляются каскадом сверху вниз */
   .nav-open .gtr-sidebar .gtr-nav-item {
     animation: gtrnavin 0.42s cubic-bezier(0.32, 0.72, 0, 1) both;
   }
@@ -2388,11 +2231,10 @@ html { -webkit-tap-highlight-color: transparent; }
   .nav-open .gtr-sidebar .gtr-nav-item:nth-of-type(10) { animation-delay: 0.3s; }
 }
 @keyframes gtrnavin {
-  from { opacity: 0; transform: translateX(-16px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .gtr-screenin,
   .nav-open .gtr-sidebar .gtr-nav-item { animation: none; }
 }
 
@@ -2411,7 +2253,7 @@ html { -webkit-tap-highlight-color: transparent; }
   border: none;
   background: linear-gradient(120deg, #e5231b, #ff3427 55%, #f5a623 130%);
   color: #fff;
-  font: 700 13px/1 Oswald, sans-serif;
+  font: 600 13px/1 var(--cond);
   letter-spacing: 0.09em;
   text-transform: uppercase;
   padding: 15px 24px;
@@ -2500,6 +2342,18 @@ html { -webkit-tap-highlight-color: transparent; }
    светил блюром сквозь содержимое и налезал на него — в списке заявок под
    ним пропадали и кнопки, и текст. Полоска в шапке даёт то же, что нужно
    на ходу (играть, следующий, что звучит), и не отнимает у экрана ничего. */
+/* переключатель языка — строка из трёх букв, как у эталона: включённый
+   язык белый с красной чертой снизу, остальные приглушены. Без рамки и
+   без заливки — в шапке не должно быть трёх коробок подряд. */
+.gtr-lang { display: inline-flex; flex: none; gap: 2px; }
+.gtr-lang button {
+  min-width: 34px; height: 34px; padding: 0 6px; border: 0; background: none; cursor: pointer;
+  font: 600 12px/1 var(--mono); letter-spacing: .08em; color: var(--gtr-t3);
+  box-shadow: inset 0 -2px 0 transparent; transition: color .2s, box-shadow .2s;
+}
+.gtr-lang button:hover { color: var(--gtr-t1); }
+.gtr-lang button[aria-pressed="true"] { color: #fff; box-shadow: inset 0 -2px 0 var(--gtr-red); }
+
 .gtr-playbar { display: none; }
 
 @media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
@@ -2557,7 +2411,7 @@ html { -webkit-tap-highlight-color: transparent; }
     cursor: pointer;
   }
   .gtr-playbar-title {
-    font: 600 11px/1.15 Oswald, sans-serif;
+    font: 600 12px/1.15 var(--cond);
     letter-spacing: 0.07em;
     text-transform: uppercase;
     color: #fff;
@@ -2606,19 +2460,15 @@ html { -webkit-tap-highlight-color: transparent; }
     height: 30px;
     display: grid;
     place-items: center;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--gtr-t3);
     background: transparent;
-    border: 1px solid var(--gtr-border2);
+    border: 0;
     cursor: pointer;
     padding: 0;
-    transition: transform 0.14s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: transform 0.14s cubic-bezier(0.32, 0.72, 0, 1), color 0.2s;
   }
-  .gtr-next-btn:active { transform: scale(0.92); }
+  .gtr-next-btn:active { transform: scale(0.92); color: #fff; }
 
-  /* ритм продукта: атмосферный свет и кромка шапки дышат с басом */
-  .gtr-atmo span {
-    opacity: calc(0.5 + var(--gtr-pulse, 0) * 0.4);
-  }
   /* пульс музыки красит световую грань шапки, а не рамку */
   .gtr-topbar::before {
     background: linear-gradient(
@@ -3023,7 +2873,7 @@ html { -webkit-tap-highlight-color: transparent; }
   transition: stroke-dashoffset 30ms linear;
 }
 .gtr-hold-label {
-  font: 700 11px/1 "Oswald", sans-serif;
+  font: 600 13px/1 var(--cond);
   color: #fff;
   z-index: 1;
   text-align: center;
@@ -3126,9 +2976,9 @@ html { -webkit-tap-highlight-color: transparent; }
     50% { opacity: 1; }
   }
 
-  /* спека §13: при открытом модале/шторке панель гаснет и не кликается */
+  /* при открытом листе меню нижней панели нет: разделы уже перед глазами */
   .nav-open .gtr-tabbar {
-    opacity: 0.35;
+    opacity: 0;
     pointer-events: none;
   }
 
@@ -3397,8 +3247,8 @@ html { -webkit-tap-highlight-color: transparent; }
    доходит. Здесь вся вертикальная механика ужимается — ширины при
    этом в избытке, поэтому по горизонтали ничего не режем. */
 @media (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
-  .gtr-topbar { padding: 5px 14px; padding-top: calc(5px + env(safe-area-inset-top)); }
-  .gtr-burger { width: 38px; height: 38px; }
+  .gtr-topbar { --top-h: calc(48px + var(--safe-t)); }
+  .gtr-burger { height: 38px; }
   .gtr-main { padding-top: 8px; }
 
   .gtr-hero-tall {
@@ -4333,7 +4183,7 @@ html { -webkit-tap-highlight-color: transparent; }
 }
 .gtr-vibe-close:active { color: #fff; }
 .gtr-vibe-title {
-  font: 600 16px/1.2 Oswald, sans-serif;
+  font: 700 15px/1.2 var(--display);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #fff;
@@ -4361,7 +4211,7 @@ html { -webkit-tap-highlight-color: transparent; }
   clip-path: none;
 }
 .gtr-vibe-bpm {
-  font: 700 46px/1 Oswald, sans-serif;
+  font: 700 40px/1 var(--display);
   color: #fff;
   font-variant-numeric: tabular-nums;
 }
@@ -4614,7 +4464,6 @@ html { -webkit-tap-highlight-color: transparent; }
 /* распознавание, поток ответа и печать по табло. Всё, что рисуется   */
 /* под ним, зрителю не видно сквозь размытие, но кадры продолжает      */
 /* есть. Пока эфир открыт — фон замирает.                              */
-.gtr-bro-live .gtr-atmo span,
 .gtr-bro-live .gtr-beam,
 .gtr-bro-live .gtr-glowbar,
 .gtr-bro-live .gtr-dancer {
@@ -4724,22 +4573,6 @@ html { -webkit-tap-highlight-color: transparent; }
   .gtr-bro-chat { height: min(46vh, 420px); }
 }
 
-/* ------------------------------------------------------------------ */
-/* Плавность на телефоне                                               */
-/*                                                                     */
-/* Четыре пятна света во весь экран, каждое со своим бесконечным        */
-/* дрейфом, — самый дорогой фон продукта. На телефоне оставляем два и   */
-/* замедляем ход: картинка та же, работы вдвое меньше.                  */
-@media (any-pointer: coarse) {
-  .gtr-atmo span:nth-child(3),
-  .gtr-atmo span:nth-child(4) {
-    display: none;
-  }
-  .gtr-atmo span {
-    animation-duration: 52s;
-  }
-}
-
 /* ---------------------------------------------------------------------
    Полоса обновления. Появляется, когда вкладка живёт на устаревшей
    сборке и человек занят формой — молча перезагружать в этот момент
@@ -4808,13 +4641,14 @@ html { -webkit-tap-highlight-color: transparent; }
 
   .gtr-navfoot {
     position: sticky;
-    bottom: calc(-10px - env(safe-area-inset-bottom));
+    bottom: calc(-16px - env(safe-area-inset-bottom));
     z-index: 1;
-    margin-inline: -14px;
-    padding: 8px 14px calc(10px + env(safe-area-inset-bottom));
-    background: linear-gradient(180deg, rgba(12, 13, 16, 0) 0%, #0c0d10 22%, #0c0d10 100%);
+    margin-inline: -20px;
+    padding: 8px 20px calc(12px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(8, 8, 10, 0) 0%, rgba(8, 8, 10, 0.98) 22%, rgba(8, 8, 10, 0.98) 100%);
     border-top: 1px solid rgba(229, 35, 27, 0.22);
   }
+  .gtr-navfoot .gtr-nav-item { font-size: 15px; }
 
   /* Выход — действие, а не пункт списка: отделяем его цветом, чтобы
      не искать глазами среди разделов. */
@@ -5707,4 +5541,115 @@ canvas.gtr-dancer-img {
     min-height: 0;
   }
   .gtr-map-hits { max-height: 40dvh; }
+}
+
+/* =====================================================================
+   КАБИНЕТ ПЛОЩАДКИ — медийная сцена (screens/Dash.tsx)
+   Снимок места от края до края, одна строка крупных цифр (как .stats у
+   bangtaostyle.com), три действия и список залов строками с волосяной
+   линией — без карточек в карточках, лазеров и пояснений под цифрами.
+   ===================================================================== */
+.gtr-dash { max-width: 1180px; margin: 0 auto; }
+.gtr-dash-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: clamp(260px, 42vh, 440px);
+  margin: -22px calc(-1 * var(--gtr-pad, 30px)) 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+.gtr-dash-hero-img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2;
+}
+.gtr-dash-hero::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(10, 11, 13, .15) 0%, rgba(10, 11, 13, .35) 45%, rgba(10, 11, 13, .96) 100%);
+}
+.gtr-dash-hero-in { padding: 0 var(--gtr-pad, 30px) 26px; min-width: 0; }
+.gtr-dash-name {
+  margin: 10px 0 0;
+  font: 800 clamp(30px, 5.4vw, 64px)/.95 var(--display);
+  letter-spacing: -.03em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.gtr-dash-sub {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 14px;
+  font: 500 14px/1.45 var(--text); color: var(--gtr-t2);
+}
+.gtr-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--gtr-border);
+  border-bottom: 1px solid var(--gtr-border);
+  margin-bottom: clamp(28px, 4vw, 44px);
+}
+.gtr-stat { padding: 18px 16px 16px 0; min-width: 0; }
+.gtr-stat + .gtr-stat { padding-left: 16px; border-left: 1px solid var(--gtr-border); }
+.gtr-stat b {
+  display: block;
+  font: 400 clamp(30px, 3.4vw, 46px)/1 var(--glitch);
+  letter-spacing: .01em;
+  font-variant-numeric: tabular-nums;
+}
+/* суммы в баттах длинные: глитч-шрифт на них налезал на соседнюю цифру */
+.gtr-stat b.long { font: 700 clamp(20px, 2.2vw, 30px)/1.1 var(--mono); letter-spacing: -.02em; overflow-wrap: anywhere; }
+.gtr-stat b small { font: 600 .36em/1 var(--mono); color: var(--gtr-t3); margin-left: 4px; letter-spacing: 0; }
+.gtr-stat > span {
+  display: block; margin-top: 10px;
+  font: 600 11px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--gtr-t3);
+}
+.gtr-dash-sec { margin-bottom: clamp(28px, 4vw, 44px); }
+.gtr-dash-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.gtr-dash-sec-head > .gtr-btn, .gtr-dash-sec-head > .gtr-dash-row-v { flex: none; white-space: nowrap; }
+.gtr-dash-h {
+  margin: 0 0 6px;
+  font: 800 clamp(20px, 2.4vw, 28px)/1 var(--display);
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+}
+.gtr-dash-h::after { content: ""; display: block; width: 44px; height: 3px; margin: 12px 0 8px; background: var(--gtr-red); }
+.gtr-dash-row {
+  display: flex; align-items: center; gap: 14px; width: 100%;
+  padding: 14px 0; border: 0; border-bottom: 1px solid var(--gtr-border);
+  background: none; color: inherit; text-align: left; font: inherit;
+}
+.gtr-dash-link { cursor: pointer; transition: border-color .2s; }
+.gtr-dash-link:hover { border-bottom-color: var(--gtr-red); }
+.gtr-dash-row-t { flex: 1; min-width: 0; font: 600 15px/1.35 var(--text); color: var(--gtr-t1); }
+.gtr-dash-row-t small { display: block; margin-top: 3px; font: 500 13px/1.4 var(--text); color: var(--gtr-t3); }
+.gtr-dash-row-v { flex: none; font: 600 13px/1 var(--mono); color: var(--gtr-t2); font-variant-numeric: tabular-nums; }
+
+/* шапка кабинета без снимка: имя крупно, два главных действия */
+.gtr-dash-head { padding: clamp(10px, 3vw, 28px) 0 clamp(22px, 3vw, 34px); }
+.gtr-dash-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.gtr-dash-cta .gtr-btn { padding: 12px 18px; font-size: 11.5px; }
+/* пайплайн: столбики без рамки и подписей «что такое пайплайн» */
+.gtr-dash-bars { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; height: 150px; align-items: end; }
+.gtr-dash-bar { display: grid; grid-template-rows: auto 1fr auto; gap: 6px; height: 100%; text-align: center; min-width: 0; }
+.gtr-dash-bar b { font: 600 11px/1 var(--mono); color: var(--gtr-t1); overflow-wrap: anywhere; }
+.gtr-dash-bar i { align-self: end; display: block; background: var(--gtr-red); }
+.gtr-dash-bar span { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--gtr-t3); }
+/* настройки свёрнуты: заголовок секции и есть кнопка раскрытия */
+.gtr-dash-more summary { cursor: pointer; list-style: none; color: var(--gtr-t3); font-size: clamp(16px, 1.8vw, 20px); }
+.gtr-dash-more summary::-webkit-details-marker { display: none; }
+.gtr-dash-more summary::after { width: 28px; height: 2px; margin: 10px 0 6px; }
+.gtr-dash-more[open] summary { color: var(--gtr-t1); }
+.gtr-dash-settings { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
+  .gtr-dash-hero { margin-top: -14px; min-height: min(56vh, 420px); }
+  .gtr-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gtr-stat:nth-child(3) { padding-left: 0; border-left: 0; }
+  .gtr-stat:nth-child(n + 3) { border-top: 1px solid var(--gtr-border); }
+  .gtr-dash-row { flex-wrap: wrap; row-gap: 8px; }
+  .gtr-dash-row > .gtr-btn { flex: none; }
+  .gtr-dash-link .gtr-dash-row-t { flex-basis: 100%; }
+  .gtr-stats:has(> .gtr-stat:nth-child(3):last-child) .gtr-stat:nth-child(3) {
+    padding-left: 12px; border-left: 1px solid var(--gtr-border); border-top: 0;
+  }
+  .gtr-stats:has(> .gtr-stat:nth-child(3):last-child) .gtr-stat { padding-right: 8px; }
+  .gtr-stats:has(> .gtr-stat:nth-child(3):last-child) .gtr-stat + .gtr-stat { padding-left: 12px; }
 }

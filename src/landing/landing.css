@@ -13,13 +13,15 @@
  *   • prefers-reduced-motion и тач-экраны получают облегчённую версию.
  */
 
-/* ---------- шрифты ---------- */
+/* ---------- шрифты: те же файлы, что у приложения (public/fonts/g) ----------
+   Раньше витрина ссылалась на Unbounded-cyrillic.woff2, которого в репозитории
+   не было: заголовок молча падал в Golos. */
 @font-face {
   font-family: 'Golos Text';
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url(/fonts/gtr/GolosText-500-cyrillic.woff2) format('woff2');
+  src: url(/fonts/g/golos-text-cyrillic-1.woff2) format('woff2');
   unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 @font-face {
@@ -27,23 +29,23 @@
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url(/fonts/gtr/GolosText-500-latin.woff2) format('woff2');
+  src: url(/fonts/g/golos-text-latin-3.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
   font-family: 'JetBrains Mono';
   font-style: normal;
-  font-weight: 500 700;
+  font-weight: 400 700;
   font-display: swap;
-  src: url(/fonts/gtr/JetBrainsMono-500-latin.woff2) format('woff2');
+  src: url(/fonts/g/jetbrains-mono-latin-7.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2122, U+2212, U+FEFF, U+FFFD;
 }
 @font-face {
   font-family: 'JetBrains Mono';
   font-style: normal;
-  font-weight: 500 700;
+  font-weight: 400 700;
   font-display: swap;
-  src: url(/fonts/gtr/JetBrainsMono-500-cyrillic.woff2) format('woff2');
+  src: url(/fonts/g/jetbrains-mono-cyrillic-5.woff2) format('woff2');
   unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 @font-face {
@@ -51,7 +53,7 @@
   font-style: normal;
   font-weight: 500 900;
   font-display: swap;
-  src: url(/fonts/gtr/Unbounded-cyrillic.woff2) format('woff2');
+  src: url(/fonts/g/unbounded-cyrillic-13.woff2) format('woff2');
   unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 @font-face {
@@ -59,7 +61,7 @@
   font-style: normal;
   font-weight: 500 900;
   font-display: swap;
-  src: url(/fonts/gtr/Unbounded-latin.woff2) format('woff2');
+  src: url(/fonts/g/unbounded-latin-15.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 /* Фирменные начертания: только латиница и цифры. */
@@ -80,18 +82,20 @@
   @view-transition {
     navigation: auto;
   }
+  /* те же кривые, что у смены экрана в приложении (gtr.css): один
+     переход на весь продукт, только transform и opacity */
   ::view-transition-old(root) {
-    animation: lpVtOut 0.32s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+    animation: lpVtOut 0.18s cubic-bezier(0.4, 0, 1, 1) both;
   }
   ::view-transition-new(root) {
-    animation: lpVtIn 0.42s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+    animation: lpVtIn 0.34s cubic-bezier(0.2, 0.75, 0.25, 1) both;
   }
 }
 @keyframes lpVtOut {
-  to { opacity: 0; filter: blur(6px); transform: scale(0.985); }
+  to { opacity: 0; transform: translateY(-10px); }
 }
 @keyframes lpVtIn {
-  from { opacity: 0; filter: blur(8px); transform: scale(1.015); }
+  from { opacity: 0; transform: translateY(14px); }
 }
 
 /* ---------- основа ---------- */

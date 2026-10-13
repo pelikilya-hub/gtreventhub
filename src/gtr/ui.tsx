@@ -228,13 +228,17 @@ export const Ring = ({ value, size = 118 }: { value: number; size?: number }) =>
           const a = (i / RING_SEGMENTS) * Math.PI * 2;
           const on = i < lit;
           const inner = on ? r - 7 : r - 4;
+          // Округление до сотых обязательно: синус на сервере и в браузере
+          // расходится в 15-м знаке, и React видел другую разметку —
+          // расхождение гидратации на каждом открытии дашборда.
+          const q = (v: number) => Math.round(v * 100) / 100;
           return (
             <line
               key={i}
-              x1={cx + Math.cos(a) * inner}
-              y1={cy + Math.sin(a) * inner}
-              x2={cx + Math.cos(a) * r}
-              y2={cy + Math.sin(a) * r}
+              x1={q(cx + Math.cos(a) * inner)}
+              y1={q(cy + Math.sin(a) * inner)}
+              x2={q(cx + Math.cos(a) * r)}
+              y2={q(cy + Math.sin(a) * r)}
               stroke={on ? color : "rgba(255,255,255,.10)"}
               strokeWidth={on ? 3 : 2}
               strokeLinecap="butt"
@@ -299,7 +303,7 @@ export const SectionHead = ({
       />
       <div
         className="gtr-oswald"
-        style={{ font: "600 14px/1 Oswald,sans-serif", letterSpacing: ".05em" }}
+        style={{ font: "600 14px/1 var(--cond)", letterSpacing: ".05em" }}
       >
         {title}
       </div>

@@ -1158,12 +1158,18 @@ function BroCardView({
     // маршрут с уже поставленной точкой.
     return (
       <div className="gtr-bro-card">
-        <div className="gtr-bro-card-k">{t("Такси")} → {String(d.venue ?? "")}</div>
-        <div className="gtr-bro-card-n">{String(d.area ?? "")} · {t("точка назначения уже в ссылке")}</div>
+        <div className="gtr-bro-card-k">{t("Такси")}{d.venue ? ` → ${String(d.venue)}` : ""}</div>
+        <div className="gtr-bro-card-n">
+          {d.venue
+            ? `${String(d.area ?? "")} · ${t("точка назначения уже в ссылке")}`
+            : t("откроется на текущем месте")}
+        </div>
         <div className="gtr-bro-taxirow">
           <a className="gtr-bro-btn go" href={String(d.grab ?? "#")} target="_blank" rel="noreferrer">Grab</a>
           <a className="gtr-bro-btn go" href={String(d.bolt ?? "#")} target="_blank" rel="noreferrer">Bolt</a>
-          <a className="gtr-bro-btn" href={String(d.maps ?? "#")} target="_blank" rel="noreferrer">{t("Карта")}</a>
+          {d.maps ? (
+            <a className="gtr-bro-btn" href={String(d.maps)} target="_blank" rel="noreferrer">{t("Карта")}</a>
+          ) : null}
         </div>
       </div>
     );
@@ -1189,7 +1195,7 @@ function BroCardView({
             .map(([source, label, url]) => ({ source, label, url: String(url) }))
         : [];
     if (!rows.length) return null;
-    const who = String(d.artist ?? d.name ?? "");
+    const who = String(d.artist ?? d.name ?? d.genre ?? "");
     return (
       <div className="gtr-bro-card">
         <div className="gtr-bro-card-k">{t("Слушать")} · {who}</div>

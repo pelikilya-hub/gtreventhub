@@ -28,6 +28,7 @@ import { hasReserve as venueHasReserve, menuVenues, reserveVenues } from "../ven
 import { capacityOf, forecast, pullScore } from "./forecast";
 import { isTeam, TEAM_ROLES } from "./roles";
 import { genreName, resolveGenre } from "../genres";
+import { fixHeardNames } from "./heard-names";
 import { fitArtist, primeSlot, slotAt, soundOf } from "../venue-sound";
 
 // ------------------------------------------------------------- типы
@@ -88,16 +89,52 @@ const fold = (x: string): string =>
       return T[ch] ?? ch;
     });
 
-const venueMatch = (venueName: string, query: string): boolean => {
+/** Доля слов запроса, найденных в имени площадки; −1 — не совпало.
+ *  Совпадение — большинство слов. */
+const venueScore = (venueName: string, query: string): number => {
   const name = fold(venueName);
   const words = fold(query)
     .split(/[^a-z0-9]+/)
     .filter((w) => w.length > 2);
-  if (!words.length) return false;
+  if (!words.length) return -1;
   // «к» транслитерируется в c, но часть названий пишется через k — считаем
   // слово совпавшим в любой из двух форм.
   const hit = words.filter((w) => name.includes(w) || name.includes(w.replace(/c/g, "k"))).length;
-  return hit * 2 >= words.length + 1;
+  return hit * 2 >= words.length + 1 ? hit / words.length : -1;
+};
+
+/** Голос отдаёт имена кириллицей: «кэтч бич клаб». Побуквенная
+ *  транслитерация даёт «cetch bich clab» и мимо Catch Beach Club.
+ *  Поэтому кириллица сначала идёт через согласный скелет из hear.ts —
+ *  тот же, что чинит табло: однозначное совпадение даёт настоящее имя. */
+const heardQuery = (query: string): string =>
+  /[а-яё]/i.test(query) ? fixHeardNames(query) : query;
+
+const venueMatch = (venueName: string, query: string): boolean =>
+  venueScore(venueName, heardQuery(query)) >= 0;
+
+/** Лучшая площадка по запросу, а не первая подходящая.
+ *
+ *  «Большинство слов» у «Catch Beach Club» набирает и Carpe Diem Beach
+ *  Club — два слова из трёх, — а она стоит в списке раньше. Брать первую
+ *  попавшуюся значило везти человека не туда. Точное имя бьёт частичное,
+ *  среди частичных — то, где совпало больше слов. */
+const bestVenue = <T,>(list: readonly T[], nameOf: (x: T) => string, query: string): T | undefined => {
+  const q = heardQuery(query);
+  const fq = fold(q).replace(/[^a-z0-9]+/g, " ").trim();
+  if (!fq) return undefined;
+  let best: T | undefined;
+  let bestScore = -1;
+  for (const x of list) {
+    const n = fold(nameOf(x)).replace(/[^a-z0-9]+/g, " ").trim();
+    if (n === fq) return x;
+    const sc = venueScore(nameOf(x), q);
+    if (sc > bestScore) {
+      best = x;
+      bestScore = sc;
+    }
+  }
+  return bestScore >= 0 ? best : undefined;
 };
 
 const km = (a: [number, number], b: [number, number]): number => {
@@ -342,11 +379,11 @@ export const TOOL_DEFS = [
     type: "function" as const,
     name: "call_taxi",
     description:
-      "Собрать поездку до площадки: ссылки Grab/Bolt/карты с точкой назначения. Само не заказывает — открывает приложение такси с маршрутом.",
+      "Вызвать такси: открывает Grab или Bolt с уже поставленной точкой назначения, человек жмёт «заказать» в приложении. Зови сразу на «вызови такси», «как доехать», «поехали в …». Без площадки — открывает приложение на текущем месте.",
     parameters: {
       type: "object",
-      properties: { venue: { type: "string", description: "куда едем: название площадки" } },
-      required: ["venue"],
+      properties: { venue: { type: "string", description: "куда едем: название площадки латиницей; можно не указывать" } },
+      required: [],
       additionalProperties: false,
     },
   },
@@ -358,14 +395,18 @@ export const TOOL_DEFS = [
     parameters: {
       type: "object",
       properties: {
-        artist: { type: "string", description: "имя артиста" },
+        artist: { type: "string", description: "имя артиста латиницей, если назван" },
+        genre: {
+          type: "string",
+          description: "жанр или настроение, если артиста не назвали: techno, house, deep house, hip-hop, chill",
+        },
         source: {
           type: "string",
           enum: ["youtube", "spotify", "soundcloud", "any"],
           description: "где слушать; youtube — для сетов и клипов",
         },
       },
-      required: ["artist"],
+      required: [],
       additionalProperties: false,
     },
   },
@@ -592,7 +633,7 @@ const resolveVenueId = async (q: string): Promise<string | null> => {
   if (!s) return null;
   if (venue(s)) return s;
   const { PH } = await import("../data/app-data");
-  return PH.venues.find((v) => venueMatch(v.name, s))?.id ?? null;
+  return bestVenue(PH.venues, (v) => v.name, s)?.id ?? null;
 };
 
 const venueLatLon = (vid: string): [number, number] | null => {
@@ -1103,7 +1144,7 @@ export const handlers: Record<
     const q = clean(String(args.venue ?? ""), 60);
     // Ищем по всем площадкам тем же матчером, что и афиша.
     const { PH } = await import("../data/app-data");
-    const hit = PH.venues.find((v) => venueMatch(v.name, q));
+    const hit = bestVenue(PH.venues, (v) => v.name, q);
     if (!hit) return err("такой площадки в базе нет — уточни название");
     const sound = soundOf(hit.id);
     const rich = richOf(hit.id);
@@ -1230,7 +1271,7 @@ export const handlers: Record<
       return err("создавать события могут организаторы и команда GTR");
     const q = clean(String(args.venue ?? ""), 60);
     const { PH } = await import("../data/app-data");
-    const hit = PH.venues.find((v) => venueMatch(v.name, q));
+    const hit = bestVenue(PH.venues, (v) => v.name, q);
     if (!hit) return err("площадка не найдена — уточни название");
     const dateIso = String(args.dateIso ?? "").slice(0, 10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dateIso)) return err("нужна дата в формате ГГГГ-ММ-ДД");
@@ -1266,8 +1307,18 @@ export const handlers: Record<
 
   async call_taxi(args) {
     const q = clean(String(args.venue ?? ""), 60);
+    // Куда — не сказали (или «вызови такси» из ветки про выпивших): это
+    // не повод отказать. Приложение открывается на текущем месте, адрес
+    // человек вводит сам — лишь бы не сел за руль.
+    if (!q)
+      return ok({
+        venue: null,
+        grab: `https://grab.onelink.me/2695613898?af_dp=${encodeURIComponent("grab://open?screenType=BOOKING")}`,
+        bolt: `https://bolt.onelink.me/8XM1?af_dp=${encodeURIComponent("bolt://action/rideRequest")}`,
+        note: "Точки назначения нет — приложение откроется на текущем месте, куда ехать человек вводит сам. Так и скажи.",
+      });
     const { PH } = await import("../data/app-data");
-    const hit = PH.venues.find((v) => venueMatch(v.name, q));
+    const hit = bestVenue(PH.venues, (v) => v.name, q);
     if (!hit) return err("не понял, куда ехать — назови площадку из базы");
     const g = GEO[hit.id];
     if (!g) return err("у площадки нет координат в базе");
@@ -1301,14 +1352,37 @@ export const handlers: Record<
   },
 
   async open_music(args) {
-    const q = fold(clean(String(args.artist ?? ""), 60));
-    if (!q) return err("назови артиста, чью музыку включить");
+    const raw = clean(String(args.artist ?? ""), 60);
+    const genre = clean(String(args.genre ?? ""), 40);
+    // «Поставь диджея», «включи техно» — артиста нет, но просьба ясная.
+    // Отказ «назови артиста» здесь и был той самой водой с «не могу» в
+    // конце. Жанру отдаём поиск сетов — честно помеченный как поиск.
+    if (!raw) {
+      const g = genre || "club";
+      const query = `${g} DJ set`;
+      const yt = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+      const sc = `https://soundcloud.com/search/sets?q=${encodeURIComponent(`${g} mix`)}`;
+      const open = { source: "youtube", label: `Сеты: ${g}`, url: yt, direct: false };
+      return ok({
+        artist: null,
+        genre: g,
+        open,
+        links: [open, { source: "soundcloud", label: `Миксы: ${g}`, url: sc, direct: false }],
+        direct: false,
+        note: "Это подборка сетов по жанру на YouTube, а не конкретный артист. Так и скажи одной фразой.",
+      });
+    }
+    const q = fold(raw);
     type Art = { id: string; name: string; sp?: string; sc?: string; yt?: string };
     const arts = (artistsRaw as { artists: Art[] }).artists;
-    const hit =
-      arts.find((a) => fold(a.name) === q) ??
-      arts.find((a) => fold(a.name).includes(q) || q.includes(fold(a.name)));
-    if (!hit) return err("такого артиста в базе GTR нет — назови иначе");
+    const find = (x: string) =>
+      arts.find((a) => fold(a.name) === x) ??
+      arts.find((a) => fold(a.name).includes(x) || x.includes(fold(a.name)));
+    // Кириллица с голоса — через тот же скелетный мост, что и площадки.
+    const heard = /[а-яё]/i.test(raw) ? fixHeardNames(raw) : raw;
+    const hit = find(q) ?? (heard !== raw ? find(fold(heard)) : undefined);
+    if (!hit)
+      return err("такого артиста в базе GTR нет — предложи включить сеты по жанру (open_music с genre) или найти похожих через find_artists");
     const want = String(args.source ?? "any");
 
     // Прямая ссылка и поисковая выдача — разные вещи. Человек просит
@@ -1445,7 +1519,7 @@ export const handlers: Record<
     // список растёт данными, а не правкой этого файла. CLC выше — особый
     // случай: почасовая аренда, обычной ReserveTable не описывается.
     const all = reserveVenues();
-    const hit = all.find((r) => venueMatch(r.venueName, q));
+    const hit = bestVenue(all, (r) => r.venueName, q);
     if (!hit)
       return err(
         `полная рассадка пока есть у: ${clcName}, ${all.map((r) => r.venueName).join(", ")} — для остальных площадок бронь через общую заявку`,
@@ -1625,10 +1699,10 @@ export const handlers: Record<
     // вещи, и гость, приехавший на несуществующую бронь, не простит.
     // Реестр рассадок: тот же список, что и в get_venue_zones — подключение
     // новой площадки данными сразу открывает и просмотр столов, и саму бронь.
-    const reserveHit = reserveVenues().find((r) => venueMatch(r.venueName, q));
+    const reserveHit = bestVenue(reserveVenues(), (r) => r.venueName, q);
     if (!reserveHit) {
       const { PH } = await import("../data/app-data");
-      const hit = PH.venues.find((v) => venueMatch(v.name, q));
+      const hit = bestVenue(PH.venues, (v) => v.name, q);
       if (!hit) return err("такой площадки в базе нет — уточни название");
       const dateIso = String(args.dateIso ?? "").slice(0, 10);
       if (!/^\d{4}-\d{2}-\d{2}$/.test(dateIso)) return err("нужна дата в формате ГГГГ-ММ-ДД");
@@ -1851,7 +1925,7 @@ export const handlers: Record<
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return err("нужна дата в формате ГГГГ-ММ-ДД");
     const q = clean(String(args.venue ?? ""), 60);
     const { PH } = await import("../data/app-data");
-    const hit = PH.venues.find((v) => venueMatch(v.name, q));
+    const hit = bestVenue(PH.venues, (v) => v.name, q);
     if (!hit) return err("такой площадки в базе нет — уточни название");
     const capacity = capacityOf(hit.capacity);
     if (!capacity) return err("у этой площадки в базе не записана вместимость — без неё прогноз будет выдумкой");

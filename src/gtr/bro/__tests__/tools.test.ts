@@ -242,6 +242,27 @@ describe("платформенные инструменты", () => {
     expect(d.lat).toBeGreaterThan(7);
   });
 
+  it("такси без площадки открывает приложение, а не отказывает", async () => {
+    const r = await handlers.call_taxi({}, ctx);
+    expect(r.ok).toBe(true);
+    const d = (r as { data: { grab: string; bolt: string; venue: unknown } }).data;
+    expect(d.venue).toBeNull();
+    expect(d.grab).toContain("grab.onelink.me");
+    expect(d.bolt).toContain("bolt.onelink.me");
+  });
+
+  it("точное имя бьёт частичное: Catch не превращается в Carpe Diem Beach Club", async () => {
+    const r = await handlers.call_taxi({ venue: "Catch Beach Club" }, ctx);
+    expect(r.ok).toBe(true);
+    expect((r as { data: { venue: string } }).data.venue).toBe("Catch Beach Club");
+  });
+
+  it("площадка, названная по-русски с голоса, находится", async () => {
+    const r = await handlers.call_taxi({ venue: "кетч бич клаб" }, ctx);
+    expect(r.ok).toBe(true);
+    expect((r as { data: { venue: string } }).data.venue).toBe("Catch Beach Club");
+  });
+
   it("в чат сообщества пишет только команда, подпись добавляется", async () => {
     let sentText = "";
     const tgSend = async (_t: "boss" | "chat", text: string) => {
@@ -667,6 +688,22 @@ describe("музыка открывается наружу, а не навига
   it("незнакомое имя не превращается в случайную ссылку", async () => {
     const r = await handlers.open_music({ artist: "Кто-то Неизвестный" }, { ...ctx, user: guest });
     expect(r.ok).toBe(false);
+  });
+
+  it("жанр без артиста включает сеты, а не просит назвать имя", async () => {
+    const r = await handlers.open_music({ genre: "techno" }, { ...ctx, user: guest });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const d = r.data as { open: { url: string }; direct: boolean };
+    expect(d.open.url).toContain("youtube.com/results");
+    expect(d.open.url).toContain("techno");
+    // Поиск честно помечен поиском — модель не скажет «включил артиста».
+    expect(d.direct).toBe(false);
+  });
+
+  it("«поставь диджея» без жанра и имени тоже не отказ", async () => {
+    const r = await handlers.open_music({}, { ...ctx, user: guest });
+    expect(r.ok).toBe(true);
   });
 
   it("инструмент доступен гостю", () => {

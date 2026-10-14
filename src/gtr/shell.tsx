@@ -158,7 +158,8 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
   // один раз: пока фича выключена, кнопка работает как раньше и никому
   // ничего не обещает.
   const [broOn, setBroOn] = useState(false);
-  const [broProv, setBroProv] = useState<"openai" | "gemini">("gemini");
+  const [broProv, setBroProv] = useState<"openai" | "gemini" | "eleven">("gemini");
+  const [broEleven, setBroEleven] = useState(false);
   const [broOpen, setBroOpen] = useState(false);
   useEffect(() => {
     let alive = true;
@@ -167,6 +168,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
         if (!alive) return;
         setBroOn(Boolean(f.enabled && f.keyReady));
         setBroProv(f.provider);
+        setBroEleven(Boolean(f.elevenReady));
       })
       .catch(() => {});
     return () => {
@@ -585,6 +587,7 @@ function ShellInner({ screen, search }: { screen: ScreenId; search: GtrSearch })
             userName={user.name}
             role={user.role}
             provider={broProv}
+            eleven={broEleven}
             onNavigate={(route, entityId) => {
               setBroOpen(false);
               if (route === "venueCard" && entityId)

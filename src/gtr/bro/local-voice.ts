@@ -2,7 +2,7 @@
 //
 // Слух — Web Speech API браузера, мысли — наш текстовый каскад
 // (/api/gtr-bro-text: Gemini Flash → Qwen на GPU GTR), голос —
-// speechSynthesis. Три шага независимы: распознавание и озвучка живут
+// speechSynthesis (в гибриде — клон голоса BOSS в ElevenLabs). Три шага независимы: распознавание и озвучка живут
 // в самом телефоне, а мозг и так задублирован. Поэтому эта полоса
 // отвечает даже в ночь, когда у голосового провайдера легла сеть, —
 // именно ради таких ночей она и написана.
@@ -26,9 +26,38 @@ export type LocalStart = {
   district?: string;
   screen?: string;
   ptt?: boolean;
+  /** eleven — говорить клоном голоса через /api/gtr-bro-tts; при любом
+   *  сбое озвучки полоса сама переходит на голос браузера. */
+  tts?: "eleven" | "browser";
 };
 
 const TEXT_URL = "/api/gtr-bro-text";
+const TTS_URL = "/api/gtr-bro-tts";
+
+/** 50 мс тишины в WAV — разблокировать <audio> на iOS прямо в касании.
+ *  Собирается на месте: никакого файла и никакой сети. */
+const silentWav = (): string => {
+  const n = 400; // 50 мс при 8 кГц, 8 бит
+  const buf = new Uint8Array(44 + n);
+  const dv = new DataView(buf.buffer);
+  const str = (o: number, s: string) => [...s].forEach((c, i) => (buf[o + i] = c.charCodeAt(0)));
+  str(0, "RIFF");
+  dv.setUint32(4, 36 + n, true);
+  str(8, "WAVEfmt ");
+  dv.setUint32(16, 16, true);
+  dv.setUint16(20, 1, true);
+  dv.setUint16(22, 1, true);
+  dv.setUint32(24, 8000, true);
+  dv.setUint32(28, 8000, true);
+  dv.setUint16(32, 1, true);
+  dv.setUint16(34, 8, true);
+  str(36, "data");
+  dv.setUint32(40, n, true);
+  buf.fill(128, 44);
+  let bin = "";
+  for (const b of buf) bin += String.fromCharCode(b);
+  return `data:audio/wav;base64,${btoa(bin)}`;
+};
 const IDLE_MS = 90_000;
 const MAX_MS = 8 * 60_000;
 
@@ -97,6 +126,13 @@ export class LocalVoiceSession {
   // Флаг «реплика ушла» — onend решает, отправлять ли собранный текст.
   private commit = false;
   private speakingN = 0;
+  private tts: "eleven" | "browser" = "browser";
+  /** Один <audio> на сессию: создан и разблокирован в касании, дальше
+   *  ему только меняют src — иначе iOS глушит звук после await. */
+  private audio: HTMLAudioElement | null = null;
+  /** Клон отказал в этой сессии — дальше говорим голосом браузера, не
+   *  тратя на каждую реплику ещё одну неудачную попытку. */
+  private elevenDown = false;
 
   constructor(ev: BroEvents) {
     this.ev = ev;
@@ -131,6 +167,21 @@ export class LocalVoiceSession {
     this.ptt = Boolean(opts.ptt);
     this.lang = opts.lang ?? loadLang();
     this.locale = speechLocale(this.lang);
+    this.tts = opts.tts === "eleven" ? "eleven" : "browser";
+    this.elevenDown = false;
+    if (this.tts === "eleven" && !this.audio) {
+      // До первого await: start() вызван из касания, и только сейчас
+      // iOS разрешает звуку играть без нового жеста.
+      try {
+        const a = new Audio();
+        a.preload = "auto";
+        a.src = silentWav();
+        void a.play().catch(() => undefined);
+        this.audio = a;
+      } catch {
+        this.audio = null;
+      }
+    }
 
     if (!recCtor()) {
       // Firefox: распознавания нет. Озвучка ответов на набранный текст
@@ -156,7 +207,9 @@ export class LocalVoiceSession {
     this.ev.onMetric?.("bro.session.start");
     this.ev.onMetric?.("bro.provider.local");
     this.startedAt = Date.now();
-    this.log(`стабильная полоса · слух ${this.locale} · ${this.ptt ? "рация" : "свободный"}`);
+    this.log(
+      `${this.tts === "eleven" ? "гибрид · голос клона" : "стабильная полоса"} · слух ${this.locale} · ${this.ptt ? "рация" : "свободный"}`,
+    );
     this.set("listening");
     this.touch();
     this.maxTimer = window.setTimeout(() => this.stop("max-duration"), MAX_MS);
@@ -292,9 +345,63 @@ export class LocalVoiceSession {
     this.speak(reply);
   }
 
-  /** Озвучка ответа кусками. Голос подбираем по языку самого текста:
-   *  кириллица — русский, остальное — язык слуха. */
+  /** Озвучка ответа. В гибриде — клоном через ElevenLabs, иначе (или
+   *  если клон отказал) — голосом браузера. */
   private speak(text: string) {
+    if (this.tts === "eleven" && !this.elevenDown && this.audio && text.trim()) {
+      this.speakEleven(text, this.audio);
+      return;
+    }
+    this.speakBrowser(text);
+  }
+
+  /** Поток mp3 по ссылке: <audio> играет с первых килобайт, не дожидаясь
+   *  конца синтеза. Сбой до начала звука — та же реплика голосом браузера. */
+  private speakEleven(text: string, a: HTMLAudioElement) {
+    this.set("speaking");
+    this.touch();
+    let started = false;
+    let settled = false;
+    const release = () => {
+      settled = true;
+      a.onended = a.onerror = a.onplaying = null;
+    };
+    const finish = () => {
+      if (settled) return;
+      release();
+      this.afterSpeech();
+    };
+    const fallback = (why: string) => {
+      if (settled) return;
+      release();
+      this.elevenDown = true;
+      this.ev.onMetric?.(`bro.eleven.fail.${why}`);
+      this.log("голос клона не ответил — говорю голосом браузера");
+      if (!this.closed) this.speakBrowser(text);
+    };
+    a.onplaying = () => {
+      started = true;
+      this.ev.onMetric?.("bro.eleven.ok");
+    };
+    a.onended = finish;
+    a.onerror = () => (started ? finish() : fallback("audio"));
+    // Синтез не начался за 6 секунд — человек ждёт, переходим на браузер.
+    window.setTimeout(() => {
+      if (started || settled) return;
+      try {
+        a.pause();
+      } catch {
+        /* уже стоит */
+      }
+      fallback("timeout");
+    }, 6_000);
+    a.src = `${TTS_URL}?t=${encodeURIComponent(text.slice(0, 600))}`;
+    void a.play().catch(() => fallback("play"));
+  }
+
+  /** Озвучка голосом браузера кусками. Голос подбираем по языку самого
+   *  текста: кириллица — русский, остальное — язык слуха. */
+  private speakBrowser(text: string) {
     const chunks = ttsChunks(text);
     if (!chunks.length || !("speechSynthesis" in window)) {
       this.afterSpeech();
@@ -335,6 +442,7 @@ export class LocalVoiceSession {
     } catch {
       /* нет синтеза — нечего глушить */
     }
+    this.silenceClone();
     this.speakingN = 0;
     this.ev.onMetric?.("bro.bargein");
     this.set("listening");
@@ -379,6 +487,20 @@ export class LocalVoiceSession {
     this.speak(text);
   }
 
+  /** Заглушить голос клона: перебивание или конец сессии. */
+  private silenceClone() {
+    const a = this.audio;
+    if (!a) return;
+    a.onended = a.onerror = a.onplaying = null;
+    try {
+      a.pause();
+      a.removeAttribute("src");
+      a.load();
+    } catch {
+      /* элемент уже пуст */
+    }
+  }
+
   /** Громкость крутит Web Audio премиальных полос; у системной озвучки
    *  штатный уровень и так максимальный — ручка здесь ничего не делает. */
   setGain(_v: number) {
@@ -401,6 +523,8 @@ export class LocalVoiceSession {
     } catch {
       /* нет синтеза */
     }
+    this.silenceClone();
+    this.audio = null;
     this.log(`сессия закрыта · ${reason}`);
     this.ev.onMetric?.(`bro.session.stop.${reason.replace(/[^a-z-]/g, "")}`);
     if (this.startedAt)

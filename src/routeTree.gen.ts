@@ -34,6 +34,7 @@ import { Route as ApiGtrBroSdpRouteImport } from './routes/api.gtr-bro-sdp'
 import { Route as ApiGtrBroSessionRouteImport } from './routes/api.gtr-bro-session'
 import { Route as ApiGtrBroTextRouteImport } from './routes/api.gtr-bro-text'
 import { Route as ApiGtrBroToolRouteImport } from './routes/api.gtr-bro-tool'
+import { Route as ApiGtrBroTtsRouteImport } from './routes/api.gtr-bro-tts'
 import { Route as ApiGtrVibeRouteImport } from './routes/api.gtr-vibe'
 import { Route as ApiPosterRouteImport } from './routes/api.poster'
 import { Route as ApiPushRouteImport } from './routes/api.push'
@@ -183,6 +184,11 @@ const ApiGtrBroToolRoute = ApiGtrBroToolRouteImport.update({
   path: '/api/gtr-bro-tool',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGtrBroTtsRoute = ApiGtrBroTtsRouteImport.update({
+  id: '/api/gtr-bro-tts',
+  path: '/api/gtr-bro-tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiGtrVibeRoute = ApiGtrVibeRouteImport.update({
   id: '/api/gtr-vibe',
   path: '/api/gtr-vibe',
@@ -325,6 +331,7 @@ export interface FileRoutesByFullPath {
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
+  '/api/gtr-bro-tts': typeof ApiGtrBroTtsRoute
   '/api/gtr-vibe': typeof ApiGtrVibeRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
@@ -374,6 +381,7 @@ export interface FileRoutesByTo {
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
+  '/api/gtr-bro-tts': typeof ApiGtrBroTtsRoute
   '/api/gtr-vibe': typeof ApiGtrVibeRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
@@ -425,6 +433,7 @@ export interface FileRoutesById {
   '/api/gtr-bro-session': typeof ApiGtrBroSessionRoute
   '/api/gtr-bro-text': typeof ApiGtrBroTextRoute
   '/api/gtr-bro-tool': typeof ApiGtrBroToolRoute
+  '/api/gtr-bro-tts': typeof ApiGtrBroTtsRoute
   '/api/gtr-vibe': typeof ApiGtrVibeRoute
   '/api/poster': typeof ApiPosterRoute
   '/api/push': typeof ApiPushRoute
@@ -477,6 +486,7 @@ export interface FileRouteTypes {
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
+    | '/api/gtr-bro-tts'
     | '/api/gtr-vibe'
     | '/api/poster'
     | '/api/push'
@@ -526,6 +536,7 @@ export interface FileRouteTypes {
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
+    | '/api/gtr-bro-tts'
     | '/api/gtr-vibe'
     | '/api/poster'
     | '/api/push'
@@ -576,6 +587,7 @@ export interface FileRouteTypes {
     | '/api/gtr-bro-session'
     | '/api/gtr-bro-text'
     | '/api/gtr-bro-tool'
+    | '/api/gtr-bro-tts'
     | '/api/gtr-vibe'
     | '/api/poster'
     | '/api/push'
@@ -627,6 +639,7 @@ export interface RootRouteChildren {
   ApiGtrBroSessionRoute: typeof ApiGtrBroSessionRoute
   ApiGtrBroTextRoute: typeof ApiGtrBroTextRoute
   ApiGtrBroToolRoute: typeof ApiGtrBroToolRoute
+  ApiGtrBroTtsRoute: typeof ApiGtrBroTtsRoute
   ApiGtrVibeRoute: typeof ApiGtrVibeRoute
   ApiPosterRoute: typeof ApiPosterRoute
   ApiPushRoute: typeof ApiPushRoute
@@ -818,6 +831,13 @@ declare module '@tanstack/react-router' {
       path: '/api/gtr-bro-tool'
       fullPath: '/api/gtr-bro-tool'
       preLoaderRoute: typeof ApiGtrBroToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gtr-bro-tts': {
+      id: '/api/gtr-bro-tts'
+      path: '/api/gtr-bro-tts'
+      fullPath: '/api/gtr-bro-tts'
+      preLoaderRoute: typeof ApiGtrBroTtsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/gtr-vibe': {
@@ -1038,6 +1058,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGtrBroSessionRoute: ApiGtrBroSessionRoute,
   ApiGtrBroTextRoute: ApiGtrBroTextRoute,
   ApiGtrBroToolRoute: ApiGtrBroToolRoute,
+  ApiGtrBroTtsRoute: ApiGtrBroTtsRoute,
   ApiGtrVibeRoute: ApiGtrVibeRoute,
   ApiPosterRoute: ApiPosterRoute,
   ApiPushRoute: ApiPushRoute,

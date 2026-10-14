@@ -3155,7 +3155,10 @@ export type BroFlags = {
   /** Какой голосовой транспорт использовать. По умолчанию — gemini, если
    *  его ключ есть: это бесплатный путь. Явное значение в setting:flags
    *  (voiceProvider) перекрывает автоматику. */
-  provider: "openai" | "gemini";
+  provider: "openai" | "gemini" | "eleven";
+  /** Гибрид готов: ключ ElevenLabs и клон голоса настроены. Тогда
+   *  стабильная полоса говорит этим голосом, а не голосом браузера. */
+  elevenReady: boolean;
 };
 
 /** Флаги голосового помощника для клиента.
@@ -3207,7 +3210,14 @@ export const saveBossHeadFn = createServerFn({ method: "POST" })
   });
 
 export const broFlagsFn = createServerFn({ method: "GET" }).handler(async (): Promise<BroFlags> => {
-  const off: BroFlags = { enabled: false, kill: false, roles: [], keyReady: false, provider: "gemini" };
+  const off: BroFlags = {
+    enabled: false,
+    kill: false,
+    roles: [],
+    keyReady: false,
+    provider: "gemini",
+    elevenReady: false,
+  };
   const user = await currentUser();
   if (!user) return off;
   const ns = await getKvNs();
@@ -3217,12 +3227,18 @@ export const broFlagsFn = createServerFn({ method: "GET" }).handler(async (): Pr
       broEnabled?: boolean;
       broKill?: boolean;
       broRoles?: string[];
-      voiceProvider?: "openai" | "gemini";
+      voiceProvider?: "openai" | "gemini" | "eleven";
     }>(ns, "setting:flags")) ?? {};
   const oai = Boolean(typeof process !== "undefined" && process.env?.OPENAI_API_KEY);
   const gem = Boolean(typeof process !== "undefined" && process.env?.GEMINI_API_KEY);
-  const provider = f.voiceProvider ?? (gem ? "gemini" : "openai");
-  const keyReady = provider === "gemini" ? gem : oai;
+  const { elevenReady: elevenOk } = await import("./bro/eleven");
+  const eleven = await elevenOk(ns);
+  // Гибрид без клона — это просто стабильная полоса с голосом браузера;
+  // такой выбор не держим, а откатываемся на Gemini Live.
+  const want = f.voiceProvider === "eleven" && !eleven ? undefined : f.voiceProvider;
+  const provider = want ?? (gem ? "gemini" : "openai");
+  // Гибриду нужен текстовый мозг — он на ключе Gemini.
+  const keyReady = provider === "openai" ? oai : gem;
   const allowed = !f.broRoles?.length || f.broRoles.includes(user.role);
   return {
     enabled: Boolean(f.broEnabled) && !f.broKill && allowed,
@@ -3230,6 +3246,7 @@ export const broFlagsFn = createServerFn({ method: "GET" }).handler(async (): Pr
     roles: f.broRoles ?? [],
     keyReady,
     provider,
+    elevenReady: eleven,
   };
 });
 

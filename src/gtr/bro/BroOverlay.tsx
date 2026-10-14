@@ -44,7 +44,7 @@ import { BroSession, type BroCard, type BroState } from "./session";
 import { VibeCheck } from "./vibecheck";
 
 type VoiceSession = BroSession | GemSession | LocalVoiceSession;
-type VoiceProvider = "openai" | "gemini";
+type VoiceProvider = "openai" | "gemini" | "eleven";
 
 const STATE_RU: Record<BroState, string> = {
   idle: "готов",
@@ -89,6 +89,8 @@ const VOICE_SETS: Record<VoiceProvider, [string, string][]> = {
     ["marin", "Marin"],
     ["ash", "Ash"],
   ],
+  // Гибрид: голос один — клон BOSS в ElevenLabs.
+  eleven: [["clone", "Голос BOSS"]],
 };
 
 /** Быстрые команды под табло: то, ради чего человек и открыл BRO.
@@ -157,6 +159,7 @@ export function GtrBroOverlay({
   userName,
   role,
   provider = "gemini",
+  eleven = false,
   onNavigate,
 }: {
   open: boolean;
@@ -168,6 +171,9 @@ export function GtrBroOverlay({
   userName?: string;
   role?: string;
   provider?: VoiceProvider;
+  /** Клон голоса в ElevenLabs настроен: стабильная полоса (и гибрид)
+   *  говорят им, а не голосом браузера. */
+  eleven?: boolean;
   onNavigate: (route: string, entityId?: string) => void;
 }) {
   const { t } = useTranslation();
@@ -276,7 +282,8 @@ export function GtrBroOverlay({
       ses.current?.stop("restart");
       reset();
       everLive.current = false;
-      const S = laneRef.current
+      // Гибрид — та же стабильная полоса, только с голосом клона.
+      const S = laneRef.current || provider === "eleven"
         ? LocalVoiceSession
         : provider === "gemini"
           ? GemSession
@@ -357,13 +364,21 @@ export function GtrBroOverlay({
       });
       ses.current = s;
       try {
-        await s.start({ voice: v, personaMode: m, screen, district, lang: langRef.current, ptt: !handsRef.current });
+        await s.start({
+          voice: v,
+          personaMode: m,
+          screen,
+          district,
+          lang: langRef.current,
+          ptt: !handsRef.current,
+          tts: eleven ? "eleven" : "browser",
+        });
         s.setGain(gainRef.current);
       } finally {
         starting.current = false;
       }
     },
-    [district, metric, onNavigate, provider, screen],
+    [district, eleven, metric, onNavigate, provider, screen],
   );
   // Актуальный режим для begin() без пересоздания колбэка.
   const handsRef = useRef(hands);

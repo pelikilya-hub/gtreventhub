@@ -75,6 +75,49 @@ npx wrangler kv key put --remote --namespace-id a26fc466919d43e4a2e684d8765810b8
 потому что секрет выдают и при нулевом балансе. Вернула `200` — можно
 переключать через `pult.voice` с `provider: "openai"`.
 
+### Гибрид: голос BOSS через ElevenLabs
+
+Gemini Live и Realtime говорят только своими стандартными голосами —
+клон туда не вставить. Поэтому гибрид разделяет мозг и голос: слышит
+браузер, думает текстовый каскад (Gemini Flash с теми же инструментами —
+такси, бронь, музыка), а говорит ElevenLabs клоном голоса BOSS. Это та же
+стабильная полоса (`local-voice.ts`), только вместо голоса браузера —
+поток mp3 из `/api/gtr-bro-tts`. Сбой клона в разговоре — реплика уходит
+голосом браузера, разговор не рвётся.
+
+Подключение, по шагам:
+
+1. **Клон.** elevenlabs.io → Voices → Add voice → Instant Voice Clone.
+   Запись: 2–3 минуты чистой речи без музыки и эха, тем тоном, каким
+   BRO должен звучать в клубе. Для Professional Clone — от 30 минут.
+   Скопировать **Voice ID** голоса.
+2. **Ключ.** elevenlabs.io → Developers → API Keys → создать ключ с
+   доступом к Text to Speech. В чат ключ не присылать — сразу в секрет
+   воркера: Cloudflare → Workers & Pages → `gtr-event-hub` → Settings →
+   Variables and Secrets → Add → тип *Secret*, имя `ELEVENLABS_API_KEY`.
+   Или из терминала: `npx wrangler secret put ELEVENLABS_API_KEY --name gtr-event-hub`.
+3. **Голос в продукт** — через пульт (Voice ID не секрет):
+
+   ```bash
+   curl -sS -X POST https://gtrevent.com/api/bro-dev -H 'content-type: application/json' \
+     -d '{"action":"pult.eleven","key":"<ключ пульта>","voiceId":"<Voice ID>"}'
+   ```
+
+   Необязательно: `model` (по умолчанию `eleven_flash_v2_5` — самый
+   быстрый ответ), `stability` и `similarity` от 0 до 1.
+4. **Проверка:** `pult.elevenTest` — синтезирует одну фразу тем же
+   запросом, что и разговор, и возвращает статус, размер и время до
+   ответа. `200` — можно включать.
+5. **Включить гибрид:** `pult.voice` с `provider: "eleven"`. Откат —
+   `provider: "gemini"`. Пока ключа или клона нет, выбор `eleven`
+   молча откатывается на Gemini Live.
+
+Пока гибрид не выбран, но клон настроен, им говорит и запасная полоса,
+на которую разговор пересаживается при сбое Gemini Live.
+
+Расход: каждая реплика BRO — запрос к ElevenLabs, потолок 120 реплик в
+час на человека (`LIMITS.broTts`).
+
 ### Почему не свой голос на Hetzner
 
 Замер 23.08.2026 на боевом сервере: генерация ~21 токен в секунду,

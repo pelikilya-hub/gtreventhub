@@ -27,6 +27,8 @@ export type GemStart = {
   district?: string;
   screen?: string;
   ptt?: boolean;
+  /** Голос гибридной полосы; премиальной полосе не нужен. */
+  tts?: "eleven" | "browser";
 };
 
 const SESSION_URL = "/api/gtr-bro-gem";

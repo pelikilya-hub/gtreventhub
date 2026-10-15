@@ -67,9 +67,10 @@ import { quoteDocument } from "../quote-doc";
 import { eventDeckDocument } from "../event-deck";
 import { drawImpulse } from "../impulse";
 import { useGtr } from "../store";
-import { getPrefsFn, sendOfferFn } from "../kv-api";
+import { getPrefsFn, planUploadFn, sendOfferFn } from "../kv-api";
 import { plural } from "../plural";
 import { Card, Chip, Dot, Eyebrow, Icon, tint } from "../ui";
+import { PlanCanvas, type PlanImage } from "./PlanCanvas";
 
 // ---------- перевод данных события при выводе ----------
 // Узлы графа, пресеты, проверки и смета хранятся по-русски: это данные, по
@@ -268,6 +269,27 @@ export function ConstructorScreen({
     linkFromVenue: boolean;
   } | null>(null);
   const [linkFrom, setLinkFrom] = useState<string | null>(null);
+  // Вид графа: «План» — значки на чертеже, «Карточки» — прежний граф.
+  // Выбор помним на устройстве: на телефоне план, на мониторе — как удобно.
+  const [viewMode, setViewMode] = useState<"plan" | "cards">("plan");
+  useEffect(() => {
+    try {
+      const v = window.localStorage.getItem("gtr:cx-view");
+      if (v === "plan" || v === "cards") setViewMode(v);
+    } catch {
+      /* приватный режим — живём без памяти */
+    }
+  }, []);
+  const setView = (m: "plan" | "cards") => {
+    setViewMode(m);
+    try {
+      window.localStorage.setItem("gtr:cx-view", m);
+    } catch {
+      /* ничего */
+    }
+  };
+  const planInputRef = useRef<HTMLInputElement>(null);
+  const [planBusy, setPlanBusy] = useState(false);
   const [openCat, setOpenCat] = useState<NodeKind | null>(null);
   const [artBase, setArtBase] = useState<ArtistBase | null>(null);
   const [artQ, setArtQ] = useState("");
@@ -385,6 +407,51 @@ export function ConstructorScreen({
       : undefined;
     return performAdd(kind, title, sub, badge, fields, linkFromVenue, room);
   };
+
+  // Плитка палитры: короткое имя и подсказка «что это за блок». Полные
+  // подписи CX_PALETTE остаются заголовком панели вариантов и именем
+  // пустого блока — в плитке на телефоне они не помещаются.
+  const cxTile: Partial<Record<NodeKind, [string, string]>> = {
+    room: [t("Зал"), t("Где проходит")],
+    artist: [t("Артисты"), t("Кто выступает")],
+    sound: [t("Звук"), t("Звук и инженер")],
+    light: [t("Свет"), t("Свет и эффекты")],
+    decor: [t("Декор"), t("Оформление")],
+    gear: [t("Прокат"), t("Сцена, LED, мебель")],
+    interactive: [t("Интерактив"), t("Для гостей")],
+    content: [t("Съёмка"), t("Фото и видео")],
+    promo: [t("Промо"), t("Реклама и билеты")],
+    money: [t("Бюджет"), t("Сколько стоит")],
+    slot: [t("Время"), t("Тайминг вечера")],
+    doc: [t("Договор"), t("Условия и подписи")],
+    staff: [t("Команда"), t("Кто работает")],
+  };
+  // Плитка с вариантами (подрядчики, пресеты площадки, каталог позиций)
+  // открывает панель под сеткой; без вариантов — сразу кладёт пустой блок.
+  const equipCatOf = (kind: NodeKind) =>
+    kind === "gear" ? "equipment" : kind === "interactive" ? "interactive" : null;
+  const cxExpandable = (kind: NodeKind) => {
+    const cat = equipCatOf(kind);
+    return (
+      (VENDOR_CATALOG[kind] ?? []).length > 0 ||
+      kind === "artist" ||
+      presetsFor(kind, vid).length > 0 ||
+      (cat ? equipOf(cat).length > 0 : false)
+    );
+  };
+  const addBlankBlock = (kind: NodeKind, label: string) =>
+    addNode(
+      kind,
+      label,
+      "Заполните данные блока",
+      "НОВОЕ",
+      [
+        ["ТИП", KINDS[kind][0]],
+        ["СТАТУС", "Черновик"],
+        ["ИСТОЧНИК", "—"],
+      ],
+      VENDOR_KINDS.includes(kind),
+    );
 
   // Добавить артиста из базы/лайнапа узлом графа с авто-связью к площадке.
   // Артист не дублируется: если уже в графе — просто выделяем его.
@@ -693,6 +760,54 @@ export function ConstructorScreen({
   // Связь рисуем только когда оба её конца на канвасе — иначе линия
   // уходит в пустоту к спрятанному блоку.
   const visibleLinks = g.links.filter((l) => visibleIds.has(l.from) && visibleIds.has(l.to));
+
+  // ---------- режим «План» ----------
+  // Чертёж живёт на узле того уровня, который открыт: зал — свой план,
+  // верхний уровень — план площадки.
+  const planHolder = openRoomNode ?? venueNode;
+  const currentPlan: PlanImage | undefined = planHolder?.plan;
+  const setPlan = (plan: PlanImage | undefined) =>
+    planHolder &&
+    mutate((gr) => ({
+      ...gr,
+      nodes: gr.nodes.map((n) => (n.id === planHolder.id ? { ...n, plan } : n)),
+    }));
+  const uploadPlan = async (file: File) => {
+    setPlanBusy(true);
+    try {
+      const { shrinkPoster } = await import("../poster-upload");
+      // чертежу нужна детализация: 2000 точек по длинной стороне, белое поле
+      const dataUrl = await shrinkPoster(file, 2000, "#ffffff");
+      const dims = await new Promise<{ w: number; h: number }>((res, rej) => {
+        const img = new Image();
+        img.onload = () => res({ w: img.naturalWidth, h: img.naturalHeight });
+        img.onerror = () => rej(new Error("decode"));
+        img.src = dataUrl;
+      });
+      const r = await planUploadFn({ data: { dataUrl } });
+      // Демо-вход и локальный режим не имеют серверной сессии: чертёж
+      // остаётся в самом событии на этом устройстве, как и весь черновик.
+      const src = r.ok ? r.src : r.reason === "нужен вход" ? dataUrl : "";
+      if (!src) {
+        toast.error(t(r.ok ? "Не удалось загрузить чертёж" : r.reason));
+        return;
+      }
+      setPlan({ src, ...dims, inv: true });
+      toast.success(t("Чертёж на месте — расставьте блоки"));
+    } catch (err) {
+      toast.error(
+        String(err).includes("too-big") ? t("чертёж тяжелее 1 МБ — сожми") : t("Не удалось загрузить чертёж"),
+      );
+    } finally {
+      setPlanBusy(false);
+    }
+  };
+  const addLink = (from: string, to: string) =>
+    mutate((gr) =>
+      gr.links.some((l) => (l.from === from && l.to === to) || (l.from === to && l.to === from))
+        ? gr
+        : { ...gr, links: [...gr.links, { from, to }] },
+    );
 
   const canvasH = Math.max(
     openRoomNode ? 460 : 420,
@@ -1191,7 +1306,7 @@ export function ConstructorScreen({
         className="gtr-md-stack"
         style={{
           display: "grid",
-          gridTemplateColumns: "230px 1fr",
+          gridTemplateColumns: "272px 1fr",
           gap: 14,
           alignItems: "start",
         }}
@@ -1208,67 +1323,69 @@ export function ConstructorScreen({
           }}
         >
           <Eyebrow style={{ marginBottom: 10 }}>{t("БЛОКИ СОБЫТИЯ")}</Eyebrow>
-          <div style={{ display: "grid", gap: 6 }}>
+          <div className="gtr-cx-tiles">
             {CX_PALETTE.map(([kind, label]) => {
               const K = KINDS[kind];
-              const vendors = VENDOR_CATALOG[kind] ?? [];
+              const [name, hint] = cxTile[kind] ?? [tr(label), ""];
               const open = openCat === kind;
-              const addBlank = () =>
-                addNode(
-                  kind,
-                  label,
-                  "Заполните данные блока",
-                  "НОВОЕ",
-                  [
-                    ["ТИП", K[0]],
-                    ["СТАТУС", "Черновик"],
-                    ["ИСТОЧНИК", "—"],
-                  ],
-                  VENDOR_KINDS.includes(kind),
-                );
+              const expandable = cxExpandable(kind);
+              const count = g.nodes.filter((n) => n.kind === kind).length;
+              return (
+                <button
+                  key={kind}
+                  type="button"
+                  className="gtr-cx-tile"
+                  data-open={open || undefined}
+                  aria-expanded={expandable ? open : undefined}
+                  title={tr(label)}
+                  style={{ "--k": K[1], "--kb": K[2] } as React.CSSProperties}
+                  onClick={() =>
+                    expandable ? setOpenCat(open ? null : kind) : addBlankBlock(kind, label)
+                  }
+                >
+                  <span className="gtr-cx-tile-ic">
+                    <Icon d={K[3]} size={22} />
+                    {count ? <span className="gtr-cx-tile-n">{count}</span> : null}
+                    {!expandable ? <span className="gtr-cx-tile-plus">+</span> : null}
+                  </span>
+                  <span className="gtr-cx-tile-name">{name}</span>
+                  {hint ? <span className="gtr-cx-tile-hint">{hint}</span> : null}
+                </button>
+              );
+            })}
+          </div>
+          <div style={{ display: "grid", gap: 6 }}>
+            {CX_PALETTE.filter(([kind]) => kind === openCat).map(([kind, label]) => {
+              const K = KINDS[kind];
+              const vendors = VENDOR_CATALOG[kind] ?? [];
+              const open = true;
+              const addBlank = () => addBlankBlock(kind, label);
               const isArtist = kind === "artist";
               // Оборудование и интерактив приходят не от подрядчика, а из
               // каталога позиций — со своим статусом провенанса цены
-              const equipCat =
-                kind === "gear" ? "equipment" : kind === "interactive" ? "interactive" : null;
+              const equipCat = equipCatOf(kind);
               const equipItems = equipCat ? equipOf(equipCat) : [];
               const presets = presetsFor(kind, vid);
-              const expandable =
-                vendors.length > 0 || isArtist || presets.length > 0 || equipItems.length > 0;
               return (
-                <div key={kind}>
-                  <button
-                    className="gtr-pal-btn"
-                    onClick={() => (expandable ? setOpenCat(open ? null : kind) : addBlank())}
-                  >
-                    <span
-                      style={{
-                        width: 24,
-                        height: 24,
-                        flex: "none",
-                        borderRadius: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background: K[2],
-                        color: K[1],
-                      }}
-                    >
-                      <Icon d={K[3]} size={13} />
+                <div
+                  key={kind}
+                  className="gtr-cx-drawer"
+                  style={{ "--k": K[1], "--kb": K[2] } as React.CSSProperties}
+                >
+                  <div className="gtr-cx-drawer-head">
+                    <span className="gtr-cx-drawer-ic">
+                      <Icon d={K[3]} size={14} />
                     </span>
-                    <span style={{ flex: 1 }}>{tr(label)}</span>
-                    <span
-                      className="gtr-mono"
-                      style={{
-                        font: "700 12px/1 'JetBrains Mono',monospace",
-                        color: "rgba(255,255,255,.3)",
-                        transition: "transform .15s",
-                        transform: open ? "rotate(90deg)" : "none",
-                      }}
+                    <span style={{ flex: 1, minWidth: 0 }}>{tr(label)}</span>
+                    <button
+                      type="button"
+                      className="gtr-cx-drawer-x"
+                      aria-label={t("Закрыть")}
+                      onClick={() => setOpenCat(null)}
                     >
-                      {expandable ? "›" : "+"}
-                    </span>
-                  </button>
+                      ×
+                    </button>
+                  </div>
                   {open && isArtist ? (
                     <div style={{ display: "grid", gap: 6, padding: "6px 0 4px 10px" }}>
                       <input
@@ -1587,309 +1704,462 @@ export function ConstructorScreen({
           </div>
         </Card>
 
-        {/* ---------- канвас ---------- */}
-        <Card
-          style={{
-            overflow: "auto",
-            background: "radial-gradient(circle at 30% 10%, #101116, #0A0B0D 70%)",
-          }}
-        >
-          <div
-            ref={canvasRef}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            style={{
-              position: "relative",
-              minWidth: 1030,
-              height: canvasH,
-              backgroundImage: "radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px)",
-              backgroundSize: "26px 26px",
-            }}
-          >
-            <svg
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                pointerEvents: "none",
-              }}
-            >
-              {visibleLinks.map((l, i) => {
-                const a = nodeById(l.from);
-                const b = nodeById(l.to);
-                if (!a || !b) return null;
-                const x1 = a.x + NODE_W;
-                const y1 = a.y + 46;
-                const x2 = b.x;
-                const y2 = b.y + 46;
-                const mx = (x1 + x2) / 2;
-                const ls = linkStatus(a, b);
-                const healthy = ls === "ok";
-                return (
-                  <path
-                    key={i}
-                    d={`M${x1} ${y1} C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`}
-                    stroke={STATUS_COLOR[ls]}
-                    strokeWidth={healthy ? 2 : 2.4}
-                    fill="none"
-                    opacity={healthy ? 0.85 : 0.95}
-                    strokeDasharray={ls === "problem" || ls === "delay" ? "5 4" : undefined}
-                    style={{ filter: healthy ? `drop-shadow(0 0 4px ${GREEN}66)` : undefined }}
-                  >
-                    {ls !== "ok" ? (
-                      <animate
-                        attributeName="opacity"
-                        values="0.4;1;0.4"
-                        dur="1.4s"
-                        repeatCount="indefinite"
-                      />
-                    ) : null}
-                  </path>
-                );
-              })}
-            </svg>
-
-            {visibleNodes.map((n) => {
-              const K = KINDS[n.kind];
-              const on = sel === n.id;
-              const linking = linkFrom === n.id;
-              const st = nodeStatus(n);
-              const healthy = st.status === "ok";
-              const sc = STATUS_COLOR[st.status];
-              // Зал — папка. На верхнем уровне он закрыт и показывает
-              // значками, что к нему прикреплено; открытый зал — обычный блок.
-              const isRoom = n.kind === "room";
-              const roomKids = isRoom ? childrenOf(n.id) : [];
-              const isShutRoom = isRoom && !openRoomNode;
-              return (
-                <div
-                  key={n.id}
-                  className={`gtr-node${isShutRoom ? " gtr-node-folder" : ""}`}
-                  onPointerDown={(e) => onPointerDown(e, n)}
-                  onContextMenu={(e) => e.preventDefault()}
-                  onDoubleClick={
-                    isRoom
-                      ? () => { cancelHold(); setOpenRoom((cur) => (cur === n.id ? null : n.id)); }
-                      : undefined
-                  }
-                  style={{
-                    left: n.x,
-                    top: n.y,
-                    width: isShutRoom ? 236 : undefined,
-                    border: `1px solid ${on ? K[1] : linking ? GREEN : healthy ? "rgba(255,255,255,.11)" : sc}`,
-                    boxShadow: on
-                      ? "0 14px 34px rgba(229,35,27,.22)"
-                      : healthy
-                        ? "0 10px 26px rgba(0,0,0,.45)"
-                        : `0 0 18px -2px ${sc}88, 0 10px 26px rgba(0,0,0,.45)`,
-                  }}
+        {/* ---------- канвас: «План» (значки, чертёж, пальцы) или «Карточки» ---------- */}
+        <div style={{ display: "grid", gap: 10, minWidth: 0 }}>
+          <div className="gtr-plan-bar">
+            <div className="gtr-seg" role="tablist" aria-label={t("Вид графа")}>
+              {(["plan", "cards"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  role="tab"
+                  aria-selected={viewMode === m}
+                  data-on={viewMode === m || undefined}
+                  onClick={() => setView(m)}
                 >
-                  {/* индикатор статуса узла */}
-                  <span
-                    title={`${t(STATUS_LABEL[st.status])}${st.reason ? " · " + tr(st.reason) : ""}`}
-                    style={{
-                      position: "absolute",
-                      top: -6,
-                      right: -6,
-                      width: 13,
-                      height: 13,
-                      borderRadius: 0,
-                      background: sc,
-                      border: "2px solid #0A0B0D",
-                      animation: healthy ? undefined : "gtrpulse 1.6s ease-out infinite",
-                    }}
-                  />
-                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 7 }}>
-                    <span
-                      style={{
-                        width: 20,
-                        height: 20,
-                        flex: "none",
-                        borderRadius: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background: K[2],
-                        color: K[1],
-                      }}
-                    >
-                      <Icon d={K[3]} size={11} />
-                    </span>
-                    <span
-                      className="gtr-mono"
-                      style={{
-                        font: "600 10px/1 'JetBrains Mono',monospace",
-                        letterSpacing: ".08em",
-                        color: K[1],
-                      }}
-                    >
-                      {tr(K[0])}
-                    </span>
-                    {n.badge ? (
-                      <span
-                        className="gtr-mono"
-                        style={{
-                          marginLeft: "auto",
-                          font: "600 10px/1 'JetBrains Mono',monospace",
-                          color: "rgba(255,255,255,.5)",
-                          background: "rgba(255,255,255,.07)",
-                          borderRadius: 0,
-                          padding: "3px 5px",
-                        }}
-                      >
-                        {tr(n.badge)}
-                      </span>
-                    ) : null}
-                  </div>
-                  <div style={{ font: "600 12px/1.25 'Golos Text',sans-serif" }}>{tr(n.title)}</div>
-                  <div
-                    style={{
-                      marginTop: 4,
-                      font: "500 11px/1.45 'Golos Text',sans-serif",
-                      color: "rgba(255,255,255,.45)",
-                    }}
-                  >
-                    {tr(n.sub)}
-                  </div>
-
-                  {/* Закрытый зал: что к нему прикреплено — значками, а не
-                      списком. Одинаковые виды сворачиваются в один значок со
-                      счётчиком: пять артистов не должны занимать полблока. */}
-                  {isShutRoom ? (
-                    <button
-                      className="gtr-folder-open"
-                      onPointerDown={(e) => e.stopPropagation()}
-                      onClick={(e) => { e.stopPropagation(); cancelHold(); setOpenRoom(n.id); }}
-                      title={t("Открыть зал: весь его граф")}
-                      style={{
-                        marginTop: 10,
-                        width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        flexWrap: "wrap",
-                        padding: "8px 9px",
-                        background: "rgba(255,255,255,.05)",
-                        border: "1px solid rgba(255,255,255,.12)",
-                        color: "#fff",
-                        cursor: "pointer",
-                        minHeight: 42,
-                      }}
-                    >
-                      {roomKids.length ? (
-                        <>
-                          {[...new Map(roomKids.map((k) => [k.kind, k])).values()].map((kid) => {
-                            const KK = KINDS[kid.kind];
-                            const cnt = roomKids.filter((x) => x.kind === kid.kind).length;
-                            return (
-                              <span
-                                key={kid.kind}
-                                title={`${tr(KK[0])}${cnt > 1 ? ` · ${cnt}` : ""}`}
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: 3,
-                                  padding: "3px 5px",
-                                  background: KK[2],
-                                  color: KK[1],
-                                }}
-                              >
-                                <Icon d={KK[3]} size={12} />
-                                {cnt > 1 ? (
-                                  <span className="gtr-mono" style={{ font: "700 10px/1 'JetBrains Mono',monospace" }}>
-                                    {cnt}
-                                  </span>
-                                ) : null}
-                              </span>
-                            );
-                          })}
-                          <span
-                            className="gtr-mono"
-                            style={{ marginLeft: "auto", font: "600 10px/1 'JetBrains Mono',monospace", color: "rgba(255,255,255,.5)" }}
-                          >
-                            {roomKids.length} ▾
-                          </span>
-                        </>
-                      ) : (
-                        <span style={{ font: "500 11px/1.4 'Golos Text',sans-serif", color: "rgba(255,255,255,.45)" }}>
-                          {t("Пусто — добавьте блоки в этот зал")}
-                        </span>
-                      )}
-                    </button>
-                  ) : null}
-
-                  {/* порты: у закрытого зала их нет — связь тянут внутри зала */}
-                  {isShutRoom ? null : (
+                  {m === "plan" ? t("План") : t("Карточки")}
+                </button>
+              ))}
+            </div>
+            {openRoomNode ? (
+              <button type="button" className="gtr-btn" style={{ padding: "8px 12px" }} onClick={() => setOpenRoom(null)}>
+                ← {t("Все залы")}
+              </button>
+            ) : null}
+            {viewMode === "plan" && planHolder ? (
+              <>
+                <button
+                  type="button"
+                  className="gtr-btn"
+                  style={{ padding: "8px 12px", marginLeft: "auto" }}
+                  disabled={planBusy}
+                  onClick={() => planInputRef.current?.click()}
+                  title={
+                    openRoomNode
+                      ? t("Планировка этого зала — подложка под значки")
+                      : t("Планировка площадки — подложка под значки")
+                  }
+                >
+                  {planBusy
+                    ? t("Загружаю…")
+                    : currentPlan
+                      ? t("Заменить чертёж")
+                      : openRoomNode
+                        ? t("+ Чертёж зала")
+                        : t("+ Чертёж площадки")}
+                </button>
+                {currentPlan ? (
                   <>
-                  <span
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (linkFrom && linkFrom !== n.id) {
-                        mutate((gr) =>
-                          gr.links.some((l) => l.from === linkFrom && l.to === n.id)
-                            ? gr
-                            : { ...gr, links: [...gr.links, { from: linkFrom, to: n.id }] },
-                        );
-                        setLinkFrom(null);
-                      }
-                    }}
-                    style={{
-                      position: "absolute",
-                      left: -7,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      width: 13,
-                      height: 13,
-                      borderRadius: 0,
-                      background: "#0A0B0D",
-                      border: `2px solid ${linkFrom && linkFrom !== n.id ? GREEN : "rgba(255,255,255,.28)"}`,
-                      cursor: "crosshair",
-                    }}
-                  />
-                  <span
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setLinkFrom(linkFrom === n.id ? null : n.id);
-                    }}
-                    style={{
-                      position: "absolute",
-                      right: -7,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      width: 13,
-                      height: 13,
-                      borderRadius: 0,
-                      background: linking ? GREEN : "#0A0B0D",
-                      border: `2px solid ${linking ? GREEN : K[1]}`,
-                      cursor: "crosshair",
-                    }}
-                  />
+                    <button
+                      type="button"
+                      className="gtr-btn"
+                      style={{ padding: "8px 12px" }}
+                      aria-pressed={Boolean(currentPlan.inv)}
+                      title={t("Светлый чертёж — в тёмные тона интерфейса")}
+                      onClick={() => setPlan({ ...currentPlan, inv: !currentPlan.inv })}
+                    >
+                      {currentPlan.inv ? t("Чертёж как есть") : t("Затемнить")}
+                    </button>
+                    <button
+                      type="button"
+                      className="gtr-btn"
+                      style={{ padding: "8px 12px", color: "var(--gtr-red-hot)" }}
+                      aria-label={t("Убрать чертёж")}
+                      title={t("Убрать чертёж")}
+                      onClick={() => setPlan(undefined)}
+                    >
+                      ✕
+                    </button>
                   </>
-                  )}
-                </div>
-              );
-            })}
-
-            {/* Открытый, но пустой зал: подсказываем, откуда берутся блоки. */}
-            {openRoomNode && !childrenOf(openRoomNode.id).length ? (
-              <div
-                style={{
-                  position: "absolute",
-                  left: Math.max(30, openRoomNode.x),
-                  top: openRoomNode.y + NODE_H + 24,
-                  maxWidth: 340,
-                  font: "500 12px/1.5 'Golos Text',sans-serif",
-                  color: "rgba(255,255,255,.5)",
-                }}
-              >
-                {t("В этом зале пока пусто. Добавьте блок из палитры слева — при добавлении выберите этот зал.")}
-              </div>
+                ) : null}
+                <input
+                  ref={planInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  hidden
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = "";
+                    if (f) uploadPlan(f);
+                  }}
+                />
+              </>
             ) : null}
           </div>
-        </Card>
+
+          {viewMode === "plan" ? (
+            <Card style={{ padding: 0, overflow: "hidden" }}>
+              <PlanCanvas
+                nodes={visibleNodes}
+                links={visibleLinks}
+                plan={currentPlan}
+                sel={sel}
+                linkFrom={linkFrom}
+                fitKey={openRoom ?? "top"}
+                kidsOf={(id) => childrenOf(id)}
+                tr={tr}
+                onTap={(id) => {
+                  if (!id) return;
+                  if (linkFrom && linkFrom !== id) {
+                    addLink(linkFrom, id);
+                    setLinkFrom(null);
+                    return;
+                  }
+                  setSel(id);
+                }}
+                onMove={(id, x, y) =>
+                  mutate((gr) => ({
+                    ...gr,
+                    nodes: gr.nodes.map((n) => (n.id === id ? { ...n, px: x, py: y } : n)),
+                  }))
+                }
+                onLink={addLink}
+                onOpen={(id) => setOpenRoom((cur) => (cur === id ? null : id))}
+                onHold={(id) => {
+                  setSel(id);
+                  if (nodeById(id)?.kind === "room") setOpenRoom((cur) => (cur === id ? null : id));
+                  else setPanelOpen(true);
+                }}
+              />
+              {/* выбранный блок: что это и что с ним сделать — без поиска по меню */}
+              {selNode && visibleIds.has(selNode.id) ? (
+                <div
+                  className="gtr-plan-sel"
+                  style={{ "--k": selKind[1], "--kb": selKind[2] } as React.CSSProperties}
+                >
+                  <span className="gtr-plan-sel-ic">
+                    <Icon d={selKind[3]} size={18} />
+                  </span>
+                  <span className="gtr-plan-sel-txt">
+                    <small>{tr(selKind[0])}</small>
+                    <b>{tr(selNode.title)}</b>
+                  </span>
+                  <div className="gtr-plan-sel-acts">
+                    {selNode.kind === "room" ? (
+                      <button type="button" className="gtr-btn" onClick={() => setOpenRoom((cur) => (cur === selNode.id ? null : selNode.id))}>
+                        {openRoom === selNode.id ? t("Закрыть зал") : t("Открыть зал")}
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      className={linkFrom === selNode.id ? "gtr-btn gtr-btn-red" : "gtr-btn"}
+                      title={t("Потяните стрелку от значка или нажмите и выберите второй блок")}
+                      onClick={() => setLinkFrom(linkFrom === selNode.id ? null : selNode.id)}
+                    >
+                      {linkFrom === selNode.id ? t("Выберите блок…") : t("Связать")}
+                    </button>
+                    <button type="button" className="gtr-btn" onClick={() => setPanelOpen(true)}>
+                      {t("Детали")}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </Card>
+          ) : (
+            <Card
+              style={{
+                overflow: "auto",
+                background: "radial-gradient(circle at 30% 10%, #101116, #0A0B0D 70%)",
+              }}
+            >
+              <div
+                ref={canvasRef}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                style={{
+                  position: "relative",
+                  minWidth: 1030,
+                  height: canvasH,
+                  backgroundImage: "radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px)",
+                  backgroundSize: "26px 26px",
+                }}
+              >
+                <svg
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    pointerEvents: "none",
+                  }}
+                >
+                  {visibleLinks.map((l, i) => {
+                    const a = nodeById(l.from);
+                    const b = nodeById(l.to);
+                    if (!a || !b) return null;
+                    const x1 = a.x + NODE_W;
+                    const y1 = a.y + 46;
+                    const x2 = b.x;
+                    const y2 = b.y + 46;
+                    const mx = (x1 + x2) / 2;
+                    const ls = linkStatus(a, b);
+                    const healthy = ls === "ok";
+                    return (
+                      <path
+                        key={i}
+                        d={`M${x1} ${y1} C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`}
+                        stroke={STATUS_COLOR[ls]}
+                        strokeWidth={healthy ? 2 : 2.4}
+                        fill="none"
+                        opacity={healthy ? 0.85 : 0.95}
+                        strokeDasharray={ls === "problem" || ls === "delay" ? "5 4" : undefined}
+                        style={{ filter: healthy ? `drop-shadow(0 0 4px ${GREEN}66)` : undefined }}
+                      >
+                        {ls !== "ok" ? (
+                          <animate
+                            attributeName="opacity"
+                            values="0.4;1;0.4"
+                            dur="1.4s"
+                            repeatCount="indefinite"
+                          />
+                        ) : null}
+                      </path>
+                    );
+                  })}
+                </svg>
+
+                {visibleNodes.map((n) => {
+                  const K = KINDS[n.kind];
+                  const on = sel === n.id;
+                  const linking = linkFrom === n.id;
+                  const st = nodeStatus(n);
+                  const healthy = st.status === "ok";
+                  const sc = STATUS_COLOR[st.status];
+                  // Зал — папка. На верхнем уровне он закрыт и показывает
+                  // значками, что к нему прикреплено; открытый зал — обычный блок.
+                  const isRoom = n.kind === "room";
+                  const roomKids = isRoom ? childrenOf(n.id) : [];
+                  const isShutRoom = isRoom && !openRoomNode;
+                  return (
+                    <div
+                      key={n.id}
+                      className={`gtr-node${isShutRoom ? " gtr-node-folder" : ""}`}
+                      onPointerDown={(e) => onPointerDown(e, n)}
+                      onContextMenu={(e) => e.preventDefault()}
+                      onDoubleClick={
+                        isRoom
+                          ? () => { cancelHold(); setOpenRoom((cur) => (cur === n.id ? null : n.id)); }
+                          : undefined
+                      }
+                      style={{
+                        left: n.x,
+                        top: n.y,
+                        width: isShutRoom ? 236 : undefined,
+                        border: `1px solid ${on ? K[1] : linking ? GREEN : healthy ? "rgba(255,255,255,.11)" : sc}`,
+                        boxShadow: on
+                          ? "0 14px 34px rgba(229,35,27,.22)"
+                          : healthy
+                            ? "0 10px 26px rgba(0,0,0,.45)"
+                            : `0 0 18px -2px ${sc}88, 0 10px 26px rgba(0,0,0,.45)`,
+                      }}
+                    >
+                      {/* индикатор статуса узла */}
+                      <span
+                        title={`${t(STATUS_LABEL[st.status])}${st.reason ? " · " + tr(st.reason) : ""}`}
+                        style={{
+                          position: "absolute",
+                          top: -6,
+                          right: -6,
+                          width: 13,
+                          height: 13,
+                          borderRadius: 0,
+                          background: sc,
+                          border: "2px solid #0A0B0D",
+                          animation: healthy ? undefined : "gtrpulse 1.6s ease-out infinite",
+                        }}
+                      />
+                      <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 7 }}>
+                        <span
+                          style={{
+                            width: 20,
+                            height: 20,
+                            flex: "none",
+                            borderRadius: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: K[2],
+                            color: K[1],
+                          }}
+                        >
+                          <Icon d={K[3]} size={11} />
+                        </span>
+                        <span
+                          className="gtr-mono"
+                          style={{
+                            font: "600 10px/1 'JetBrains Mono',monospace",
+                            letterSpacing: ".08em",
+                            color: K[1],
+                          }}
+                        >
+                          {tr(K[0])}
+                        </span>
+                        {n.badge ? (
+                          <span
+                            className="gtr-mono"
+                            style={{
+                              marginLeft: "auto",
+                              font: "600 10px/1 'JetBrains Mono',monospace",
+                              color: "rgba(255,255,255,.5)",
+                              background: "rgba(255,255,255,.07)",
+                              borderRadius: 0,
+                              padding: "3px 5px",
+                            }}
+                          >
+                            {tr(n.badge)}
+                          </span>
+                        ) : null}
+                      </div>
+                      <div style={{ font: "600 12px/1.25 'Golos Text',sans-serif" }}>{tr(n.title)}</div>
+                      <div
+                        style={{
+                          marginTop: 4,
+                          font: "500 11px/1.45 'Golos Text',sans-serif",
+                          color: "rgba(255,255,255,.45)",
+                        }}
+                      >
+                        {tr(n.sub)}
+                      </div>
+
+                      {/* Закрытый зал: что к нему прикреплено — значками, а не
+                          списком. Одинаковые виды сворачиваются в один значок со
+                          счётчиком: пять артистов не должны занимать полблока. */}
+                      {isShutRoom ? (
+                        <button
+                          className="gtr-folder-open"
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={(e) => { e.stopPropagation(); cancelHold(); setOpenRoom(n.id); }}
+                          title={t("Открыть зал: весь его граф")}
+                          style={{
+                            marginTop: 10,
+                            width: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                            flexWrap: "wrap",
+                            padding: "8px 9px",
+                            background: "rgba(255,255,255,.05)",
+                            border: "1px solid rgba(255,255,255,.12)",
+                            color: "#fff",
+                            cursor: "pointer",
+                            minHeight: 42,
+                          }}
+                        >
+                          {roomKids.length ? (
+                            <>
+                              {[...new Map(roomKids.map((k) => [k.kind, k])).values()].map((kid) => {
+                                const KK = KINDS[kid.kind];
+                                const cnt = roomKids.filter((x) => x.kind === kid.kind).length;
+                                return (
+                                  <span
+                                    key={kid.kind}
+                                    title={`${tr(KK[0])}${cnt > 1 ? ` · ${cnt}` : ""}`}
+                                    style={{
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: 3,
+                                      padding: "3px 5px",
+                                      background: KK[2],
+                                      color: KK[1],
+                                    }}
+                                  >
+                                    <Icon d={KK[3]} size={12} />
+                                    {cnt > 1 ? (
+                                      <span className="gtr-mono" style={{ font: "700 10px/1 'JetBrains Mono',monospace" }}>
+                                        {cnt}
+                                      </span>
+                                    ) : null}
+                                  </span>
+                                );
+                              })}
+                              <span
+                                className="gtr-mono"
+                                style={{ marginLeft: "auto", font: "600 10px/1 'JetBrains Mono',monospace", color: "rgba(255,255,255,.5)" }}
+                              >
+                                {roomKids.length} ▾
+                              </span>
+                            </>
+                          ) : (
+                            <span style={{ font: "500 11px/1.4 'Golos Text',sans-serif", color: "rgba(255,255,255,.45)" }}>
+                              {t("Пусто — добавьте блоки в этот зал")}
+                            </span>
+                          )}
+                        </button>
+                      ) : null}
+
+                      {/* порты: у закрытого зала их нет — связь тянут внутри зала */}
+                      {isShutRoom ? null : (
+                      <>
+                      <span
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (linkFrom && linkFrom !== n.id) {
+                            mutate((gr) =>
+                              gr.links.some((l) => l.from === linkFrom && l.to === n.id)
+                                ? gr
+                                : { ...gr, links: [...gr.links, { from: linkFrom, to: n.id }] },
+                            );
+                            setLinkFrom(null);
+                          }
+                        }}
+                        style={{
+                          position: "absolute",
+                          left: -7,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          width: 13,
+                          height: 13,
+                          borderRadius: 0,
+                          background: "#0A0B0D",
+                          border: `2px solid ${linkFrom && linkFrom !== n.id ? GREEN : "rgba(255,255,255,.28)"}`,
+                          cursor: "crosshair",
+                        }}
+                      />
+                      <span
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLinkFrom(linkFrom === n.id ? null : n.id);
+                        }}
+                        style={{
+                          position: "absolute",
+                          right: -7,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          width: 13,
+                          height: 13,
+                          borderRadius: 0,
+                          background: linking ? GREEN : "#0A0B0D",
+                          border: `2px solid ${linking ? GREEN : K[1]}`,
+                          cursor: "crosshair",
+                        }}
+                      />
+                      </>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Открытый, но пустой зал: подсказываем, откуда берутся блоки. */}
+                {openRoomNode && !childrenOf(openRoomNode.id).length ? (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: Math.max(30, openRoomNode.x),
+                      top: openRoomNode.y + NODE_H + 24,
+                      maxWidth: 340,
+                      font: "500 12px/1.5 'Golos Text',sans-serif",
+                      color: "rgba(255,255,255,.5)",
+                    }}
+                  >
+                    {t("В этом зале пока пусто. Добавьте блок из палитры слева — при добавлении выберите этот зал.")}
+                  </div>
+                ) : null}
+              </div>
+            </Card>
+          )}
+        </div>
 
         {/* ---------- панель взаимодействия: выезжает по длительному нажатию ---------- */}
         {panelOpen ? <div className="gtr-cons-scrim" onClick={() => setPanelOpen(false)} /> : null}

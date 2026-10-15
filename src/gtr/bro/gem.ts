@@ -27,6 +27,8 @@ export type GemStart = {
   district?: string;
   screen?: string;
   ptt?: boolean;
+  /** Голос гибридной полосы; премиальной полосе не нужен. */
+  tts?: "eleven" | "browser";
 };
 
 const SESSION_URL = "/api/gtr-bro-gem";
@@ -66,6 +68,10 @@ export class GemSession {
   private sending = false;
   private ptt = false;
   private holdAt = 0;
+  private holdTimer = 0;
+  /** Бюджет «раздумий» модели. 0 — отвечать сразу; -1 — оставить
+   *  поведение модели по умолчанию (динамическое размышление). */
+  private thinkingBudget = 0;
   private bufUser = "";
   private bufBro = "";
   private idleTimer = 0;
@@ -148,6 +154,7 @@ export class GemSession {
         speechLocale?: string;
         instructions?: string;
         tools?: unknown[];
+        thinkingBudget?: number;
         error?: string;
         reason?: string;
         detail?: string;
@@ -163,6 +170,7 @@ export class GemSession {
       if (data.speechLocale) locale = data.speechLocale;
       instructions = data.instructions ?? "";
       tools = data.tools ?? [];
+      if (typeof data.thinkingBudget === "number") this.thinkingBudget = data.thinkingBudget;
       this.log(`сеанс создан · ${model} · голос ${opts.voice} · ${locale} · ${this.ptt ? "рация" : "свободный"}`);
     } catch {
       this.log("сеанс: сеть не ответила");
@@ -227,6 +235,11 @@ export class GemSession {
                 // Ниже температура — меньше соблазна украсить ответ
                 // выдуманным баром.
                 temperature: 0.6,
+                // Нативная аудиомодель по умолчанию сначала «думает» и
+                // только потом говорит — это и есть пауза в секунды
+                // после реплики гостя. Для клубного разговора с
+                // инструментами размышление не нужно.
+                ...(this.thinkingBudget >= 0 ? { thinkingConfig: { thinkingBudget: this.thinkingBudget } } : {}),
                 speechConfig: {
                   languageCode: locale,
                   voiceConfig: { prebuiltVoiceConfig: { voiceName: opts.voice } },
@@ -236,7 +249,21 @@ export class GemSession {
               tools: [{ functionDeclarations: tools }],
               // Рация: авто-детектор речи выключен, конец реплики
               // определяет палец на кнопке.
-              ...(this.ptt ? { realtimeInputConfig: { automaticActivityDetection: { disabled: true } } } : {}),
+              // Свободный режим: детектор речи настроен под клуб. Начало
+              // реплики — низкая чувствительность, чтобы фон и чужие
+              // голоса не открывали ход; конец — высокая и короткая
+              // тишина, чтобы ответ шёл сразу, а не после двух секунд
+              // ожидания. Запас в начале не съедает первый слог.
+              realtimeInputConfig: this.ptt
+                ? { automaticActivityDetection: { disabled: true } }
+                : {
+                    automaticActivityDetection: {
+                      startOfSpeechSensitivity: "START_SENSITIVITY_LOW",
+                      endOfSpeechSensitivity: "END_SENSITIVITY_HIGH",
+                      prefixPaddingMs: 200,
+                      silenceDurationMs: 500,
+                    },
+                  },
               outputAudioTranscription: {},
               inputAudioTranscription: {},
             },
@@ -292,6 +319,9 @@ export class GemSession {
     try {
       const ctx = new AudioContext();
       this.ctx = ctx;
+      // iOS создаёт контекст спящим, если он родился не прямо в касании:
+      // без resume() нет ни захвата, ни голоса BRO.
+      void ctx.resume().catch(() => undefined);
       this.out = new LoudOut(ctx);
       const src = ctx.createMediaStreamSource(this.mic);
       const proc = ctx.createScriptProcessor(4096, 1, 1);
@@ -304,9 +334,16 @@ export class GemSession {
         for (let i = 0; i < inp.length; i += 8) sum += Math.abs(inp[i]);
         this.ev.onLevel?.(Math.min(1, (sum / (inp.length / 8)) * 6));
         if (!this.sending || this.ws?.readyState !== WebSocket.OPEN) return;
+        // Понижение 48 → 16 кГц усреднением окна, а не выборкой каждого
+        // третьего отсчёта: прореживание без фильтра заворачивает верха
+        // клубного звука в речевую полосу, и распознавание слышит кашу.
         const out = new Int16Array(Math.floor(inp.length / ratio));
         for (let i = 0; i < out.length; i++) {
-          const v = inp[Math.floor(i * ratio)];
+          const a = Math.floor(i * ratio);
+          const b = Math.max(a + 1, Math.floor((i + 1) * ratio));
+          let acc = 0;
+          for (let k = a; k < b; k++) acc += inp[k];
+          const v = acc / (b - a);
           out[i] = Math.max(-32768, Math.min(32767, Math.round(v * 32767)));
         }
         this.send({ realtimeInput: { audio: { data: b64(out), mimeType: `audio/pcm;rate=${IN_RATE}` } } });
@@ -421,6 +458,10 @@ export class GemSession {
 
   private async runTools(calls: { id?: string; name?: string; args?: Record<string, unknown> }[]) {
     const responses: { id?: string; name?: string; response: Record<string, unknown> }[] = [];
+    // Каждый вызов обязан получить ответ: вызов без ответа модель ждёт
+    // вечно, и разговор замирает. Лишние сверх четырёх отклоняем явно.
+    for (const c of calls.slice(4))
+      responses.push({ id: c.id, name: c.name, response: { ok: false, error: "too-many-calls", retryable: true } });
     for (const c of calls.slice(0, 4)) {
       const name = String(c.name ?? "");
       this.log(`инструмент: ${name}`);
@@ -512,6 +553,9 @@ export class GemSession {
   holdStart() {
     routeAudio("play-and-record");
     if (this.ws?.readyState !== WebSocket.OPEN) return;
+    // Новое нажатие поверх хвоста прошлого — прошлую реплику закрываем
+    // сразу, иначе сервер получит два activityStart подряд.
+    if (this.holdTimer) this.flushHold();
     if (this.state === "speaking" || this.state === "thinking") this.bargeIn();
     this.send({ realtimeInput: { activityStart: {} } });
     this.sending = true;
@@ -521,12 +565,28 @@ export class GemSession {
   }
 
   holdEnd() {
+    if (this.ws?.readyState !== WebSocket.OPEN) return;
+    // Последнее слово ещё сидит в буфере захвата (4096 отсчётов ≈ 85 мс):
+    // если перестать слать в момент отпускания, хвост фразы теряется.
+    // Досылаем ещё немного и только потом закрываем реплику.
+    const short = Date.now() - this.holdAt < 250;
+    this.holdTimer = window.setTimeout(() => this.flushHold(short), 250);
+  }
+
+  /** Закрыть реплику рации. activityEnd уходит всегда: открытая на
+   *  сервере активность после короткого тычка вешала следующий ход. */
+  private flushHold(short = false) {
+    window.clearTimeout(this.holdTimer);
+    this.holdTimer = 0;
     // Палец отпущен — говорить будет BRO, и говорить он должен громко.
     routeAudio("playback");
-    if (this.ws?.readyState !== WebSocket.OPEN) return;
     this.sending = false;
-    if (Date.now() - this.holdAt < 250) return;
+    if (this.ws?.readyState !== WebSocket.OPEN) return;
     this.send({ realtimeInput: { activityEnd: {} } });
+    if (short) {
+      this.set("listening");
+      return;
+    }
     this.log("реплика ушла");
     this.set("thinking");
     this.touch();
@@ -560,6 +620,7 @@ export class GemSession {
     this.closed = true;
     clearTimeout(this.idleTimer);
     clearTimeout(this.maxTimer);
+    clearTimeout(this.holdTimer);
     this.silence();
     try {
       this.proc?.disconnect();

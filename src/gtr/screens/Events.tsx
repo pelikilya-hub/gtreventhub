@@ -8,24 +8,29 @@ import { useEffect, useMemo, useState } from "react";
 import {
   computeQuote,
   draftTitle,
+  eventAlerts,
   fmtThb,
+  graphHealth,
   genreLabel,
   PH,
   RATE_COLOR,
   rateOf,
+  richOf,
   STAGE_COLOR,
   STAGE_LABEL,
+  STATUS_COLOR,
   SPACES,
   V,
   venueGraph,
   zonesOf,
+  type EventDraft,
   type EventStage,
   type Graph,
 } from "../data/app-data";
 import { BRIEF, vibeOf, vibeQuestionFor, type BriefAnswers } from "../data/brief";
 import { buildPresetDraft, EVENT_PRESETS, presetBlockCount } from "../data/presets";
 import { useGtr } from "../store";
-import { Card, Chip, Eyebrow, tint } from "../ui";
+import { Card, Icon } from "../ui";
 import { GtrCalendar, GtrCapacity, humanDate } from "../pickers";
 import { ImpulseArt } from "../impulse";
 import { venueConfirmsFn, type VenueConfirm } from "../kv-api";
@@ -42,11 +47,12 @@ const FORMATS = [
 ];
 
 export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const tr = useTrData();
   const briefLabel = useBriefLabel();
   const { user, myDrafts, createDraft, deleteDraft } = useGtr();
   const navigate = useNavigate();
+  const lang = i18n.language || "ru";
 
   // Личный кабинет: менеджер видит только свои события, GTR-админ — все
   const isAdmin = user.role === "gtr";
@@ -63,19 +69,32 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
   const [creating, setCreating] = useState(Boolean(newForVenue));
   const presetVenue = newForVenue === "new" ? "" : newForVenue;
 
-  const list = useMemo(() => {
+  // Список делится по времени: что впереди — по дате от ближайшего,
+  // без даты — по свежести правки, прошедшие — в конце, от недавних.
+  const groups = useMemo(() => {
     const needle = q.toLowerCase().trim();
-    return scoped
-      .filter((d) => {
-        if (stage !== "all" && (d.graph.stage ?? "draft") !== stage) return false;
-        if (!needle) return true;
-        const v = V(d.venueId);
-        return `${draftTitle(d)} ${d.format} ${v.name ?? ""} ${d.venueId}`
-          .toLowerCase()
-          .includes(needle);
-      })
-      .sort((a, b) => b.updated - a.updated);
-  }, [scoped, q, stage]);
+    const today = isoToday();
+    const hit = scoped.filter((d) => {
+      if (stage !== "all" && (d.graph.stage ?? "draft") !== stage) return false;
+      if (!needle) return true;
+      const v = V(d.venueId);
+      return `${draftTitle(d)} ${tr(draftTitle(d))} ${d.format} ${tr(d.format)} ${v.name ?? ""} ${d.venueId}`
+        .toLowerCase()
+        .includes(needle);
+    });
+    const upcoming = hit
+      .filter((d) => d.dateIso && d.dateIso >= today)
+      .sort((a, b) => a.dateIso!.localeCompare(b.dateIso!));
+    const undated = hit.filter((d) => !d.dateIso).sort((a, b) => b.updated - a.updated);
+    const past = hit
+      .filter((d) => d.dateIso && d.dateIso < today)
+      .sort((a, b) => b.dateIso!.localeCompare(a.dateIso!));
+    return [
+      { id: "up", title: t("Ближайшие"), items: upcoming },
+      { id: "nodate", title: t("Без даты"), items: undated },
+      { id: "past", title: t("Прошедшие"), items: past },
+    ].filter((g) => g.items.length);
+  }, [scoped, q, stage, tr, t]);
 
   const open = (id: string) =>
     navigate({
@@ -93,28 +112,40 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
     return c;
   }, [scoped]);
 
+  const duplicate = (d: EventDraft) =>
+    createDraft({
+      venueId: d.venueId,
+      format: d.format,
+      // название копии — на языке того, кто её создаёт
+      title: fillT(t, "{{name}} — копия", { name: tr(draftTitle(d)) }),
+      guests: d.guests,
+      graph: structuredClone(d.graph),
+      brief: { ...d.brief },
+    });
+  const remove = (d: EventDraft) => {
+    if (
+      confirm(
+        fillT(t, "Удалить событие «{{name}}»? Отменить будет нельзя.", {
+          name: tr(draftTitle(d)),
+        }),
+      )
+    )
+      deleteDraft(d.id);
+  };
+
   return (
-    <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 14,
-          flexWrap: "wrap",
-          marginBottom: 16,
-        }}
-      >
-        <h1 className="gtr-oswald gtr-h1">
-          {t("События")}
-        </h1>
-        <Chip color="rgba(255,255,255,.5)">{scoped.length}</Chip>
-        <button
-          className="gtr-btn gtr-btn-red"
-          style={{ marginLeft: "auto", padding: "9px 15px" }}
-          onClick={() => setCreating((x) => !x)}
-        >
-          {creating ? t("Отмена") : t("+ Новое событие")}
-        </button>
+    <div className="gtr-ev" style={{ maxWidth: 1180, margin: "0 auto" }}>
+      <div className="gtr-ev-head">
+        <h1 className="gtr-oswald gtr-h1">{t("События")}</h1>
+        {!creating ? (
+          <button
+            className="gtr-btn gtr-btn-red"
+            style={{ marginLeft: "auto", padding: "10px 16px" }}
+            onClick={() => setCreating(true)}
+          >
+            {t("+ Новое событие")}
+          </button>
+        ) : null}
       </div>
 
       {creating ? (
@@ -129,233 +160,275 @@ export function EventsScreen({ newForVenue }: { newForVenue?: string } = {}) {
             open(id);
           }}
         />
-      ) : null}
-
-      {/* ---------- фильтры ---------- */}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
-        <input
-          className="gtr-input"
-          style={{ maxWidth: 300, padding: "8px 11px", fontSize: 12 }}
-          placeholder={t("Событие, формат или площадка…")}
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-        {(["all", "draft", "sent", "approved"] as const).map((s) => {
-          const on = stage === s;
-          const color = s === "all" ? "#fff" : STAGE_COLOR[s];
-          return (
-            <button
-              key={s}
-              onClick={() => setStage(s)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 7,
-                borderRadius: 0,
-                padding: "7px 12px",
-                cursor: "pointer",
-                font: `${on ? 600 : 500} 10.5px/1 'JetBrains Mono',monospace`,
-                letterSpacing: ".07em",
-                textTransform: "uppercase",
-                border: `1px solid ${on ? tint(color, 0.55) : "rgba(255,255,255,.12)"}`,
-                borderTop: `2px solid ${on ? color : "transparent"}`,
-                background: on ? tint(color, 0.12) : "transparent",
-                color: on ? "#fff" : "rgba(234,234,234,.55)",
-                transition: "border-color .15s, background .15s, color .15s",
-              }}
-            >
-              <span style={{ width: 7, height: 7, borderRadius: 0, background: color }} />
-              {s === "all" ? t("Все") : t(STAGE_LABEL[s])}
-              <span className="gtr-mono" style={{ fontSize: 11, opacity: 0.6 }}>
-                {counts[s] ?? 0}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ---------- список ---------- */}
-      {!list.length ? (
-        <Card style={{ padding: "30px 24px", textAlign: "center" }}>
-          <div style={{ font: "500 12.5px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}>
-            {scoped.length
-              ? t("Под фильтр ничего не подошло.")
-              : t("Событий пока нет. Создайте первое — площадка, зал и слот подставятся из базы.")}
-          </div>
-        </Card>
       ) : (
-        <div className="gtr-seq" style={{ display: "grid", gap: 10 }}>
-          {list.map((d) => {
-            const v = V(d.venueId);
-            const st = d.graph.stage ?? "draft";
-            const quote = computeQuote(d.graph, d.venueId);
-            const rooms = d.graph.nodes.filter((n) => n.kind === "room").length;
-            const artists = d.graph.nodes.filter((n) => n.kind === "artist").length;
-            const vendors = d.graph.nodes.filter((n) =>
-              ["sound", "light", "decor", "content"].includes(n.kind),
-            ).length;
-            const vibe = vibeOf(d.format, d.brief ?? {});
-            return (
-              <Card
-                key={d.id}
-                hover
-                onClick={() => open(d.id)}
-                style={{
-                  padding: "16px 18px",
-                  paddingLeft: 26,
-                  display: "grid",
-                  gap: 9,
-                  cursor: "pointer",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  aria-hidden="true"
-                  style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 14 }}
+        <>
+          {/* ---------- статусы: цифры как на дашборде, они же фильтр ---------- */}
+          <div className="gtr-stats gtr-ev-stats" role="tablist" aria-label={t("Статус события")}>
+            {(["all", "draft", "sent", "approved"] as const).map((s) => {
+              const on = stage === s;
+              const color = s === "all" ? "var(--gtr-t1)" : STAGE_COLOR[s];
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  className="gtr-stat gtr-ev-stat"
+                  data-on={on || undefined}
+                  style={{ "--c": color } as React.CSSProperties}
+                  onClick={() => setStage(s)}
                 >
-                  <ImpulseArt seed={d.id} density={0.4} />
-                </div>
-                {/* полоса вайба: направление события видно в списке с одного взгляда */}
-                {vibe?.colors ? (
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: 3,
-                      background: `linear-gradient(90deg, ${vibe.colors[0]}, ${vibe.colors[1]})`,
-                    }}
-                  />
-                ) : null}
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}
-                >
-                  <span style={{ font: "600 14px/1.45 'Golos Text',sans-serif" }}>
-                    {tr(draftTitle(d))}
-                  </span>
-                  <Chip color={STAGE_COLOR[st]}>{t(STAGE_LABEL[st]).toUpperCase()}</Chip>
-                  {vibe?.colors ? (
-                    <span
-                      className="gtr-mono"
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 5,
-                        borderRadius: 0,
-                        padding: "4px 9px",
-                        font: "600 11px/1 'JetBrains Mono',monospace",
-                        letterSpacing: ".05em",
-                        color: "#fff",
-                        border: "1px solid rgba(255,255,255,.12)",
-                        background: `linear-gradient(120deg, ${vibe.colors[0]}44, ${vibe.colors[1]}44)`,
-                      }}
-                    >
-                      <span
-                        style={{
-                          width: 7,
-                          height: 7,
-                          borderRadius: 0,
-                          background: `linear-gradient(120deg, ${vibe.colors[0]}, ${vibe.colors[1]})`,
-                        }}
-                      />
-                      {briefLabel(vibe.label, vibe.labelEn).toUpperCase()}
-                    </span>
-                  ) : null}
-                  <span
-                    className="gtr-mono"
-                    style={{
-                      marginLeft: "auto",
-                      font: "700 13px/1 'JetBrains Mono',monospace",
-                      color: quote.total ? "#fff" : "var(--gtr-t3)",
-                    }}
-                  >
-                    {quote.total ? fmtThb(quote.total) : t("смета пуста")}
-                  </span>
-                </div>
+                  <b>{counts[s] ?? 0}</b>
+                  <span>{s === "all" ? t("Все") : t(STAGE_LABEL[s])}</span>
+                </button>
+              );
+            })}
+          </div>
 
-                <div
-                  className="gtr-mono"
-                  style={{
-                    font: "500 12px/1.5 'JetBrains Mono',monospace",
-                    color: "var(--gtr-t3)",
-                    display: "flex",
-                    gap: 14,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <span>
-                    {v.name ?? d.venueId} · {d.venueId}
-                  </span>
-                  <span>{t("залов:")} {rooms}</span>
-                  <span>{t("артистов:")} {artists}</span>
-                  <span>{t("подрядчиков:")} {vendors}</span>
-                  {d.date ? <span>{d.date}</span> : null}
-                  {d.guests ? <span>{tr(d.guests)} {t("гостей")}</span> : null}
-                </div>
+          <input
+            className="gtr-input gtr-ev-search"
+            type="search"
+            placeholder={t("Событие, формат или площадка…")}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
 
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    borderTop: "1px solid rgba(255,255,255,.06)",
-                    paddingTop: 9,
-                  }}
+          {/* ---------- список ---------- */}
+          {!groups.length ? (
+            <Card style={{ padding: "30px 24px", textAlign: "center" }}>
+              <div style={{ font: "500 14px/1.6 var(--text)", color: "var(--gtr-t2)" }}>
+                {scoped.length
+                  ? t("Под фильтр ничего не подошло.")
+                  : t("Событий пока нет. Создайте первое — площадка, зал и слот подставятся из базы.")}
+              </div>
+              {!scoped.length ? (
+                <button
+                  className="gtr-btn gtr-btn-red"
+                  style={{ marginTop: 16, padding: "10px 16px" }}
+                  onClick={() => setCreating(true)}
                 >
-                  <span
-                    className="gtr-mono"
-                    style={{ font: "500 11px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-                  >
-                    {d.author || "GTR"}
-                    {isAdmin && d.owner ? ` (${d.owner})` : ""}
-                    {d.updated
-                      ? ` · ${t("изменено")} ${new Date(d.updated).toLocaleDateString("ru-RU")}`
-                      : ""}
-                  </span>
-                  <button
-                    className="gtr-btn"
-                    style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 12 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      createDraft({
-                        venueId: d.venueId,
-                        format: d.format,
-                        // название копии — на языке того, кто её создаёт
-                        title: fillT(t, "{{name}} — копия", { name: tr(draftTitle(d)) }),
-                        guests: d.guests,
-                        graph: structuredClone(d.graph),
-                        brief: { ...d.brief },
-                      });
-                    }}
-                  >
-                    {t("Дублировать")}
-                  </button>
-                  <button
-                    className="gtr-btn"
-                    style={{ padding: "5px 10px", fontSize: 12, color: "#E5231B" }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (
-                        confirm(
-                          fillT(t, "Удалить событие «{{name}}»? Отменить будет нельзя.", {
-                            name: tr(draftTitle(d)),
-                          }),
-                        )
-                      )
-                        deleteDraft(d.id);
-                    }}
-                  >
-                    {t("Удалить")}
-                  </button>
+                  {t("+ Новое событие")}
+                </button>
+              ) : null}
+            </Card>
+          ) : (
+            groups.map((grp) => (
+              <section key={grp.id} className="gtr-ev-group">
+                <h2 className="gtr-ev-group-h">
+                  {grp.title}
+                  <span>{grp.items.length}</span>
+                </h2>
+                <div className="gtr-ev-grid gtr-seq">
+                  {grp.items.map((d) => (
+                    <EventCard
+                      key={d.id}
+                      d={d}
+                      lang={lang}
+                      past={grp.id === "past"}
+                      author={
+                        (d.author || "GTR") + (isAdmin && d.owner ? ` (${d.owner})` : "")
+                      }
+                      vibeLabel={(l, le) => briefLabel(l, le)}
+                      onOpen={() => open(d.id)}
+                      onDuplicate={() => duplicate(d)}
+                      onDelete={() => remove(d)}
+                    />
+                  ))}
                 </div>
-              </Card>
-            );
-          })}
-        </div>
+              </section>
+            ))
+          )}
+        </>
       )}
     </div>
+  );
+}
+
+const isoToday = () => {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+};
+
+// иконки карточки события: 24×24, обводка
+const EV_IC = {
+  pin: "M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z",
+  room: "M3 21V8l9-5 9 5v13 M9 21v-7h6v7",
+  artist: "M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z M21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z",
+  vendor: "M11 5L6 9H2v6h4l5 4V5z M15.5 8.5a5 5 0 0 1 0 7",
+  guests: "M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M2 21v-1a6 6 0 0 1 12 0v1 M16 11a3 3 0 1 0 0-6 M22 21v-1a6 6 0 0 0-4-5.7",
+  copy: "M8 8h12v12H8z M16 8V4H4v12h4",
+  trash: "M4 7h16 M10 11v6 M14 11v6 M6 7l1 13h10l1-13 M9 7V4h6v3",
+  clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M12 7v5l3 2",
+};
+
+// Карточка события: снимок площадки, дата плиткой, название крупно,
+// состав значками, здоровье и смета внизу. Нажатие — в конструктор.
+function EventCard({
+  d,
+  lang,
+  past,
+  author,
+  vibeLabel,
+  onOpen,
+  onDuplicate,
+  onDelete,
+}: {
+  d: EventDraft;
+  lang: string;
+  past: boolean;
+  author: string;
+  vibeLabel: (label: string, labelEn?: string) => string;
+  onOpen: () => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
+}) {
+  const { t } = useTranslation();
+  const tr = useTrData();
+  const [noPhoto, setNoPhoto] = useState(false);
+  const v = V(d.venueId);
+  const st = d.graph.stage ?? "draft";
+  const quote = computeQuote(d.graph, d.venueId);
+  const nodes = d.graph.nodes;
+  const rooms = nodes.filter((n) => n.kind === "room").length;
+  const artists = nodes.filter((n) => n.kind === "artist").length;
+  const vendors = nodes.filter((n) => ["sound", "light", "decor", "content"].includes(n.kind)).length;
+  const health = graphHealth(eventAlerts(d.graph, v, { guests: d.guests, quoteTotal: quote.total }));
+  const vibe = vibeOf(d.format, d.brief ?? {});
+  const cover = richOf(d.venueId).hero || `/venues/${d.venueId}-hero.jpg`;
+  const date = d.dateIso ? new Date(`${d.dateIso}T12:00:00`) : null;
+  const loc = lang.startsWith("th") ? "th-TH" : lang.startsWith("en") ? "en-GB" : "ru-RU";
+  const time = d.date.includes(" · ") ? d.date.split(" · ").pop() : "";
+  const issues = health.problems + health.delays;
+  const facts: [string, number | string, string][] = [
+    [EV_IC.room, rooms, t("Залы")],
+    [EV_IC.artist, artists, t("Артисты")],
+    [EV_IC.vendor, vendors, t("Подрядчики")],
+  ];
+  if (d.guests) facts.push([EV_IC.guests, tr(d.guests), t("Гости")]);
+
+  return (
+    <article
+      className="gtr-ev-card"
+      data-past={past || undefined}
+      role="link"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
+    >
+      <div className="gtr-ev-cover">
+        {!noPhoto ? (
+          <img src={cover} alt="" loading="lazy" onError={() => setNoPhoto(true)} />
+        ) : (
+          <div className="gtr-ev-cover-art" aria-hidden="true">
+            <ImpulseArt seed={d.id} density={0.5} />
+          </div>
+        )}
+        {vibe?.colors ? (
+          <span
+            className="gtr-ev-vibe"
+            style={{ background: `linear-gradient(90deg, ${vibe.colors[0]}, ${vibe.colors[1]})` }}
+          />
+        ) : null}
+        {date ? (
+          <div className="gtr-ev-date">
+            <b>{date.getDate()}</b>
+            <span>{date.toLocaleDateString(loc, { month: "short" }).replace(".", "")}</span>
+          </div>
+        ) : null}
+        <span
+          className="gtr-ev-stage"
+          style={{ "--c": STAGE_COLOR[st] } as React.CSSProperties}
+        >
+          {t(STAGE_LABEL[st])}
+        </span>
+      </div>
+
+      <div className="gtr-ev-body">
+        <h3 className="gtr-ev-title">{tr(draftTitle(d))}</h3>
+        <div className="gtr-ev-venue">
+          <Icon d={EV_IC.pin} size={14} />
+          <span>
+            {v.name ?? d.venueId}
+            {d.format && d.title ? ` · ${tr(d.format)}` : ""}
+          </span>
+        </div>
+        {time || vibe ? (
+          <div className="gtr-ev-venue">
+            {time ? (
+              <>
+                <Icon d={EV_IC.clock} size={14} />
+                <span>{time}</span>
+              </>
+            ) : null}
+            {vibe ? (
+              <span className="gtr-ev-vibe-tag">{vibeLabel(vibe.label, vibe.labelEn)}</span>
+            ) : null}
+          </div>
+        ) : null}
+
+        <ul className="gtr-ev-facts">
+          {facts.map(([ic, n, label]) => (
+            <li key={label} title={label}>
+              <Icon d={ic} size={15} />
+              <b>{n}</b>
+              <span>{label}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="gtr-ev-foot">
+          <span
+            className="gtr-ev-health"
+            style={{ "--c": STATUS_COLOR[health.verdict] } as React.CSSProperties}
+          >
+            {health.clean
+              ? t("В порядке")
+              : issues
+                ? fillT(t, "Проблем: {{n}}", { n: issues })
+                : fillT(t, "Внимание: {{n}}", { n: health.warns })}
+          </span>
+          <span className="gtr-ev-sum" data-empty={!quote.total || undefined}>
+            {quote.total ? fmtThb(quote.total) : t("смета пуста")}
+          </span>
+        </div>
+
+        <div className="gtr-ev-meta">
+          <span>
+            {author}
+            {d.updated ? ` · ${t("изменено")} ${new Date(d.updated).toLocaleDateString(loc)}` : ""}
+          </span>
+          <button
+            type="button"
+            className="gtr-ev-act"
+            aria-label={t("Дублировать")}
+            title={t("Дублировать")}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDuplicate();
+            }}
+          >
+            <Icon d={EV_IC.copy} size={16} />
+          </button>
+          <button
+            type="button"
+            className="gtr-ev-act gtr-ev-act-del"
+            aria-label={t("Удалить")}
+            title={t("Удалить")}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+          >
+            <Icon d={EV_IC.trash} size={16} />
+          </button>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -456,24 +529,11 @@ const stampSlot = (g: Graph, dateH: string, time: string): Graph => {
 
 function Step({ n, title, note }: { n: number; title: string; note?: string }) {
   return (
-    <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-      <span
-        className="gtr-mono"
-        style={{
-          font: "700 12px/1 'JetBrains Mono',monospace",
-          color: "var(--gtr-red)",
-          letterSpacing: ".08em",
-        }}
-      >
-        {String(n).padStart(2, "0")}
-      </span>
-      <span style={{ font: "600 13px/1 'Golos Text',sans-serif" }}>{title}</span>
-      {note ? (
-        <span style={{ font: "500 12px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-          — {note}
-        </span>
-      ) : null}
-    </span>
+    <h3 className="gtr-ev-step">
+      <span className="gtr-ev-step-n">{String(n).padStart(2, "0")}</span>
+      <span className="gtr-ev-step-t">{title}</span>
+      {note ? <span className="gtr-ev-step-note">{note}</span> : null}
+    </h3>
   );
 }
 
@@ -607,159 +667,118 @@ function NewEvent({
 
   let step = 0;
   const next = () => ++step;
+  // сводка выбора в нижней панели: видно, что уже собрано, не листая вверх
+  const summary = [
+    preset ? tr(preset.title) : presetId === "blank" && format ? tr(format) : "",
+    dateIso ? `${humanDate(dateIso)}${time ? " · " + time : ""}` : "",
+    guests ? fillT(t, "{{n}} гостей", { n: guests }) : "",
+    picked?.name ?? "",
+  ].filter(Boolean);
 
   return (
-    <Card style={{ padding: "20px 22px", marginBottom: 16, display: "grid", gap: 18 }}>
-      <Eyebrow>{t("НОВОЕ СОБЫТИЕ")}</Eyebrow>
-
+    <div className="gtr-ev-new">
       {/* сценарий: готовый каркас или пустое событие */}
-      <div style={{ display: "grid", gap: 8 }}>
-        <Step n={next()} title={t("Сценарий")} />
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill,minmax(215px,1fr))",
-            gap: 8,
-          }}
-        >
+      <section className="gtr-ev-sec">
+        <Step n={next()} title={t("Сценарий")} note={t("готовый каркас или с нуля")} />
+        <div className="gtr-ev-opts">
           {EVENT_PRESETS.map((p) => {
             const on = presetId === p.id;
             const blocks = presetBlockCount(p);
             return (
               <button
                 key={p.id}
+                type="button"
+                className="gtr-ev-opt"
+                data-on={on || undefined}
+                aria-pressed={on}
                 onClick={() => {
                   setPresetId(on ? "" : p.id);
                   setVibeId("");
                 }}
-                style={{
-                  borderRadius: 0,
-                  padding: "11px 13px",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  display: "grid",
-                  gap: 5,
-                  border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.1)"}`,
-                  background: on ? "rgba(229,35,27,.12)" : "var(--gtr-card2)",
-                }}
               >
-                <span
-                  style={{
-                    font: "600 12px/1.45 'Golos Text',sans-serif",
-                    color: on ? "#fff" : "rgba(255,255,255,.85)",
-                  }}
-                >
-                  {tr(p.title)}
+                <span className="gtr-ev-opt-ic">
+                  <Icon d={FORMAT_IC[p.format] ?? FORMAT_IC.default} size={20} />
                 </span>
-                <span
-                  style={{ font: "500 12px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}
-                >
-                  {tr(p.desc)}
-                </span>
-                <span
-                  className="gtr-mono"
-                  style={{
-                    font: "600 11px/1 'JetBrains Mono',monospace",
-                    color: on ? "#2ECC71" : "rgba(255,255,255,.35)",
-                  }}
-                >
-                  {tr(p.format)} {t("· зал + слот +")} {blocks} {t("блоков")}
+                <span className="gtr-ev-opt-txt">
+                  <span className="gtr-ev-opt-t">{tr(p.title)}</span>
+                  <span className="gtr-ev-opt-d">{tr(p.desc)}</span>
+                  <span className="gtr-ev-opt-m">
+                    {fillT(t, "{{n}} блоков готово", { n: blocks + 2 })}
+                  </span>
                 </span>
               </button>
             );
           })}
           <button
+            type="button"
+            className="gtr-ev-opt"
+            data-dashed
+            data-on={presetId === "blank" || undefined}
+            aria-pressed={presetId === "blank"}
             onClick={() => {
               setPresetId(presetId === "blank" ? "" : "blank");
               setVibeId("");
             }}
-            style={{
-              borderRadius: 0,
-              padding: "11px 13px",
-              cursor: "pointer",
-              textAlign: "left",
-              display: "grid",
-              gap: 5,
-              alignContent: "start",
-              border: `1px dashed ${presetId === "blank" ? "#E5231B" : "rgba(255,255,255,.18)"}`,
-              background: presetId === "blank" ? "rgba(229,35,27,.12)" : "transparent",
-            }}
           >
-            <span
-              style={{ font: "600 12px/1.45 'Golos Text',sans-serif", color: "rgba(255,255,255,.75)" }}
-            >
-              {t("Пустое событие")}
+            <span className="gtr-ev-opt-ic">
+              <Icon d="M12 5v14 M5 12h14" size={20} />
             </span>
-            <span style={{ font: "500 12px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-              {t("Только площадка, залы и слот — состав собираете сами")}
+            <span className="gtr-ev-opt-txt">
+              <span className="gtr-ev-opt-t">{t("Пустое событие")}</span>
+              <span className="gtr-ev-opt-d">
+                {t("Только площадка, залы и слот — состав собираете сами")}
+              </span>
             </span>
           </button>
         </div>
         {presetId === "blank" ? (
-          <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 3 }}>
-            {FORMATS.map((f) => {
-              const on = format === f;
-              return (
-                <button
-                  key={f}
-                  onClick={() => setFormat(f)}
-                  style={{
-                    borderRadius: 0,
-                    padding: "7px 12px",
-                    cursor: "pointer",
-                    font: `${on ? 600 : 500} 11px/1 'Golos Text',sans-serif`,
-                    border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.12)"}`,
-                    background: on ? "rgba(229,35,27,.14)" : "transparent",
-                    color: on ? "#fff" : "rgba(255,255,255,.6)",
-                  }}
-                >
-                  {tr(f)}
-                </button>
-              );
-            })}
+          <div className="gtr-ev-pills">
+            {FORMATS.map((f) => (
+              <button
+                key={f}
+                type="button"
+                className="gtr-ev-pill"
+                data-on={format === f || undefined}
+                aria-pressed={format === f}
+                onClick={() => setFormat(f)}
+              >
+                {tr(f)}
+              </button>
+            ))}
           </div>
         ) : null}
-      </div>
+      </section>
 
       {/* дата и время: полноценный календарь вместо текстового поля */}
-      <div className="gtr-md-stack" style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 18 }}>
-        <div style={{ display: "grid", gap: 8, alignContent: "start" }}>
+      <div className="gtr-md-stack gtr-ev-pair">
+        <section className="gtr-ev-sec">
           <Step n={next()} title={t("Дата")} note={dateIso ? humanDate(dateIso) : t("необязательно")} />
           <GtrCalendar value={dateIso} onChange={setDateIso} />
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", maxWidth: 340 }}>
-            {TIME_SLOTS.map((t) => {
-              const on = time === t;
-              return (
-                <button
-                  key={t}
-                  className="gtr-mono"
-                  onClick={() => setTime(on ? "" : t)}
-                  style={{
-                    borderRadius: 0,
-                    padding: "6px 10px",
-                    cursor: "pointer",
-                    font: `${on ? 700 : 500} 10.5px/1 'JetBrains Mono',monospace`,
-                    border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.14)"}`,
-                    background: on ? "rgba(229,35,27,.16)" : "transparent",
-                    color: on ? "#fff" : "rgba(255,255,255,.55)",
-                  }}
-                >
-                  {t}
-                </button>
-              );
-            })}
+          <div className="gtr-ev-pills" style={{ maxWidth: 360 }}>
+            {TIME_SLOTS.map((ts) => (
+              <button
+                key={ts}
+                type="button"
+                className="gtr-ev-pill gtr-ev-pill-num"
+                data-on={time === ts || undefined}
+                aria-pressed={time === ts}
+                onClick={() => setTime(time === ts ? "" : ts)}
+              >
+                {ts}
+              </button>
+            ))}
           </div>
-        </div>
+        </section>
 
         {/* вместимость: регулятор вместо свободного текста */}
-        <div style={{ display: "grid", gap: 8, alignContent: "start", minWidth: 0 }}>
+        <section className="gtr-ev-sec" style={{ minWidth: 0 }}>
           <Step n={next()} title={t("Вместимость")} note={t("фильтрует подбор площадки")} />
           <GtrCapacity value={guests} onChange={setGuests} />
-        </div>
+        </section>
       </div>
 
       {/* площадка: поиск + район + автофит под вместимость */}
-      <div style={{ display: "grid", gap: 8 }}>
+      <section className="gtr-ev-sec">
         <Step
           n={next()}
           title={t("Площадка")}
@@ -770,25 +789,32 @@ function NewEvent({
           }
         />
         {picked ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            {isTeam ? <Chip color="#E5231B">{picked.id}</Chip> : null}
-            <span style={{ font: "500 12.5px/1.45 'Golos Text',sans-serif" }}>{picked.name}</span>
-            <span
-              className="gtr-mono"
-              style={{ font: "500 12px/1 'JetBrains Mono',monospace", color: "var(--gtr-t3)" }}
-            >
-              {picked.type} · {picked.area}
-              {picked.capacity
-                ? ` · ${fillT(t, "до {{n}} гостей", { n: capOf(picked.capacity) })}`
-                : ""}
+          <div className="gtr-ev-picked">
+            <span className="gtr-ev-opt-ic">
+              <Icon d="M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" size={20} />
             </span>
-            {pickedCapShort ? (
-              <Chip color="#F5A623">{t("МАЛА ДЛЯ")} {guests}</Chip>
-            ) : null}
+            <span className="gtr-ev-opt-txt">
+              <span className="gtr-ev-opt-t">
+                {picked.name}
+                {isTeam ? <span className="gtr-ev-id">{picked.id}</span> : null}
+              </span>
+              <span className="gtr-ev-opt-d">
+                {[picked.type, picked.area].filter(Boolean).join(" · ")}
+                {picked.capacity
+                  ? ` · ${fillT(t, "до {{n}} гостей", { n: capOf(picked.capacity) })}`
+                  : ""}
+              </span>
+              {pickedCapShort ? (
+                <span className="gtr-ev-opt-m" style={{ color: "var(--gtr-amber)" }}>
+                  {t("МАЛА ДЛЯ")} {guests}
+                </span>
+              ) : null}
+            </span>
             {canChoose ? (
               <button
+                type="button"
                 className="gtr-btn"
-                style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 12 }}
+                style={{ flex: "none", padding: "8px 12px" }}
                 onClick={() => setVenueId("")}
               >
                 {t("Изменить")}
@@ -797,48 +823,30 @@ function NewEvent({
           </div>
         ) : (
           <>
-            <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
-              <input
-                className="gtr-input"
-                style={{ flex: "1 1 220px", maxWidth: 320, padding: "8px 11px", fontSize: 12 }}
-                placeholder={t("Название, район, ID…")}
-                value={vq}
-                onChange={(e) => setVq(e.target.value)}
-              />
-              {clusters.map(([c, cnt]) => {
-                const on = cluster === c;
-                return (
-                  <button
-                    key={c}
-                    onClick={() => setCluster(on ? "" : c)}
-                    style={{
-                      borderRadius: 0,
-                      padding: "7px 11px",
-                      cursor: "pointer",
-                      font: `${on ? 600 : 500} 10.5px/1 'Golos Text',sans-serif`,
-                      border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.12)"}`,
-                      background: on ? "rgba(229,35,27,.14)" : "transparent",
-                      color: on ? "#fff" : "rgba(255,255,255,.55)",
-                    }}
-                  >
-                    {c}
-                    <span className="gtr-mono" style={{ marginLeft: 6, fontSize: 11, opacity: 0.6 }}>
-                      {cnt}
-                    </span>
-                  </button>
-                );
-              })}
+            <input
+              className="gtr-input gtr-ev-search"
+              style={{ marginBottom: 0 }}
+              type="search"
+              placeholder={t("Название, район, ID…")}
+              value={vq}
+              onChange={(e) => setVq(e.target.value)}
+            />
+            <div className="gtr-ev-pills gtr-ev-pills-scroll">
+              {clusters.map(([c, cnt]) => (
+                <button
+                  key={c}
+                  type="button"
+                  className="gtr-ev-pill"
+                  data-on={cluster === c || undefined}
+                  aria-pressed={cluster === c}
+                  onClick={() => setCluster(cluster === c ? "" : c)}
+                >
+                  {c}
+                  <span>{cnt}</span>
+                </button>
+              ))}
             </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))",
-                gap: 6,
-                maxHeight: 330,
-                overflowY: "auto",
-                paddingRight: 4,
-              }}
-            >
+            <div className="gtr-ev-venues">
               {venues.slice(0, 24).map((v) => {
                 const cap = capOf(v.capacity);
                 const score = v.readiness?.score;
@@ -848,46 +856,24 @@ function NewEvent({
                 return (
                   <button
                     key={v.id}
-                    className="gtr-pal-btn"
-                    style={{ padding: "9px 11px" }}
+                    type="button"
+                    className="gtr-ev-venue-btn"
                     onClick={() => setVenueId(v.id)}
                   >
-                    <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                      <span style={{ display: "block", fontWeight: 600, fontSize: 13 }}>
-                        {v.name}
-                      </span>
-                      <span
-                        style={{
-                          display: "block",
-                          marginTop: 2,
-                          font: "500 11px/1.45 'JetBrains Mono',monospace",
-                          color: "rgba(255,255,255,.4)",
-                        }}
-                      >
-                        {isTeam ? `${v.id} · ` : ""}{v.type || "—"} · {v.cluster || v.area}
+                    <span className="gtr-ev-opt-txt">
+                      <span className="gtr-ev-opt-t">{v.name}</span>
+                      <span className="gtr-ev-opt-d">
+                        {isTeam ? `${v.id} · ` : ""}
+                        {v.type || "—"} · {v.cluster || v.area}
                         {cap ? ` · ${fillT(t, "до {{n}}", { n: cap })}` : ""}
                       </span>
                       {cRate?.amount ? (
-                        <span
-                          style={{
-                            display: "block",
-                            marginTop: 2,
-                            font: "600 11px/1.45 'JetBrains Mono',monospace",
-                            color: "#2ECC71",
-                          }}
-                        >
+                        <span className="gtr-ev-opt-m" style={{ color: "var(--gtr-green)" }}>
                           ✓ {fmtThb(cRate.amount)}
                           {cRate.unit !== "событие" ? ` / ${t(cRate.unit)}` : ""} {t("· площадка")}
                         </span>
                       ) : rate ? (
-                        <span
-                          style={{
-                            display: "block",
-                            marginTop: 2,
-                            font: "600 11px/1.45 'JetBrains Mono',monospace",
-                            color: RATE_COLOR[rate.kind],
-                          }}
-                        >
+                        <span className="gtr-ev-opt-m" style={{ color: RATE_COLOR[rate.kind] }}>
                           {fmtThb(rate.amount)}
                           {rate.unit !== "событие" ? ` / ${t(rate.unit)}` : ""}
                           {rate.kind === "gtr-estimate" ? " ~" : ""}
@@ -895,120 +881,78 @@ function NewEvent({
                       ) : null}
                     </span>
                     {guests && cap ? (
-                      <span
-                        className="gtr-mono"
-                        style={{
-                          flex: "none",
-                          font: "700 10px/1 'JetBrains Mono',monospace",
-                          color: "#2ECC71",
-                          border: "1px solid rgba(46,204,113,.4)",
-                          padding: "3px 6px",
-                        }}
-                      >
-                        ✓ {guests}
-                      </span>
+                      <span className="gtr-ev-fit">✓ {guests}</span>
                     ) : isTeam && score ? (
-                      <span
-                        className="gtr-mono"
-                        style={{
-                          flex: "none",
-                          font: "600 10px/1 'JetBrains Mono',monospace",
-                          color: "rgba(255,255,255,.35)",
-                        }}
-                      >
-                        {score}/100
-                      </span>
+                      <span className="gtr-ev-score">{score}/100</span>
                     ) : null}
                   </button>
                 );
               })}
               {!venues.length ? (
-                <span
-                  style={{
-                    font: "500 13px/1.5 'Golos Text',sans-serif",
-                    color: "var(--gtr-t3)",
-                    padding: "8px 2px",
-                  }}
-                >
+                <span className="gtr-ev-hint">
                   {t("Под фильтры ничего не подошло — снимите район или уменьшите вместимость.")}
                 </span>
               ) : null}
             </div>
           </>
         )}
-      </div>
+      </section>
 
       {/* залы и зоны: что арендуем и где ставим программу */}
       {picked ? (
-        <div style={{ display: "grid", gap: 8 }}>
+        <section className="gtr-ev-sec">
           <Step
             n={next()}
             title={t("Залы и зоны")}
             note={t("сюда будут закрепляться артисты, интерактив и оборудование")}
           />
           {venueRooms.length ? (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill,minmax(215px,1fr))",
-                gap: 7,
-              }}
-            >
+            <div className="gtr-ev-opts">
               {venueRooms.map((r) => {
                 const on = roomsSel.includes(r.name);
                 return (
                   <button
                     key={r.name}
+                    type="button"
+                    className="gtr-ev-opt"
+                    data-on={on || undefined}
+                    aria-pressed={on}
                     onClick={() =>
                       setRoomsSel((cur) =>
                         on ? cur.filter((x) => x !== r.name) : [...cur, r.name],
                       )
                     }
-                    style={{
-                      borderRadius: 0,
-                      padding: "10px 12px",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      display: "grid",
-                      gap: 4,
-                      border: `1px solid ${on ? "#E5231B" : "rgba(255,255,255,.12)"}`,
-                      background: on ? "rgba(229,35,27,.12)" : "var(--gtr-card2)",
-                    }}
                   >
-                    <span style={{ font: "600 12px/1.45 'Golos Text',sans-serif", color: on ? "#fff" : "rgba(255,255,255,.8)" }}>
-                      {on ? "✓ " : ""}
-                      {r.name}
+                    <span className="gtr-ev-opt-ic">
+                      <Icon d={on ? "M5 12.5l4.5 4.5L19 7.5" : "M3 21V8l9-5 9 5v13 M9 21v-7h6v7"} size={20} />
                     </span>
-                    <span className="gtr-mono" style={{ font: "500 11px/1.45 'JetBrains Mono',monospace", color: "rgba(255,255,255,.4)" }}>
-                      {tr(r.sub)}
+                    <span className="gtr-ev-opt-txt">
+                      <span className="gtr-ev-opt-t">{r.name}</span>
+                      <span className="gtr-ev-opt-d">{tr(r.sub)}</span>
                     </span>
                   </button>
                 );
               })}
             </div>
           ) : (
-            <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+            <span className="gtr-ev-hint">
               {t("У площадки пока нет отдельных залов — событие соберётся на всю площадку, зоны можно включить ниже.")}
             </span>
           )}
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <div className="gtr-ev-pills">
             {zonesOf(venueId).map((z) => {
               const on = zonesSel.includes(z);
               return (
                 <button
                   key={z}
+                  type="button"
+                  className="gtr-ev-pill"
+                  data-dashed={!on || undefined}
+                  data-on={on || undefined}
+                  aria-pressed={on}
                   onClick={() =>
                     setZonesSel((cur) => (on ? cur.filter((x) => x !== z) : [...cur, z]))
                   }
-                  style={{
-                    borderRadius: 0,
-                    padding: "7px 12px",
-                    cursor: "pointer",
-                    font: `${on ? 600 : 500} 10.5px/1 'Golos Text',sans-serif`,
-                    border: `1px ${on ? "solid #E5231B" : "dashed rgba(255,255,255,.2)"}`,
-                    background: on ? "rgba(229,35,27,.14)" : "transparent",
-                    color: on ? "#fff" : "rgba(255,255,255,.55)",
-                  }}
                 >
                   {on ? "✓ " : "+ "}
                   {tr(z)}
@@ -1016,58 +960,38 @@ function NewEvent({
               );
             })}
           </div>
-        </div>
+        </section>
       ) : null}
 
       {/* вайб пресета: направление и музыкальные стили */}
       {preset && vibeQ ? (
-        <div style={{ display: "grid", gap: 8 }}>
+        <section className="gtr-ev-sec">
           <Step
             n={next()}
             title={briefLabel(vibeQ.q, vibeQ.qEn)}
             note={t("задаёт палитру и музыкальные стили")}
           />
-          <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+          <div className="gtr-ev-opts">
             {vibeQ.options.map((o) => {
               const on = vibeId === o.id;
               const [c1, c2] = o.colors ?? ["#E5231B", "#F5A623"];
               return (
                 <button
                   key={o.id}
+                  type="button"
+                  className="gtr-ev-opt"
+                  data-on={on || undefined}
+                  aria-pressed={on}
+                  style={on ? { borderColor: c1, background: `linear-gradient(120deg, ${c1}26, ${c2}26)` } : undefined}
                   onClick={() => setVibeId(on ? "" : o.id)}
-                  title={(o.styles ?? []).map((st) => genreLabel(st, gl)).join(" · ")}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    borderRadius: 0,
-                    padding: "7px 12px 7px 8px",
-                    cursor: "pointer",
-                    font: `${on ? 600 : 500} 11.5px/1.2 'Golos Text',sans-serif`,
-                    border: `1px solid ${on ? c1 : "rgba(255,255,255,.12)"}`,
-                    background: on ? `linear-gradient(120deg, ${c1}33, ${c2}33)` : "transparent",
-                    color: on ? "#fff" : "rgba(255,255,255,.65)",
-                  }}
                 >
                   <span
-                    style={{
-                      width: 22,
-                      height: 22,
-                      flex: "none",
-                      borderRadius: 0,
-                      background: `linear-gradient(120deg, ${c1}, ${c2})`,
-                    }}
+                    className="gtr-ev-opt-ic"
+                    style={{ background: `linear-gradient(120deg, ${c1}, ${c2})` }}
                   />
-                  <span>
-                    {briefLabel(o.label, o.labelEn)}
-                    <span
-                      style={{
-                        display: "block",
-                        marginTop: 2,
-                        font: "500 10px/1.2 'JetBrains Mono',monospace",
-                        color: on ? "rgba(255,255,255,.75)" : "rgba(255,255,255,.35)",
-                      }}
-                    >
+                  <span className="gtr-ev-opt-txt">
+                    <span className="gtr-ev-opt-t">{briefLabel(o.label, o.labelEn)}</span>
+                    <span className="gtr-ev-opt-d">
                       {(o.styles ?? []).slice(0, 3).map((st) => genreLabel(st, gl)).join(" · ")}
                     </span>
                   </span>
@@ -1075,15 +999,15 @@ function NewEvent({
               );
             })}
           </div>
-        </div>
+        </section>
       ) : null}
 
       {/* название */}
-      <div style={{ display: "grid", gap: 8 }}>
+      <section className="gtr-ev-sec">
         <Step n={next()} title={t("Название")} note={t("необязательно")} />
         <input
           className="gtr-input"
-          style={{ padding: "8px 11px", fontSize: 12 }}
+          style={{ padding: "12px 13px", fontSize: 15 }}
           placeholder={
             preset
               ? `${tr(preset.title)} · ${picked?.name ?? ""}`
@@ -1094,30 +1018,47 @@ function NewEvent({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-      </div>
+      </section>
 
-      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+      {/* итог прилипает к низу экрана: кнопка всегда под пальцем */}
+      <div className="gtr-ev-submit">
+        <div className="gtr-ev-submit-sum">
+          {ready ? (
+            <span>{summary.join(" · ")}</span>
+          ) : (
+            <small>
+              {!presetId || (presetId === "blank" && !format)
+                ? t("Выберите сценарий или формат")
+                : !venueId
+                  ? t("Выберите площадку")
+                  : t("Выберите вайб")}
+            </small>
+          )}
+        </div>
+        <button type="button" className="gtr-btn" style={{ padding: "11px 14px" }} onClick={onCancel}>
+          {t("Отмена")}
+        </button>
         <button
+          type="button"
           className="gtr-btn gtr-btn-red"
-          style={{ padding: "9px 16px", opacity: ready ? 1 : 0.4 }}
+          style={{ padding: "11px 16px", opacity: ready ? 1 : 0.4 }}
           disabled={!ready}
           onClick={create}
         >
-          {t("Создать и открыть конструктор →")}
+          {t("Создать →")}
         </button>
-        <button className="gtr-btn" style={{ padding: "9px 14px" }} onClick={onCancel}>
-          {t("Отмена")}
-        </button>
-        {!ready ? (
-          <span style={{ font: "500 12px/1.5 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
-            {!venueId
-              ? t("Выберите площадку")
-              : preset && vibeQ && !vibeId
-                ? t("Выберите вайб")
-                : t("Выберите сценарий или формат")}
-          </span>
-        ) : null}
       </div>
-    </Card>
+    </div>
   );
 }
+
+// значки сценариев: формат события с одного взгляда
+const FORMAT_IC: Record<string, string> = {
+  "Клубная ночь": "M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z M21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z",
+  "Свадьба": "M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z",
+  "Корпоратив": "M4 8h16v12H4z M9 8V5h6v3 M4 13h16",
+  "Конференция": "M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z M5 11a7 7 0 0 0 14 0 M12 18v3",
+  "Частная вечеринка": "M8 3h8l-4 7z M12 10v9 M8 21h8",
+  "Бренд-активация": "M12 3l2.2 5.6L20 10.4l-5.8 1.8L12 18l-2.2-5.8L4 10.4l5.8-1.8z",
+  default: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z",
+};

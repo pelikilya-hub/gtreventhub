@@ -44,7 +44,7 @@ import { BroSession, type BroCard, type BroState } from "./session";
 import { VibeCheck } from "./vibecheck";
 
 type VoiceSession = BroSession | GemSession | LocalVoiceSession;
-type VoiceProvider = "openai" | "gemini";
+type VoiceProvider = "openai" | "gemini" | "eleven";
 
 const STATE_RU: Record<BroState, string> = {
   idle: "готов",
@@ -89,6 +89,8 @@ const VOICE_SETS: Record<VoiceProvider, [string, string][]> = {
     ["marin", "Marin"],
     ["ash", "Ash"],
   ],
+  // Гибрид: голос один — клон BOSS в ElevenLabs.
+  eleven: [["clone", "Голос BOSS"]],
 };
 
 /** Быстрые команды под табло: то, ради чего человек и открыл BRO.
@@ -157,6 +159,7 @@ export function GtrBroOverlay({
   userName,
   role,
   provider = "gemini",
+  eleven = false,
   onNavigate,
 }: {
   open: boolean;
@@ -168,6 +171,9 @@ export function GtrBroOverlay({
   userName?: string;
   role?: string;
   provider?: VoiceProvider;
+  /** Клон голоса в ElevenLabs настроен: стабильная полоса (и гибрид)
+   *  говорят им, а не голосом браузера. */
+  eleven?: boolean;
   onNavigate: (route: string, entityId?: string) => void;
 }) {
   const { t } = useTranslation();
@@ -276,7 +282,8 @@ export function GtrBroOverlay({
       ses.current?.stop("restart");
       reset();
       everLive.current = false;
-      const S = laneRef.current
+      // Гибрид — та же стабильная полоса, только с голосом клона.
+      const S = laneRef.current || provider === "eleven"
         ? LocalVoiceSession
         : provider === "gemini"
           ? GemSession
@@ -357,13 +364,21 @@ export function GtrBroOverlay({
       });
       ses.current = s;
       try {
-        await s.start({ voice: v, personaMode: m, screen, district, lang: langRef.current, ptt: !handsRef.current });
+        await s.start({
+          voice: v,
+          personaMode: m,
+          screen,
+          district,
+          lang: langRef.current,
+          ptt: !handsRef.current,
+          tts: eleven ? "eleven" : "browser",
+        });
         s.setGain(gainRef.current);
       } finally {
         starting.current = false;
       }
     },
-    [district, metric, onNavigate, provider, screen],
+    [district, eleven, metric, onNavigate, provider, screen],
   );
   // Актуальный режим для begin() без пересоздания колбэка.
   const handsRef = useRef(hands);
@@ -1158,12 +1173,18 @@ function BroCardView({
     // маршрут с уже поставленной точкой.
     return (
       <div className="gtr-bro-card">
-        <div className="gtr-bro-card-k">{t("Такси")} → {String(d.venue ?? "")}</div>
-        <div className="gtr-bro-card-n">{String(d.area ?? "")} · {t("точка назначения уже в ссылке")}</div>
+        <div className="gtr-bro-card-k">{t("Такси")}{d.venue ? ` → ${String(d.venue)}` : ""}</div>
+        <div className="gtr-bro-card-n">
+          {d.venue
+            ? `${String(d.area ?? "")} · ${t("точка назначения уже в ссылке")}`
+            : t("откроется на текущем месте")}
+        </div>
         <div className="gtr-bro-taxirow">
           <a className="gtr-bro-btn go" href={String(d.grab ?? "#")} target="_blank" rel="noreferrer">Grab</a>
           <a className="gtr-bro-btn go" href={String(d.bolt ?? "#")} target="_blank" rel="noreferrer">Bolt</a>
-          <a className="gtr-bro-btn" href={String(d.maps ?? "#")} target="_blank" rel="noreferrer">{t("Карта")}</a>
+          {d.maps ? (
+            <a className="gtr-bro-btn" href={String(d.maps)} target="_blank" rel="noreferrer">{t("Карта")}</a>
+          ) : null}
         </div>
       </div>
     );
@@ -1189,7 +1210,7 @@ function BroCardView({
             .map(([source, label, url]) => ({ source, label, url: String(url) }))
         : [];
     if (!rows.length) return null;
-    const who = String(d.artist ?? d.name ?? "");
+    const who = String(d.artist ?? d.name ?? d.genre ?? "");
     return (
       <div className="gtr-bro-card">
         <div className="gtr-bro-card-k">{t("Слушать")} · {who}</div>

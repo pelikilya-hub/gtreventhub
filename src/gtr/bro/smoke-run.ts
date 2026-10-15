@@ -20,7 +20,7 @@ export const SMOKE_KEY = "smoke:last";
  *  «не доехал KV». */
 const CANARIES = ["что такое GTR", "сколько давать чаевых", "можно ли курить в клубе"];
 
-type Flags = { broEnabled?: boolean; broKill?: boolean; voiceProvider?: "openai" | "gemini" };
+type Flags = { broEnabled?: boolean; broKill?: boolean; voiceProvider?: "openai" | "gemini" | "eleven" };
 
 /** Прогнать проверки, записать исход и положить тревогу в пульт на
  *  переходе. Возвращает то, что увидел, — вызывающий решает, что с этим
@@ -40,7 +40,14 @@ export async function runSmoke(ns: KvNs): Promise<{ ok: boolean; checks: Check[]
   // 2. Ключ того движка, который реально выбран. Проверять оба
   //    бессмысленно: молчит тот, чей ключ отсутствует, а не «какой-то».
   const voice = flags.voiceProvider ?? (env?.GEMINI_API_KEY ? "gemini" : "openai");
-  const voiceKey = voice === "gemini" ? env?.GEMINI_API_KEY : env?.OPENAI_API_KEY;
+  // Гибрид думает на ключе Gemini, а говорит клоном — нужны оба.
+  const { elevenReady } = await import("./eleven");
+  const voiceKey =
+    voice === "eleven"
+      ? (await elevenReady(ns)) && env?.GEMINI_API_KEY
+      : voice === "gemini"
+        ? env?.GEMINI_API_KEY
+        : env?.OPENAI_API_KEY;
   // Наличие ключа — не то же самое, что рабочий голос: у OpenAI ключ
   // остаётся валидным и при нулевом балансе, и живой разговор падает с
   // 429. Здесь баланс не проверяем намеренно — это платный вызов, а

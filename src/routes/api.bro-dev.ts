@@ -26,7 +26,7 @@ type Flags = {
   broKill?: boolean;
   broRoles?: string[];
   geminiOff?: boolean;
-  voiceProvider?: "openai" | "gemini";
+  voiceProvider?: "openai" | "gemini" | "eleven";
 };
 type Brain = { url?: string; token?: string; model?: string };
 type Gemini = { textModel?: string };
@@ -398,12 +398,63 @@ export const Route = createFileRoute("/api/bro-dev")({
           if (String(body.key ?? "") !== (await pultAccessKey()))
             return json({ ok: false, error: "key" }, 401);
           const p = String(body.provider ?? "");
-          if (p !== "openai" && p !== "gemini")
+          if (p !== "openai" && p !== "gemini" && p !== "eleven")
             return json({ ok: false, error: "bad-provider" }, 400);
           const cur = (await kvGetJson<Flags>(ns, "setting:flags")) ?? {};
           const next: Flags = { ...cur, voiceProvider: p };
           await ns.put("setting:flags", JSON.stringify(next));
           return json({ ok: true, flags: next });
+        }
+
+        // Голос гибридной полосы — по ключу пульта.
+        //
+        // Клон голоса BOSS живёт в ElevenLabs; сюда вписывается только
+        // его id и настройки. Ключ ElevenLabs — секрет воркера, через
+        // пульт он не ходит ни в одну сторону.
+        if (action === "pult.eleven") {
+          if (String(body.key ?? "") !== (await pultAccessKey()))
+            return json({ ok: false, error: "key" }, 401);
+          const { VOICE_KEY, isVoiceId, voiceCfg } = await import("../gtr/bro/eleven");
+          if (body.clear) {
+            await ns.delete(VOICE_KEY);
+            return json({ ok: true, cleared: true });
+          }
+          const cur = await voiceCfg(ns);
+          const voiceId = body.voiceId === undefined ? cur.voiceId : body.voiceId;
+          if (!isVoiceId(voiceId)) return json({ ok: false, error: "bad-voice-id" }, 400);
+          const num = (v: unknown, d?: number) =>
+            typeof v === "number" && v >= 0 && v <= 1 ? v : d;
+          const next = {
+            voiceId,
+            model: typeof body.model === "string" ? body.model.slice(0, 60) : cur.model,
+            stability: num(body.stability, cur.stability),
+            similarity: num(body.similarity, cur.similarity),
+          };
+          await ns.put(VOICE_KEY, JSON.stringify(next));
+          return json({ ok: true, voice: next });
+        }
+
+        // Проверка голоса ElevenLabs — по ключу пульта: тот же запрос,
+        // что и боевая озвучка, на одной короткой фразе. Звук наружу не
+        // отдаём — только статус, размер и время до первого байта.
+        if (action === "pult.elevenTest") {
+          if (String(body.key ?? "") !== (await pultAccessKey()))
+            return json({ ok: false, error: "key" }, 401);
+          const { elevenKey, elevenSpeak, voiceCfg } = await import("../gtr/bro/eleven");
+          const key = elevenKey();
+          if (!key) return json({ ok: false, error: "no-key" }, 503);
+          const cfg = await voiceCfg(ns);
+          if (!cfg.voiceId) return json({ ok: false, error: "no-voice" }, 503);
+          const t0 = Date.now();
+          try {
+            const r = await elevenSpeak("Йо, брат, я на связи.", cfg, key, AbortSignal.timeout(15_000));
+            if (!r.ok)
+              return json({ ok: false, status: r.status, body: (await r.text()).slice(0, 200) });
+            const bytes = (await r.arrayBuffer()).byteLength;
+            return json({ ok: true, status: 200, bytes, ms: Date.now() - t0, voice: cfg });
+          } catch (e) {
+            return json({ ok: false, error: String(e).slice(0, 200) });
+          }
         }
 
         // Отметка исполнения от Claude — по ключу пульта, без cookie.

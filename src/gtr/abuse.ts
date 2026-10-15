@@ -91,6 +91,9 @@ export const LIMITS = {
   contacts: { hits: 120, windowSec: 3600 } as Limit,
   /** BRO: разговор, а не бесплатный доступ к чужой модели. */
   bro: { hits: 90, windowSec: 3600 } as Limit,
+  /** Голос BRO через ElevenLabs: каждая реплика стоит денег, счёт —
+   *  нам. Отдельный счётчик, чтобы озвучка не съедала лимит разговора. */
+  broTts: { hits: 120, windowSec: 3600 } as Limit,
 } as const;
 
 export const TOO_MANY_MSG =

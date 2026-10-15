@@ -376,8 +376,34 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
             });
           contents.push({ role: "user", parts: [{ text }] });
 
+          // Размышление выключено: в голосовой полосе оно — секунды
+          // тишины, а его токены съедали лимит в 600 и оставляли пустой
+          // ответ. Модель, которая бюджет не принимает, ответит 400 —
+          // тогда один повтор без него.
+          let think = true;
+          const ROUNDS = 5;
+          const reqBody = (round: number) =>
+            JSON.stringify({
+              systemInstruction: {
+                parts: [{ text: systemPrompt }],
+              },
+              contents,
+              tools: [{ functionDeclarations: gemTools(user.role) }],
+              // Последний круг — только словами. Цепочка «зоны → меню →
+              // бронь» занимает три вызова, и раньше на этом месте цикл
+              // кончался без ответа вовсе.
+              ...(round === ROUNDS - 1
+                ? { toolConfig: { functionCallingConfig: { mode: "NONE" } } }
+                : {}),
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 600,
+                ...(think ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
+              },
+            });
+
           let gemFail = "";
-          for (let round = 0; round < 3 && !gemFail; round++) {
+          for (let round = 0; round < ROUNDS && !gemFail; round++) {
             if (timeLeft() < 3_000) {
               gemFail = "deadline";
               break;
@@ -389,17 +415,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
                 {
                   method: "POST",
                   headers: { "content-type": "application/json" },
-                  body: JSON.stringify({
-                    systemInstruction: {
-                      parts: [{ text: systemPrompt }],
-                    },
-                    contents,
-                    tools: [{ functionDeclarations: gemTools(user.role) }],
-                    generationConfig: {
-                      temperature: 0.7,
-                      maxOutputTokens: 600,
-                    },
-                  }),
+                  body: reqBody(round),
                   signal: AbortSignal.timeout(
                     Math.min(12_000, Math.max(2_000, timeLeft())),
                   ),
@@ -408,6 +424,25 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
             } catch {
               gemFail = "network";
               break;
+            }
+            if (res.status === 400 && think) {
+              think = false;
+              const again = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${gmodel}:generateContent?key=${gemKey}`,
+                {
+                  method: "POST",
+                  headers: { "content-type": "application/json" },
+                  body: reqBody(round),
+                  signal: AbortSignal.timeout(
+                    Math.min(12_000, Math.max(2_000, timeLeft())),
+                  ),
+                },
+              ).catch(() => null);
+              if (!again) {
+                gemFail = "network";
+                break;
+              }
+              res = again;
             }
             if (res.status === 429) {
               // Свободный тариф Gemini считает запросы по минуте или по дню:
@@ -425,17 +460,7 @@ export const Route = createFileRoute("/api/gtr-bro-text")({
                 {
                   method: "POST",
                   headers: { "content-type": "application/json" },
-                  body: JSON.stringify({
-                    systemInstruction: {
-                      parts: [{ text: systemPrompt }],
-                    },
-                    contents,
-                    tools: [{ functionDeclarations: gemTools(user.role) }],
-                    generationConfig: {
-                      temperature: 0.7,
-                      maxOutputTokens: 600,
-                    },
-                  }),
+                  body: reqBody(round),
                   signal: AbortSignal.timeout(
                     Math.min(12_000, Math.max(2_000, timeLeft())),
                   ),

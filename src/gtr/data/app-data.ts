@@ -868,6 +868,12 @@ export type GraphNode = {
   fields: [string, string][];
   status?: NodeStatus; // ручной статус (override); нет — берётся авто-оценка
   note?: string; // комментарий участника к статусу (что пошло не так)
+  // Режим «План»: позиция центра значка на чертеже (мир шириной 1000) —
+  // отдельно от x/y карточного графа, чтобы раскладки не ломали друг друга.
+  px?: number;
+  py?: number;
+  // Чертёж площадки или зала (у узлов venue/room): подложка плана.
+  plan?: { src: string; w: number; h: number; inv?: boolean };
 };
 export type GraphLink = { from: string; to: string };
 

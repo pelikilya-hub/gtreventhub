@@ -992,6 +992,138 @@
 }
 .gtr-pal-btn:active { transform: translateX(0); }
 
+/* ---------- палитра конструктора: плитки блоков ----------
+   Значок в цвете типа, под ним имя и подсказка, что блок значит.
+   --k / --kb — цвет и подложка типа из KINDS, ставятся инлайном. */
+.gtr-cx-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.gtr-cx-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-height: 100px;
+  padding: 11px 2px 9px;
+  border: var(--gtr-hair) solid var(--gtr-border);
+  border-radius: 0;
+  background: var(--gtr-card2);
+  color: var(--gtr-t1);
+  cursor: pointer;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s, background 0.15s, transform 0.12s;
+}
+.gtr-cx-tile-ic {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--kb);
+  color: var(--k);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.gtr-cx-tile-name {
+  font: 700 11px/1.15 "Golos Text", sans-serif;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.gtr-cx-tile-hint {
+  font: 500 10px/1.3 "Golos Text", sans-serif;
+  color: var(--gtr-t3);
+}
+/* сколько блоков этого типа уже в графе */
+.gtr-cx-tile-n {
+  position: absolute;
+  top: -6px;
+  right: -9px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  background: var(--k);
+  color: var(--gtr-bg);
+  font: 800 10px/17px "JetBrains Mono", monospace;
+}
+/* плитка без вариантов кладёт блок сразу — помечаем плюсом */
+.gtr-cx-tile-plus {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  width: 15px;
+  height: 15px;
+  background: var(--gtr-raised);
+  color: var(--gtr-t2);
+  font: 700 12px/15px "JetBrains Mono", monospace;
+}
+@media (hover: hover) {
+  .gtr-cx-tile:hover { border-color: var(--k); transform: translateY(-2px); }
+  .gtr-cx-tile:hover .gtr-cx-tile-ic { transform: scale(1.07); }
+}
+.gtr-cx-tile:active { transform: scale(0.95); }
+.gtr-cx-tile[data-open] {
+  border-color: var(--k);
+  background: var(--kb);
+  box-shadow: inset 0 -2px 0 var(--k);
+}
+.gtr-cx-tile[data-open] .gtr-cx-tile-ic { box-shadow: 0 0 0 1px var(--k); }
+
+/* панель вариантов выбранной плитки — под сеткой */
+.gtr-cx-drawer {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 2px solid var(--k);
+  animation: gtr-cx-drawer-in 0.18s ease-out;
+}
+.gtr-cx-drawer-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 700 12.5px/1.2 "Golos Text", sans-serif;
+  color: var(--gtr-t1);
+}
+.gtr-cx-drawer-ic {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--kb);
+  color: var(--k);
+}
+.gtr-cx-drawer-x {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border: var(--gtr-hair) solid var(--gtr-border);
+  background: transparent;
+  color: var(--gtr-t2);
+  font: 400 18px/1 "Golos Text", sans-serif;
+  cursor: pointer;
+}
+.gtr-cx-drawer-x:hover { border-color: var(--k); color: var(--gtr-t1); }
+@keyframes gtr-cx-drawer-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtr-cx-tile,
+  .gtr-cx-tile-ic { transition: none; }
+  .gtr-cx-tile:hover,
+  .gtr-cx-tile:active,
+  .gtr-cx-tile:hover .gtr-cx-tile-ic { transform: none; }
+  .gtr-cx-drawer { animation: none; }
+}
+/* телефон: палитра во всю ширину — плиток в ряд столько, сколько влезает */
+@media (max-width: 860px), (max-width: 1180px) and (max-height: 560px) and (any-pointer: coarse) {
+  .gtr-cx-tiles { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); }
+}
+
 .gtr-node {
   position: absolute;
   width: 196px;

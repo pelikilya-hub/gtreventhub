@@ -386,6 +386,51 @@ export function ConstructorScreen({
     return performAdd(kind, title, sub, badge, fields, linkFromVenue, room);
   };
 
+  // Плитка палитры: короткое имя и подсказка «что это за блок». Полные
+  // подписи CX_PALETTE остаются заголовком панели вариантов и именем
+  // пустого блока — в плитке на телефоне они не помещаются.
+  const cxTile: Partial<Record<NodeKind, [string, string]>> = {
+    room: [t("Зал"), t("Где проходит")],
+    artist: [t("Артисты"), t("Кто выступает")],
+    sound: [t("Звук"), t("Звук и инженер")],
+    light: [t("Свет"), t("Свет и эффекты")],
+    decor: [t("Декор"), t("Оформление")],
+    gear: [t("Прокат"), t("Сцена, LED, мебель")],
+    interactive: [t("Интерактив"), t("Для гостей")],
+    content: [t("Съёмка"), t("Фото и видео")],
+    promo: [t("Промо"), t("Реклама и билеты")],
+    money: [t("Бюджет"), t("Сколько стоит")],
+    slot: [t("Время"), t("Тайминг вечера")],
+    doc: [t("Договор"), t("Условия и подписи")],
+    staff: [t("Команда"), t("Кто работает")],
+  };
+  // Плитка с вариантами (подрядчики, пресеты площадки, каталог позиций)
+  // открывает панель под сеткой; без вариантов — сразу кладёт пустой блок.
+  const equipCatOf = (kind: NodeKind) =>
+    kind === "gear" ? "equipment" : kind === "interactive" ? "interactive" : null;
+  const cxExpandable = (kind: NodeKind) => {
+    const cat = equipCatOf(kind);
+    return (
+      (VENDOR_CATALOG[kind] ?? []).length > 0 ||
+      kind === "artist" ||
+      presetsFor(kind, vid).length > 0 ||
+      (cat ? equipOf(cat).length > 0 : false)
+    );
+  };
+  const addBlankBlock = (kind: NodeKind, label: string) =>
+    addNode(
+      kind,
+      label,
+      "Заполните данные блока",
+      "НОВОЕ",
+      [
+        ["ТИП", KINDS[kind][0]],
+        ["СТАТУС", "Черновик"],
+        ["ИСТОЧНИК", "—"],
+      ],
+      VENDOR_KINDS.includes(kind),
+    );
+
   // Добавить артиста из базы/лайнапа узлом графа с авто-связью к площадке.
   // Артист не дублируется: если уже в графе — просто выделяем его.
   const addArtistNode = (a: Artist) => {
@@ -1191,7 +1236,7 @@ export function ConstructorScreen({
         className="gtr-md-stack"
         style={{
           display: "grid",
-          gridTemplateColumns: "230px 1fr",
+          gridTemplateColumns: "272px 1fr",
           gap: 14,
           alignItems: "start",
         }}
@@ -1208,67 +1253,69 @@ export function ConstructorScreen({
           }}
         >
           <Eyebrow style={{ marginBottom: 10 }}>{t("БЛОКИ СОБЫТИЯ")}</Eyebrow>
-          <div style={{ display: "grid", gap: 6 }}>
+          <div className="gtr-cx-tiles">
             {CX_PALETTE.map(([kind, label]) => {
               const K = KINDS[kind];
-              const vendors = VENDOR_CATALOG[kind] ?? [];
+              const [name, hint] = cxTile[kind] ?? [tr(label), ""];
               const open = openCat === kind;
-              const addBlank = () =>
-                addNode(
-                  kind,
-                  label,
-                  "Заполните данные блока",
-                  "НОВОЕ",
-                  [
-                    ["ТИП", K[0]],
-                    ["СТАТУС", "Черновик"],
-                    ["ИСТОЧНИК", "—"],
-                  ],
-                  VENDOR_KINDS.includes(kind),
-                );
+              const expandable = cxExpandable(kind);
+              const count = g.nodes.filter((n) => n.kind === kind).length;
+              return (
+                <button
+                  key={kind}
+                  type="button"
+                  className="gtr-cx-tile"
+                  data-open={open || undefined}
+                  aria-expanded={expandable ? open : undefined}
+                  title={tr(label)}
+                  style={{ "--k": K[1], "--kb": K[2] } as React.CSSProperties}
+                  onClick={() =>
+                    expandable ? setOpenCat(open ? null : kind) : addBlankBlock(kind, label)
+                  }
+                >
+                  <span className="gtr-cx-tile-ic">
+                    <Icon d={K[3]} size={22} />
+                    {count ? <span className="gtr-cx-tile-n">{count}</span> : null}
+                    {!expandable ? <span className="gtr-cx-tile-plus">+</span> : null}
+                  </span>
+                  <span className="gtr-cx-tile-name">{name}</span>
+                  {hint ? <span className="gtr-cx-tile-hint">{hint}</span> : null}
+                </button>
+              );
+            })}
+          </div>
+          <div style={{ display: "grid", gap: 6 }}>
+            {CX_PALETTE.filter(([kind]) => kind === openCat).map(([kind, label]) => {
+              const K = KINDS[kind];
+              const vendors = VENDOR_CATALOG[kind] ?? [];
+              const open = true;
+              const addBlank = () => addBlankBlock(kind, label);
               const isArtist = kind === "artist";
               // Оборудование и интерактив приходят не от подрядчика, а из
               // каталога позиций — со своим статусом провенанса цены
-              const equipCat =
-                kind === "gear" ? "equipment" : kind === "interactive" ? "interactive" : null;
+              const equipCat = equipCatOf(kind);
               const equipItems = equipCat ? equipOf(equipCat) : [];
               const presets = presetsFor(kind, vid);
-              const expandable =
-                vendors.length > 0 || isArtist || presets.length > 0 || equipItems.length > 0;
               return (
-                <div key={kind}>
-                  <button
-                    className="gtr-pal-btn"
-                    onClick={() => (expandable ? setOpenCat(open ? null : kind) : addBlank())}
-                  >
-                    <span
-                      style={{
-                        width: 24,
-                        height: 24,
-                        flex: "none",
-                        borderRadius: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background: K[2],
-                        color: K[1],
-                      }}
-                    >
-                      <Icon d={K[3]} size={13} />
+                <div
+                  key={kind}
+                  className="gtr-cx-drawer"
+                  style={{ "--k": K[1], "--kb": K[2] } as React.CSSProperties}
+                >
+                  <div className="gtr-cx-drawer-head">
+                    <span className="gtr-cx-drawer-ic">
+                      <Icon d={K[3]} size={14} />
                     </span>
-                    <span style={{ flex: 1 }}>{tr(label)}</span>
-                    <span
-                      className="gtr-mono"
-                      style={{
-                        font: "700 12px/1 'JetBrains Mono',monospace",
-                        color: "rgba(255,255,255,.3)",
-                        transition: "transform .15s",
-                        transform: open ? "rotate(90deg)" : "none",
-                      }}
+                    <span style={{ flex: 1, minWidth: 0 }}>{tr(label)}</span>
+                    <button
+                      type="button"
+                      className="gtr-cx-drawer-x"
+                      aria-label={t("Закрыть")}
+                      onClick={() => setOpenCat(null)}
                     >
-                      {expandable ? "›" : "+"}
-                    </span>
-                  </button>
+                      ×
+                    </button>
+                  </div>
                   {open && isArtist ? (
                     <div style={{ display: "grid", gap: 6, padding: "6px 0 4px 10px" }}>
                       <input

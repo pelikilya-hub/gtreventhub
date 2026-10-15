@@ -28,9 +28,9 @@ const readImage = (file: File): Promise<HTMLImageElement> =>
 
 /** Файл → data-URL, готовый для afishaPosterFn. Бросает, если даже на
  *  минимальном качестве картинка не влезает в лимит. */
-export async function shrinkPoster(file: File): Promise<string> {
+export async function shrinkPoster(file: File, maxSide = MAX_SIDE, bg = "#0A0B0D"): Promise<string> {
   const img = await readImage(file);
-  const k = Math.min(1, MAX_SIDE / Math.max(1, img.width, img.height));
+  const k = Math.min(1, maxSide / Math.max(1, img.width, img.height));
   const w = Math.max(1, Math.round(img.width * k));
   const h = Math.max(1, Math.round(img.height * k));
   const c = document.createElement("canvas");
@@ -40,7 +40,7 @@ export async function shrinkPoster(file: File): Promise<string> {
   if (!g) throw new Error("canvas");
   // Афиши часто с прозрачностью; JPEG её не знает — подкладываем чёрное
   // поле продукта, иначе прозрачные места станут белыми пятнами.
-  g.fillStyle = "#0A0B0D";
+  g.fillStyle = bg;
   g.fillRect(0, 0, w, h);
   g.drawImage(img, 0, 0, w, h);
   for (const q of QUALITY) {

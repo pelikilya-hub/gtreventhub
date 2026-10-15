@@ -1280,6 +1280,26 @@ export const afishaPosterFn = createServerFn({ method: "POST" })
     return { ok: true as const, poster: posterUrl(data.vid, data.id) };
   });
 
+// Чертёж площадки/зала для режима «План» конструктора. Картинка уже сжата в
+// браузере (длинная сторона до 2000 точек); здесь — только проверка формата
+// и размера. Ключ случайный: чертёж прикреплён к событию, а не к площадке, и
+// чужой адрес не угадать.
+const PLAN_UP_MAX = 1_400_000;
+export const planUploadFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { dataUrl: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await currentUser();
+    const ns = await getKvNs();
+    if (!u || !ns) return { ok: false as const, reason: "нужен вход" };
+    const m = data.dataUrl.match(/^data:(image\/(?:png|webp|jpeg));base64,([A-Za-z0-9+/=]+)$/);
+    if (!m) return { ok: false as const, reason: "нужен PNG, JPEG или WEBP" };
+    if (m[2].length > PLAN_UP_MAX)
+      return { ok: false as const, reason: "чертёж тяжелее 1 МБ — сожми" };
+    const id = crypto.randomUUID().replace(/-/g, "").slice(0, 24);
+    await ns.put(`plan:${id}`, JSON.stringify({ ct: m[1], b64: m[2], by: u.email, ts: Date.now() }));
+    return { ok: true as const, src: `/api/plan?k=${id}` };
+  });
+
 export const syncAfishaNowFn = createServerFn({ method: "POST" }).handler(async () => {
   const u = await currentUser();
   const ns = await getKvNs();

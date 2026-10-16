@@ -59,7 +59,7 @@ type View = { s: number; tx: number; ty: number };
 type Gesture =
   | { mode: "node"; id: string; sx: number; sy: number; ox: number; oy: number; moved: boolean }
   | { mode: "wire"; id: string }
-  | { mode: "pan"; sx: number; sy: number; v: View; moved: boolean }
+  | { mode: "pan"; sx: number; sy: number; v: View; moved: boolean; link?: string }
   | { mode: "pinch"; d0: number; cx: number; cy: number; v: View }
   | null;
 
@@ -83,6 +83,11 @@ export function PlanCanvas({
   onLink,
   onOpen,
   onHold,
+  selLink = null,
+  onLinkTap,
+  fresh = null,
+  centerRef,
+  tools,
 }: {
   nodes: GraphNode[];
   links: GraphLink[];
@@ -100,6 +105,15 @@ export function PlanCanvas({
   onLink: (from: string, to: string) => void;
   onOpen: (id: string) => void;
   onHold: (id: string) => void;
+  /** выбранная связь «from>to» и нажатие на связь */
+  selLink?: string | null;
+  onLinkTap?: (from: string, to: string) => void;
+  /** только что добавленный блок — вспыхивает, чтобы его было видно */
+  fresh?: string | null;
+  /** сюда холст пишет центр экрана в координатах мира: новый блок ставится туда, куда смотрят */
+  centerRef?: React.MutableRefObject<{ x: number; y: number } | null>;
+  /** дополнительные кнопки в столбике управления (отменить, разложить) */
+  tools?: React.ReactNode;
 }) {
   const { t } = useTranslation();
   const boxRef = useRef<HTMLDivElement>(null);
@@ -180,6 +194,11 @@ export function PlanCanvas({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size.w, size.h, fitKey, plan?.src, planH, nodes.length > 0, cols, anchorKey]);
   useEffect(fit, [fit]);
+
+  useEffect(() => {
+    if (!centerRef || !size.w) return;
+    centerRef.current = { x: (size.w / 2 - view.tx) / view.s, y: (size.h / 2 - view.ty) / view.s };
+  }, [centerRef, view, size.w, size.h]);
 
   const zoomAt = (cx: number, cy: number, k: number, v = viewRef.current) => {
     const s = clampS(v.s * k);
@@ -269,7 +288,8 @@ export function PlanCanvas({
       }, 520);
       return;
     }
-    gest.current = { mode: "pan", sx: p.x, sy: p.y, v: viewRef.current, moved: false };
+    const lk = target.closest<SVGElement>("[data-link]")?.dataset.link;
+    gest.current = { mode: "pan", sx: p.x, sy: p.y, v: viewRef.current, moved: false, link: lk };
   };
 
   const onMoveP = (e: React.PointerEvent) => {
@@ -329,7 +349,11 @@ export function PlanCanvas({
     }
     gest.current = null;
     if (g.mode === "pan") {
-      if (!g.moved) onTap(null);
+      if (g.moved) return;
+      if (g.link && onLinkTap) {
+        const [from, to] = g.link.split(">");
+        onLinkTap(from, to);
+      } else onTap(null);
       return;
     }
     if (g.mode === "wire") {
@@ -407,9 +431,17 @@ export function PlanCanvas({
           // подложка связи + бегущий поток поверх: видно, что связь живая
           // и в какую сторону она идёт
           return (
-            <g key={i} className="gtr-link" data-st={ls} style={{ "--lc": STATUS_COLOR[ls] } as React.CSSProperties}>
+            <g
+              key={i}
+              className="gtr-link"
+              data-st={ls}
+              data-on={selLink === `${l.from}>${l.to}` || undefined}
+              style={{ "--lc": STATUS_COLOR[ls] } as React.CSSProperties}
+            >
               <path className="gtr-link-base" d={d} />
               <path className="gtr-link-flow" d={d} />
+              {/* широкая невидимая полоса: по тонкой линии пальцем не попасть */}
+              <path className="gtr-link-hit" d={d} data-link={`${l.from}>${l.to}`} />
             </g>
           );
         })}
@@ -442,6 +474,7 @@ export function PlanCanvas({
             data-hit={wireHit === n.id || undefined}
             data-drag={drag?.id === n.id || undefined}
             data-st={st.status}
+            data-fresh={fresh === n.id || undefined}
             style={
               {
                 left: p.x,
@@ -478,6 +511,12 @@ export function PlanCanvas({
         <button type="button" className="gtr-ibtn" aria-label={t("Вписать в экран")} title={t("Вписать в экран")} onClick={fit}>
           <Icon d={UI_IC.fit} size={17} />
         </button>
+        {tools ? (
+          <>
+            <span className="gtr-plan-ctl-sep" aria-hidden="true" />
+            {tools}
+          </>
+        ) : null}
       </div>
 
       {!nodes.length ? (

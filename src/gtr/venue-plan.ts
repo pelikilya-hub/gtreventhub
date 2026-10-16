@@ -60,6 +60,7 @@ const LAYOUTS: Record<string, VenueLayout> = {
 };
 
 const PX = 22; // точек SVG на метр
+const F = 'font-family="Golos Text,Arial,sans-serif"'; // шрифт продукта, запасной — Arial
 const PAD = 40;
 
 /** Размеры зала из заметок базы: «29.4 x 19.5 x 4.7 m» → [29.4, 19.5]. */
@@ -91,9 +92,11 @@ const capLine = (s?: Record<string, unknown>) => {
 const svgUrl = (svg: string) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 
 // Метровая сетка и масштабная линейка — общие для обоих видов схемы.
-const gridDefs = `<defs><pattern id="m" width="${PX}" height="${PX}" patternUnits="userSpaceOnUse"><path d="M${PX} 0H0V${PX}" fill="none" stroke="#ffffff" stroke-opacity=".06" stroke-width="1"/></pattern></defs>`;
+// Мягкая подача: скруглённые залы с лёгкой заливкой и тонкой светящейся
+// кромкой, без сплошного фона — схема лежит прямо на холсте плана.
+const gridDefs = `<defs><linearGradient id="rf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".07"/><stop offset="1" stop-color="#ffffff" stop-opacity=".02"/></linearGradient><filter id="glow" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
 const scaleBar = (x: number, y: number, meters: number) =>
-  `<g font-family="Arial,sans-serif" font-size="13" fill="#8a8d93"><path d="M${x} ${y}h${meters * PX}M${x} ${y - 5}v10M${x + meters * PX} ${y - 5}v10" stroke="#8a8d93" stroke-width="2"/><text x="${x + (meters * PX) / 2}" y="${y - 10}" text-anchor="middle">${meters} m</text></g>`;
+  `<g font-family="Golos Text,Arial,sans-serif" font-size="12" fill="#8a8d93"><path d="M${x} ${y}h${meters * PX}" stroke="#8a8d93" stroke-width="2" stroke-linecap="round"/><circle cx="${x}" cy="${y}" r="3" fill="#8a8d93"/><circle cx="${x + meters * PX}" cy="${y}" r="3" fill="#8a8d93"/><text x="${x + (meters * PX) / 2}" y="${y - 9}" text-anchor="middle">${meters} m</text></g>`;
 
 export type VenuePlan = {
   image: { src: string; w: number; h: number };
@@ -122,24 +125,23 @@ export function venuePlan(vid: string): VenuePlan | null {
       const small = r.w * PX < 170 || r.h * PX < 80;
       const sqm = Math.round(r.w * r.h);
       const cap = capLine(s);
-      return `<g><rect x="${X(r.x)}" y="${Y(r.y)}" width="${r.w * PX}" height="${r.h * PX}" fill="#ffffff" fill-opacity=".035" stroke="#c9cbd0" stroke-opacity=".7" stroke-width="3"/>
-<text x="${cx}" y="${cy - (small ? 4 : 14)}" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="${small ? 13 : 18}" fill="#ffffff" fill-opacity=".8">${esc(r.label ?? r.name)}</text>
-<text x="${cx}" y="${cy + (small ? 12 : 8)}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${small ? 11 : 13}" fill="#8a8d93">${r.w} × ${r.h} m · ${sqm} m²</text>
-${cap && !small ? `<text x="${cx}" y="${cy + 28}" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#8a8d93">${cap}</text>` : ""}</g>`;
+      return `<g><rect x="${X(r.x) + 2}" y="${Y(r.y) + 2}" width="${r.w * PX - 4}" height="${r.h * PX - 4}" rx="12" fill="url(#rf)" stroke="#ffffff" stroke-opacity=".28" stroke-width="1.5" filter="url(#glow)"/>
+<text x="${cx}" y="${cy - (small ? 4 : 14)}" text-anchor="middle" ${F} font-weight="700" font-size="${small ? 13 : 17}" fill="#ffffff" fill-opacity=".72">${esc(r.label ?? r.name)}</text>
+<text x="${cx}" y="${cy + (small ? 12 : 8)}" text-anchor="middle" ${F} font-size="${small ? 11 : 12.5}" fill="#8a8d93">${r.w} × ${r.h} m · ${sqm} m²</text>
+${cap && !small ? `<text x="${cx}" y="${cy + 27}" text-anchor="middle" ${F} font-size="12.5" fill="#8a8d93">${cap}</text>` : ""}</g>`;
     })
     .join("");
   const parts = L.partitions
     .map(
       ([x1, y1, x2, y2]) =>
-        `<path d="M${X(x1)} ${Y(y1)}L${X(x2)} ${Y(y2)}" stroke="#e5231b" stroke-opacity=".7" stroke-width="3" stroke-dasharray="10 7"/>`,
+        `<path d="M${X(x1)} ${Y(y1)}L${X(x2)} ${Y(y2)}" stroke="#ff3427" stroke-opacity=".55" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 9"/>`,
     )
     .join("");
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${gridDefs}
-<rect width="${W}" height="${H}" fill="#0c0d10"/><rect width="${W}" height="${H}" fill="url(#m)"/>
-<text x="${PAD}" y="${PAD + 4}" font-family="Arial,sans-serif" font-weight="700" font-size="16" fill="#ffffff" fill-opacity=".75">${esc(L.title)}</text>
+<text x="${PAD}" y="${PAD + 4}" ${F} font-weight="700" font-size="15" fill="#ffffff" fill-opacity=".6">${esc(L.title)}</text>
 ${rooms}${parts}
 ${scaleBar(PAD, H - 26, 10)}
-<text x="${W - PAD}" y="${H - 22}" text-anchor="end" font-family="Arial,sans-serif" font-size="12" fill="#55585e">${esc(L.note)}</text></svg>`;
+<text x="${W - PAD}" y="${H - 22}" text-anchor="end" ${F} font-size="11" fill="#55585e">${esc(L.note)}</text></svg>`;
 
   const k = PLAN_WORLD / W;
   // составной зал — значок у верхней стены: в центре он лёг бы на значки
@@ -186,12 +188,12 @@ export function roomPlan(vid: string, roomName: string): VenuePlan | null {
   const H = Math.round(mh * px + PAD * 2 + 60);
   const step = mw > 60 ? 10 : mw > 25 ? 5 : 1; // шаг сетки, метры
   const cap = capLine(s);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs><pattern id="g" width="${step * px}" height="${step * px}" patternUnits="userSpaceOnUse" x="${PAD}" y="${PAD + 30}"><path d="M${step * px} 0H0V${step * px}" fill="none" stroke="#ffffff" stroke-opacity=".08" stroke-width="1"/></pattern></defs>
-<rect width="${W}" height="${H}" fill="#0c0d10"/>
-<text x="${PAD}" y="${PAD + 4}" font-family="Arial,sans-serif" font-weight="700" font-size="16" fill="#ffffff" fill-opacity=".75">${esc(roomName)} · ${mw} × ${mh} m${cap ? " · " + cap : ""}</text>
-<rect x="${PAD}" y="${PAD + 30}" width="${mw * px}" height="${mh * px}" fill="url(#g)" stroke="#c9cbd0" stroke-opacity=".7" stroke-width="3"/>
-<g font-family="Arial,sans-serif" font-size="13" fill="#8a8d93"><path d="M${PAD} ${H - 26}h${step * px}M${PAD} ${H - 31}v10M${PAD + step * px} ${H - 31}v10" stroke="#8a8d93" stroke-width="2"/><text x="${PAD + step * px + 10}" y="${H - 21}">${step} m</text></g>
-<text x="${W - PAD}" y="${H - 22}" text-anchor="end" font-family="Arial,sans-serif" font-size="12" fill="#55585e">schematic from published room size</text></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs><pattern id="g" width="${step * px}" height="${step * px}" patternUnits="userSpaceOnUse" x="${PAD}" y="${PAD + 30}"><circle cx="0" cy="0" r="1.4" fill="#ffffff" fill-opacity=".14"/></pattern><linearGradient id="rf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".06"/><stop offset="1" stop-color="#ffffff" stop-opacity=".015"/></linearGradient><filter id="glow" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<text x="${PAD}" y="${PAD + 4}" font-family="Golos Text,Arial,sans-serif" font-weight="700" font-size="15" fill="#ffffff" fill-opacity=".6">${esc(roomName)} · ${mw} × ${mh} m${cap ? " · " + cap : ""}</text>
+<rect x="${PAD}" y="${PAD + 30}" width="${mw * px}" height="${mh * px}" rx="16" fill="url(#rf)" stroke="#ffffff" stroke-opacity=".28" stroke-width="1.5" filter="url(#glow)"/>
+<rect x="${PAD}" y="${PAD + 30}" width="${mw * px}" height="${mh * px}" rx="16" fill="url(#g)"/>
+<g font-family="Golos Text,Arial,sans-serif" font-size="12" fill="#8a8d93"><path d="M${PAD} ${H - 26}h${step * px}" stroke="#8a8d93" stroke-width="2" stroke-linecap="round"/><circle cx="${PAD}" cy="${H - 26}" r="3" fill="#8a8d93"/><circle cx="${PAD + step * px}" cy="${H - 26}" r="3" fill="#8a8d93"/><text x="${PAD + step * px + 10}" y="${H - 22}">${step} m</text></g>
+<text x="${W - PAD}" y="${H - 22}" text-anchor="end" font-family="Golos Text,Arial,sans-serif" font-size="11" fill="#55585e">schematic from published room size</text></svg>`;
   const k = PLAN_WORLD / W;
   return {
     image: { src: svgUrl(svg), w: W, h: H },

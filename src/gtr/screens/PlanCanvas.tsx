@@ -38,13 +38,18 @@ const KIND_ORDER = [
   "venue", "room", "slot", "artist", "sound", "light", "decor", "gear",
   "interactive", "content", "staff", "promo", "money", "doc", "tech",
 ];
-export const autoLayout = (nodes: GraphNode[], cols: number) => {
+export const autoLayout = (
+  nodes: GraphNode[],
+  cols: number,
+  top = 70,
+  anchored: Record<string, unknown> = {},
+) => {
   const free = nodes
-    .filter((n) => n.px == null || n.py == null)
+    .filter((n) => (n.px == null || n.py == null) && !anchored[n.id])
     .sort((a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind));
   const out = new Map<string, { x: number; y: number }>();
   free.forEach((n, i) => {
-    out.set(n.id, { x: 80 + (i % cols) * 150, y: 70 + Math.floor(i / cols) * 140 });
+    out.set(n.id, { x: 80 + (i % cols) * 150, y: top + Math.floor(i / cols) * 140 });
   });
   return out;
 };
@@ -66,6 +71,7 @@ export function PlanCanvas({
   nodes,
   links,
   plan,
+  anchors = {},
   sel,
   linkFrom,
   fitKey,
@@ -80,6 +86,8 @@ export function PlanCanvas({
   nodes: GraphNode[];
   links: GraphLink[];
   plan?: PlanImage;
+  /** где стоит значок, пока его не перетащили: залы — в центре своего зала на схеме */
+  anchors?: Record<string, { x: number; y: number }>;
   sel: string;
   linkFrom: string | null;
   /** смена ключа (вошли в зал, сменили чертёж) — заново вписать в экран */
@@ -109,10 +117,18 @@ export function PlanCanvas({
   const planH = plan ? Math.round((PLAN_W * plan.h) / Math.max(1, plan.w)) : 0;
   const cols = size.w && size.w < 640 ? 3 : 5;
   const freeKey = nodes.filter((n) => n.px == null).map((n) => n.id).join(",");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const auto = useMemo(() => autoLayout(nodes, cols), [freeKey, cols]);
+  // с чертежом нерасставленные блоки ждут под ним, а не поверх залов
+  const autoTop = plan ? planH + 90 : 70;
+  const anchorKey = Object.keys(anchors).join(",");
+  const auto = useMemo(
+    () => autoLayout(nodes, cols, autoTop, anchors),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [freeKey, cols, autoTop, anchorKey],
+  );
   const posBase = (n: GraphNode) =>
-    n.px != null && n.py != null ? { x: n.px, y: n.py } : (auto.get(n.id) ?? { x: 80, y: 70 });
+    n.px != null && n.py != null
+      ? { x: n.px, y: n.py }
+      : (anchors[n.id] ?? auto.get(n.id) ?? { x: 80, y: 70 });
   const posOf = (n: GraphNode) => (drag && drag.id === n.id ? { x: drag.x, y: drag.y } : posBase(n));
   const toScreen = (p: { x: number; y: number }, v = view) => ({ x: p.x * v.s + v.tx, y: p.y * v.s + v.ty });
   const local = (e: { clientX: number; clientY: number }) => {
@@ -161,7 +177,7 @@ export function PlanCanvas({
       ty: size.h / 2 - ((minY + maxY) / 2) * s + 10,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [size.w, size.h, fitKey, plan?.src, planH, nodes.length > 0, cols]);
+  }, [size.w, size.h, fitKey, plan?.src, planH, nodes.length > 0, cols, anchorKey]);
   useEffect(fit, [fit]);
 
   const zoomAt = (cx: number, cy: number, k: number, v = viewRef.current) => {
@@ -349,11 +365,17 @@ export function PlanCanvas({
   const wireFrom = wire ? byId.get(wire.from) : undefined;
   const wireHit = wire ? nodeAt({ x: wire.x, y: wire.y }, wire.from) : null;
 
+  // Отдалили — значки мельчают, подписи прячутся (кроме выбранного), как
+  // метки на карте: иначе на телефоне схема площадки — каша из надписей.
+  const ts = Math.min(1, Math.max(0.6, view.s * 1.6));
+
   return (
     <div
       ref={boxRef}
       className="gtr-plan"
       data-plan={plan ? "" : undefined}
+      data-compact={ts < 0.8 || undefined}
+      style={{ "--ts": ts } as React.CSSProperties}
       onPointerDown={onDown}
       onPointerMove={onMoveP}
       onPointerUp={onUp}

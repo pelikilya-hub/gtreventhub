@@ -1414,6 +1414,30 @@ export const roomsOf = (venueId: string): [string, string, string][] => {
 };
 
 // Граф события для площадки: вручную собранный сид либо генерация из базы
+// Узел зала из записи базы — общий для сборщика графа площадки и для
+// мастера, который добавляет выбранные залы сверх первых MAX_AUTO_ROOMS.
+export const spaceRoomNode = (s: Space, id: string, y: number): GraphNode => {
+  const pax = spacePax(s);
+  const area = spaceArea(s);
+  const gap = spaceGap(s);
+  return {
+    id,
+    kind: "room",
+    x: 276,
+    y,
+    title: String(s.name),
+    sub: spaceSub(s),
+    badge: pax || "—",
+    fields: [
+      ["ЗАЛ", String(s.name)],
+      ["ПЛОЩАДЬ", area ? `${area.toLocaleString("ru-RU")} м²` : "не заявлена"],
+      ["ВМЕСТИМОСТЬ", pax ? `${pax} гостей` : "не заявлена"],
+      ["БРОНИРОВАНИЕ", String(s.bookable ?? "по запросу")],
+      ...(gap ? ([["ТРЕБУЕТ ДАННЫХ", gap]] as [string, string][]) : []),
+    ],
+  };
+};
+
 export const venueGraph = (venueId: string): Graph => {
   const seed = GRAPH_SEED[venueId];
   if (seed) return structuredClone(seed);
@@ -1444,25 +1468,7 @@ export const venueGraph = (venueId: string): Graph => {
   const spaces = SPACES(venueId).slice(0, MAX_AUTO_ROOMS);
   spaces.forEach((s, i) => {
     const id = `r${i + 1}`;
-    const pax = spacePax(s);
-    const area = spaceArea(s);
-    const gap = spaceGap(s);
-    nodes.push({
-      id,
-      kind: "room",
-      x: 276,
-      y: 26 + i * 150,
-      title: String(s.name),
-      sub: spaceSub(s),
-      badge: pax || "—",
-      fields: [
-        ["ЗАЛ", String(s.name)],
-        ["ПЛОЩАДЬ", area ? `${area.toLocaleString("ru-RU")} м²` : "не заявлена"],
-        ["ВМЕСТИМОСТЬ", pax ? `${pax} гостей` : "не заявлена"],
-        ["БРОНИРОВАНИЕ", String(s.bookable ?? "по запросу")],
-        ...(gap ? ([["ТРЕБУЕТ ДАННЫХ", gap]] as [string, string][]) : []),
-      ],
-    });
+    nodes.push(spaceRoomNode(s, id, 26 + i * 150));
     links.push({ from: "n1", to: id });
   });
 

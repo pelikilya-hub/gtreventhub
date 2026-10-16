@@ -6225,7 +6225,10 @@ canvas.gtr-dancer-img {
   position: absolute; z-index: 2; width: 96px; margin-left: -48px; margin-top: -24px;
   display: flex; flex-direction: column; align-items: center; gap: 5px;
   cursor: pointer; -webkit-tap-highlight-color: transparent;
+  /* --ts — масштаб значка от зума холста; центр значка остаётся на месте */
+  transform: scale(var(--ts, 1)); transform-origin: 50% 24px;
 }
+.gtr-plan[data-compact] .gtr-tok:not([data-on]):not([data-hit]):not([data-drag]) .gtr-tok-label { display: none; }
 .gtr-tok-ic {
   position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
   background: var(--gtr-card2); color: var(--k);
@@ -6292,4 +6295,9 @@ canvas.gtr-dancer-img {
 @media (prefers-reduced-motion: reduce) {
   .gtr-tok-ic { transition: none; }
   .gtr-tok-st { animation: none; }
+}
+/* метка «схема по размерам»: подложка нарисована из данных, а не загружена */
+.gtr-plan-auto {
+  padding: 6px 9px; font: 600 10.5px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--gtr-amber); border: var(--gtr-hair) dashed rgba(245, 166, 35, .55);
 }

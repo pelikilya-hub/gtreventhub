@@ -20,6 +20,7 @@ import {
   STAGE_LABEL,
   STATUS_COLOR,
   SPACES,
+  spaceRoomNode,
   V,
   venueGraph,
   zonesOf,
@@ -445,15 +446,29 @@ const spaceMeta = (sp: Record<string, unknown>) =>
 
 // Залы события = выбранные в брифе; остальные узлы-залы убираются, их связи
 // переезжают на первый оставшийся зал. Зоны добавляются узлами с меткой ЗОНА.
-const applyRooms = (g: Graph, keepNames: string[], zones: string[]): Graph => {
+export const applyRooms = (g: Graph, keepNames: string[], zones: string[], venueId: string): Graph => {
   const venue = g.nodes.find((n) => n.kind === "venue");
+  // Выбранные залы, которых нет в графе, добавляем из базы. Сценарий кладёт
+  // один «подходящий» зал, а сборщик площадки — только первые шесть: без
+  // этого выбор в мастере молча терялся и событие оставалось без залов.
+  for (const name of keepNames) {
+    if (g.nodes.some((n) => n.kind === "room" && n.title === name)) continue;
+    const sp = SPACES(venueId).find((x) => String(x.name) === name);
+    if (!sp) continue;
+    let k = g.nodes.filter((n) => n.kind === "room").length + 1;
+    while (g.nodes.some((n) => n.id === `r${k}`)) k++;
+    const id = `r${k}`;
+    g.nodes.push(spaceRoomNode(sp, id, 26 + (k - 1) * 150));
+    if (venue) g.links.push({ from: venue.id, to: id });
+  }
   if (keepNames.length) {
     const removed = g.nodes.filter((n) => n.kind === "room" && !keepNames.includes(n.title));
     const removedIds = new Set(removed.map((r) => r.id));
     if (removedIds.size) {
       g.nodes = g.nodes.filter((n) => !removedIds.has(n.id));
       const kept = g.nodes.filter((n) => n.kind === "room");
-      const fallback = kept[0]?.id ?? venue?.id;
+      const primary = keepNames.map((nm) => kept.find((n) => n.title === nm)).find(Boolean);
+      const fallback = (primary ?? kept[0])?.id ?? venue?.id;
       g.links = g.links.flatMap((l) => {
         if (removedIds.has(l.from))
           return fallback && l.to !== fallback ? [{ from: fallback, to: l.to }] : [];
@@ -484,7 +499,10 @@ const applyRooms = (g: Graph, keepNames: string[], zones: string[]): Graph => {
   // Блоки пресета (артисты, декор, промо-интерактив…) закрепляются за первым
   // залом события — или зоной, если залы площадки не нормализованы.
   // «Висящих в воздухе» блоков не остаётся.
-  const firstRoom = g.nodes.find((n) => n.kind === "room");
+  // главный зал — первый выбранный в мастере, а не первый попавшийся в графе
+  const firstRoom =
+    keepNames.map((nm) => g.nodes.find((n) => n.kind === "room" && n.title === nm)).find(Boolean) ??
+    g.nodes.find((n) => n.kind === "room");
   if (firstRoom) {
     const PLACEABLE = ["artist", "sound", "light", "decor", "content", "gear", "interactive"];
     for (const n of g.nodes) {
@@ -649,7 +667,7 @@ function NewEvent({
         guests: guestsStr || guestsLabel,
         date: dateFull,
         dateIso,
-        graph: stampSlot(applyRooms(built.graph, roomsSel, zonesSel), dateH, time),
+        graph: stampSlot(applyRooms(built.graph, roomsSel, zonesSel, venueId), dateH, time),
         brief: built.brief,
       });
     } else {
@@ -660,7 +678,7 @@ function NewEvent({
         guests: guestsStr,
         date: dateFull,
         dateIso,
-        graph: stampSlot(applyRooms(venueGraph(venueId), roomsSel, zonesSel), dateH, time),
+        graph: stampSlot(applyRooms(venueGraph(venueId), roomsSel, zonesSel, venueId), dateH, time),
       });
     }
   };

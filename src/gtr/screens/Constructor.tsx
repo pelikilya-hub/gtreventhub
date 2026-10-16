@@ -70,7 +70,8 @@ import { useGtr } from "../store";
 import { getPrefsFn, planUploadFn, sendOfferFn } from "../kv-api";
 import { plural } from "../plural";
 import { Card, Chip, Dot, Eyebrow, Icon, tint } from "../ui";
-import { PlanCanvas, type PlanImage } from "./PlanCanvas";
+import { PLAN_W, PlanCanvas, type PlanImage } from "./PlanCanvas";
+import { roomPlan, venuePlan } from "../venue-plan";
 
 // ---------- перевод данных события при выводе ----------
 // Узлы графа, пресеты, проверки и смета хранятся по-русски: это данные, по
@@ -765,7 +766,32 @@ export function ConstructorScreen({
   // Чертёж живёт на узле того уровня, который открыт: зал — свой план,
   // верхний уровень — план площадки.
   const planHolder = openRoomNode ?? venueNode;
-  const currentPlan: PlanImage | undefined = planHolder?.plan;
+  // Своего чертежа нет — рисуем схему по размерам залов из базы (если
+  // они известны): залы событий встают значками на свои места.
+  const autoPlan = planHolder?.plan
+    ? null
+    : openRoomNode
+      ? roomPlan(vid, openRoomNode.title)
+      : venuePlan(vid);
+  const currentPlan: PlanImage | undefined = planHolder?.plan ?? autoPlan?.image;
+  const planAnchors: Record<string, { x: number; y: number }> = {};
+  if (autoPlan) {
+    if (venueNode) planAnchors[venueNode.id] = { x: PLAN_W / 2, y: -120 };
+    if (openRoomNode) {
+      const a = autoPlan.anchor(openRoomNode.title);
+      if (a) planAnchors[openRoomNode.id] = a;
+      const kids = childrenOf(openRoomNode.id);
+      kids.forEach((k, i) => {
+        const p = autoPlan.slot?.(i, kids.length);
+        if (p) planAnchors[k.id] = p;
+      });
+    } else {
+      for (const r of roomNodes) {
+        const a = autoPlan.anchor(r.title);
+        if (a) planAnchors[r.id] = a;
+      }
+    }
+  }
   const setPlan = (plan: PlanImage | undefined) =>
     planHolder &&
     mutate((gr) => ({
@@ -1742,23 +1768,28 @@ export function ConstructorScreen({
                 >
                   {planBusy
                     ? t("Загружаю…")
-                    : currentPlan
+                    : planHolder.plan
                       ? t("Заменить чертёж")
                       : openRoomNode
                         ? t("+ Чертёж зала")
                         : t("+ Чертёж площадки")}
                 </button>
-                {currentPlan ? (
+                {autoPlan ? (
+                  <span className="gtr-plan-auto" title={t("Нарисовано по размерам залов из открытых данных — загрузите настоящий чертёж, когда он будет")}>
+                    {t("Схема по размерам")}
+                  </span>
+                ) : null}
+                {planHolder.plan ? (
                   <>
                     <button
                       type="button"
                       className="gtr-btn"
                       style={{ padding: "8px 12px" }}
-                      aria-pressed={Boolean(currentPlan.inv)}
+                      aria-pressed={Boolean(currentPlan?.inv)}
                       title={t("Светлый чертёж — в тёмные тона интерфейса")}
-                      onClick={() => setPlan({ ...currentPlan, inv: !currentPlan.inv })}
+                      onClick={() => setPlan({ ...planHolder.plan!, inv: !planHolder.plan!.inv })}
                     >
-                      {currentPlan.inv ? t("Чертёж как есть") : t("Затемнить")}
+                      {planHolder.plan.inv ? t("Чертёж как есть") : t("Затемнить")}
                     </button>
                     <button
                       type="button"
@@ -1793,6 +1824,7 @@ export function ConstructorScreen({
                 nodes={visibleNodes}
                 links={visibleLinks}
                 plan={currentPlan}
+                anchors={planAnchors}
                 sel={sel}
                 linkFrom={linkFrom}
                 fitKey={openRoom ?? "top"}

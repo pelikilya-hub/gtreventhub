@@ -70,7 +70,9 @@ import { useGtr } from "../store";
 import { getPrefsFn, planUploadFn, sendOfferFn } from "../kv-api";
 import { plural } from "../plural";
 import { Card, Chip, Dot, Eyebrow, Icon, tint } from "../ui";
-import { PlanCanvas, type PlanImage } from "./PlanCanvas";
+import { PLAN_W, PlanCanvas, type PlanImage } from "./PlanCanvas";
+import { roomPlan, venuePlan } from "../venue-plan";
+import { kindArt, UI_IC } from "../kind-art";
 
 // ---------- перевод данных события при выводе ----------
 // Узлы графа, пресеты, проверки и смета хранятся по-русски: это данные, по
@@ -765,7 +767,32 @@ export function ConstructorScreen({
   // Чертёж живёт на узле того уровня, который открыт: зал — свой план,
   // верхний уровень — план площадки.
   const planHolder = openRoomNode ?? venueNode;
-  const currentPlan: PlanImage | undefined = planHolder?.plan;
+  // Своего чертежа нет — рисуем схему по размерам залов из базы (если
+  // они известны): залы событий встают значками на свои места.
+  const autoPlan = planHolder?.plan
+    ? null
+    : openRoomNode
+      ? roomPlan(vid, openRoomNode.title)
+      : venuePlan(vid);
+  const currentPlan: PlanImage | undefined = planHolder?.plan ?? autoPlan?.image;
+  const planAnchors: Record<string, { x: number; y: number }> = {};
+  if (autoPlan) {
+    if (venueNode) planAnchors[venueNode.id] = { x: PLAN_W / 2, y: -120 };
+    if (openRoomNode) {
+      const a = autoPlan.anchor(openRoomNode.title);
+      if (a) planAnchors[openRoomNode.id] = a;
+      const kids = childrenOf(openRoomNode.id);
+      kids.forEach((k, i) => {
+        const p = autoPlan.slot?.(i, kids.length);
+        if (p) planAnchors[k.id] = p;
+      });
+    } else {
+      for (const r of roomNodes) {
+        const a = autoPlan.anchor(r.title);
+        if (a) planAnchors[r.id] = a;
+      }
+    }
+  }
   const setPlan = (plan: PlanImage | undefined) =>
     planHolder &&
     mutate((gr) => ({
@@ -1344,7 +1371,7 @@ export function ConstructorScreen({
                   }
                 >
                   <span className="gtr-cx-tile-ic">
-                    <Icon d={K[3]} size={22} />
+                    <img src={kindArt(kind)} alt="" draggable={false} />
                     {count ? <span className="gtr-cx-tile-n">{count}</span> : null}
                     {!expandable ? <span className="gtr-cx-tile-plus">+</span> : null}
                   </span>
@@ -1374,7 +1401,7 @@ export function ConstructorScreen({
                 >
                   <div className="gtr-cx-drawer-head">
                     <span className="gtr-cx-drawer-ic">
-                      <Icon d={K[3]} size={14} />
+                      <img src={kindArt(kind)} alt="" />
                     </span>
                     <span style={{ flex: 1, minWidth: 0 }}>{tr(label)}</span>
                     <button
@@ -1714,61 +1741,81 @@ export function ConstructorScreen({
                   type="button"
                   role="tab"
                   aria-selected={viewMode === m}
+                  aria-label={m === "plan" ? t("План") : t("Карточки")}
+                  title={m === "plan" ? t("План") : t("Карточки")}
                   data-on={viewMode === m || undefined}
                   onClick={() => setView(m)}
                 >
-                  {m === "plan" ? t("План") : t("Карточки")}
+                  <Icon d={m === "plan" ? UI_IC.map : UI_IC.cards} size={16} />
+                  <span>{m === "plan" ? t("План") : t("Карточки")}</span>
                 </button>
               ))}
             </div>
             {openRoomNode ? (
-              <button type="button" className="gtr-btn" style={{ padding: "8px 12px" }} onClick={() => setOpenRoom(null)}>
-                ← {t("Все залы")}
+              <button
+                type="button"
+                className="gtr-ibtn"
+                aria-label={t("Все залы")}
+                title={t("Все залы")}
+                onClick={() => setOpenRoom(null)}
+              >
+                <Icon d={UI_IC.back} size={18} />
               </button>
             ) : null}
             {viewMode === "plan" && planHolder ? (
               <>
+                {autoPlan ? (
+                  <span
+                    className="gtr-plan-auto"
+                    style={{ marginLeft: "auto" }}
+                    title={t("Нарисовано по размерам залов из открытых данных — загрузите настоящий чертёж, когда он будет")}
+                  >
+                    {t("Схема по размерам")}
+                  </span>
+                ) : null}
                 <button
                   type="button"
-                  className="gtr-btn"
-                  style={{ padding: "8px 12px", marginLeft: "auto" }}
+                  className="gtr-ibtn"
+                  style={autoPlan ? undefined : { marginLeft: "auto" }}
                   disabled={planBusy}
                   onClick={() => planInputRef.current?.click()}
+                  aria-label={
+                    planHolder.plan
+                      ? t("Заменить чертёж")
+                      : openRoomNode
+                        ? t("+ Чертёж зала")
+                        : t("+ Чертёж площадки")
+                  }
                   title={
                     openRoomNode
                       ? t("Планировка этого зала — подложка под значки")
                       : t("Планировка площадки — подложка под значки")
                   }
                 >
-                  {planBusy
-                    ? t("Загружаю…")
-                    : currentPlan
-                      ? t("Заменить чертёж")
-                      : openRoomNode
-                        ? t("+ Чертёж зала")
-                        : t("+ Чертёж площадки")}
+                  <Icon d={UI_IC.image} size={18} />
                 </button>
-                {currentPlan ? (
+                {planHolder.plan ? (
                   <>
                     <button
                       type="button"
-                      className="gtr-btn"
-                      style={{ padding: "8px 12px" }}
-                      aria-pressed={Boolean(currentPlan.inv)}
+                      className="gtr-ibtn"
+                      data-on={planHolder.plan.inv || undefined}
+                      aria-pressed={Boolean(planHolder.plan.inv)}
+                      aria-label={t("Затемнить")}
                       title={t("Светлый чертёж — в тёмные тона интерфейса")}
-                      onClick={() => setPlan({ ...currentPlan, inv: !currentPlan.inv })}
+                      onClick={() => setPlan({ ...planHolder.plan!, inv: !planHolder.plan!.inv })}
                     >
-                      {currentPlan.inv ? t("Чертёж как есть") : t("Затемнить")}
+                      <Icon d={UI_IC.contrast} size={18} />
                     </button>
                     <button
                       type="button"
-                      className="gtr-btn"
-                      style={{ padding: "8px 12px", color: "var(--gtr-red-hot)" }}
+                      className="gtr-ibtn"
+                      data-tone="danger"
                       aria-label={t("Убрать чертёж")}
                       title={t("Убрать чертёж")}
                       onClick={() => setPlan(undefined)}
                     >
-                      ✕
+                      <Icon d={UI_IC.trash} size={18} />
                     </button>
                   </>
                 ) : null}
@@ -1793,6 +1840,7 @@ export function ConstructorScreen({
                 nodes={visibleNodes}
                 links={visibleLinks}
                 plan={currentPlan}
+                anchors={planAnchors}
                 sel={sel}
                 linkFrom={linkFrom}
                 fitKey={openRoom ?? "top"}
@@ -1825,10 +1873,11 @@ export function ConstructorScreen({
               {selNode && visibleIds.has(selNode.id) ? (
                 <div
                   className="gtr-plan-sel"
-                  style={{ "--k": selKind[1], "--kb": selKind[2] } as React.CSSProperties}
+                  key={selNode.id}
+                  style={{ "--k": selKind[1] } as React.CSSProperties}
                 >
                   <span className="gtr-plan-sel-ic">
-                    <Icon d={selKind[3]} size={18} />
+                    <img src={kindArt(selNode.kind)} alt="" />
                   </span>
                   <span className="gtr-plan-sel-txt">
                     <small>{tr(selKind[0])}</small>
@@ -1836,19 +1885,33 @@ export function ConstructorScreen({
                   </span>
                   <div className="gtr-plan-sel-acts">
                     {selNode.kind === "room" ? (
-                      <button type="button" className="gtr-btn" onClick={() => setOpenRoom((cur) => (cur === selNode.id ? null : selNode.id))}>
-                        {openRoom === selNode.id ? t("Закрыть зал") : t("Открыть зал")}
+                      <button
+                        type="button"
+                        className="gtr-plan-act"
+                        onClick={() => setOpenRoom((cur) => (cur === selNode.id ? null : selNode.id))}
+                      >
+                        <span className="gtr-ibtn">
+                          <Icon d={openRoom === selNode.id ? UI_IC.exit : UI_IC.enter} size={18} />
+                        </span>
+                        {openRoom === selNode.id ? t("Выйти") : t("Войти")}
                       </button>
                     ) : null}
                     <button
                       type="button"
-                      className={linkFrom === selNode.id ? "gtr-btn gtr-btn-red" : "gtr-btn"}
+                      className="gtr-plan-act"
+                      data-on={linkFrom === selNode.id || undefined}
                       title={t("Потяните стрелку от значка или нажмите и выберите второй блок")}
                       onClick={() => setLinkFrom(linkFrom === selNode.id ? null : selNode.id)}
                     >
+                      <span className="gtr-ibtn">
+                        <Icon d={UI_IC.link} size={18} />
+                      </span>
                       {linkFrom === selNode.id ? t("Выберите блок…") : t("Связать")}
                     </button>
-                    <button type="button" className="gtr-btn" onClick={() => setPanelOpen(true)}>
+                    <button type="button" className="gtr-plan-act" onClick={() => setPanelOpen(true)}>
+                      <span className="gtr-ibtn">
+                        <Icon d={UI_IC.info} size={18} />
+                      </span>
                       {t("Детали")}
                     </button>
                   </div>

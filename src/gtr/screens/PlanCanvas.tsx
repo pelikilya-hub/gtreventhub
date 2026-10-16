@@ -26,6 +26,7 @@ import {
   type GraphLink,
   type GraphNode,
 } from "../data/app-data";
+import { kindArt, UI_IC } from "../kind-art";
 import { Icon } from "../ui";
 
 export const PLAN_W = 1000;
@@ -38,13 +39,18 @@ const KIND_ORDER = [
   "venue", "room", "slot", "artist", "sound", "light", "decor", "gear",
   "interactive", "content", "staff", "promo", "money", "doc", "tech",
 ];
-export const autoLayout = (nodes: GraphNode[], cols: number) => {
+export const autoLayout = (
+  nodes: GraphNode[],
+  cols: number,
+  top = 70,
+  anchored: Record<string, unknown> = {},
+) => {
   const free = nodes
-    .filter((n) => n.px == null || n.py == null)
+    .filter((n) => (n.px == null || n.py == null) && !anchored[n.id])
     .sort((a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind));
   const out = new Map<string, { x: number; y: number }>();
   free.forEach((n, i) => {
-    out.set(n.id, { x: 80 + (i % cols) * 150, y: 70 + Math.floor(i / cols) * 140 });
+    out.set(n.id, { x: 80 + (i % cols) * 150, y: top + Math.floor(i / cols) * 140 });
   });
   return out;
 };
@@ -66,6 +72,7 @@ export function PlanCanvas({
   nodes,
   links,
   plan,
+  anchors = {},
   sel,
   linkFrom,
   fitKey,
@@ -80,6 +87,8 @@ export function PlanCanvas({
   nodes: GraphNode[];
   links: GraphLink[];
   plan?: PlanImage;
+  /** где стоит значок, пока его не перетащили: залы — в центре своего зала на схеме */
+  anchors?: Record<string, { x: number; y: number }>;
   sel: string;
   linkFrom: string | null;
   /** смена ключа (вошли в зал, сменили чертёж) — заново вписать в экран */
@@ -109,10 +118,18 @@ export function PlanCanvas({
   const planH = plan ? Math.round((PLAN_W * plan.h) / Math.max(1, plan.w)) : 0;
   const cols = size.w && size.w < 640 ? 3 : 5;
   const freeKey = nodes.filter((n) => n.px == null).map((n) => n.id).join(",");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const auto = useMemo(() => autoLayout(nodes, cols), [freeKey, cols]);
+  // с чертежом нерасставленные блоки ждут под ним, а не поверх залов
+  const autoTop = plan ? planH + 90 : 70;
+  const anchorKey = Object.keys(anchors).join(",");
+  const auto = useMemo(
+    () => autoLayout(nodes, cols, autoTop, anchors),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [freeKey, cols, autoTop, anchorKey],
+  );
   const posBase = (n: GraphNode) =>
-    n.px != null && n.py != null ? { x: n.px, y: n.py } : (auto.get(n.id) ?? { x: 80, y: 70 });
+    n.px != null && n.py != null
+      ? { x: n.px, y: n.py }
+      : (anchors[n.id] ?? auto.get(n.id) ?? { x: 80, y: 70 });
   const posOf = (n: GraphNode) => (drag && drag.id === n.id ? { x: drag.x, y: drag.y } : posBase(n));
   const toScreen = (p: { x: number; y: number }, v = view) => ({ x: p.x * v.s + v.tx, y: p.y * v.s + v.ty });
   const local = (e: { clientX: number; clientY: number }) => {
@@ -161,7 +178,7 @@ export function PlanCanvas({
       ty: size.h / 2 - ((minY + maxY) / 2) * s + 10,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [size.w, size.h, fitKey, plan?.src, planH, nodes.length > 0, cols]);
+  }, [size.w, size.h, fitKey, plan?.src, planH, nodes.length > 0, cols, anchorKey]);
   useEffect(fit, [fit]);
 
   const zoomAt = (cx: number, cy: number, k: number, v = viewRef.current) => {
@@ -349,11 +366,17 @@ export function PlanCanvas({
   const wireFrom = wire ? byId.get(wire.from) : undefined;
   const wireHit = wire ? nodeAt({ x: wire.x, y: wire.y }, wire.from) : null;
 
+  // Отдалили — значки мельчают, подписи прячутся (кроме выбранного), как
+  // метки на карте: иначе на телефоне схема площадки — каша из надписей.
+  const ts = Math.min(1, Math.max(0.6, view.s * 1.6));
+
   return (
     <div
       ref={boxRef}
       className="gtr-plan"
       data-plan={plan ? "" : undefined}
+      data-compact={ts < 0.8 || undefined}
+      style={{ "--ts": ts } as React.CSSProperties}
       onPointerDown={onDown}
       onPointerMove={onMoveP}
       onPointerUp={onUp}
@@ -380,32 +403,28 @@ export function PlanCanvas({
           const mx = (p1.x + p2.x) / 2 - (p2.y - p1.y) * 0.12;
           const my = (p1.y + p2.y) / 2 + (p2.x - p1.x) * 0.12;
           const ls = linkStatus(a, b);
+          const d = `M${p1.x} ${p1.y} Q${mx} ${my} ${p2.x} ${p2.y}`;
+          // подложка связи + бегущий поток поверх: видно, что связь живая
+          // и в какую сторону она идёт
           return (
-            <path
-              key={i}
-              d={`M${p1.x} ${p1.y} Q${mx} ${my} ${p2.x} ${p2.y}`}
-              stroke={STATUS_COLOR[ls]}
-              strokeWidth={ls === "ok" ? 2 : 2.4}
-              strokeDasharray={ls === "problem" || ls === "delay" ? "6 5" : undefined}
-              fill="none"
-              opacity={0.85}
-            />
+            <g key={i} className="gtr-link" data-st={ls} style={{ "--lc": STATUS_COLOR[ls] } as React.CSSProperties}>
+              <path className="gtr-link-base" d={d} />
+              <path className="gtr-link-flow" d={d} />
+            </g>
           );
         })}
         {wire && wireFrom ? (
           <line
+            className="gtr-link-wire"
             x1={toScreen(posOf(wireFrom)).x}
             y1={toScreen(posOf(wireFrom)).y}
             x2={wire.x}
             y2={wire.y}
-            stroke="var(--gtr-green)"
-            strokeWidth={2.4}
-            strokeDasharray="5 4"
           />
         ) : null}
       </svg>
 
-      {nodes.map((n) => {
+      {nodes.map((n, i) => {
         const K = KINDS[n.kind];
         const p = toScreen(posOf(n));
         const st = nodeStatus(n);
@@ -417,30 +436,32 @@ export function PlanCanvas({
             key={n.id}
             data-node={n.id}
             className="gtr-tok"
+            data-kind={n.kind}
             data-on={on || undefined}
             data-target={target || undefined}
             data-hit={wireHit === n.id || undefined}
             data-drag={drag?.id === n.id || undefined}
+            data-st={st.status}
             style={
               {
                 left: p.x,
                 top: p.y,
                 "--k": K[1],
-                "--kb": K[2],
                 "--st": STATUS_COLOR[st.status],
+                "--i": Math.min(i, 14),
               } as React.CSSProperties
             }
             title={`${tr(K[0])} · ${tr(n.title)}`}
           >
-            <span className="gtr-tok-ic">
-              <Icon d={K[3]} size={20} />
+            <span className="gtr-tok-orb">
+              <img src={kindArt(n.kind)} alt="" draggable={false} />
               {st.status !== "ok" ? <span className="gtr-tok-st" /> : null}
               {kids.length ? <span className="gtr-tok-n">{kids.length}</span> : null}
             </span>
             <span className="gtr-tok-label">{tr(n.title)}</span>
             {on ? (
               <span className="gtr-tok-port" data-port={n.id} title={t("Потяните к другому блоку")}>
-                <Icon d="M5 12h14 M13 6l6 6-6 6" size={14} />
+                <Icon d={UI_IC.link} size={15} />
               </span>
             ) : null}
           </div>
@@ -448,14 +469,14 @@ export function PlanCanvas({
       })}
 
       <div className="gtr-plan-ctl" onPointerDown={(e) => e.stopPropagation()}>
-        <button type="button" aria-label={t("Приблизить")} onClick={() => zoomAt(size.w / 2, size.h / 2, 1.3)}>
-          +
+        <button type="button" className="gtr-ibtn" aria-label={t("Приблизить")} title={t("Приблизить")} onClick={() => zoomAt(size.w / 2, size.h / 2, 1.3)}>
+          <Icon d={UI_IC.plus} size={18} />
         </button>
-        <button type="button" aria-label={t("Отдалить")} onClick={() => zoomAt(size.w / 2, size.h / 2, 1 / 1.3)}>
-          −
+        <button type="button" className="gtr-ibtn" aria-label={t("Отдалить")} title={t("Отдалить")} onClick={() => zoomAt(size.w / 2, size.h / 2, 1 / 1.3)}>
+          <Icon d={UI_IC.minus} size={18} />
         </button>
-        <button type="button" aria-label={t("Вписать в экран")} title={t("Вписать в экран")} onClick={fit}>
-          <Icon d="M4 9V4h5 M20 9V4h-5 M4 15v5h5 M20 15v5h-5" size={15} />
+        <button type="button" className="gtr-ibtn" aria-label={t("Вписать в экран")} title={t("Вписать в экран")} onClick={fit}>
+          <Icon d={UI_IC.fit} size={17} />
         </button>
       </div>
 

@@ -1036,6 +1036,14 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
       } satisfies VenueBusy),
     );
   }
+  // Лента RA по всей стране — для витрины маршрута (bangtaostyle.com).
+  // Отдельным ключом: в афишу площадок и дайджест Пхукета она не входит.
+  try {
+    const { syncRaRoute } = await import("./afisha-ra-area");
+    counts["ra-route"] = await syncRaRoute(ns);
+  } catch {
+    counts["ra-route"] = -1;
+  }
   await sendFindsDigest(ns, finds).catch(() => {
     // телеграм прилёг — афиша всё равно собрана, дайджест догонит в
     // следующий прогон только новыми находками, старые уже в KV

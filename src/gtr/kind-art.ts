@@ -40,4 +40,7 @@ export const UI_IC = {
   map: "M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z M9 4v14 M15 6v14",
   cards: "M4 5h7v6H4z M13 5h7v6h-7z M4 13h7v6H4z M13 13h7v6h-7z",
   close: "M6 6l12 12 M18 6L6 18",
+  undo: "M9 14L4 9l5-5 M4 9h10.5a5.5 5.5 0 0 1 0 11H11",
+  wand: "M3 21l11-11 M14 4V2 M14 12v-2 M18 8h2 M8 8h2 M17 5l1.5-1.5 M17 11l1.5 1.5 M11 5L9.5 3.5",
+  arrow: "M5 12h14 M13 6l6 6-6 6",
 } as const;

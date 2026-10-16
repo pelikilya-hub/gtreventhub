@@ -291,6 +291,13 @@ export function ConstructorScreen({
     }
   };
   const planInputRef = useRef<HTMLInputElement>(null);
+  // План: центр экрана (куда ставить новый блок), выбранная связь, только
+  // что добавленный блок и история правок для «отменить».
+  const planCenter = useRef<{ x: number; y: number } | null>(null);
+  const [selLink, setSelLink] = useState<string | null>(null);
+  const [fresh, setFresh] = useState<string | null>(null);
+  const history = useRef<Graph[]>([]);
+  const [canUndo, setCanUndo] = useState(false);
   const [planBusy, setPlanBusy] = useState(false);
   const [openCat, setOpenCat] = useState<NodeKind | null>(null);
   const [artBase, setArtBase] = useState<ArtistBase | null>(null);
@@ -316,6 +323,36 @@ export function ConstructorScreen({
   }, [openCat, artBase]);
 
   const mutate = (fn: (gr: Graph) => Graph) => draft && setDraftGraph(draft.id, fn);
+  // Правка, которую можно отменить: перед ней кладём снимок графа в историю.
+  // Перетаскивание карточек сюда не ходит — там правка на каждый пиксель.
+  const edit = (fn: (gr: Graph) => Graph) => {
+    if (!draft) return;
+    history.current = [...history.current.slice(-39), structuredClone(g)];
+    setCanUndo(true);
+    mutate(fn);
+  };
+  const undoRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    // Ctrl/Cmd+Z — отменить; не мешаем отмене внутри полей ввода
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        undoRef.current();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+  const undo = () => {
+    const prev = history.current.pop();
+    setCanUndo(history.current.length > 0);
+    if (!prev || !draft) return;
+    setDraftGraph(draft.id, () => prev);
+    setSelLink(null);
+  };
+  undoRef.current = undo;
   const nodeById = (id: string) => g.nodes.find((n) => n.id === id);
 
   const actor = organizer ? "Организатор" : user.roleLabel;
@@ -352,7 +389,23 @@ export function ConstructorScreen({
     const finalFields: [string, string][] = room
       ? [...fields.filter((f) => f[0] !== "ЗАЛ"), ["ЗАЛ", room.title]]
       : fields;
-    mutate((gr) => {
+    // На плане новый блок встаёт туда, куда сейчас смотрят, — если он будет
+    // виден на этом уровне (в открытом зале или на общем плане без зала).
+    const visibleHere = room ? openRoom === room.id : !openRoom;
+    const c = viewMode === "plan" && visibleHere ? planCenter.current : null;
+    edit((gr) => {
+      let pp: { px: number; py: number } | Record<string, never> = {};
+      if (c) {
+        const taken = gr.nodes.filter((n) => n.px != null && n.py != null);
+        const free = (x: number, y: number) => taken.every((n) => Math.hypot(n.px! - x, n.py! - y) > 80);
+        let spot = { x: c.x, y: c.y };
+        for (let k = 0; k < 24 && !free(spot.x, spot.y); k++) {
+          const a = k * 2.4;
+          const r = 90 + k * 14;
+          spot = { x: c.x + Math.cos(a) * r, y: c.y + Math.sin(a) * r };
+        }
+        pp = { px: Math.round(spot.x), py: Math.round(spot.y) };
+      }
       const roomNode = room ? gr.nodes.find((n) => n.id === room.id) : undefined;
       // ставим рядом со своим залом: колонка справа, стопкой вниз
       const siblings = roomNode
@@ -368,7 +421,7 @@ export function ConstructorScreen({
           ? [{ from: venue.id, to: id }]
           : [];
       return {
-        nodes: [...gr.nodes, { id, kind, x: pos.x, y: pos.y, title, sub, badge, fields: finalFields }],
+        nodes: [...gr.nodes, { id, kind, x: pos.x, y: pos.y, title, sub, badge, fields: finalFields, ...pp }],
         links: [...gr.links, ...link],
         log: pushLog(
           gr,
@@ -377,6 +430,8 @@ export function ConstructorScreen({
       };
     });
     setSel(id); // сразу выделяем добавленный блок — инспектор показывает его поля
+    setFresh(id);
+    window.setTimeout(() => setFresh((f) => (f === id ? null : f)), 2400);
     return id;
   };
 
@@ -830,11 +885,36 @@ export function ConstructorScreen({
     }
   };
   const addLink = (from: string, to: string) =>
-    mutate((gr) =>
+    edit((gr) =>
       gr.links.some((l) => (l.from === from && l.to === to) || (l.from === to && l.to === from))
         ? gr
         : { ...gr, links: [...gr.links, { from, to }] },
     );
+  const removeLink = (key: string) => {
+    const [from, to] = key.split(">");
+    edit((gr) => ({ ...gr, links: gr.links.filter((l) => !(l.from === from && l.to === to)) }));
+    setSelLink(null);
+  };
+  const removeNode = (id: string) => {
+    const n = nodeById(id);
+    if (!n || n.kind === "venue") return;
+    edit((gr) => ({
+      ...gr,
+      nodes: gr.nodes.filter((x) => x.id !== id),
+      links: gr.links.filter((l) => l.from !== id && l.to !== id),
+      log: pushLog(gr, `Удалён блок «${n.title}»`),
+    }));
+    setSel(venueNode?.id ?? g.nodes[0]?.id ?? "n1");
+  };
+  // «Разложить»: блоки этого уровня забывают ручные места и встают в сетку
+  // (залы — в свои прямоугольники на схеме). Отменяется одной кнопкой.
+  const arrange = () =>
+    edit((gr) => ({
+      ...gr,
+      nodes: gr.nodes.map((n) =>
+        visibleIds.has(n.id) ? { ...n, px: undefined, py: undefined } : n,
+      ),
+    }));
 
   const canvasH = Math.max(
     openRoomNode ? 460 : 420,
@@ -1847,6 +1927,7 @@ export function ConstructorScreen({
                 kidsOf={(id) => childrenOf(id)}
                 tr={tr}
                 onTap={(id) => {
+                  setSelLink(null);
                   if (!id) return;
                   if (linkFrom && linkFrom !== id) {
                     addLink(linkFrom, id);
@@ -1856,12 +1937,39 @@ export function ConstructorScreen({
                   setSel(id);
                 }}
                 onMove={(id, x, y) =>
-                  mutate((gr) => ({
+                  edit((gr) => ({
                     ...gr,
                     nodes: gr.nodes.map((n) => (n.id === id ? { ...n, px: x, py: y } : n)),
                   }))
                 }
                 onLink={addLink}
+                selLink={selLink}
+                onLinkTap={(from, to) => setSelLink(`${from}>${to}`)}
+                fresh={fresh}
+                centerRef={planCenter}
+                tools={
+                  <>
+                    <button
+                      type="button"
+                      className="gtr-ibtn"
+                      disabled={!canUndo}
+                      aria-label={t("Отменить")}
+                      title={t("Отменить последнее действие")}
+                      onClick={undo}
+                    >
+                      <Icon d={UI_IC.undo} size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      className="gtr-ibtn"
+                      aria-label={t("Разложить")}
+                      title={t("Разложить блоки заново")}
+                      onClick={arrange}
+                    >
+                      <Icon d={UI_IC.wand} size={18} />
+                    </button>
+                  </>
+                }
                 onOpen={(id) => setOpenRoom((cur) => (cur === id ? null : id))}
                 onHold={(id) => {
                   setSel(id);
@@ -1870,7 +1978,53 @@ export function ConstructorScreen({
                 }}
               />
               {/* выбранный блок: что это и что с ним сделать — без поиска по меню */}
-              {selNode && visibleIds.has(selNode.id) ? (
+              {selLink && (() => {
+                const [lf, lt] = selLink.split(">");
+                const a = nodeById(lf);
+                const b = nodeById(lt);
+                if (!a || !b) return null;
+                const ls = linkStatus(a, b);
+                return (
+                  <div
+                    className="gtr-plan-sel"
+                    key={selLink}
+                    style={{ "--k": STATUS_COLOR[ls] } as React.CSSProperties}
+                  >
+                    <span className="gtr-plan-sel-pair">
+                      <span className="gtr-plan-sel-ic" style={{ "--k": KINDS[a.kind][1] } as React.CSSProperties}>
+                        <img src={kindArt(a.kind)} alt="" />
+                      </span>
+                      <Icon d={UI_IC.arrow} size={16} />
+                      <span className="gtr-plan-sel-ic" style={{ "--k": KINDS[b.kind][1] } as React.CSSProperties}>
+                        <img src={kindArt(b.kind)} alt="" />
+                      </span>
+                    </span>
+                    <span className="gtr-plan-sel-txt">
+                      <small>
+                        {t("СВЯЗЬ")} · {t(STATUS_LABEL[ls])}
+                      </small>
+                      <b>
+                        {tr(a.title)} → {tr(b.title)}
+                      </b>
+                    </span>
+                    <div className="gtr-plan-sel-acts">
+                      <button type="button" className="gtr-plan-act" onClick={() => removeLink(selLink)}>
+                        <span className="gtr-ibtn" data-tone="danger">
+                          <Icon d={UI_IC.trash} size={18} />
+                        </span>
+                        {t("Удалить")}
+                      </button>
+                      <button type="button" className="gtr-plan-act" onClick={() => setSelLink(null)}>
+                        <span className="gtr-ibtn">
+                          <Icon d={UI_IC.close} size={18} />
+                        </span>
+                        {t("Закрыть")}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+              {!selLink && selNode && visibleIds.has(selNode.id) ? (
                 <div
                   className="gtr-plan-sel"
                   key={selNode.id}
@@ -1914,6 +2068,14 @@ export function ConstructorScreen({
                       </span>
                       {t("Детали")}
                     </button>
+                    {selNode.kind !== "venue" ? (
+                      <button type="button" className="gtr-plan-act" onClick={() => removeNode(selNode.id)}>
+                        <span className="gtr-ibtn" data-tone="danger">
+                          <Icon d={UI_IC.trash} size={18} />
+                        </span>
+                        {t("Удалить")}
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               ) : null}

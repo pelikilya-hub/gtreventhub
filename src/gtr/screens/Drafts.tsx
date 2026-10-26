@@ -1,12 +1,14 @@
 // Черновики приёмника афиш: что продукт узнал сам и ждёт решения.
 //
 // Приёмник разбирает присланные посты и складывает всё незнакомое —
-// площадки и имена из лайнапов. Заводить их в базу автоматически нельзя:
+// площадки и имена из лайнапов. Площадки сюда же приносит радар
+// агрегаторов (venue-radar.ts): RA и городской календарь. Заводить их в базу автоматически нельзя:
 // половина «новых площадок» окажется опечаткой, а половина «артистов» —
 // названием вечеринки. Здесь человек смотрит на собранное и решает.
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { regionName } from "../data/app-data";
 import { draftDecideFn, draftsFn, type ArtistDraftRow, type VenueDraftRow } from "../kv-api";
 import { Card, Chip, Eyebrow } from "../ui";
 import { fillT } from "./Constructor";
@@ -27,7 +29,7 @@ function noteText(note: string, t: (k: string, o?: Record<string, unknown>) => s
 }
 
 export function DraftsScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [venues, setVenues] = useState<VenueDraftRow[]>([]);
   const [artists, setArtists] = useState<ArtistDraftRow[]>([]);
   const [busy, setBusy] = useState("");
@@ -75,7 +77,7 @@ export function DraftsScreen() {
       {loaded && !venues.length && !artists.length ? (
         <Card style={{ padding: 20 }}>
           <div style={{ font: "500 13.5px/1.6 'Golos Text',sans-serif" }}>
-            {t("Пусто — всё разобрано. Черновики появляются, когда в присланной афише встречается площадка или имя, которых нет в базе.")}
+            {t("Пусто — всё разобрано. Черновики появляются, когда в присланной афише или в ленте агрегатора встречается площадка или имя, которых нет в базе.")}
           </div>
           <div
             className="gtr-mono"
@@ -94,6 +96,9 @@ export function DraftsScreen() {
               <Card key={v.slug} style={{ padding: 14 }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
                   <span style={{ font: "700 15px/1.45 'Golos Text',sans-serif" }}>{v.name}</span>
+                  {v.region && v.region !== "phuket" ? (
+                    <Chip color={AMBER}>{regionName(v.region, i18n.language).toUpperCase()}</Chip>
+                  ) : null}
                   {v.kind ? <Chip color={AMBER}>{v.kind.toUpperCase()}</Chip> : null}
                   {v.waiting.length ? (
                     <Chip color={GREEN}>{t("СОБЫТИЙ ЖДЁТ:")} {v.waiting.length}</Chip>
@@ -117,7 +122,14 @@ export function DraftsScreen() {
                         key={w.dateIso + w.title}
                         style={{ font: "500 12px/1.45 'Golos Text',sans-serif", color: "var(--gtr-t2)" }}
                       >
-                        {w.dateIso} — {w.title}
+                        {w.dateIso} —{" "}
+                        {w.url ? (
+                          <a href={w.url} target="_blank" rel="noreferrer" style={{ color: "inherit" }}>
+                            {w.title} ↗
+                          </a>
+                        ) : (
+                          w.title
+                        )}
                       </div>
                     ))}
                   </div>
@@ -132,7 +144,7 @@ export function DraftsScreen() {
                     href={
                       v.lat && v.lon
                         ? `https://www.google.com/maps/search/?api=1&query=${v.lat},${v.lon}`
-                        : `https://www.google.com/maps/search/${encodeURIComponent(`${v.name} Phuket`)}`
+                        : `https://www.google.com/maps/search/${encodeURIComponent(`${v.name} ${regionName(v.region || "phuket", "en")}`)}`
                     }
                     target="_blank"
                     rel="noreferrer"

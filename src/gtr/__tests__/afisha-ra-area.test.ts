@@ -82,4 +82,14 @@ describe("чистка RA", () => {
     expect(e.title).toBe("VINYL SESSIONS (Strictly Vinyl)");
     expect(regionFromRa({ name: "Woowon, Bangsaen, Chonburi", address: "Bangsaen, Chon Buri" })).toBeNull();
   });
+
+  it("неопознанной площадке — адрес и точная точка для радара, узнанной — нет", () => {
+    const precise = { ...ELSEWHERE, location: { latitude: 13.7231, longitude: 100.5279 } };
+    const [e] = parseRaListings([ev("8", "2026-11-04", precise)], "2026-10-16");
+    expect(e).toMatchObject({ vid: undefined, venueAddress: ELSEWHERE.address, venueGeo: [13.7231, 100.5279] });
+    const [round] = parseRaListings([ev("9", "2026-11-04", ELSEWHERE)], "2026-10-16");
+    expect(round.venueGeo).toBeUndefined();
+    const [known] = parseRaListings([ev("10", "2026-11-04", ARMANIA)], "2026-10-16", [{ id: "VEN-0016", name: "Armania Phuket" }]);
+    expect(known.venueAddress).toBeUndefined();
+  });
 });

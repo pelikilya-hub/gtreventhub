@@ -189,9 +189,16 @@ describe("экран карты", () => {
 
   it("выбор региона и категории переживает перезагрузку, район — нет", () => {
     // Застрявший фильтр района читается как поломка карты.
-    expect(src).toContain("gtr-map-view");
-    expect(src).toContain("savePref({ ...loadPref(), region: code })");
-    expect(src).not.toMatch(/savePref\([^)]*district/);
+    //
+    // Память переехала в region-pref: тот же выбор читает база площадок,
+    // и раньше она его не видела — открывалась всегда на Пхукете.
+    // Собственного хранилища у карты больше нет, иначе два экрана снова
+    // начнут расходиться.
+    expect(src).toContain('from "../region-pref"');
+    expect(src).toContain("saveRegion(code)");
+    expect(src).toContain("saveTag(next)");
+    expect(src).not.toContain("localStorage");
+    expect(src).not.toMatch(/save(Pref|Region|Tag)\([^)]*district/);
   });
 
   it("маршрут всегда сохраняется вместе с состоянием", () => {

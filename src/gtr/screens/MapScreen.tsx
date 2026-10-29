@@ -45,6 +45,7 @@ import { catOf, MAP_CATS, pinHtml } from "../map-style";
 import { useMyLocation } from "../geo-me";
 import { gpsTracker } from "../gps-track";
 import { mapAfishaFn, type MapAfisha } from "../kv-api";
+import { loadRegion, loadTag, saveRegion, saveTag } from "../region-pref";
 import { driveUrl, findVenues, kmLabel, nearestOrder, straightKm, walkable } from "../map-find";
 import { loadRoute, roadRoute, routeLabel, saveRoute, type LatLon, type RoadRoute } from "../evening-route";
 
@@ -73,25 +74,8 @@ const ALL = "Все";
 
 // Выбор региона и категории переживает перезагрузку. Гость на Самуи
 // открывал карту и каждый раз видел Пхукет: остров по умолчанию —
-// исторический, а не его. Район не запоминаем сознательно: это выбор на
-// один взгляд, и застрявший на «Патонге» фильтр читается как поломка.
-const PREF_KEY = "gtr-map-view";
-type Pref = { region?: string; tag?: string };
-const loadPref = (): Pref => {
-  try {
-    const p = JSON.parse(localStorage.getItem(PREF_KEY) ?? "{}") as Pref;
-    return p && typeof p === "object" ? p : {};
-  } catch {
-    return {};
-  }
-};
-const savePref = (p: Pref) => {
-  try {
-    localStorage.setItem(PREF_KEY, JSON.stringify(p));
-  } catch {
-    /* приватный режим Safari — выбор просто не переживёт перезагрузку */
-  }
-};
+// исторический, а не его. Память вынесена в region-pref: тот же выбор
+// читает база площадок, и соседние экраны не спорят друг с другом.
 
 export function MapScreen() {
   const { t, i18n } = useTranslation();
@@ -114,16 +98,16 @@ export function MapScreen() {
   const pickRegion = (code: string) => {
     setRegion(code);
     setDistrict(ALL);
-    savePref({ ...loadPref(), region: code });
+    saveRegion(code);
   };
   const pickTag = (next: string) => {
     setTag(next);
-    savePref({ ...loadPref(), tag: next });
+    saveTag(next);
   };
   useEffect(() => {
-    const p = loadPref();
-    if (p.region && REGIONS[p.region]) setRegion(p.region);
-    if (p.tag) setTag(p.tag);
+    setRegion(loadRegion(REGIONS));
+    const tagPref = loadTag();
+    if (tagPref) setTag(tagPref);
   }, []);
 
   // Поиск по названию, району и типу.

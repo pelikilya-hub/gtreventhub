@@ -1547,8 +1547,17 @@ function TeamPanel() {
   const [artistName, setArtistName] = useState("");
   const [artBase, setArtBase] = useState<{ id: string; name: string; role?: string }[] | null>(null);
   const [password, setPassword] = useState("");
+  const [userQ, setUserQ] = useState("");
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Кого показываем в списке. Ищем по имени, почте и роли сразу: админ
+  // помнит человека по фамилии, а не по адресу, с которым его заводили.
+  const userHits = (users ?? []).filter((u) => {
+    const q = userQ.trim().toLowerCase();
+    if (!q) return true;
+    return `${u.name} ${u.email} ${u.roleLabel}`.toLowerCase().includes(q);
+  });
 
   const refresh = () =>
     listUsersFn()
@@ -1583,6 +1592,38 @@ function TeamPanel() {
             }
           : { ok: false, text: t(r.error ?? "Не получилось") },
       );
+    } catch {
+      setMsg({ ok: false, text: t("Сервер недоступен") });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Удаление доступа. Отчёт обязателен: удаление — необратимое действие,
+  // и раньше оно шло молча. Админ жал «Удалить», строка оставалась на
+  // месте (отказ, недоступное хранилище, собственный аккаунт), и прочесть
+  // это было негде — выглядело как «кнопка не работает». В ответе есть
+  // число вычищенных записей: кроме самой карточки стираются привязка
+  // Telegram, подписки, профиль и заявки, и видеть, что их убрали, важнее
+  // всего именно при увольнении.
+  const removeUser = async (u: PublicUser) => {
+    if (!confirm(t("Удалить доступ {{email}}? Это необратимо.", { email: u.email }))) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      const r = await deleteUserFn({ data: { email: u.email } });
+      setMsg(
+        r.ok
+          ? {
+              ok: true,
+              text: t("Доступ {{email}} удалён — вычищено записей: {{n}} (аккаунт, привязка Telegram, подписки, профиль).", {
+                email: u.email,
+                n: r.removed,
+              }),
+            }
+          : { ok: false, text: t(r.error ?? "Не получилось") },
+      );
+      refresh();
     } catch {
       setMsg({ ok: false, text: t("Сервер недоступен") });
     } finally {
@@ -1853,8 +1894,27 @@ function TeamPanel() {
 
       {users?.length ? (
         <div style={{ display: "grid", gap: 6, marginTop: 4 }}>
-          <Eyebrow style={{ fontSize: 10 }}>{t("ПРИГЛАШЁННЫЕ ·")} {users.length}</Eyebrow>
-          {users.map((u) => (
+          <Eyebrow style={{ fontSize: 10 }}>
+            {t("ПРИГЛАШЁННЫЕ ·")} {userQ.trim() ? `${userHits.length} / ${users.length}` : users.length}
+          </Eyebrow>
+          {/* Поиск по списку. Увольнение начинается с «найди такого-то», а
+              список растёт и отсортирован по дате — нужного человека
+              приходилось искать глазами, с риском удалить соседнюю строку. */}
+          {users.length > 6 ? (
+            <input
+              className="gtr-input"
+              value={userQ}
+              onChange={(e) => setUserQ(e.target.value)}
+              placeholder={t("Найти по фамилии, почте или роли")}
+              style={{ font: "500 13px/1.5 'Golos Text',sans-serif" }}
+            />
+          ) : null}
+          {userHits.length === 0 ? (
+            <span style={{ font: "500 12px/1.6 'Golos Text',sans-serif", color: "var(--gtr-t3)" }}>
+              {t("Никого не нашли — проверьте написание.")}
+            </span>
+          ) : null}
+          {userHits.map((u) => (
             <div
               key={u.email}
               style={{
@@ -1906,10 +1966,8 @@ function TeamPanel() {
               <button
                 className="gtr-btn"
                 style={{ padding: "5px 9px", fontSize: 12, color: "#E5231B" }}
-                onClick={() => {
-                  if (confirm(t("Удалить доступ {{email}}?", { email: u.email })))
-                    deleteUserFn({ data: { email: u.email } }).then(refresh);
-                }}
+                disabled={busy}
+                onClick={() => removeUser(u)}
               >
                 {t("Удалить")}
               </button>

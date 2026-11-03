@@ -205,3 +205,41 @@ describe("удаление из кабинета", () => {
     expect(fn).toContain('error: "Нет прав"');
   });
 });
+
+// Причину с сервера надо ещё и показать. Ровно здесь она терялась:
+// кнопка звала удаление и обновляла список, а ответ выбрасывала.
+describe("кнопка «Удалить» в панели команды", () => {
+  const src = readFileSync(join(__dirname, "..", "screens", "Misc.tsx"), "utf8");
+  const fn = src.slice(src.indexOf("const removeUser"), src.indexOf("const artHits"));
+
+  it("удаление не проходит без подтверждения", () => {
+    // Необратимое действие рядом с кнопкой «Новый пароль»: промах пальцем
+    // по телефону не должен стирать человека из команды.
+    expect(fn).toMatch(/if \(!confirm\(/);
+    expect(fn).toMatch(/\)\) return;/);
+  });
+
+  it("показывает и успех, и отказ", () => {
+    expect(fn).toContain("setMsg");
+    expect(fn).toContain("r.ok");
+    expect(fn).toContain("r.error");
+    expect(fn).toContain("Сервер недоступен");
+  });
+
+  it("не выбрасывает ответ сервера", () => {
+    // Прежний вид — deleteUserFn(...).then(refresh) — молчал обо всём:
+    // и об отказе, и об упавшем хранилище.
+    expect(src).not.toMatch(/deleteUserFn\([^)]*\)\s*\.then\(refresh\)/);
+    expect(fn).toContain("await deleteUserFn");
+  });
+
+  it("обновляет список после удаления", () => {
+    expect(fn).toContain("refresh()");
+  });
+
+  it("кнопка заперта на время запроса", () => {
+    // Двойной тап по медленной сети отправлял удаление дважды.
+    const btn = src.slice(src.indexOf("onClick={() => removeUser(u)}") - 400, src.indexOf("onClick={() => removeUser(u)}"));
+    expect(btn).toContain("disabled={busy}");
+  });
+});

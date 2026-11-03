@@ -19,6 +19,7 @@ import {
   V,
   readinessLabel,
 } from "../data/app-data";
+import { loadRegion, saveRegion } from "../region-pref";
 import { CdmReserve, zonesOfSpace, hasReserve } from "../cdm-booking";
 import { Card, Chip, Eyebrow, Field, tint, TrashTitle, VenueLogo } from "../ui";
 import { VenueHero } from "../venue-hero";
@@ -65,11 +66,23 @@ export function BaseScreen() {
   // География: продукт больше не равен Пхукету. Регион — верхний фильтр,
   // при его смене кластеры и теги сбрасываются: районы соседнего региона
   // здесь бессмысленны.
+  //
+  // Выбор запоминаем в том же месте, что и карта. До этого база всегда
+  // открывалась на Пхукете: тому, кто ведёт один регион, приходилось
+  // переключаться при каждом заходе, и каждый раз — секунда сомнения
+  // «я смотрю свои площадки или чужие».
   const [region, setRegion] = useState("phuket");
+  // Читаем после отрисовки, а не в инициализаторе useState: на сервере
+  // хранилища нет, и
+  // расхождение разметки React считает ошибкой гидратации.
+  useEffect(() => {
+    setRegion(loadRegion(REGIONS));
+  }, []);
   const pickRegion = (code: string) => {
     setRegion(code);
     setCluster(t("Все"));
     setTag(t("Все"));
+    saveRegion(code);
   };
   const [cluster, setCluster] = useState(t("Все"));
   const [tag, setTag] = useState(t("Все"));

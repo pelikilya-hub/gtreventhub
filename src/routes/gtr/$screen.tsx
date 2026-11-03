@@ -39,10 +39,16 @@ const SCREENS: ScreenId[] = [
 export const Route = createFileRoute("/gtr/$screen")({
   validateSearch: (
     s: Record<string, unknown>,
-  ): { vid?: string; artist?: string; draft?: string } => ({
+  ): { vid?: string; artist?: string; draft?: string; pin?: string; label?: string; kind?: string; find?: string } => ({
     vid: typeof s.vid === "string" ? s.vid : undefined,
     artist: typeof s.artist === "string" ? s.artist : undefined,
     draft: typeof s.draft === "string" ? s.draft : undefined,
+    // Карта со стороны: точка «lat,lon» с подписью и типом — черновик
+    // площадки, которой в базе нет; find — строка поиска, когда точки нет.
+    pin: typeof s.pin === "string" ? s.pin : undefined,
+    label: typeof s.label === "string" ? s.label : undefined,
+    kind: typeof s.kind === "string" ? s.kind : undefined,
+    find: typeof s.find === "string" ? s.find : undefined,
   }),
   beforeLoad: async ({ params }) => {
     const { user } = await sessionFn();

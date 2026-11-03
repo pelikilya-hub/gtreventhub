@@ -51,3 +51,22 @@ export const pinHtml = (cat: MapCat, exact: boolean, dim: boolean): string => {
     <img src="${stickerUrl(cat.sticker)}" alt="" />
   </span>`;
 };
+
+/** Категория для площадки, которой в базе ещё нет: черновик из приёмника
+ *  или радара приходит с типом из Nominatim («nightclub», «pub»), а не с
+ *  нашим тегом. Сводим к ближайшему знаку карты; что не узнали — «Прочее». */
+export const draftCat = (kind?: string): MapCat => {
+  const k = (kind ?? "").toLowerCase();
+  if (!k) return catOf("Other");
+  if (/club|disco/.test(k)) return catOf("Nightclub");
+  if (/beach/.test(k)) return catOf("Beach club");
+  if (/roof/.test(k)) return catOf("Rooftop");
+  if (/bar|pub|lounge|biergarten/.test(k)) return catOf("Bar / Lounge");
+  if (/hotel|resort|hostel|guest/.test(k)) return catOf("Resort / MICE");
+  if (/marina|yacht|pier/.test(k)) return catOf("Marina / Yacht");
+  if (/theatre|theater|cinema|park|attraction|arts_centre/.test(k)) return catOf("Show / Park");
+  if (/music|concert/.test(k)) return catOf("Live music");
+  if (/events?_venue|conference|exhibition|community_centre/.test(k)) return catOf("Event space");
+  if (/villa|house|chalet/.test(k)) return catOf("Villa");
+  return catOf("Other");
+};

@@ -5,6 +5,7 @@
 // агрегаторов (venue-radar.ts): RA и городской календарь. Заводить их в базу автоматически нельзя:
 // половина «новых площадок» окажется опечаткой, а половина «артистов» —
 // названием вечеринки. Здесь человек смотрит на собранное и решает.
+import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,6 +31,7 @@ function noteText(note: string, t: (k: string, o?: Record<string, unknown>) => s
 
 export function DraftsScreen() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [venues, setVenues] = useState<VenueDraftRow[]>([]);
   const [artists, setArtists] = useState<ArtistDraftRow[]>([]);
   const [busy, setBusy] = useState("");
@@ -139,18 +141,25 @@ export function DraftsScreen() {
                   {/* Прежде чем заводить карточку, площадку надо увидеть
                       глазами: карта и профиль отвечают на «это вообще
                       существует» быстрее любых полей. */}
-                  <a
+                  {/* Наша карта, не чужая: черновик встаёт на неё пунктирным
+                      знаком среди соседей из базы — сразу видно, где он и
+                      нет ли его уже под другим именем. Без координаты карта
+                      открывается с именем в поиске: это тот же вопрос. */}
+                  <button
                     className="gtr-btn"
-                    href={
-                      v.lat && v.lon
-                        ? `https://www.google.com/maps/search/?api=1&query=${v.lat},${v.lon}`
-                        : `https://www.google.com/maps/search/${encodeURIComponent(`${v.name} ${regionName(v.region || "phuket", "en")}`)}`
+                    onClick={() =>
+                      navigate({
+                        to: "/gtr/$screen",
+                        params: { screen: "map" },
+                        search:
+                          v.lat && v.lon
+                            ? { pin: `${v.lat},${v.lon}`, label: v.name, kind: v.kind }
+                            : { find: v.name },
+                      })
                     }
-                    target="_blank"
-                    rel="noreferrer"
                   >
-                    {t("На карте ↗")}
-                  </a>
+                    {t("На карте")} →
+                  </button>
                   <a
                     className="gtr-btn"
                     href={`https://www.instagram.com/explore/search/keyword/?q=${encodeURIComponent(v.name)}`}

@@ -109,7 +109,17 @@ export type VenueDraft = {
   hours?: string;
   website?: string;
   status: "new" | "approved" | "skip";
+  /** Код региона. У черновиков из приёмника его нет — это Пхукет. */
+  region?: string;
+  /** Когда площадку увидели впервые: seenAt сдвигается с каждой находкой. */
+  firstSeenAt?: number;
+  /** Вечера, с которыми площадку принёс агрегатор (см. venue-radar.ts).
+   *  Лежат в самом черновике, а не ключами intakewait: так радар пишет
+   *  в KV один ключ на площадку, и только когда что-то изменилось. */
+  events?: DraftEvent[];
 };
+
+export type DraftEvent = { id: string; dateIso: string; title: string; url: string; source: string };
 
 /** Обогащение новой площадки по OpenStreetMap: координаты, тип заведения,
  *  адрес, часы. Ключей не требует. Остальное — сайт, соцсети, фото,

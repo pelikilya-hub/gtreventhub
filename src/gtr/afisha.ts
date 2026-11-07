@@ -6,6 +6,8 @@ import venuesRaw from "./data/venues.json";
 import { kvGetJson, type KvNs } from "./kv-ns";
 import { pickVenueByName } from "./intake";
 import { absImg, posterKvKey, posterUrl } from "./poster";
+import type { VenueDraft } from "./intake";
+import type { RadarSighting } from "./venue-radar";
 
 export type VenueAfishaEvent = {
   id: string;
@@ -729,10 +731,26 @@ const sameNight = (a: string, b: string) => {
 const CITY_CALENDARS = ["https://www.phuket.net"];
 const CITY_WINDOW_DAYS = 95;
 
+type CityVenue = { venue?: string; address?: string; city?: string; geo_lat?: number | string; geo_lng?: number | string };
+
+function citySighting(place: string, v: CityVenue | undefined, host: string, ev: VenueAfishaEvent): RadarSighting {
+  const lat = Number(v?.geo_lat);
+  const lon = Number(v?.geo_lng);
+  const address = [v?.address, v?.city].map((x) => decodeEntities(String(x ?? "")).trim()).filter(Boolean).join(", ");
+  return {
+    name: place,
+    region: "phuket",
+    source: host,
+    event: { id: ev.id, dateIso: ev.dateIso, title: ev.title, url: ev.url },
+    address: address || undefined,
+    ...(lat && lon ? { lat, lon } : {}),
+  };
+}
+
 /** События города по площадкам. Имя площадки из агрегатора сводим с базой
  *  строгим сопоставлением: неузнанное имя — не наша площадка, и приписать
  *  вечер соседу хуже, чем не показать его вовсе. */
-async function syncCityCalendar(): Promise<Map<string, VenueAfishaEvent[]>> {
+async function syncCityCalendar(misses: RadarSighting[] = []): Promise<Map<string, VenueAfishaEvent[]>> {
   const out = new Map<string, VenueAfishaEvent[]>();
   const today = new Date().toISOString().slice(0, 10);
   const until = new Date(Date.now() + CITY_WINDOW_DAYS * 86400e3).toISOString().slice(0, 10);
@@ -740,15 +758,19 @@ async function syncCityCalendar(): Promise<Map<string, VenueAfishaEvent[]>> {
     const host = new URL(site).host;
     const j = (await jsonOrNull(
       `${site}/wp-json/tribe/events/v1/events?per_page=50&start_date=${today}&end_date=${until}`,
-    )) as { events?: (TribeEvent & { venue?: { venue?: string } })[] } | null;
+    )) as { events?: (TribeEvent & { venue?: CityVenue })[] } | null;
     if (!j?.events?.length) continue;
     for (const raw of j.events) {
       const place = decodeEntities(String(raw.venue?.venue ?? "")).trim();
       if (!place) continue;
       const hit = pickVenueByName(place, VENUES);
-      if (!hit) continue; // площадки нет в базе — её заводит поток черновиков
       const [ev] = fromTribe([raw], host);
       if (!ev) continue;
+      if (!hit) {
+        // площадки нет в базе — это находка радара новых площадок
+        misses.push(citySighting(place, raw.venue, host, ev));
+        continue;
+      }
       out.set(hit.id, [...(out.get(hit.id) ?? []), ev]);
     }
   }
@@ -962,11 +984,14 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
     // разведка — необязательный слой, её падение не ломает основной прогон
   }
 
+  // Неопознанные площадки агрегаторов — находки радара (venue-radar.ts).
+  const misses: RadarSighting[] = [];
+
   // Городской агрегатор поверх сайтов площадок. Он видит вечера тех, у
   // кого своего календаря нет вовсе, — отели и рестораны выкладывают
   // программу туда, а не к себе на сайт.
   try {
-    for (const [vid, ev] of await syncCityCalendar()) {
+    for (const [vid, ev] of await syncCityCalendar(misses)) {
       const cur = byVid.get(vid) ?? [];
       const fresh = ev.filter((e) => !cur.some((c) => c.dateIso === e.dateIso && sameNight(c.title, e.title)));
       byVid.set(vid, dedupe([...cur, ...fresh]));
@@ -1048,6 +1073,32 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
     // телеграм прилёг — афиша всё равно собрана, дайджест догонит в
     // следующий прогон только новыми находками, старые уже в KV
   });
+
+  // Радар новых площадок. Ленту RA читаем из KV, а не из ответа выше:
+  // если RA сейчас прилёг, вчерашняя лента всё равно несёт те же
+  // площадки, а радар от повтора ничего не пишет.
+  try {
+    const { RA_ROUTE_KEY } = await import("./afisha-ra-area");
+    const ra = await kvGetJson<import("./afisha-ra-area").RaRouteStore>(ns, RA_ROUTE_KEY);
+    for (const e of ra?.events ?? [])
+      if (!e.vid && e.venue)
+        misses.push({
+          name: e.venue,
+          region: e.region,
+          source: "ra.co",
+          event: { id: e.id, dateIso: e.dateIso, title: e.title, url: e.url },
+          address: e.venueAddress,
+          ...(e.venueGeo ? { lat: e.venueGeo[0], lon: e.venueGeo[1] } : {}),
+        });
+    const { runRadar } = await import("./venue-radar");
+    const fresh = await runRadar(ns, misses, today);
+    counts["radar-new"] = fresh.length;
+    await sendRadarDigest(ns, fresh).catch(() => {
+      // черновики уже в KV — их видно на экране «Черновики»
+    });
+  } catch {
+    counts["radar-new"] = -1;
+  }
   return counts;
 }
 
@@ -1065,9 +1116,8 @@ const SRC_MARK: Record<string, string> = {
 
 async function sendFindsDigest(ns: KvNs, finds: { vid: string; e: VenueAfishaEvent }[]) {
   if (!finds.length) return;
-  const { tgApi, tgConfigured, tgEsc } = await import("./tg");
+  const { tgConfigured, tgEsc } = await import("./tg");
   if (!tgConfigured()) return;
-  const { guardInternalChatId, OPS_KEY } = await import("./community");
 
   const nameOf = new Map(
     ((venuesRaw as { venues?: { id: string; name?: string }[] }).venues ?? []).map((v) => [
@@ -1091,8 +1141,46 @@ async function sendFindsDigest(ns: KvNs, finds: { vid: string; e: VenueAfishaEve
     rows.join("\n") +
     more +
     `\n\nПравки: приложение → Черновики/Афиша`;
+  const chats = await sendOps(ns, text);
 
-  // адресаты: BOSS и GTR-админы с привязанным TG + закрытый ops-канал
+  // след прогона — для «почему не пришло» без чтения логов
+  await ns.put(
+    `afishafinds:${new Date().toISOString().slice(0, 10)}`,
+    JSON.stringify({ at: Date.now(), count: finds.length, chats }),
+    { expirationTtl: 60 * 60 * 24 * 14 },
+  );
+}
+
+/** Новые площадки с радара: имя, город, первый вечер. Решение — на
+ *  экране «Черновики», здесь только повод туда заглянуть. */
+async function sendRadarDigest(ns: KvNs, fresh: VenueDraft[]) {
+  if (!fresh.length) return;
+  const { tgEsc } = await import("./tg");
+  const dd = (iso: string) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}`;
+  const rows = fresh.slice(0, 15).map((d) => {
+    const e = d.events?.[0];
+    const city = d.region && d.region !== "phuket" ? ` <i>(${tgEsc(d.region.toUpperCase())})</i>` : "";
+    const first = e ? ` — ${dd(e.dateIso)} <a href="${tgEsc(e.url)}">${tgEsc(e.title.slice(0, 50))}</a>` : "";
+    const n = (d.events?.length ?? 0) > 1 ? ` · вечеров: ${d.events!.length}` : "";
+    return `• <b>${tgEsc(d.name)}</b>${city}${first}${n}`;
+  });
+  const more = fresh.length > 15 ? `\n…и ещё ${fresh.length - 15}` : "";
+  await sendOps(
+    ns,
+    `📡 <b>Радар: новых площадок ${fresh.length}</b>\n` +
+      rows.join("\n") +
+      more +
+      `\n\nЗавести или отклонить: приложение → Черновики`,
+  );
+}
+
+/** Служебная рассылка: BOSS и GTR-админы с привязанным TG + закрытый
+ *  ops-канал. В публичные чаты не уходит никогда. Возвращает число чатов. */
+async function sendOps(ns: KvNs, text: string): Promise<number> {
+  const { tgApi, tgConfigured } = await import("./tg");
+  if (!tgConfigured()) return 0;
+  const { guardInternalChatId, OPS_KEY } = await import("./community");
+
   const sent = new Set<string>();
   const push = async (raw: string | number | null | undefined) => {
     const chat = await guardInternalChatId(ns, raw);
@@ -1112,13 +1200,7 @@ async function sendFindsDigest(ns: KvNs, finds: { vid: string; e: VenueAfishaEve
   const ops = await kvGetJson<{ chatId?: number }>(ns, OPS_KEY);
   await push(ops?.chatId);
   await push(typeof process !== "undefined" ? process.env?.TELEGRAM_CHAT_ID : undefined);
-
-  // след прогона — для «почему не пришло» без чтения логов
-  await ns.put(
-    `afishafinds:${new Date().toISOString().slice(0, 10)}`,
-    JSON.stringify({ at: Date.now(), count: finds.length, chats: sent.size }),
-    { expirationTtl: 60 * 60 * 24 * 14 },
-  );
+  return sent.size;
 }
 
 // Ключ ручного/кронового запуска — производная от секрета сессий

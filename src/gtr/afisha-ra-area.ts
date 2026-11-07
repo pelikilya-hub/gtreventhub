@@ -37,6 +37,10 @@ export type RaRouteEvent = {
   venue: string;
   region: string;
   vid?: string; // площадка из нашей базы, если имя совпало
+  /** Адрес и точка площадки — только у неопознанных: по ним радар новых
+   *  площадок заводит черновик сразу с местом на карте. */
+  venueAddress?: string;
+  venueGeo?: [number, number];
 };
 export type RaRouteStore = { events: RaRouteEvent[]; syncedAt: number };
 
@@ -132,6 +136,9 @@ export function parseRaListings(
     // не должен забрать одноимённый бар в Бангкоке
     const hit = name ? pickVenueByName(name, venues.filter((v) => (v.region || "phuket") === region)) : null;
     const img = e.images?.[0]?.filename;
+    const lat = e.venue?.location?.latitude ?? 0;
+    const lon = e.venue?.location?.longitude ?? 0;
+    const precise = !Number.isInteger(lat) && !Number.isInteger(lon);
     out.push({
       id,
       title,
@@ -142,6 +149,12 @@ export function parseRaListings(
       venue: name || e.venue?.name || "",
       region,
       vid: hit?.id,
+      ...(hit
+        ? {}
+        : {
+            venueAddress: clean(e.venue?.address ?? "") || undefined,
+            venueGeo: precise ? ([lat, lon] as [number, number]) : undefined,
+          }),
     });
   }
   return out.sort((a, b) => a.dateIso.localeCompare(b.dateIso));

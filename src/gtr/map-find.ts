@@ -146,3 +146,33 @@ export { straight as straightKm };
  *  нужен тот, где уже сохранён его дом и оплачено такси. */
 export const driveUrl = (lat: number, lon: number): string =>
   `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+
+/** Точка из адресной строки: «lat,lon». Карта открывается со стороны —
+ *  из черновиков приёмника — и координата приходит текстом. Мусор и
+ *  координаты вне диапазона отбрасываем: подлёт в (NaN, NaN) ломает
+ *  Leaflet молча. */
+export const parsePin = (raw?: string): [number, number] | null => {
+  if (!raw) return null;
+  const [a, b] = raw.split(",").map((x) => Number(x.trim()));
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  if (Math.abs(a) > 90 || Math.abs(b) > 180) return null;
+  return [a, b];
+};
+
+/** Регион, чей центр ближе к точке: чужую площадку надо показать среди
+ *  своих соседей, а не на Пхукете по умолчанию. */
+export const nearestRegion = (
+  at: [number, number],
+  regions: Record<string, { center: [number, number] }>,
+): string | null => {
+  let best: string | null = null;
+  let bestKm = Infinity;
+  for (const [code, r] of Object.entries(regions)) {
+    const km = straight(at, r.center);
+    if (km < bestKm) {
+      bestKm = km;
+      best = code;
+    }
+  }
+  return best;
+};

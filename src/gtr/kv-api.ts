@@ -7,6 +7,7 @@ import type { EventDraft, Offer, OrgRequest, RoleId } from "./data/app-data";
 import { getKvNs, kvGetJson, kvListAll, type KvNs } from "./kv-ns";
 import { tgApi, tgConfigured, tgEsc, tgWebhookSecret } from "./tg";
 import type { VenueAfisha } from "./afisha";
+import type { DraftEvent } from "./intake";
 // Афиша площадки возвращается наружу серверными функциями этого модуля,
 // поэтому тип обязан уезжать вместе с ними — экраны импортируют его отсюда.
 export type { VenueAfisha };
@@ -3509,8 +3510,9 @@ export type VenueDraftRow = {
   hours?: string;
   website?: string;
   status: string;
+  region?: string;
   /** События, которые ждут эту площадку: без карточки их некуда класть. */
-  waiting: { dateIso: string; title: string }[];
+  waiting: { dateIso: string; title: string; url?: string }[];
 };
 
 export type ArtistDraftRow = {
@@ -3531,19 +3533,25 @@ export const draftsFn = createServerFn({ method: "GET" }).handler(async () => {
   const vKeys = await kvListAll(ns, "venuedraft:");
   const wKeys = await kvListAll(ns, "intakewait:");
   const venues: VenueDraftRow[] = [];
+  const today = new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10);
   for (const k of vKeys) {
-    const d = await kvGetJson<Omit<VenueDraftRow, "waiting">>(ns, k);
+    const d = await kvGetJson<Omit<VenueDraftRow, "waiting"> & { events?: DraftEvent[] }>(ns, k);
     if (!d || d.status === "skip") continue;
     const slug = k.slice("venuedraft:".length);
     // События этой площадки ждут своей карточки — показываем их рядом,
     // иначе решение принимается вслепую: одно дело новая точка, другое —
-    // точка, за которой уже стоят три вечера.
-    const waiting: { dateIso: string; title: string }[] = [];
+    // точка, за которой уже стоят три вечера. Приёмник кладёт их ключами
+    // intakewait, радар агрегаторов — в сам черновик.
+    const waiting: { dateIso: string; title: string; url?: string }[] = [];
     for (const wk of wKeys.filter((x) => x.startsWith(`intakewait:${slug}:`))) {
       const w = await kvGetJson<{ dateIso: string; title: string }>(ns, wk);
       if (w) waiting.push({ dateIso: w.dateIso, title: w.title });
     }
-    venues.push({ ...d, slug, waiting: waiting.sort((a, b) => a.dateIso.localeCompare(b.dateIso)) });
+    for (const e of d.events ?? [])
+      if (e.dateIso >= today && !waiting.some((w) => w.dateIso === e.dateIso && w.title === e.title))
+        waiting.push({ dateIso: e.dateIso, title: e.title, url: e.url });
+    const { events: _events, ...row } = d;
+    venues.push({ ...row, slug, waiting: waiting.sort((a, b) => a.dateIso.localeCompare(b.dateIso)) });
   }
 
   const aKeys = await kvListAll(ns, "artistdraft:");
@@ -3613,6 +3621,12 @@ export const draftDecideFn = createServerFn({ method: "POST" })
       });
       await ns.delete(wk);
     }
+    // вечера, с которыми площадку принёс радар агрегаторов, — со ссылкой
+    // на первоисточник: по ней команда сверит программу
+    for (const e of (draft.events as DraftEvent[] | undefined) ?? [])
+      if (!events.some((x) => x.dateIso === e.dateIso && x.title === e.title))
+        events.push({ id: e.id, title: e.title, dateIso: e.dateIso, url: e.url, artistIds: [], source: e.source });
+    events.sort((a, b) => a.dateIso.localeCompare(b.dateIso));
     if (events.length) {
       await ns.put(
         `venueevents:${id}`,

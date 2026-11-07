@@ -41,12 +41,12 @@ import { addDarkBasemap } from "../map-tiles";
 import geoRaw from "../data/venue-geo.json";
 import shapesRaw from "../data/district-shapes.json";
 import { PH, REGIONS, regionName, regionOf, richOf, V } from "../data/app-data";
-import { catOf, MAP_CATS, pinHtml } from "../map-style";
+import { catOf, draftCat, MAP_CATS, pinHtml } from "../map-style";
 import { useMyLocation } from "../geo-me";
 import { gpsTracker } from "../gps-track";
 import { mapAfishaFn, type MapAfisha } from "../kv-api";
 import { loadRegion, loadTag, saveRegion, saveTag } from "../region-pref";
-import { driveUrl, findVenues, kmLabel, nearestOrder, straightKm, walkable } from "../map-find";
+import { driveUrl, findVenues, kmLabel, nearestOrder, nearestRegion, parsePin, straightKm, walkable } from "../map-find";
 import { loadRoute, roadRoute, routeLabel, saveRoute, type LatLon, type RoadRoute } from "../evening-route";
 
 type Geo = Record<string, { lat: number; lon: number; src: string }>;
@@ -77,7 +77,20 @@ const ALL = "Все";
 // исторический, а не его. Память вынесена в region-pref: тот же выбор
 // читает база площадок, и соседние экраны не спорят друг с другом.
 
-export function MapScreen() {
+/** Карта открывается и со стороны — из черновиков приёмника. pin —
+ *  «lat,lon» площадки, которой в базе нет; label и kind — её подпись и
+ *  тип; find — строка поиска, когда координаты у черновика нет. */
+export function MapScreen({
+  pin,
+  label,
+  kind,
+  find,
+}: {
+  pin?: string;
+  label?: string;
+  kind?: string;
+  find?: string;
+} = {}) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -111,7 +124,7 @@ export function MapScreen() {
   }, []);
 
   // Поиск по названию, району и типу.
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(find ?? "");
   // Афиша: у кого сегодня событие, у кого ближайшее и когда.
   const [afisha, setAfisha] = useState<MapAfisha | null>(null);
   const [tonightOnly, setTonightOnly] = useState(false);
@@ -223,6 +236,8 @@ export function MapScreen() {
   // склейка точек выключена, поэтому у площадки гарантированно есть свой
   // знак — и попап откроется на нём, а не на кусте из шести соседей.
   const pending = useRef<string | null>(null);
+  /** Регион сменила точка со стороны — один перелёт к центру пропустить. */
+  const holdFly = useRef(false);
   const focusVenue = useCallback(
     (vid: string) => {
       const g = GEO[vid];
@@ -316,6 +331,12 @@ export function MapScreen() {
       // Подлёт к площадке главнее подлёта к району: он только что заказан
       // человеком, а район — фон, на котором это происходит.
       if (pending.current) return;
+      // Регион переключила точка со стороны: подлёт к ней уже сделан, и
+      // перелёт к центру региона его бы отменил.
+      if (holdFly.current) {
+        holdFly.current = false;
+        return;
+      }
       if (district !== ALL && shapes[district]) {
         map.flyToBounds(L.polygon(shapes[district].rings).getBounds(), {
           padding: [30, 30],
@@ -558,10 +579,55 @@ export function MapScreen() {
   // датчика не даёт ничего рассмотреть.
   const centred = useRef(false);
   useEffect(() => {
-    if (!ready || !me || centred.current || !L4.current) return;
+    // Карту открыли ради точки со стороны — к себе не летим.
+    if (!ready || !me || centred.current || !L4.current || parsePin(pin)) return;
     centred.current = true;
     L4.current.map.flyTo([me.lat, me.lon], 14, { duration: 0.8 });
-  }, [ready, me]);
+  }, [ready, me, pin]);
+
+  // Точка со стороны: черновик площадки из приёмника или радара. В базе
+  // её нет, поэтому она не проходит через общий слой точек, а встаёт
+  // отдельно — тем же знаком, что и свои, но с пунктирным кольцом: так
+  // карта помечает приблизительный адрес, и черновик по смыслу он и есть.
+  // Регион переключаем на ближайший, чтобы вокруг стояли соседи из базы:
+  // по ним видно, не заведена ли площадка уже под другим именем.
+  useEffect(() => {
+    const at = parsePin(pin);
+    if (!ready || !at || !L4.current) return;
+    const { map } = L4.current;
+    const near = nearestRegion(at, REGIONS);
+    if (near && near !== region) {
+      holdFly.current = true;
+      setRegion(near);
+      setDistrict(ALL);
+    }
+    setTag(ALL);
+    setTonightOnly(false);
+    let marker: import("leaflet").Marker | null = null;
+    void (async () => {
+      const L = await import("leaflet");
+      if (!L4.current) return;
+      const cat = draftCat(kind);
+      marker = L.marker(at, {
+        zIndexOffset: 900,
+        icon: L.divIcon({ className: "", html: pinHtml(cat, false, false), iconSize: [26, 26], iconAnchor: [13, 13] }),
+      })
+        // Прямо на карту, мимо слоёв: слой «я и мой вечер» перерисовывается
+        // целиком при каждом движении датчика и унёс бы точку с собой.
+        .addTo(map)
+        .bindTooltip(`${label || t("Черновик")} · ${t("нет в базе")}`, {
+          direction: "top",
+          permanent: true,
+          className: "gtr-area-tip",
+        });
+      map.flyTo(at, 16, { duration: 0.8 });
+    })();
+    return () => {
+      if (marker) map.removeLayer(marker);
+    };
+    // region в зависимости не нужен: точка одна на открытие, и перерисовка
+    // по смене региона только дёргала бы её.
+  }, [ready, pin, label, kind, t]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // клики из попапов (HTML вне React)
   useEffect(() => {

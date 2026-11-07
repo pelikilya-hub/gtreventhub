@@ -105,7 +105,16 @@ const LAZY = {
 const preloadScreen = (id: ScreenId) =>
   Object.hasOwn(LAZY, id) ? LAZY[id as keyof typeof LAZY].preload().catch(() => {}) : undefined;
 
-export type GtrSearch = { vid?: string; artist?: string; draft?: string };
+export type GtrSearch = {
+  vid?: string;
+  artist?: string;
+  draft?: string;
+  /** карта со стороны: точка «lat,lon», подпись, тип и строка поиска */
+  pin?: string;
+  label?: string;
+  kind?: string;
+  find?: string;
+};
 
 // Переключатель языка в шапке: RU / EN / TH одним тапом, мгновенно —
 // в мобильной шапке справа и в сайдбаре десктопа под логотипом
@@ -657,7 +666,7 @@ function ScreenSwitch({ screen, search }: { screen: ScreenId; search: GtrSearch 
     case "afishagen":
       return <AfishaGenScreen />;
     case "map":
-      return <MapScreen />;
+      return <MapScreen pin={search.pin} label={search.label} kind={search.kind} find={search.find} />;
     case "feed":
       return <FeedScreen />;
     case "tonight":

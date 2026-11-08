@@ -30,6 +30,7 @@ export type DailyJob = {
 
 /** Часы те же, что были у отдельных кронов: люди к ним привыкли. */
 export const DAILY_JOBS: DailyJob[] = [
+  { hour: 6, route: "/api/tickets", what: "билетные площадки Megatix и Ticketmelon" },
   { hour: 8, route: "/api/fill-digest", what: "очередь наполнения на смену" },
   { hour: 9, route: "/api/villa-check", what: "сверка цен вилл Private" },
   { hour: 11, route: "/api/bro-learn", what: "BRO учит новые темы" },

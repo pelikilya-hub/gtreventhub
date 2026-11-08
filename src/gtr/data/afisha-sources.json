@@ -44,7 +44,31 @@
       "access": "публичный",
       "structured": "средне — страницы событий с датами и ценами",
       "priority": 3,
-      "note": "Точка консолидации билетных событий. Проверить, есть ли устойчивый URL-паттерн по площадке."
+      "note": "Подключено 08.11.2026 (afisha-tickets.ts): открытая ручка https://megatix.in.th/api/v2/events/search?page=N, 100 событий на страницу, ~5 страниц на страну. Координат нет — город по площадке и названию.",
+      "connected": "2026-11-08"
+    },
+    {
+      "id": "ticketmelon",
+      "name": "Ticketmelon",
+      "url": "https://www.ticketmelon.com",
+      "kind": "ticketing",
+      "coverage": "концерты и фестивали, больше Бангкок; Zamna, Illuzion и курортные организаторы",
+      "access": "карта сайта sitemap-event1..5.xml и страницы событий с __NEXT_DATA__; ручки API отвечают 403",
+      "structured": "высоко — дата в мс, площадка с адресом и координатами",
+      "priority": 3,
+      "note": "Подключено 08.11.2026 (afisha-tickets.ts): страницы кэшируются, за прогон дочитывается до 24 новых или изменённых.",
+      "connected": "2026-11-08"
+    },
+    {
+      "id": "eventpop",
+      "name": "Eventpop",
+      "url": "https://www.eventpop.me",
+      "kind": "ticketing",
+      "coverage": "крупные концерты и фестивали",
+      "access": "закрыт проверкой Cloudflare «Just a moment» (403) на любой запрос",
+      "structured": "—",
+      "priority": 9,
+      "note": "Не подключён 08.11.2026: читать анониму нечего."
     },
     {
       "id": "phuket-101",

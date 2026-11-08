@@ -727,7 +727,9 @@ const sameNight = (a: string, b: string) => {
 // Городской календарь Пхукета на The Events Calendar: единственный из
 // разведанных агрегаторов, который отдаёт анониму структурированный JSON
 // с датой и названием площадки. Проверено живой загрузкой 27.08.2026:
-// ra.co отвечает 403, megatix — 404 на региональной ручке.
+// ra.co отвечает 403, megatix — 404 на региональной ручке. С тех пор
+// нашлись обходы: RA — через GraphQL ленты страны (afisha-ra-area.ts),
+// Megatix — через общую ручку поиска (afisha-tickets.ts).
 const CITY_CALENDARS = ["https://www.phuket.net"];
 const CITY_WINDOW_DAYS = 95;
 
@@ -1020,6 +1022,40 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
       if (!byVid.has(vid)) counts[vid] = counts[vid] ?? -1;
     }
   }
+  // Билетные площадки (afisha-tickets.ts): их собирает своя дневная
+  // задача, здесь только читаем готовое из KV — ни одного подзапроса.
+  // В афишу площадок идут вечера пхукетских площадок из базы; Бангкоку и
+  // островам место на витрине маршрута, а не в дайджесте Пхукета.
+  let tickets: import("./afisha-tickets").TicketEvent[] = [];
+  try {
+    const { readTickets } = await import("./afisha-tickets");
+    tickets = await readTickets(ns);
+    for (const t of tickets) {
+      if (!t.vid || t.region !== "phuket") continue;
+      const cur = byVid.get(t.vid) ?? [];
+      if (cur.some((c) => c.id === t.id || (c.dateIso === t.dateIso && sameNight(c.title, t.title)))) continue;
+      byVid.set(
+        t.vid,
+        dedupe([
+          ...cur,
+          {
+            id: t.id,
+            title: t.title,
+            dateIso: t.dateIso,
+            time: t.time,
+            price: t.price,
+            poster: t.poster,
+            posterSrc: t.poster,
+            url: t.url,
+            artistIds: matchArtists(t.title),
+            source: t.source,
+          },
+        ]),
+      );
+    }
+  } catch {
+    // билеты — необязательный слой
+  }
   // Находки прогона: события, которых в KV ещё не было. Уходят ссылками
   // в служебный телеграм — команда смотрит первоисточник и правит афишу
   // раньше, чем гость заметит ошибку. Сравнение с прошлым KV даёт
@@ -1090,6 +1126,20 @@ export async function syncAfisha(ns: KvNs): Promise<Record<string, number>> {
           address: e.venueAddress,
           ...(e.venueGeo ? { lat: e.venueGeo[0], lon: e.venueGeo[1] } : {}),
         });
+    // вечера билетных площадок у площадок, которых нет в базе. Бангкок
+    // не берём: Megatix продаёт там бранчи каждого отеля, и экран
+    // «Черновики» утонул бы в ресторанах. Клубы столицы радар и так
+    // видит через ленту RA.
+    for (const t of tickets)
+      if (!t.vid && t.venue && t.region !== "bkk")
+        misses.push({
+          name: t.venue,
+          region: t.region,
+          source: t.source,
+          event: { id: t.id, dateIso: t.dateIso, title: t.title, url: t.url },
+          address: t.venueAddress,
+          ...(t.venueGeo ? { lat: t.venueGeo[0], lon: t.venueGeo[1] } : {}),
+        });
     const { runRadar } = await import("./venue-radar");
     const fresh = await runRadar(ns, misses, today);
     counts["radar-new"] = fresh.length;
@@ -1112,6 +1162,8 @@ const SRC_MARK: Record<string, string> = {
   ra: "RA",
   facebook: "FB",
   instagram: "IG",
+  "megatix.in.th": "Megatix",
+  "ticketmelon.com": "Ticketmelon",
 };
 
 async function sendFindsDigest(ns: KvNs, finds: { vid: string; e: VenueAfishaEvent }[]) {

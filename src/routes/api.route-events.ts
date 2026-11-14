@@ -35,7 +35,7 @@ export type RouteEvent = {
   lat?: number;
   lon?: number;
   url: string; // карточка вечера в GTR Event, а для площадок вне базы — страница RA
-  source?: "gtr" | "ra"; // ra — лента Resident Advisor по стране (afisha-ra-area)
+  source?: "gtr" | "ra" | "tickets"; // ra — лента RA по стране, tickets — Megatix и Ticketmelon
 };
 
 export const Route = createFileRoute("/api/route-events")({
@@ -92,7 +92,6 @@ export const Route = createFileRoute("/api/route-events")({
         const { readRaRoute } = await import("../gtr/afisha-ra-area");
         const have = new Set(items.map((i) => `${i.date}|${i.title.toLowerCase().slice(0, 12)}`));
         for (const e of await readRaRoute(ns).catch(() => [])) {
-          if (items.length >= MAX_ITEMS) break;
           if (from && e.dateIso < from) continue;
           if (to && e.dateIso > to) continue;
           if (want.size && !want.has(e.region)) continue;
@@ -117,7 +116,38 @@ export const Route = createFileRoute("/api/route-events")({
             source: "ra",
           });
         }
+        // Билетные площадки: у них есть цена и точное начало. Вечер,
+        // который уже пришёл из нашей афиши или RA, второй раз не выводим.
+        const { readTickets } = await import("../gtr/afisha-tickets");
+        for (const e of await readTickets(ns).catch(() => [])) {
+          if (from && e.dateIso < from) continue;
+          if (to && e.dateIso > to) continue;
+          if (want.size && !want.has(e.region)) continue;
+          const k = `${e.dateIso}|${e.title.toLowerCase().slice(0, 12)}`;
+          if (have.has(k)) continue;
+          have.add(k);
+          const g = e.vid ? geo[e.vid] : undefined;
+          items.push({
+            id: e.id,
+            title: e.title,
+            date: e.dateIso,
+            time: e.time,
+            price: e.price,
+            poster: e.poster,
+            venue: e.vid ? V(e.vid).name || e.venue : e.venue,
+            venueId: e.vid || "",
+            region: e.region,
+            lat: typeof g?.lat === "number" ? g.lat : e.venueGeo?.[0],
+            lon: typeof g?.lon === "number" ? g.lon : e.venueGeo?.[1],
+            // билет — прямо на площадку продажи: гость пришёл за вечером
+            url: e.url,
+            source: "tickets",
+          });
+        }
+        // потолок — по дате, а не по порядку источников: иначе дальние
+        // вечера нашей афиши вытеснили бы завтрашние билеты
         items.sort((a, b) => a.date.localeCompare(b.date));
+        items.splice(MAX_ITEMS);
         const regions = Object.fromEntries(Object.entries(REGIONS).map(([k, r]) => [k, { ru: r.ru, en: r.en }]));
         return new Response(JSON.stringify({ items, regions, source: APP_URL }), { headers });
       },

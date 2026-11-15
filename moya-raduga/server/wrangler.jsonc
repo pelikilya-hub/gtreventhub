@@ -13,7 +13,9 @@
   "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "moya-raduga-media" }],
   "vars": {
     // Сколько «чудес» (генераций) в сутки на одного ребёнка.
-    "MAGIC_DAILY_LIMIT": "10"
+    "MAGIC_DAILY_LIMIT": "10",
+    // Модель картинок OpenAI. Нужна с прозрачным фоном: маски и стикеры без него не работают.
+    "MAGIC_MODEL": "gpt-image-1.5"
   }
   // Секреты (wrangler secret put): MEMBERS — JSON со списком участников,
   // OPENAI_API_KEY — ключ для генерации.

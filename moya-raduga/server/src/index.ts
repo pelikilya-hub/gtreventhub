@@ -10,6 +10,7 @@ export interface Env {
   MEMBERS: string; // JSON: Member[] вместе с token
   OPENAI_API_KEY?: string;
   MAGIC_DAILY_LIMIT?: string;
+  MAGIC_MODEL?: string;
 }
 
 interface Member {
@@ -340,7 +341,7 @@ export class Room implements DurableObject {
       method: "POST",
       headers: auth,
       body: JSON.stringify({
-        model: "gpt-image-1",
+        model: this.env.MAGIC_MODEL || "gpt-image-1.5",
         prompt:
           `${MAGIC_STYLE[kind]} Картинка для детей 5–10 лет: добрая, смешная, ничего страшного, ` +
           `никакого оружия и насилия. Что нарисовать: ${prompt}`,
@@ -352,8 +353,12 @@ export class Room implements DurableObject {
       }),
     });
     if (!gen.ok) {
-      // Отказ модели по содержанию приходит как 400 — для ребёнка это «не получилось».
-      return json({ error: gen.status === 400 ? "unkind" : "magic_failed", left: limit - used }, gen.status === 400 ? 422 : 502);
+      // Отказ по содержанию для ребёнка — «придумай доброе»; всё остальное — наша поломка,
+      // её пишем в лог, чтобы не прятать за детской формулировкой.
+      const detail = await gen.text();
+      const refused = gen.status === 400 && /moderation_blocked|content_policy|safety/i.test(detail);
+      if (!refused) console.error("magic failed", gen.status, detail.slice(0, 500));
+      return json({ error: refused ? "unkind" : "magic_failed", left: limit - used }, refused ? 422 : 502);
     }
     const out = (await gen.json()) as { data?: { b64_json?: string }[] };
     const b64 = out.data?.[0]?.b64_json;

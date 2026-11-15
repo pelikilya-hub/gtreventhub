@@ -8,10 +8,10 @@ struct BoardCanvas: View {
         Canvas { context, size in
             for stroke in strokes {
                 let points = stroke.points.compactMap { p in
-                    p.count == 2 ? CGPoint(x: p[0] * size.width, y: p[1] * size.height) : nil
+                    p.count == 2 ? CGPoint(x: CGFloat(p[0]) * size.width, y: CGFloat(p[1]) * size.height) : nil
                 }
                 guard let first = points.first else { continue }
-                let width = max(stroke.width * size.width, 1)
+                let width = max(CGFloat(stroke.width) * size.width, 1)
                 let color = Color(hexString: stroke.color)
                 if points.count == 1 {
                     context.fill(Path(ellipseIn: CGRect(x: first.x - width / 2, y: first.y - width / 2, width: width, height: width)), with: .color(color))
@@ -41,7 +41,10 @@ struct DrawView: View {
     @State private var confirmClear = false
 
     private var everything: [Stroke] {
-        client.strokes + client.live.values.sorted { $0.id < $1.id } + (current.map { [$0] } ?? [])
+        var all = client.strokes
+        all.append(contentsOf: liveStrokes)
+        if let current { all.append(current) }
+        return all
     }
 
     private var artists: String {
@@ -68,18 +71,7 @@ struct DrawView: View {
                 .padding(.horizontal, 16)
 
             HStack(spacing: 10) {
-                ForEach(Self.widths, id: \.self) { w in
-                    Button {
-                        width = w
-                    } label: {
-                        Circle().fill(Ink.ink)
-                            .frame(width: 8 + w * 400, height: 8 + w * 400)
-                            .frame(width: 44, height: 44)
-                            .background(Circle().fill(width == w ? Ink.yellow : .clear))
-                            .overlay(Circle().strokeBorder(width == w ? Ink.ink : .clear, lineWidth: 2.5))
-                    }
-                    .accessibilityLabel(w == Self.widths[0] ? "Тонкая линия" : w == Self.widths[1] ? "Средняя линия" : "Толстая линия")
-                }
+                ForEach(Self.widths, id: \.self) { w in dot(w) }
                 Spacer()
                 tool("arrow.uturn.backward", "Отменить мой штрих") { client.undoLast() }
                 tool("eraser", "Ластик", active: color == Self.eraser) { color = Self.eraser }
@@ -93,18 +85,7 @@ struct DrawView: View {
             .padding(.horizontal, 16)
 
             HStack(alignment: .bottom, spacing: 8) {
-                ForEach(Ink.markers, id: \.self) { marker in
-                    Button {
-                        color = marker
-                    } label: {
-                        UnevenRoundedRectangle(topLeadingRadius: 14, topTrailingRadius: 14)
-                            .fill(Color(hexString: marker))
-                            .overlay(UnevenRoundedRectangle(topLeadingRadius: 14, topTrailingRadius: 14).strokeBorder(Ink.ink, lineWidth: 2.5))
-                            .frame(width: 40, height: color == marker ? 74 : 54)
-                    }
-                    .accessibilityLabel("Фломастер")
-                    .accessibilityAddTraits(color == marker ? .isSelected : [])
-                }
+                ForEach(Ink.markers, id: \.self) { marker in pen(marker) }
             }
             .frame(height: 74, alignment: .bottom)
             .animation(.spring(duration: 0.2), value: color)
@@ -120,52 +101,103 @@ struct DrawView: View {
                 Color.white
                 BoardCanvas(strokes: everything)
                 // Подпись у «пера» каждого, кто рисует сейчас.
-                ForEach(client.live.values.sorted { $0.id < $1.id }) { stroke in
-                    if let last = stroke.points.last, last.count == 2, let member = client.member(stroke.member) {
-                        Text(member.name)
-                            .font(.text(12, bold: true))
-                            .foregroundStyle(Ink.ink)
-                            .padding(.horizontal, 8).padding(.vertical, 2)
-                            .background(Capsule().fill(Color(hexString: member.color)))
-                            .overlay(Capsule().strokeBorder(Ink.ink, lineWidth: 2))
-                            .position(x: last[0] * geo.size.width + 26, y: last[1] * geo.size.height - 16)
-                    }
+                ForEach(liveStrokes) { stroke in
+                    nameTag(for: stroke, in: geo.size)
                 }
             }
             .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        let point = [
-                            min(max(value.location.x / geo.size.width, 0), 1),
-                            min(max(value.location.y / geo.size.height, 0), 1),
-                        ]
-                        if current == nil {
-                            current = Stroke(id: UUID().uuidString, member: client.me?.id, color: color, width: width, points: [point])
-                        } else {
-                            current?.points.append(point)
-                        }
-                        guard let stroke = current else { return }
-                        // Очень длинную линию режем на части: у сервера предел точек на штрих.
-                        if stroke.points.count >= 1500 {
-                            client.commit(stroke)
-                            current = Stroke(id: UUID().uuidString, member: client.me?.id, color: color, width: width, points: [point])
-                        } else if Date().timeIntervalSince(lastSent) > 0.06 {
-                            lastSent = Date()
-                            client.sendDraw(stroke)
-                        }
-                    }
-                    .onEnded { _ in
-                        if let stroke = current { client.commit(stroke) }
-                        current = nil
-                    }
-            )
+            .gesture(drawing(in: geo.size))
         }
         .aspectRatio(3 / 4, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(Ink.ink, lineWidth: 2.5))
         .background(RoundedRectangle(cornerRadius: 20).fill(Ink.ink).offset(x: 5, y: 5))
         .accessibilityLabel("Общий лист для рисования")
+    }
+
+    private var liveStrokes: [Stroke] {
+        client.live.values.sorted { $0.id < $1.id }
+    }
+
+    @ViewBuilder
+    private func nameTag(for stroke: Stroke, in size: CGSize) -> some View {
+        if let last = stroke.points.last, last.count == 2, let member = client.member(stroke.member) {
+            let x = CGFloat(last[0]) * size.width + 26
+            let y = CGFloat(last[1]) * size.height - 16
+            Text(member.name)
+                .font(.text(12, bold: true))
+                .foregroundStyle(Ink.ink)
+                .padding(.horizontal, 8).padding(.vertical, 2)
+                .background(Capsule().fill(Color(hexString: member.color)))
+                .overlay(Capsule().strokeBorder(Ink.ink, lineWidth: 2))
+                .position(x: x, y: y)
+        }
+    }
+
+    private func drawing(in size: CGSize) -> some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in moved(to: value.location, in: size) }
+            .onEnded { _ in lifted() }
+    }
+
+    private func newStroke(at point: [Double]) -> Stroke {
+        Stroke(id: UUID().uuidString, member: client.me?.id, color: color, width: width, points: [point])
+    }
+
+    private func moved(to location: CGPoint, in size: CGSize) {
+        guard size.width > 0, size.height > 0 else { return }
+        let x = Double(min(max(location.x / size.width, 0), 1))
+        let y = Double(min(max(location.y / size.height, 0), 1))
+        let point = [x, y]
+        guard var stroke = current else {
+            current = newStroke(at: point)
+            return
+        }
+        stroke.points.append(point)
+        current = stroke
+        // Очень длинную линию режем на части: у сервера предел точек на штрих.
+        if stroke.points.count >= 1500 {
+            client.commit(stroke)
+            current = newStroke(at: point)
+        } else if Date().timeIntervalSince(lastSent) > 0.06 {
+            lastSent = Date()
+            client.sendDraw(stroke)
+        }
+    }
+
+    private func pen(_ marker: String) -> some View {
+        let shape = UnevenRoundedRectangle(topLeadingRadius: 14, topTrailingRadius: 14)
+        let chosen = color == marker
+        return Button {
+            color = marker
+        } label: {
+            shape.fill(Color(hexString: marker))
+                .overlay(shape.strokeBorder(Ink.ink, lineWidth: 2.5))
+                .frame(width: 40, height: chosen ? 74 : 54)
+        }
+        .accessibilityLabel("Фломастер")
+        .accessibilityAddTraits(chosen ? .isSelected : [])
+    }
+
+    private func lifted() {
+        if let stroke = current { client.commit(stroke) }
+        current = nil
+    }
+
+    private func dot(_ w: Double) -> some View {
+        let side = CGFloat(8 + w * 400)
+        let chosen = width == w
+        let label = w == Self.widths[0] ? "Тонкая линия" : (w == Self.widths[1] ? "Средняя линия" : "Толстая линия")
+        return Button {
+            width = w
+        } label: {
+            Circle().fill(Ink.ink)
+                .frame(width: side, height: side)
+                .frame(width: 44, height: 44)
+                .background(Circle().fill(chosen ? Ink.yellow : Color.clear))
+                .overlay(Circle().strokeBorder(chosen ? Ink.ink : Color.clear, lineWidth: 2.5))
+        }
+        .accessibilityLabel(label)
     }
 
     private func tool(_ symbol: String, _ label: String, active: Bool = false, action: @escaping () -> Void) -> some View {

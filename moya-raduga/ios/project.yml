@@ -29,8 +29,8 @@ targets:
         CFBundleDisplayName: Моя радуга
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        # Адрес сервера: подставь свой после `wrangler deploy`.
-        RadugaServer: https://moya-raduga.example.workers.dev
+        # Адрес выкаченного сервера (воркер moya-raduga).
+        RadugaServer: https://moya-raduga.gameiskra.workers.dev
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIRequiresFullScreen: true

@@ -1,0 +1,50 @@
+# «Моя радуга»: проверки отдельного приложения из папки moya-raduga.
+# К выкатке gtr-event-hub (deploy.yml) отношения не имеет и ничего не деплоит.
+name: Moya Raduga
+
+on:
+  push:
+    paths: ["moya-raduga/**", ".github/workflows/moya-raduga.yml"]
+  pull_request:
+    paths: ["moya-raduga/**", ".github/workflows/moya-raduga.yml"]
+
+concurrency:
+  group: moya-raduga-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: moya-raduga/server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx tsc -p .
+      - name: Дымовой тест на локальном воркере
+        run: |
+          node scripts/gen-members.mjs Ева Мия Лёва Соня Тима Аня Марк Поля Даня > /dev/null
+          echo "MEMBERS='$(cat members.json)'" > .dev.vars
+          npx wrangler dev --port 8787 > wrangler.log 2>&1 &
+          for i in $(seq 60); do curl -s -o /dev/null http://127.0.0.1:8787/ && break; sleep 1; done
+          npm test || { cat wrangler.log; exit 1; }
+
+  ios:
+    # Сборка под симулятор: проверяет, что приложение компилируется. Подпись не нужна.
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: moya-raduga/ios
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install xcodegen
+      - run: xcodegen
+      - run: |
+          set -o pipefail
+          xcodebuild build -project MoyaRaduga.xcodeproj -scheme MoyaRaduga \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO -quiet

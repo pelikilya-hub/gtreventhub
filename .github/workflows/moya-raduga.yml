@@ -4,6 +4,7 @@ name: Moya Raduga
 
 on:
   push:
+    branches: [main]
     paths: ["moya-raduga/**", ".github/workflows/moya-raduga.yml"]
   pull_request:
     paths: ["moya-raduga/**", ".github/workflows/moya-raduga.yml"]
